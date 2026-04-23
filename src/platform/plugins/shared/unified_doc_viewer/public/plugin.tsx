@@ -10,7 +10,7 @@
 import React from 'react';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { DocViewsRegistry, registerDocViewerAnalyticsEvents } from '@kbn/unified-doc-viewer';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -56,13 +56,15 @@ export class UnifiedDocViewerPublicPlugin
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
+    registerDocViewerAnalyticsEvents(core.analytics);
+
     this.docViewsRegistry.add({
       id: 'doc_view_table',
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
         defaultMessage: 'Table',
       }),
       order: 10,
-      component: (props) => {
+      render: (props) => {
         return <LazyDocViewerTable {...props} />;
       },
     });
@@ -73,7 +75,14 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
+      render: ({
+        hit,
+        dataView,
+        textBasedHits,
+        decreaseAvailableHeightBy,
+        initialState,
+        onInitialStateChange,
+      }) => {
         return (
           <LazySourceViewer
             index={hit.raw._index}
@@ -85,6 +94,8 @@ export class UnifiedDocViewerPublicPlugin
             esqlHit={Array.isArray(textBasedHits) ? hit : undefined}
             decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
+            initialState={initialState}
+            onInitialStateChange={onInitialStateChange}
           />
         );
       },

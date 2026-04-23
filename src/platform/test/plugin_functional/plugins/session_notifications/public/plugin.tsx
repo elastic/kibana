@@ -7,40 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { AppPluginDependenciesStart, AppPluginDependenciesSetup } from './types';
+import type { CoreStart, Plugin } from '@kbn/core/public';
+import type { AppPluginDependenciesStart, SessionNotificationsGlobalApi } from './types';
 
 export class SessionNotificationsPlugin implements Plugin {
   private sessionIds: Array<string | undefined> = [];
-  public setup(core: CoreSetup, { navigation }: AppPluginDependenciesSetup) {
-    const showSessions = {
-      id: 'showSessionsButton',
-      label: 'Show Sessions',
-      description: 'Sessions',
-      run: () => {
-        core.notifications.toasts.addInfo(this.sessionIds.join(','), {
-          toastLifeTimeMs: 50000,
-        });
-      },
-      tooltip: () => {
-        return this.sessionIds.join(',');
-      },
-      testId: 'showSessionsButton',
+
+  public setup() {
+    const windowWithGlobalApi = window as {
+      __SESSION_NOTIFICATIONS_PLUGIN__?: SessionNotificationsGlobalApi;
     };
 
-    navigation.registerMenuItem(showSessions);
-
-    const clearSessions = {
-      id: 'clearSessionsButton',
-      label: 'Clear Sessions',
-      description: 'Sessions',
-      run: () => {
+    windowWithGlobalApi.__SESSION_NOTIFICATIONS_PLUGIN__ = {
+      getSessionIds: () => this.sessionIds,
+      clearSessionIds: () => {
         this.sessionIds.length = 0;
       },
-      testId: 'clearSessionsButton',
     };
-
-    navigation.registerMenuItem(clearSessions);
   }
 
   public start(core: CoreStart, { data }: AppPluginDependenciesStart) {
@@ -52,5 +35,6 @@ export class SessionNotificationsPlugin implements Plugin {
       this.sessionIds.push(sessionId);
     });
   }
+
   public stop() {}
 }

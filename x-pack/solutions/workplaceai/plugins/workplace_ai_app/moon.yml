@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/workplace-ai-app'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/workplace-ai-app'
+  title: '@kbn/workplace-ai-app'
   description: Moon project for @kbn/workplace-ai-app
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/solutions/workplaceai/plugins/workplace_ai_app
+  sourceRoot: x-pack/solutions/workplaceai/plugins/workplace_ai_app
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -32,21 +31,22 @@ dependsOn:
   - '@kbn/actions-plugin'
   - '@kbn/features-plugin'
   - '@kbn/logging'
-  - '@kbn/data-sources-registry-plugin'
   - '@kbn/react-query'
   - '@kbn/deeplinks-agent-builder'
-  - '@kbn/deeplinks-data-connectors'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-workflows'
-  - '@kbn/onechat-common'
+  - '@kbn/agent-builder-common'
   - '@kbn/cloud'
   - '@kbn/cloud-plugin'
   - '@kbn/share-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/triggers-actions-ui-plugin'
-  - '@kbn/elastic-assistant'
+  - '@kbn/inference-connectors'
   - '@kbn/ai-assistant-connector-selector-action'
   - '@kbn/core-application-browser'
+  - '@kbn/workflows-extensions'
+  - '@kbn/zod'
+  - '@kbn/workflows'
 tags:
   - plugin
   - prod
@@ -61,16 +61,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

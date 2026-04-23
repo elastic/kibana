@@ -6,13 +6,16 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '..';
 
 export class DifferentialFunctionsPage {
   constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async gotoDifferential() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/functions/differential`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj
+      .locator('profilingNormalizationMenuButton')
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   async gotoDifferentialWithTimeRange(
@@ -33,28 +36,38 @@ export class DifferentialFunctionsPage {
     await this.page.goto(
       `${this.kbnUrl.app('profiling')}/functions/differential?${params.toString()}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+
+    await this.page.testSubj
+      .locator('overallPerformance_value')
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
-  async getSummaryValue(id: string) {
+  getSummaryValue(id: string) {
     return this.page.testSubj.locator(`${id}_value`);
   }
 
-  async getSummaryComparisonValue(id: string) {
+  getSummaryComparisonValue(id: string) {
     return this.page.testSubj.locator(`${id}_comparison_value`);
   }
 
   async addKqlFilterToBaseline(key: string, value: string) {
-    const searchBar = this.page.testSubj.locator('profilingUnifiedSearchBar');
-    await searchBar.fill(`${key}:"${value}"`);
-    await searchBar.press('Enter');
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.applyKqlFilter('profilingUnifiedSearchBar', key, value);
   }
 
   async addKqlFilterToComparison(key: string, value: string) {
-    const searchBar = this.page.testSubj.locator('profilingComparisonUnifiedSearchBar');
+    await this.applyKqlFilter('profilingComparisonUnifiedSearchBar', key, value);
+  }
+
+  private async applyKqlFilter(searchBarTestSubj: string, key: string, value: string) {
+    const searchBar = this.page.testSubj.locator(searchBarTestSubj);
     await searchBar.fill(`${key}:"${value}"`);
     await searchBar.press('Enter');
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitForGridRefresh();
+  }
+
+  private async waitForGridRefresh() {
+    const grid = this.page.testSubj.locator('profilingDiffTopNFunctionsGrid');
+    await grid.waitFor({ state: 'hidden' });
+    await grid.waitFor({ state: 'visible' });
   }
 }

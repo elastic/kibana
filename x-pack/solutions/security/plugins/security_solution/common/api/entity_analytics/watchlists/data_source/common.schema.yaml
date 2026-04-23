@@ -1,0 +1,138 @@
+openapi: 3.0.0
+info:
+  title: Watchlists Entity Source Common Schema
+  description: Common schema for Watchlists Entity Source
+  version: "1"
+
+paths: {}
+components:
+  schemas:
+    EntitySourceType:
+      type: string
+      enum:
+        - index
+        - entity_analytics_integration
+        - store
+
+    UpdateableMonitoringEntitySourceProperties:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/EntitySourceType"
+        name:
+          type: string
+        indexPattern:
+          type: string
+        integrationName:
+          type: string
+        enabled:
+          type: boolean
+        identifierField:
+          type: string
+          description: Field used to query the entity store for index-type sources
+        queryRule:
+          type: string
+          description: KQL query used to filter data from the provided index patterns
+        matchers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Matcher"
+        filter:
+          $ref: "#/components/schemas/Filter"
+        integrations:
+          $ref: "#/components/schemas/Integrations"
+        range:
+          $ref: "#/components/schemas/DateRange"
+
+    UpdateEntitySourceNoadditionalProps:
+      allOf:
+        - $ref: "#/components/schemas/UpdateableMonitoringEntitySourceProperties"
+        - type: object
+          additionalProperties: false
+
+    MonitoringEntitySourceProperties:
+      allOf:
+        - $ref: "#/components/schemas/UpdateableMonitoringEntitySourceProperties"
+        - type: object
+          properties:
+            managed:
+              type: boolean
+
+    Matcher:
+      type: object
+      required:
+        - fields
+        - values
+      properties:
+        fields:
+          type: array
+          items:
+            type: string
+        values:
+          description: >
+            Matcher values. Must be either an array of strings
+            (e.g. group or role names) or an array of booleans
+            (e.g. integration-derived flags like privileged_group_member).
+            Mixed types are intentionally not supported for simplicity and predictability.
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: array
+              items:
+                type: boolean
+    Filter:
+      type: object
+      properties:
+        kuery:
+          oneOf:
+            - type: string
+            - type: object
+
+    MonitoringEntitySourceAttributes:
+      allOf:
+        - $ref: "#/components/schemas/MonitoringEntitySourceProperties"
+        - type: object
+          required: [type, name, managed]
+
+    MonitoringEntitySource:
+      allOf:
+        - $ref: "#/components/schemas/MonitoringEntitySourceProperties"
+        - type: object
+          required: [type, name, id, managed]
+          properties:
+            id:
+              type: string
+
+    DateRange:
+      description: Defines the lookback period for filtering source data by timestamp.
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          description: Start of the lookback period (date math or ISO string, e.g. "now-10d")
+        end:
+          type: string
+          description: End of the lookback period (date math or ISO string, e.g. "now")
+
+    Integrations:
+      type: object
+      properties:
+        syncMarkerIndex:
+          type: string
+          description: Index to read latest sync markers from
+        syncData:
+          type: object
+          description: integrations latest full sync and update syncData
+          properties:
+            lastFullSync:
+              type: string
+              format: date-time
+              description: Timestamp of the last full sync from integrations
+            lastUpdateProcessed:
+              type: string
+              format: date-time
+              description: Timestamp of the last update processed from integrations

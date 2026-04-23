@@ -22,6 +22,12 @@ import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { hasErrorFields } from './utils/has_error_fields';
 
+jest.mock('@kbn/presentation-panel-plugin/public/kibana_services', () => ({
+  uiActions: {
+    getAction: jest.fn(),
+  },
+}));
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   EuiCodeBlock: ({
@@ -166,7 +172,14 @@ const renderLogsOverview = (
 ) => {
   const { rerender: baseRerender, ...tools } = render(
     <EuiProvider highContrastMode={false}>
-      <LogsOverview ref={ref} dataView={dataView} hit={fullHit} indexes={indexes} {...props} />
+      <LogsOverview
+        ref={ref}
+        dataView={dataView}
+        hit={fullHit}
+        indexes={indexes}
+        profileId="test-profile"
+        {...props}
+      />
     </EuiProvider>
   );
 
@@ -178,6 +191,7 @@ const renderLogsOverview = (
           dataView={dataView}
           hit={fullHit}
           indexes={indexes}
+          profileId="test-profile"
           {...props}
           {...rerenderProps}
         />
@@ -396,10 +410,12 @@ describe('LogsOverview with APM links', () => {
         ).not.toBeInTheDocument();
       });
 
-      it('should render trace id link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
-        ).toBeInTheDocument();
+      it('should render trace id without a link', () => {
+        const traceId = screen.getByTestId('unifiedDocViewLogsOverviewTraceID');
+        expect(traceId).toBeInTheDocument();
+
+        const traceLink = traceId.querySelector('a');
+        expect(traceLink).toBeNull();
       });
     });
   });

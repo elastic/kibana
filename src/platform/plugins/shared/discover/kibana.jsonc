@@ -34,6 +34,7 @@
       "contentManagement"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "dataVisualizer",
       "home",
       "share",
@@ -48,18 +49,18 @@
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
-      "embeddableEnhanced",
       "apmSourcesAccess",
       "fileUpload",
-      "metricsExperience"
+      "cps",
+      "alertingVTwo"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "savedObjects",
-      "controls",
-      "presentationPanel"
+      "presentationPanel",
+      "presentationUtil",
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

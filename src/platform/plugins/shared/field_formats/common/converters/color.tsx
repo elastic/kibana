@@ -9,11 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import ReactDOM from 'react-dom/server';
-import { findLast, cloneDeep, escape } from 'lodash';
+import { findLast, cloneDeep } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert } from '../types';
+import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
@@ -62,13 +61,28 @@ export class ColorFormat extends FieldFormat {
     }
   }
 
-  htmlConvert: HtmlContextTypeConvert = (val: string | number, options) => {
-    const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
+  textConvert: TextContextTypeConvert = (val: string | number, options) => {
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
+    }
 
-    const displayVal = escape(asPrettyString(val, options));
+    return asPrettyString(val, options);
+  };
+
+  reactConvertSingle: ReactContextTypeSingleConvert = (val, options) => {
+    const missing = this.checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    const value = val as string | number | boolean;
+    const color = this.findColorRuleForVal(value) as typeof DEFAULT_CONVERTER_COLOR;
+    const displayVal = asPrettyString(value, options);
+
     if (!color) return displayVal;
 
-    return ReactDOM.renderToStaticMarkup(
+    return (
       <span
         // using `style` so we can test with jest and emotion does not work for these formatter utils
         // EuiBadge is not multiline, so we define custom styles here instead of using it.
@@ -79,8 +93,9 @@ export class ColorFormat extends FieldFormat {
           padding: '0 8px',
           borderRadius: '3px',
         }}
-        dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
-      />
+      >
+        {displayVal}
+      </span>
     );
   };
 }

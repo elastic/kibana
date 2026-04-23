@@ -271,7 +271,7 @@ describe('createFiltersFromClickEvent', () => {
           expect.objectContaining({
             query: expect.objectContaining({
               match_phrase: expect.objectContaining({
-                message: 'test message',
+                '1-1': 'test message',
               }),
             }),
           })
@@ -298,17 +298,17 @@ describe('createFiltersFromClickEvent', () => {
                 should: expect.arrayContaining([
                   expect.objectContaining({
                     match_phrase: expect.objectContaining({
-                      tags: 'tag1',
+                      '1-1': 'tag1',
                     }),
                   }),
                   expect.objectContaining({
                     match_phrase: expect.objectContaining({
-                      tags: 'tag2',
+                      '1-1': 'tag2',
                     }),
                   }),
                   expect.objectContaining({
                     match_phrase: expect.objectContaining({
-                      tags: 'tag3',
+                      '1-1': 'tag3',
                     }),
                   }),
                 ]),
@@ -442,6 +442,55 @@ AND \`columnB\` == "2048"`);
 
       expect(queryString).toEqual(`from meow
 | WHERE \`columnA\` != "2048"`);
+    });
+
+    describe('null value handling', () => {
+      beforeEach(() => {
+        dataPoints = [
+          {
+            table: {
+              columns: [
+                {
+                  name: 'columnA',
+                  id: 'columnA',
+                  meta: {
+                    type: 'string',
+                  },
+                },
+              ],
+              rows: [
+                {
+                  columnA: null,
+                },
+              ],
+            },
+            column: 0,
+            row: 0,
+            value: 'test',
+          },
+        ];
+      });
+
+      test('should filter for null values', () => {
+        const queryString = appendFilterToESQLQueryFromValueClickAction({
+          data: dataPoints,
+          query: { esql: 'from meow' },
+        });
+
+        expect(queryString).toEqual(`from meow
+| WHERE \`columnA\` is null`);
+      });
+
+      test('should filter out null values', () => {
+        const queryString = appendFilterToESQLQueryFromValueClickAction({
+          data: dataPoints,
+          query: { esql: 'from meow' },
+          negate: true,
+        });
+
+        expect(queryString).toEqual(`from meow
+| WHERE \`columnA\` is not null`);
+      });
     });
   });
 });

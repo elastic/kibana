@@ -10,7 +10,6 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -18,9 +17,6 @@ import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
-  apiHasParentApi,
-  apiPublishesTimeRange,
-  apiPublishesTimeslice,
   fetch$,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -31,19 +27,11 @@ import {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
-import type { Observable } from 'rxjs';
-import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  map,
-  merge,
-  of,
-  Subscription,
-} from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
+import { SWIM_LANE_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
@@ -55,7 +43,6 @@ import {
 } from '../../application/explorer/swimlane_container';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeSwimLaneControls, swimLaneComparators } from './initialize_swim_lane_controls';
@@ -116,35 +103,29 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      const query$ = ((initialState.rawState.query
-        ? new BehaviorSubject(initialState.rawState.query)
+      const query$ = ((initialState.query
+        ? new BehaviorSubject(initialState.query)
         : (parentApi as Partial<PublishesUnifiedSearch>)?.query$) ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
-      const filters$ = ((initialState.rawState.filters
-        ? new BehaviorSubject(initialState.rawState.filters)
+      const filters$ = ((initialState.filters
+        ? new BehaviorSubject(initialState.filters)
         : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['filters$'];
 
-      const refresh$ = new BehaviorSubject<void>(undefined);
+      const titleManager = initializeTitleManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
 
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-
-      const swimlaneManager = initializeSwimLaneControls(initialState.rawState, titleManager.api);
+      const swimlaneManager = initializeSwimLaneControls(initialState, titleManager.api);
 
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
 
       function serializeState() {
-        const rawState: AnomalySwimLaneEmbeddableState = {
+        return {
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...swimlaneManager.getLatestState(),
         } as AnomalySwimLaneEmbeddableState;
-        return {
-          rawState,
-          references: [],
-        };
       }
 
       const unsavedChangesApi = initializeUnsavedChanges<AnomalySwimLaneEmbeddableState>({
@@ -168,9 +149,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           };
         },
         onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (lastSaved) swimlaneManager.reinitializeState(lastSaved.rawState);
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) swimlaneManager.reinitializeState(lastSaved);
         },
       });
 
@@ -222,39 +203,11 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         dataLoading$,
         serializeState,
       });
-      const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
-        api.timeRange$,
-        apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
-          ? api.parentApi.timeRange$
-          : of(null),
-        apiHasParentApi(api) && apiPublishesTimeslice(api.parentApi)
-          ? api.parentApi.timeslice$
-          : of(null),
-      ]).pipe(
-        // @ts-ignore
-        map(([timeRange, parentTimeRange, parentTimeslice]) => {
-          if (timeRange) {
-            return timeRange;
-          }
-          if (parentTimeRange) {
-            return parentTimeRange;
-          }
-          if (parentTimeslice) {
-            return parentTimeslice;
-          }
-          return undefined;
-        })
-      ) as Observable<TimeRange | undefined>;
-
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
         api,
         chartWidth$.asObservable(),
         dataLoading$,
         blockingError$,
-        appliedTimeRange$,
-        query$,
-        filters$,
-        refresh$,
         anomalySwimLaneServices
       );
 
@@ -339,7 +292,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
               setSelectedCells(update);
 
               if (update) {
-                uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
+                uiActions.executeTriggerActions(SWIM_LANE_SELECTION_TRIGGER, {
                   embeddable: api,
                   data: update,
                   updateCallback: setSelectedCells.bind(null, undefined),
@@ -365,6 +318,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                 >
                   {error ? (
                     <EuiCallOut
+                      announceOnMount
                       title={
                         <FormattedMessage
                           id="xpack.ml.swimlaneEmbeddable.errorMessage"

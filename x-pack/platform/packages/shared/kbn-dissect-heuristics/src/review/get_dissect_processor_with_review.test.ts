@@ -8,7 +8,7 @@
 import { getDissectProcessorWithReview } from './get_dissect_processor_with_review';
 import { collapseRepeats } from './collapse_repeats';
 import { serializeAST } from '../serialize_ast';
-import type { DissectPattern, DissectAST } from '../types';
+import type { DissectPattern, DissectAST, DissectFieldNode } from '../types';
 import type { NormalizedReviewResult } from './get_review_fields';
 
 // Helper to parse a pattern string into AST
@@ -21,7 +21,7 @@ function parsePattern(patternString: string): DissectAST {
     if (match[1]) {
       // Field node
       const fieldContent = match[1];
-      const modifiers: any = {};
+      const modifiers: DissectFieldNode['modifiers'] = {};
       let fieldName = fieldContent;
 
       // Parse modifiers
@@ -448,5 +448,26 @@ describe('getDissectProcessorWithReview', () => {
     expect(serialized).toBe(
       '%{+attributes.custom.timestamp} %{+attributes.custom.timestamp} %{+attributes.custom.timestamp} %{resource.attributes.host.name} %{attributes.process.name} %{body.text}'
     );
+  });
+
+  it('collapses trailing repeated body.text fields with mixed delimiters', () => {
+    const patternString =
+      '%{+attributes.custom.timestamp} %{+attributes.custom.timestamp}, %{severity_text->} %{attributes.log.logger->} %{+body.text}: %{+body.text}\\%{+body.text}_%{+body.text}_%{+body.text}_%{+body.text}_%{?}_%{+body.text}';
+    const ast = parsePattern(patternString);
+    const collapsed = collapseRepeats(ast);
+    const serialized = serializeAST(collapsed);
+    // Should collapse trailing timestamp fields AND trailing body.text fields
+    expect(serialized).toBe(
+      '%{attributes.custom.timestamp}, %{severity_text->} %{attributes.log.logger->} %{body.text}'
+    );
+  });
+
+  it('collapses repeated fields with skip fields in between', () => {
+    const patternString = '%{body.text} %{body.text} %{?} %{body.text}, %{other.field}';
+    const ast = parsePattern(patternString);
+    const collapsed = collapseRepeats(ast);
+    const serialized = serializeAST(collapsed);
+    // Should collapse the entire sequence: body.text, body.text, skip, body.text -> body.text
+    expect(serialized).toBe('%{body.text}, %{other.field}');
   });
 });

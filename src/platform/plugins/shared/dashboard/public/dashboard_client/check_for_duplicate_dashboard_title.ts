@@ -52,13 +52,11 @@ export async function checkForDuplicateDashboardTitle({
   const [baseDashboardName] = extractTitleAndCount(title);
 
   const { dashboards } = await dashboardClient.search({
-    search: baseDashboardName,
+    query: baseDashboardName,
     per_page: 20,
   });
 
-  const duplicate = Boolean(
-    dashboards.find(({ data }) => data.title.toLowerCase() === title.toLowerCase())
-  );
+  const duplicate = Boolean(dashboards.find(({ data }) => data.title === title));
 
   if (!duplicate) {
     return true;

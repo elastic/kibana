@@ -11,6 +11,7 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 import { defineConfig, devices } from '@playwright/test';
 import {
   scoutFailedTestsReporter,
+  scoutFailureSummaryReporter,
   scoutPlaywrightReporter,
   generateTestRunId,
 } from '@kbn/scout-reporting';
@@ -36,10 +37,21 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'ech',
+
+      testIgnore: [
+        // TODO: remove when AI suggestions are supported on ECH or when the new tagging system is in place
+        '**/ai_suggestions_*.spec.ts',
+        // TODO: remove when we find a way to run "no data" tests without being affected by others
+        '**/no_data_*.spec.ts',
+      ],
       use: { ...devices['Desktop Chrome'], configName: 'cloud_ech' },
     },
     {
       name: 'mki',
+      testIgnore: [
+        // TODO: remove when we find a way to run "no data" tests without being affected by others
+        '**/no_data_*.spec.ts',
+      ],
       use: { ...devices['Desktop Chrome'], configName: 'cloud_mki' },
     },
   ];
@@ -58,6 +70,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
           name: `setup-${project?.name}`,
           use: project?.use ? { ...project.use } : {},
           testMatch: /global.setup\.ts/,
+          timeout: 180000, // Default to 3 minutes for global setup
         },
         { ...project, dependencies: [`setup-${project?.name}`] },
       ])
@@ -79,6 +92,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
       scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
       scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
+      scoutFailureSummaryReporter({ name: 'scout-failure-summary', runId }), // Scout failure summary (local only)
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
@@ -88,6 +102,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
+      runGlobalSetup: options.runGlobalSetup,
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 
@@ -96,6 +111,8 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
+      timezoneId: 'GMT',
+      ignoreHTTPSErrors: true,
     },
 
     // Timeout for each test, includes test, hooks and fixtures

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils';
 import type { TimeRange } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -17,7 +17,7 @@ import { useDatePickerContext } from '../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
 import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 
-export type ChartProps = Pick<LensChartProps, 'overrides'> & {
+export type ChartProps = Pick<LensChartProps, 'overrides' | 'dataTestSubj'> & {
   id: string;
   queryField: string;
   dateRange: TimeRange;
@@ -34,6 +34,7 @@ export const Chart = ({
   entityId,
   lensAttributes,
   dataView,
+  dataTestSubj,
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
@@ -90,6 +91,7 @@ export const Chart = ({
       overrides={overrides}
       onBrushEnd={handleBrushEnd}
       onFilter={handleFilter}
+      dataTestSubj={dataTestSubj}
     />
   );
 };

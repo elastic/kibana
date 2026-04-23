@@ -23,6 +23,97 @@ export const artifactListPageLabels = Object.freeze({
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.artifactListPage.addButtonTitle', {
     defaultMessage: 'Add artifact',
   }),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importButtonTitle',
+    {
+      defaultMessage: 'Import artifacts',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.exportButtonTitle',
+    {
+      defaultMessage: 'Export artifact list',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.exportSuccessToastTitle',
+    {
+      defaultMessage: 'Artifact list exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.exportErrorToastTitle',
+    {
+      defaultMessage: 'Artifact list export failed',
+    }
+  ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importSuccessToastTitle',
+    {
+      defaultMessage: 'Artifacts imported',
+    }
+  ),
+  pageImportSuccessToastText: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importSuccessToastText',
+    {
+      defaultMessage: 'All artifacts were imported successfully.',
+    }
+  ),
+  pageImportCompletedWithErrorsToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importCompletedWithErrorsToastTitle',
+    {
+      defaultMessage: 'Import completed with errors',
+    }
+  ),
+  getPageImportCompletedWithErrorsToastText: (
+    importedCount: number,
+    failedCount: number
+  ): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.importCompletedWithErrorsToastText',
+      {
+        defaultMessage:
+          '{importedCount} imported, {failedCount} failed. Review the errors for details.',
+        values: { importedCount, failedCount },
+      }
+    );
+  },
+  pageImportAllItemsFailedToastText: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importAllItemsFailedToastText',
+    {
+      defaultMessage: "The artifacts couldn't be imported. Review the errors and try again.",
+    }
+  ),
+  pageImportViewErrorsButton: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importViewErrorsButton',
+    {
+      defaultMessage: 'View errors',
+    }
+  ),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importErrorToastTitle',
+    {
+      defaultMessage: "Artifacts weren't imported",
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importOnlyCurrentArtifactCanBeImportedToastMessage',
+    {
+      defaultMessage: 'You can only import the current artifact type here.',
+    }
+  ),
+  importFlyoutDetails: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutDetails',
+    {
+      defaultMessage: 'Import artifacts to your artifact list.',
+    }
+  ),
+  importFlyoutImportSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutImportSubmitButtonLabel',
+    {
+      defaultMessage: 'Import artifacts',
+    }
+  ),
 
   // ------------------------------
   // EMPTY state labels
@@ -42,6 +133,10 @@ export const artifactListPageLabels = Object.freeze({
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import artifacts' }
   ),
 
   // ------------------------------
@@ -82,7 +177,7 @@ export const artifactListPageLabels = Object.freeze({
   cardActionDeleteLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.cardActionDeleteLabel',
     {
-      defaultMessage: 'Delete event filter',
+      defaultMessage: 'Delete artifact',
     }
   ),
 
@@ -108,6 +203,11 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'pageTitle'
   | 'pageAboutInfo'
   | 'pageAddButtonTitle'
+  | 'pageImportButtonTitle'
+  | 'pageExportButtonTitle'
+  | 'pageExportSuccessToastTitle'
+  | 'pageExportErrorToastTitle'
+  | 'pageImportOnlyCurrentArtifactCanBeImportedError'
   | 'getShowingCountLabel'
   | 'cardActionEditLabel'
   | 'cardActionDeleteLabel'
@@ -122,6 +222,7 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'emptyStateTitle'
   | 'emptyStateInfo'
   | 'emptyStatePrimaryButtonLabel'
+  | 'emptyStateImportButtonLabel'
 >;
 
 export type ArtifactListPageOptionalLabels = Omit<IAllLabels, keyof ArtifactListPageRequiredLabels>;

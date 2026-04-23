@@ -17,6 +17,8 @@
           "void"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/public/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -32,6 +34,8 @@
           "void"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/public/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -57,6 +61,8 @@
         "void"
       ],
       "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/server/types.ts",
+      "lineNumber": 16,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -84,6 +90,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/expression_functions/mosaic_vis_function.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -143,6 +151,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/expression_functions/partition_labels_function.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -167,6 +177,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/expression_functions/pie_vis_function.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -191,6 +203,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/expression_functions/treemap_vis_function.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -215,6 +229,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/expression_functions/waffle_vis_function.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -231,6 +247,8 @@
         "label": "Dimension",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -242,6 +260,8 @@
             "label": "accessor",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -272,6 +292,8 @@
               "> | undefined; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -286,6 +308,8 @@
         "label": "Dimensions",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -308,6 +332,8 @@
               ")[]"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -330,6 +356,8 @@
               ")[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -352,6 +380,8 @@
               ")[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -374,6 +404,8 @@
               ")[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -388,6 +420,8 @@
         "label": "LabelsParams",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -399,6 +433,8 @@
             "label": "show",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -419,6 +455,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -430,6 +468,8 @@
             "label": "values",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -450,6 +490,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -461,6 +503,8 @@
             "label": "percentDecimals",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -475,6 +519,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -491,6 +537,8 @@
               "number | null | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -517,6 +565,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -551,6 +601,8 @@
           " extends Omit<VisCommonConfig, \"metrics\" | \"metricsToLabels\" | \"colorOverrides\">"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -572,6 +624,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -583,6 +637,8 @@
             "label": "nestedLegend",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -607,6 +663,8 @@
           " extends VisCommonParams"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -627,6 +685,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -641,6 +701,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -661,6 +723,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -682,6 +746,8 @@
               "<Record<string, unknown>>"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -696,6 +762,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -717,6 +785,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -731,6 +801,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -752,6 +824,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -766,6 +840,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -780,6 +856,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -794,6 +872,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -818,6 +898,8 @@
           " extends VisCommonConfig"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -832,6 +914,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -843,6 +927,8 @@
             "label": "isDonut",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -864,6 +950,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -878,6 +966,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -892,6 +982,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -906,6 +998,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -917,6 +1011,8 @@
             "label": "nestedLegend",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -941,6 +1037,8 @@
           " extends VisCommonConfig"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -952,6 +1050,8 @@
             "label": "nestedLegend",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -976,6 +1076,8 @@
           " extends Omit<VisCommonConfig, \"buckets\">"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -998,6 +1100,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1019,6 +1123,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1035,6 +1141,8 @@
         "label": "EmptySizeRatios",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1047,6 +1155,8 @@
         "label": "LabelPositions",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 127,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1059,6 +1169,8 @@
         "label": "LegendDisplay",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 137,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1071,6 +1183,8 @@
         "label": "ValueFormats",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1098,6 +1212,8 @@
           " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; } | undefined; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1129,6 +1245,8 @@
           "; percentDecimals: number; colorOverrides: Record<string, string>; truncate?: number | null | undefined; last_level?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1144,6 +1262,8 @@
           "\"mosaicVis\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1208,6 +1328,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1223,6 +1345,8 @@
           "\"partitionLabels\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1238,6 +1362,8 @@
           "\"partitionLabelsValue\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1294,6 +1420,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1309,6 +1437,8 @@
           "\"value\" | \"percent\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1324,6 +1454,8 @@
           "\"pieVis\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1388,6 +1520,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1403,6 +1537,8 @@
           "\"expressionPartitionVis\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1418,6 +1554,8 @@
           "\"expressionPartitionVis\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1433,6 +1571,8 @@
           "\"treemapVis\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1497,6 +1637,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1512,6 +1654,8 @@
           "\"waffleVis\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1576,6 +1720,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

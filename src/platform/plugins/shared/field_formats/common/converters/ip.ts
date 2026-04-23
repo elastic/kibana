@@ -22,7 +22,10 @@ export class IpFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES.IP;
 
   textConvert: TextContextTypeConvert = (val: number) => {
-    if (val === undefined || val === null) return '-';
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
+    }
     if (!isFinite(val)) return String(val);
 
     // shazzam!

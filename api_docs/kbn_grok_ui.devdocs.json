@@ -26,6 +26,8 @@
         "label": "DraftGrokExpression",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -60,6 +64,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+                "lineNumber": 21,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -75,6 +81,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+                "lineNumber": 21,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -93,6 +101,8 @@
               "(expression: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -107,6 +117,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+                "lineNumber": 33,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -125,6 +137,8 @@
               "(samples: string[]) => Record<string, string | number>[]"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -139,6 +153,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+                "lineNumber": 40,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -157,6 +173,8 @@
               "() => RegExp | null"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -173,6 +191,8 @@
               "() => string | null"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -197,6 +217,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -213,6 +235,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -231,6 +255,8 @@
               "<string>"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -247,6 +273,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -263,6 +291,8 @@
         "label": "GrokCollection",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -278,6 +308,8 @@
               "<void>"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -292,6 +324,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -316,6 +350,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -330,6 +366,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 75,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -364,6 +402,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -378,6 +418,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 84,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -393,6 +435,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 84,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -416,6 +460,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 84,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -434,6 +480,8 @@
               "(patterns: Record<string, string>) => void"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -448,6 +496,8 @@
                   "Record<string, string>"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 96,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -474,6 +524,8 @@
               ">) => void"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -496,6 +548,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 105,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -516,6 +570,8 @@
               ".CompletionItemProvider"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -532,6 +588,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -550,6 +608,8 @@
               "<{}>) => Record<string, { backgroundColor: string; color: string; cursor: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -565,6 +625,8 @@
                   "<{}>"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 170,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -583,6 +645,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -599,6 +663,8 @@
         "label": "GrokPattern",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+        "lineNumber": 189,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -613,6 +679,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -627,6 +695,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 202,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -642,6 +712,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 202,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -663,6 +735,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 202,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -681,6 +755,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -697,6 +773,8 @@
               "(forceResolve?: boolean) => string | null"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -711,6 +789,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 213,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -729,6 +809,8 @@
               "(samples: string[], regenerateRegex?: boolean) => Record<string, string | number>[]"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 367,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -743,6 +825,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 367,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -758,6 +842,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 367,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -776,6 +862,8 @@
               "() => RegExp | null"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 408,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -792,6 +880,8 @@
               "() => string | null"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 422,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -808,6 +898,8 @@
               "(rawPattern: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 435,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -822,6 +914,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 435,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -848,6 +942,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 441,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -866,7 +962,7 @@
         "label": "Expression",
         "description": [],
         "signature": [
-          "({ grokCollection, draftGrokExpression, onChange, height, dataTestSubj, }: { grokCollection: ",
+          "({ grokCollection, pattern, onChange, height, dataTestSubj, }: { grokCollection: ",
           {
             "pluginId": "@kbn/grok-ui",
             "scope": "common",
@@ -874,25 +970,11 @@
             "section": "def-common.GrokCollection",
             "text": "GrokCollection"
           },
-          "; draftGrokExpression: ",
-          {
-            "pluginId": "@kbn/grok-ui",
-            "scope": "common",
-            "docId": "kibKbnGrokUiPluginApi",
-            "section": "def-common.DraftGrokExpression",
-            "text": "DraftGrokExpression"
-          },
-          "; onChange?: ((expression: ",
-          {
-            "pluginId": "@kbn/grok-ui",
-            "scope": "common",
-            "docId": "kibKbnGrokUiPluginApi",
-            "section": "def-common.DraftGrokExpression",
-            "text": "DraftGrokExpression"
-          },
-          ") => void) | undefined; height?: string | number | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
+          "; pattern: string; onChange?: ((pattern: string) => void) | undefined; height?: string | number | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -901,9 +983,11 @@
             "id": "def-common.Expression.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  grokCollection,\n  draftGrokExpression,\n  onChange,\n  height = '100px',\n  dataTestSubj,\n}",
+            "label": "{\n  grokCollection,\n  pattern,\n  onChange,\n  height = '100px',\n  dataTestSubj,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+            "lineNumber": 22,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -924,26 +1008,21 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 23,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/grok-ui",
-                "id": "def-common.Expression.$1.draftGrokExpression",
-                "type": "Object",
+                "id": "def-common.Expression.$1.pattern",
+                "type": "string",
                 "tags": [],
-                "label": "draftGrokExpression",
+                "label": "pattern",
                 "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/grok-ui",
-                    "scope": "common",
-                    "docId": "kibKbnGrokUiPluginApi",
-                    "section": "def-common.DraftGrokExpression",
-                    "text": "DraftGrokExpression"
-                  }
-                ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 24,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -955,37 +1034,27 @@
                 "label": "onChange",
                 "description": [],
                 "signature": [
-                  "((expression: ",
-                  {
-                    "pluginId": "@kbn/grok-ui",
-                    "scope": "common",
-                    "docId": "kibKbnGrokUiPluginApi",
-                    "section": "def-common.DraftGrokExpression",
-                    "text": "DraftGrokExpression"
-                  },
-                  ") => void) | undefined"
+                  "((pattern: string) => void) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 25,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/grok-ui",
                     "id": "def-common.Expression.$1.onChange.$1",
-                    "type": "Object",
+                    "type": "string",
                     "tags": [],
-                    "label": "expression",
+                    "label": "pattern",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/grok-ui",
-                        "scope": "common",
-                        "docId": "kibKbnGrokUiPluginApi",
-                        "section": "def-common.DraftGrokExpression",
-                        "text": "DraftGrokExpression"
-                      }
+                      "string"
                     ],
                     "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                    "lineNumber": 25,
+                    "columnNumber": 15,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1004,6 +1073,8 @@
                   "string | number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 26,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1018,10 +1089,168 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 27,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokCollectionProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "GrokCollectionProvider",
+        "description": [
+          "\nProvider component that makes a GrokCollection instance available to all child components.\nThe collection is set up (patterns loaded) automatically when the provider mounts.\n\nThis allows multiple UI components to share the same Grok collection, and for custom\npattern definitions to be updated centrally."
+        ],
+        "signature": [
+          "({ grokCollection, children, }: GrokCollectionProviderProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_collection_context.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollectionProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  grokCollection,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "GrokCollectionProviderProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_collection_context.tsx",
+            "lineNumber": 33,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokExpressionsProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "GrokExpressionsProvider",
+        "description": [
+          "\nProvider component that converts an array of grok pattern strings into\nDraftGrokExpression instances and makes them available to child components.\n\nThis provider sits between the GrokCollectionProvider (which provides the collection)\nand components that need to render/interact with specific grok patterns (like Sample components).\n\nUsage:\n```tsx\n<GrokExpressionsProvider patterns={['%{TIMESTAMP}', '%{IP}']}>\n  <Sample />  // Can access expressions via useGrokExpressionsFromContext()\n</GrokExpressionsProvider>\n```"
+        ],
+        "signature": [
+          "({ patterns, children }: GrokExpressionsProviderProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+        "lineNumber": 113,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokExpressionsProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ patterns, children }",
+            "description": [],
+            "signature": [
+              "GrokExpressionsProviderProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+            "lineNumber": 113,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokSampleInputWithContext",
+        "type": "Function",
+        "tags": [],
+        "label": "GrokSampleInputWithContext",
+        "description": [
+          "\nWrapper component for the Grok Sample component that reads\ngrokCollection and draftGrokExpressions from context.\n\nMust be used within both GrokCollectionProvider and GrokExpressionsProvider.\n\nUsage:\n```tsx\n<GrokCollectionProvider grokCollection={collection}>\n  <GrokExpressionsProvider patterns={['%{TIMESTAMP}', '%{IP}']}>\n    <GrokSampleInputWithContext sample=\"2024-01-27 192.168.1.1\" />\n  </GrokExpressionsProvider>\n</GrokCollectionProvider>\n```"
+        ],
+        "signature": [
+          "({ sample }: GrokSampleWithContextProps) => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_sample_with_context.tsx",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokSampleInputWithContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ sample }",
+            "description": [],
+            "signature": [
+              "GrokSampleWithContextProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_sample_with_context.tsx",
+            "lineNumber": 66,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokSampleWithContext",
+        "type": "Function",
+        "tags": [],
+        "label": "GrokSampleWithContext",
+        "description": [
+          "\nWrapper component for the Grok Sample component that reads\ngrokCollection and draftGrokExpressions from context.\n\nMust be used within both GrokCollectionProvider and GrokExpressionsProvider.\n\nUsage:\n```tsx\n<GrokCollectionProvider grokCollection={collection}>\n  <GrokExpressionsProvider patterns={['%{TIMESTAMP}', '%{IP}']}>\n    <GrokSampleWithContext sample=\"2024-01-27 192.168.1.1\" />\n  </GrokExpressionsProvider>\n</GrokCollectionProvider>\n```"
+        ],
+        "signature": [
+          "({ sample }: GrokSampleWithContextProps) => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_sample_with_context.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokSampleWithContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ sample }",
+            "description": [],
+            "signature": [
+              "GrokSampleWithContextProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_sample_with_context.tsx",
+            "lineNumber": 34,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1054,6 +1283,8 @@
           "[]; sample: string; onChangeSample?: ((sample: string) => void) | undefined; height?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1065,6 +1296,8 @@
             "label": "{\n  grokCollection,\n  draftGrokExpressions,\n  sample = '',\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+            "lineNumber": 24,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1085,6 +1318,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 25,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1106,6 +1341,8 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 26,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1117,6 +1354,8 @@
                 "label": "sample",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 27,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1131,6 +1370,8 @@
                   "((sample: string) => void) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1145,6 +1386,8 @@
                       "string"
                     ],
                     "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                    "lineNumber": 28,
+                    "columnNumber": 21,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1163,6 +1406,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1199,6 +1444,8 @@
           "[]; sample: string; readOnly?: boolean | undefined; onChangeSample?: ((sample: string) => void) | undefined; height?: string | number | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1210,6 +1457,8 @@
             "label": "{\n  grokCollection,\n  draftGrokExpressions,\n  sample = '',\n  readOnly = false,\n  onChangeSample,\n  height = '150px',\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+            "lineNumber": 30,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1230,6 +1479,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 31,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1251,6 +1502,8 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 32,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1262,6 +1515,8 @@
                 "label": "sample",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 33,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1276,6 +1531,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 34,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1290,6 +1547,8 @@
                   "((sample: string) => void) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 35,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1304,6 +1563,8 @@
                       "string"
                     ],
                     "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                    "lineNumber": 35,
+                    "columnNumber": 21,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1322,6 +1583,8 @@
                   "string | number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 36,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1329,6 +1592,115 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.useGrokCollection",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useGrokCollection",
+        "description": [
+          "\nHook to access the GrokCollection instance from context.\n"
+        ],
+        "signature": [
+          "() => GrokCollectionContextValue"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_collection_context.tsx",
+        "lineNumber": 69,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "The grokCollection instance, loading state, and any error"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.useGrokExpressions",
+        "type": "Function",
+        "tags": [],
+        "label": "useGrokExpressions",
+        "description": [
+          "\nHook to manage DraftGrokExpression instances based on an array of grok pattern strings.\n\nThis hook abstracts away the complexity of creating, updating, and destroying DraftGrokExpression\ninstances. Consumers just work with plain string arrays, and this hook ensures that:\n- DraftGrokExpression instances are created and destroyed as needed\n- Instances are reused for stable identity (important for React reconciliation)\n- Subscriptions to custom pattern changes are properly managed\n- Memory leaks are prevented through proper cleanup\n"
+        ],
+        "signature": [
+          "(patterns: string[]) => ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.DraftGrokExpression",
+            "text": "DraftGrokExpression"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+        "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.useGrokExpressions.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "patterns",
+            "description": [
+              "- Array of grok pattern strings"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+            "lineNumber": 40,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Array of DraftGrokExpression instances corresponding to the input strings"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.useGrokExpressionsFromContext",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useGrokExpressionsFromContext",
+        "description": [
+          "\nHook to access DraftGrokExpression instances from context.\nMust be used within a GrokExpressionsProvider.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.DraftGrokExpression",
+            "text": "DraftGrokExpression"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+        "lineNumber": 130,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "Array of DraftGrokExpression instances"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -1341,6 +1713,8 @@
         "label": "FieldDefinition",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1352,6 +1726,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1373,6 +1749,8 @@
               " | null"
             ],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1384,6 +1762,8 @@
             "label": "colour",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1395,6 +1775,8 @@
             "label": "pattern",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1411,6 +1793,8 @@
         "label": "SupportedTypeConversion",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

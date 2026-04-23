@@ -70,6 +70,23 @@
                     }
                   }
                 },
+                "modifiers": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "subtype": {
+                      "type": "keyword"
+                    },
+                    "contribution": {
+                      "type": "float"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "enabled": false
+                    }
+                  }
+                },
                 "notes": {
                   "type": "keyword"
                 }
@@ -136,6 +153,23 @@
                     },
                     "contribution_score": {
                       "type": "float"
+                    }
+                  }
+                },
+                "modifiers": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "subtype": {
+                      "type": "keyword"
+                    },
+                    "contribution": {
+                      "type": "float"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "enabled": false
                     }
                   }
                 },
@@ -234,6 +268,23 @@
                         }
                       }
                     },
+                    "modifiers": {
+                      "properties": {
+                        "type": {
+                          "type": "keyword"
+                        },
+                        "subtype": {
+                          "type": "keyword"
+                        },
+                        "contribution": {
+                          "type": "float"
+                        },
+                        "metadata": {
+                          "type": "object",
+                          "enabled": false
+                        }
+                      }
+                    },
                     "notes": {
                       "type": "keyword"
                     }
@@ -291,6 +342,23 @@
                         },
                         "contribution_score": {
                           "type": "float"
+                        }
+                      }
+                    },
+                    "modifiers": {
+                      "properties": {
+                        "type": {
+                          "type": "keyword"
+                        },
+                        "subtype": {
+                          "type": "keyword"
+                        },
+                        "contribution": {
+                          "type": "float"
+                        },
+                        "metadata": {
+                          "type": "object",
+                          "enabled": false
                         }
                       }
                     },

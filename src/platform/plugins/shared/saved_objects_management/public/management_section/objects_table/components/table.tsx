@@ -329,7 +329,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               }
             ),
             type: 'icon',
-            icon: 'kqlSelector',
+            icon: 'querySelector',
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
@@ -375,7 +375,7 @@ export class Table extends PureComponent<TableProps, TableState> {
 
     const button = (
       <EuiButton
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.toggleExportPopoverVisibility}
         isDisabled={selectedSavedObjects.length === 0}
@@ -451,6 +451,10 @@ export class Table extends PureComponent<TableProps, TableState> {
               button={button}
               isOpen={this.state.isExportPopoverOpen}
               closePopover={this.closeExportPopover}
+              aria-label={i18n.translate(
+                'savedObjectsManagement.objectsTable.table.exportPopoverAriaLabel',
+                { defaultMessage: 'Export options' }
+              )}
             >
               <EuiFormRow
                 label={
@@ -473,7 +477,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                 />
               </EuiFormRow>
               <EuiFormRow>
-                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+                <EuiButton key="exportSO" iconType="upload" onClick={this.onExportClick} fill>
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"
@@ -509,6 +513,9 @@ export class Table extends PureComponent<TableProps, TableState> {
             onChange={onTableChange}
             rowProps={(item) => ({
               'data-test-subj': `savedObjectsTableRow row-${item.id}`,
+            })}
+            tableCaption={i18n.translate('savedObjectsManagement.objectsTable.table.tableCaption', {
+              defaultMessage: 'Saved objects list',
             })}
           />
         </div>

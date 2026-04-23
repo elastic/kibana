@@ -9,9 +9,24 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { setVarStepDefinition } from './setvar_step';
+import { getExternalStepDefinition } from './external_step';
+import type { IExampleExternalService } from '../../common/external_service/types';
+
+const asyncFeatureFlagExample = () => Promise.resolve(true);
+export interface RegisterStepDefinitionsDependencies {
+  externalService: IExampleExternalService;
+}
 
 export const registerStepDefinitions = (
-  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
+  deps: RegisterStepDefinitionsDependencies
 ) => {
   workflowsExtensions.registerStepDefinition(setVarStepDefinition);
+  workflowsExtensions.registerStepDefinition(async () => {
+    const isFeatureFlagEnabled = await asyncFeatureFlagExample();
+    if (!isFeatureFlagEnabled) {
+      return undefined; // Skips step registration
+    }
+    return getExternalStepDefinition(deps);
+  });
 };

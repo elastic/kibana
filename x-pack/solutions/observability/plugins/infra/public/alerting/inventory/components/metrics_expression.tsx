@@ -39,7 +39,7 @@ import {
   SnapshotCustomMetricInputRT,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';
-
+import { AGGREGATION_LABELS } from '../../../../common/snapshot_metric_i18n';
 interface Props {
   metric?: { value: string; text: string };
   metrics: Array<{ value: string; text: string }>;
@@ -71,22 +71,8 @@ const V2ToLegacyMapping: Record<V2MetricType, string> = {
   cpuV2: 'cpu',
 };
 
-const AGGREGATION_LABELS = {
-  ['avg']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.avg', {
-    defaultMessage: 'Average',
-  }),
-  ['max']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.max', {
-    defaultMessage: 'Max',
-  }),
-  ['min']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.min', {
-    defaultMessage: 'Min',
-  }),
-  ['rate']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.rate', {
-    defaultMessage: 'Rate',
-  }),
-};
 const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map((k) => ({
-  text: AGGREGATION_LABELS[k as SnapshotCustomAggregation],
+  text: AGGREGATION_LABELS[k],
   value: k,
 }));
 

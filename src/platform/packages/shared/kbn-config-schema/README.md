@@ -5,38 +5,41 @@ Kibana configuration entries providing developers with a fully typed model of th
 
 ## Table of Contents
 
-* [Why `@kbn/config-schema`?](#why-kbnconfig-schema)
-* [Base concepts](#base-concepts)
-* [Basic types](#basic-types)
-  * [`schema.string()`](#schemastring)
-  * [`schema.number()`](#schemanumber)
-  * [`schema.boolean()`](#schemaboolean)
-  * [`schema.literal()`](#schemaliteral)
-  * [`schema.buffer()`](#schemabuffer)
-  * [`schema.stream()`](#schemastream)
-* [Composite types](#composite-types)
-  * [`schema.arrayOf()`](#schemaarrayof)
-  * [`schema.object()`](#schemaobject)
-  * [`schema.recordOf()`](#schemarecordof)
-  * [`schema.mapOf()`](#schemamapof)
-  * [`schema.intersection()` / `schema.allOf()`](#schemaintersection--schemaallof)
-* [Advanced types](#advanced-types)
-  * [`schema.oneOf()`](#schemaoneof)
-  * [`schema.any()`](#schemaany)
-  * [`schema.maybe()`](#schemamaybe)
-  * [`schema.nullable()`](#schemanullable)
-  * [`schema.never()`](#schemanever)
-  * [`schema.uri()`](#schemauri)
-  * [`schema.byteSize()`](#schemabytesize)
-  * [`schema.duration()`](#schemaduration)
-  * [`schema.conditional()`](#schemaconditional)
-  * [`schema.lazy()`](#schemalazy)
-* [References](#references)
-  * [`schema.contextRef()`](#schemacontextref)
-  * [`schema.siblingRef()`](#schemasiblingref)
-* [Custom validation](#custom-validation)
-* [Default values](#default-values)
-* [Extending object schemas](#extending-object-schemas)
+- [`@kbn/config-schema` — The Kibana config validation library](#kbnconfig-schema--the-kibana-config-validation-library)
+  - [Table of Contents](#table-of-contents)
+  - [Why `@kbn/config-schema`?](#why-kbnconfig-schema)
+  - [Base concepts](#base-concepts)
+  - [Basic types](#basic-types)
+    - [`schema.string()`](#schemastring)
+    - [`schema.number()`](#schemanumber)
+    - [`schema.boolean()`](#schemaboolean)
+    - [`schema.literal()`](#schemaliteral)
+    - [`schema.buffer()`](#schemabuffer)
+    - [`schema.stream()`](#schemastream)
+  - [Composite types](#composite-types)
+    - [`schema.arrayOf()`](#schemaarrayof)
+    - [`schema.object()`](#schemaobject)
+    - [`schema.recordOf()`](#schemarecordof)
+    - [`schema.mapOf()`](#schemamapof)
+    - [`schema.intersection()` / `schema.allOf()`](#schemaintersection--schemaallof)
+  - [Advanced types](#advanced-types)
+    - [`schema.oneOf()`](#schemaoneof)
+    - [`schema.discriminatedUnion()`](#schemadiscriminatedunion)
+    - [`schema.any()`](#schemaany)
+    - [`schema.maybe()`](#schemamaybe)
+    - [`schema.nullable()`](#schemanullable)
+    - [`schema.never()`](#schemanever)
+    - [`schema.uri()`](#schemauri)
+    - [`schema.byteSize()`](#schemabytesize)
+    - [`schema.duration()`](#schemaduration)
+    - [`schema.conditional()`](#schemaconditional)
+    - [`schema.lazy()`](#schemalazy)
+  - [References](#references)
+    - [`schema.contextRef()`](#schemacontextref)
+    - [`schema.siblingRef()`](#schemasiblingref)
+  - [Custom validation](#custom-validation)
+  - [Default values](#default-values)
+  - [Extending object schemas](#extending-object-schemas)
 
 ## Why `@kbn/config-schema`?
 
@@ -307,7 +310,7 @@ __Notes:__
 
 ### `schema.intersection()` / `schema.allOf()`
 
-Creates an `object` schema being the intersection of the provided `object` schemas. 
+Creates an `object` schema being the intersection of the provided `object` schemas.
 Note that schema construction will throw an error if some of the intersection schema share the same key(s).
 
 See the documentation for [schema.object](#schemaobject).
@@ -349,6 +352,37 @@ const valueSchema = schema.oneOf([schema.literal('∞'), schema.number()]);
 __Notes:__
 * Since the result data type is a type union you should use various TypeScript type guards to get the exact type.
 * Can't use the `unknowns` option since this is implemented on top of `joi.alternatives()`, and it doesn't accept this option.
+
+### `schema.discriminatedUnion()`
+
+Allows a list of alternative object schemas to validate input data against, using a common discriminator property to determine which schema to use.
+
+__Output type:__ `TObject1 | TObject2 | TObject3 | ..... as TUnion`
+
+__Options:__
+  * `defaultValue: TUnion | Reference<TUnion> | (() => TUnion)` - defines a default value, see [Default values](#default-values) section for more details.
+  * `validate: (value: TUnion) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+
+__Usage:__
+```typescript
+const valueSchema = schema.discriminatedUnion('type', [
+  schema.object({ type: schema.literal('str'), value: schema.string() }),
+  schema.object({ type: schema.literal('num'), value: schema.number() }),
+  schema.object({ type: schema.literal('bool'), value: schema.boolean() }),
+]);
+
+// Valid inputs:
+// { type: 'str', value: 'hello' }
+// { type: 'num', value: 123 }
+// { type: 'bool', value: true }
+```
+
+__Notes:__
+* The first argument is the name of the discriminator property that must be present in all object schemas.
+* Each object schema defines the discriminator property using `schema.literal()` with a unique string value.
+* Discriminator values must be unique across all schemas - duplicate values will throw an error at schema construction time.
+* You can define a fallback schema by using a non-literal type (e.g., `schema.string()`) for the discriminator property. Only one fallback schema is allowed.
+* Unlike `schema.oneOf()`, this provides better error messages since it can identify which schema variant was intended based on the discriminator value.
 
 ### `schema.any()`
 

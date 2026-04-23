@@ -32,9 +32,11 @@ export function WelcomeTourCallout({
   firstClassicStreamName,
 }: WelcomeTourCalloutProps) {
   const {
-    core: { docLinks },
+    core: { docLinks, notifications },
   } = useKibana();
   const { isCalloutDismissed, dismissCallout, startTour, tourState } = useStreamsTour();
+
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
   if (isCalloutDismissed || !hasClassicStreams || tourState.isTourActive) {
     return null;
@@ -72,25 +74,27 @@ export function WelcomeTourCallout({
                 <EuiText size="s" color="subdued">
                   {i18n.translate('xpack.streams.welcomeCallout.description', {
                     defaultMessage:
-                      'Your existing Elasticsearch data streams appear here as classic streams, simplifying field extraction and retention management.',
+                      'Existing Elasticsearch data streams appear in this list as classic streams, so you can manage field extraction and retention in one place.',
                   })}
                   <br />
                   {i18n.translate('xpack.streams.welcomeCallout.descriptionSecondLine', {
                     defaultMessage:
-                      'To try the full managed hierarchy experience, enable /logs streams when onboarding new data.',
+                      'To try the full managed hierarchy experience, pick "Wired Streams" in the Ingestion selector when onboarding new data.',
                   })}
                 </EuiText>
               </EuiFlexItem>
               <EuiSpacer size="m" />
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton color="primary" size="s" onClick={handleStartTour}>
-                      {i18n.translate('xpack.streams.welcomeCallout.startTourButton', {
-                        defaultMessage: 'Start tour',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
+                  {isTourEnabled && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton color="primary" size="s" onClick={handleStartTour}>
+                        {i18n.translate('xpack.streams.welcomeCallout.startTourButton', {
+                          defaultMessage: 'Start tour',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="primary"
@@ -98,7 +102,7 @@ export function WelcomeTourCallout({
                       href={docLinks.links.observability.logsStreams}
                       target="_blank"
                       rel="noopener"
-                      iconType="popout"
+                      iconType="external"
                       iconSide="right"
                     >
                       {i18n.translate('xpack.streams.welcomeCallout.docsButton', {

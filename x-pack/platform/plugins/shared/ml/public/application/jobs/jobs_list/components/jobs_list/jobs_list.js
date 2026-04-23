@@ -150,7 +150,11 @@ export class JobsListUI extends Component {
         render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
-            iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
+            iconType={
+              this.state.itemIdToExpandedRowMap[item.id]
+                ? 'chevronSingleDown'
+                : 'chevronSingleRight'
+            }
             aria-label={
               this.state.itemIdToExpandedRowMap[item.id]
                 ? i18n.translate('xpack.ml.jobsList.collapseJobDetailsAriaLabel', {
@@ -412,6 +416,9 @@ export class JobsListUI extends Component {
       <>
         <EuiBasicTable
           data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
+          tableCaption={i18n.translate('xpack.ml.jobsList.tableCaption', {
+            defaultMessage: 'List of anomaly detection jobs',
+          })}
           loading={loading === true}
           noItemsMessage={
             loading

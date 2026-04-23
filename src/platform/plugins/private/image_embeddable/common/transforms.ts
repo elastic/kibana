@@ -6,39 +6,52 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { Reference } from '@kbn/content-management-utils';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { convertCamelCasedKeysToSnakeCase, transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
 import type { ImageEmbeddableState } from '../server';
 
-export function getTransforms(
-  transformEnhancementsIn: EnhancementsRegistry['transformIn'],
-  transformEnhancementsOut: EnhancementsRegistry['transformOut']
-) {
+export function getTransformOut(
+  transformDrilldownsOut: DrilldownTransforms['transformOut']
+): (storedState: object, panelReferences?: Reference[]) => ImageEmbeddableState {
+  return (storedState: object, panelReferences?: Reference[]) => {
+    const transformsFlow = flow(
+      // Strip fileImageMeta from src and hoist objectFit out of sizing — both removed in 9.4.0
+      (state: Record<string, unknown>) => {
+        if ('imageConfig' in state === false) return state;
+        const config = state.imageConfig as Record<string, unknown>;
+
+        const updated = { ...config };
+
+        const src = updated.src as Record<string, unknown> | undefined;
+        if (src?.fileImageMeta) {
+          delete src.fileImageMeta;
+        }
+
+        const sizing = updated.sizing as Record<string, unknown> | undefined;
+        if (sizing) {
+          updated.objectFit = sizing.objectFit;
+          delete updated.sizing;
+        }
+
+        return { ...state, imageConfig: updated };
+      },
+      transformTitlesOut<ImageEmbeddableState>,
+      (state: ImageEmbeddableState) => transformDrilldownsOut(state, panelReferences),
+      // snake case last as snake casing may effect other transforms
+      // BWC transforms may be looking for original camel cased keys
+      convertCamelCasedKeysToSnakeCase
+    );
+    return transformsFlow(storedState as ImageEmbeddableState);
+  };
+}
+
+export function getTransforms(drilldownTransforms: DrilldownTransforms) {
   return {
-    transformOutInjectsReferences: true,
     transformIn: (state: ImageEmbeddableState) => {
-      const { enhancementsState, enhancementsReferences } = state.enhancements
-        ? transformEnhancementsIn(state.enhancements)
-        : { enhancementsState: undefined, enhancementsReferences: [] };
-
-      return {
-        state: {
-          ...state,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-        },
-        references: enhancementsReferences,
-      };
+      return drilldownTransforms.transformIn(state);
     },
-    transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {
-      const enhancementsState = state.enhancements
-        ? transformEnhancementsOut(state.enhancements, references ?? [])
-        : undefined;
-
-      return {
-        ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-      };
-    },
+    transformOut: getTransformOut(drilldownTransforms.transformOut),
   };
 }

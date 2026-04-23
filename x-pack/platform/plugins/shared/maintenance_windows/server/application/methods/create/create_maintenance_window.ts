@@ -10,6 +10,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '../../../lib/get_es_query_config';
+import { getAlertsDataViewBase } from '../../../lib/get_alerts_data_view_base';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
 import type { MaintenanceWindowClientContext } from '../../../../common';
 import { getScopedQueryErrorMessage } from '../../../../common';
@@ -29,7 +30,7 @@ export async function createMaintenanceWindow(
 ): Promise<MaintenanceWindow> {
   const { data } = params;
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
-  const { title, duration, rRule, categoryIds, scopedQuery, enabled = true } = data;
+  const { title, schedule, scope, rRule, categoryIds, duration, enabled = true } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -38,21 +39,22 @@ export async function createMaintenanceWindow(
     throw Boom.badRequest(`Error validating create maintenance window data - ${error.message}`);
   }
 
-  let scopedQueryWithGeneratedValue = scopedQuery;
+  let scopedQueryWithGeneratedValue = scope?.alerting;
+  const indexPattern = getAlertsDataViewBase();
 
   try {
-    if (scopedQuery) {
+    if (scope?.alerting) {
       const dsl = JSON.stringify(
         buildEsQuery(
-          undefined,
-          [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[],
+          indexPattern,
+          [{ query: scope.alerting.kql, language: 'kuery' }],
+          scope.alerting.filters as Filter[],
           esQueryConfig
         )
       );
 
       scopedQueryWithGeneratedValue = {
-        ...scopedQuery,
+        ...scope.alerting,
         dsl,
       };
     }
@@ -67,22 +69,28 @@ export async function createMaintenanceWindow(
   const id = SavedObjectsUtils.generateId();
 
   const expirationDate = getMaintenanceWindowExpirationDate({
-    rRule,
-    duration,
+    schedule: schedule.custom,
   });
 
   const modificationMetadata = await getModificationMetadata();
 
-  const events = generateMaintenanceWindowEvents({ rRule, expirationDate, duration });
+  const events = generateMaintenanceWindowEvents({
+    schedule: schedule.custom,
+    expirationDate,
+  });
   const maintenanceWindowAttributes = transformMaintenanceWindowToMaintenanceWindowAttributes({
     title,
     enabled,
     expirationDate,
     categoryIds,
     scopedQuery: scopedQueryWithGeneratedValue,
-    rRule: rRule as MaintenanceWindow['rRule'],
+    rRule,
     duration,
     events,
+    schedule,
+    ...(scopedQueryWithGeneratedValue
+      ? { scope: { alerting: scopedQueryWithGeneratedValue } }
+      : {}),
     ...modificationMetadata,
   });
 

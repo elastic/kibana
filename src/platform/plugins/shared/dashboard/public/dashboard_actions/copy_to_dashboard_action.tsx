@@ -21,6 +21,7 @@ import {
   apiHasUniqueId,
   apiIsOfType,
   apiPublishesSavedObjectId,
+  apiCanBeDuplicated,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -47,6 +48,7 @@ export type CopyToDashboardAPI = HasType &
 
 const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
   return (
+    apiCanBeDuplicated(api) &&
     apiHasUniqueId(api) &&
     apiHasParentApi(api) &&
     apiIsOfType(api.parentApi, DASHBOARD_API_TYPE) &&

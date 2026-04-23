@@ -7,18 +7,15 @@
   "plugin": {
     "id": "dashboardAgent",
     "server": true,
-    "browser": false,
-    "configPath": [
-      "xpack",
-      "dashboardAgent"
-    ],
+    "browser": true,
+    "configPath": ["xpack", "dashboardAgent"],
     "requiredPlugins": [
-      "onechat",
-      "dashboard"
-    ],
-    "optionalPlugins": [
+      "agentBuilder",
+      "dashboard",
+      "dashboardMarkdown",
+      "data",
       "share",
-      "spaces"
+      "unifiedSearch"
     ]
   }
 }

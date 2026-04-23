@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { z } from '@kbn/zod/v4';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { Case, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
 import type { CasesFindRequest } from '@kbn/cases-plugin/common/types/api';

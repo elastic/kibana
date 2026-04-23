@@ -21,8 +21,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import { DATA_CONNECTORS_APP_ID } from '@kbn/deeplinks-data-connectors';
-import type { AgentConfiguration, ToolSelection } from '@kbn/onechat-common';
+import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_AGENTS } from '../../../common';
 import { useAgents } from '../hooks/use_agents';
 import { useKibana } from '../hooks/use_kibana';
@@ -261,7 +260,7 @@ export const SnapshotsSection: React.FC = () => {
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       {status === 'Sync error' && (
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="alert" color="danger" />
+                          <EuiIcon type="warning" color="danger" />
                         </EuiFlexItem>
                       )}
                       <EuiFlexItem>
@@ -277,7 +276,7 @@ export const SnapshotsSection: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiLink onClick={() => navigateToApp(DATA_CONNECTORS_APP_ID)}>
+                    <EuiLink onClick={() => {}}>
                       <FormattedMessage
                         id="xpack.workplaceai.gettingStarted.snapshots.seeAllSources"
                         defaultMessage="See all"

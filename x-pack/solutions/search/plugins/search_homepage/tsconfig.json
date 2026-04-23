@@ -8,7 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -32,23 +32,21 @@
     "@kbn/core-http-server",
     "@kbn/search-navigation",
     "@kbn/search-api-keys-components",
+    "@kbn/search-api-keys-server",
     "@kbn/logging",
     "@kbn/sample-data-ingest",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-shared-ui",
-    "@kbn/search-code-examples",
-    "@kbn/try-in-console",
-    "@kbn/management-settings-ids",
-    "@kbn/deeplinks-search",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/react-query",
-    "@kbn/core-feature-flags-browser",
     "@kbn/index-management-shared-types",
     "@kbn/data-views-plugin",
     "@kbn/cloud",
+    "@kbn/agent-builder-plugin",
+    "@kbn/scout-search",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

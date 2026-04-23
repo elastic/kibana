@@ -29,10 +29,134 @@
         "signature": [
           "() => string"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 182,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.ruleParamsSchemasForCreate",
+        "type": "Function",
+        "tags": [],
+        "label": "ruleParamsSchemasForCreate",
+        "description": [],
+        "signature": [
+          "(baseFields: Record<string, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<unknown>>) => ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<any>[]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 160,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-rule-params",
+            "id": "def-common.ruleParamsSchemasForCreate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "baseFields",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<unknown>>"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.ruleParamsSchemasForCreate",
+        "type": "Function",
+        "tags": [],
+        "label": "ruleParamsSchemasForCreate",
+        "description": [],
+        "signature": [
+          "(baseFields: Record<string, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<unknown>>) => ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<any>[]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 160,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-rule-params",
+            "id": "def-common.ruleParamsSchemasForCreate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "baseFields",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<unknown>>"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -50,7 +174,9 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 185,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -65,7 +191,91 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 185,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.RuleParamsForCreate",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleParamsForCreate",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<any>[]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 188,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.RuleParamsForCreate",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleParamsForCreate",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<any>[]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 188,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.RuleParamsForUpdate",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleParamsForUpdate",
+        "description": [],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 187,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.RuleParamsForUpdate",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleParamsForUpdate",
+        "description": [],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 187,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -80,7 +290,9 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 186,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -95,7 +307,9 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 186,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -119,7 +333,9 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 147,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -141,7 +357,57 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 147,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.ruleParamsSchemaForUpdate",
+        "type": "Object",
+        "tags": [],
+        "label": "ruleParamsSchemaForUpdate",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 180,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.ruleParamsSchemaForUpdate",
+        "type": "Object",
+        "tags": [],
+        "label": "ruleParamsSchemaForUpdate",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 180,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -163,7 +429,9 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 151,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -185,7 +453,9 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 151,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

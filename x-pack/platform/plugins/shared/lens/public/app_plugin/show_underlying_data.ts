@@ -94,6 +94,22 @@ const sortByDateFieldsFirst = (
   return dateFieldsFirst;
 };
 
+/**
+ * The config builder will create predictable ad hoc index pattern IDs that do not
+ * necessarily match the data view IDs in the current Kibana instance.
+ * This function tries to find a data view matching the given index pattern ID
+ * either by ID or by title.
+ */
+export function findDataViewByIndexPatternId(
+  indexPatternId: string,
+  indexPatterns: IndexPatternMap
+) {
+  return (
+    indexPatterns[indexPatternId] ??
+    Object.values(indexPatterns).find((dv) => dv.title === indexPatternId)
+  );
+}
+
 export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,

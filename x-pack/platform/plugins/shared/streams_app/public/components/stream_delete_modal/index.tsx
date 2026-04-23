@@ -29,7 +29,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-import { buildRequestPreviewCodeContent } from '../data_management/shared/utils';
+import { buildRequestPreviewCodeContent } from '../stream_management/data_management/shared/utils';
+import { getFormattedError } from '../../util/errors';
 
 export function StreamDeleteModal({
   onClose,
@@ -63,7 +64,7 @@ export function StreamDeleteModal({
       onClose();
     } catch (error) {
       setDeleteInProgress(false);
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.failedToDelete', {
           defaultMessage: 'Failed to delete stream {id}',
           values: {
@@ -146,7 +147,7 @@ export function StreamDeleteModal({
                 <EuiButtonEmpty
                   data-test-subj="streamsAppDeleteStreamModalCopyCodeButton"
                   size="s"
-                  iconType="editorCodeBlock"
+                  iconType="code"
                   onClick={copy}
                 >
                   {copyCodeButtonText}
@@ -168,6 +169,7 @@ export function StreamDeleteModal({
                 color="danger"
                 onClick={handleDelete}
                 fill
+                data-test-subj="streamsAppDeleteStreamModalDeleteButton"
               >
                 {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.deleteButton', {
                   defaultMessage: 'Delete',

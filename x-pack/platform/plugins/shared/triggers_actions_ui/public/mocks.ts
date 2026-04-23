@@ -139,6 +139,12 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         }),
       };
     },
+    getAlertFormatter: (ruleTypeId: string) => {
+      if (ruleTypeRegistry.has(ruleTypeId)) {
+        return undefined;
+      }
+      return ruleTypeRegistry.get(ruleTypeId).format;
+    },
   };
 }
 

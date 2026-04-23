@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { Query } from '@kbn/es-query';
-import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   AGG_TYPE,
@@ -143,7 +142,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource: ISearchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = {
@@ -171,6 +170,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions,
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);

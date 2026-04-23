@@ -32,7 +32,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   AsyncSearchGetResponse,
   ErrorResponseBase,
-  SqlGetAsyncResponse,
+  EsqlAsyncQueryResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -52,6 +52,7 @@ import type {
   UserProfileService,
 } from '@kbn/core/public';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
@@ -64,6 +65,8 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
+import type { ICPSManager } from '@kbn/cps-utils';
+import moment from 'moment';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -77,6 +80,7 @@ import {
   isRunningResponse,
   pollSearch,
   shimHitsTotal,
+  strategyToString,
   UI_SETTINGS,
 } from '../../../common';
 import type { SearchUsageCollector } from '../collectors';
@@ -103,10 +107,13 @@ export interface SearchInterceptorDeps {
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
   searchConfig: SearchConfigSchema;
+  getCPSManager?: () => ICPSManager | undefined;
 }
 
 const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
+
+const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
 
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
@@ -115,6 +122,8 @@ export class SearchInterceptor {
     MAX_CACHE_ITEMS,
     MAX_CACHE_SIZE_MB
   );
+  private protocolSupportsMultiplexing: boolean = false;
+  private performanceObserver?: PerformanceObserver;
 
   /**
    * Observable that emits when the number of pending requests changes.
@@ -160,11 +169,29 @@ export class SearchInterceptor {
         this.searchTimeout = timeout;
       })
     );
+
+    // Set up PerformanceObserver to capture search requests as they happen
+    try {
+      this.performanceObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries() as PerformanceResourceTiming[];
+        const entry = entries.find(({ name }) => name.includes('/internal/search/'));
+        if (entry) {
+          this.protocolSupportsMultiplexing = ['h2', 'h3'].includes(entry.nextHopProtocol);
+          this.performanceObserver?.disconnect(); // We only need to detect this once, so we can disconnect the observer after the first match
+        }
+      });
+      this.performanceObserver.observe({ entryTypes: ['resource'] });
+    } catch (e) {
+      // Silently fail - protocol detection is not critical
+    }
   }
 
   public stop() {
     this.responseCache.clear();
     this.uiSettingsSubs.forEach((s) => s.unsubscribe());
+    if (this.performanceObserver) {
+      this.performanceObserver.disconnect();
+    }
   }
 
   /*
@@ -181,10 +208,11 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
-    const { sessionId } = options;
+    const { sessionId, projectRouting } = options;
     const hashOptions = {
       ...request.params,
       sessionId,
+      projectRouting,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
@@ -270,8 +298,8 @@ export class SearchInterceptor {
 
     if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
     if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
-    if (combined.retrieveResults !== undefined)
-      serializableOptions.retrieveResults = combined.retrieveResults;
+    if (combined.returnIntermediateResults !== undefined)
+      serializableOptions.returnIntermediateResults = combined.returnIntermediateResults;
     if (combined.legacyHitsTotal !== undefined)
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
@@ -280,6 +308,9 @@ export class SearchInterceptor {
       serializableOptions.isSearchStored = combined.isSearchStored;
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
+    }
+    if (combined.projectRouting !== undefined) {
+      serializableOptions.projectRouting = combined.projectRouting;
     }
 
     return serializableOptions;
@@ -298,18 +329,22 @@ export class SearchInterceptor {
 
     const search = ({
       abortSignal = searchAbortController.getSignal(),
-    }: Pick<ISearchOptions, 'abortSignal'> = {}) => {
+      pollLength,
+    }: Pick<ISearchOptions, 'abortSignal'> & { pollLength?: string } = {}) => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
       ];
+      const projectRouting = this.deps.getCPSManager?.()?.getProjectRouting(options.projectRouting);
       return this.runSearch(
         { id, ...request },
         {
           ...options,
+          projectRouting,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
           isSearchStored,
+          pollLength,
         }
       )
         .then((result) => {
@@ -327,7 +362,12 @@ export class SearchInterceptor {
           abort: (reason?: AbortReason) => searchAbortController.abort(reason),
           poll: async (abortSignal) => {
             if (id) {
-              await search({ abortSignal });
+              await search({
+                abortSignal,
+                // pollLength should be 0 because this poll is not for results, but just to signal to the server to
+                // record the search in the background search saved object. we want it to finish quickly
+                pollLength: '0',
+              });
             }
           },
         })
@@ -358,7 +398,15 @@ export class SearchInterceptor {
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+      this.deps.http.delete(
+        buildPath('/internal/search/{strategy}/{id}', {
+          strategy: strategyToString(strategy),
+          id: id as string,
+        }),
+        {
+          version: '1',
+        }
+      )
     );
 
     const cancel = async () => {
@@ -386,8 +434,17 @@ export class SearchInterceptor {
     // Preserve and project first request params into responses.
     let firstRequestParams: SanitizedConnectionRequestParams;
 
+    const pollInterval = this.deps.searchConfig.asyncSearch.pollInterval
+      ? // the types incorrectly report asyncSearch.pollInterval as a duration already, but it
+        // is actually a duration string that needs to be initialized with moment.duration
+        // TODO — can we fix this?
+        moment.duration(this.deps.searchConfig.asyncSearch.pollInterval).asMilliseconds()
+      : this.protocolSupportsMultiplexing
+      ? 0
+      : undefined;
+
     return pollSearch(search, cancel, {
-      pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
+      pollInterval,
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
@@ -422,7 +479,11 @@ export class SearchInterceptor {
           return from(
             this.runSearch(
               { id, ...request },
-              { ...options, abortSignal: new AbortController().signal, retrieveResults: true }
+              {
+                ...options,
+                abortSignal: new AbortController().signal,
+                returnIntermediateResults: true,
+              }
             )
           ).pipe(
             map((response) =>
@@ -466,22 +527,34 @@ export class SearchInterceptor {
    */
   private runSearch(
     { params, ...request }: IKibanaSearchRequest,
-    options?: ISearchOptions
+    options?: ISearchOptions & { pollLength?: string }
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
     const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
+    const paramsToUse = request.id
+      ? {
+          wait_for_completion_timeout: options?.pollLength
+            ? options.pollLength
+            : // don't set or override user-configured pollLength, it will be applied server-side
+            !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
+            ? DEFAULT_MULTIPLEXING_POLL_LENGTH
+            : undefined,
 
-    // FIXME: the dropNullColumns param shouldn't be needed during polling
-    // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
-    // at that point, exclude all params when request.id is defined (polling phase)
-    const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
-
+          // FIXME: the dropNullColumns param shouldn't be needed during polling
+          // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
+          // at that point, exclude all params when request.id is defined (polling phase)
+          dropNullColumns: params?.dropNullColumns,
+        }
+      : params || {};
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+        buildPath('/internal/search/{strategy}/{id?}', {
+          strategy: strategyToString(strategy),
+          id: request.id,
+        }),
         {
           version: '1',
           signal: abortSignal,
@@ -539,7 +612,7 @@ export class SearchInterceptor {
               ...getTotalLoaded(shimmedResponse),
             };
           case ESQL_ASYNC_SEARCH_STRATEGY:
-            const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
+            const esqlResponse = rawResponse.body as unknown as EsqlAsyncQueryResponse;
             return {
               id: esqlResponse.id,
               rawResponse: esqlResponse,

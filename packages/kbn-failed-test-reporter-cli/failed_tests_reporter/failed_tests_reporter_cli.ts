@@ -43,26 +43,10 @@ run(
     let pipeline: string = '';
     let prependTitle: string = '';
     if (updateGithub) {
-      let isPr = false;
-
-      if (process.env.BUILDKITE === 'true') {
-        branch = process.env.BUILDKITE_BRANCH || '';
-        pipeline = process.env.BUILDKITE_PIPELINE_SLUG || '';
-        isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
-        updateGithub = process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
-        prependTitle = process.env.PREPEND_FAILURE_TITLE || '';
-      } else {
-        // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
-        const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
-        branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH || '';
-        isPr = !!process.env.ghprbPullId;
-
-        const isMainOrVersion = branch === 'main' || branch.match(/^\d+\.(x|\d+)$/);
-        if (!isMainOrVersion || isPr) {
-          log.info('Failure issues only created on main/version branch jobs');
-          updateGithub = false;
-        }
-      }
+      branch = process.env.BUILDKITE_BRANCH || '';
+      pipeline = process.env.BUILDKITE_PIPELINE_SLUG || '';
+      updateGithub = process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
+      prependTitle = process.env.PREPEND_FAILURE_TITLE || '';
 
       if (!branch) {
         throw createFailError(
@@ -97,9 +81,6 @@ run(
         // it is fine for code coverage to not have test results
         return;
       }
-
-      // Scout test failures reporting
-      await generateScoutTestFailureArtifacts({ log, bkMeta });
 
       if (reportPaths.length) {
         log.info('found', reportPaths.length, 'reports', reportPaths);
@@ -137,6 +118,9 @@ run(
 
         // Process Scout reports
         await processScoutReports(scoutReports, processParams);
+
+        // Generate Scout test failure artifacts after reports are updated (GH issue info, html reports, etc.)
+        await generateScoutTestFailureArtifacts({ log, bkMeta });
       }
     } finally {
       await CiStatsReporter.fromEnv(log).metrics([

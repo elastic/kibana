@@ -16,7 +16,9 @@ import {
   getIsKqlFreeTextExpression,
 } from '@kbn/es-query';
 import { getQueryColumnsFromESQLQuery, getKqlSearchQueries } from '@kbn/esql-utils';
+import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
 import { TabsEventDataKeys, type TabsEBTEvent, type TabsEventName } from '@kbn/unified-tabs';
+import { LRUCache } from 'lru-cache';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
@@ -29,6 +31,21 @@ import {
   TABS_EVENT_TYPE,
   QUERY_FIELDS_USAGE_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
+import {
+  DISCOVER_IN_DASHBOARD_EVENT_TYPE,
+  DiscoverInDashboardEventDataKeys,
+  type DiscoverInDashboardEBTEvent,
+} from './discover_in_dashboard_event_definition';
+import {
+  CASCADE_EVENT_TYPE,
+  CascadeEventDataKeys,
+  type CascadeEBTEvent,
+} from '../application/main/components/layout/cascaded_documents/telemetry/event_definition';
+import {
+  analyzeMultiMatchTypesRequest,
+  mergeMultiMatchAnalyses,
+  type MultiMatchAnalysis,
+} from './query_analysis_utils';
 import { ContextualProfileLevel } from '../context_awareness';
 import type {
   ReportEvent,
@@ -83,6 +100,15 @@ export class ScopedDiscoverEBTManager {
     [ContextualProfileLevel.dataSourceLevel]: undefined,
     [ContextualProfileLevel.documentLevel]: undefined,
   };
+  private queryAnalysisCache = new LRUCache<
+    string, // cache analysis per request id
+    MultiMatchAnalysis,
+    { request: InspectedRequest } // pass full request via context
+  >({
+    max: 10,
+    memoMethod: (requestId, _previousValue, { context: { request } }) =>
+      analyzeMultiMatchTypesRequest(request),
+  });
 
   constructor(
     private readonly reportEvent: ReportEvent | undefined,
@@ -341,6 +367,51 @@ export class ScopedDiscoverEBTManager {
     };
   }
 
+  public trackQueryPerformanceEvent(eventName: string) {
+    const startTime = window.performance.now();
+    let reported = false;
+
+    return {
+      startTime,
+      reportEvent: (
+        {
+          queryRangeSeconds,
+          requests = [],
+        }: {
+          queryRangeSeconds: number;
+          requests?: InspectedRequest[];
+        },
+        otherEventData?: Omit<PerformanceMetricEvent, 'eventName' | 'duration'>
+      ) => {
+        if (reported || !this.reportPerformanceEvent) {
+          return;
+        }
+
+        reported = true;
+        const duration = window.performance.now() - startTime;
+
+        const queryAnalyses = requests.map((request) =>
+          this.queryAnalysisCache.memo(request.id, { context: { request } })
+        );
+        const mergedAnalysis = mergeMultiMatchAnalyses(queryAnalyses);
+
+        this.reportPerformanceEvent({
+          key1: 'query_range_secs',
+          value1: queryRangeSeconds,
+          key2: 'phrase_query_count',
+          value2: mergedAnalysis.typeCounts.get('match_phrase') ?? 0,
+          ...otherEventData,
+          meta: {
+            multi_match_types: mergedAnalysis.rawTypes,
+            ...otherEventData?.meta,
+          },
+          eventName,
+          duration,
+        });
+      },
+    };
+  }
+
   public trackTabsEvent({ eventName, ...payload }: TabsEBTEvent) {
     if (!this.reportEvent) {
       return;
@@ -351,5 +422,25 @@ export class ScopedDiscoverEBTManager {
     };
 
     this.reportEvent(TABS_EVENT_TYPE, eventData);
+  }
+
+  public trackCascadeEvent({ eventName, ...payload }: CascadeEBTEvent) {
+    if (!this.reportEvent) {
+      return;
+    }
+    this.reportEvent(CASCADE_EVENT_TYPE, {
+      [CascadeEventDataKeys.CASCADE_EVENT_NAME]: eventName,
+      ...payload,
+    });
+  }
+
+  public trackDiscoverToDashboardEvent({ eventName, ...payload }: DiscoverInDashboardEBTEvent) {
+    if (!this.reportEvent) {
+      return;
+    }
+    this.reportEvent(DISCOVER_IN_DASHBOARD_EVENT_TYPE, {
+      [DiscoverInDashboardEventDataKeys.EVENT_NAME]: eventName,
+      ...payload,
+    });
   }
 }

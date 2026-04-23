@@ -10,6 +10,7 @@ import { first, uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
+  clearIntegrationKnowledgeIndex,
   addSampleDocsToInternalKb,
   addSampleDocsToCustomIndex,
 } from '../../utils/knowledge_base';
@@ -31,6 +32,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
+      await clearKnowledgeBase(es);
+      await clearIntegrationKnowledgeIndex(es);
       await addSampleDocsToInternalKb(getService, technicalSampleDocs);
       await addSampleDocsToCustomIndex(getService, animalSampleDocs, customSearchConnectorIndex);
     });

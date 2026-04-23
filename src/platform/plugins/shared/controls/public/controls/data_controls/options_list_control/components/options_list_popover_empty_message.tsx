@@ -12,6 +12,8 @@ import React, { useMemo } from 'react';
 import { EuiIcon, EuiSelectableMessage, EuiSpacer } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { BehaviorSubject } from 'rxjs';
+import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
@@ -22,10 +24,10 @@ export const OptionsListPopoverEmptyMessage = ({
 }) => {
   const { componentApi } = useOptionsListContext();
 
-  const [searchTechnique, searchStringValid, field] = useBatchedPublishingSubjects(
-    componentApi.searchTechnique$,
+  const [searchStringValid, searchTechnique, field] = useBatchedPublishingSubjects(
     componentApi.searchStringValid$,
-    componentApi.field$
+    componentApi.searchTechnique$,
+    isDSLOptionsListApi(componentApi) ? componentApi.field$ : new BehaviorSubject(undefined)
   );
 
   const noResultsMessage = useMemo(() => {
@@ -46,8 +48,9 @@ export const OptionsListPopoverEmptyMessage = ({
       }`}
     >
       <EuiIcon
-        type={searchStringValid ? 'minusInCircle' : 'alert'}
+        type={searchStringValid ? 'minusCircle' : 'alert'}
         color={searchStringValid ? 'default' : 'danger'}
+        aria-hidden={true}
       />
       <EuiSpacer size="xs" />
       {noResultsMessage}

@@ -90,6 +90,34 @@ describe('RAG Utils', () => {
         { index: 'index-b', id: 'doc_d' },
       ]);
     });
+
+    it('should deduplicate relevant docs to avoid counting the same doc multiple times', () => {
+      const retrieved: RetrievedDoc[] = [
+        { index: 'index-a', id: 'doc_a' },
+        { index: 'index-a', id: 'doc_a' }, // duplicate
+        { index: 'index-a', id: 'doc_b' },
+        { index: 'index-a', id: 'doc_a' }, // another duplicate
+        { index: 'index-b', id: 'doc_d' },
+        { index: 'index-b', id: 'doc_d' }, // duplicate from different index
+      ];
+      // Should only count each unique relevant doc once
+      expect(getRelevantDocs(retrieved, groundTruth, 1)).toEqual([
+        { index: 'index-a', id: 'doc_a' },
+        { index: 'index-a', id: 'doc_b' },
+        { index: 'index-b', id: 'doc_d' },
+      ]);
+    });
+
+    it('should not deduplicate non-relevant docs (they are filtered out anyway)', () => {
+      const retrieved: RetrievedDoc[] = [
+        { index: 'index-a', id: 'doc_unknown' },
+        { index: 'index-a', id: 'doc_unknown' }, // duplicate non-relevant
+        { index: 'index-a', id: 'doc_a' },
+      ];
+      expect(getRelevantDocs(retrieved, groundTruth, 1)).toEqual([
+        { index: 'index-a', id: 'doc_a' },
+      ]);
+    });
   });
 
   describe('countRelevantInGroundTruth', () => {

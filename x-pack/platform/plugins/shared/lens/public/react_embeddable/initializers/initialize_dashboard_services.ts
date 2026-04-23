@@ -14,7 +14,7 @@ import type {
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
 import { titleComparators } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type {
@@ -28,8 +28,8 @@ import type {
 } from '@kbn/lens-common';
 import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
+import { stripInheritedContext } from '../../../common/transforms/helpers';
 import { isTextBasedLanguage, transformToApiConfig } from '../helper';
-
 import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
 import type { StateManagementConfig } from './initialize_state_management';
@@ -83,7 +83,7 @@ export function initializeDashboardServices(
   // ( based on existing FTR tests ).
   const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState.attributes.title);
   const defaultDescription$ = new BehaviorSubject<string | undefined>(
-    initialState.savedObjectId
+    initialState.ref_id
       ? internalApi.attributes$.getValue().description || initialState.description
       : initialState.description
   );
@@ -108,7 +108,7 @@ export function initializeDashboardServices(
           attributes.references
         );
         // keep in sync the state
-        stateConfig.api.updateSavedObjectId(savedObjectId);
+        stateConfig.api.updateRefId(savedObjectId);
         return savedObjectId;
       },
       checkForDuplicateTitle: async (
@@ -128,22 +128,18 @@ export function initializeDashboardServices(
         });
       },
       canLinkToLibrary: async () =>
-        !getLatestState().savedObjectId && !isTextBasedLanguage(getLatestState()),
-      canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
+        !getLatestState().ref_id && !isTextBasedLanguage(getLatestState()),
+      canUnlinkFromLibrary: async () => Boolean(getLatestState().ref_id),
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
         return {
-          rawState: {
-            ...currentState,
-            savedObjectId: newId,
-          },
+          ...currentState,
+          ref_id: newId,
         };
       },
       getSerializedStateByValue: () => {
-        const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return {
-          rawState: transformToApiConfig(byValueRuntimeState),
-        };
+        const { ref_id: refId, ...byValueRuntimeState } = stripInheritedContext(getLatestState());
+        return transformToApiConfig(byValueRuntimeState);
       },
     },
     anyStateChange$: merge(
@@ -174,8 +170,6 @@ export function initializeDashboardServices(
     },
     reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       titleManager.reinitializeState(lastSaved);
-      internalApi.updateDisabledTriggers(lastSaved?.disableTriggers);
-      internalApi.updateOverrides(lastSaved?.overrides);
     },
   };
 }

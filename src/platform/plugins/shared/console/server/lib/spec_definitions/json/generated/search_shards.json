@@ -21,7 +21,7 @@
         "0"
       ],
       "preference": "",
-      "routing": ""
+      "routing": []
     },
     "methods": [
       "GET",

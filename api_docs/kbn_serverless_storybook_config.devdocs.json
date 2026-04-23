@@ -35,6 +35,8 @@
           "\"Serverless Storybook\""
         ],
         "path": "src/platform/packages/shared/serverless/storybook/config/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52,6 +54,8 @@
           "\"https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/serverless\""
         ],
         "path": "src/platform/packages/shared/serverless/storybook/config/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

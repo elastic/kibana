@@ -23,15 +23,20 @@ export async function bootstrap({
   const logger = createLogger(runOptions.logLevel);
   setIdGeneratorStrategy(runOptions.uniqueIds ? 'random' : 'sequential');
 
-  const { kibanaUrl, esUrl } = await getServiceUrls({ ...runOptions, logger });
-
-  const kibanaClient = getKibanaClient({
-    target: kibanaUrl,
-    apiKey: runOptions.apiKey,
+  const { kibanaUrl, esUrl, username, password, apiKey } = await getServiceUrls({
+    ...runOptions,
     logger,
   });
 
-  const client = new Client({
+  const kibanaClient = getKibanaClient({
+    target: kibanaUrl,
+    username,
+    password,
+    apiKey,
+    logger,
+  });
+
+  const esClient = new Client({
     node: esUrl,
     ...(runOptions.apiKey && { auth: { apiKey: runOptions.apiKey } }),
     tls: getEsClientTlsSettings(esUrl, runOptions.insecure),
@@ -40,7 +45,7 @@ export async function bootstrap({
   });
 
   const clientManager = new SynthtraceClientsManager({
-    client,
+    client: esClient,
     logger,
     concurrency: runOptions.concurrency,
   });
@@ -66,6 +71,7 @@ export async function bootstrap({
   }
 
   return {
+    esClient,
     kibanaClient,
     clients,
     logger,

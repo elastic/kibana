@@ -17,6 +17,7 @@
     "requiredPlugins": [
       "actions",
       "alerting",
+      "anonymization",
       "cases",
       "cloud",
       "cloudDefend",
@@ -28,6 +29,7 @@
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
+      "entityStore",
       "eventLog",
       "features",
       "fieldFormats",
@@ -46,6 +48,7 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "files",
       "controls",
       "dataViewEditor",
@@ -63,10 +66,11 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
-      "share"
+      "share",
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
+      "evals",
       "fleet",
       "ml",
       "newsfeed",
@@ -80,7 +84,11 @@
       "savedObjectsTaggingOss",
       "automaticImport",
       "serverless",
-      "onechat"
+      "agentBuilder",
+      "llmTasks",
+      "workflowsExtensions",
+      "cps",
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -92,10 +100,17 @@
       "ml",
       "unifiedSearch",
       "esql",
-      "onechat"
+      "agentBuilder"
     ],
     "extraPublicDirs": [
       "common"
+    ]
+  },
+  "build": {
+    "extraExcludes": [
+      // Data generator episode fixtures are large vendored artifacts intended for dev/testing only.
+      // Keep them out of distributable builds.
+      "**/scripts/data/episodes/**"
     ]
   }
 }

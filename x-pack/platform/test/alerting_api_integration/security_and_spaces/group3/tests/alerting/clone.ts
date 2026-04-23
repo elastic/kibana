@@ -169,8 +169,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                         total_alerts_detected: null,
                         total_alerts_created: null,
                         gap_duration_s: null,
-                        // TODO: uncomment after intermidiate release
-                        // gap_range: null,
+                        gap_range: null,
+                        gap_reason: null,
                       },
                     },
                   },
@@ -376,6 +376,98 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         expect(rawActionUuid).to.not.be(undefined);
         expect(rawSystemActionUuid).to.not.be(undefined);
+      });
+    });
+
+    describe('API keys', () => {
+      it('should not carry over API key fields from the source rule', async () => {
+        const ruleCreated = await supertest
+          .post(`${getUrlPrefix(space1)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData({ name: 'source_for_clone_api_key_test' }))
+          .expect(200);
+        objectRemover.add(space1, ruleCreated.body.id, 'rule', 'alerting');
+
+        const sourceEsResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${ruleCreated.body.id}`,
+          },
+          { meta: true }
+        );
+        const sourceRawAlert = (sourceEsResponse.body._source as any)?.alert;
+
+        expect(sourceRawAlert.apiKey).to.be.a('string');
+        expect(sourceRawAlert.apiKey.length).to.be.greaterThan(0);
+        expect(sourceRawAlert.apiKeyOwner).to.be.a('string');
+
+        const cloneRuleResponse = await supertest
+          .post(`${getUrlPrefix(space1)}/internal/alerting/rule/${ruleCreated.body.id}/_clone`)
+          .set('kbn-xsrf', 'foo')
+          .send()
+          .expect(200);
+        objectRemover.add(space1, cloneRuleResponse.body.id, 'rule', 'alerting');
+
+        const cloneEsResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${cloneRuleResponse.body.id}`,
+          },
+          { meta: true }
+        );
+        const cloneRawAlert = (cloneEsResponse.body._source as any)?.alert;
+
+        // The cloned rule must have a freshly generated API key, not the source's
+        expect(cloneRawAlert.apiKey).to.be.a('string');
+        expect(cloneRawAlert.apiKey.length).to.be.greaterThan(0);
+        expect(cloneRawAlert.apiKey).to.not.eql(sourceRawAlert.apiKey);
+
+        expect(cloneRawAlert.apiKeyOwner).to.eql('elastic');
+        expect(cloneRawAlert.apiKeyCreatedByUser).to.eql(false);
+
+        // uiamApiKey must not be carried over from the source rule
+        expect(cloneRawAlert.uiamApiKey).to.be(undefined);
+      });
+
+      it('should generate a new API key for a cloned disabled rule', async () => {
+        const ruleCreated = await supertest
+          .post(`${getUrlPrefix(space1)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData({ name: 'disabled_source_for_clone', enabled: false }))
+          .expect(200);
+        objectRemover.add(space1, ruleCreated.body.id, 'rule', 'alerting');
+
+        const sourceEsResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${ruleCreated.body.id}`,
+          },
+          { meta: true }
+        );
+        const sourceRawAlert = (sourceEsResponse.body._source as any)?.alert;
+
+        const cloneRuleResponse = await supertest
+          .post(`${getUrlPrefix(space1)}/internal/alerting/rule/${ruleCreated.body.id}/_clone`)
+          .set('kbn-xsrf', 'foo')
+          .send()
+          .expect(200);
+        objectRemover.add(space1, cloneRuleResponse.body.id, 'rule', 'alerting');
+
+        const cloneEsResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${cloneRuleResponse.body.id}`,
+          },
+          { meta: true }
+        );
+        const cloneRawAlert = (cloneEsResponse.body._source as any)?.alert;
+
+        // Disabled cloned rule should not inherit source API key
+        if (sourceRawAlert.apiKey) {
+          expect(cloneRawAlert.apiKey).to.not.eql(sourceRawAlert.apiKey);
+        }
+        expect([false, null]).to.contain(cloneRawAlert.apiKeyCreatedByUser);
+        expect(cloneRawAlert.uiamApiKey).to.be(undefined);
       });
     });
 

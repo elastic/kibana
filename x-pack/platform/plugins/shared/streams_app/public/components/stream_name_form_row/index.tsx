@@ -1,0 +1,303 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiFieldText,
+  EuiFormPrepend,
+  EuiFormRow,
+  EuiLink,
+  EuiScreenReaderOnly,
+  EuiTextTruncate,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { validateStreamName } from '@kbn/streams-schema';
+import type { ReactNode } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsRoutingSelector } from '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
+
+interface StreamNameFormRowProps {
+  onChange?: (value: string) => void;
+  setLocalStreamName?: React.Dispatch<React.SetStateAction<string>>;
+  readOnly?: boolean;
+  autoFocus?: boolean;
+  error?: string;
+  isInvalid?: boolean;
+  helpText?: string;
+  errorMessage?: ReactNode | string | undefined;
+  isStreamNameValid?: boolean;
+  partitionName: string;
+  prefix?: string;
+}
+
+const MIN_NAME_LENGTH = 1;
+const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
+
+export const getHelpText = (isStreamNameEmpty: boolean, readOnly: boolean): string | undefined => {
+  if (isStreamNameEmpty && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
+      defaultMessage: `Stream name is required.`,
+    });
+  }
+  return undefined;
+};
+
+export const getErrorMessage = (
+  baseValidationError: string | undefined,
+  isDuplicatedName: boolean,
+  rootChildExists: boolean,
+  isDotPresent: boolean,
+  prefix: string,
+  rootChild: string,
+  router: StatefulStreamsAppRouter,
+  checkRootChildExists: boolean = true
+): ReactNode | string | undefined => {
+  // Return base validation errors from the shared validator first
+  if (baseValidationError) {
+    return baseValidationError;
+  }
+  if (isDuplicatedName) {
+    return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
+      defaultMessage: 'A stream with this name already exists',
+    });
+  }
+  if (isDotPresent) {
+    // Query streams don't have a meaningful child-stream link to point at.
+    if (!checkRootChildExists) {
+      return i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessageSimple', {
+        defaultMessage: `Stream name cannot contain the "." character.`,
+      });
+    }
+    if (!rootChildExists) {
+      return i18n.translate('xpack.streams.streamDetailRouting.rootChildDoesNotExistError', {
+        defaultMessage: `The child stream {rootChild} does not exist. Please create it first.`,
+        values: {
+          rootChild: prefix + rootChild,
+        },
+      });
+    }
+    return (
+      <FormattedMessage
+        id="xpack.streams.streamDetailRouting.nameContainsDotErrorMessage"
+        defaultMessage={`Stream name cannot contain the "." character. Open the stream {childStreamLink} and create the child there.`}
+        values={{
+          childStreamLink: (
+            <EuiLink
+              data-test-subj="streamsAppChildStreamLink"
+              external
+              target="_blank"
+              href={router.link('/{key}', { path: { key: prefix + rootChild } })}
+            >
+              {prefix + rootChild}
+            </EuiLink>
+          ),
+        }}
+      />
+    );
+  }
+
+  return undefined;
+};
+
+interface ChildStreamInputHookResponse {
+  localStreamName: string;
+  setLocalStreamName: React.Dispatch<React.SetStateAction<string>>;
+  isStreamNameValid: boolean;
+  prefix: string;
+  partitionName: string;
+  helpText: string | undefined;
+  errorMessage: ReactNode | string | undefined;
+}
+
+interface UseChildStreamInputOptions {
+  streamName: string;
+  readOnly?: boolean;
+  checkRootChildExists?: boolean;
+  additionalExistingNames?: readonly string[];
+}
+
+/**
+ * Custom hook that handles computations necessary for child stream input component instances.
+ * Used by parent components to lift up the states needed for the local input field so validation concerns can be shared across components.
+ * @param options.checkRootChildExists - When true (default), surfaces a root-child existence error on dot. Set to false for query streams.
+ * @param options.additionalExistingNames - Extra full names for the duplicate check — covers siblings not present in the wired routing array.
+ * @example
+ * const { setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput({ streamName: 'logs.linux' });
+ * return (
+ *   <StreamNameFormRow
+ *     setLocalStreamName={setLocalStreamName}
+ *     isStreamNameValid={isStreamNameValid}
+ *     prefix={prefix}
+ *     partitionName={partitionName}
+ *     helpText={helpText}
+ *     errorMessage={errorMessage}
+ *   />
+ * );
+ */
+export const useChildStreamInput = ({
+  streamName,
+  readOnly = false,
+  checkRootChildExists = true,
+  additionalExistingNames,
+}: UseChildStreamInputOptions): ChildStreamInputHookResponse => {
+  const [localStreamName, setLocalStreamName] = useState(streamName);
+
+  useEffect(() => {
+    setLocalStreamName(streamName);
+  }, [streamName]);
+
+  const router = useStreamsAppRouter();
+  const parentStreamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
+  const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
+
+  const prefix = parentStreamName + '.';
+  const partitionName = localStreamName.replace(prefix, '');
+  const rootChild = partitionName.split('.')[0];
+  const isDuplicatedName = useMemo(
+    () =>
+      routing.some((r) => r.destination === localStreamName && !r.isNew) ||
+      (additionalExistingNames?.includes(localStreamName) ?? false),
+    [routing, localStreamName, additionalExistingNames]
+  );
+  const rootChildExists = useMemo(
+    () => routing.some((r) => r.destination === prefix + rootChild && !r.isNew),
+    [routing, prefix, rootChild]
+  );
+
+  // Use shared validation for basic stream name checks
+  const baseValidation = validateStreamName(localStreamName);
+  const isStreamNameEmpty = localStreamName.length <= prefix.length;
+
+  // `validateStreamName` only checks the start of the full name, so query-stream flows
+  // also validate the partition segment to catch e.g. "-x" under "logs.ecs.android".
+  const partitionValidation =
+    !checkRootChildExists && !isStreamNameEmpty ? validateStreamName(partitionName) : undefined;
+
+  const baseValidationError =
+    (!baseValidation.valid && !isStreamNameEmpty && baseValidation.message) ||
+    (partitionValidation && !partitionValidation.valid && partitionValidation.message) ||
+    undefined;
+
+  const helpText = getHelpText(isStreamNameEmpty, readOnly);
+
+  // Skip dot detection when read-only — the value is already persisted and unactionable.
+  const isDotPresent = !readOnly && partitionName.includes('.');
+
+  const errorMessage = getErrorMessage(
+    baseValidationError,
+    isDuplicatedName,
+    rootChildExists,
+    isDotPresent,
+    prefix,
+    rootChild,
+    router,
+    checkRootChildExists
+  );
+
+  return {
+    localStreamName,
+    setLocalStreamName,
+    isStreamNameValid:
+      baseValidation.valid &&
+      (partitionValidation?.valid ?? true) &&
+      !isStreamNameEmpty &&
+      !isDotPresent &&
+      !isDuplicatedName,
+    prefix,
+    partitionName,
+    helpText,
+    errorMessage,
+  };
+};
+
+export function StreamNameFormRow({
+  onChange = (value: string) => {},
+  setLocalStreamName = () => {},
+  readOnly = false,
+  autoFocus = false,
+  error,
+  isInvalid = false,
+  helpText,
+  errorMessage,
+  isStreamNameValid = true,
+  partitionName,
+  prefix,
+}: StreamNameFormRowProps) {
+  const descriptionId = useGeneratedHtmlId();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPartitionName = e.target.value;
+    const newStreamName = prefix ? `${prefix}${newPartitionName}` : newPartitionName;
+    setLocalStreamName(newStreamName);
+    onChange(newStreamName);
+  };
+
+  return (
+    <EuiFormRow
+      fullWidth
+      label={
+        <span data-test-subj="streamsAppRoutingStreamNameLabel">
+          {i18n.translate('xpack.streams.streamDetailRouting.name', {
+            defaultMessage: 'Stream name',
+          })}
+        </span>
+      }
+      helpText={helpText}
+      describedByIds={[descriptionId]}
+      isInvalid={isInvalid || !isStreamNameValid}
+      error={error || errorMessage}
+    >
+      <EuiFieldText
+        isInvalid={isInvalid || !isStreamNameValid}
+        data-test-subj="streamsAppRoutingStreamEntryNameField"
+        value={partitionName}
+        fullWidth
+        compressed
+        readOnly={readOnly}
+        autoFocus={autoFocus}
+        onChange={handleChange}
+        minLength={MIN_NAME_LENGTH}
+        prepend={
+          prefix ? (
+            <EuiFormPrepend
+              id={descriptionId}
+              iconLeft="productStreamsWired"
+              label={
+                <>
+                  <EuiScreenReaderOnly>
+                    <span>
+                      {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
+                        defaultMessage: 'Stream prefix:',
+                      })}
+                    </span>
+                  </EuiScreenReaderOnly>
+                  <EuiTextTruncate
+                    text={prefix}
+                    truncation="start"
+                    data-test-subj={`streamNamePrefix`}
+                  />
+                </>
+              }
+              css={css`
+                .euiFormLabel {
+                  inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
+                }
+              `}
+              data-test-subj="streamsAppRoutingStreamNamePrefix"
+            />
+          ) : undefined
+        }
+      />
+    </EuiFormRow>
+  );
+}

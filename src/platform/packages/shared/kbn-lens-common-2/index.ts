@@ -22,12 +22,14 @@ import type {
   PublishesViewMode,
   PublishesWritableDescription,
   PublishesWritableTitle,
+  PublishesUnsavedChanges,
+  SerializedTitles,
+  SerializedTimeRange,
 } from '@kbn/presentation-publishing';
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import type {
   LensByValueBase,
-  LensSerializedSharedState,
   LensByRefSerializedState,
   LensInspectorAdapters,
   LensRequestHandlersProps,
@@ -37,15 +39,22 @@ import type {
 } from '@kbn/lens-common';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 
-type LensByValueAPIConfigBase = Omit<LensByValueBase, 'attributes'> & {
-  // Temporarily allow both old and new attributes until all are new types are supported and feature flag removed
-  attributes: LensApiSchemaType | LensByValueBase['attributes'];
+/**
+ * Panel-level state that should be persisted for by-value Lens panels.
+ * Excludes runtime/inherited state from unified search and dashboard contexts.
+ */
+type LensPersistableState = SerializedTitles & // title, description, hide_title
+  SerializedDrilldowns &
+  SerializedTimeRange;
+
+export type LensByValueSerializedAPIConfig = LensPersistableState & {
+  // Temporarily allow both old and new attributes until all chart types are supported and feature flag removed
+  attributes: LensApiConfig | LensByValueBase['attributes'];
+  ref_id?: string; // really should be never but creates type issues
 };
 
-export type LensByValueSerializedAPIConfig = Simplify<
-  LensSerializedSharedState & LensByValueAPIConfigBase
->;
 export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
 
 /**
@@ -95,6 +104,8 @@ export type LensApi = Simplify<
     PublishesViewMode &
     // Let the container know the saved object id
     PublishesSavedObjectId &
+    // Let the container know about unsaved changes
+    PublishesUnsavedChanges &
     PublishesProjectRoutingOverrides &
     // Lens specific API methods:
     // Let the container know when the data has been loaded/updated

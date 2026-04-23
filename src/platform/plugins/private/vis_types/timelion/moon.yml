@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/vis-type-timelion-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/vis-type-timelion-plugin'
+  title: '@kbn/vis-type-timelion-plugin'
   description: Moon project for @kbn/vis-type-timelion-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/plugins/private/vis_types/timelion
+  sourceRoot: src/platform/plugins/private/vis_types/timelion
 dependsOn:
   - '@kbn/core'
   - '@kbn/visualizations-plugin'
@@ -44,6 +43,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/visualizations-common'
   - '@kbn/vis-type-timeseries-plugin'
+  - '@kbn/safer-lodash-set'
 tags:
   - plugin
   - prod
@@ -58,16 +58,6 @@ fileGroups:
     - server/timelion.json
     - '*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

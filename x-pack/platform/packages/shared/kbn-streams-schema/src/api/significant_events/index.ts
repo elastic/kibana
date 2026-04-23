@@ -7,10 +7,9 @@
 
 import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
-import type { Condition } from '@kbn/streamlang';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamQueryKql } from '../../queries';
-import type { FeatureType } from '../../feature';
+import type { EsqlQuery, QueryType, StreamQuery } from '../../queries';
+import type { TaskStatus } from '../../tasks/types';
 
 /**
  * SignificantEvents Get Response
@@ -36,11 +35,13 @@ interface SignificantEventOccurrence {
   count: number;
 }
 
-type SignificantEventsResponse = StreamQueryKql & {
+type SignificantEventsResponse = StreamQuery & {
+  stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
   };
+  rule_backed: boolean;
 };
 
 interface SignificantEventsGetResponse {
@@ -50,19 +51,38 @@ interface SignificantEventsGetResponse {
 
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
-  'occurrences' | 'change_points' | 'kql'
->;
+  'occurrences' | 'change_points' | 'esql'
+> & {
+  /**
+   * For STATS queries only: how many result rows the preview returned.
+   * With a single GROUP BY dimension this equals unique time buckets
+   * that breached the threshold. With multiple dimensions (`multi_group`)
+   * this is the total entity × bucket cells, not unique time buckets.
+   * Absent for match-type queries.
+   */
+  firing_count?: number;
+  /**
+   * True when the STATS preview hit the server-side row limit and the
+   * `firing_count` / sparkline data may be incomplete.
+   */
+  truncated?: boolean;
+  /**
+   * For STATS queries with multiple GROUP BY dimensions (beyond the
+   * temporal bucket): true means the sparkline sums firing cells across
+   * entity groups per bucket, so each y-value represents "how many
+   * entity × bucket cells breached" rather than unique events.
+   */
+  multi_group?: boolean;
+};
 
 interface GeneratedSignificantEventQuery {
+  type: QueryType;
   title: string;
-  kql: string;
-  feature?: {
-    name: string;
-    filter: Condition;
-    type: FeatureType;
-  };
+  esql: EsqlQuery;
   severity_score: number;
   evidence?: string[];
+  description: string;
+  replaces?: string;
 }
 
 type SignificantEventsGenerateResponse = Observable<
@@ -72,10 +92,34 @@ type SignificantEventsGenerateResponse = Observable<
   >
 >;
 
+interface SignificantEventsQueriesGenerationResult {
+  queries: GeneratedSignificantEventQuery[];
+  tokensUsed: Pick<ChatCompletionTokenCount, 'prompt' | 'completion'>;
+}
+
+type SignificantEventsQueriesGenerationTaskResult =
+  | {
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
+    }
+  | {
+      status: TaskStatus.Failed;
+      error: string;
+    }
+  | ({
+      status: TaskStatus.Completed | TaskStatus.Acknowledged;
+    } & SignificantEventsQueriesGenerationResult);
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 };

@@ -70,6 +70,7 @@ const externals = {
   'io-ts/lib/Reporter': '__kbnSharedDeps__.IoTsReporter',
   'io-ts/lib/PathReporter': '__kbnSharedDeps__.IoTsPathReporter',
   'io-ts/lib/ThrowReporter': '__kbnSharedDeps__.IoTsThrowReporter',
+  'zod/v4': '__kbnSharedDeps__.Zod',
   '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
   'react-redux': '__kbnSharedDeps__.ReactRedux',
   redux: '__kbnSharedDeps__.Redux',
@@ -96,6 +97,7 @@ const externals = {
     'useToggle',
     'useUnmount',
     'useUpdateEffect',
+    'useObservable',
   ].reduce((memo, subset) => {
     memo[`react-use/lib/${subset}`] = `__kbnSharedDeps__.ReactUse.${subset}`;
     return memo;
@@ -108,6 +110,8 @@ const externals = {
   numeral: '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/numeral': '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/charts': '__kbnSharedDeps__.ElasticCharts',
+  '@elastic/esql': '__kbnSharedDeps__.ElasticEsql',
+  '@elastic/esql/types': '__kbnSharedDeps__.ElasticEsqlTypes',
   '@kbn/datemath': '__kbnSharedDeps__.KbnDatemath',
   '@elastic/eui': '__kbnSharedDeps__.ElasticEui',
   '@elastic/eui/lib/components/provider/nested':
@@ -137,7 +141,7 @@ const externals = {
   '@kbn/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
-  '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
+  '@kbn/esql-language': '__kbnSharedDeps__.KbnEsqlAst',
   '@kbn/ebt-tools': '__kbnSharedDeps__.KbnEbtTools',
   '@elastic/apm-rum-core': '__kbnSharedDeps__.ElasticApmRumCore',
   '@kbn/react-kibana-context-common': '__kbnSharedDeps__.KbnReactKibanaContextCommon',
@@ -148,6 +152,9 @@ const externals = {
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
   '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
   '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',
+  '@kbn/core-di-browser': '__kbnSharedDeps__.KbnCoreDi',
+  '@kbn/core-chrome-sidebar-context': '__kbnSharedDeps__.KbnCoreSidebarContext',
+  '@kbn/core-chrome-browser-context': '__kbnSharedDeps__.KbnCoreChromeBrowserContext',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

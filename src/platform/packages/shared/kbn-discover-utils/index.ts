@@ -16,6 +16,7 @@ export {
   DOC_HIDE_TIME_COLUMN_SETTING,
   FIELDS_LIMIT_SETTING,
   HIDE_ANNOUNCEMENTS,
+  IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
   MAX_DOC_FIELDS_DISPLAYED,
   MODIFY_COLUMNS_ON_SWITCH,
   ROW_HEIGHT_OPTION,
@@ -26,18 +27,19 @@ export {
   SHOW_FIELD_STATISTICS,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
+  DataGridDensity,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
   convertValueToString,
   createLogsContextService,
   createApmContextService,
-  createMetricsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
   formatFieldValue,
-  formatHit,
+  formatFieldValueReact,
+  formatHitReact,
   getDocId,
   getLogDocumentOverview,
   getTraceDocumentOverview,
@@ -45,6 +47,7 @@ export {
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getAvailableResourceFields,
+  getAvailableTraceFields,
   getLogLevelFieldWithFallback,
   getLogEventTypeFieldWithFallback,
   getLogExceptionTypeFieldWithFallback,
@@ -64,6 +67,7 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   prepareDataViewForEditing,
+  getEsqlDataView,
   LogLevelBadge,
   getDefaultSort,
   getSort,
@@ -71,17 +75,12 @@ export {
   getSortForSearchSource,
   getEsQuerySort,
   getTieBreakerFieldName,
+  escapeAndPreserveHighlightTags,
+  getHighlightedFieldValue,
   severityOrder,
 } from './src';
 
-export type {
-  LogsContextService,
-  ApmContextService,
-  MetricsContextService,
-  SortOrder,
-  SortInput,
-  SortPair,
-} from './src';
+export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
 
 export * from './src/types';
 

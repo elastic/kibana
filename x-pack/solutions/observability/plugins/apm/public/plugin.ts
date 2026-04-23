@@ -48,7 +48,6 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -77,15 +76,24 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type {
   DiscoverSharedPublicSetup,
   DiscoverSharedPublicStart,
 } from '@kbn/discover-shared-plugin/public';
+import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
+import type { SLOPublicStart } from '@kbn/slo-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ICPSManager } from '@kbn/cps-utils';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/cps_feature_flag';
 import type { ConfigSchema } from '.';
-import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
-import { registerEmbeddables } from './embeddable/register_embeddables';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
@@ -93,10 +101,13 @@ import {
 import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
+import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
+import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
+import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -108,6 +119,7 @@ export interface ApmPluginSetupDeps {
   embeddable: EmbeddableSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -127,6 +139,13 @@ export interface ApmServices {
   securityService: SecurityServiceStart;
   telemetry: ITelemetryClient;
 }
+
+export interface ApmInternalServices {
+  cpsManager?: ICPSManager;
+}
+
+export const [getApmInternalServices, setApmInternalServices] =
+  createGetterSetter<ApmInternalServices>('ApmInternalServices', false);
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
@@ -153,6 +172,7 @@ export interface ApmPluginStartDeps {
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
@@ -168,7 +188,10 @@ export interface ApmPluginStartDeps {
   share?: SharePublicStart;
   notifications: NotificationsStart;
   discoverShared: DiscoverSharedPublicStart;
-  onechat?: OnechatPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
+  slo?: SLOPublicStart;
+  cps?: CPSPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -339,14 +362,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       import('./tutorial/config_agent/rum_script').then((mod) => mod.TutorialConfigAgentRumScript)
     );
 
-    pluginSetupDeps.uiActions.registerTrigger({
-      id: ObservabilityTriggerId.ApmTransactionContextMenu,
-    });
-
-    pluginSetupDeps.uiActions.registerTrigger({
-      id: ObservabilityTriggerId.ApmErrorContextMenu,
-    });
-
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {
@@ -495,13 +510,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    registerApmRuleTypes(observabilityRuleTypeRegistry);
-    registerEmbeddables({
-      coreSetup: core,
-      pluginsSetup: plugins,
-      config,
-      kibanaEnvironment,
-      observabilityRuleTypeRegistry,
+    import('./components/alerting/rule_types/register_apm_rule_types').then(
+      ({ registerApmRuleTypes }) => {
+        registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup);
+      }
+    );
+    import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {
+      registerEmbeddables({
+        coreSetup: core,
+        pluginsSetup: plugins,
+        config,
+        kibanaEnvironment,
+        observabilityRuleTypeRegistry,
+      });
     });
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
@@ -512,14 +533,42 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    const { fleet } = plugins;
+    const { fleet, discoverShared } = plugins;
 
+    if (
+      core.featureFlags.getBooleanValue(
+        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+      )
+    ) {
+      plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
+      setApmInternalServices({
+        cpsManager: plugins.cps?.cpsManager,
+      });
+    } else {
+      setApmInternalServices({});
+    }
+    if (plugins.agentBuilder) {
+      import('./agent_builder/attachment_types').then(({ registerServiceMapAttachment }) => {
+        registerServiceMapAttachment(plugins.agentBuilder!.attachments);
+      });
+    }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
 
       mod.registerAssistantFunctions({
         registerRenderFunction,
       });
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-focused-trace-waterfall',
+      render: createLazyFocusedTraceWaterfallRenderer({ core }),
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-full-trace-waterfall',
+      render: createLazyFullTraceWaterfallRenderer({ core }),
     });
 
     if (fleet) {

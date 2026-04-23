@@ -81,8 +81,8 @@ const columnsToDisplay = [
 ];
 
 // These tests can take more than standard timeout of 5s
-// that is why we are increasing the timeout
-const SPECIAL_TEST_TIMEOUT = 50000;
+// that is why we are increasing the timeout (higher under parallel Jest workers)
+const SPECIAL_TEST_TIMEOUT = 90000;
 
 const localMockedTimelineData = structuredClone(mockTimelineData);
 

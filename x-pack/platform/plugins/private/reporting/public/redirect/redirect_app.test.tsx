@@ -11,6 +11,7 @@ import { RedirectApp } from './redirect_app';
 import { EuiProvider } from '@elastic/eui';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { scopedHistoryMock } from '@kbn/core/public/mocks';
+import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 
 const mockApiClient = {
   getInfo: jest.fn(),
@@ -79,6 +80,37 @@ describe('RedirectApp', () => {
       expect(mockApiClient.getScheduledReportInfo).toHaveBeenCalledWith('happy', 2, 50);
       expect(mockShare.navigate).toHaveBeenCalledWith(locatorParams);
     });
+  });
+
+  it('strips export-only ai value report params when redirecting from jobId', async () => {
+    setLocationSearch('?jobId=happy');
+    const locatorParams = {
+      id: AI_VALUE_REPORT_LOCATOR,
+      params: {
+        timeRange: { from: 'now-30d', to: 'now' },
+        insight: 'This should not be forwarded to the in-app view',
+        reportDataHash: 'abc123',
+      },
+    };
+    mockApiClient.getInfo.mockResolvedValue({ locatorParams: [locatorParams] });
+
+    render(
+      <EuiProvider>
+        <RedirectApp
+          apiClient={mockApiClient as any}
+          screenshotMode={mockScreenshotMode as any}
+          share={mockShare}
+          history={historyMock}
+        />
+      </EuiProvider>
+    );
+
+    await waitFor(() =>
+      expect(mockShare.navigate).toHaveBeenCalledWith({
+        id: AI_VALUE_REPORT_LOCATOR,
+        params: { timeRange: { from: 'now-30d', to: 'now' } },
+      })
+    );
   });
 
   it('displays error when apiClient.getInfo throws', async () => {

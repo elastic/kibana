@@ -45,7 +45,12 @@ import {
   isBillablePolicy,
   removeDeviceControl,
 } from '../../common/endpoint/models/policy_config_helpers';
-import type { NewPolicyData, PolicyConfig, PolicyData } from '../../common/endpoint/types';
+import {
+  ProtectionModes,
+  type NewPolicyData,
+  type PolicyConfig,
+  type PolicyData,
+} from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
 import type { IRequestContextFactory } from '../request_context_factory';
@@ -172,23 +177,39 @@ export const getPackagePolicyCreateCallback = (
       validateIntegrationConfig(endpointIntegrationConfig, logger);
     }
 
-    // In this callback we are handling an HTTP request to the fleet plugin. Since we use
-    // code from the security_solution plugin to handle it (installPrepackagedRules),
-    // we need to build the context that is native to security_solution and pass it there.
-    const securitySolutionContext = await securitySolutionRequestContextFactory.create(
-      context,
-      request
-    );
+    const conditionallyInstallEndpointSecurityPrebuiltRule = async () => {
+      // In this callback we are handling an HTTP request to the fleet plugin. Since we use
+      // code from the security_solution plugin to handle it (installPrepackagedRules),
+      // we need to build the context that is native to security_solution and pass it there.
+      const securitySolutionContext = await securitySolutionRequestContextFactory.create(
+        context,
+        request
+      );
+
+      if (
+        !securitySolutionContext
+          .getEndpointService()
+          .getServerConfigValue('disableEndpointRuleAutoInstall')
+      ) {
+        logger.debug(`Checking if Endpoint Security prebuilt rule is installed/enabled...`);
+
+        return installEndpointSecurityPrebuiltRule({
+          logger,
+          context: securitySolutionContext,
+          request,
+          alerts,
+          soClient,
+        });
+      } else {
+        logger.debug(
+          `Server setting 'disableEndpointRuleAutoInstall' is 'true' - skipping the install of Endpoint Security prebuilt rule`
+        );
+      }
+    };
 
     // perform these operations in parallel in order to help in not delaying the API response too much
     const [, manifestValue] = await Promise.all([
-      installEndpointSecurityPrebuiltRule({
-        logger,
-        context: securitySolutionContext,
-        request,
-        alerts,
-        soClient,
-      }),
+      conditionallyInstallEndpointSecurityPrebuiltRule(),
 
       // create the Artifact Manifest for this policy
       createPolicyArtifactManifest(logger, manifestManager),
@@ -258,6 +279,15 @@ export const getPackagePolicyUpdateCallback = (
     );
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
+
+    // The advanced settings UI may delete mac.ransomware.mode when cleared;
+    // restore the default before validation so the typed field is never missing.
+    const policyValue = endpointIntegrationData.inputs?.[0]?.config?.policy?.value as
+      | PolicyConfig
+      | undefined;
+    if (policyValue?.mac?.ransomware && !policyValue.mac.ransomware.mode) {
+      policyValue.mac.ransomware.mode = ProtectionModes.off;
+    }
 
     // Validate that Endpoint Security policy uses only enabled App Features
     validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);

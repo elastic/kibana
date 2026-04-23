@@ -24,7 +24,7 @@ export function ErrorUiActionsContextMenu({ items }: Props) {
         <EuiButton
           data-test-subj="ErrorSampleDetailsButton"
           onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
         >
           {i18n.translate('xpack.apm.errorSampleDetails.investigateMenu', {

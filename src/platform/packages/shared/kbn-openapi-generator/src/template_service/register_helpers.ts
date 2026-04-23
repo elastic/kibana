@@ -8,7 +8,11 @@
  */
 import type Handlebars from '@kbn/handlebars';
 import type { HelperOptions } from '@kbn/handlebars';
-import { snakeCase, camelCase, upperCase } from 'lodash';
+import { snakeCase, camelCase, upperCase, startCase } from 'lodash';
+
+function pascalCase(str: string): string {
+  return startCase(camelCase(str)).replace(/ /g, '');
+}
 
 export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('concat', (...args) => {
@@ -18,6 +22,16 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('snakeCase', snakeCase);
   handlebarsInstance.registerHelper('camelCase', camelCase);
   handlebarsInstance.registerHelper('upperCase', upperCase);
+  handlebarsInstance.registerHelper(
+    'transformSchemaName',
+    (name: string, options: HelperOptions) => {
+      const config = options.data?.root?.config;
+      if (config?.schemaNameTransform === 'pascalCase') {
+        return pascalCase(name);
+      }
+      return name;
+    }
+  );
   handlebarsInstance.registerHelper('toJSON', (value: unknown) => {
     return JSON.stringify(value);
   });

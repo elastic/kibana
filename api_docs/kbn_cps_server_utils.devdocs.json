@@ -1,0 +1,115 @@
+{
+  "id": "@kbn/cps-server-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cps-server-utils",
+        "id": "def-server.getSpaceNPRE",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "getSpaceNPRE",
+        "description": [
+          "\nGet the NPRE for a given space ID or a request carrying a URL.\n\nWhen a request object is provided, the space is taken from a URL pathname via\n{@link getSpaceIdFromPath}. If the request has a `rewrittenUrl` (set by core\nwhen the first `onPreRouting` handler returns `rewriteUrl`), that URL is\nused instead of `url`. This matches HTTP requests after the Spaces plugin\nstrips `/s/:spaceId` from `request.url` during pre-routing: the original\nbrowser path (including the space segment) remains on `rewrittenUrl`.\n\n**Server base path**: {@link getSpaceIdFromPath} is called with the pathname\nonly; a non-root `server.basePath` is not stripped here. CPS is only\navailable on Serverless, where custom base paths are not used, so this\nlimitation is not a practical concern for CPS.\n"
+        ],
+        "signature": [
+          "(spaceIdOrRequest: string | ",
+          "ScopeableUrlRequest",
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-server-utils/src/get_space_npre.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-server-utils",
+            "id": "def-server.getSpaceNPRE.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "spaceIdOrRequest",
+            "description": [
+              "- Space ID string, or a `ScopeableUrlRequest` (incoming"
+            ],
+            "signature": [
+              "string | ",
+              "ScopeableUrlRequest"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-server-utils/src/get_space_npre.ts",
+            "lineNumber": 35,
+            "columnNumber": 30,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The NPRE"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/cps-server-utils",
+        "id": "def-server.PROJECT_ROUTING_ALL",
+        "type": "string",
+        "tags": [],
+        "label": "PROJECT_ROUTING_ALL",
+        "description": [
+          "\nProject routing expression that allows requests across all projects."
+        ],
+        "signature": [
+          "\"_alias:*\""
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-server-utils/src/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-server-utils",
+        "id": "def-server.PROJECT_ROUTING_ORIGIN",
+        "type": "string",
+        "tags": [],
+        "label": "PROJECT_ROUTING_ORIGIN",
+        "description": [
+          "\nProject routing expression that restricts requests to the origin project only."
+        ],
+        "signature": [
+          "\"_alias:_origin\""
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-server-utils/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

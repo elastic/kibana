@@ -4,22 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/portable-dashboards-example'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/portable-dashboards-example'
+  title: '@kbn/portable-dashboards-example'
   description: Moon project for @kbn/portable-dashboards-example
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: examples/portable_dashboards_example
+  sourceRoot: examples/portable_dashboards_example
 dependsOn:
   - '@kbn/core'
-  - '@kbn/es-query'
   - '@kbn/data-plugin'
   - '@kbn/dashboard-plugin'
   - '@kbn/navigation-plugin'
@@ -27,10 +25,13 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/developer-examples-plugin'
   - '@kbn/shared-ux-page-kibana-template'
-  - '@kbn/controls-plugin'
   - '@kbn/shared-ux-router'
   - '@kbn/presentation-publishing'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/control-group-renderer'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/presentation-util-plugin'
+  - '@kbn/as-code-filters-schema'
 tags:
   - plugin
   - prod

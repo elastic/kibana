@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { extractDataStreamName } from '../utils';
 
 function escapeRegExp(value: string): string {
@@ -33,7 +33,7 @@ export function filterIndicesToRestore(snapshotIndices: string[], patterns: stri
 
 export async function restoreIndices({
   esClient,
-  logger,
+  log,
   repoName,
   snapshotName,
   indices,
@@ -41,7 +41,7 @@ export async function restoreIndices({
   renameReplacement,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   repoName: string;
   snapshotName: string;
   indices: string[];
@@ -53,21 +53,24 @@ export async function restoreIndices({
   }
 
   const hasRename = renamePattern && renameReplacement;
-  logger.debug(`Restoring ${indices.length} indices${hasRename ? ' to temp location' : ''}`);
+  log.debug(`Restoring ${indices.length} indices${hasRename ? ' to temp location' : ''}`);
 
-  await esClient.snapshot.restore({
-    repository: repoName,
-    snapshot: snapshotName,
-    wait_for_completion: true,
-    indices: indices.join(','),
-    include_global_state: false,
-    ...(hasRename && { rename_pattern: renamePattern, rename_replacement: renameReplacement }),
-  });
+  await esClient.snapshot.restore(
+    {
+      repository: repoName,
+      snapshot: snapshotName,
+      wait_for_completion: true,
+      indices: indices.join(','),
+      include_global_state: false,
+      ...(hasRename && { rename_pattern: renamePattern, rename_replacement: renameReplacement }),
+    },
+    { requestTimeout: 5 * 60 * 1000 }
+  );
 
   const restoredNames = hasRename
     ? indices.map((idx) => idx.replace(new RegExp(renamePattern), renameReplacement))
     : indices;
 
-  logger.info(`Restore initiated for ${restoredNames.length} indices`);
+  log.info(`Restore initiated for ${restoredNames.length} indices`);
   return restoredNames;
 }

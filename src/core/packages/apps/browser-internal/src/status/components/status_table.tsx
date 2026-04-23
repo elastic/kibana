@@ -91,7 +91,7 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
           aria-label={itemIdToExpandedRowMap[item.id] ? collapseLabel : expandLabel}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleUp' : 'chevronSingleDown'}
         />
       ),
     },
@@ -113,6 +113,9 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
         },
       }}
       data-test-subj="statusBreakdown"
+      tableCaption={i18n.translate('core.statusPage.statusTable.tableCaption', {
+        defaultMessage: 'Status breakdown',
+      })}
     />
   );
 };

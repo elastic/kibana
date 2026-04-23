@@ -159,6 +159,9 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
 
         cloud_lookup_url: null,
       },
+      ransomware: {
+        diagnostic: null,
+      },
       memory_protection: {
         memory_scan_collect_sample: false,
         memory_scan: null,

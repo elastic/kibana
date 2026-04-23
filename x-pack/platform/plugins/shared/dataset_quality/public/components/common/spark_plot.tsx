@@ -91,7 +91,7 @@ function SparkPlotItem({
 
   return (
     <div style={commonStyle}>
-      <EuiIcon type="visLine" color={euiTheme.colors.mediumShade} />
+      <EuiIcon type="chartLine" color={euiTheme.colors.mediumShade} />
     </div>
   );
 }

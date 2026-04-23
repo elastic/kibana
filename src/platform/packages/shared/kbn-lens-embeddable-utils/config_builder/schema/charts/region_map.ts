@@ -12,57 +12,64 @@ import { schema } from '@kbn/config-schema';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
   esqlColumnSchema,
-  genericOperationOptionsSchema,
+  esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllBucketsWithChartDimensionSchema } from './shared';
+import { objectUnion } from './utils/object_union';
 
-const regionMapStateRegionOptionsSchema = schema.object({
+const regionMapConfigRegionOptionsSchema = {
   ems: schema.maybe(
     schema.object({
       boundaries: schema.string({ meta: { description: 'EMS boundaries' } }),
       join: schema.string({ meta: { description: 'EMS join field' } }),
     })
   ),
-});
+};
 
-export const regionMapStateSchemaNoESQL = schema.object({
-  type: schema.literal('region_map'),
-  ...sharedPanelInfoSchema,
-  ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  /**
-   * Metric configuration
-   */
-  metric: fieldMetricOrFormulaOperationDefinitionSchema,
-  /**
-   * Configure how to break down to regions
-   */
-  region: mergeAllBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
-});
+export const regionMapConfigSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('region_map'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...dataSourceSchema,
+    /**
+     * Metric configuration
+     */
+    metric: fieldMetricOrFormulaOperationDefinitionSchema,
+    /**
+     * Configure how to break down to regions
+     */
+    region: mergeAllBucketsWithChartDimensionSchema(regionMapConfigRegionOptionsSchema),
+  },
+  { meta: { id: 'regionMapNoESQL', title: 'Region Map (DSL)' } }
+);
 
-const regionMapStateSchemaESQL = schema.object({
-  type: schema.literal('region_map'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  /**
-   * Metric configuration
-   */
-  metric: schema.allOf([schema.object(genericOperationOptionsSchema), esqlColumnSchema]),
-  /**
-   * Configure how to break down to regions
-   */
-  region: schema.allOf([regionMapStateRegionOptionsSchema, esqlColumnSchema]),
-});
+export const regionMapConfigSchemaESQL = schema.object(
+  {
+    type: schema.literal('region_map'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...dataSourceEsqlTableSchema,
+    /**
+     * Metric configuration
+     */
+    metric: esqlColumnWithFormatSchema,
+    /**
+     * Configure how to break down to regions
+     */
+    region: esqlColumnSchema.extends(regionMapConfigRegionOptionsSchema),
+  },
+  { meta: { id: 'regionMapESQL', title: 'Region Map (ES|QL)' } }
+);
 
-export const regionMapStateSchema = schema.oneOf([
-  regionMapStateSchemaNoESQL,
-  regionMapStateSchemaESQL,
-]);
+export const regionMapConfigSchema = objectUnion(
+  [regionMapConfigSchemaNoESQL, regionMapConfigSchemaESQL],
+  { meta: { id: 'regionMapChart', title: 'Region Map' } }
+);
 
-export type RegionMapState = TypeOf<typeof regionMapStateSchema>;
-export type RegionMapStateNoESQL = TypeOf<typeof regionMapStateSchemaNoESQL>;
-export type RegionMapStateESQL = TypeOf<typeof regionMapStateSchemaESQL>;
+export type RegionMapConfig = TypeOf<typeof regionMapConfigSchema>;
+export type RegionMapConfigNoESQL = TypeOf<typeof regionMapConfigSchemaNoESQL>;
+export type RegionMapConfigESQL = TypeOf<typeof regionMapConfigSchemaESQL>;

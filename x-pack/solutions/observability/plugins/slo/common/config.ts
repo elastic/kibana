@@ -11,10 +11,15 @@ import { schema } from '@kbn/config-schema';
 export const configSchema = schema.object({
   sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
   tempSummaryCleanupTaskEnabled: schema.boolean({ defaultValue: true }),
+  healthScanTaskEnabled: schema.boolean({ defaultValue: true }),
+  staleInstancesCleanupTaskEnabled: schema.boolean({ defaultValue: false }),
   enabled: schema.boolean({ defaultValue: true }),
   experimental: schema.maybe(
     schema.object({
       ruleFormV2: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      compositeSlo: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
     })

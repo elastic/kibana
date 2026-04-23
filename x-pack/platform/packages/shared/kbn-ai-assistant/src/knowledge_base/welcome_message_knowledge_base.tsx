@@ -17,8 +17,10 @@ import { InspectKnowledgeBasePopover } from './inspect_knowlegde_base_popover';
 
 export function WelcomeMessageKnowledgeBase({
   knowledgeBase,
+  eisCalloutZIndex,
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
+  eisCalloutZIndex?: number;
 }) {
   const prevIsInstalling = usePrevious(knowledgeBase.isInstalling || knowledgeBase.isPolling);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
@@ -43,7 +45,7 @@ export function WelcomeMessageKnowledgeBase({
       <div>
         <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText
@@ -62,5 +64,10 @@ export function WelcomeMessageKnowledgeBase({
     ) : null;
   }
 
-  return <KnowledgeBaseInstallationStatusPanel knowledgeBase={knowledgeBase} />;
+  return (
+    <KnowledgeBaseInstallationStatusPanel
+      knowledgeBase={knowledgeBase}
+      eisCalloutZIndex={eisCalloutZIndex}
+    />
+  );
 }

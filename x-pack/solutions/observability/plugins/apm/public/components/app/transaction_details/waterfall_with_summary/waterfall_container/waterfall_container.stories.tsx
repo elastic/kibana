@@ -11,9 +11,9 @@ import type { StoryFn, Meta } from '@storybook/react';
 import { noop } from 'lodash';
 import type { ComponentProps } from 'react';
 import React, { useState } from 'react';
+import type { Error } from '@kbn/apm-types';
 import { WaterfallContainer } from '.';
 import type {
-  WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../common/waterfall/typings';
@@ -76,17 +76,21 @@ export const Example: StoryFn<any> = () => {
 
   const traceDocs = events
     .filter((event) => event['processor.event'] !== 'metric')
-    .map((event) => dedot(event, {}) as WaterfallTransaction | WaterfallSpan);
+    .map((event) => dedot(event, {}) as unknown as WaterfallTransaction | WaterfallSpan);
   const traceItems = {
     exceedsMax: false,
     traceDocs,
-    errorDocs: errorDocs.map((error) => dedot(error, {}) as WaterfallError),
+    errorDocs: errorDocs.map((error) => dedot(error, {}) as unknown as Error),
     spanLinksCountById: {},
     traceDocsTotal: traceDocs.length,
     maxTraceItems: 5000,
   };
 
-  const entryTransaction = dedot(traceDocs[0]!, {}) as Transaction;
+  const firstTraceDoc = traceDocs[0];
+  if (!firstTraceDoc) {
+    throw new Error('Expected at least one trace document');
+  }
+  const entryTransaction = firstTraceDoc as unknown as Transaction;
   const waterfall = getWaterfall({ traceItems, entryTransaction });
 
   return (

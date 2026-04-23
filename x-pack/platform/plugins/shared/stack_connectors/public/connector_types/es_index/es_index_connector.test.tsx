@@ -17,6 +17,12 @@ import { ConnectorFormTestProvider, createAppMockRenderer } from '../lib/test_ut
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 jest.mock('lodash', () => {
   const module = jest.requireActual('lodash');
@@ -52,6 +58,8 @@ getIndexOptions.mockResolvedValueOnce([
 const { getFields } = jest.requireMock(
   '@kbn/triggers-actions-ui-plugin/public/common/index_controls'
 );
+
+const ILLEGAL_INDEX_CHARACTERS = ['\\', '/', '?', '"', '<', '>', '|', '#', ',', ':'];
 
 async function setup(actionConnector: any) {
   const wrapper = mountWithIntl(
@@ -331,7 +339,7 @@ describe('IndexActionConnectorFields', () => {
     test('connector validation succeeds when connector config is valid', async () => {
       const actionConnector = {
         secrets: {},
-        id: 'test',
+        id: 'es-index',
         actionTypeId: '.index',
         name: 'es_index',
         config: {
@@ -354,29 +362,31 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.index',
-          config: {
-            index: 'test_es_index',
-            executionTimeField: '1',
-            refresh: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.index',
+            config: {
+              index: 'test_es_index',
+              executionTimeField: '1',
+              refresh: false,
+            },
+            id: 'es-index',
+            isDeprecated: false,
+            __internal__: {
+              hasTimeFieldCheckbox: true,
+            },
+            name: 'es_index',
           },
-          id: 'test',
-          isDeprecated: false,
-          __internal__: {
-            hasTimeFieldCheckbox: true,
-          },
-          name: 'es_index',
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
     test('connector validation succeeds when connector config is valid with minimal config', async () => {
       const actionConnector = {
         secrets: {},
-        id: 'test',
+        id: 'es-index',
         actionTypeId: '.index',
         name: 'es_index',
         config: {
@@ -397,17 +407,19 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.index',
-          config: {
-            index: 'test_es_index',
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.index',
+            config: {
+              index: 'test_es_index',
+            },
+            id: 'es-index',
+            isDeprecated: false,
+            name: 'es_index',
           },
-          id: 'test',
-          isDeprecated: false,
-          name: 'es_index',
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -435,10 +447,266 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
+    });
+
+    test('connector validation fails when index contains empty spaces', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: 'test index',
+        },
+        isDeprecated: false,
+      };
+
+      appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
+      });
+
+      expect(
+        await screen.findByText('The index pattern cannot contain spaces.')
+      ).toBeInTheDocument();
+    });
+
+    test('connector validation fails when wildcards (*) index patterns', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: 'index*',
+        },
+        isDeprecated: false,
+      };
+
+      appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
+      });
+
+      expect(
+        await screen.findByText('The index pattern cannot contain wildcards (*).')
+      ).toBeInTheDocument();
+    });
+
+    test.each(ILLEGAL_INDEX_CHARACTERS)(
+      'connector validation fails when index contains invalid character "%s"',
+      async (char) => {
+        const actionConnector = {
+          secrets: {},
+          id: 'test',
+          actionTypeId: '.index',
+          name: 'es_index',
+          config: {
+            index: `test${char}index`,
+          },
+          isDeprecated: false,
+        };
+
+        appMockRenderer.render(
+          <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+            <IndexActionConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>
+        );
+
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+        await waitFor(() => {
+          expect(onSubmit).toBeCalledWith({
+            data: {},
+            isValid: false,
+          });
+        });
+
+        expect(
+          await screen.findByText(`The index pattern contains the invalid character ${char}.`)
+        ).toBeInTheDocument();
+      }
+    );
+
+    test('connector validation fails when index name contains uppercase letters', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: 'TestIndex',
+        },
+        isDeprecated: false,
+      };
+
+      appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
+      });
+
+      expect(await screen.findByText('The index pattern must be lowercase.')).toBeInTheDocument();
+    });
+
+    test.each(['-', '_', '+'])(
+      'connector validation fails when index starts with "%s"',
+      async (char) => {
+        const actionConnector = {
+          secrets: {},
+          id: 'test',
+          actionTypeId: '.index',
+          name: 'es_index',
+          config: {
+            index: `${char}index`,
+          },
+          isDeprecated: false,
+        };
+
+        appMockRenderer.render(
+          <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+            <IndexActionConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>
+        );
+
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+        await waitFor(() => {
+          expect(onSubmit).toBeCalledWith({
+            data: {},
+            isValid: false,
+          });
+        });
+
+        expect(
+          await screen.findByText(`The index pattern cannot start with ${char}.`)
+        ).toBeInTheDocument();
+      }
+    );
+
+    test.each(['.', '..'])('connector validation fails when index name is "%s"', async (char) => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: `${char}`,
+        },
+        isDeprecated: false,
+      };
+
+      appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
+      });
+
+      expect(await screen.findByText(`The index pattern cannot be ${char}`)).toBeInTheDocument();
+    });
+
+    test('connector validation fails when index exceeds 255 bytes', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: 'a'.repeat(256),
+        },
+        isDeprecated: false,
+      };
+
+      appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
+      });
+
+      expect(
+        await screen.findByText('The index pattern cannot be longer than 255.')
+      ).toBeInTheDocument();
     });
   });
 });

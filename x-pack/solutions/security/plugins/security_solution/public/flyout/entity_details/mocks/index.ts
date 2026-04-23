@@ -18,6 +18,7 @@ import type {
 import { HostPolicyResponseActionStatus, RiskSeverity } from '../../../../common/search_strategy';
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { HostEntity } from '../../../../common/api/entity_analytics';
 
 const userRiskScore: UserRiskScore = {
   '@timestamp': '1989-11-08T23:00:00.000Z',
@@ -45,6 +46,23 @@ const userRiskScore: UserRiskScore = {
           description: 'Alert from Rule: My rule',
           risk_score: 30,
           timestamp: '2021-08-19T18:55:59.000Z',
+        },
+      ],
+      modifiers: [
+        {
+          type: 'asset_criticality',
+          contribution: 5,
+          metadata: {
+            criticality_level: 'high_impact',
+          },
+        },
+        {
+          type: 'watchlist',
+          subtype: 'privmon',
+          contribution: 5,
+          metadata: {
+            is_privileged_user: true,
+          },
         },
       ],
     },
@@ -79,6 +97,23 @@ const hostRiskScore: HostRiskScore = {
           description: 'Alert from Rule: My rule',
           risk_score: 30,
           timestamp: '2021-08-19T18:55:59.000Z',
+        },
+      ],
+      modifiers: [
+        {
+          type: 'asset_criticality',
+          contribution: 5,
+          metadata: {
+            criticality_level: 'high_impact',
+          },
+        },
+        {
+          type: 'watchlist',
+          subtype: 'privmon',
+          contribution: 5,
+          metadata: {
+            is_privileged_user: true,
+          },
         },
       ],
     },
@@ -233,4 +268,33 @@ export const mockObservedHostData: ObservedEntityData<HostItem> = {
     date: '2023-02-23T20:03:17.489Z',
   },
   anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
+};
+
+export const mockEntityRecord: HostEntity = {
+  '@timestamp': '2024-01-15T10:00:00.000Z',
+  entity: {
+    id: 'test-entity-id-host-abc123',
+    name: 'test-host-name',
+    type: 'host',
+    lifecycle: {
+      first_seen: '2023-01-01T00:00:00.000Z',
+      last_activity: '2024-01-15T10:00:00.000Z',
+    },
+  },
+  host: {
+    name: 'test-host-name',
+    id: ['host-id'],
+    ip: ['10.0.0.1', '127.0.0.1'],
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    architecture: ['x86_64'],
+    type: ['server'],
+    os: {
+      name: 'Ubuntu',
+      family: 'debian',
+      version: '22.04',
+    },
+  },
+  asset: {
+    criticality: 'high_impact',
+  },
 };

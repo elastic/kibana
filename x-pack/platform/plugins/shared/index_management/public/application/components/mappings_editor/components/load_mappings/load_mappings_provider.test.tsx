@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
@@ -15,64 +16,27 @@ jest.mock('lodash', () => {
 
   return {
     ...original,
-    debounce: (fn: any) => fn,
+    debounce: <T extends (...args: unknown[]) => unknown>(fn: T) => fn,
   };
 });
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+jest.mock('@kbn/code-editor');
 
-  const CodeEditorMock = (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-currentvalue={props.value}
-      value={props.value}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-        props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
-      }}
-    />
-  );
-
-  return {
-    ...original,
-    CodeEditor: CodeEditorMock,
-  };
-});
-
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
-  <KibanaContextProvider services={{ uiSettings: uiSettingsServiceMock.createSetupContract() }}>
-    <LoadMappingsProvider onJson={onJson} esNodesPlugins={[]}>
-      {(openModal) => (
-        <button onClick={openModal} data-test-subj="load-json-button">
-          Load JSON
-        </button>
-      )}
-    </LoadMappingsProvider>
-  </KibanaContextProvider>
+  <I18nProvider>
+    <KibanaContextProvider services={{ uiSettings: uiSettingsServiceMock.createSetupContract() }}>
+      <LoadMappingsProvider onJson={onJson} esNodesPlugins={[]}>
+        {(openModal) => (
+          <button onClick={openModal} data-test-subj="load-json-button">
+            Load JSON
+          </button>
+        )}
+      </LoadMappingsProvider>
+    </KibanaContextProvider>
+  </I18nProvider>
 );
-
-const setup = (props: any) =>
-  registerTestBed(ComponentToTest, {
-    memoryRouter: { wrapComponent: false },
-    defaultProps: props,
-  })();
-
-const openModalWithJsonContent =
-  ({ component, find }: TestBed) =>
-  (json: any) => {
-    act(() => {
-      find('load-json-button').simulate('click');
-    });
-
-    component.update();
-
-    find('mockCodeEditor').getDOMNode().setAttribute('data-currentvalue', JSON.stringify(json));
-    find('mockCodeEditor').simulate('change');
-  };
 
 describe('<LoadMappingsProvider />', () => {
   test('it should forward valid mapping definition', () => {
@@ -85,13 +49,18 @@ describe('<LoadMappingsProvider />', () => {
     };
 
     const onJson = jest.fn();
-    const testBed = setup({ onJson }) as TestBed;
 
-    // Open the modal and add the JSON
-    openModalWithJsonContent(testBed)(mappingsToLoad);
+    render(<ComponentToTest onJson={onJson} />);
+
+    // Open the modal
+    fireEvent.click(screen.getByTestId('load-json-button'));
+
+    // Add JSON content to the editor
+    const editor = screen.getByTestId('mockCodeEditor');
+    fireEvent.change(editor, { target: { value: JSON.stringify(mappingsToLoad) } });
 
     // Confirm
-    testBed.find('confirmModalConfirmButton').simulate('click');
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     const [jsonReturned] = onJson.mock.calls[0];
     expect(jsonReturned).toEqual({ ...mappingsToLoad, dynamic_templates: [] });

@@ -26,6 +26,8 @@
           ") => void"
         ],
         "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+        "lineNumber": 72,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "ContentInsightsDependencies"
             ],
             "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -55,6 +59,8 @@
               "ContentInsightsConfig"
             ],
             "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,6 +79,8 @@
         "label": "ContentInsightsStats",
         "description": [],
         "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,6 +94,8 @@
               "\nThe date from which the data is counted"
             ],
             "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,6 +109,8 @@
               "\nTotal count of events"
             ],
             "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -115,6 +127,8 @@
               "{ date: string; count: number; }[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -129,6 +143,8 @@
         "label": "ContentInsightsStatsResponse",
         "description": [],
         "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -149,6 +165,8 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -16,6 +16,7 @@ import { VIS_EVENT_TO_TRIGGER, VisGroups } from '@kbn/visualizations-plugin/publ
 
 import { getDefaultSpec } from './default_spec';
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
+import { extractProjectRoutingOverrides } from './lib/extract_project_routing_overrides';
 import { createInspectorAdapters } from './vega_inspector';
 import { toExpressionAst } from './to_ast';
 import { getInfoMessage } from './components/vega_info_message';
@@ -31,7 +32,7 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
     defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
     description: 'Vega and Vega-Lite are product names and should not be translated',
   }),
-  icon: 'visVega',
+  icon: 'code',
   group: VisGroups.PROMOTED,
   titleInWizard: i18n.translate('visTypeVega.type.vegaTitleInWizard', {
     defaultMessage: 'Custom visualization',
@@ -59,6 +60,16 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
       // spec is invalid
     }
     return [];
+  },
+  getProjectRoutingOverrides: async (visParams) => {
+    try {
+      const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
+
+      return extractProjectRoutingOverrides(spec);
+    } catch (e) {
+      // spec is invalid
+    }
+    return undefined;
   },
   inspectorAdapters: createInspectorAdapters,
   /**

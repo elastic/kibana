@@ -26,6 +26,8 @@
           ">"
         ],
         "path": "src/platform/plugins/private/vis_types/gauge/public/vis_type/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "GaugeTypeProps"
             ],
             "path": "src/platform/plugins/private/vis_types/gauge/public/vis_type/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -71,6 +75,8 @@
           ">"
         ],
         "path": "src/platform/plugins/private/vis_types/gauge/public/vis_type/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +91,8 @@
               "GaugeTypeProps"
             ],
             "path": "src/platform/plugins/private/vis_types/gauge/public/vis_type/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -103,6 +111,8 @@
         "label": "VisTypeGaugePluginSetup",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/gauge/public/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -116,6 +126,8 @@
         "label": "VisTypeGaugePluginStart",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/gauge/public/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -151,6 +163,8 @@
           "\"visualization:visualize:legacyGaugeChartsLibrary\""
         ],
         "path": "src/platform/plugins/private/vis_types/gauge/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

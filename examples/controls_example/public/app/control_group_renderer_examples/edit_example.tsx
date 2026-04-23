@@ -23,22 +23,28 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/common';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import {
-  ACTION_DELETE_CONTROL,
-  ACTION_EDIT_CONTROL,
-  ControlGroupRenderer,
+  type ControlGroupRuntimeState,
+  type ControlGroupRendererApi,
   type ControlStateTransform,
-} from '@kbn/controls-plugin/public';
+  ControlGroupRenderer,
+} from '@kbn/control-group-renderer';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
 const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
 
+const ACTION_EDIT_CONTROL = 'editPanel';
+const ACTION_DELETE_CONTROL = 'deletePanel';
+
 type StoredState = ControlGroupRuntimeState & { disabledActions: string[] };
 
-export const EditExample = () => {
+interface Props {
+  dataView: DataView;
+}
+
+export const EditExample = ({ dataView }: Props) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
@@ -54,7 +60,7 @@ export const EditExample = () => {
           (value, key) => value && key !== WITH_CUSTOM_PLACEHOLDER
         )
       );
-      controlGroupAPI.setDisabledActionIds(disabledActions);
+      controlGroupAPI.setDisabledActionIds?.(disabledActions);
     }
   }, [controlGroupAPI, toggleIconIdToSelectedMapIcon]);
 
@@ -66,7 +72,7 @@ export const EditExample = () => {
       INPUT_KEY,
       JSON.stringify({
         ...controlGroupAPI.getInput(),
-        disabledActions: controlGroupAPI.disabledActionIds$.getValue(), // not part of runtime
+        disabledActions: controlGroupAPI.disabledActionIds$?.getValue(), // not part of runtime
       })
     );
 
@@ -105,7 +111,7 @@ export const EditExample = () => {
     if (type === OPTIONS_LIST_CONTROL && toggleIconIdToSelectedMapIcon[WITH_CUSTOM_PLACEHOLDER]) {
       return {
         ...newState,
-        placeholder: 'Custom Placeholder',
+        displaySettings: { placeholder: 'Custom Placeholder' },
       };
     }
 
@@ -134,6 +140,7 @@ export const EditExample = () => {
             <EuiButtonEmpty
               color="primary"
               iconType="plusInCircle"
+              aria-label={'Add control'}
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
                 if (!controlGroupAPI) return;
@@ -204,6 +211,9 @@ export const EditExample = () => {
                 ...initialState,
                 ...persistedState,
               },
+              getEditorOptions: () => ({
+                defaultDataViewId: dataView?.id,
+              }),
             };
           }}
           viewMode={'edit'}

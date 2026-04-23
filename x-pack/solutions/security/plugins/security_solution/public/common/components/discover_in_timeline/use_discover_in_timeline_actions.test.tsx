@@ -20,16 +20,12 @@ import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createDiscoverServicesMock } from '@kbn/discover-plugin/public/__mocks__/services';
-import { getExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public/customizations';
-import { getDiscoverStateMock } from '@kbn/discover-plugin/public/__mocks__/discover_state.mock';
+import { createMockDiscoverStateContainer } from './mocks/discover_in_timeline_provider';
 
 const discoverServices = createDiscoverServicesMock();
 
 let mockDiscoverStateContainerRef = {
-  current: getExtendedDiscoverStateContainer(
-    getDiscoverStateMock({ services: discoverServices }),
-    discoverServices
-  ),
+  current: createMockDiscoverStateContainer(discoverServices),
 };
 
 jest.mock('../../lib/kibana');
@@ -76,10 +72,7 @@ const getTestProviderWithCustomState = (state: State = mockState) => {
 
 const renderTestHook = (customWrapper: ComponentType = getTestProviderWithCustomState()) => {
   mockDiscoverStateContainerRef = {
-    current: getExtendedDiscoverStateContainer(
-      getDiscoverStateMock({ services: discoverServices }),
-      discoverServices
-    ),
+    current: createMockDiscoverStateContainer(discoverServices),
   };
   return renderHook(() => useDiscoverInTimelineActions(mockDiscoverStateContainerRef), {
     wrapper: customWrapper,
@@ -163,7 +156,7 @@ describe('useDiscoverInTimelineActions', () => {
             breakdownField: 'customBreakDownField',
             columns: ['default_column'],
             filters: [customFilter],
-            grid: undefined,
+            grid: {},
             hideAggregatedPreview: undefined,
             hideChart: true,
             dataSource: {

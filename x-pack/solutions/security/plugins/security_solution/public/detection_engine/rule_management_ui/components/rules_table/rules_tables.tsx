@@ -50,6 +50,7 @@ import { useBulkFillRuleGapsConfirmation } from '../../../rule_gaps/components/b
 import { BulkFillRuleGapsRuleLimitErrorModal } from './bulk_actions/bulk_schedule_gap_fills_rule_limit_error_modal';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { RulesWithGapsOverviewPanel } from '../../../rule_gaps/components/rules_with_gaps_overview_panel';
+import { RulesTableWarnings } from './rules_table_warnings';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -73,7 +74,9 @@ const NO_ITEMS_MESSAGE = (
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const {
+    rules: { read: canReadRules },
+  } = useUserPrivileges().rulesPrivileges;
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const rulesTableContext = useRulesTableContext();
@@ -93,6 +96,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       pagination,
       selectedRuleIds,
       sortingOptions,
+      warnings,
     },
     actions: {
       setFilterOptions,
@@ -203,7 +207,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const { loading: isLoadingJobs, jobs: mlJobs, startMlJobs } = useStartMlJobs();
   const rulesColumns = useRulesColumns({
-    hasCRUDPermissions: canEditRules,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -213,7 +216,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   });
 
   const monitoringColumns = useMonitoringColumns({
-    hasCRUDPermissions: canEditRules,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -225,7 +227,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const isSelectAllCalled = useRef(false);
 
   const isTableSelectable =
-    canEditRules &&
+    canReadRules &&
     (selectedTab === AllRulesTabs.management || selectedTab === AllRulesTabs.monitoring);
 
   const euiBasicTableSelectionProps = useMemo(
@@ -381,8 +383,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             </>
           )}
           <RulesTableFilters selectedTab={selectedTab} />
+          <RulesTableWarnings warnings={warnings} />
           <RulesTableUtilityBar
-            canBulkEdit={canEditRules}
+            canBulkEdit={canReadRules}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
             onToggleSelectAll={toggleSelectAll}
             isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
@@ -402,6 +405,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               },
             }}
             {...tableProps}
+            tableLayout="auto"
+            scrollableInline
+            responsiveBreakpoint={false}
           />
         </>
       )}

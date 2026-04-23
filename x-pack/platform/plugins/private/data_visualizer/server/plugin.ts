@@ -33,10 +33,12 @@ export class DataVisualizerPlugin implements Plugin<void, void, SetupDeps, Start
     }
     routes(coreSetup, this._logger);
 
-    plugins.embeddable.registerTransforms(FIELD_STATS_EMBEDDABLE_TYPE, {
-      transformOutInjectsReferences: true,
-      transformIn,
-      transformOut,
+    plugins.embeddable.registerEmbeddableServerDefinition(FIELD_STATS_EMBEDDABLE_TYPE, {
+      title: 'Field statistics table',
+      getTransforms: () => ({
+        transformIn,
+        transformOut,
+      }),
     });
   }
 

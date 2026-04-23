@@ -7,9 +7,7 @@
       "pretty": "__flag__",
       "dry_run": "__flag__",
       "explain": "__flag__",
-      "metric": [
-        "all"
-      ],
+      "metric": [],
       "retry_failed": "__flag__",
       "master_timeout": [
         "30s",

@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import { getAncestors, getSegments, isRootStreamDefinition, Streams } from '@kbn/streams-schema';
+import {
+  getAncestors,
+  getSegments,
+  isDescendantOf,
+  isRootStreamDefinition,
+  LOGS_ECS_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  Streams,
+} from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
+import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { Direction } from '@elastic/eui';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
-import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers/helpers';
+import { parseDurationInSeconds } from '../../util/parse_duration';
 
 const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
 
@@ -33,10 +42,6 @@ export type TableRow = EnrichedStream & {
 };
 export interface StreamTree extends ListStreamDetail {
   children: StreamTree[];
-}
-
-export function isParentName(parent: string, descendant: string) {
-  return parent !== descendant && descendant.startsWith(parent + '.');
 }
 
 export function shouldComposeTree(sortField: SortableField) {
@@ -154,7 +159,7 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
     let existingNode: StreamTree | undefined;
     while (
       (existingNode = currentTree.find((node) =>
-        isParentName(node.stream.name, streamDetail.stream.name)
+        isDescendantOf(node.stream.name, streamDetail.stream.name)
       ))
     ) {
       currentTree = existingNode.children;
@@ -188,6 +193,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     stream: node.stream,
     effective_lifecycle: node.effective_lifecycle,
     data_stream: node.data_stream,
+    privileges: node.privileges,
     nameSortKey,
     documentsCount: 0,
     retentionMs,
@@ -198,4 +204,18 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
       : 'wired',
     ...(children && { children }),
   };
+};
+
+export const getLegacyLogsStatus = (
+  streamsStatus: WiredStreamsStatus | undefined
+): { hasLegacyLogs: boolean; hasNewStreams: boolean } => {
+  if (!streamsStatus) {
+    return { hasLegacyLogs: false, hasNewStreams: false };
+  }
+
+  const hasLegacyLogs = streamsStatus.logs === true;
+  const hasNewStreams =
+    streamsStatus[LOGS_OTEL_STREAM_NAME] === true && streamsStatus[LOGS_ECS_STREAM_NAME] === true;
+
+  return { hasLegacyLogs, hasNewStreams };
 };

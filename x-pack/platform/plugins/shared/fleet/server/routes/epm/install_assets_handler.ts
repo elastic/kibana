@@ -7,8 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { FleetError, FleetNotFoundError, FleetUnauthorizedError } from '../../errors';
+import { FleetError, FleetNotFoundError } from '../../errors';
 import { appContextService } from '../../services';
 import {
   deleteKibanaAssetsAndReferencesForSpace,
@@ -25,8 +26,10 @@ import type {
   InstallRuleAssetsRequestSchema,
 } from '../../types';
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
-import { stepCreateAlertingRules } from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_rules';
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+import {
+  createInactivityMonitoringTemplate,
+  stepCreateAlertingAssets,
+} from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_assets';
 
 export async function checkIntegrationsAllPrivilegesForSpaces(
   request: KibanaRequest,
@@ -82,12 +85,16 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
   const spaceIds = request.body?.space_ids ?? [spaceId];
 
   for (const spaceToInstallId of spaceIds) {
+    const spaceScopedClient = appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId);
+    const installAsAdditionalSpace =
+      (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceToInstallId;
+
     await installKibanaAssetsAndReferences({
-      savedObjectsClient: appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId),
+      savedObjectsClient: spaceScopedClient,
       logger,
       pkgName,
       pkgTitle: packageInfo.title,
-      installAsAdditionalSpace: true,
+      installAsAdditionalSpace,
       spaceId: spaceToInstallId,
       assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
       installedPkg: installation,
@@ -97,6 +104,11 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
         archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
       },
     });
+
+    await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient: spaceScopedClient },
+      { packageInfo, spaceId: spaceToInstallId, installAsAdditionalSpace }
+    );
   }
 
   return response.ok({ body: { success: true } });
@@ -162,25 +174,24 @@ export const installRuleAssetsHandler: FleetRequestHandler<
     throw new FleetNotFoundError('Requested version is not installed');
   }
 
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
-
-  if (!authorizationHeader) {
-    throw new FleetUnauthorizedError('Authorization header is missing or invalid');
-  }
-
   const { packageInfo } = installedPkgWithAssets;
 
-  await stepCreateAlertingRules({
+  const installAsAdditionalSpace =
+    (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId;
+
+  await stepCreateAlertingAssets({
     logger,
-    savedObjectsClient,
+    savedObjectsClient: installAsAdditionalSpace
+      ? appContextService.getInternalUserSOClientForSpaceId(spaceId)
+      : savedObjectsClient,
     packageInstallContext: {
       packageInfo,
       paths: installedPkgWithAssets.paths,
       archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
     },
     spaceId,
-    authorizationHeader,
+    request,
+    installAsAdditionalSpace,
   });
 
   return response.ok({ body: { success: true } });

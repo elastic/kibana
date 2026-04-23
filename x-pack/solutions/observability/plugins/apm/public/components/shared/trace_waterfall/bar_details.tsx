@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
@@ -23,7 +24,7 @@ import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import { SpanLinksBadge } from './badges/span_links_badge';
+import { SpanLinksBadge, SyncBadge, ColdStartBadge } from './badges';
 
 const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
@@ -38,7 +39,8 @@ const ORPHAN_CONTENT = i18n.translate(
 
 export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref, onErrorClick } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick, onClick, getServiceBadgeHref } =
+    useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
   const errorCount = item.errors.length;
 
@@ -51,6 +53,12 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
       },
     }
   );
+
+  const compositePrefix = item.composite?.compressionStrategy === 'exact_match' ? 'x' : '';
+
+  const displayName = item.composite
+    ? `${item.composite.count}${compositePrefix} ${item.name}`
+    : item.name;
 
   return (
     <div
@@ -68,6 +76,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           position: absolute;
           right: 0;
           max-width: 100%;
+          overflow-x: auto;
           margin-top: ${theme.euiTheme.size.xxs};
           & > div:last-child {
             margin-right: ${theme.euiTheme.size.s};
@@ -75,20 +84,62 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           }
         `}
       >
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            min-width: 0;
-          `}
-        >
-          <EuiText css={{ overflow: 'hidden' }} size="s">
-            <TruncateWithTooltip content={item.name} text={item.name} />
+        {item.icon && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" aria-hidden={true} />
+          </EuiFlexItem>
+        )}
+        {item.result && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{item.result}</EuiText>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiText
+            css={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+            size="s"
+            data-test-subj="apmBarDetailsName"
+          >
+            <TruncateWithTooltip content={displayName} text={displayName} />
           </EuiText>
         </EuiFlexItem>
+        {item.serviceName && (
+          <EuiFlexItem grow={false} style={{ maxWidth: '30%', flexShrink: 0 }}>
+            <EuiBadge
+              color="hollow"
+              data-test-subj="apmBarDetailsServiceNameBadge"
+              href={getServiceBadgeHref?.(item.serviceName) as any}
+              {...(getServiceBadgeHref
+                ? ({
+                    onClick(e: React.SyntheticEvent) {
+                      e.stopPropagation(); // prevents triggering row click when navigating to service
+                    },
+                  } as object)
+                : {})}
+              aria-label={
+                getServiceBadgeHref
+                  ? i18n.translate('xpack.apm.trace.barDetails.serviceBadge.ariaLabel', {
+                      defaultMessage: 'Go to {serviceName} service overview',
+                      values: { serviceName: item.serviceName },
+                    })
+                  : undefined
+              }
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <AgentIcon agentName={item.agentName} size="m" role="presentation" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className="eui-textTruncate">
+                  <span className="eui-textTruncate">{item.serviceName}</span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
+          <EuiBadge color="hollow" iconType="clock">
             {asDuration(item.duration)}
-          </EuiText>
+          </EuiBadge>
         </EuiFlexItem>
         {item.status && itemStatusIsFailureOrError && (
           <EuiFlexItem grow={false}>
@@ -108,7 +159,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiBadge
                 color={theme.euiTheme.colors.danger}
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 href={getRelatedErrorsHref?.(item.id) as any}
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
@@ -119,6 +170,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                       docId: item.id,
                       errorCount,
                       errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
+                      docIndex: errorCount > 1 ? undefined : item.errors[0].errorDocIndex,
                     });
                   }
                 }}
@@ -132,10 +184,11 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               </EuiBadge>
             ) : (
               <EuiIcon
-                type="errorFilled"
+                type="errorFill"
                 color={theme.euiTheme.colors.danger}
                 size="s"
                 data-test-subj="apmBarDetailsErrorIcon"
+                aria-hidden={true}
               />
             )}
           </EuiFlexItem>
@@ -155,11 +208,16 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             />
           </EuiFlexItem>
         ) : null}
+        <SyncBadge sync={item.sync} agentName={item.agentName} />
         <SpanLinksBadge
           outgoingCount={item.spanLinksCount.outgoing}
           incomingCount={item.spanLinksCount.incoming}
           id={item.id}
+          onClick={
+            onClick ? (flyoutTab) => onClick(item.id, { flyoutDetailTab: flyoutTab }) : undefined
+          }
         />
+        {item.coldstart && <ColdStartBadge />}
       </EuiFlexGroup>
     </div>
   );

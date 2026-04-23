@@ -9,20 +9,29 @@
 
 import { pickBy } from 'lodash';
 
+import type { TypeOf } from '@kbn/config-schema';
 import type {
   FormBasedLayer,
   GaugeVisualizationState,
+  HeatmapVisualizationState,
+  XYVisualizationState,
   MetricVisualizationState,
+  SharedPartitionLayerState,
   TextBasedLayer,
 } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../types';
-import type { LensApiState } from '../../schema';
-import { isTextBasedLayer } from '../utils';
+import type { LensApiConfig } from '../../schema';
+import type { legendTruncateAfterLinesSchema } from '../../schema/shared';
+import { buildReferences, getAdhocDataviews, isTextBasedLayer, nonNullable } from '../utils';
+import { LENS_LAYER_SUFFIX } from '../constants';
+import type { APIAdHocDataView, APIDataView } from '../columns/types';
+import type { AnyMetricLensStateColumn } from '../columns/types';
+import type { XScaleSchemaType } from '../../schema/charts/shared';
 
 export function getSharedChartLensStateToAPI(
   config: Pick<LensAttributes, 'title' | 'description'>
-): Pick<LensApiState, 'title' | 'description'> {
+): Pick<LensApiConfig, 'title' | 'description'> {
   return {
     // @TODO: need to make this optional in LensDocument type
     title: config.title ?? '',
@@ -91,5 +100,127 @@ type OptionalProperties<T extends Record<string, any> | undefined> = Pick<
 export function stripUndefined<T extends Record<string, any> | undefined>(
   obj: OptionalProperties<T>
 ): OptionalProperties<T> {
-  return pickBy(obj, (value) => value !== undefined) as OptionalProperties<T>;
+  return pickBy(obj, nonNullable) as OptionalProperties<T>;
+}
+
+export function getDataViewsMetadata(
+  usedDataviews: Record<string, APIDataView | APIAdHocDataView>
+) {
+  const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
+  const regularDataViews = Object.entries(usedDataviews).filter(
+    (v): v is [string, { id: string; type: 'dataView' }] => v[1].type === 'dataView'
+  );
+
+  const regularDataViewsMap = Object.fromEntries(
+    regularDataViews.map(([key, { id }]) => [key, id])
+  );
+  // merge both internal references and regularDataViews into a single map { layerId => dataViewId }
+  const dataViewLayerToIdMap: Record<string, string> = Object.fromEntries([
+    ...Object.entries(regularDataViewsMap).map(([layerId, dataViewId]) => [layerId, dataViewId]),
+    ...internalReferences.map((ref) => [ref.name.replace(LENS_LAYER_SUFFIX, ''), ref.id]),
+  ]);
+  const references = regularDataViews.length ? buildReferences(regularDataViewsMap) : [];
+
+  return { adHocDataViews, internalReferences, references, dataViewLayerToIdMap };
+}
+
+/**
+ * Processes converted metric columns and their optional reference columns,
+ * assigning IDs.
+ */
+export function processMetricColumnsWithReferences<T extends AnyMetricLensStateColumn>(
+  convertedMetrics: T[][],
+  getAccessorName: (index: number) => string,
+  getRefAccessorName: (index: number) => string
+): Array<{ column: T; id: string }> {
+  const result: Array<{ column: T; id: string }> = [];
+
+  for (const [index, convertedColumns] of Object.entries(convertedMetrics)) {
+    const [mainMetric, refMetric] = convertedColumns;
+    const id = getAccessorName(Number(index));
+    result.push({ column: mainMetric, id });
+
+    if (refMetric) {
+      // Use a different format for reference column ids
+      // as visualization doesn't know about them, so wrong id could be generated on that side
+      const refId = getRefAccessorName(Number(index));
+      // Rewrite the main metric's reference to match the new ID
+      if ('references' in mainMetric && Array.isArray(mainMetric.references)) {
+        mainMetric.references = [refId];
+      }
+      result.push({ column: refMetric, id: refId });
+    }
+  }
+
+  return result;
+}
+
+type LegendTruncateAfterLines = TypeOf<typeof legendTruncateAfterLinesSchema>;
+
+export function getLegendTruncateAfterLines(
+  legend:
+    | Pick<XYVisualizationState['legend'], 'shouldTruncate' | 'maxLines'>
+    | Pick<HeatmapVisualizationState['legend'], 'shouldTruncate' | 'maxLines'>
+    | Pick<SharedPartitionLayerState, 'truncateLegend' | 'legendMaxLines'>
+): LegendTruncateAfterLines {
+  if (!legend) return;
+
+  const { shouldTruncate, maxLines = 1 } =
+    'shouldTruncate' in legend
+      ? legend
+      : 'truncateLegend' in legend
+      ? { shouldTruncate: legend.truncateLegend, maxLines: legend.legendMaxLines }
+      : {};
+
+  return shouldTruncate && maxLines > 0 ? maxLines : undefined;
+}
+
+// This is needed as numbers like 0 | -90 | -45 are often just typed as number
+// So we need the types to be looser if the given values are numbers vs strings
+type ExtendsNumber<N, Yes, No> = N extends number ? Yes : No;
+
+/**
+ * Used to map enum values from api to state and vice versa.
+ */
+export function getReversibleMappings<
+  API extends string | number | undefined,
+  State extends string | number | undefined
+>(entries: readonly [API, State][]) {
+  const mappings = new Map(entries);
+  const reverseMappings = new Map(entries.map(([key, value]) => [value, key]));
+
+  function toState(
+    value: ExtendsNumber<API, number, API>
+  ): ExtendsNumber<API, State | undefined, State>;
+  function toState(value?: ExtendsNumber<API, number, API>): State | undefined;
+  function toState(value?: ExtendsNumber<API, number, API>): State | undefined {
+    return value != null ? mappings.get(value as API) : undefined;
+  }
+
+  function toAPI(
+    value: ExtendsNumber<State, number, State>
+  ): ExtendsNumber<State, API | undefined, API>;
+  function toAPI(value?: ExtendsNumber<State, number, State>): API | undefined;
+  function toAPI(value?: ExtendsNumber<State, number, State>): API | undefined {
+    return value != null ? reverseMappings.get(value as State) : undefined;
+  }
+
+  return {
+    toState,
+    toAPI,
+  };
+}
+
+/**
+ * Determines the x-axis scale type based on column metadata type.
+ * Returns 'temporal' for date columns, 'linear' for numeric columns, and 'ordinal' for others.
+ */
+export function getScaleTypeFromColumnType(columnType: string | undefined): XScaleSchemaType {
+  if (columnType === 'date') {
+    return 'temporal';
+  } else if (columnType === 'number') {
+    return 'linear';
+  } else {
+    return 'ordinal';
+  }
 }

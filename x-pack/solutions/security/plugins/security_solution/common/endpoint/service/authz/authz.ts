@@ -63,10 +63,14 @@ export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
   userRoles: MaybeImmutable<string[]> = [],
+  isServerless: boolean,
   productFeaturesService?: ProductFeaturesService // only exists on the server side
 ): EndpointAuthz => {
   const hasAuth = hasAuthFactory(fleetAuthz, productFeaturesService);
   const hasSuperuserRole = userRoles.includes('superuser');
+  const hasAdminRole = userRoles.includes('admin');
+
+  const hasSuperuserPrivileges = isServerless ? hasAdminRole : hasSuperuserRole;
 
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
@@ -108,12 +112,12 @@ export const calculateEndpointAuthz = (
   const canReadWorkflowInsights = hasAuth('readWorkflowInsights');
   const canWriteWorkflowInsights = hasAuth('writeWorkflowInsights');
 
-  const canReadScriptsLibrary = isEnterpriseLicense; // TODO: update once team issue #14705 is implemented
-  const canWriteScriptsLibrary = isEnterpriseLicense; // TODO: update once team issue #14705 is implemented
+  const canReadScriptsLibrary = hasAuth('readScriptsManagement');
+  const canWriteScriptsLibrary = hasAuth('writeScriptsManagement');
 
-  // These are currently tied to the superuser role
-  const canReadAdminData = hasSuperuserRole;
-  const canWriteAdminData = hasSuperuserRole;
+  // These are currently tied to the superuser role on ESS and the admin role on Serverless
+  const canReadAdminData = hasSuperuserPrivileges;
+  const canWriteAdminData = hasSuperuserPrivileges;
 
   const authz: EndpointAuthz = {
     canWriteSecuritySolution,
@@ -156,8 +160,12 @@ export const calculateEndpointAuthz = (
     canWriteExecuteOperations: canWriteExecuteOperations && isEnterpriseLicense,
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
     canWriteScanOperations: canWriteScanOperations && isEnterpriseLicense,
-    canReadScriptsLibrary,
-    canWriteScriptsLibrary,
+
+    // ---------------------------------------------------------
+    // Scripts Library Management
+    // ---------------------------------------------------------
+    canReadScriptsLibrary: canReadScriptsLibrary && isEnterpriseLicense,
+    canWriteScriptsLibrary: canWriteScriptsLibrary && isEnterpriseLicense,
 
     // ---------------------------------------------------------
     // artifacts

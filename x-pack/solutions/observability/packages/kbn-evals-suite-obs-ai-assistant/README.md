@@ -14,7 +14,7 @@ For general information about writing evaluation tests, configuration, and usage
 Start Scout server:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 > The Scout server Kibana instance is accessible at <http://localhost:5620>. This may be useful if you want to query evaluation results for further analysis.
@@ -57,9 +57,9 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
   --project="my-connector" \
 ```
 
-### Running Evaluations with Observability Agent (Agent Builder)
+### Running Evaluations with Elastic AI Agent (Agent Builder)
 
-The evaluation suite supports running evaluations against both the Obs AI Assistant API and the Agent Builder API. This allows engineers to evaluate the Observability Agent early in the migration process.
+The evaluation suite supports running evaluations against both the Obs AI Assistant API and the Agent Builder API. This allows engineers to evaluate the Elastic AI Agent early in the migration process.
 
 #### Client Selection
 
@@ -72,18 +72,9 @@ When using `agent_builder`, you can optionally specify which agent to invoke usi
 
 #### Local Setup for Agent Builder Evaluations
 
-The Scout server **cannot be used for Observability Agent evaluations**, because the Observability Agent requires a feature flag enabled at Kibana start time. Instead, run evaluations against a local Kibana instance:
+Run Agent Builder evaluations against a local Kibana instance using these steps:
 
-**1. Enable the Observability Agent feature flag**
-
-Add the following to your Kibana config file (e.g., `config/kibana.dev.yml`):
-
-```yaml
-feature_flags.overrides:
-  observabilityAgent.enabled: true
-```
-
-**2. Start Kibana without base path**
+**1. Start Kibana without base path**
 
 ```bash
 yarn start --no-base-path
@@ -91,7 +82,7 @@ yarn start --no-base-path
 
 > The APM synthrace client fixture requires Kibana to run without a base path.
 
-**3. Configure local Scout server**
+**2. Configure local Scout server**
 
 Create `.scout/servers/local.json` with the following content:
 
@@ -110,12 +101,11 @@ Create `.scout/servers/local.json` with the following content:
 }
 ```
 
-**4. Run evaluations**
+**3. Run evaluations**
 
 ```bash
 EVALUATION_REPETITIONS=1 \
 EVALUATION_CLIENT="agent_builder" \
-AGENT_BUILDER_AGENT_ID="observability.agent" \
 EVALUATION_CONNECTOR_ID="your-connector-id" \
   node scripts/playwright test \
   --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
@@ -126,7 +116,7 @@ EVALUATION_CONNECTOR_ID="your-connector-id" \
 
 #### Important Notes
 
-- Current evaluation criteria are designed for the Obs AI Assistant and may not be fully applicable to the Observability Agent due to differences in tool implementations (e.g., knowledge base is now a tool rather than returned via the `context` tool, alerts tool behavior differs)
+- Current evaluation criteria are designed for the Obs AI Assistant and may not be fully applicable to the Elastic AI Agent due to differences in tool implementations (e.g., knowledge base is now a tool rather than returned via the `context` tool, alerts tool behavior differs)
 - The Agent Builder client implementation and infrastructure are ready for when Agent-specific evaluation criteria are developed
 
 ### Evaluation Reporting
@@ -217,15 +207,6 @@ FROM .kibana-evaluations
 }
 ```
 
-## Snapshot Replay
+## AI Insights Evaluations
 
-For loading historical observability data (logs, metrics, traces) into Elasticsearch with timestamp transformation, use the [`@kbn/es-snapshot-loader`](../../../../platform/packages/shared/kbn-es-snapshot-loader/README.md) package:
-
-```bash
-node scripts/es_snapshot_loader replay \
-  --snapshot-url file:///path/to/snapshot \
-  --es-url http://elastic:changeme@localhost:9200 \
-  --patterns "logs-*,metrics-*,traces-*"
-```
-
-See the [@kbn/es-snapshot-loader documentation](../../../../platform/packages/shared/kbn-es-snapshot-loader/README.md) for full usage details.
+For setup, prerequisites, and instructions on running AI Insights evaluations, see the [AI Insights README](./ai_insights/README.md).

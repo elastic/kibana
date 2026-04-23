@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:sampleRowsPerPage': PAGE_SIZE,
-    hideAnnouncements: true,
   };
 
   describe('discover data grid row selection', function describeIndexTests() {
@@ -290,6 +289,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it(`can copy columns for selected rows as text in format: ${format}`, async () => {
         await unifiedFieldList.clickFieldListItemAdd('extension');
         await unifiedFieldList.clickFieldListItemAdd('bytes');
+        await discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension', 'bytes']);
         });

@@ -81,17 +81,14 @@ export const AttachmentsMenu = ({
 
       const state = {
         serializedState: {
-          rawState: {
-            title: newTitle,
-            description: newDescription,
-            dataViewId: dataView.id,
-            fieldName: selectedField,
-            randomSamplerMode,
-            randomSamplerProbability,
-            minimumTimeRangeOption: 'No minimum',
-            ...(applyTimeRange && { timeRange }),
-          },
-          references: [],
+          title: newTitle,
+          description: newDescription,
+          dataViewId: dataView.id,
+          fieldName: selectedField,
+          randomSamplerMode,
+          randomSamplerProbability,
+          minimumTimeRangeOption: 'No minimum',
+          ...(applyTimeRange && { timeRange }),
         },
         type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
       };
@@ -148,7 +145,7 @@ export const AttachmentsMenu = ({
                       minimumTimeRangeOption: 'No minimum',
                       randomSamplerMode,
                       randomSamplerProbability,
-                      timeRange,
+                      time_range: timeRange,
                     });
                   },
                 },
@@ -228,7 +225,7 @@ export const AttachmentsMenu = ({
                 color="text"
                 display="base"
                 isSelected={isActionMenuOpen}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
               />
             }

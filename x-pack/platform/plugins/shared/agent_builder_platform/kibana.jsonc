@@ -9,9 +9,9 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "agentBuilderPlatform"],
-    "requiredPlugins": ["onechat"],
+    "requiredPlugins": ["agentBuilder", "share"],
     "requiredBundles": [],
-    "optionalPlugins": ["cases", "llmTasks", "workflowsManagement"],
+    "optionalPlugins": ["cases", "esql", "llmTasks", "workflowsManagement"],
     "extraPublicDirs": []
   }
 }

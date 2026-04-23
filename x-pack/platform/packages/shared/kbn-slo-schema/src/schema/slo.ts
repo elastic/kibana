@@ -113,6 +113,7 @@ const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRe
 
 export {
   budgetingMethodSchema,
+  dashboardsWithIdSchema,
   groupBySchema,
   objectiveSchema,
   occurrencesBudgetingMethodSchema,

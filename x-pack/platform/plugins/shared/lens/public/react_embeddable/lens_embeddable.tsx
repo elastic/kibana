@@ -8,11 +8,10 @@
 import React from 'react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
-import type { LensRuntimeState } from '@kbn/lens-common';
+import { LENS_EMBEDDABLE_TYPE, type LensRuntimeState } from '@kbn/lens-common';
 import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
-import { DOC_TYPE } from '../../common/constants';
 
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
@@ -38,7 +37,7 @@ export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
 ): EmbeddableFactory<LensSerializedAPIConfig, LensApi> => {
   return {
-    type: DOC_TYPE,
+    type: LENS_EMBEDDABLE_TYPE,
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param uuid      a unique identifier for the embeddable panel
@@ -54,16 +53,18 @@ export const createLensEmbeddableFactory = (
      *                  from the Lens component container to the Lens embeddable.
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const titleManager = initializeTitleManager(initialState.rawState);
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
+      const titleManager = initializeTitleManager(initialState);
 
-      const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState
-      );
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
-      const initialRuntimeState = await deserializeState(services, initialState.rawState);
+      const initialRuntimeState = await deserializeState(services, initialState);
 
       /**
        * Observables and functions declared here are used internally to store mutating state values
@@ -122,7 +123,7 @@ export const createLensEmbeddableFactory = (
         searchContextConfig.api,
         internalApi,
         services,
-        dynamicActionsManager
+        drilldownsManager
       );
 
       /**
@@ -141,7 +142,12 @@ export const createLensEmbeddableFactory = (
       const unsavedChangesApi = initializeUnsavedChanges<LensSerializedAPIConfig>({
         uuid,
         parentApi,
-        serializeState: integrationsConfig.api.serializeState,
+        serializeState: () => {
+          if (internalApi.isEditingInProgress()) {
+            return initialState;
+          }
+          return integrationsConfig.api.serializeState();
+        },
         anyStateChange$: merge(
           actionsConfig.anyStateChange$,
           dashboardConfig.anyStateChange$,
@@ -149,21 +155,30 @@ export const createLensEmbeddableFactory = (
           searchContextConfig.anyStateChange$
         ),
         getComparators: () => {
-          return {
+          const comparators = {
             ...stateConfig.getComparators(),
             ...actionsConfig.getComparators(),
             ...dashboardServicesComparators,
             ...searchContextComparators,
             isNewPanel: 'skip',
             references: 'skip',
-          };
+          } as const;
+          // set all comparators to 'skip' when inline editing is in progress
+          if (internalApi.isEditingInProgress()) {
+            const keys = Object.keys(comparators) as (keyof typeof comparators)[];
+            return keys.reduce((acc, key) => {
+              acc[key] = 'skip';
+              return acc;
+            }, {} as Record<keyof typeof comparators, 'skip'>);
+          }
+          return comparators;
         },
         onReset: async (lastSaved) => {
-          actionsConfig.reinitializeState(lastSaved?.rawState);
-          dashboardConfig.reinitializeState(lastSaved?.rawState);
-          searchContextConfig.reinitializeState(lastSaved?.rawState);
+          actionsConfig.reinitializeState(lastSaved);
+          dashboardConfig.reinitializeState(lastSaved);
+          searchContextConfig.reinitializeState(lastSaved);
           if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(services, lastSaved.rawState);
+          const lastSavedRuntimeState = await deserializeState(services, lastSaved);
           stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
         },
       });

@@ -9,17 +9,15 @@ require('@kbn/setup-node-env');
 
 const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const fetch = require('node-fetch');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { camelCase, sortBy } = require('lodash');
 const { resolve } = require('path');
 
-const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
+const OUTPUT_DIRECTORY = resolve('common', 'detection_engine', 'mitre');
 
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
 // This version is basically a tag on https://github.com/mitre/cti/tags, or can be a branch name like `master`.
-const MITRE_CONTENT_VERSION = 'ATT&CK-v17.1'; // last updated when preparing for 9.2 release
+const MITRE_CONTENT_VERSION = 'ATT&CK-v18.1'; // last updated when preparing for 9.3 release
 const MITRE_CONTENT_URL = `https://raw.githubusercontent.com/mitre/cti/${MITRE_CONTENT_VERSION}/enterprise-attack/enterprise-attack.json`;
 
 /**

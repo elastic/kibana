@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 
 import type { RuleSnooze, GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -66,6 +66,7 @@ export interface FetchRulesProps {
   filterOptions?: FilterOptions;
   sortingOptions?: SortingOptions;
   signal?: AbortSignal;
+  schedulerId?: string;
 }
 
 // Rule snooze settings map keyed by rule SO's id (not ruleId) and valued by rule snooze settings
@@ -111,6 +112,7 @@ export interface FetchRulesResponse {
   perPage: number;
   total: number;
   data: RuleResponse[];
+  warnings?: WarningSchema[];
 }
 
 export interface FetchRuleProps {

@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect((response.body as unknown as SiemMigrationsAPIErrorResponse).message).to.eql(
-          'Saved object [action/preconfigured_bedrock] not found'
+          "No connector or inference endpoint found for ID 'preconfigured_bedrock'"
         );
       });
 
@@ -143,7 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
         expect((response.body as unknown as SiemMigrationsAPIErrorResponse).message).to.eql(
-          '[request body]: settings.connector_id: Required'
+          '[request body]: settings.connector_id: Invalid input: expected string, received undefined'
         );
       });
 

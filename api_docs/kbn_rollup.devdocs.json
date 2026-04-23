@@ -30,6 +30,8 @@
           "({ children }: RollupDeprecationTooltipProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/rollup/src/rollup_deprecation_tooltip/rollup_deprecation_tooltip.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "RollupDeprecationTooltipProps"
             ],
             "path": "x-pack/platform/packages/private/rollup/src/rollup_deprecation_tooltip/rollup_deprecation_tooltip.tsx",
+            "lineNumber": 18,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,6 +68,8 @@
         "label": "ROLLUP_DEPRECATION_BADGE_LABEL",
         "description": [],
         "path": "x-pack/platform/packages/private/rollup/src/constants/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

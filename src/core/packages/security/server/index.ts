@@ -28,27 +28,16 @@ export type {
 } from './src/audit_logging/audit_events';
 export type { AuditLogger } from './src/audit_logging/audit_logger';
 
-export type {
-  APIKeysServiceWithContext,
-  APIKeysService,
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  InvalidateAPIKeyResult,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  GrantAPIKeyResult,
-  UpdateAPIKeyParams,
-  UpdateAPIKeyResult,
-  UpdateCrossClusterAPIKeyParams,
-  UpdateRestAPIKeyParams,
-  UpdateRestAPIKeyWithKibanaPrivilegesParams,
-} from './src/authentication/api_keys';
+export type * from './src/authentication';
 
 export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';
-export { isCreateRestAPIKeyParams } from './src/authentication/api_keys';
+export {
+  isCreateRestAPIKeyParams,
+  extractApiKeyIdFromAuthzHeader,
+  decodeApiKeyId,
+  HTTPAuthorizationHeader,
+} from './src/authentication';
+export { isUiamCredential, isMissingApiKey, isRevokedApiKey } from './src/uiam';
 export type { CoreFipsService } from './src/fips';
 export { AuthzDisabled, AuthzOptOutReason, unwindNestedSecurityPrivileges } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';

@@ -42,7 +42,8 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/248742
+describe.skip(
   'Detection ES|QL - Alert suppression',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],

@@ -4,28 +4,27 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-agent-builder-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ai-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-agent-builder-plugin'
+  title: '@kbn/observability-agent-builder-plugin'
   description: Moon project for @kbn/observability-agent-builder-plugin
   channel: ''
   owner: '@elastic/obs-ai-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability_agent_builder
+  sourceRoot: x-pack/solutions/observability/plugins/observability_agent_builder
 dependsOn:
   - '@kbn/core'
-  - '@kbn/onechat-common'
-  - '@kbn/onechat-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/apm-data-access-plugin'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/logs-data-access-plugin'
   - '@kbn/zod'
-  - '@kbn/onechat-server'
+  - '@kbn/agent-builder-server'
   - '@kbn/security-plugin'
   - '@kbn/es-query'
   - '@kbn/core-elasticsearch-server'
@@ -44,11 +43,28 @@ dependsOn:
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
   - '@kbn/spaces-plugin'
-  - '@kbn/inference-plugin'
-  - '@kbn/logging'
-  - '@kbn/inference-common'
   - '@kbn/management-settings-ids'
+  - '@kbn/logging'
   - '@kbn/ai-assistant-common'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/discover-shared-plugin'
+  - '@kbn/i18n'
+  - '@kbn/licensing-types'
+  - '@kbn/licensing-plugin'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/sse-utils-server'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/server-route-repository-client'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/apm-types'
+  - '@kbn/slo-schema'
+  - '@kbn/apm-types-shared'
+  - '@kbn/observability-utils-server'
+  - '@kbn/calculate-auto'
+  - '@kbn/search-inference-endpoints'
+  - '@kbn/inference-connectors'
+  - '@kbn/react-query'
 tags:
   - plugin
   - prod
@@ -59,17 +75,9 @@ fileGroups:
   src:
     - common/**/*
     - server/**/*
+    - public/**/*
+    - scripts/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

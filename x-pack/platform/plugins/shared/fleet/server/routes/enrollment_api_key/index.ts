@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -54,6 +56,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_enrollment_api_key.yaml'),
+        },
         validate: {
           request: GetOneEnrollmentAPIKeyRequestSchema,
           response: {
@@ -88,6 +93,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_enrollment_api_key.yaml'),
+        },
         validate: {
           request: DeleteEnrollmentAPIKeyRequestSchema,
           response: {
@@ -118,6 +126,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Get enrollment API keys`,
+      description: `List all enrollment API keys.`,
       options: {
         tags: ['oas-tag:Fleet enrollment API keys'],
       },
@@ -125,6 +134,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_enrollment_api_keys.yaml'),
+        },
         validate: {
           request: GetEnrollmentAPIKeysRequestSchema,
           response: {
@@ -132,7 +144,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               description: 'OK: A successful request.',
               body: () =>
                 ListResponseSchema(EnrollmentAPIKeySchema).extends({
-                  list: schema.arrayOf(EnrollmentAPIKeySchema, { meta: { deprecated: true } }),
+                  list: schema.arrayOf(EnrollmentAPIKeySchema, {
+                    meta: { deprecated: true },
+                    maxSize: 10000,
+                  }),
                 }),
             },
             400: {
@@ -154,6 +169,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Create an enrollment API key`,
+      description: `Create an enrollment API key for a given agent policy.`,
       options: {
         tags: ['oas-tag:Fleet enrollment API keys'],
       },
@@ -161,6 +177,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_enrollment_api_key.yaml'),
+        },
         validate: {
           request: PostEnrollmentAPIKeyRequestSchema,
           response: {

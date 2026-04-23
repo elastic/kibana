@@ -22,10 +22,22 @@ export function initializeSearchSessionManager(
   dashboardInternalApi: DashboardInternalApi
 ) {
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
+  const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(false);
 
   let stopSearchSessionIntegration: (() => void) | undefined;
   let requestSearchSessionId: (() => Promise<string | undefined>) | undefined;
   if (searchSessionSettings) {
+    stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
+      {
+        ...dashboardApi,
+        searchSessionId$,
+      },
+      dashboardInternalApi,
+      searchSessionSettings,
+      (searchSessionId: string) => searchSessionId$.next(searchSessionId),
+      searchSessionGenerationInProgress$
+    );
+
     const { sessionIdToRestore } = searchSessionSettings;
 
     // if this incoming embeddable has a session, continue it.
@@ -47,7 +59,6 @@ export function initializeSearchSessionManager(
     searchSessionId$.next(initialSearchSessionId);
 
     // `requestSearchSessionId` should be used when you need to ensure that you have the up-to-date search session ID
-    const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(false);
     requestSearchSessionId = async () => {
       if (!searchSessionGenerationInProgress$.getValue()) return searchSessionId$.getValue();
       return new Promise((resolve) => {
@@ -59,17 +70,6 @@ export function initializeSearchSessionManager(
         });
       });
     };
-
-    stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
-      {
-        ...dashboardApi,
-        searchSessionId$,
-      },
-      dashboardInternalApi,
-      searchSessionSettings,
-      (searchSessionId: string) => searchSessionId$.next(searchSessionId),
-      searchSessionGenerationInProgress$
-    );
   }
   return {
     api: {

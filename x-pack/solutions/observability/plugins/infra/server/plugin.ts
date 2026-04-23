@@ -16,7 +16,6 @@ import {
   InventoryLocatorDefinition,
   MetricsExplorerLocatorDefinition,
 } from '@kbn/observability-shared-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { getMetricsFeature } from './features';
@@ -54,6 +53,8 @@ import type {
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { mapSourceToLogView } from './utils/map_source_to_log_view';
+import { registerDataProviders } from './agent_builder/register_data_providers';
+import { getInfraRequestHandlerContext } from './utils/get_infra_request_handler_context';
 
 export interface KbnServer extends Server {
   usage: any;
@@ -200,35 +201,14 @@ export class InfraServerPlugin
       'infra',
       async (context, request) => {
         const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
-        const uiSettingsClient = coreContext.uiSettings.client;
-
-        const mlSystem = plugins.ml?.mlSystemProvider(request, savedObjectsClient);
-        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
-          request,
-          savedObjectsClient
-        );
-        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
-        const getMetricsIndices = async () => {
-          return metricsClient.getMetricIndices({
-            savedObjectsClient,
-          });
-        };
-
-        return {
-          mlAnomalyDetectors,
-          mlSystem,
-          spaceId,
-          savedObjectsClient,
-          uiSettingsClient,
-          getMetricsIndices,
-        };
+        return getInfraRequestHandlerContext({ coreContext, request, plugins });
       }
     );
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
+
+    registerDataProviders({ core, plugins, libs: this.libs, logger: this.logger });
 
     return {
       inventoryViews,

@@ -8,6 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useCreateMigration } from './use_create_migration';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../../common/lib/kibana/kibana_react');
 
@@ -63,7 +64,11 @@ describe('useCreateMigration', () => {
         await result.current.createMigration('test-migration', mockDashboards);
       });
 
-      expect(mockCreateDashboardMigration).toHaveBeenCalledWith(mockDashboards, 'test-migration');
+      expect(mockCreateDashboardMigration).toHaveBeenCalledWith(
+        mockDashboards,
+        'test-migration',
+        MigrationSource.SPLUNK
+      );
       expect(mockGetDashboardMigrationStats).toHaveBeenCalledWith({
         migrationId: 'mock-migration-id',
       });

@@ -12,6 +12,7 @@ import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
 import type { ToolCallOfToolOptions } from './tools_of';
+import type { AnonymizationResponseMetadata } from './anonymization';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -79,12 +80,16 @@ export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
 ) => ChatCompleteAPIResponse<TOptions>;
 
 /**
- * Options used to call the {@link ChatCompleteAPI}
+ * Options used to call the {@link ChatCompleteAPI}.
+ *
+ * `connectorId` accepts both Kibana stack connector IDs (OpenAI, Bedrock, Gemini, etc.)
+ * and Elasticsearch inference endpoint IDs. The system automatically resolves which
+ * pipeline to use based on the provided identifier.
  */
 export type ChatCompleteOptions = {
   /**
-   * The ID of the connector to use.
-   * Must be an inference connector, or an error will be thrown.
+   * The ID of the connector or inference endpoint to use.
+   * Accepts both Kibana stack connector IDs and Elasticsearch inference endpoint IDs.
    */
   connectorId: string;
   /**
@@ -139,6 +144,10 @@ export type ChatCompleteOptions = {
    * Defaults to false.
    */
   stream?: boolean;
+  /**
+   * The timeout for the chat completion request.
+   */
+  timeout?: number;
 } & ToolOptions;
 
 export interface ChatCompleteRetryConfiguration {
@@ -198,6 +207,10 @@ export interface ChatCompleteResponse<
    */
   content: string;
   /**
+   * Optional refusal reason returned by the model when content is filtered.
+   */
+  refusal?: string;
+  /**
    * The eventual tool calls performed by the LLM.
    */
   toolCalls: ToolCallOfToolOptions<TOptions>[];
@@ -205,6 +218,14 @@ export interface ChatCompleteResponse<
    * Token counts
    */
   tokens?: ChatCompletionTokenCount;
+  /**
+   * Model effectively used, as specified by the response
+   */
+  model?: string;
+  /**
+   * Optional metadata attached by inference runtime.
+   */
+  metadata?: AnonymizationResponseMetadata;
 }
 
 /**

@@ -1,0 +1,45 @@
+{
+  "description": "kbn-evals CI config -- copy to config.json and fill in secrets",
+  "contact": "REPLACE_ME",
+  "owner": "REPLACE_ME",
+  "environment": "local",
+  "refresh_interval": "168h",
+  "litellm": {
+    "baseUrl": "https://elastic.litellm-prod.ai",
+    "virtualKey": "sk-REPLACE_ME",
+    "teamId": "REPLACE_ME"
+  },
+  "evaluationConnectorId": "litellm-llm-gateway-gpt-4o",
+  "evaluationsEs": {
+    "url": "https://kbn-evals-serverless-ed035a.es.us-central1.gcp.elastic.cloud",
+    "apiKey": "REPLACE_ME"
+  },
+  "evaluationsKbn": {
+    "url": "https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud",
+    "apiKey": "REPLACE_ME"
+  },
+  "tracingEs": {
+    "url": "https://kbn-evals-serverless-ed035a.es.us-central1.gcp.elastic.cloud",
+    "apiKey": "REPLACE_ME"
+  },
+  "tracingExporters": [
+    {
+      "http": {
+        "url": "https://kbn-evals-serverless-ed035a.ingest.us-central1.gcp.elastic.cloud:443/v1/traces",
+        "headers": {
+          "Authorization": "ApiKey REPLACE_ME"
+        }
+      }
+    }
+  ],
+  "gcsDatasetAccessCredentials": {
+    "type": "service_account",
+    "project_id": "REPLACE_ME",
+    "private_key_id": "REPLACE_ME",
+    "private_key": "REPLACE_ME",
+    "client_email": "REPLACE_ME",
+    "client_id": "REPLACE_ME",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token"
+  }
+}

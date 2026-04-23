@@ -20,8 +20,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { LinksEmbeddableState } from '../common';
 import {
   APP_ICON,
@@ -72,12 +71,12 @@ export class LinksPlugin
             {
               panelType: LINKS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                },
+                ref_id: savedObject.id,
               },
             },
-            true
+            {
+              displaySuccessMessage: true,
+            }
           );
         },
         savedObjectType: LINKS_SAVED_OBJECT_TYPE,
@@ -85,9 +84,14 @@ export class LinksPlugin
         getIconForSavedObject: () => APP_ICON,
       });
 
-      plugins.embeddable.registerReactEmbeddableFactory(LINKS_EMBEDDABLE_TYPE, async () => {
+      plugins.embeddable.registerEmbeddablePublicDefinition(LINKS_EMBEDDABLE_TYPE, async () => {
         const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
         return getLinksEmbeddableFactory();
+      });
+
+      plugins.embeddable.registerLegacyURLTransform(LINKS_EMBEDDABLE_TYPE, async () => {
+        const { transformOut } = await import('../common/embeddable/transforms/transform_out');
+        return transformOut;
       });
 
       plugins.visualizations.registerAlias({
@@ -116,11 +120,11 @@ export class LinksPlugin
                 id,
                 title,
                 editor: {
-                  onEdit: async (savedObjectId: string) => {
+                  onEdit: async (refId: string) => {
                     const { onVisualizationsEdit } = await import(
                       './editor/on_visualizations_edit'
                     );
-                    onVisualizationsEdit(savedObjectId);
+                    onVisualizationsEdit(refId);
                   },
                 },
                 description,
@@ -149,9 +153,9 @@ export class LinksPlugin
       }
     );
 
-    plugins.dashboard.registerDashboardPanelSettings(
+    plugins.presentationUtil.registerPanelPlacementSettings(
       LINKS_EMBEDDABLE_TYPE,
-      async (serializedState?: SerializedPanelState<LinksEmbeddableState>) => {
+      async (serializedState?: LinksEmbeddableState) => {
         const { getPanelPlacement } = await import('./embeddable/embeddable_module');
         const placementSettings = await getPanelPlacement(serializedState);
         return { placementSettings };

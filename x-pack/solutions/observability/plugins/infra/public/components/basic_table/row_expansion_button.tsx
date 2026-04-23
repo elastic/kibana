@@ -30,7 +30,7 @@ export const RowExpansionButton = <Item extends any>({
       data-test-subj="infraRowExpansionButtonButton"
       onClick={handleClick}
       aria-label={isExpanded ? collapseAriaLabel : expandAriaLabel}
-      iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+      iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
     />
   );
 };

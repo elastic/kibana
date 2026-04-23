@@ -24,6 +24,7 @@ const testBlock = {
     },
   ],
 };
+
 beforeAll(async () => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
@@ -35,14 +36,14 @@ beforeAll(async () => {
 });
 
 describe('connectorTypeRegistry.get works', () => {
-  test('connector type static data is as expected', () => {
+  it('connector type static data is as expected', () => {
     expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
     expect(connectorTypeModel.iconClass).toEqual('logoSlack');
   });
 });
 
 describe('hideInUi', () => {
-  test('should return true when slack is enabled in config', () => {
+  it('should return true when slack is enabled in config', () => {
     expect(
       // @ts-expect-error
       connectorTypeModel.getHideInUi([
@@ -52,7 +53,7 @@ describe('hideInUi', () => {
     ).toEqual(true);
   });
 
-  test('should return false when slack is disabled in config', () => {
+  it('should return false when slack is disabled in config', () => {
     expect(
       // @ts-expect-error
       connectorTypeModel.getHideInUi([
@@ -62,7 +63,7 @@ describe('hideInUi', () => {
     ).toEqual(false);
   });
 
-  test('should return false when slack is not found in config', () => {
+  it('should return false when slack is not found in config', () => {
     expect(
       // @ts-expect-error
       connectorTypeModel.getHideInUi([
@@ -75,7 +76,7 @@ describe('hideInUi', () => {
 
 describe('Slack action params validation', () => {
   describe('postMessage', () => {
-    test('should succeed when action params include valid message and channels list', async () => {
+    it('should succeed when action params include valid message and channels list', async () => {
       const actionParams = {
         subAction: 'postMessage',
         subActionParams: { channels: ['general'], text: 'some text' },
@@ -89,7 +90,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should succeed when action params include valid message and channels and channel ids', async () => {
+    it('should succeed when action params include valid message and channels and channel ids', async () => {
       const actionParams = {
         subAction: 'postMessage',
         subActionParams: { channels: ['general'], channelIds: ['general'], text: 'some text' },
@@ -103,7 +104,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should fail when channels field is missing in action params', async () => {
+    it('should fail when channels field is missing in action params', async () => {
       const actionParams = {
         subAction: 'postMessage',
         subActionParams: { text: 'some text' },
@@ -117,7 +118,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should fail when field text does not exist', async () => {
+    it('should fail when field text does not exist', async () => {
       const actionParams = {
         subAction: 'postMessage',
         subActionParams: { channels: ['general'] },
@@ -131,7 +132,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should fail when text is empty string', async () => {
+    it('should fail when text is empty string', async () => {
       const actionParams = {
         subAction: 'postMessage',
         subActionParams: { channels: ['general'], text: '' },
@@ -147,7 +148,7 @@ describe('Slack action params validation', () => {
   });
 
   describe('postBlockkit', () => {
-    test('should succeed when action params include valid JSON message and channels list', async () => {
+    it('should succeed when action params include valid JSON message and channels list', async () => {
       const actionParams = {
         subAction: 'postBlockkit',
         subActionParams: { channels: ['general'], text: JSON.stringify(testBlock) },
@@ -161,7 +162,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should succeed when action params include valid JSON message and channels and channel ids', async () => {
+    it('should succeed when action params include valid JSON message and channels and channel ids', async () => {
       const actionParams = {
         subAction: 'postBlockkit',
         subActionParams: {
@@ -179,7 +180,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should fail when channels field is missing in action params', async () => {
+    it('should fail when channels field is missing in action params', async () => {
       const actionParams = {
         subAction: 'postBlockkit',
         subActionParams: { text: JSON.stringify(testBlock) },
@@ -193,7 +194,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should fail when field text does not exist', async () => {
+    it('should fail when field text does not exist', async () => {
       const actionParams = {
         subAction: 'postBlockkit',
         subActionParams: { channels: ['general'] },
@@ -207,7 +208,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should fail when text is empty string', async () => {
+    it('should fail when text is empty string', async () => {
       const actionParams = {
         subAction: 'postBlockkit',
         subActionParams: { channels: ['general'], text: '' },
@@ -221,7 +222,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should fail when text is invalid JSON', async () => {
+    it('should fail when text is invalid JSON', async () => {
       const actionParams = {
         subAction: 'postBlockkit',
         subActionParams: { channels: ['general'], text: 'abcd' },
@@ -235,7 +236,7 @@ describe('Slack action params validation', () => {
       });
     });
 
-    test('should fail when text is JSON but does not contain "blocks" property', async () => {
+    it('should fail when text is JSON but does not contain "blocks" property', async () => {
       const actionParams = {
         subAction: 'postBlockkit',
         subActionParams: { channels: ['general'], text: JSON.stringify({ foo: 'bar' }) },
@@ -246,6 +247,121 @@ describe('Slack action params validation', () => {
           text: ['JSON must contain field "blocks".'],
           channels: [],
         },
+      });
+    });
+  });
+
+  describe('channels', () => {
+    it('should fail when all channel variables are undefined', async () => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text' },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: ['Channel ID is required.'],
+        },
+      });
+    });
+
+    it('should fail when all channel variables are empty', async () => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channelNames: [], channels: [], channelIds: [] },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: ['Channel ID is required.'],
+        },
+      });
+    });
+
+    it.each([
+      ['channelIds', undefined],
+      ['channels', undefined],
+      ['channelIds', []],
+      ['channels', []],
+    ])('should not fail when channelNames is set and %s is %s', async (key, value) => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channelNames: ['#test'], [key]: value },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: [],
+        },
+      });
+    });
+
+    it.each([
+      ['channelNames', undefined],
+      ['channels', undefined],
+      ['channelNames', []],
+      ['channels', []],
+    ])('should not fail when channelIds is set and %s is %s', async (key, value) => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channelIds: ['channel-id'], [key]: value },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: [],
+        },
+      });
+    });
+
+    it.each([
+      ['channelIds', undefined],
+      ['channelNames', undefined],
+      ['channelIds', []],
+      ['channelNames', []],
+    ])('should not fail when channels is set and %s is %s', async (key, value) => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channels: ['my-channel'], [key]: value },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: [],
+        },
+      });
+    });
+
+    it('should not fail if channel names do not start with #', async () => {
+      const actionParams = {
+        subAction: 'postMessage',
+        subActionParams: { text: 'some text', channelNames: ['test'] },
+      };
+
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+        errors: {
+          text: [],
+          channels: ['Channel name must start with a #'],
+        },
+      });
+    });
+  });
+
+  describe('default values', () => {
+    it('sets the default values as expected', () => {
+      expect(connectorTypeModel.defaultActionParams).toEqual({
+        subAction: 'postMessage',
+        subActionParams: { text: undefined },
+      });
+
+      expect(connectorTypeModel.defaultRecoveredActionParams).toEqual({
+        subAction: 'postMessage',
+        subActionParams: { text: undefined },
       });
     });
   });

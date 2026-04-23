@@ -87,8 +87,10 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
     hideAggregatedPreview,
     breakdownField,
     hideChart,
+    hideTable,
     sampleSize,
     isAlertResults,
+    esqlControls,
   } = params;
 
   const appState: Partial<DiscoverAppState> = {};
@@ -112,12 +114,14 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
   if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
   if (breakdownField) appState.breakdownField = breakdownField;
   if (typeof hideChart === 'boolean') appState.hideChart = hideChart;
+  if (typeof hideTable === 'boolean') appState.hideTable = hideTable;
   if (typeof sampleSize === 'number' && sampleSize > 0) appState.sampleSize = sampleSize;
 
   const state: MainHistoryLocationState = {};
 
   if (dataViewSpec) state.dataViewSpec = dataViewSpec;
   if (isAlertResults) state.isAlertResults = isAlertResults;
+  if (esqlControls) state.esqlControls = esqlControls;
 
   return { appState, globalState, state };
 };

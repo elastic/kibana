@@ -83,6 +83,11 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'gettingStartedHeader',
         },
         {
+          link: { deepLinkId: 'searchGettingStarted' },
+          breadcrumbs: ['Getting started'],
+          pageTestSubject: 'gettingStartedHeader',
+        },
+        {
           link: { deepLinkId: 'dev_tools' },
           breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
@@ -110,6 +115,7 @@ export default function searchSolutionNavigation({
           'discover',
           'dashboards',
           'agent_builder',
+          'workflows',
           'machine_learning',
           'search_getting_started',
           'dev_tools',

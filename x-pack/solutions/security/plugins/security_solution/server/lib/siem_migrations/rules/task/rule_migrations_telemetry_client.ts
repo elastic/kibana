@@ -48,6 +48,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
               model: this.modelName,
               prebuiltMatch: migrationResult.elastic_rule?.prebuilt_rule_id ? true : false,
               eventName: siemMigrationEventNames[SiemMigrationsEventTypes.RuleTranslationSuccess],
+              vendor: this.vendor,
             });
           },
           failure: (error: Error) => {
@@ -57,6 +58,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
               error: error.message,
               model: this.modelName,
               eventName: siemMigrationEventNames[SiemMigrationsEventTypes.RuleTranslationFailure],
+              vendor: this.vendor,
             });
           },
         };
@@ -72,6 +74,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
           total: stats.completed + stats.failed,
           duration,
           eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationSuccess],
+          vendor: this.vendor,
         });
       },
       failure: (error: Error) => {
@@ -86,6 +89,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
           duration,
           error: error.message,
           eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationFailure],
+          vendor: this.vendor,
         });
       },
       aborted: (error: Error) => {
@@ -100,6 +104,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
           duration,
           reason: error.message,
           eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationAborted],
+          vendor: this.vendor,
         });
       },
     };
@@ -117,6 +122,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
       postFilterIntegrationName: postFilterIntegration ? postFilterIntegration.id : '',
       postFilterIntegrationCount: postFilterIntegration ? 1 : 0,
       eventName: siemMigrationEventNames[SiemMigrationsEventTypes.RuleTranslationIntegrationsMatch],
+      vendor: this.vendor,
     });
   }
 
@@ -133,6 +139,7 @@ export class RuleMigrationTelemetryClient extends SiemMigrationTelemetryClient<R
       postFilterRuleCount: postFilterRule ? 1 : 0,
       eventName:
         siemMigrationEventNames[SiemMigrationsEventTypes.RuleTranslationPrebuiltRulesMatch],
+      vendor: this.vendor,
     });
   }
 }

@@ -32,6 +32,8 @@
           "(factory: () => T) => () => T"
         ],
         "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_annotations.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "() => T"
             ],
             "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_annotations.ts",
+            "lineNumber": 22,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
           "(obj: T) => T"
         ],
         "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_annotations.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,6 +87,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_annotations.ts",
+            "lineNumber": 39,
+            "columnNumber": 80,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -100,6 +108,8 @@
           "(factories: TFactories) => { [K in keyof TFactories]: ReturnType<TFactories[K]>; }"
         ],
         "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_factories.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -114,6 +124,8 @@
               "TFactories"
             ],
             "path": "src/platform/packages/shared/kbn-lazy-object/src/create_lazy_object_from_factories.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -133,6 +145,8 @@
           "() => { count: number; called: number; }"
         ],
         "path": "src/platform/packages/shared/kbn-lazy-object/src/metrics.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -150,6 +164,8 @@
           "(obj: T) => T"
         ],
         "path": "src/platform/packages/shared/kbn-lazy-object/src/lazy_object.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -164,6 +180,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-lazy-object/src/lazy_object.ts",
+            "lineNumber": 10,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

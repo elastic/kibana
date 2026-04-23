@@ -32,7 +32,7 @@ export const EmptyPrompt: React.FunctionComponent<{
         hasFleetAddAgentsPrivileges ? (
           <EuiButton
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={() => setEnrollmentFlyoutState({ isOpen: true })}
           >
             <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />

@@ -11,12 +11,16 @@ import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
+import { getAppIdFromFilePath } from '../helpers/get_app_id_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
 import { getStringValue, isTruthy } from '../helpers/utils';
 
 export const RULE_WARNING_MESSAGE =
   'First parameter passed to i18n.translate should start with the correct i18n identifier for this file. Correct it or use the autofix suggestion.';
+
+export const NO_IDENTIFIER_MESSAGE =
+  'APP_ID does not have an i18n identifier added to i18nrc.json yet. Translations for this plugin or package will not work until one is added.';
 
 export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
   meta: {
@@ -44,6 +48,18 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
         const callExprNode = node as TSESTree.CallExpression;
         const args = callExprNode.arguments;
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
+
+        // If no i18n identifier is found for this file, report an error
+        if (!i18nAppId) {
+          // Find the package/plugin ID from kibana.jsonc to show in the error message
+          const appId = getAppIdFromFilePath(filename, cwd);
+
+          report({
+            node,
+            message: NO_IDENTIFIER_MESSAGE.replace('APP_ID', appId),
+          });
+          return;
+        }
 
         // Check if the first argument is a ternary expression (ConditionalExpression)
         // If so, validate both branches have correct i18n identifiers

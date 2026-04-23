@@ -8,105 +8,82 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
-import { transformControlGroupIn } from './transform_control_group_in';
+import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
-import { isSearchSourceReference } from '../out/transform_references_out';
 
 export const transformDashboardIn = (
-  dashboardState: DashboardState
-):
-  | {
-      attributes: DashboardSavedObjectAttributes;
-      references: SavedObjectReference[];
-      error: null;
-    }
-  | {
-      attributes: null;
-      references: null;
-      error: Error;
-    } => {
-  try {
-    const {
-      controlGroupInput,
-      options,
-      filters,
-      panels,
-      query,
-      references: incomingReferences,
-      tags,
-      time_range,
-      refresh_interval,
-      project_routing,
-      ...rest
-    } = dashboardState;
+  dashboardState: Partial<DashboardState>,
+  isDashboardAppRequest: boolean = false
+): {
+  attributes: DashboardSavedObjectAttributes;
+  references: SavedObjectReference[];
+} => {
+  const {
+    pinned_panels,
+    options,
+    filters,
+    panels,
+    query,
+    tags,
+    time_range,
+    refresh_interval,
+    project_routing,
+    ...rest
+  } = dashboardState;
 
-    // TODO remove when references are removed from API
-    const hasTagReference = (incomingReferences ?? []).some(
-      ({ type }) => type === tagSavedObjectTypeName
-    );
-    if (hasTagReference) {
-      throw new Error(`Tag references are not supported. Pass tags in with 'data.tags'`);
-    }
-    // TODO remove when references are removed from API
-    const hasSearchSourceReference = (incomingReferences ?? []).some(isSearchSourceReference);
-    if (hasSearchSourceReference) {
-      throw new Error(
-        `Search source references are not supported. Pass filters in with injected references'`
-      );
-    }
+  const tagReferences = transformTagsIn(tags);
 
-    const tagReferences = transformTagsIn(tags);
+  const {
+    panelsJSON,
+    sections,
+    references: panelReferences,
+  } = panels
+    ? transformPanelsIn(panels, isDashboardAppRequest)
+    : {
+        panelsJSON: '',
+        sections: undefined,
+        references: [],
+      };
 
-    const {
-      panelsJSON,
-      sections,
-      references: panelReferences,
-    } = panels
-      ? transformPanelsIn(panels)
-      : {
-          panelsJSON: '',
-          sections: undefined,
-          references: [],
-        };
+  const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
+    filters,
+    query
+  );
 
-    const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
-      filters,
-      query
-    );
+  const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
+    pinned_panels ?? []
+  );
 
-    const attributes = {
-      description: '',
-      ...rest,
-      ...(controlGroupInput && {
-        controlGroupInput: transformControlGroupIn(controlGroupInput),
-      }),
-      optionsJSON: transformOptionsIn(options),
-      panelsJSON,
-      ...(refresh_interval && { refreshInterval: refresh_interval }),
-      ...(sections?.length && { sections }),
-      ...(time_range
-        ? { timeFrom: time_range.from, timeTo: time_range.to, timeRestore: true }
-        : { timeRestore: false }),
-      kibanaSavedObjectMeta: { searchSourceJSON },
-      ...(project_routing !== undefined && { projectRouting: project_routing }),
-    };
-    return {
-      attributes,
-      references: [
-        ...tagReferences,
-        ...(incomingReferences ?? []),
-        ...panelReferences,
-        ...searchSourceReferences,
-      ],
-      error: null,
-    };
-  } catch (e) {
-    return { attributes: null, references: null, error: e };
-  }
+  const attributes = {
+    description: '',
+    title: '',
+    ...rest,
+    ...(Object.keys(pinnedPanels).length && {
+      pinned_panels: { panels: pinnedPanels },
+    }),
+    optionsJSON: transformOptionsIn(options ?? {}),
+    panelsJSON,
+    ...(refresh_interval && { refreshInterval: refresh_interval }),
+    ...(sections?.length && { sections }),
+    ...(time_range
+      ? { timeFrom: time_range.from, timeTo: time_range.to, timeRestore: true }
+      : { timeRestore: false }),
+    kibanaSavedObjectMeta: { searchSourceJSON },
+    ...(project_routing !== undefined && { projectRouting: project_routing }),
+  };
+
+  return {
+    attributes,
+    references: [
+      ...tagReferences,
+      ...panelReferences,
+      ...controlGroupReferences,
+      ...searchSourceReferences,
+    ],
+  };
 };

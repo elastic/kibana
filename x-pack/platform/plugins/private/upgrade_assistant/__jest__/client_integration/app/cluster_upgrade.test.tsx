@@ -5,32 +5,29 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import '@testing-library/jest-dom';
+import { screen, waitFor } from '@testing-library/react';
 
-import { setupEnvironment } from '../helpers';
-import type { AppTestBed } from './app.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
 import { setupAppPage } from './app.helpers';
 
 describe('Cluster upgrade', () => {
-  let testBed: AppTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('when user is still preparing for upgrade', () => {
-    beforeEach(async () => {
-      testBed = await setupAppPage(httpSetup);
-    });
+    test('renders overview', async () => {
+      await setupAppPage(httpSetup);
 
-    test('renders overview', () => {
-      const { exists } = testBed;
-      expect(exists('overview')).toBe(true);
-      expect(exists('isUpgradingMessage')).toBe(false);
-      expect(exists('isUpgradeCompleteMessage')).toBe(false);
+      expect(screen.getByTestId('overviewPageHeader')).toBeInTheDocument();
+      expect(screen.queryByTestId('isUpgradingMessage')).toBeNull();
+      expect(screen.queryByTestId('isUpgradeCompleteMessage')).toBeNull();
     });
   });
 
@@ -49,17 +46,15 @@ describe('Cluster upgrade', () => {
         },
       });
 
-      await act(async () => {
-        testBed = await setupAppPage(httpSetup);
-      });
+      await setupAppPage(httpSetup);
     });
 
     test('renders rolling upgrade message', async () => {
-      const { component, exists } = testBed;
-      component.update();
-      expect(exists('overview')).toBe(false);
-      expect(exists('isUpgradingMessage')).toBe(true);
-      expect(exists('isUpgradeCompleteMessage')).toBe(false);
+      await screen.findByTestId('isUpgradingMessage');
+      await waitFor(() => {
+        expect(screen.queryByTestId('overviewPageHeader')).toBeNull();
+      });
+      expect(screen.queryByTestId('isUpgradeCompleteMessage')).toBeNull();
     });
   });
 
@@ -73,17 +68,15 @@ describe('Cluster upgrade', () => {
         },
       });
 
-      await act(async () => {
-        testBed = await setupAppPage(httpSetup);
-      });
+      await setupAppPage(httpSetup);
     });
 
-    test('renders upgrade complete message', () => {
-      const { component, exists } = testBed;
-      component.update();
-      expect(exists('overview')).toBe(false);
-      expect(exists('isUpgradingMessage')).toBe(false);
-      expect(exists('isUpgradeCompleteMessage')).toBe(true);
+    test('renders upgrade complete message', async () => {
+      await screen.findByTestId('isUpgradeCompleteMessage');
+      await waitFor(() => {
+        expect(screen.queryByTestId('overviewPageHeader')).toBeNull();
+      });
+      expect(screen.queryByTestId('isUpgradingMessage')).toBeNull();
     });
   });
 });

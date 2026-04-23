@@ -39,7 +39,14 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     isTestRun: {
       type: 'boolean',
     },
+    // Only exists in single step test executions
+    stepId: {
+      type: 'keyword',
+    },
     createdBy: {
+      type: 'keyword',
+    },
+    executedBy: {
       type: 'keyword',
     },
     startedAt: {
@@ -52,6 +59,12 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'long',
     },
     triggeredBy: {
+      type: 'keyword',
+    },
+    dispatchEventId: {
+      type: 'keyword',
+    },
+    concurrencyGroupKey: {
       type: 'keyword',
     },
   },
@@ -77,6 +90,9 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     },
     status: {
       type: 'keyword',
+    },
+    isTestRun: {
+      type: 'boolean',
     },
     startedAt: {
       type: 'date',

@@ -13,6 +13,6 @@ export {
   SecurityGroupName,
   LinkCategoryType,
   SECURITY_UI_APP_ID,
-  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
 } from './src/constants';
 export * from './src/types';

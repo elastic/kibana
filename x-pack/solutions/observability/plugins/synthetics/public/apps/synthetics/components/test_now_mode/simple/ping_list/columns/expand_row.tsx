@@ -70,7 +70,7 @@ export const ExpandRowColumn = ({ item, expandedRows, setExpandedRows }: Props) 
             })
           : i18n.translate('xpack.synthetics.pingList.expandRow', { defaultMessage: 'Expand' })
       }
-      iconType={expandedRows[item.docId] ? 'arrowUp' : 'arrowDown'}
+      iconType={expandedRows[item.docId] ? 'chevronSingleUp' : 'chevronSingleDown'}
     />
   );
 };

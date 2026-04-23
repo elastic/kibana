@@ -15,7 +15,8 @@ import {
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
-} from '@kbn/esql-ast';
+} from '@elastic/esql';
+import { CommandNames, esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
 
 import type {
   ESQLSource,
@@ -25,7 +26,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
-} from '@kbn/esql-ast';
+} from '@elastic/esql/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
@@ -90,11 +91,10 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
  */
 export function hasTransformationalCommand(esql?: string) {
   if (!esql) return false;
-  const transformationalCommands = ['stats', 'keep'];
   const { root } = Parser.parse(esql);
 
   // Check for direct transformational commands first
-  const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
+  const hasAtLeastOneTransformationalCommand = TRANSFORMATIONAL_COMMANDS.some((command) =>
     root.commands.find(({ name }) => name === command)
   );
 
@@ -128,7 +128,7 @@ export function hasTransformationalCommand(esql?: string) {
       // Branch must have at least one command and all commands must be transformational
       return (
         branchCommands.length > 0 &&
-        branchCommands.every((cmd) => transformationalCommands.includes(cmd.name))
+        branchCommands.every((cmd) => TRANSFORMATIONAL_COMMANDS.includes(cmd.name))
       );
     });
   });
@@ -210,6 +210,12 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
   );
+  // PromQL queries always use @timestamp as timefield
+  const isPromQLQuery = root.commands.some(({ name }) => name === 'promql');
+  if (isPromQLQuery) {
+    return '@timestamp';
+  }
+
   if (!timeNamedParam || !functions.length) {
     return undefined;
   }
@@ -266,9 +272,17 @@ export const getKqlSearchQueries = (esql: string) => {
     .filter((query) => query !== '');
 };
 
-export const prettifyQuery = (src: string): string => {
+/**
+ * Prettifies an ES|QL query with configurable line wrapping.
+ * @param src - The raw ES|QL query string
+ * @param lineWidth - Optional line width in characters; when provided, output is wrapped to fit. Otherwise uses the library default (80).
+ */
+export const prettifyQuery = (src: string, lineWidth?: number): string => {
   const { root } = Parser.parse(src, { withFormatting: true });
-  return WrappingPrettyPrinter.print(root, { multiline: true });
+  return WrappingPrettyPrinter.print(root, {
+    multiline: true,
+    ...(lineWidth !== undefined && { wrap: lineWidth }),
+  });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
@@ -519,6 +533,59 @@ export const getCategorizeColumns = (esql: string): string[] => {
   return columns;
 };
 
+export const getSparklineColumns = (esql: string): string[] => {
+  const { root } = Parser.parse(esql);
+  const statsCommand = root.commands.find(({ name }) => name === 'stats');
+  if (!statsCommand) {
+    return [];
+  }
+  const columns: string[] = [];
+
+  for (const arg of statsCommand.args) {
+    if ((arg as ESQLCommandOption).type === 'option') {
+      continue;
+    }
+    if (!isFunctionExpression(arg)) {
+      continue;
+    }
+    if (arg.name === 'sparkline') {
+      // STATS SPARKLINE(field)
+      columns.push(arg.text);
+      continue;
+    }
+    if (
+      arg.name === '=' &&
+      isColumn(arg.args[0]) &&
+      Walker.match(arg, { type: 'function', name: 'sparkline' })
+    ) {
+      // STATS col = SPARKLINE(...) — Walker finds the call regardless of RHS shape (e.g. array-wrapped)
+      columns.push((arg.args[0] as ESQLColumn).name);
+    }
+  }
+
+  const renameCommands = root.commands.filter(({ name }) => name === 'rename');
+  if (renameCommands.length === 0) {
+    return columns;
+  }
+  const renameFunctions: ESQLFunction[] = [];
+  renameCommands.forEach((renameCommand) => {
+    walk(renameCommand, {
+      visitFunction: (node) => renameFunctions.push(node),
+    });
+  });
+
+  renameFunctions.forEach((renameFunction) => {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const oldColumn = original.name;
+    const newColumn = renamed.name;
+    if (columns.includes(oldColumn)) {
+      columns[columns.indexOf(oldColumn)] = newColumn;
+    }
+  });
+
+  return columns;
+};
+
 /**
  * Extracts the original and renamed columns from a rename function.
  * RENAME original AS renamed Vs RENAME renamed = original
@@ -591,54 +658,32 @@ export const missingSortBeforeLimit = (esql: string): boolean => {
   }
   return false;
 };
+/**
+ * Checks if the ESQL query contains only source commands (e.g., FROM, TS).
+ * If the query contains PROMQL command, we will exclude it from this check.
+ * @param esql: string - The ESQL query string
+ * @returns true if the query contains only source commands, false otherwise
+ */
+export const hasOnlySourceCommand = (query: string): boolean => {
+  const { root } = Parser.parse(query);
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  return (
+    root.commands.length > 0 &&
+    root.commands.every(({ name }) => name !== 'promql') &&
+    root.commands.every((command) => sourceCommands.includes(command.name))
+  );
+};
 
 /**
- * Checks if the ESQL query contains a timeseries bucket aggregation.
- * @param esql: string - The ESQL query string
- * @param columns: DatatableColumn[] - The columns of the datatable
- * @returns true if the query contains a timeseries bucket aggregation, false otherwise
+ * Determines if an ES|QL query contains the METRICS_INFO or TS_INFO commands.
+ *
+ * @param esql - The ES|QL query string to analyze
+ * @returns true if the query contains the METRICS_INFO or TS_INFO commands, false otherwise
  */
-export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []): boolean {
+export const hasTimeseriesInfoCommand = (esql?: string): boolean => {
+  if (!esql) return false;
   const { root } = Parser.parse(esql);
-
-  const normalize = (name: string) => name.toLowerCase().replace(/\s+/g, '');
-  const dateColumnNames = new Set(
-    columns.filter((col) => col.meta.type === 'date').map((col) => normalize(col.name))
+  return root.commands.some(
+    ({ name }) => name === CommandNames.METRICS_INFO || name === CommandNames.TS_INFO
   );
-  if (dateColumnNames.size === 0) {
-    return false;
-  }
-
-  const commands = Walker.commands(root);
-  if (!commands.some((cmd) => cmd.name === 'ts')) {
-    return false;
-  }
-
-  const statsCommands = commands.filter((cmd) => cmd.name === 'stats');
-  if (statsCommands.length === 0) {
-    return false;
-  }
-
-  const statsByCommands = Walker.matchAll(statsCommands, { type: 'option', name: 'by' });
-  if (statsByCommands.length === 0) {
-    return false;
-  }
-
-  const lastByCommand = statsByCommands[statsByCommands.length - 1];
-
-  let foundDateField = false;
-  walk(lastByCommand, {
-    visitColumn: (node) => {
-      if (!foundDateField && dateColumnNames.has(normalize(node.name))) {
-        foundDateField = true;
-      }
-    },
-    visitFunction: (node) => {
-      if (!foundDateField && dateColumnNames.has(normalize(node.text))) {
-        foundDateField = true;
-      }
-    },
-  });
-
-  return foundDateField;
-}
+};

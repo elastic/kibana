@@ -7,25 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DotKeysOf, DotObject } from '@kbn/utility-types';
+import type { StepPropertyHandler } from '@kbn/workflows';
+import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
+
+/**
+ * Helper function to create a PublicStepDefinition with automatic type inference.
+ * This ensures that the editorHandlers' types are correctly inferred
+ * from the inputSchema and configSchema without needing explicit type annotations.
+ *
+ **/
+export function createPublicStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+>(
+  definition: PublicStepDefinition<Input, Output, Config>
+): PublicStepDefinition<Input, Output, Config> {
+  return definition;
+}
 
 /**
  * User-facing metadata for a workflow step.
  * This is used by the UI to display step information (label, description, icon, schemas, documentation).
  */
-export interface PublicStepDefinition extends CommonStepDefinition {
-  /**
-   * User-facing label/title for this step type.
-   * Displayed in the UI when selecting or viewing steps.
-   */
-  label: string;
-
-  /**
-   * User-facing description of what this step does.
-   * Displayed as help text or in tooltips.
-   */
-  description?: string;
-
+export interface PublicStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> extends CommonStepDefinition<Input, Output, Config> {
   /**
    * Icon type from EUI icon library.
    * Used to visually represent this step type in the UI.
@@ -35,37 +46,64 @@ export interface PublicStepDefinition extends CommonStepDefinition {
   icon?: React.ComponentType;
 
   /**
-   * Documentation for the step, including details, and examples.
+   * Property handlers for the step.
    */
-  documentation?: StepDocumentation;
+  editorHandlers?: EditorHandlers<Input, Output, Config>;
 }
 
 /**
- * Documentation information for a workflow step.
+ * Editor handlers type that maintains type safety while allowing variance
  */
-export interface StepDocumentation {
-  /**
-   * Detailed description with usage examples (markdown supported)
-   * @example "This step allows you to set variables that can be accessed in subsequent steps via `{{ steps.stepName.variableName }}`"
-   */
-  details?: string;
+export interface EditorHandlers<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> {
+  config?: EditorHandlersConfig<Config, Input>;
+  input?: EditorHandlersInput<Input, Config>;
+  dynamicSchema?: DynamicSchema<Input, Output, Config>;
+}
 
-  /**
-   * External documentation URL
-   * @example "https://docs.example.com/custom-steps/setvar"
-   */
-  url?: string;
+export type EditorHandlersConfig<
+  Config extends z.ZodObject = z.ZodObject,
+  Input extends z.ZodType = z.ZodType
+> = {
+  [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<
+    DotObject<z.infer<Config>>[K],
+    z.infer<Config>,
+    Input extends z.ZodObject ? z.infer<Input> : Record<string, unknown>
+  >;
+};
 
+export type EditorHandlersInput<
+  Input extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> = Input extends z.ZodObject
+  ? {
+      [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<
+        DotObject<z.infer<Input>>[K],
+        z.infer<Config>,
+        z.infer<Input>
+      >;
+    }
+  : {};
+
+/**
+ * Dynamic schema handlers for a step
+ */
+export interface DynamicSchema<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> {
   /**
-   * Usage examples in YAML format
-   * @example
-   * ```yaml
-   * - name: myStep
-   *   type: setvar
-   *   with:
-   *     variables:
-   *       x: 10
-   * ```
+   * Dynamic Zod schema for validating step output based on input.
+   * Allows for more flexible output structure based on the specific input provided.
+   * @param input The input data for the step.
+   * @returns A Zod schema defining structure and validation rules for the output of the step.
    */
-  examples?: string[];
+  getOutputSchema?(params: {
+    input: z.infer<Input>;
+    config: z.infer<Config>;
+  }): z.ZodType<z.infer<Output>>;
 }

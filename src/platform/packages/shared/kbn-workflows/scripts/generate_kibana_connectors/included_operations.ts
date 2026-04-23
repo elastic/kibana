@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Re-export from the single source of truth
+export { OPERATION_TYPE_OVERRIDES } from '../../spec/kibana/aliases';
+
+/**
+ * List of OpenAPI operation IDs to include in the generated Kibana connectors.
+ */
 export const INCLUDED_OPERATIONS = [
   'createCaseDefaultSpace',
-  'post_agent_builder_converse',
   'getCaseDefaultSpace',
   'updateCaseDefaultSpace',
   'addCaseCommentDefaultSpace',
   'SetAlertsStatus',
   'SetAlertTags',
+  'get-streams',
+  'get-streams-name',
+  'get-streams-name-significant-events',
 ];

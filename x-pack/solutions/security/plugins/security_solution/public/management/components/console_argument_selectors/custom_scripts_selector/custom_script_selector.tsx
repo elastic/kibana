@@ -60,7 +60,7 @@ export const CustomScriptSelector = memo<
   const { agentType, platform } = command.commandDefinition.meta ?? {};
 
   const scriptsApiQueryParams: Omit<CustomScriptsRequestQueryParams, 'agentType'> = useMemo(() => {
-    if (agentType === 'sentinel_one' && platform) {
+    if (platform && (agentType === 'sentinel_one' || agentType === 'endpoint')) {
       return { osType: platform };
     }
 
@@ -88,7 +88,7 @@ export const CustomScriptSelector = memo<
 
   useEffect(() => {
     // If the argument selector should not be rendered, then at least set the `value` to a string
-    // so that the normal com,and argument validations can be invoked if the user still ENTERs the command
+    // so that the normal command, and argument validations can be invoked if the user still ENTERs the command
     if (!shouldRender && value !== '') {
       onChange({
         value: '',
@@ -100,7 +100,7 @@ export const CustomScriptSelector = memo<
       // might be getting initialized from either console input history or from a user's past action.
       // Ensure that we set `selectedOption` once we get the list of scripts
       shouldRender &&
-      agentType === 'sentinel_one' &&
+      (agentType === 'sentinel_one' || agentType === 'endpoint') &&
       value &&
       !state?.selectedOption &&
       data.length > 0

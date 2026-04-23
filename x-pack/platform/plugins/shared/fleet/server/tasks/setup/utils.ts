@@ -10,5 +10,9 @@ export const TASK_TITLE = 'Fleet setup operations';
 export const TASK_TIMEOUT = '10m';
 
 export interface SetupTaskParams {
-  type: 'backportPackagePolicyInputId' | 'migrateComponentTemplateILMs';
+  type:
+    | 'backportPackagePolicyInputId'
+    | 'migrateComponentTemplateILMs'
+    | 'upgradePackageInstallVersion'
+    | 'reinstallPackagesForGlobalAssetUpdate';
 }

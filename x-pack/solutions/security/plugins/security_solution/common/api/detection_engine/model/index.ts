@@ -11,5 +11,7 @@ export * from './rule_schema';
 export * from './error_schema.gen';
 export * from './pagination.gen';
 export * from './schemas';
+export * from './set_alert_assignees_body.gen';
+export * from './set_alert_tags_body.gen';
 export * from './sorting.gen';
 export * from './warning_schema.gen';

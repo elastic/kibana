@@ -23,6 +23,7 @@ import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachm
 import type { AddToExistingCaseModalProps } from './use_cases_add_to_existing_case_modal';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
 
 jest.mock('../../../analytics/use_attach_events_ebt');
@@ -60,6 +61,7 @@ const useBulkPostObservablesMock = useBulkPostObservables as jest.Mock;
 
 const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
 const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
 
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
@@ -78,12 +80,13 @@ describe('use cases add to existing case modal hook', () => {
         value={{
           externalReferenceAttachmentTypeRegistry,
           persistableStateAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
           owner: ['test'],
           permissions: allCasesPermissions(),
           basePath: '/jest',
           dispatch,
           features: {
-            alerts: { sync: true, enabled: true, isExperimental: false },
+            alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
             metrics: [],
             observables: { enabled: true, autoExtract: true },
             events: { enabled: true },

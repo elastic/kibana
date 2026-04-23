@@ -1,0 +1,20 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          deleteAgentResponseExample:
+            description: "Example response showing that the deletion operation was successful"
+            value:
+              success: true
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X DELETE "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true"
+- lang: Console
+  source: |
+    DELETE kbn:/api/agent_builder/tools/{toolId}

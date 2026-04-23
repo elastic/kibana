@@ -83,8 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/227730
-  describe.skip('Serverless Query Rules Overview', function () {
+  describe('Serverless Query Rules Overview', function () {
     before(async () => {
       try {
         await deleteTestRuleset('my-test-ruleset');
@@ -96,9 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await pageObjects.svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'searchQueryRules',
-      });
+      await pageObjects.common.navigateToApp('searchQueryRules');
     });
 
     describe('Creating a query ruleset from an empty deployment', () => {
@@ -128,7 +125,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           0,
           'my_query_field'
         );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.expectUpdateButtonIsEnabled();
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickUpdateButton();
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.expectRuleFlyoutNotToExist();
+        // expect flyout to be closed
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
@@ -143,9 +143,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Adding a new ruleset in a non-empty deployment', () => {
       before(async () => {
-        await pageObjects.svlCommonNavigation.sidenav.clickLink({
-          deepLinkId: 'searchQueryRules',
-        });
+        await pageObjects.common.navigateToApp('searchQueryRules');
       });
       it('should be able to create a new ruleset on top of an existing one', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();

@@ -66,6 +66,9 @@ const taskSchema = schema.object({
     state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
     id: schema.maybe(schema.string()),
     timeoutOverride: schema.maybe(schema.string()),
+    cost: schema.maybe(
+      schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
+    ),
   }),
 });
 
@@ -215,6 +218,7 @@ export function initRoutes(
               }),
             }),
           ]),
+          regenerateApiKey: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -224,10 +228,11 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const taskManager = await taskManagerStart;
-      const { taskIds, schedule } = req.body;
+      const { taskIds, schedule, regenerateApiKey } = req.body;
 
       const taskResult = await taskManager.bulkUpdateSchedules(taskIds, schedule, {
         request: req,
+        regenerateApiKey,
       });
 
       return res.ok({ body: taskResult });

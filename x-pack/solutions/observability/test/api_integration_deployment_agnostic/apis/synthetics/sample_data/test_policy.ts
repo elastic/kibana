@@ -7,7 +7,7 @@
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
 import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
-import { INSTALLED_VERSION } from '../../../services/synthetics_private_location';
+import { DEFAULT_SYNTHETICS_VERSION } from '../../../services/synthetics_private_location';
 import { commonVars } from './test_project_monitor_policy';
 
 interface PolicyProps {
@@ -22,17 +22,22 @@ interface PolicyProps {
   params?: Record<string, any>;
   isBrowser?: boolean;
   spaceId?: string;
+  kibanaUrl?: string;
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
-  const { namespace } = props;
+  const { namespace, spaceId } = props;
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
-    spaceIds: ['default'],
-    package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+    spaceIds: [spaceId ?? 'default'],
+    package: {
+      name: 'synthetics',
+      title: 'Elastic Synthetics',
+      version: DEFAULT_SYNTHETICS_VERSION,
+    },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
     policy_ids: ['5347cd10-0368-11ed-8df7-a7424c6f5167'],
@@ -134,6 +139,7 @@ export const getHttpInput = ({
   isBrowser,
   spaceId,
   namespace,
+  kibanaUrl,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
   const enabled = !isBrowser;
@@ -201,9 +207,12 @@ export const getHttpInput = ({
             fields: {
               'monitor.fleet_managed': true,
               config_id: id,
+              ...(projectId
+                ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
+                : {}),
+              'monitor.interval': 300,
               meta: { space_id: spaceId ?? 'default' },
-              'monitor.project.name': projectId,
-              'monitor.project.id': projectId,
+              ...(kibanaUrl ? { kibanaUrl } : {}),
             },
             target: '',
           },
@@ -301,14 +310,16 @@ export const getHttpInput = ({
       {
         add_fields: {
           fields: {
+            'monitor.fleet_managed': true,
             config_id: id,
+            ...(projectId
+              ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
+              : {}),
+            'monitor.interval': 300,
             meta: {
               space_id: spaceId ?? 'default',
             },
-            'monitor.fleet_managed': true,
-            ...(projectId
-              ? { 'monitor.project.id': projectId, 'monitor.project.name': projectId }
-              : {}),
+            ...(kibanaUrl ? { kibanaUrl } : {}),
           },
           target: '',
         },
@@ -360,7 +371,7 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
         'run_from.geo.name': 'Test private location 0',
         enabled: true,
         schedule: '@every 3m',
-        timeout: '16s',
+        timeout: '30s',
         throttling: { download: 5, upload: 3, latency: 20 },
         tags: ['cookie-test', 'browser'],
         'source.inline.script':
@@ -404,7 +415,7 @@ export const getBrowserInput = ({ id, params, isBrowser, projectId }: PolicyProp
         name: { value: 'Test HTTP Monitor 03', type: 'text' },
         schedule: { value: '"@every 3m"', type: 'text' },
         'service.name': { value: '', type: 'text' },
-        timeout: { value: '16s', type: 'text' },
+        timeout: { value: '30s', type: 'text' },
         tags: { value: '["cookie-test","browser"]', type: 'yaml' },
         'source.zip_url.url': { type: 'text' },
         'source.zip_url.username': { type: 'text' },

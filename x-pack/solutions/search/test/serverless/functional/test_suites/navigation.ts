@@ -75,11 +75,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'dashboardLandingPage',
         },
         {
-          link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Playground'],
-          pageTestSubject: 'playgroundsListPage',
-        },
-        {
           link: { deepLinkId: 'searchGettingStarted' },
           breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
@@ -161,11 +156,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'agent_builder',
           'discover',
           'dashboards',
-          'searchPlayground',
           'machine_learning',
           // footer:
           'search_getting_started',
           'dev_tools',
+          'workflows',
           'data_management',
           'admin_and_settings',
         ],
@@ -176,16 +171,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     it('does not show cloud connect in sidebar navigation', async () => {
       // Cloud Connect should NOT appear in serverless deployments
       expect(await testSubjects.missingOrFail('cloud_connect'));
-    });
-
-    it('renders a feedback callout', async function () {
-      await solutionNavigation.sidenav.feedbackCallout.reset();
-      await solutionNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
-      await solutionNavigation.sidenav.feedbackCallout.expectExists();
-      await solutionNavigation.sidenav.feedbackCallout.dismiss();
-      await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-      await browser.refresh();
-      await solutionNavigation.sidenav.feedbackCallout.expectMissing();
     });
 
     it('opens panel on legacy management landing page', async () => {

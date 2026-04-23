@@ -103,6 +103,51 @@ describe('useLensAttributes', () => {
     ]);
   });
 
+  it('skips host.name exists tab filter when entityStoreV2Enabled extraOption is set', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          extraOptions: { entityStoreV2Enabled: true },
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes(params).state.filters,
+      ...getDetailsPageFilter('hosts', 'mockHost'),
+      ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
+    ]);
+  });
+
+  it('skips user.name exists tab filter when entityStoreV2Enabled on users page', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: 'elastic',
+        pageName: SecurityPageName.users,
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          extraOptions: { entityStoreV2Enabled: true },
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes(params).state.filters,
+      ...getDetailsPageFilter(SecurityPageName.users, 'elastic'),
+      ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
+    ]);
+  });
+
   it('should add correct filters - network details', () => {
     (useRouteSpy as jest.Mock).mockReturnValue([
       {
@@ -268,7 +313,7 @@ describe('useLensAttributes', () => {
     ]);
   });
 
-  it('should not set splitAccessor if stackByField is undefined', () => {
+  it('should not set splitAccessors if stackByField is undefined', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -281,7 +326,7 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state?.visualization).toEqual(
       expect.objectContaining({
         layers: expect.arrayContaining([
-          expect.objectContaining({ seriesType: 'bar_stacked', splitAccessor: undefined }),
+          expect.objectContaining({ seriesType: 'bar_stacked', splitAccessors: undefined }),
         ]),
       })
     );

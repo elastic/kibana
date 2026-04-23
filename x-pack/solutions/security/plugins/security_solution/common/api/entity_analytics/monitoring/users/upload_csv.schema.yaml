@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: PrivmonBulkUploadUsersCSV
       summary: Upsert multiple monitored users via CSV upload
+      description: Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
       requestBody:
         content:
           multipart/form-data:
@@ -35,9 +36,10 @@ paths:
                       username: "john.doe"
                       index: 1
                   stats:
-                    successful: 1
-                    failed: 1
-                    total: 2
+                    successfulOperations: 1
+                    uploaded: 1
+                    failedOperations: 1
+                    totalOperations: 2
                 properties:
                   errors:
                     type: array
@@ -72,13 +74,16 @@ components:
     PrivmonUserCsvUploadStats:
       type: object
       properties:
-        successful:
+        successfulOperations:
           type: integer
-        failed:
+        uploaded:
           type: integer
-        total:
+        failedOperations:
+          type: integer
+        totalOperations:
           type: integer
       required:
-        - successful
-        - failed
-        - total
+        - successfulOperations
+        - uploaded
+        - failedOperations
+        - totalOperations

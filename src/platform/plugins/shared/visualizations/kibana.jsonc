@@ -26,6 +26,7 @@
       "dataViews",
       "dataViewEditor",
       "unifiedSearch",
+      "kql",
       "usageCollection",
       "savedObjectsFinder",
       "savedObjectsManagement",
@@ -39,7 +40,7 @@
       "savedObjectsTaggingOss",
       "serverless",
       "noDataPage",
-      "embeddableEnhanced"
+      "cps"
     ],
     "requiredBundles": [
       "kibanaUtils",

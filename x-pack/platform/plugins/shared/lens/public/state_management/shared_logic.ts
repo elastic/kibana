@@ -11,16 +11,17 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type {
-  VisualizationState,
-  DatasourceStates,
-  DatasourceMap,
-  VisualizationMap,
-  Datasource,
-  LensDocument,
+import {
+  type VisualizationState,
+  type DatasourceStates,
+  type DatasourceMap,
+  type VisualizationMap,
+  type Datasource,
+  type LensDocument,
+  type Visualization,
 } from '@kbn/lens-common';
-import { DOC_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
-import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { INDEX_PATTERN_TYPE } from '../../common/constants';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(
@@ -121,7 +122,6 @@ export function mergeToNewDoc(
     title: persistedDoc?.title || '',
     description: persistedDoc?.description,
     visualizationType: visualization.activeId!,
-    type: DOC_TYPE,
     references,
     state: {
       visualization: persistibleVisualizationState,
@@ -133,6 +133,25 @@ export function mergeToNewDoc(
     },
     version: LENS_ITEM_LATEST_VERSION,
   } satisfies LensDocument;
+}
+
+/**
+ * Converts runtime visualization state to its persisted (storage-ready) format
+ * by delegating to the visualization's `getPersistableState` method.
+ *
+ * This is the same conversion that `mergeToNewDoc` performs for the full editor
+ * save path — extracted here so the inline editor's `saveByRef` can reuse it.
+ */
+export function serializeVisualizationToSave<T extends { state: { visualization: unknown } }>(
+  attrs: T,
+  visualization: Pick<Visualization, 'getPersistableState'>
+): T {
+  if (!visualization.getPersistableState) return attrs;
+  const { state: persistedVizState } = visualization.getPersistableState(attrs.state.visualization);
+  return {
+    ...attrs,
+    state: { ...attrs.state, visualization: persistedVizState },
+  };
 }
 
 export function getActiveDataFromDatatable(

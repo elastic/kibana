@@ -164,6 +164,7 @@ export class SharePlugin
         taskManager,
         checkInterval: this.config.url_expiration.check_interval,
         isEnabled: this.config.url_expiration.enabled,
+        logger: this.logger,
       });
     }
 

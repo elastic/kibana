@@ -23,6 +23,7 @@
       "usageCollection",
       "sampleDataIngest",
       "dataViews",
+      "agentBuilder",
     ],
     "requiredBundles": [
       "kibanaReact"

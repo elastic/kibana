@@ -14,13 +14,14 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper, EuiFieldTextWrapper } from '@kbn/scout-oblt';
+import { waitForApmMainContainer } from '../page_helpers';
 
 export class AgentConfigurationsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/agent-configuration`);
-    await this.page.testSubj.waitForSelector('apmMainContainer');
+    await waitForApmMainContainer(this.page);
 
     // Wait for the page content to load
     await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
@@ -44,15 +45,9 @@ export class AgentConfigurationsPage {
   }
 
   async hasPermissionsError() {
-    try {
-      this.page.getByRole('heading', { name: 'Configurations', exact: true });
-
-      return await this.page
-        .getByText('Your user may not have the sufficient permissions')
-        .isVisible();
-    } catch {
-      return false;
-    }
+    return await this.page
+      .getByText('Your user may not have the sufficient permissions')
+      .isVisible({ timeout: 2500 });
   }
 
   async clickCreateConfiguration() {

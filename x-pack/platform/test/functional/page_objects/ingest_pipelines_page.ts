@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import path from 'path';
+import * as path from 'path';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -86,6 +86,27 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await links.at(index)?.click();
     },
 
+    async waitForPipelineInList(pipelineName: string) {
+      await retry.waitFor(`pipeline "${pipelineName}" to appear in list`, async () => {
+        const pipelines = await this.getPipelinesList();
+        return pipelines.includes(pipelineName);
+      });
+    },
+
+    async openPipelineDetailsByName(pipelineName: string) {
+      await this.searchPipelineList(pipelineName);
+      await this.waitForPipelineInList(pipelineName);
+
+      const pipelines = await this.getPipelinesList();
+      const index = pipelines.indexOf(pipelineName);
+      if (index < 0) {
+        throw new Error(`Expected pipeline "${pipelineName}" to be present in list`);
+      }
+
+      await this.clickPipelineLink(index);
+      await this.waitForDetailsFlyoutTitle(pipelineName);
+    },
+
     async createPipelineFromCsv({ name }: { name: string }) {
       await pageObjects.common.sleep(250);
       await testSubjects.click('createPipelineDropdown');
@@ -115,6 +136,13 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
     async getDetailsFlyoutTitle() {
       return await testSubjects.getVisibleText('detailsPanelTitle');
+    },
+
+    async waitForDetailsFlyoutTitle(expectedTitle: string) {
+      await retry.waitFor(`details flyout title to be "${expectedTitle}"`, async () => {
+        const title = await testSubjects.getVisibleText('detailsPanelTitle');
+        return title === expectedTitle;
+      });
     },
 
     async pipelineTreeExists() {

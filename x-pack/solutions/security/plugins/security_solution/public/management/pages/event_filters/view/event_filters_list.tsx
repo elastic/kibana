@@ -13,7 +13,7 @@ import { EuiLink } from '@elastic/eui';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
-import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageLabels } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
@@ -50,7 +50,7 @@ export const RULE_NAME = i18n.translate('xpack.securitySolution.eventFilter.form
   defaultMessage: 'Endpoint Event Filtering',
 });
 
-const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.eventFilters.pageTitle', {
     defaultMessage: 'Event Filters',
   }),
@@ -61,6 +61,36 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.eventFilters.pageAddButtonTitle', {
     defaultMessage: 'Add event filter',
   }),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import event filters',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export event filters',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.exportSuccessToastTitle',
+    {
+      defaultMessage: 'Event filters exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.exportErrorToastTitle',
+    {
+      defaultMessage: 'Event filters export failed',
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'You can only import event filters here.',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.eventFilters.showingTotal', {
       defaultMessage: 'Showing {total} {total, plural, one {event filter} other {event filters}}',
@@ -134,6 +164,10 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.eventFilters.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add event filter' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.eventFilters.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import event filters' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.eventFilters.searchPlaceholderInfo',

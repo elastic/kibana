@@ -35,6 +35,7 @@ import {
   getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type {
   BulkEditActions,
   Pagination,
@@ -71,10 +72,8 @@ import { runRule } from '../../../lib/run_rule';
 import { ALERT_STATUS_LICENSE_ERROR, getConfirmDeletionModalWarningText } from '../translations';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
-import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
-import { RulesListDocLink } from './rules_list_doc_link';
 import { RulesListPrompts } from './rules_list_prompts';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 
@@ -84,7 +83,6 @@ import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
 
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import {
@@ -119,9 +117,9 @@ export interface RulesListProps {
   onStatusFilterChange?: (status: RuleStatus[]) => void;
   onTypeFilterChange?: (type: string[]) => void;
   onRefresh?: (refresh: Date) => void;
-  setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   navigateToEditRuleForm?: (ruleId: string) => void;
+  navigateToCreateRuleForm?: (ruleTypeId: string) => void;
 }
 
 export const percentileFields = {
@@ -162,25 +160,28 @@ export const RulesList = ({
   onStatusFilterChange,
   onTypeFilterChange,
   onRefresh,
-  setHeaderActions,
   navigateToEditRuleForm,
+  navigateToCreateRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
-    application: { capabilities, navigateToApp },
+    application,
     http,
+    cps,
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
     ...startServices
   } = kibanaServices;
 
+  const { capabilities, navigateToApp } = application;
+
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.DISABLED, { application, cps });
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>(searchFilter);
 
   const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
@@ -246,6 +247,8 @@ export const RulesList = ({
       searchFilter,
       typeFilter,
     });
+
+  const [inputText, setInputText] = useState<string>(filters.searchText ?? searchFilter ?? '');
 
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
@@ -447,7 +450,11 @@ export const RulesList = ({
   }, [ruleParamFilter]);
 
   useEffect(() => {
-    if (typeof searchFilter === 'string') {
+    if (
+      typeof searchFilter === 'string' &&
+      searchFilter !== filters.searchText &&
+      searchFilter.trim() !== ''
+    ) {
       updateFilters({ filter: 'searchText', value: searchFilter });
     }
   }, [searchFilter]);
@@ -662,20 +669,6 @@ export const RulesList = ({
 
   const openRuleTypeModal = useCallback(() => {
     setRuleTypeModalVisibility(true);
-  }, []);
-
-  useEffect(() => {
-    setHeaderActions?.([
-      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-      <RulesSettingsLink
-        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-      />,
-      <RulesListDocLink />,
-    ]);
-  }, [authorizedToCreateAnyRules]);
-
-  useEffect(() => {
-    return () => setHeaderActions?.();
   }, []);
 
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
@@ -958,7 +951,9 @@ export const RulesList = ({
                   <EuiButtonIcon
                     onClick={() => toggleErrorMessage(_executionStatus, rule)}
                     aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-                    iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
+                    iconType={
+                      itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
+                    }
                   />
                 ) : null;
               }}
@@ -1019,11 +1014,17 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
-              });
+              if (navigateToCreateRuleForm) {
+                navigateToCreateRuleForm(ruleTypeId);
+              } else {
+                navigateToApp('management', {
+                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                });
+              }
             }}
             onSelectTemplate={(templateId) => {
+              // For templates, we need to extract the ruleTypeId or handle it differently
+              // For now, fall back to default behavior
               navigateToApp('management', {
                 path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
                   encodeURIComponent(templateId)
@@ -1034,6 +1035,7 @@ export const RulesList = ({
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
+            cps={cps}
           />
         )}
       </EuiPageTemplate.Section>

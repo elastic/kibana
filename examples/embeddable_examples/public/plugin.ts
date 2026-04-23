@@ -17,11 +17,12 @@ import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/publ
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { setupApp } from './app/setup_app';
 import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
@@ -50,6 +51,7 @@ export interface StartDeps {
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -61,7 +63,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     const startServicesPromise = core.getStartServices();
 
-    embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
+    embeddable.registerEmbeddablePublicDefinition(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
         './react_embeddables/field_list/field_list_embeddable'
       );
@@ -69,7 +71,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return getFieldListFactory(coreStart, deps);
     });
 
-    embeddable.registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
+    embeddable.registerEmbeddablePublicDefinition(DATA_TABLE_ID, async () => {
       const { getDataTableFactory } = await import(
         './react_embeddables/data_table/data_table_react_embeddable'
       );
@@ -95,7 +97,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return createFieldListAction;
     });
 
-    registerFieldListPanelPlacementSetting(deps.dashboard);
+    registerFieldListPanelPlacementSetting(deps.presentationUtil);
     registerSearchPanelAction(deps.uiActions);
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
       const { createDataTableAction } = await import(

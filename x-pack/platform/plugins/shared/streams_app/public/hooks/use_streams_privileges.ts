@@ -7,49 +7,22 @@
 
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
 
-export interface StreamsFeatures {
-  ui?: {
-    enabled: boolean;
-  };
-  significantEvents?: {
-    available: boolean;
-    enabled: boolean;
-  };
-  significantEventsDiscovery?: {
-    available: boolean;
-    enabled: boolean;
-  };
-  groupStreams?: {
-    enabled: boolean;
-  };
-  contentPacks?: {
-    enabled: boolean;
-  };
-  attachments?: {
-    enabled: boolean;
-  };
-}
+export type StreamsPrivileges = ReturnType<typeof useStreamsPrivileges>;
+export type StreamsFeatures = StreamsPrivileges['features'];
 
-export interface StreamsPrivileges {
-  ui: {
-    manage: boolean;
-    show: boolean;
-  };
-  features: StreamsFeatures;
-  isLoading?: boolean;
-}
-
-export function useStreamsPrivileges(): StreamsPrivileges {
+export function useStreamsPrivileges() {
   const {
     core: {
       pricing,
@@ -65,7 +38,7 @@ export function useStreamsPrivileges(): StreamsPrivileges {
 
   const license = useObservable(licensing.license$);
 
-  const groupStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS, false);
+  const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
 
   const significantEventsEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
@@ -84,6 +57,13 @@ export function useStreamsPrivileges(): StreamsPrivileges {
 
   const attachmentsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS, false);
 
+  const wiredStreamViewsEnabled = uiSettings.get(
+    OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+    false
+  );
+
+  const overviewPageEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE, false);
+
   return {
     ui: streams as {
       [STREAMS_UI_PRIVILEGES.manage]: boolean;
@@ -101,14 +81,20 @@ export function useStreamsPrivileges(): StreamsPrivileges {
         enabled: significantEventsDiscoveryEnabled,
         available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
       },
-      groupStreams: {
-        enabled: groupStreamsEnabled,
+      queryStreams: {
+        enabled: queryStreamsEnabled,
       },
       contentPacks: {
         enabled: contentPacksEnabled,
       },
       attachments: {
         enabled: attachmentsEnabled,
+      },
+      wiredStreamViews: {
+        enabled: wiredStreamViewsEnabled,
+      },
+      overviewPage: {
+        enabled: overviewPageEnabled,
       },
     },
     isLoading: !license,

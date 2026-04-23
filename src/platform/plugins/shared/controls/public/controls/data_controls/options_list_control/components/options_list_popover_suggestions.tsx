@@ -8,19 +8,22 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiHighlight, EuiSelectable, useEuiTheme } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-
 import { css } from '@emotion/react';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '@kbn/controls-constants';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
+
 import type { OptionsListSuggestions } from '../../../../../common/options_list/types';
-import type { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
-import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
+import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
+import type { DSLOptionsListComponentApi } from '../types';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 
@@ -33,49 +36,58 @@ export const OptionsListPopoverSuggestions = ({
 }: OptionsListPopoverSuggestionsProps) => {
   const {
     componentApi,
-    displaySettings: { hideExists },
+    displaySettings: { hide_exists },
   } = useOptionsListContext();
 
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(optionListPopoverSuggestionsStyles);
 
+  const conditionalApiSubjects: [
+    PublishingSubject<boolean>,
+    DSLOptionsListComponentApi['sort$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>
+  ] = useMemo(() => {
+    const isDSLControl = isDSLOptionsListApi(componentApi);
+    return [
+      isDSLControl ? componentApi.existsSelected$ : new BehaviorSubject(false),
+      isDSLControl ? componentApi.sort$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.fieldFormatter : new BehaviorSubject(undefined),
+    ];
+  }, [componentApi]);
+
   const [
-    sort,
-    searchString,
-    existsSelected,
-    searchTechnique,
-    selectedOptions,
-    fieldName,
-    invalidSelections,
     availableOptions,
-    totalCardinality,
     loading,
+    selectedOptions,
+    totalCardinality,
+    label,
+    searchString,
+    searchTechnique,
+    invalidSelections,
+    existsSelected,
+    sort,
     fieldFormatter,
-    allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
-    componentApi.sort$,
-    componentApi.searchString$,
-    componentApi.existsSelected$,
-    componentApi.searchTechnique$,
-    componentApi.selectedOptions$,
-    componentApi.fieldName$,
-    componentApi.invalidSelections$,
     componentApi.availableOptions$,
-    componentApi.totalCardinality$,
     componentApi.dataLoading$,
-    componentApi.fieldFormatter,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.selectedOptions$,
+    componentApi.totalCardinality$,
+    componentApi.label$,
+    componentApi.searchString$,
+    componentApi.searchTechnique$,
+    componentApi.invalidSelections$,
+    ...conditionalApiSubjects
   );
 
   const listRef = useRef<HTMLDivElement>(null);
 
   const canLoadMoreSuggestions = useMemo<boolean>(
     () =>
-      allowExpensiveQueries && totalCardinality && !showOnlySelected // && searchString.valid
+      totalCardinality && !showOnlySelected
         ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
-    [availableOptions, totalCardinality, showOnlySelected, allowExpensiveQueries]
+    [availableOptions, totalCardinality, showOnlySelected]
   );
 
   const suggestions = useMemo<OptionsListSuggestions | OptionsListSelection[]>(() => {
@@ -83,7 +95,7 @@ export const OptionsListPopoverSuggestions = ({
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
-    if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
+    if (hide_exists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
 
     return {
       key: 'exists-option',
@@ -92,7 +104,7 @@ export const OptionsListPopoverSuggestions = ({
       css: styles.optionsListExistsFilter,
       'data-test-subj': 'optionsList-control-selection-exists',
     };
-  }, [suggestions, existsSelected, showOnlySelected, hideExists, styles]);
+  }, [suggestions, existsSelected, showOnlySelected, hide_exists, styles]);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -105,11 +117,11 @@ export const OptionsListPopoverSuggestions = ({
 
       return {
         key: String(suggestion.value),
-        label: String(fieldFormatter(suggestion.value) ?? suggestion.value),
-        checked: (selectedOptions ?? []).includes(suggestion.value) ? 'on' : undefined,
+        label: String(fieldFormatter?.(suggestion.value) ?? suggestion.value),
+        checked: (selectedOptions ?? []).includes(suggestion.value as string) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
-          showOnlySelected && invalidSelections.has(suggestion.value)
+          showOnlySelected && invalidSelections?.has(suggestion.value as string)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:
@@ -149,6 +161,8 @@ export const OptionsListPopoverSuggestions = ({
   ]);
 
   const loadMoreOptions = useCallback(() => {
+    if (!isDSLOptionsListApi(componentApi)) return; // only DSL controls have "load more" behaviour
+
     const listbox = listRef.current?.querySelector('.euiSelectableList__list');
     if (!listbox) return;
 
@@ -162,16 +176,16 @@ export const OptionsListPopoverSuggestions = ({
   }, [componentApi, euiTheme.size.xxl, totalCardinality]);
 
   const renderOption = useCallback(
-    (option: EuiSelectableOption, searchStringValue: string) => {
-      if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
+    (option: EuiSelectableOption, searchStringValue?: string) => {
+      if (searchTechnique === 'exact') return option.label;
 
       return (
-        <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
+        <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue ?? ''}>
           {option.label}
         </EuiHighlight>
       );
     },
-    [searchTechnique, allowExpensiveQueries]
+    [searchTechnique]
   );
 
   useEffect(() => {
@@ -198,7 +212,7 @@ export const OptionsListPopoverSuggestions = ({
           renderOption={(option) => renderOption(option, searchString)}
           listProps={{ onFocusBadge: false }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
-            fieldName,
+            label,
             selectableOptions.length
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}

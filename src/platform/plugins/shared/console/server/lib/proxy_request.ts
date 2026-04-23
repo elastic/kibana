@@ -22,21 +22,12 @@ interface Args {
   payload: stream.Stream;
   timeout: number;
   headers: http.OutgoingHttpHeaders;
-  rejectUnauthorized?: boolean;
 }
 
 // We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
 // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
 // diverged too much from current behaviour.
-export const proxyRequest = ({
-  method,
-  headers,
-  agent,
-  uri,
-  timeout,
-  payload,
-  rejectUnauthorized,
-}: Args) => {
+export const proxyRequest = ({ method, headers, agent, uri, timeout, payload }: Args) => {
   const { hostname, port, protocol, search, pathname } = uri;
   const client = uri.protocol === 'https:' ? https : http;
 
@@ -58,8 +49,6 @@ export const proxyRequest = ({
   const parsedPort = port === '' ? undefined : parseInt(port, 10);
   const req = client.request({
     method: method.toUpperCase(),
-    // We support overriding this on a per request basis to support legacy proxy config. See ./proxy_config.
-    rejectUnauthorized: typeof rejectUnauthorized === 'boolean' ? rejectUnauthorized : undefined,
     host: sanitizeHostname(hostname),
     port: parsedPort,
     protocol,

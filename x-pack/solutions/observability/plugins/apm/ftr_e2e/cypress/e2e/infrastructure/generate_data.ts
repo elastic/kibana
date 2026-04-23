@@ -34,7 +34,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
         .transaction({ transactionName: 'GET /apple 🍎' })
         .defaults({
           'container.id': 'foo',
-          'host.hostname': 'bar',
+          'host.name': 'bar',
           'kubernetes.pod.name': 'baz',
         })
         .timestamp(timestamp)
@@ -43,13 +43,16 @@ export function generateData({ from, to }: { from: number; to: number }) {
       serviceInstance
         .transaction({ transactionName: 'GET /banana 🍌' })
         .defaults({
-          'host.hostname': 'bar',
+          'host.name': 'bar',
         })
         .timestamp(timestamp)
         .duration(1000)
         .success(),
       serviceNoInfraDataInstance
         .transaction({ transactionName: 'GET /banana 🍌' })
+        .overrides({
+          'host.name': undefined,
+        })
         .timestamp(timestamp)
         .duration(1000)
         .success(),

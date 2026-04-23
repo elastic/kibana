@@ -6,20 +6,19 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
-      "@testing-library/jest-dom",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../../../../../../typings/**/*",
+    "../../../../../../typings/**/*"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
+    "@kbn/i18n"
   ]
 }

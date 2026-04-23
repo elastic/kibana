@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
+import {
+  type PresentationUtilPluginStart,
+  PanelPlacementStrategy,
+} from '@kbn/presentation-util-plugin/public';
 import { FIELD_LIST_ID } from './constants';
 
 const getPanelSettings = () => ({
@@ -24,6 +26,8 @@ const getPanelSettings = () => ({
   },
 });
 
-export function registerFieldListPanelPlacementSetting(dashboard: DashboardStart) {
-  dashboard.registerDashboardPanelSettings(FIELD_LIST_ID, getPanelSettings);
+export function registerFieldListPanelPlacementSetting(
+  presentationUtil: PresentationUtilPluginStart
+) {
+  presentationUtil.registerPanelPlacementSettings(FIELD_LIST_ID, getPanelSettings);
 }

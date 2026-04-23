@@ -60,6 +60,7 @@ export function getDefaultStepCreateState(): StepDetailsExposedState {
 
 export interface StepCreateFormProps {
   createDataView: boolean;
+  deferValidation?: boolean;
   transformId: string;
   transformConfig: PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema;
   overrides: StepDetailsExposedState;
@@ -68,7 +69,15 @@ export interface StepCreateFormProps {
 }
 
 export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
-  ({ createDataView, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
+  ({
+    createDataView,
+    deferValidation,
+    transformConfig,
+    transformId,
+    onChange,
+    overrides,
+    timeFieldName,
+  }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
     const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
@@ -124,7 +133,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       setLoading(true);
 
       createTransform(
-        { transformId, transformConfig, createDataView, timeFieldName },
+        { transformId, transformConfig, createDataView, timeFieldName, deferValidation },
         {
           onError: () => setCreated(false),
           onSuccess: (resp) => {
@@ -384,7 +393,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               <EuiFlexGroup gutterSize="l">
                 <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                   <EuiCard
-                    icon={<EuiIcon size="xxl" type="list" />}
+                    icon={<EuiIcon size="xxl" type="listBullet" />}
                     title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
                       defaultMessage: 'Transforms',
                     })}

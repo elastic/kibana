@@ -14,7 +14,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, common } = getPageObjects(['dashboard', 'timePicker', 'common']);
+  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker', 'common']);
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -45,39 +45,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboard.waitForRenderComplete();
+      const panelCountBefore = await dashboard.getPanelCount();
 
       await retry.try(async () => {
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
       });
 
-      await esql.waitESQLEditorLoaded('InlineEditingESQLEditor');
+      await esql.waitESQLEditorLoaded('kibanaCodeEditor');
 
-      await retry.waitFor('control flyout to open', async () => {
-        await esql.typeEsqlEditorQuery(
-          'FROM logstash* | STATS COUNT(*) BY BUCKET(@timestamp, )',
-          'InlineEditingESQLEditor'
-        );
-        await browser.pressKeys(browser.keys.ARROW_LEFT);
-        await browser.pressKeys(browser.keys.SPACE);
-        // Wait until suggestions are loaded
-        await common.sleep(1000);
-        // Create control is the first suggestion
-        await browser.pressKeys(browser.keys.ENTER);
+      await esql.typeEsqlEditorQuery(
+        'FROM logstash* | STATS COUNT(*) BY BUCKET(@timestamp, )',
+        'kibanaCodeEditor'
+      );
 
-        return await testSubjects.exists('create_esql_control_flyout');
-      });
+      // Interval control uses a different typing flow (cursor moved
+      // inside BUCKET argument), so we need to trigger autocomplete
+      // deterministically instead of relying on default behavior
+      await browser.pressKeys(browser.keys.ARROW_LEFT);
+      await browser.pressKeys(browser.keys.SPACE);
+      // select the "Create control" suggestion
+      await esql.selectEsqlSuggestionByLabel('Create control');
+
+      await testSubjects.existOrFail('create_esql_control_flyout');
 
       await comboBox.set('esqlValuesOptions', '1 hour');
       await comboBox.set('esqlValuesOptions', '1 day');
 
+      await testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       // create the control
       await testSubjects.click('saveEsqlControlsFlyoutButton');
       await dashboard.waitForRenderComplete();
-
       await retry.try(async () => {
-        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
-        expect(controlGroupVisible).to.be(true);
+        expect(await dashboard.getPanelCount()).to.be(panelCountBefore + 1);
       });
 
       // Check Lens editor has been updated accordingly

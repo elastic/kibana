@@ -81,13 +81,23 @@ describe('JsonEditorInput', () => {
     );
   });
 
-  it('calls the onInputChange prop when the object value changes with no value', async () => {
+  it('normalizes empty string to empty object when object default is cleared', async () => {
     const { getByTestId } = render(wrap(<CodeEditorInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: '' } });
 
     await waitFor(() =>
-      expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '' })
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '{}' })
+    );
+  });
+
+  it('normalizes whitespace-only string to empty object when object default is cleared', async () => {
+    const { getByTestId } = render(wrap(<CodeEditorInput {...defaultProps} />));
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
+    fireEvent.change(input, { target: { value: '   ' } });
+
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '{}' })
     );
   });
 
@@ -120,7 +130,7 @@ describe('JsonEditorInput', () => {
     );
   });
 
-  it('calls the onInputChange prop when the array value changes with no value', async () => {
+  it('normalizes empty string to empty array when array default is cleared', async () => {
     const props = {
       ...defaultProps,
       defaultValue: '["bar", "foo"]',
@@ -131,7 +141,22 @@ describe('JsonEditorInput', () => {
     fireEvent.change(input, { target: { value: '' } });
 
     await waitFor(() =>
-      expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '' })
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '[]' })
+    );
+  });
+
+  it('normalizes whitespace-only string to empty array when array default is cleared', async () => {
+    const props = {
+      ...defaultProps,
+      defaultValue: '["bar", "foo"]',
+      value: '["bar", "foo"]',
+    };
+    const { getByTestId } = render(wrap(<CodeEditorInput {...props} />));
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
+    fireEvent.change(input, { target: { value: '\t\n  ' } });
+
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '[]' })
     );
   });
 

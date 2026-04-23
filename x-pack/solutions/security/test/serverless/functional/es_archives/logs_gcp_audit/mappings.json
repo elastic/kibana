@@ -263,6 +263,22 @@
                 }
               }
             },
+            "entity": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "target": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
             "data_stream": {
               "properties": {
                 "dataset": {
@@ -578,6 +594,10 @@
                 "containerized": {
                   "type": "boolean"
                 },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "os": {
                   "properties": {
                     "build": {
@@ -585,6 +605,14 @@
                       "type": "keyword"
                     },
                     "codename": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "target": {
+                  "properties": {
+                    "id": {
                       "ignore_above": 1024,
                       "type": "keyword"
                     }
@@ -604,6 +632,66 @@
               "properties": {
                 "offset": {
                   "type": "long"
+                }
+              }
+            },
+            "service": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "target": {
+                  "properties": {
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "target": {
+              "properties": {
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "user": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "target": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "email": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             }

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -38,7 +38,7 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
           onSave: (imageConfig: ImageConfig) => {
             parentApi.addNewPanel<ImageEmbeddableState>({
               panelType: IMAGE_EMBEDDABLE_TYPE,
-              serializedState: { rawState: { imageConfig } },
+              serializedState: { image_config: imageConfig },
             });
           },
         });

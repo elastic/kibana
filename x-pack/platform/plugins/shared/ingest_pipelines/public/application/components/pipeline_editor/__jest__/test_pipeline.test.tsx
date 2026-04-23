@@ -9,8 +9,8 @@ import type { Pipeline } from '../../../../../common/types';
 import { API_BASE_PATH } from '../../../../../common/constants';
 
 import type { VerboseTestOutput, Document } from '../types';
-import type { SetupResult } from './test_pipeline.helpers';
-import { setup, setupEnvironment } from './test_pipeline.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderTestPipeline, setupEnvironment } from './test_pipeline.helpers';
 import { DOCUMENTS, SIMULATE_RESPONSE, PROCESSORS } from './constants';
 
 interface ReqBody {
@@ -19,11 +19,19 @@ interface ReqBody {
   pipeline: Pick<Pipeline, 'processors' | 'on_failure'>;
 }
 
+const hasStringBody = (value: unknown): value is { body: string } => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'body' in value &&
+    typeof (value as { body?: unknown }).body === 'string'
+  );
+};
+
 describe('Test pipeline', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   // This is a hack
   // We need to provide the processor id in the mocked output;
@@ -31,11 +39,9 @@ describe('Test pipeline', () => {
   // As a workaround, the value is added as a data attribute in the UI
   // and we retrieve it to generate the mocked output.
   const addProcessorTagtoMockOutput = (output: VerboseTestOutput) => {
-    const { find } = testBed;
-
     const docs = output.docs.map((doc) => {
       const results = doc.processor_results.map((result, index) => {
-        const tag = find(`processors>${index}`).props()['data-processor-id'];
+        const tag = screen.getByTestId(`processors>${index}`).getAttribute('data-processor-id');
         return {
           ...result,
           tag,
@@ -46,17 +52,12 @@ describe('Test pipeline', () => {
     return { docs };
   };
 
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(async () => {
+    jest.clearAllMocks();
     onUpdate = jest.fn();
-    testBed = await setup(httpSetup, {
+
+    ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
+    renderTestPipeline(httpSetup, {
       value: {
         ...PROCESSORS,
       },
@@ -67,29 +68,39 @@ describe('Test pipeline', () => {
 
   describe('Test pipeline actions', () => {
     it('should successfully add sample documents and execute the pipeline', async () => {
-      const { actions, exists } = testBed;
+      const postMock = jest.mocked(httpSetup.post);
 
       httpRequestsMockHelpers.setSimulatePipelineResponse(SIMULATE_RESPONSE);
 
       // Flyout and document dropdown should not be visible
-      expect(exists('testPipelineFlyout')).toBe(false);
-      expect(exists('documentsDropdown')).toBe(false);
+      expect(screen.queryByTestId('testPipelineFlyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('documentsDropdown')).not.toBeInTheDocument();
 
       // Open flyout
-      actions.clickAddDocumentsButton();
+      fireEvent.click(screen.getByTestId('addDocumentsButton'));
+      await screen.findByTestId('testPipelineFlyout');
 
       // Flyout should be visible with output tab initially disabled
-      expect(exists('testPipelineFlyout')).toBe(true);
-      expect(exists('documentsTabContent')).toBe(true);
-      expect(exists('outputTabContent')).toBe(false);
+      expect(screen.getByTestId('documentsTabContent')).toBeInTheDocument();
+      expect(screen.queryByTestId('outputTabContent')).not.toBeInTheDocument();
 
       // Add sample documents and click run
-      actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
-      await actions.clickRunPipelineButton();
+      fireEvent.change(screen.getByTestId('documentsEditor'), {
+        target: { value: JSON.stringify(DOCUMENTS) },
+      });
+
+      const runCallsBefore = postMock.mock.calls.length;
+      fireEvent.click(screen.getByTestId('runPipelineButton'));
+      await waitFor(() => expect(postMock.mock.calls.length).toBeGreaterThan(runCallsBefore));
 
       // Verify request
-      const latestRequest: any = httpSetup.post.mock.calls.pop() || [];
-      const requestBody: ReqBody = JSON.parse(latestRequest[1]?.body);
+      const latestRequest = postMock.mock.calls[postMock.mock.calls.length - 1];
+      const requestOptions: unknown = latestRequest?.[1];
+      if (!hasStringBody(requestOptions)) {
+        throw new Error('Expected simulate request body to be a string');
+      }
+
+      const requestBody: ReqBody = JSON.parse(requestOptions.body);
 
       const {
         documents: reqDocuments,
@@ -111,61 +122,59 @@ describe('Test pipeline', () => {
         });
       });
 
+      await screen.findByTestId('outputTabContent');
+
       // Verify output tab is active
-      expect(exists('documentsTabContent')).toBe(false);
-      expect(exists('outputTabContent')).toBe(true);
+      expect(screen.queryByTestId('documentsTabContent')).not.toBeInTheDocument();
+      expect(screen.getByTestId('outputTabContent')).toBeInTheDocument();
 
       // Click reload button and verify request
-      await actions.clickRefreshOutputButton();
-      // There will be two requests made to the simulate API
-      // the second request will have verbose enabled to update the processor results
-      expect(httpSetup.post).toHaveBeenNthCalledWith(
-        1,
-        `${API_BASE_PATH}/simulate`,
-        expect.anything()
-      );
-      expect(httpSetup.post).toHaveBeenNthCalledWith(
-        2,
-        `${API_BASE_PATH}/simulate`,
-        expect.anything()
-      );
+      const refreshCallsBefore = postMock.mock.calls.length;
+      fireEvent.click(screen.getByTestId('refreshOutputButton'));
+      await waitFor(() => expect(postMock.mock.calls.length).toBeGreaterThan(refreshCallsBefore));
 
       // Click verbose toggle and verify request
-      await actions.toggleVerboseSwitch();
-      // There will be one request made to the simulate API
-      expect(httpSetup.post).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/simulate`,
-        expect.anything()
-      );
+      const verboseCallsBefore = postMock.mock.calls.length;
+      fireEvent.click(screen.getByTestId('verboseOutputToggle'));
+      await waitFor(() => expect(postMock.mock.calls.length).toBeGreaterThan(verboseCallsBefore));
+      expect(postMock).toHaveBeenLastCalledWith(`${API_BASE_PATH}/simulate`, expect.anything());
     });
 
     test('should enable the output tab if cached documents exist', async () => {
-      const { actions, exists } = testBed;
+      const postMock = jest.mocked(httpSetup.post);
 
       httpRequestsMockHelpers.setSimulatePipelineResponse(SIMULATE_RESPONSE);
 
       // Open flyout
-      actions.clickAddDocumentsButton();
+      fireEvent.click(screen.getByTestId('addDocumentsButton'));
+      await screen.findByTestId('testPipelineFlyout');
 
       // Add sample documents and click run
-      actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
-      await actions.clickRunPipelineButton();
+      fireEvent.change(screen.getByTestId('documentsEditor'), {
+        target: { value: JSON.stringify(DOCUMENTS) },
+      });
+      const runCallsBefore = postMock.mock.calls.length;
+      fireEvent.click(screen.getByTestId('runPipelineButton'));
+      await waitFor(() => expect(postMock.mock.calls.length).toBeGreaterThan(runCallsBefore));
+      await screen.findByTestId('outputTabContent');
 
       // Close flyout
-      actions.closeTestPipelineFlyout();
-      expect(exists('testPipelineFlyout')).toBe(false);
-      expect(exists('addDocumentsButton')).toBe(false);
-      expect(exists('documentsDropdown')).toBe(true);
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      await waitFor(() =>
+        expect(screen.queryByTestId('testPipelineFlyout')).not.toBeInTheDocument()
+      );
+      expect(screen.queryByTestId('addDocumentsButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('documentsDropdown')).toBeInTheDocument();
 
       // Reopen flyout and verify output tab is enabled
-      await actions.clickViewOutputButton();
-      expect(exists('testPipelineFlyout')).toBe(true);
-      expect(exists('documentsTabContent')).toBe(false);
-      expect(exists('outputTabContent')).toBe(true);
+      fireEvent.click(screen.getByTestId('viewOutputButton'));
+      await screen.findByTestId('testPipelineFlyout');
+      expect(screen.queryByTestId('documentsTabContent')).not.toBeInTheDocument();
+      expect(screen.getByTestId('outputTabContent')).toBeInTheDocument();
     });
 
     test('should surface API errors from the request', async () => {
-      const { actions, find, exists } = testBed;
+      const postMock = jest.mocked(httpSetup.post);
 
       const error = {
         statusCode: 500,
@@ -176,67 +185,78 @@ describe('Test pipeline', () => {
       httpRequestsMockHelpers.setSimulatePipelineResponse(undefined, error);
 
       // Open flyout
-      actions.clickAddDocumentsButton();
+      fireEvent.click(screen.getByTestId('addDocumentsButton'));
+      await screen.findByTestId('testPipelineFlyout');
 
       // Add invalid sample documents array and run the pipeline
-      actions.addDocumentsJson(
-        JSON.stringify([
-          {
-            _index: 'test',
-            _id: '1',
-            _version: 1,
-            _seq_no: 0,
-            _primary_term: 1,
-            _source: {
-              name: 'John Doe',
+      fireEvent.change(screen.getByTestId('documentsEditor'), {
+        target: {
+          value: JSON.stringify([
+            {
+              _index: 'test',
+              _id: '1',
+              _version: 1,
+              _seq_no: 0,
+              _primary_term: 1,
+              _source: {
+                name: 'John Doe',
+              },
             },
-          },
-        ])
-      );
-      await actions.clickRunPipelineButton();
+          ]),
+        },
+      });
+      const runCallsBefore = postMock.mock.calls.length;
+      fireEvent.click(screen.getByTestId('runPipelineButton'));
+      await waitFor(() => expect(postMock.mock.calls.length).toBeGreaterThan(runCallsBefore));
 
       // Verify error rendered
-      expect(exists('pipelineExecutionError')).toBe(true);
-      expect(find('pipelineExecutionError').text()).toContain(error.message);
+      const executionError = await screen.findByTestId('pipelineExecutionError');
+      expect(executionError).toHaveTextContent(error.message);
     });
 
     describe('Add indexed documents', () => {
       test('should successfully add an indexed document', async () => {
-        const { actions, form, exists } = testBed;
+        const getMock = jest.mocked(httpSetup.get);
 
         const { _index: index, _id: documentId } = DOCUMENTS[0];
 
         httpRequestsMockHelpers.setFetchDocumentsResponse(index, documentId, DOCUMENTS[0]);
 
         // Open flyout
-        actions.clickAddDocumentsButton();
+        fireEvent.click(screen.getByTestId('addDocumentsButton'));
+        await screen.findByTestId('testPipelineFlyout');
 
         // Open documents accordion, click run without required fields, and verify error messages
-        await actions.toggleDocumentsAccordion();
-        await actions.clickAddDocumentButton();
-        expect(form.getErrorsMessages()).toEqual([
-          'An index name is required.',
-          'A document ID is required.',
-        ]);
+        fireEvent.click(screen.getByTestId('addDocumentsAccordion'));
+        fireEvent.click(screen.getByTestId('addDocumentButton'));
+        expect(await screen.findByText('An index name is required.')).toBeInTheDocument();
+        expect(screen.getByText('A document ID is required.')).toBeInTheDocument();
 
         // Add required fields, and click run
-        form.setInputValue('indexField.input', index);
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-        form.setInputValue('idField.input', documentId);
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-        await actions.clickAddDocumentButton();
+        fireEvent.change(within(screen.getByTestId('indexField')).getByTestId('input'), {
+          target: { value: index },
+        });
+        fireEvent.blur(within(screen.getByTestId('indexField')).getByTestId('input'));
+        fireEvent.change(within(screen.getByTestId('idField')).getByTestId('input'), {
+          target: { value: documentId },
+        });
+        fireEvent.blur(within(screen.getByTestId('idField')).getByTestId('input'));
+
+        const getCallsBefore = getMock.mock.calls.length;
+        fireEvent.click(screen.getByTestId('addDocumentButton'));
+        await waitFor(() => expect(getMock.mock.calls.length).toBeGreaterThan(getCallsBefore));
 
         // Verify request
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
+        expect(getMock).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/documents/${index}/${documentId}`,
           expect.anything()
         );
         // Verify success callout
-        expect(exists('addDocumentSuccess')).toBe(true);
+        expect(await screen.findByTestId('addDocumentSuccess')).toBeInTheDocument();
       });
 
       test('should surface API errors from the request', async () => {
-        const { actions, form, exists, find } = testBed;
+        const getMock = jest.mocked(httpSetup.get);
 
         const nonExistentDoc = {
           index: 'foo',
@@ -257,159 +277,185 @@ describe('Test pipeline', () => {
         );
 
         // Open flyout
-        actions.clickAddDocumentsButton();
+        fireEvent.click(screen.getByTestId('addDocumentsButton'));
+        await screen.findByTestId('testPipelineFlyout');
 
         // Open documents accordion, add required fields, and click run
-        await actions.toggleDocumentsAccordion();
-        form.setInputValue('indexField.input', nonExistentDoc.index);
-        form.setInputValue('idField.input', nonExistentDoc.id);
-        await actions.clickAddDocumentButton();
+        fireEvent.click(screen.getByTestId('addDocumentsAccordion'));
+        fireEvent.change(within(screen.getByTestId('indexField')).getByTestId('input'), {
+          target: { value: nonExistentDoc.index },
+        });
+        fireEvent.blur(within(screen.getByTestId('indexField')).getByTestId('input'));
+        fireEvent.change(within(screen.getByTestId('idField')).getByTestId('input'), {
+          target: { value: nonExistentDoc.id },
+        });
+        fireEvent.blur(within(screen.getByTestId('idField')).getByTestId('input'));
+
+        const getCallsBefore = getMock.mock.calls.length;
+        fireEvent.click(screen.getByTestId('addDocumentButton'));
+        await waitFor(() => expect(getMock.mock.calls.length).toBeGreaterThan(getCallsBefore));
 
         // Verify error rendered
-        expect(exists('addDocumentError')).toBe(true);
-        expect(exists('addDocumentSuccess')).toBe(false);
-        expect(find('addDocumentError').text()).toContain(error.message);
+        expect(await screen.findByTestId('addDocumentError')).toBeInTheDocument();
+        expect(screen.queryByTestId('addDocumentSuccess')).not.toBeInTheDocument();
+        expect(screen.getByTestId('addDocumentError')).toHaveTextContent(error.message);
       });
     });
 
     describe('Documents dropdown', () => {
       beforeEach(async () => {
-        const { actions } = testBed;
+        const postMock = jest.mocked(httpSetup.post);
 
         httpRequestsMockHelpers.setSimulatePipelineResponse(
           addProcessorTagtoMockOutput(SIMULATE_RESPONSE)
         );
 
         // Open flyout
-        actions.clickAddDocumentsButton();
+        fireEvent.click(screen.getByTestId('addDocumentsButton'));
+        await screen.findByTestId('testPipelineFlyout');
         // Add sample documents and click run
-        actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
-        await actions.clickRunPipelineButton();
+        fireEvent.change(screen.getByTestId('documentsEditor'), {
+          target: { value: JSON.stringify(DOCUMENTS) },
+        });
+        const runCallsBefore = postMock.mock.calls.length;
+        fireEvent.click(screen.getByTestId('runPipelineButton'));
+        await waitFor(() => expect(postMock.mock.calls.length).toBeGreaterThan(runCallsBefore));
+        await screen.findByTestId('outputTabContent');
         // Close flyout
-        actions.closeTestPipelineFlyout();
+        fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+        await waitFor(() =>
+          expect(screen.queryByTestId('testPipelineFlyout')).not.toBeInTheDocument()
+        );
       });
 
       it('should open flyout to edit documents', () => {
-        const { exists, actions } = testBed;
-
         // Dropdown should be visible
-        expect(exists('documentsDropdown')).toBe(true);
+        expect(screen.getByTestId('documentsDropdown')).toBeInTheDocument();
 
         // Open dropdown and edit documents
-        actions.clickDocumentsDropdown();
-        actions.clickEditDocumentsButton();
+        fireEvent.click(
+          within(screen.getByTestId('documentsDropdown')).getByTestId('documentsButton')
+        );
+        fireEvent.click(screen.getByTestId('editDocumentsButton'));
 
         // Flyout should be visible with "Documents" tab enabled
-        expect(exists('testPipelineFlyout')).toBe(true);
-        expect(exists('documentsTabContent')).toBe(true);
+        expect(screen.getByTestId('testPipelineFlyout')).toBeInTheDocument();
+        expect(screen.getByTestId('documentsTabContent')).toBeInTheDocument();
       });
 
       it('should clear all documents and stop pipeline simulation', async () => {
-        const { exists, actions, find } = testBed;
-
         // Dropdown should be visible and processor status should equal "success"
-        expect(exists('documentsDropdown')).toBe(true);
-        const initialProcessorStatusLabel = find('processors>0.processorStatusIcon').props()
-          .children;
-        expect(initialProcessorStatusLabel).toEqual('Success');
+        expect(screen.getByTestId('documentsDropdown')).toBeInTheDocument();
+        expect(
+          within(screen.getByTestId('processors>0')).getByTestId('processorStatusIcon')
+        ).toHaveTextContent('Success');
 
         // Open flyout and click clear all button
-        actions.clickDocumentsDropdown();
-        actions.clickEditDocumentsButton();
-        actions.clickClearAllButton();
+        fireEvent.click(
+          within(screen.getByTestId('documentsDropdown')).getByTestId('documentsButton')
+        );
+        fireEvent.click(screen.getByTestId('editDocumentsButton'));
+        fireEvent.click(screen.getByTestId('clearAllDocumentsButton'));
 
-        // Verify modal
-        const modal = document.body.querySelector(
-          '[data-test-subj="resetDocumentsConfirmationModal"]'
+        const modal = await screen.findByTestId('resetDocumentsConfirmationModal');
+        expect(modal).toHaveTextContent('Clear documents');
+        fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+        await waitFor(() =>
+          expect(screen.queryByTestId('resetDocumentsConfirmationModal')).not.toBeInTheDocument()
         );
 
-        expect(modal).not.toBe(null);
-        expect(modal!.textContent).toContain('Clear documents');
-
-        // Confirm reset and close modal
-        await actions.clickConfirmResetButton();
-
         // Verify documents and processors were reset
-        expect(exists('documentsDropdown')).toBe(false);
-        expect(exists('addDocumentsButton')).toBe(true);
-        const resetProcessorStatusIconLabel = find('processors>0.processorStatusIcon').props()
-          .children;
-        expect(resetProcessorStatusIconLabel).toEqual('Not run');
+        expect(screen.queryByTestId('documentsDropdown')).not.toBeInTheDocument();
+        expect(screen.getByTestId('addDocumentsButton')).toBeInTheDocument();
+        expect(
+          within(screen.getByTestId('processors>0')).getByTestId('processorStatusIcon')
+        ).toHaveTextContent('Not run');
       });
     });
   });
 
   describe('Processors', () => {
     it('should show "inactive" processor status by default', async () => {
-      const { find } = testBed;
-
-      const statusIconLabel = find('processors>0.processorStatusIcon').props().children;
-
-      expect(statusIconLabel).toEqual('Not run');
+      expect(
+        within(screen.getByTestId('processors>0')).getByTestId('processorStatusIcon')
+      ).toHaveTextContent('Not run');
     });
 
     it('should update the processor status after execution', async () => {
-      const { actions, find } = testBed;
+      const postMock = jest.mocked(httpSetup.post);
 
       const mockVerboseOutputWithProcessorTag = addProcessorTagtoMockOutput(SIMULATE_RESPONSE);
       httpRequestsMockHelpers.setSimulatePipelineResponse(mockVerboseOutputWithProcessorTag);
 
       // Open flyout
-      actions.clickAddDocumentsButton();
+      fireEvent.click(screen.getByTestId('addDocumentsButton'));
+      await screen.findByTestId('testPipelineFlyout');
 
       // Add sample documents and click run
-      actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
-      await actions.clickRunPipelineButton();
-      actions.closeTestPipelineFlyout();
+      fireEvent.change(screen.getByTestId('documentsEditor'), {
+        target: { value: JSON.stringify(DOCUMENTS) },
+      });
+      const runCallsBefore = postMock.mock.calls.length;
+      fireEvent.click(screen.getByTestId('runPipelineButton'));
+      await waitFor(() => expect(postMock.mock.calls.length).toBeGreaterThan(runCallsBefore));
+      await screen.findByTestId('outputTabContent');
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      await waitFor(() =>
+        expect(screen.queryByTestId('testPipelineFlyout')).not.toBeInTheDocument()
+      );
 
       // Verify status
-      const statusIconLabel = find('processors>0.processorStatusIcon').props().children;
-      expect(statusIconLabel).toEqual('Success');
+      expect(
+        within(screen.getByTestId('processors>0')).getByTestId('processorStatusIcon')
+      ).toHaveTextContent('Success');
     });
 
     describe('Configuration tab', () => {
       it('should not clear up form when clicking configuration tab', async () => {
-        const { actions, find, exists } = testBed;
-
         // Click processor to open manage flyout
-        await actions.clickProcessor('processors>0');
-        // Verify flyout opened
-        expect(exists('editProcessorForm')).toBe(true);
+        fireEvent.click(within(screen.getByTestId('processors>0')).getByTestId('manageItemButton'));
+        await screen.findByTestId('editProcessorForm');
         // Click the "Configuration" tab
-        await actions.clickProcessorConfigurationTab();
+        fireEvent.click(screen.getByTestId('configurationTab'));
         // Verify type selector has not changed
         expect(
-          find('processorTypeSelector.input').find('input[role="combobox"]').props().value
-        ).toBe('Set');
+          within(screen.getByTestId('processorTypeSelector')).getByTestId('input')
+        ).toHaveValue('Set');
       });
     });
 
     describe('Output tab', () => {
       beforeEach(async () => {
-        const { actions } = testBed;
+        const postMock = jest.mocked(httpSetup.post);
 
         const mockVerboseOutputWithProcessorTag = addProcessorTagtoMockOutput(SIMULATE_RESPONSE);
         httpRequestsMockHelpers.setSimulatePipelineResponse(mockVerboseOutputWithProcessorTag);
 
         // Add documents and run the pipeline
-        actions.clickAddDocumentsButton();
-        actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
-        await actions.clickRunPipelineButton();
-        actions.closeTestPipelineFlyout();
+        fireEvent.click(screen.getByTestId('addDocumentsButton'));
+        await screen.findByTestId('testPipelineFlyout');
+        fireEvent.change(screen.getByTestId('documentsEditor'), {
+          target: { value: JSON.stringify(DOCUMENTS) },
+        });
+        const runCallsBefore = postMock.mock.calls.length;
+        fireEvent.click(screen.getByTestId('runPipelineButton'));
+        await waitFor(() => expect(postMock.mock.calls.length).toBeGreaterThan(runCallsBefore));
+        await screen.findByTestId('outputTabContent');
+        fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+        await waitFor(() =>
+          expect(screen.queryByTestId('testPipelineFlyout')).not.toBeInTheDocument()
+        );
       });
 
       it('should show the output of the processor', async () => {
-        const { actions, exists } = testBed;
-
         // Click processor to open manage flyout
-        await actions.clickProcessor('processors>0');
-        // Verify flyout opened
-        expect(exists('editProcessorForm')).toBe(true);
+        fireEvent.click(within(screen.getByTestId('processors>0')).getByTestId('manageItemButton'));
+        await screen.findByTestId('editProcessorForm');
 
         // Navigate to "Output" tab
-        await actions.clickProcessorOutputTab();
+        fireEvent.click(screen.getByTestId('outputTab'));
         // Verify content
-        expect(exists('processorOutputTabContent')).toBe(true);
+        expect(await screen.findByTestId('processorOutputTabContent')).toBeInTheDocument();
       });
     });
   });

@@ -103,6 +103,7 @@ export const saveDiscoverSession = async (
         columns: tab.columns,
         grid: tab.grid,
         hideChart: tab.hideChart,
+        hideTable: tab.hideTable,
         isTextBasedQuery: tab.isTextBasedQuery,
         usesAdHocDataView: tab.usesAdHocDataView,
         kibanaSavedObjectMeta: {
@@ -118,6 +119,7 @@ export const saveDiscoverSession = async (
         rowsPerPage: tab.rowsPerPage,
         sampleSize: tab.sampleSize,
         breakdownField: tab.breakdownField,
+        chartInterval: tab.chartInterval,
         density: tab.density,
         visContext: tab.visContext,
         controlGroupJson: tab.controlGroupJson,
@@ -125,14 +127,17 @@ export const saveDiscoverSession = async (
     };
   });
 
+  const { chartInterval, ...firstTabAttributes } = tabs[0].attributes;
+
   const attributes: SavedSearchAttributes = {
     title: discoverSession.title,
     description: discoverSession.description,
     tabs,
     // TODO: Spreading the first tab attributes like this shouldn't be necessary soon
-    ...tabs[0].attributes,
-    sort: tabs[0].attributes.sort as SortOrder[],
-    density: tabs[0].attributes.density as DataGridDensity,
+    ...firstTabAttributes,
+    hideTable: firstTabAttributes.hideTable,
+    sort: firstTabAttributes.sort as SortOrder[],
+    density: firstTabAttributes.density as DataGridDensity,
   };
 
   const references = savedObjectsTagging

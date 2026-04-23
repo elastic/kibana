@@ -17,7 +17,11 @@ import React, {
 } from 'react';
 import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { useGetGapsSummaryByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id';
-import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
+import {
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  EXCLUDED_GAP_REASONS_KEY,
+} from '../../../../../../common/constants';
+import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -29,6 +33,7 @@ import type {
   RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
+import type { WarningSchema } from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
@@ -130,6 +135,10 @@ export interface RulesTableState {
    * Rules snooze settings for the current rules
    */
   rulesSnoozeSettings: RulesSnoozeSettings;
+  /**
+   * Warning, such as when the number of rules with gaps is greater than the limit.
+   */
+  warnings?: WarningSchema[];
 }
 
 export type LoadingRuleAction =
@@ -190,12 +199,15 @@ interface RulesTableContextProviderProps {
 }
 
 export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
+  const { scheduler } = useGapAutoFillSchedulerContext();
+  const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
     value: number;
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
-  const { sessionStorage } = useKibana().services;
+  const { sessionStorage, uiSettings } = useKibana().services;
+  const excludedReasons = uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
   const {
     filter: savedFilter,
     sorting: savedSorting,
@@ -289,7 +301,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules
   const {
-    data: { rules, total } = { rules: [], total: 0 },
+    data: { rules, total, warnings } = { rules: [], total: 0, warnings: [] },
     refetch,
     dataUpdatedAt,
     isFetched,
@@ -301,6 +313,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       filterOptions,
       sortingOptions,
       pagination,
+      schedulerId: activeSchedulerId,
     },
     {
       // We don't need refreshes on windows focus and reconnects if auto-refresh if off
@@ -327,6 +340,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     {
       ruleIds: rules.map((x) => x.id),
       gapRange: defaultRangeValue,
+      excludedReasons,
+      schedulerId: activeSchedulerId,
     },
     {
       enabled: rules.length > 0,
@@ -414,6 +429,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
           perPage,
           total,
         }),
+        warnings,
       },
       actions,
     };
@@ -441,6 +457,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     selectedRuleIds,
     sortingOptions,
     actions,
+    warnings,
   ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;

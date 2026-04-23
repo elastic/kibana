@@ -7,14 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, {
+  type PropsWithChildren,
+  type ReactElement,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
-import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import { useProfileAccessor } from '../../../../context_awareness';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { i18n } from '@kbn/i18n';
+import { type UpdateESQLQueryFn, useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
@@ -27,10 +36,8 @@ import {
   useInternalStateDispatch,
   useCurrentTabAction,
   internalStateActions,
+  useRuntimeStateManager,
 } from '../../state_management/redux';
-import type { DiscoverMainContentProps } from '../layout/discover_main_content';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
@@ -86,7 +93,7 @@ const updatePortals = (portals: ChartPortalNodes, tabsIds: string[]) =>
 interface UnifiedHistogramGuardProps {
   tabId: string;
   runtimeStateManager: RuntimeStateManager;
-  panelsToggle?: DiscoverMainContentProps['panelsToggle'];
+  panelsToggle?: ReactElement;
 }
 
 const UnifiedHistogramGuard = ({
@@ -97,7 +104,7 @@ const UnifiedHistogramGuard = ({
   const isSelected = useInternalStateSelector((state) => state.tabs.unsafeCurrentId === tabId);
   const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
-  const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
+  const currentDataStateContainer = useRuntimeState(currentTabRuntimeState.dataStateContainer$);
   const currentScopedProfilesManager = useRuntimeState(
     currentTabRuntimeState.scopedProfilesManager$
   );
@@ -109,7 +116,7 @@ const UnifiedHistogramGuard = ({
   if (
     (!isSelected && !isInitialized.current) ||
     !currentCustomizationService ||
-    !currentStateContainer ||
+    !currentDataStateContainer ||
     !currentDataView
   ) {
     return null;
@@ -120,39 +127,44 @@ const UnifiedHistogramGuard = ({
   return (
     <CurrentTabProvider currentTabId={tabId}>
       <DiscoverCustomizationProvider value={currentCustomizationService}>
-        <DiscoverMainProvider value={currentStateContainer}>
-          <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <ScopedServicesProvider
-              scopedProfilesManager={currentScopedProfilesManager}
-              scopedEBTManager={currentScopedEbtManager}
-            >
-              <ChartsWrapper stateContainer={currentStateContainer} panelsToggle={panelsToggle} />
-            </ScopedServicesProvider>
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
+        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+          <ScopedServicesProvider
+            scopedProfilesManager={currentScopedProfilesManager}
+            scopedEBTManager={currentScopedEbtManager}
+          >
+            <ChartsWrapper panelsToggle={panelsToggle} />
+          </ScopedServicesProvider>
+        </RuntimeStateProvider>
       </DiscoverCustomizationProvider>
     </CurrentTabProvider>
   );
 };
 
-type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle'> & {
-  stateContainer: DiscoverStateContainer;
-};
+type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle'>;
 
-const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+const ChartsWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
   const dispatch = useInternalStateDispatch();
+  const runtimeStateManager = useRuntimeStateManager();
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
 
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
+    (queryOrUpdater) => {
+      dispatch(updateESQLQuery({ queryOrUpdater }));
+    },
+    [dispatch, updateESQLQuery]
+  );
   const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
     useMemo(() => {
       return {
         actions: {
           openInNewTab: (params) =>
             dispatch(internalStateActions.openInNewTabExtPointAction(params)),
-          updateESQLQuery: stateContainer.actions.updateESQLQuery,
+          updateESQLQuery: onUpdateESQLQuery,
         },
       };
-    }, [dispatch, stateContainer.actions.updateESQLQuery]);
+    }, [dispatch, onUpdateESQLQuery]);
 
   const isEsqlMode = useIsEsqlMode();
   const chartSectionConfig = useMemo<ChartSectionConfiguration>(() => {
@@ -169,8 +181,8 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
 
   useEffect(() => {
     const histogramConfig$ = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
+      runtimeStateManager,
+      currentTabId
     ).unifiedHistogramConfig$;
 
     histogramConfig$.next({
@@ -179,21 +191,20 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
         ? chartSectionConfig.localStorageKeyPrefix
         : undefined,
     });
-  }, [chartSectionConfig, stateContainer]);
+  }, [chartSectionConfig, runtimeStateManager, currentTabId]);
 
   return chartSectionConfig.replaceDefaultChart ? (
     <CustomChartSectionWrapper
-      stateContainer={stateContainer}
       panelsToggle={panelsToggle}
       chartSectionConfig={chartSectionConfig}
     />
   ) : (
-    <UnifiedHistogramWrapper stateContainer={stateContainer} panelsToggle={panelsToggle} />
+    <UnifiedHistogramWrapper panelsToggle={panelsToggle} />
   );
 };
 
-const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
-  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
+const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
+  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState();
 
   const { setUnifiedHistogramApi } = unifiedHistogramProps;
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
@@ -205,7 +216,6 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
   const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps: unifiedHistogram.layoutProps,
-    stateContainer,
     panelsToggle,
   });
 
@@ -222,7 +232,6 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
 };
 
 const CustomChartSectionWrapper = ({
-  stateContainer,
   panelsToggle,
   chartSectionConfig,
 }: UnifiedHistogramChartProps & {
@@ -230,7 +239,6 @@ const CustomChartSectionWrapper = ({
 }) => {
   const dispatch = useInternalStateDispatch();
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(
-    stateContainer,
     chartSectionConfig.localStorageKeyPrefix
   );
   const localStorageKeyPrefix =
@@ -247,10 +255,7 @@ const CustomChartSectionWrapper = ({
   const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
   const onInitialStateChange = useCallback(
     (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
-      // Defer dispatch to next tick - ensures React render cycle is complete
-      // setTimeout(() => {
       dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));
-      // }, 0);
     },
     [setMetricsGridState, dispatch]
   );
@@ -278,7 +283,6 @@ const CustomChartSectionWrapper = ({
   const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps,
-    stateContainer,
     panelsToggle,
     localStorageKeyPrefix,
   });
@@ -293,15 +297,24 @@ const CustomChartSectionWrapper = ({
 
   const isComponentVisible = !!layoutProps.chart && !layoutProps.chart.hidden;
 
-  return chartSectionConfig.renderChartSection({
-    histogramCss,
-    chartToolbarCss,
-    renderToggleActions: renderCustomChartToggleActions,
-    fetch$,
-    fetchParams,
-    isComponentVisible,
-    ...unifiedHistogramProps,
-    initialState: metricsGridState,
-    onInitialStateChange,
-  });
+  return (
+    <KibanaSectionErrorBoundary
+      sectionName={i18n.translate('discover.chart.errorBoundarySectionName', {
+        defaultMessage: 'Discover chart section',
+      })}
+    >
+      {chartSectionConfig.renderChartSection({
+        histogramCss,
+        chartToolbarCss,
+        renderToggleActions: renderCustomChartToggleActions,
+        fetch$,
+        fetchParams,
+        isComponentVisible,
+        ...unifiedHistogramProps,
+        setLensRequestAdapter: api.setLensRequestAdapter,
+        initialState: metricsGridState,
+        onInitialStateChange,
+      })}
+    </KibanaSectionErrorBoundary>
+  );
 };

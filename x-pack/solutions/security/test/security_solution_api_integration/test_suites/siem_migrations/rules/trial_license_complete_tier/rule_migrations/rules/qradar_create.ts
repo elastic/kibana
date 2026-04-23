@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { getMockQRadarXml } from '@kbn/security-solution-plugin/common/siem_migrations/parsers/qradar/mock/data';
 import {
   deleteAllRuleMigrations,
   expectedQradarReferenceSets,
@@ -93,6 +94,25 @@ export default ({ getService }: FtrProviderContext) => {
             xml: 'not valid xml content',
           },
           expectStatusCode: 400,
+        });
+      });
+
+      it('should not allow building block rules to be created', async () => {
+        const rule1Name = 'QRadar Building Block Rule';
+        const isBuildingBlockRule = true;
+
+        const { mockQradarXml } = getMockQRadarXml([rule1Name], isBuildingBlockRule);
+
+        const response = await migrationRulesRoutes.addQradarRulesToMigration({
+          migrationId,
+          payload: {
+            xml: mockQradarXml,
+          },
+          expectStatusCode: 400,
+        });
+
+        expect(response.body).toMatchObject({
+          message: 'No valid rules could be extracted from the XML',
         });
       });
 

@@ -11,7 +11,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { AssistantHeader } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { alertConvo, welcomeConvo } from '../../mock/conversation';
-import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { mockConnectors } from '../../mock/connectors';
 import { CLOSE } from './translations';
 import { ConversationSharedState } from '@kbn/elastic-assistant-common';
@@ -55,7 +55,7 @@ const testProps = {
   setCurrentConversation: jest.fn(),
 };
 
-jest.mock('../../connectorland/use_load_connectors', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(() => {
     return {
       data: [],
@@ -118,6 +118,20 @@ describe('AssistantHeader', () => {
     expect(
       within(screen.getByTestId('conversationTitle')).getByTestId('euiInlineReadModeButton')
     ).not.toBeDisabled();
+  });
+
+  it('disables assistant settings menu when isDisabled=true', () => {
+    render(<AssistantHeader {...testProps} isDisabled={true} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('chat-context-menu')).toBeDisabled();
+  });
+
+  it('enables assistant settings menu when isDisabled=false', () => {
+    render(<AssistantHeader {...testProps} isDisabled={false} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('chat-context-menu')).not.toBeDisabled();
   });
 
   it('disables share badge when isConversationOwner=false', () => {

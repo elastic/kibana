@@ -63,7 +63,8 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
   const [dashboardTitle, setDashboardTitle] = useState<string>();
 
-  const { dashboardContainer, handleDashboardLoaded } = useDashboardRenderer();
+  const { dashboardContainer, dashboardInternalApi, handleDashboardLoaded } =
+    useDashboardRenderer();
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
@@ -86,22 +87,23 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
           data-test-subj="dashboard-view-wrapper"
         >
           <EuiFlexItem grow={false}>
-            {dashboardContainer && (
-              <HeaderPage
-                border
-                title={
-                  <DashboardTitle
-                    dashboardContainer={dashboardContainer}
-                    onTitleLoaded={setDashboardTitle}
-                  />
-                }
-                subtitle={
-                  <DashboardToolBar
-                    dashboardContainer={dashboardContainer}
-                    onLoad={onDashboardToolBarLoad}
-                  />
-                }
-              />
+            {dashboardContainer && dashboardInternalApi && (
+              <>
+                <HeaderPage
+                  border
+                  title={
+                    <DashboardTitle
+                      dashboardContainer={dashboardContainer}
+                      onTitleLoaded={setDashboardTitle}
+                    />
+                  }
+                />
+                <DashboardToolBar
+                  dashboardContainer={dashboardContainer}
+                  dashboardInternalApi={dashboardInternalApi}
+                  onLoad={onDashboardToolBarLoad}
+                />
+              </>
             )}
           </EuiFlexItem>
           {!errorState && (

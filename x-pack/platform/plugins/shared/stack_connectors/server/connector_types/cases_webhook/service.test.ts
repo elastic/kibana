@@ -272,6 +272,48 @@ describe('Cases webhook service', () => {
         },
       });
     });
+
+    it('headers work as expected if secrets are undefined', () => {
+      createExternalService(
+        actionId,
+        {
+          config: { ...config, hasAuth: false },
+          // @ts-expect-error: should not happen but it does with very old SOs
+          secrets: undefined,
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
+
+    it('headers work as expected if secrets are null', () => {
+      createExternalService(
+        actionId,
+        {
+          config: { ...config, hasAuth: false },
+          // @ts-expect-error: should not happen but it does with very old SOs
+          secrets: null,
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
   });
 
   describe('getIncident', () => {
@@ -1354,6 +1396,48 @@ describe('Cases webhook service', () => {
       await expect(service.updateIncident(incident)).rejects.toThrow(
         '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
+    });
+
+    it('it should throw if the request status is a 204 and has data', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: 'some data',
+          headers: { ['content-type']: 'text/html' },
+          status: 204,
+        })
+      );
+
+      await expect(service.updateIncident(incident)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+      );
+    });
+
+    it('it should NOT throw if the request status is a 204 and is empty', async () => {
+      // Initial mock for the update call
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: undefined,
+          headers: { ['content-type']: 'text/html' },
+          status: 204,
+        })
+      );
+
+      // Second mock for the getIncident call inside updateIncident
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+
+      await expect(service.updateIncident(incident)).resolves.toEqual({
+        id: '1',
+        title: 'CK-1',
+        pushedDate: mockTime.toISOString(),
+        url: 'https://coolsite.net/browse/CK-1',
+      });
     });
   });
 

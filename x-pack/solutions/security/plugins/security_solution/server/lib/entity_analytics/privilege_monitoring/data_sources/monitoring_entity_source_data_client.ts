@@ -7,11 +7,15 @@
 
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  CreateMonitoringEntitySource,
+  MonitoringEntitySourceAttributes,
   MonitoringEntitySource,
   ListEntitySourcesRequestQuery,
+  ListEntitySourcesResponse,
+  Matcher,
 } from '../../../../../common/api/entity_analytics';
+import type { PartialMonitoringEntitySource } from '../types';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
+import { areMatchersEqual, getDefaultMatchersForSource } from './matchers';
 
 interface MonitoringEntitySourceDataClientOpts {
   logger: Logger;
@@ -29,12 +33,12 @@ export class MonitoringEntitySourceDataClient {
     });
   }
 
-  public async init(input: CreateMonitoringEntitySource) {
-    const descriptor = await this.monitoringEntitySourceClient.create({
+  public async create(input: MonitoringEntitySourceAttributes): Promise<MonitoringEntitySource> {
+    const source = await this.monitoringEntitySourceClient.create({
       ...input,
     });
     this.log('debug', 'Initializing MonitoringEntitySourceDataClient Saved Object');
-    return descriptor;
+    return source;
   }
 
   public async get(id: string): Promise<MonitoringEntitySource> {
@@ -42,19 +46,49 @@ export class MonitoringEntitySourceDataClient {
     return this.monitoringEntitySourceClient.get(id);
   }
 
-  public async update(
-    update: Partial<MonitoringEntitySource> & { id: string }
-  ): Promise<MonitoringEntitySource> {
+  public async update(update: PartialMonitoringEntitySource): Promise<MonitoringEntitySource> {
     this.log('debug', `Updating Monitoring Entity Source Sync saved object with id: ${update.id}`);
+    const isMatcherUpdate = update.matchers !== undefined;
+    const sanitizedMatchers = update.matchers?.map((matcher: Matcher) => ({
+      fields: matcher.fields ?? [],
+      values: matcher.values ?? [],
+    }));
 
-    const sanitizedUpdate = {
+    let matchersModifiedByUser: boolean | undefined;
+    if (isMatcherUpdate) {
+      const existing = (await this.monitoringEntitySourceClient.get(
+        update.id
+      )) as MonitoringEntitySource & {
+        matchersModifiedByUser?: boolean;
+      };
+      const isManaged = update.managed ?? existing.managed;
+
+      if (isManaged) {
+        const integrationName = update.integrationName ?? existing.integrationName;
+        const sourceType = update.type ?? existing.type;
+        const defaultMatchers = getDefaultMatchersForSource(sourceType, integrationName);
+        if (!defaultMatchers) {
+          this.log(
+            'warn',
+            `Missing default matchers for managed source ${update.id}; treating matchers as modified`
+          );
+          matchersModifiedByUser = true;
+        } else {
+          matchersModifiedByUser = !areMatchersEqual(sanitizedMatchers, defaultMatchers);
+        }
+      } else {
+        // source not managed so we don't use default matchers to compare, fallback to existing matchers check
+        matchersModifiedByUser = areMatchersEqual(sanitizedMatchers, existing.matchers)
+          ? existing.matchersModifiedByUser ?? false
+          : true;
+      }
+    }
+
+    const sanitizedUpdate: PartialMonitoringEntitySource = {
       ...update,
-      matchers: update.matchers?.map((matcher: { fields: string[]; values: string[] }) => ({
-        fields: matcher.fields ?? [],
-        values: matcher.values ?? [],
-      })),
+      ...(isMatcherUpdate ? { matchersModifiedByUser: matchersModifiedByUser ?? false } : {}),
+      matchers: sanitizedMatchers,
     };
-
     return this.monitoringEntitySourceClient.update(sanitizedUpdate);
   }
 
@@ -63,9 +97,12 @@ export class MonitoringEntitySourceDataClient {
     return this.monitoringEntitySourceClient.delete(id);
   }
 
-  public async list(query: ListEntitySourcesRequestQuery): Promise<MonitoringEntitySource[]> {
+  public async list(
+    query: ListEntitySourcesRequestQuery,
+    ids?: string[]
+  ): Promise<ListEntitySourcesResponse> {
     this.log('debug', 'Finding all Monitoring Entity Source Sync saved objects');
-    return this.monitoringEntitySourceClient.findAll(query);
+    return this.monitoringEntitySourceClient.list(query, ids);
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

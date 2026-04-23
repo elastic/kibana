@@ -34,11 +34,12 @@ import {
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
+import { storedSloDefinitionSchema } from '@kbn/slo-schema';
 import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ALERT_ACTION,
@@ -50,7 +51,7 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
-} from '../../../../common/field_names/slo';
+} from '../../../../common/burn_rate_rule/field_names';
 import type { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
@@ -58,12 +59,12 @@ import { createSLO } from '../../../services/fixtures/slo';
 import type { BurnRateAlert } from './executor';
 import { getRuleExecutor } from './executor';
 import {
-  LONG_WINDOW,
-  SHORT_WINDOW,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateStatsKey,
   generateWindowId,
+  LONG_WINDOW,
+  SHORT_WINDOW,
 } from './lib/build_query';
 import type { EvaluationBucket } from './lib/evaluate';
 import type {
@@ -73,7 +74,6 @@ import type {
   BurnRateRuleParams,
 } from './types';
 import { AlertStates } from './types';
-import { toStoredSLO } from '../../../services/slo_repository';
 
 const commonEsResponse = {
   took: 100,
@@ -97,10 +97,9 @@ function createFindResponse(
     per_page: 25,
     total: sloList.length,
     saved_objects: sloList.map((slo) => {
-      const { storedSLO } = toStoredSLO(slo);
       return {
         id: slo.id,
-        attributes: storedSLO,
+        attributes: storedSloDefinitionSchema.encode(omit(slo, 'artifacts')),
         type: SO_SLO_TYPE,
         references: [],
         score: 1,
@@ -488,6 +487,7 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-foo,asia',
+          viewInAppUrl: `https://kibana.dev/s/irrelevant/app/slos/${slo.id}?instanceId=foo,asia`,
         }),
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
@@ -499,6 +499,7 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-bar,asia',
+          viewInAppUrl: `https://kibana.dev/s/irrelevant/app/slos/${slo.id}?instanceId=bar,asia`,
         }),
       });
     });

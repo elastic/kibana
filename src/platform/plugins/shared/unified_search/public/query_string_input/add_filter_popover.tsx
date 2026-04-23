@@ -13,11 +13,11 @@ import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiFlexItem, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_bar/filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_bar/filter_editor';
-import type { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {
   getAddFilterButtonLabel: () =>
@@ -61,7 +61,8 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
     <EuiToolTip delay="long" content={strings.getAddFilterButtonLabel()} disableScreenReaderOutput>
       <EuiButtonIcon
         display="base"
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
+        color="text"
         aria-label={strings.getAddFilterButtonLabel()}
         data-test-subj="addFilter"
         onClick={() => setShowAddFilterPopover((isOpen) => !isOpen)}
@@ -92,6 +93,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         initialFocus=".filterEditor__hiddenItem"
         ownFocus
         repositionOnScroll
+        aria-label={strings.getAddFilterButtonLabel()}
       >
         <FilterEditorWrapper
           indexPatterns={indexPatterns}

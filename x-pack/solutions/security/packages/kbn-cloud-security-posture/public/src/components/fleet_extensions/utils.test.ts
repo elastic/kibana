@@ -16,13 +16,15 @@ import {
   getDefaultAwsCredentialsType,
   getDefaultAwsCredentialConfig,
   getDefaultAzureCredentialsConfig,
+  getDefaultGcpCredentialConfig,
   getDefaultGcpHiddenVars,
+  getCloudCredentialVarsConfig,
 } from './utils';
 import { AWS_PROVIDER } from './constants';
-import {
-  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
-  ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
-} from './cloud_connector/constants';
+
+// Constants moved to Fleet - define locally for test assertions
+const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS = 'cloud_formation_cloud_connectors_template';
+const ARM_TEMPLATE_URL_CLOUD_CONNECTORS = 'arm_template_cloud_connectors_url';
 
 // Internal test mocks
 const TEMPLATE_NAME = 'cspm';
@@ -374,8 +376,13 @@ describe('getDefaultAwsCredentialsType', () => {
 });
 
 describe('getDefaultAwsCredentialsConfig', () => {
+  const withAwsSupportsVar = (pkg: Record<string, unknown>) => ({
+    ...pkg,
+    data_streams: [{ streams: [{ vars: [{ name: 'aws.supports_cloud_connectors' }] }] }],
+  });
+
   it('should return "cloud_connectors" for agentless, when cloud connectors template is available and showCloudConnectors is true', () => {
-    const packageInfo = {
+    const packageInfo = withAwsSupportsVar({
       policy_templates: [
         {
           name: TEMPLATE_NAME,
@@ -391,7 +398,7 @@ describe('getDefaultAwsCredentialsConfig', () => {
           ],
         },
       ],
-    } as PackageInfo;
+    }) as PackageInfo;
     const result = getDefaultAwsCredentialConfig({
       packageInfo,
       templateName: TEMPLATE_NAME,
@@ -404,7 +411,7 @@ describe('getDefaultAwsCredentialsConfig', () => {
   });
 
   it('should return "cloud_formation" for agent-based, when cloud formation template is available', () => {
-    const packageInfo = {
+    const packageInfo = withAwsSupportsVar({
       policy_templates: [
         {
           name: TEMPLATE_NAME,
@@ -420,7 +427,7 @@ describe('getDefaultAwsCredentialsConfig', () => {
           ],
         },
       ],
-    } as PackageInfo;
+    }) as PackageInfo;
     const result = getDefaultAwsCredentialConfig({
       packageInfo,
       templateName: TEMPLATE_NAME,
@@ -433,7 +440,7 @@ describe('getDefaultAwsCredentialsConfig', () => {
   });
 
   it('should return "assume_role" for agent-based, when cloud formation template is not available', () => {
-    const packageInfo = {
+    const packageInfo = withAwsSupportsVar({
       policy_templates: [
         {
           name: TEMPLATE_NAME,
@@ -449,7 +456,7 @@ describe('getDefaultAwsCredentialsConfig', () => {
           ],
         },
       ],
-    } as PackageInfo;
+    }) as PackageInfo;
     const result = getDefaultAwsCredentialConfig({
       packageInfo,
       templateName: TEMPLATE_NAME,
@@ -462,7 +469,7 @@ describe('getDefaultAwsCredentialsConfig', () => {
   });
 
   it('should return "cloud_formation" for agent-based even with showCloudConnectors true, when cloud formation template is available', () => {
-    const packageInfo = {
+    const packageInfo = withAwsSupportsVar({
       policy_templates: [
         {
           name: TEMPLATE_NAME,
@@ -478,7 +485,7 @@ describe('getDefaultAwsCredentialsConfig', () => {
           ],
         },
       ],
-    } as PackageInfo;
+    }) as PackageInfo;
     const result = getDefaultAwsCredentialConfig({
       packageInfo,
       templateName: TEMPLATE_NAME,
@@ -489,8 +496,33 @@ describe('getDefaultAwsCredentialsConfig', () => {
     expect(result['aws.credentials.type'].value).toBe('cloud_formation');
     expect(result['aws.supports_cloud_connectors'].value).toBe(true);
   });
+
+  it('should NOT include aws.supports_cloud_connectors when the var is not defined in the package', () => {
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: TEMPLATE_NAME,
+          inputs: [{ vars: [] }],
+        },
+      ],
+    } as unknown as PackageInfo;
+    const result = getDefaultAwsCredentialConfig({
+      packageInfo,
+      templateName: TEMPLATE_NAME,
+      isAgentless: true,
+      showCloudConnectors: true,
+    });
+
+    expect(result['aws.credentials.type'].value).toBe('cloud_connectors');
+    expect(result['aws.supports_cloud_connectors']).toBeUndefined();
+  });
 });
 describe('getDefaultAzureCredentialsConfig', () => {
+  const withAzureSupportsVar = (pkg: Record<string, unknown>) => ({
+    ...pkg,
+    data_streams: [{ streams: [{ vars: [{ name: 'azure.supports_cloud_connectors' }] }] }],
+  });
+
   let packageInfo: PackageInfo;
 
   beforeEach(() => {
@@ -549,7 +581,7 @@ describe('getDefaultAzureCredentialsConfig', () => {
   });
 
   it('should return "cloud_connectors" for agentless, when cloud connectors template is available and showCloudConnectors is true', () => {
-    packageInfo = {
+    packageInfo = withAzureSupportsVar({
       policy_templates: [
         {
           name: TEMPLATE_NAME,
@@ -565,7 +597,7 @@ describe('getDefaultAzureCredentialsConfig', () => {
           ],
         },
       ],
-    } as PackageInfo;
+    }) as PackageInfo;
 
     const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, true, true);
 
@@ -574,7 +606,7 @@ describe('getDefaultAzureCredentialsConfig', () => {
   });
 
   it('should return "arm_template" for agent-based even with showCloudConnectors true, when arm_template is available', () => {
-    packageInfo = {
+    packageInfo = withAzureSupportsVar({
       policy_templates: [
         {
           name: TEMPLATE_NAME,
@@ -590,12 +622,28 @@ describe('getDefaultAzureCredentialsConfig', () => {
           ],
         },
       ],
-    } as PackageInfo;
+    }) as PackageInfo;
 
     const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, false, true);
 
     expect(result['azure.credentials.type'].value).toBe('arm_template');
     expect(result['azure.supports_cloud_connectors'].value).toBe(true);
+  });
+
+  it('should NOT include azure.supports_cloud_connectors when the var is not defined in the package', () => {
+    packageInfo = {
+      policy_templates: [
+        {
+          name: TEMPLATE_NAME,
+          inputs: [{ vars: [] }],
+        },
+      ],
+    } as unknown as PackageInfo;
+
+    const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, true, true);
+
+    expect(result['azure.credentials.type'].value).toBe('cloud_connectors');
+    expect(result['azure.supports_cloud_connectors']).toBeUndefined();
   });
 });
 
@@ -726,5 +774,139 @@ describe('findVariableDef', () => {
     const result = findVariableDef(packageInfo, key);
 
     expect(result).toBeUndefined();
+  });
+});
+
+describe('supports_cloud_connectors conditional inclusion', () => {
+  const makePackageInfoWithVar = (varName: string): PackageInfo =>
+    ({
+      data_streams: [{ streams: [{ vars: [{ name: varName }] }] }],
+      policy_templates: [{ name: TEMPLATE_NAME, inputs: [{ vars: [] }] }],
+    } as unknown as PackageInfo);
+
+  const makePackageInfoWithoutVar = (): PackageInfo =>
+    ({
+      data_streams: [{ streams: [{ vars: [{ name: 'unrelated_var' }] }] }],
+      policy_templates: [{ name: TEMPLATE_NAME, inputs: [{ vars: [] }] }],
+    } as unknown as PackageInfo);
+
+  describe('getDefaultGcpCredentialConfig', () => {
+    it('should include gcp.supports_cloud_connectors when the var is defined in the package', () => {
+      const pkg = makePackageInfoWithVar('gcp.supports_cloud_connectors');
+      const result = getDefaultGcpCredentialConfig(pkg, TEMPLATE_NAME, true, true);
+
+      expect(result['gcp.supports_cloud_connectors']).toEqual({
+        value: true,
+        type: 'bool',
+      });
+    });
+
+    it('should NOT include gcp.supports_cloud_connectors when the var is not defined in the package', () => {
+      const pkg = makePackageInfoWithoutVar();
+      const result = getDefaultGcpCredentialConfig(pkg, TEMPLATE_NAME, true, true);
+
+      expect(result['gcp.credentials.type']).toBeDefined();
+      expect(result['gcp.supports_cloud_connectors']).toBeUndefined();
+    });
+
+    it('should NOT include gcp.supports_cloud_connectors when showCloudConnectors is false and var is not defined', () => {
+      const pkg = makePackageInfoWithoutVar();
+      const result = getDefaultGcpCredentialConfig(pkg, TEMPLATE_NAME, true, false);
+
+      expect(result['gcp.supports_cloud_connectors']).toBeUndefined();
+    });
+  });
+
+  describe('getDefaultAwsCredentialConfig', () => {
+    it('should include aws.supports_cloud_connectors when the var is defined in the package', () => {
+      const pkg = makePackageInfoWithVar('aws.supports_cloud_connectors');
+      const result = getDefaultAwsCredentialConfig({
+        packageInfo: pkg,
+        templateName: TEMPLATE_NAME,
+        isAgentless: true,
+        showCloudConnectors: true,
+      });
+
+      expect(result['aws.supports_cloud_connectors']).toEqual({
+        value: true,
+        type: 'bool',
+      });
+    });
+
+    it('should NOT include aws.supports_cloud_connectors when the var is not defined in the package', () => {
+      const pkg = makePackageInfoWithoutVar();
+      const result = getDefaultAwsCredentialConfig({
+        packageInfo: pkg,
+        templateName: TEMPLATE_NAME,
+        isAgentless: true,
+        showCloudConnectors: true,
+      });
+
+      expect(result['aws.credentials.type']).toBeDefined();
+      expect(result['aws.supports_cloud_connectors']).toBeUndefined();
+    });
+  });
+
+  describe('getDefaultAzureCredentialsConfig', () => {
+    it('should include azure.supports_cloud_connectors when the var is defined in the package', () => {
+      const pkg = makePackageInfoWithVar('azure.supports_cloud_connectors');
+      const result = getDefaultAzureCredentialsConfig(pkg, TEMPLATE_NAME, true, true);
+
+      expect(result['azure.supports_cloud_connectors']).toEqual({
+        value: true,
+        type: 'bool',
+      });
+    });
+
+    it('should NOT include azure.supports_cloud_connectors when the var is not defined in the package', () => {
+      const pkg = makePackageInfoWithoutVar();
+      const result = getDefaultAzureCredentialsConfig(pkg, TEMPLATE_NAME, true, true);
+
+      expect(result['azure.credentials.type']).toBeDefined();
+      expect(result['azure.supports_cloud_connectors']).toBeUndefined();
+    });
+  });
+
+  describe('getCloudCredentialVarsConfig', () => {
+    it('should include supports_cloud_connectors when packageInfo defines the var', () => {
+      const pkg = makePackageInfoWithVar('aws.supports_cloud_connectors');
+      const result = getCloudCredentialVarsConfig({
+        setupTechnology: SetupTechnology.AGENTLESS,
+        optionId: 'cloud_connectors',
+        showCloudConnectors: true,
+        provider: 'aws',
+        packageInfo: pkg,
+      });
+
+      expect(result['aws.supports_cloud_connectors']).toBeDefined();
+    });
+
+    it('should NOT include supports_cloud_connectors when packageInfo does not define the var', () => {
+      const pkg = makePackageInfoWithoutVar();
+      const result = getCloudCredentialVarsConfig({
+        setupTechnology: SetupTechnology.AGENTLESS,
+        optionId: 'cloud_connectors',
+        showCloudConnectors: true,
+        provider: 'gcp',
+        packageInfo: pkg,
+      });
+
+      expect(result['gcp.credentials.type']).toBeDefined();
+      expect(result['gcp.supports_cloud_connectors']).toBeUndefined();
+    });
+
+    it('should NOT include supports_cloud_connectors when showCloudConnectors is false', () => {
+      const pkg = makePackageInfoWithVar('aws.supports_cloud_connectors');
+      const result = getCloudCredentialVarsConfig({
+        setupTechnology: SetupTechnology.AGENTLESS,
+        optionId: 'direct_access_keys',
+        showCloudConnectors: false,
+        provider: 'aws',
+        packageInfo: pkg,
+      });
+
+      expect(result['aws.credentials.type']).toBeDefined();
+      expect(result['aws.supports_cloud_connectors']).toBeUndefined();
+    });
   });
 });

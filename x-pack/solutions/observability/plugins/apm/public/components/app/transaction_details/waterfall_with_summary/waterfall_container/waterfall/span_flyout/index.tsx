@@ -27,10 +27,12 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
-import { OpenSpanInDiscoverLink } from '../../../../../../shared/links/discover_links/open_span_in_discover_link';
+import { getTimestampUs } from '../../../../../../../../common/utils/get_timestamp_us';
+import { OpenInDiscover } from '../../../../../../shared/links/discover_links/open_in_discover';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../../../../hooks/use_time_range';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Summary } from '../../../../../../shared/summary';
@@ -93,8 +95,9 @@ interface Props {
   spanLinksCount: SpanLinksCount;
   flyoutDetailTab?: string;
   onClose: () => void;
-  start: string;
-  end: string;
+  rangeFrom: string;
+  rangeTo: string;
+  kuery?: string;
 }
 
 const INITIAL_DATA = {
@@ -110,9 +113,12 @@ export function SpanFlyout({
   onClose,
   spanLinksCount,
   flyoutDetailTab,
-  start,
-  end,
+  rangeFrom,
+  rangeTo,
+  kuery,
 }: Props) {
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/traces/{traceId}/spans/{spanId}', {
@@ -148,9 +154,20 @@ export function SpanFlyout({
             </EuiFlexItem>
             {span && (
               <EuiFlexItem grow={false}>
-                <OpenSpanInDiscoverLink
+                <OpenInDiscover
                   dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
-                  spanId={spanId}
+                  label={i18n.translate('xpack.apm.spanFlyout.openInDiscover', {
+                    defaultMessage: 'Open in Discover',
+                  })}
+                  variant="emptyButton"
+                  indexType="traces"
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  queryParams={{
+                    kuery,
+                    spanId,
+                    sortDirection: 'DESC',
+                  }}
                 />
               </EuiFlexItem>
             )}
@@ -204,7 +221,7 @@ function SpanFlyoutBody({
 }) {
   const stackframes = span.span.stacktrace;
   const plaintextStacktrace = span.code?.stacktrace;
-  const codeLanguage = parentTransaction?.service.language?.name;
+  const codeLanguage = parentTransaction?.service?.language?.name;
   const spanDb = span.span.db;
   const spanTypes = getSpanTypes(span);
   const spanHttpStatusCode =
@@ -266,7 +283,7 @@ function SpanFlyoutBody({
       <EuiSpacer size="m" />
       <Summary
         items={[
-          <Timestamp timestamp={span.timestamp.us / 1000} renderMode="tooltip" />,
+          <Timestamp timestamp={getTimestampUs(span) / 1000} renderMode="tooltip" />,
           <>
             <Duration
               duration={span.span.duration.us}
@@ -322,7 +339,7 @@ function SpanFlyoutBody({
 
             <FailureBadge outcome={span.event?.outcome} />
 
-            <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
+            <SyncBadge sync={span.span.sync} agentName={span.agent?.name} />
           </ContainerWithMarginRight>,
         ]}
       />

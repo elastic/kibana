@@ -20,8 +20,10 @@ import {
 } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization, VisualizationSuggestion } from '@kbn/lens-common';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { GaugeVisualizationState } from './constants';
 import { gaugeTitlesByType } from './constants';
+import { getDefaultPalette } from './utils';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||
@@ -30,11 +32,20 @@ const isNotNumericMetric = (table: TableSuggestion) =>
 const hasLayerMismatch = (keptLayerIds: string[], table: TableSuggestion) =>
   keptLayerIds.length > 1 || (keptLayerIds.length && table.layerId !== keptLayerIds[0]);
 
-export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggestions'] = ({
+type GaugeSuggestionInput = Parameters<
+  Visualization<GaugeVisualizationState>['getSuggestions']
+>[0] & {
+  paletteService: PaletteRegistry;
+};
+
+type GaugeSuggestionReturn = ReturnType<Visualization<GaugeVisualizationState>['getSuggestions']>;
+
+export const getSuggestions = ({
   table,
   state,
   keptLayerIds,
-}) => {
+  paletteService,
+}: GaugeSuggestionInput): GaugeSuggestionReturn => {
   const isGauge = Boolean(
     state && (state.minAccessor || state.maxAccessor || state.goalAccessor || state.metricAccessor)
   );
@@ -59,8 +70,10 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
       shape: state?.shape ?? GaugeShapes.HORIZONTAL_BULLET,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
-      ticksPosition: GaugeTicksPositions.AUTO,
+      ticksPosition: GaugeTicksPositions.BANDS,
       labelMajorMode: GaugeLabelMajorModes.AUTO,
+      colorMode: 'palette',
+      palette: getDefaultPalette(paletteService),
     },
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',

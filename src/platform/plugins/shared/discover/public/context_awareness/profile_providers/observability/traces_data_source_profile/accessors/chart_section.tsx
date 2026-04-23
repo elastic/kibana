@@ -7,18 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TraceMetricsGrid, type DataSource } from '@kbn/unified-metrics-grid';
+import { TraceMetricsGrid } from '@kbn/unified-chart-section-viewer';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import { OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID } from '../profile';
 
 export const createChartSection =
-  (dataSource: DataSource): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
+  (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev) =>
   (params) => {
     return {
       ...prev(params),
       renderChartSection: (props) => {
-        return <TraceMetricsGrid {...props} dataSource={dataSource} actions={params.actions} />;
+        return (
+          <TraceMetricsGrid
+            {...props}
+            actions={params.actions}
+            profileId={OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID}
+          />
+        );
       },
       replaceDefaultChart: true,
       defaultTopPanelHeight: 300,

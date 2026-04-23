@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -19,7 +19,7 @@ import { errors } from '@elastic/elasticsearch';
 import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
 import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { outputService } from '../../services';
+import { appContextService, outputService } from '../../services';
 import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
 import {
   FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
@@ -144,7 +144,7 @@ export class SyncIntegrationsTask {
 
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
       // write integrations on main cluster
@@ -196,7 +196,7 @@ export class SyncIntegrationsTask {
 
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient,
+    soClient: SavedObjectsClientContract,
     abortController: AbortController
   ) => {
     const outputs = await outputService.list();

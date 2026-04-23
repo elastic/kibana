@@ -14,14 +14,21 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
 import { transformDashboardOut } from './api/transforms';
 import type { DashboardState } from './api';
 
+/**
+ * The result of scanning dashboards.
+ * Contains a paginated list of dashboard summaries.
+ */
 export interface ScanDashboardsResult {
+  /** Array of dashboard summaries with their metadata. */
   dashboards: Array<
     Pick<DashboardState, 'description' | 'panels' | 'tags' | 'title'> & {
       id: string;
       references: Reference[];
     }
   >;
+  /** The current page number. */
   page: number;
+  /** The total number of dashboards. */
   total: number;
 }
 
@@ -33,16 +40,19 @@ export async function scanDashboards(
   const { core } = await ctx.resolve(['core']);
   const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
     type: DASHBOARD_SAVED_OBJECT_TYPE,
-    fields: ['description', 'title', 'panelsJSON'],
+    fields: ['description', 'title', 'panelsJSON', 'sections'],
     perPage,
     page,
   });
 
   return {
     dashboards: soResponse.saved_objects.map((so) => {
-      const { description, tags, title, panels } = transformDashboardOut(
+      const {
+        dashboardState: { description, tags, title, panels },
+      } = transformDashboardOut(
         so.attributes,
-        so.references
+        so.references,
+        true // temporary fix to return old Lens SO panel format
       );
 
       return {

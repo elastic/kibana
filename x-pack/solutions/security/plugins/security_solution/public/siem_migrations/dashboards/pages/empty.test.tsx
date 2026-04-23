@@ -25,7 +25,7 @@ describe('EmptyMigrationDashboardsPage', () => {
       wrapper: TestProviders,
     });
     expect(getByTestId('siemMigrationsTranslatedDashboardsEmptyPageMessage')).toHaveTextContent(
-      'Translate your existing Splunk Dashboards with Elastic Automatic Migration. Got to Automatic Migration for step-by-step guidance.'
+      'Translate your existing SIEM Dashboards with Elastic Automatic Migration. Go to Automatic Migration for step-by-step guidance.'
     );
   });
 

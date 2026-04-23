@@ -13,12 +13,14 @@ import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintena
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TimeBuckets } from '@kbn/data-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { BehaviorSubject } from 'rxjs';
 import * as dataContext from '../../hooks/use_has_data';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import type { ObservabilityPublicPluginsStart } from '../../plugin';
@@ -33,6 +35,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+const license$ = new BehaviorSubject(
+  licensingMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum' },
+  })
+);
+mockUseKibanaReturnValue.services.licensing.license$ = license$;
 mockUseKibanaReturnValue.services.application.capabilities = {
   ...mockUseKibanaReturnValue.services.application.capabilities,
   [MAINTENANCE_WINDOW_FEATURE_ID]: {
@@ -71,6 +79,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('../../hooks/create_use_rules_link', () => ({
+  createUseRulesLink: jest.fn(() => () => ({
+    href: '/app/rules',
+    onClick: jest.fn(),
+  })),
+}));
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {
     setHeaderActionMenu: () => {},
@@ -124,6 +138,8 @@ const { useTimeBuckets } = jest.requireMock('../../hooks/use_time_buckets');
 const { useHasData } = jest.requireMock('../../hooks/use_has_data');
 
 jest.mock('../../hooks/use_get_available_rules_with_descriptions');
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public');
 
 const ruleDescriptions = [
   {
@@ -192,6 +208,11 @@ describe('AlertsPage with all capabilities', () => {
 
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockClear();
+    license$.next(
+      licensingMock.createLicense({
+        license: { type: 'platinum', mode: 'platinum' },
+      })
+    );
     useTimeBuckets.mockReturnValue(timeBuckets);
     useLocationMock.mockReturnValue({ pathname: '/alerts', search: '', state: '', hash: '' });
   });
@@ -215,6 +236,35 @@ describe('AlertsPage with all capabilities', () => {
     await waitFor(() => {
       expect(wrapper.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
       expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('does not fetch maintenance windows on a basic license', async () => {
+    license$.next(
+      licensingMock.createLicense({
+        license: { type: 'basic', mode: 'basic' },
+      })
+    );
+
+    await setup();
+
+    await waitFor(() => {
+      expect(fetchActiveMaintenanceWindowsMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Manage rules link', () => {
+    it('should direct to unified rules page', async () => {
+      let wrapper;
+      await act(async () => {
+        wrapper = await setup();
+      });
+
+      await waitFor(() => {
+        const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
+        expect(manageRulesLink).toBeInTheDocument();
+        expect(manageRulesLink.getAttribute('href')).toBe('/app/rules');
+      });
     });
   });
 });

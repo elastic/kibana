@@ -33,7 +33,7 @@ import {
   type LENS_NUMBER_DISPLAY,
   type LENS_LAYER_TYPES,
 } from './constants';
-import type { SeriesType, XYState } from './xy/types';
+import type { SeriesType, XYVisualizationState } from './xy/types';
 import type { LensTagCloudState } from './tagcloud/types';
 import type { LensPartitionVisualizationState } from './partition/types';
 import type { MetricVisualizationState } from './metric/types';
@@ -90,7 +90,7 @@ export type LensLayerType = (typeof LENS_LAYER_TYPES)[keyof typeof LENS_LAYER_TY
 export type CollapseFunction = (typeof LENS_COLLAPSE_FUNCTIONS)[number];
 
 export type LensConfiguration =
-  | XYState
+  | XYVisualizationState
   | DatatableVisualizationState
   | LensPartitionVisualizationState
   | MetricVisualizationState
@@ -246,6 +246,12 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   triggers?: string[];
   /**
+   * Optional priority used to sort suggestions when multiple visualizations
+   * compete. Higher values are sorted first. Defaults to 0.
+   */
+  suggestionPriority?: number;
+
+  /**
    * Visualizations must provide at least one type for the chart switcher,
    * but can register multiple subtypes
    */
@@ -380,6 +386,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   setDimension: (
     props: VisualizationDimensionChangeProps<T> & { groupId: string; previousColumn?: string }
   ) => T;
+
+  reorderDimension?: (
+    props: VisualizationDimensionChangeProps<T> & { groupId: string; targetColumnId: string }
+  ) => T;
   /**
    * The frame is telling the visualization to remove a dimension. The visualization needs to
    * look at its internal state to determine which dimension is being affected.
@@ -476,7 +486,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
+  getUserMessages?: (
+    state: T,
+    deps: { frame: FramePublicAPI; setState?: StateSetter<T> }
+  ) => UserMessage[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state

@@ -1,0 +1,1225 @@
+{
+  "id": "@kbn/es-snapshot-loader",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.createFsRepository",
+        "type": "Function",
+        "tags": [],
+        "label": "createFsRepository",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.FsRepositoryConfig",
+            "text": "FsRepositoryConfig"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.RepositoryStrategy",
+            "text": "RepositoryStrategy"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.createFsRepository.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-snapshot-loader",
+                "scope": "common",
+                "docId": "kibKbnEsSnapshotLoaderPluginApi",
+                "section": "def-common.FsRepositoryConfig",
+                "text": "FsRepositoryConfig"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
+            "lineNumber": 16,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.createGcsRepository",
+        "type": "Function",
+        "tags": [],
+        "label": "createGcsRepository",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.GcsRepositoryConfig",
+            "text": "GcsRepositoryConfig"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.RepositoryStrategy",
+            "text": "RepositoryStrategy"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.createGcsRepository.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-snapshot-loader",
+                "scope": "common",
+                "docId": "kibKbnEsSnapshotLoaderPluginApi",
+                "section": "def-common.GcsRepositoryConfig",
+                "text": "GcsRepositoryConfig"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
+            "lineNumber": 17,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.createSnapshot",
+        "type": "Function",
+        "tags": [],
+        "label": "createSnapshot",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.CreateConfig",
+            "text": "CreateConfig"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.CreateResult",
+            "text": "CreateResult"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/create/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.createSnapshot.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-snapshot-loader",
+                "scope": "common",
+                "docId": "kibKbnEsSnapshotLoaderPluginApi",
+                "section": "def-common.CreateConfig",
+                "text": "CreateConfig"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/create/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.createUrlRepository",
+        "type": "Function",
+        "tags": [],
+        "label": "createUrlRepository",
+        "description": [],
+        "signature": [
+          "(snapshotUrl: string) => ",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.RepositoryStrategy",
+            "text": "RepositoryStrategy"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/url_repository.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.createUrlRepository.$1",
+            "type": "string",
+            "tags": [],
+            "label": "snapshotUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/url_repository.ts",
+            "lineNumber": 11,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.replaySnapshot",
+        "type": "Function",
+        "tags": [],
+        "label": "replaySnapshot",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.ReplayConfig",
+            "text": "ReplayConfig"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.LoadResult",
+            "text": "LoadResult"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/replay/index.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.replaySnapshot.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-snapshot-loader",
+                "scope": "common",
+                "docId": "kibKbnEsSnapshotLoaderPluginApi",
+                "section": "def-common.ReplayConfig",
+                "text": "ReplayConfig"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/replay/index.ts",
+            "lineNumber": 54,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.restoreSnapshot",
+        "type": "Function",
+        "tags": [],
+        "label": "restoreSnapshot",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.RestoreConfig",
+            "text": "RestoreConfig"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.LoadResult",
+            "text": "LoadResult"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/restore/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.restoreSnapshot.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-snapshot-loader",
+                "scope": "common",
+                "docId": "kibKbnEsSnapshotLoaderPluginApi",
+                "section": "def-common.RestoreConfig",
+                "text": "RestoreConfig"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/restore/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.CreateConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.CreateConfig",
+            "text": "CreateConfig"
+          },
+          " extends Omit<BaseConfig, \"snapshotName\">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.CreateConfig.snapshotName",
+            "type": "string",
+            "tags": [],
+            "label": "snapshotName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.CreateConfig.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.CreateConfig.ignoreUnavailable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreUnavailable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.CreateResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.CreateResult.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.CreateResult.snapshotName",
+            "type": "string",
+            "tags": [],
+            "label": "snapshotName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.CreateResult.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.CreateResult.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.FsRepositoryConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "FsRepositoryConfig",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.FsRepositoryConfig.location",
+            "type": "string",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.FsRepositoryConfig.compress",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compress",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.GcsRepositoryConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "GcsRepositoryConfig",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.GcsRepositoryConfig.bucket",
+            "type": "string",
+            "tags": [],
+            "label": "bucket",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.GcsRepositoryConfig.basePath",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.GcsRepositoryConfig.client",
+            "type": "string",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.LoadResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "LoadResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.LoadResult.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.LoadResult.snapshotName",
+            "type": "string",
+            "tags": [],
+            "label": "snapshotName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.LoadResult.restoredIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "restoredIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.LoadResult.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.LoadResult.reindexedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "reindexedIndices",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.LoadResult.maxTimestamp",
+            "type": "string",
+            "tags": [],
+            "label": "maxTimestamp",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.ReplayConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReplayConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.ReplayConfig",
+            "text": "ReplayConfig"
+          },
+          " extends BaseConfig"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.ReplayConfig.patterns",
+            "type": "Array",
+            "tags": [],
+            "label": "patterns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.ReplayConfig.concurrency",
+            "type": "number",
+            "tags": [],
+            "label": "concurrency",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.ReplayConfig.shouldUseInlineScript",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldUseInlineScript",
+            "description": [
+              "Predicate that determines whether a given destination index should use an inline\nPainless script instead of the ingest pipeline for timestamp transformation. Return\n`true` for destinations whose index templates are managed externally and reject\nexplicit pipelines in bulk/reindex requests."
+            ],
+            "signature": [
+              "((destIndex: string) => boolean) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-snapshot-loader",
+                "id": "def-common.ReplayConfig.shouldUseInlineScript.$1",
+                "type": "string",
+                "tags": [],
+                "label": "destIndex",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+                "lineNumber": 56,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.ReplayConfig.beforeReindex",
+            "type": "Function",
+            "tags": [],
+            "label": "beforeReindex",
+            "description": [
+              "Called after temp indices are restored, before reindexing to final destinations."
+            ],
+            "signature": [
+              "((params: { esClient: ",
+              "default",
+              "; log: ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              },
+              "; originalIndices: string[]; restoredIndices: string[]; destinationIndices: string[]; }) => Promise<void>) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-snapshot-loader",
+                "id": "def-common.ReplayConfig.beforeReindex.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+                "lineNumber": 58,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/es-snapshot-loader",
+                    "id": "def-common.ReplayConfig.beforeReindex.$1.esClient",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "esClient",
+                    "description": [],
+                    "signature": [
+                      "default"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+                    "lineNumber": 59,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-snapshot-loader",
+                    "id": "def-common.ReplayConfig.beforeReindex.$1.log",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "log",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/tooling-log",
+                        "scope": "common",
+                        "docId": "kibKbnToolingLogPluginApi",
+                        "section": "def-common.ToolingLog",
+                        "text": "ToolingLog"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+                    "lineNumber": 60,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-snapshot-loader",
+                    "id": "def-common.ReplayConfig.beforeReindex.$1.originalIndices",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "originalIndices",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+                    "lineNumber": 61,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-snapshot-loader",
+                    "id": "def-common.ReplayConfig.beforeReindex.$1.restoredIndices",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "restoredIndices",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+                    "lineNumber": 62,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-snapshot-loader",
+                    "id": "def-common.ReplayConfig.beforeReindex.$1.destinationIndices",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "destinationIndices",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+                    "lineNumber": 63,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.RepositoryStrategy",
+        "type": "Interface",
+        "tags": [],
+        "label": "RepositoryStrategy",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RepositoryStrategy.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"url\" | \"fs\" | \"gcs\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RepositoryStrategy.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RepositoryStrategy.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "(params: { esClient: ",
+              "default",
+              "; log: ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              },
+              "; repoName: string; }) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-snapshot-loader",
+                "id": "def-common.RepositoryStrategy.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
+                "lineNumber": 16,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/es-snapshot-loader",
+                    "id": "def-common.RepositoryStrategy.register.$1.esClient",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "esClient",
+                    "description": [],
+                    "signature": [
+                      "default"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
+                    "lineNumber": 16,
+                    "columnNumber": 22,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-snapshot-loader",
+                    "id": "def-common.RepositoryStrategy.register.$1.log",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "log",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/tooling-log",
+                        "scope": "common",
+                        "docId": "kibKbnToolingLogPluginApi",
+                        "section": "def-common.ToolingLog",
+                        "text": "ToolingLog"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
+                    "lineNumber": 16,
+                    "columnNumber": 40,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-snapshot-loader",
+                    "id": "def-common.RepositoryStrategy.register.$1.repoName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "repoName",
+                    "description": [],
+                    "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
+                    "lineNumber": 16,
+                    "columnNumber": 57,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.RestoreConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "RestoreConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/es-snapshot-loader",
+            "scope": "common",
+            "docId": "kibKbnEsSnapshotLoaderPluginApi",
+            "section": "def-common.RestoreConfig",
+            "text": "RestoreConfig"
+          },
+          " extends BaseConfig"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RestoreConfig.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RestoreConfig.renamePattern",
+            "type": "string",
+            "tags": [],
+            "label": "renamePattern",
+            "description": [
+              "\nOptional index rename during restore. This is useful to restore into a\ntemporary location to avoid clobbering existing indices.\n\nBoth values must be provided to enable renaming."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RestoreConfig.renameReplacement",
+            "type": "string",
+            "tags": [],
+            "label": "renameReplacement",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RestoreConfig.allowNoMatches",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowNoMatches",
+            "description": [
+              "\nWhen true, a restore that matches no indices is treated as a successful\nno-op (restoring nothing) instead of an error."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.RepositoryType",
+        "type": "Type",
+        "tags": [],
+        "label": "RepositoryType",
+        "description": [],
+        "signature": [
+          "\"url\" | \"fs\" | \"gcs\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-snapshot-loader",
+        "id": "def-common.TEMP_INDEX_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "TEMP_INDEX_PREFIX",
+        "description": [],
+        "signature": [
+          "\"snapshot-loader-temp-\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/replay/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

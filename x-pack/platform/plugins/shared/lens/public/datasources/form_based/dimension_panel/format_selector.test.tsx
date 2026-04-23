@@ -93,5 +93,26 @@ describe('FormatSelector', () => {
       expect(screen.queryByLabelText('Decimals')).toHaveValue(2);
       expect(screen.queryByTestId('lns-indexpattern-dimension-formatCompact')).toBeInTheDocument();
     });
+
+    it('sets compact to true by default when selecting duration format', async () => {
+      renderFormatSelector({
+        selectedColumn: {
+          ...props.selectedColumn,
+          params: { format: { id: 'number' } },
+        },
+      });
+
+      // Change format from number to duration
+      const formatInput = within(screen.getByTestId('indexPattern-dimension-format')).getByRole(
+        'combobox'
+      );
+      await user.click(formatInput);
+      fireEvent.click(screen.getByText('Duration'));
+
+      expect(props.onChange).toBeCalledWith({
+        id: 'duration',
+        params: { decimals: 0, compact: true },
+      });
+    });
   });
 });

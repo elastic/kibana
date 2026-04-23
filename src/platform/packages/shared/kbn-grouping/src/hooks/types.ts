@@ -55,6 +55,15 @@ export interface GroupSettings {
    * Allows to customize the label of the group selection dropdown.
    */
   popoverButtonLabel?: string;
+  /**
+   * Array of group keys that are enforced and cannot be deselected by users.
+   * Enforced groups are automatically added to activeGroups on initialization.
+   * Constraints:
+   * - 'none' cannot be in enforcedGroups
+   * - enforcedGroups cannot be used when maxGroupingLevels === 1 (toggle mode)
+   * - enforcedGroups.length must be <= maxGroupingLevels
+   */
+  enforcedGroups?: string[];
 }
 
 export interface GroupModel {

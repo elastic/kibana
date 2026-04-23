@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ]
@@ -14,8 +13,6 @@
     "**/*",
     "../../../typings/**/*",
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
-    "api_integration/apis/logstash/pipeline/fixtures/*.json",
-    "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json"
     , "../../../x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/export_transform copy.ts"  ],
@@ -41,7 +38,6 @@
     "@kbn/std",
     "@kbn/test-subj-selector",
     "@kbn/rison",
-    "@kbn/controls-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/axe-config",
     "@kbn/data-view-field-editor-plugin",
@@ -77,6 +73,8 @@
     "@kbn/ai-assistant-management-plugin",
     "@kbn/setup-node-env",
     "@kbn/visualizations-common",
-    "@kbn/unified-data-table"
+    "@kbn/unified-data-table",
+    "@kbn/session-notifications-plugin",
+    "@kbn/ui-actions-plugin"
   ]
 }

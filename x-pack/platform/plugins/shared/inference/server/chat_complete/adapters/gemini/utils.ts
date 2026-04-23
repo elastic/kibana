@@ -13,7 +13,8 @@ export const mustUseThoughtSignature = (modelName: string | undefined): boolean 
   if (modelName === undefined) {
     return false;
   }
-  return isGemini3Pro(modelName);
+  return isGemini3(modelName);
 };
 
-const isGemini3Pro = (modelName: string) => modelName.toLowerCase().includes('gemini-3-pro');
+// matches gemini-3-flash, gemini-3-pro, gemini-3.1-pro-preview, etc.
+const isGemini3 = (modelName: string) => /gemini-3[\.\-]/i.test(modelName);

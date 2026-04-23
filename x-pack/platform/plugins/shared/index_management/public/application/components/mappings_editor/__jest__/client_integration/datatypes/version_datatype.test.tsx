@@ -5,38 +5,21 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import type { MappingsEditorTestBed } from '../helpers';
-import { componentHelpers } from '../helpers';
+import { WithAppDependencies } from '../helpers/setup_environment';
+import { MappingsEditor } from '../../../mappings_editor';
 
-const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
-
-// Parameters automatically added to the version datatype when saved (with the default values)
 export const defaultVersionParameters = {
   type: 'version',
 };
 
+const onChangeHandler = jest.fn();
 describe('Mappings editor: version datatype', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
-  let data: any;
-  let onChangeHandler: jest.Mock = jest.fn();
-  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-  let testBed: MappingsEditorTestBed;
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
-    onChangeHandler = jest.fn();
-    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
+    jest.clearAllMocks();
   });
 
   test('supports meta parameter', async () => {
@@ -56,43 +39,67 @@ describe('Mappings editor: version datatype', () => {
       },
     };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    const Component = WithAppDependencies(MappingsEditor, {});
+    render(
+      <I18nProvider>
+        <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
+      </I18nProvider>
+    );
+
+    await screen.findByTestId('mappingsEditor');
+
+    const editButton = screen.getByTestId('editFieldButton');
+    fireEvent.click(editButton);
+
+    const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
+
+    const advancedSettingsToggle = within(flyout).getByTestId('toggleAdvancedSetting');
+    fireEvent.click(advancedSettingsToggle);
+
+    await waitFor(() => {
+      const advancedSettings = within(flyout).getByTestId('advancedSettings');
+      expect(advancedSettings.style.display).not.toBe('none');
     });
-    testBed.component.update();
 
-    const {
-      component,
-      actions: {
-        startEditField,
-        updateFieldAndCloseFlyout,
-        showAdvancedSettings,
-        toggleFormRow,
-        updateJsonEditor,
-      },
-    } = testBed;
+    const metaParameterSection = within(flyout).getByTestId('metaParameter');
+    const metaToggle = within(metaParameterSection).getByTestId('formRowToggle');
+    fireEvent.click(metaToggle);
 
-    // Open the flyout to edit the field
-    await startEditField('myField');
-    await showAdvancedSettings();
-
-    // Enable the meta parameter and provide a valid object
-    toggleFormRow('metaParameter');
-    await act(async () => {
-      updateJsonEditor('metaParameterEditor', metaParameter.meta);
+    await waitFor(() => {
+      expect(metaToggle.getAttribute('aria-checked')).toBe('true');
     });
-    component.update();
 
-    // Save the field and close the flyout
-    await updateFieldAndCloseFlyout();
+    const metaEditor = await within(flyout).findByTestId('metaParameterEditor');
+    const metaValue = JSON.stringify(metaParameter.meta);
 
-    // It should have the default parameters values added, plus metadata
+    Object.defineProperty(metaEditor, 'value', {
+      writable: true,
+      value: metaValue,
+    });
+
+    metaEditor.setAttribute('data-currentvalue', metaValue);
+
+    fireEvent.change(metaEditor, { target: { value: metaValue } });
+
+    await waitFor(() => {
+      const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+      expect(updateButton).not.toBeDisabled();
+    });
+
+    const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+    fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(onChangeHandler).toHaveBeenCalled();
+    });
+
     updatedMappings.properties.myField = {
       ...defaultVersionParameters,
       ...metaParameter,
     };
 
-    ({ data } = await getMappingsEditorData(component));
-    expect(data).toEqual(updatedMappings);
+    const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+    const actualMappings = callData.getData();
+    expect(actualMappings).toEqual(updatedMappings);
   });
 });

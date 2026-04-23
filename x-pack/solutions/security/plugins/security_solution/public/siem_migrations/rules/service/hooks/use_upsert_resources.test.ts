@@ -8,6 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useUpsertResources } from './use_upsert_resources';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
@@ -46,10 +47,14 @@ describe('useUpsertResources', () => {
     const { result } = renderHook(() => useUpsertResources(onSuccess));
 
     await act(async () => {
-      result.current.upsertResources(migrationId, data);
+      result.current.upsertResources({ migrationId, vendor: MigrationSource.SPLUNK, data });
     });
 
-    expect(upsertMigrationResources).toHaveBeenCalledWith(migrationId, data);
+    expect(upsertMigrationResources).toHaveBeenCalledWith({
+      migrationId,
+      vendor: MigrationSource.SPLUNK,
+      body: data,
+    });
     expect(onSuccess).toHaveBeenCalledWith(data);
     expect(result.current.isLoading).toBe(false);
   });
@@ -63,7 +68,7 @@ describe('useUpsertResources', () => {
     const { result } = renderHook(() => useUpsertResources(onSuccess));
 
     await act(async () => {
-      result.current.upsertResources(migrationId, data);
+      result.current.upsertResources({ migrationId, vendor: MigrationSource.SPLUNK, data });
     });
 
     expect(result.current.isLoading).toBe(false);

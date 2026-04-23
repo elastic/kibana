@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-language';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';

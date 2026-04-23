@@ -16,7 +16,7 @@ import type {
   AxesSettingsConfig,
   FramePublicAPI,
   VisualizationToolbarProps,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-common';
 import {
   hasNumericHistogramDimension,
@@ -72,7 +72,7 @@ export const getDataBounds = function (
 export function hasPercentageAxis(
   axisGroups: AxisGroupConfiguration[],
   groupId: string,
-  state: XYState
+  state: XYVisualizationState
 ) {
   return Boolean(
     axisGroups
@@ -94,7 +94,7 @@ export const axisKeyToTitleMapping: Record<
   yRight: 'yRightTitle',
 };
 
-type Props = VisualizationToolbarProps<XYState>;
+type Props = VisualizationToolbarProps<XYVisualizationState>;
 
 export const XyStyleSettings: React.FC<Props> = (props) => {
   const { state, setState, frame } = props;
@@ -281,10 +281,12 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
   const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
   const chartHasMoreThanOneBarSeries =
     filteredBarLayers.length > 1 ||
-    filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessor);
+    filteredBarLayers.some(
+      (layer) => layer.accessors.length > 1 || (layer.splitAccessors ?? []).length > 0
+    );
 
   const isTimeHistogramModeEnabled = dataLayers.some(
-    ({ xAccessor, layerId, seriesType, splitAccessor }) => {
+    ({ xAccessor, layerId, seriesType, splitAccessors }) => {
       if (!xAccessor) {
         return false;
       }
@@ -293,7 +295,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
       return (
         getScaleType(xAccessorOp, ScaleType.Linear) === ScaleType.Time &&
         xAccessorOp?.isBucketed &&
-        (seriesType.includes('stacked') || !splitAccessor) &&
+        (seriesType.includes('stacked') || (splitAccessors ?? []).length === 0) &&
         (seriesType.includes('stacked') ||
           !seriesType.includes('bar') ||
           !chartHasMoreThanOneBarSeries)

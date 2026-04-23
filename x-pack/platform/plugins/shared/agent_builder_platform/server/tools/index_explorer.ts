@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import { indexExplorer } from '@kbn/onechat-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { z } from '@kbn/zod/v4';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { indexExplorer } from '@kbn/agent-builder-genai-utils';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const indexExplorerSchema = z.object({
   query: z

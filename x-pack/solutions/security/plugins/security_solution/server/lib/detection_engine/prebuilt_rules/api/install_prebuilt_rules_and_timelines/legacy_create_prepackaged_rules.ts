@@ -44,6 +44,7 @@ export const legacyCreatePrepackagedRules = async (
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const detectionRulesClient = context.getDetectionRulesClient();
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+  const mlAuthz = context.getMlAuthz();
 
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
@@ -54,17 +55,22 @@ export const legacyCreatePrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(
-    ruleAssetsClient,
-    context,
-    logger
-  );
+  await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
 
+  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
   const installedPrebuiltRules = rulesToMap(
     await getExistingPrepackagedRules({ rulesClient, logger })
   );
-  const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
-  const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
+  const rulesToInstall = await getRulesToInstall(
+    latestPrebuiltRules,
+    installedPrebuiltRules,
+    mlAuthz
+  );
+  const rulesToUpdate = await getRulesToUpdate(
+    latestPrebuiltRules,
+    installedPrebuiltRules,
+    mlAuthz
+  );
 
   const ruleCreationResult = await createPrebuiltRules(
     detectionRulesClient,

@@ -25,6 +25,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_sidebar'));
-    loadTestFile(require.resolve('./_unsaved_changes_badge'));
+    loadTestFile(require.resolve('./_unsaved_changes_notification_indicator'));
   });
 }

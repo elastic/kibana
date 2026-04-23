@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiComboBox,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -18,6 +19,8 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -28,15 +31,19 @@ import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { getStatusLabel } from '../../../shared/translations';
 
-interface ExecutionListFiltersProps {
+export interface ExecutionListFiltersProps {
   filters: {
     statuses: ExecutionStatus[];
     executionTypes: ExecutionType[];
+    executedBy: string[];
   };
   onFiltersChange: (filters: {
     statuses: ExecutionStatus[];
     executionTypes: ExecutionType[];
+    executedBy: string[];
   }) => void;
+  availableExecutedByOptions?: string[];
+  showExecutor?: boolean;
 }
 
 interface ExecutionListFiltersItem {
@@ -45,7 +52,12 @@ interface ExecutionListFiltersItem {
 
 const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears
 
-export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionListFiltersProps) {
+export function ExecutionListFilters({
+  filters,
+  onFiltersChange,
+  availableExecutedByOptions = [],
+  showExecutor = false,
+}: ExecutionListFiltersProps) {
   const styles = useMemoCss(componentStyles);
 
   const filterGroupPopoverId = useGeneratedHtmlId({
@@ -104,6 +116,16 @@ export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionList
       executionTypes: newOptions
         .filter((item) => item.checked === 'on' && item.key && item.group === 'executionType')
         .map((item) => item.key as ExecutionType),
+      executedBy: filters.executedBy,
+    });
+  };
+
+  const handleExecutedByChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    const executedByValues = selectedOptions.map((option) => option.label);
+    onFiltersChange({
+      statuses: filters.statuses,
+      executionTypes: filters.executionTypes,
+      executedBy: executedByValues,
     });
   };
 
@@ -112,10 +134,13 @@ export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionList
     onFiltersChange({
       statuses: [],
       executionTypes: [],
+      executedBy: showExecutor ? [] : filters.executedBy,
     });
   };
 
-  const numActiveFilters = items.filter((item) => item.checked === 'on').length;
+  const numActiveFilters =
+    items.filter((item) => item.checked === 'on').length +
+    (showExecutor ? filters.executedBy.length : 0);
 
   return (
     <EuiFilterGroup compressed css={styles.filterGroup}>
@@ -142,7 +167,7 @@ export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionList
             )}
             css={styles.filterButtonStyle}
           >
-            <EuiIcon type="filter" />
+            <EuiIcon type="filter" aria-hidden={true} />
           </EuiFilterButton>
         }
         panelPaddingSize="none"
@@ -161,7 +186,7 @@ export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionList
                 </h5>
               </EuiTitle>
             </EuiFlexItem>
-            {filters.statuses.length > 0 && (
+            {numActiveFilters > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
@@ -185,6 +210,50 @@ export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionList
         >
           {(list) => list}
         </EuiSelectable>
+        {showExecutor && (
+          <div css={styles.comboBoxContainer}>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued">
+              <strong>
+                {i18n.translate(
+                  'workflows.workflowExecutionList.filterIconButton.executedByLabel',
+                  {
+                    defaultMessage: 'Executed by',
+                  }
+                )}
+              </strong>
+            </EuiText>
+            <EuiSpacer size="xs" />
+            <EuiComboBox
+              aria-label={i18n.translate(
+                'workflows.workflowExecutionList.filterIconButton.executedByAriaLabel',
+                {
+                  defaultMessage: 'Filter by executor',
+                }
+              )}
+              placeholder={i18n.translate(
+                'workflows.workflowExecutionList.filterIconButton.executedByPlaceholder',
+                {
+                  defaultMessage: 'Filter by username',
+                }
+              )}
+              options={availableExecutedByOptions.map((user) => ({ label: user }))}
+              selectedOptions={filters.executedBy.map((user) => ({ label: user }))}
+              onChange={handleExecutedByChange}
+              onCreateOption={(searchValue) => {
+                const newOption = { label: searchValue };
+                handleExecutedByChange([
+                  ...filters.executedBy.map((user) => ({ label: user })),
+                  newOption,
+                ]);
+              }}
+              isClearable={true}
+              compressed
+              fullWidth
+            />
+            <EuiSpacer size="s" />
+          </div>
+        )}
       </EuiPopover>
     </EuiFilterGroup>
   );
@@ -221,5 +290,9 @@ const componentStyles = {
       min-width: 0;
       line-height: 1;
     }
+  `,
+  comboBoxContainer: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.s};
+    border-top: ${euiTheme.border.thin};
   `,
 };

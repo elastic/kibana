@@ -9,7 +9,8 @@ import type {
   DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_EVENT,
   DOCUMENT_TYPE_ALERT,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+  EntityDocumentDataModel,
+} from '@kbn/cloud-security-posture-common/types/graph/latest';
 
 export interface BaseGroupedItemCommonFields {
   id: string;
@@ -51,8 +52,7 @@ export interface AlertItem extends EventOrAlertSpecificFields {
 }
 export interface EntityItem extends EntitySpecificFields {
   itemType: typeof DOCUMENT_TYPE_ENTITY;
-  type?: string;
-  subType?: string;
+  entity: EntityDocumentDataModel;
 }
 
 export type EntityOrEventItem = EventItem | AlertItem | EntityItem;

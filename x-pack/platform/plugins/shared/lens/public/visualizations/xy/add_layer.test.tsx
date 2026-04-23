@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { AddLayerButton } from './add_layer';
-import type { XYState } from './types';
+import type { XYVisualizationState } from './types';
 import { Position } from '@elastic/charts';
 import { LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
@@ -18,7 +18,7 @@ describe('AddLayerButton', () => {
   const addLayer = jest.fn();
 
   const renderAddLayerButton = () => {
-    const state: XYState = {
+    const state: XYVisualizationState = {
       legend: { position: Position.Bottom, isVisible: true },
       valueLabels: 'show',
       preferredSeriesType: 'bar',
@@ -27,7 +27,7 @@ describe('AddLayerButton', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'area',
-          splitAccessor: 'd',
+          splitAccessors: ['d'],
           xAccessor: 'a',
           accessors: ['b', 'c'],
         },

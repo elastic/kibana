@@ -97,7 +97,7 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
     microsoft_defender_endpoint: false,
   },
   runscript: {
-    endpoint: false,
+    endpoint: true,
     sentinel_one: true,
     crowdstrike: false,
     microsoft_defender_endpoint: true,

@@ -98,8 +98,8 @@ describe('SecurityAlertsPageReference', () => {
     fireEvent.click(screen.getByTestId('alertsReferenceLink'));
     expect(mockOpenAlertsPageWithFilters).toHaveBeenCalledWith(
       {
-        selectedOptions: [ALERTS_PAGE_FILTER_OPEN, ALERTS_PAGE_FILTER_ACKNOWLEDGED],
-        fieldName: 'kibana.alert.workflow_status',
+        selected_options: [ALERTS_PAGE_FILTER_OPEN, ALERTS_PAGE_FILTER_ACKNOWLEDGED],
+        field_name: 'kibana.alert.workflow_status',
         persist: false,
       },
       true,

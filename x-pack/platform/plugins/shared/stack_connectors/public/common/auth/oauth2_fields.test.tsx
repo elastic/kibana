@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { OAuth2Fields, jsonValidator } from './oauth2_fields';
 import * as i18n from './translations';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
@@ -65,6 +65,20 @@ describe('OAuth2Fields', () => {
     expect(screen.getByLabelText(i18n.CLIENT_ID)).toHaveAttribute('readonly');
     expect(screen.getByLabelText(i18n.CLIENT_SECRET)).toHaveAttribute('readonly');
     expect(screen.getByLabelText(i18n.SCOPE)).toHaveAttribute('readonly');
+  });
+
+  it('shows error message when additionalFields contain invalid JSON', async () => {
+    render(
+      <AuthFormTestProvider defaultValue={baseFormData} onSubmit={onSubmit}>
+        <OAuth2Fields readOnly={false} />
+      </AuthFormTestProvider>
+    );
+
+    fireEvent.change(screen.getByTestId('additional_fieldsJsonEditor'), {
+      target: { value: ':' },
+    });
+
+    expect(await screen.findByText(i18n.INVALID_JSON)).toBeInTheDocument();
   });
 });
 

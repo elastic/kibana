@@ -7,41 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState } from '../../types';
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import { transformDashboardIn } from './transform_dashboard_in';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
+
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
-    const dashboardState: DashboardState = {
-      controlGroupInput: {
-        chainingSystem: 'NONE',
-        labelPosition: 'twoLine',
-        controls: [
-          {
-            controlConfig: { anyKey: 'some value' },
-            grow: false,
-            id: 'foo',
-            order: 0,
-            type: 'type1',
-            width: 'small',
-          },
-        ],
-        ignoreParentSettings: {
-          ignoreFilters: true,
-          ignoreQuery: true,
-          ignoreTimerange: true,
-          ignoreValidations: true,
-        },
-        autoApplySelections: false,
-      },
+    const dashboardState = {
+      pinned_panels: [
+        {
+          config: { anyKey: 'some value' },
+          grow: false,
+          id: 'foo',
+          type: 'type1',
+          width: 'small',
+        } as unknown as PinnedControlState,
+      ],
       description: 'description',
-      query: { query: 'test', language: 'KQL' },
+      query: { expression: 'test', language: 'kql' as const },
       options: {
+        ...DEFAULT_DASHBOARD_OPTIONS,
         hide_panel_titles: true,
         use_margins: false,
         sync_colors: false,
         sync_tooltips: false,
         sync_cursor: false,
+        auto_apply_filters: true,
       },
       panels: [
         {
@@ -50,10 +48,9 @@ describe('transformDashboardIn', () => {
             enhancements: {},
             savedObjectId: '1',
           },
-          uid: '1',
+          id: '1',
           title: 'title1',
           type: 'type1',
-          version: '2',
         },
       ],
       tags: [],
@@ -69,19 +66,25 @@ describe('transformDashboardIn', () => {
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "controlGroupInput": Object {
-            "chainingSystem": "NONE",
-            "controlStyle": "twoLine",
-            "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
-            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
-            "showApplySelections": true,
-          },
           "description": "description",
           "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
+            "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"kuery\\"}}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
-          "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"hidePanelBorders\\":false,\\"useMargins\\":false,\\"autoApplyFilters\\":true,\\"syncColors\\":false,\\"syncCursor\\":false,\\"syncTooltips\\":false}",
+          "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "pinned_panels": Object {
+            "panels": Object {
+              "foo": Object {
+                "config": Object {
+                  "anyKey": "some value",
+                },
+                "grow": false,
+                "order": 0,
+                "type": "type1",
+                "width": "small",
+              },
+            },
+          },
           "refreshInterval": Object {
             "pause": true,
             "value": 1000,
@@ -91,14 +94,13 @@ describe('transformDashboardIn', () => {
           "timeTo": "now",
           "title": "title",
         },
-        "error": null,
         "references": Array [],
       }
     `);
   });
 
   it('should not provide default values for optional properties', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       title: 'title',
     };
 
@@ -115,74 +117,27 @@ describe('transformDashboardIn', () => {
           "timeRestore": false,
           "title": "title",
         },
-        "error": null,
         "references": Array [],
       }
     `);
   });
 
-  it('should return error when passed tag references', () => {
-    const dashboardState: DashboardState = {
-      title: 'title',
-      references: [
-        {
-          name: 'someTagRef',
-          type: 'tag',
-          id: '1',
-        },
-      ],
-    };
-
-    const output = transformDashboardIn(dashboardState);
-    expect(output).toMatchInlineSnapshot(`
-      Object {
-        "attributes": null,
-        "error": [Error: Tag references are not supported. Pass tags in with 'data.tags'],
-        "references": null,
-      }
-    `);
-  });
-
-  it('should return error when passed search source references', () => {
-    const dashboardState: DashboardState = {
-      title: 'title',
-      references: [
-        {
-          id: 'fizzle-1234',
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-          type: 'index-pattern',
-        },
-      ],
-    };
-
-    const output = transformDashboardIn(dashboardState);
-    expect(output).toMatchInlineSnapshot(`
-      Object {
-        "attributes": null,
-        "error": [Error: Search source references are not supported. Pass filters in with injected references'],
-        "references": null,
-      }
-    `);
-  });
-
   it('should transform project_routing to attributes', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       title: 'title',
       project_routing: '_alias:_origin',
     };
 
     const output = transformDashboardIn(dashboardState);
-    expect(output.error).toBeNull();
     expect(output.attributes?.projectRouting).toBe('_alias:_origin');
   });
 
   it('should not include projectRouting in attributes when it is undefined', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       title: 'title',
     };
 
     const output = transformDashboardIn(dashboardState);
-    expect(output.error).toBeNull();
     expect(output.attributes).not.toHaveProperty('projectRouting');
   });
 });

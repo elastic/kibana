@@ -7,31 +7,35 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { useMemo } from 'react';
-import moment from 'moment';
 import { useKibana } from './use_kibana';
 
 export const useGetLicenseInfo = () => {
   const {
-    services: { licensing },
+    services: { licensing, cloud },
   } = useKibana();
 
   const license = useObservable(licensing.license$, null);
 
-  const { isTrial, daysLeft } = useMemo(() => {
+  const { isTrial, licenseType, hasEnterpriseLicense } = useMemo(() => {
+    const isInTrial =
+      cloud?.isCloudEnabled && cloud.isInTrial()
+        ? true
+        : license && license.isAvailable && license.isActive && license.type === 'trial';
     return {
-      isTrial: license && license.isAvailable && license.isActive && license.type === 'trial',
-      daysLeft:
-        (license &&
-          license.isAvailable &&
-          license.isActive &&
-          license.expiryDateInMillis &&
-          moment(license.expiryDateInMillis).days()) ||
-        0,
+      isTrial: isInTrial ?? false,
+      licenseType: isInTrial ? 'trial' : license?.type ?? 'basic',
+      hasEnterpriseLicense: !!(
+        license &&
+        license.isAvailable &&
+        license.isActive &&
+        license.hasAtLeast('enterprise')
+      ),
     };
-  }, [license]);
+  }, [cloud, license]);
 
   return {
     isTrial,
-    daysLeft,
+    licenseType,
+    hasEnterpriseLicense,
   };
 };

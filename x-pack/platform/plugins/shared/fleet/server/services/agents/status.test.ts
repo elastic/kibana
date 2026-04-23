@@ -194,7 +194,6 @@ describe('getAgentStatusForAgentPolicy', () => {
         ],
       }),
     };
-
     const agentPolicyIds = ['agentPolicyId1', 'agentPolicyId2'];
     const filterKuery = 'filterKuery';
     const spaceId = 'spaceId';
@@ -231,6 +230,7 @@ describe('getAgentStatusForAgentPolicy', () => {
             }),
           }),
         }),
+        timeout: expect.any(String),
       })
     );
   });

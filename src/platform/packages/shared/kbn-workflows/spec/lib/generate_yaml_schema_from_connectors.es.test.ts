@@ -13,9 +13,17 @@ import { generateYamlSchemaFromConnectors, getElasticsearchConnectors } from '..
 
 describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
   let workflowSchema: z.ZodType;
+  let availableEsTypes: string[];
 
   beforeAll(() => {
-    workflowSchema = generateYamlSchemaFromConnectors(getElasticsearchConnectors());
+    const connectors = getElasticsearchConnectors();
+    availableEsTypes = connectors.map((connector) => connector.type);
+    workflowSchema = generateYamlSchemaFromConnectors(connectors);
+  });
+
+  it('there should be a sample for each available es type', () => {
+    const allReferencedTypes = Array.from(new Set(ES_VALID_SAMPLE_STEPS.map((step) => step.type)));
+    expect(allReferencedTypes.sort()).toEqual(availableEsTypes.sort());
   });
 
   it('should generate a valid YAML schema from connectors', () => {
@@ -25,7 +33,7 @@ describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
   });
 
   ES_VALID_SAMPLE_STEPS.forEach((step) => {
-    it(`${step.type}`, async () => {
+    it(`${step.type} (${step.name})`, async () => {
       const result = workflowSchema.safeParse({
         name: 'test-workflow',
         enabled: true,
@@ -34,11 +42,12 @@ describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
       });
       expect(result.error).toBeUndefined();
       expect(result.success).toBe(true);
+      expect((result.data as any).steps[0]).toMatchObject(step);
     });
   });
 
   ES_INVALID_SAMPLE_STEPS.forEach(({ step, zodErrorMessage }) => {
-    it(`${step.type} with invalid params`, async () => {
+    it(`${step.type} (${step.name}) with invalid params`, async () => {
       const result = workflowSchema.safeParse({
         name: 'test-workflow',
         enabled: true,

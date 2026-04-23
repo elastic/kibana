@@ -9,14 +9,18 @@
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
+import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
-import { UrlValidator } from '../lib/url_validator';
+import { extractEventChainDepthFromExecution } from '../lib/telemetry/utils/extract_execution_metadata';
+import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -35,15 +39,23 @@ export async function setupDependencies(
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   dependencies: ContextDependencies,
-  fakeRequest?: KibanaRequest
+  fakeRequest?: KibanaRequest,
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
 ) {
-  const { coreStart, actions, taskManager } = dependencies;
+  const { coreStart, actions, taskManager, workflowsExtensions } = dependencies;
 
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
   const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
   const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const workflowRepository = new WorkflowRepository({
+    esClient: internalEsClient,
+    logger,
+  });
+
+  // Wait for the workflows extensions registries to be ready
+  await workflowsExtensions.isReady();
 
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -59,6 +71,15 @@ export async function setupDependencies(
     throw new Error(
       `Workflow execution id ${workflowRunId} cannot execute a workflow without Kibana Request`
     );
+  }
+
+  const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution);
+
+  if (eventChainDepth !== undefined) {
+    setWorkflowEventChainContext(fakeRequest, {
+      depth: eventChainDepth,
+      sourceExecutionId: workflowExecution.id,
+    });
   }
 
   let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
@@ -93,6 +114,9 @@ export async function setupDependencies(
     stepExecutionRepository
   );
 
+  // Create telemetry client
+  const telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, logger);
+
   // Create workflow runtime first (simpler, fewer dependencies)
   const workflowRuntime = new WorkflowExecutionRuntimeManager({
     workflowExecution: workflowExecution as EsWorkflowExecution,
@@ -101,6 +125,7 @@ export async function setupDependencies(
     workflowExecutionState,
     coreStart,
     dependencies,
+    telemetryClient,
   });
 
   const esClient: ElasticsearchClient =
@@ -108,9 +133,15 @@ export async function setupDependencies(
 
   const workflowTaskManager = new WorkflowTaskManager(taskManager);
 
-  const urlValidator = new UrlValidator({
-    allowedHosts: config.http.allowedHosts,
-  });
+  const enhancedDependencies: ContextDependencies = {
+    ...dependencies,
+    workflowRepository,
+    workflowExecutionRepository,
+    stepExecutionRepository,
+    workflowsExecutionEngine,
+    spaceId,
+    request: fakeRequest,
+  };
 
   const stepExecutionRuntimeFactory = new StepExecutionRuntimeFactory({
     workflowExecutionGraph,
@@ -119,17 +150,17 @@ export async function setupDependencies(
     esClient,
     fakeRequest,
     coreStart,
-    dependencies,
+    dependencies: enhancedDependencies,
   });
 
   const nodesFactory = new NodesFactory(
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    urlValidator,
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
-    dependencies
+    enhancedDependencies,
+    workflowExecutionState
   );
 
   return {
@@ -142,5 +173,6 @@ export async function setupDependencies(
     nodesFactory,
     workflowExecutionRepository,
     esClient,
+    telemetryClient,
   };
 }

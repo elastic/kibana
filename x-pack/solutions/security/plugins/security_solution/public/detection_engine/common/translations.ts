@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_RULES_WITH_GAPS_TO_FETCH } from '../../../common/constants';
 
 export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
@@ -35,14 +36,6 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip',
-  {
-    defaultMessage:
-      'A user with manage cluster privileges must visit the Rules page before you can import value lists.',
-  }
-);
-
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
@@ -51,7 +44,7 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Detection rules (SIEM)',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate(
@@ -598,6 +591,15 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_TITLE = i18n.transla
   }
 );
 
+export const RULES_TABLE_MAX_RULES_WITH_GAPS_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.rulesTable.maxRulesWithGapsWarningMessage',
+  {
+    values: { maxRules: MAX_RULES_WITH_GAPS_TO_FETCH },
+    defaultMessage:
+      'Showing up to the first {maxRules} rules with gaps in the selected time range. Adjust your filters to narrow down the selection.',
+  }
+);
+
 export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxLabel',
   {
@@ -659,6 +661,13 @@ export const CLEAR_SELECTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.clearSelectionTitle',
   {
     defaultMessage: 'Clear selection',
+  }
+);
+
+export const RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tableCaption',
+  {
+    defaultMessage: 'Detection rules',
   }
 );
 
@@ -750,6 +759,13 @@ export const MANUAL_RULE_RUN_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunTooltip',
   {
     defaultMessage: 'Manual run available only for enabled rules',
+  }
+);
+
+export const MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunPermissionsTooltip',
+  {
+    defaultMessage: 'You need access to the "Manual rule run" privilege',
   }
 );
 
@@ -995,6 +1011,13 @@ export const GAP_FILL_STATUS_FILLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
   {
     defaultMessage: 'Filled',
+  }
+);
+
+export const GAP_FILL_STATUS_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.error',
+  {
+    defaultMessage: 'Error',
   }
 );
 

@@ -7,40 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { HardcodedIcons } from './hardcoded_icons';
 
-// eslint-disable-next-line complexity
-export const getStepIconType = (nodeType: string): EuiIconType => {
-  let iconType: EuiIconType = 'info';
-
-  let typeToMatch = nodeType;
-  if (nodeType.startsWith('trigger_')) {
-    typeToMatch = nodeType.replace('trigger_', '');
+export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
+  switch (triggerType) {
+    case 'trigger_manual':
+      return 'play';
+    case 'trigger_alert':
+      return 'warning';
+    case 'trigger_document':
+    case 'trigger_event':
+      return 'document';
+    case 'trigger_scheduled':
+      return 'clock';
+    default:
+      return 'info';
   }
+};
 
-  switch (typeToMatch) {
-    // triggers
-    case 'manual':
-      iconType = 'play';
-      break;
-    case 'alert':
-      iconType = 'warning';
-      break;
-    case 'scheduled':
-      iconType = 'clock';
-      break;
+// Switch has good readability as it is
+// eslint-disable-next-line complexity
+export const getStepIconType = (nodeType: string): IconType => {
+  let iconType: IconType = 'info';
 
+  switch (nodeType) {
     // built-in node types
     case 'http':
       iconType = 'globe';
       break;
     case 'console':
-      iconType = 'console';
+      iconType = 'commandLine';
+      break;
+    case 'data.set':
+      iconType = 'database';
+      break;
+    case 'workflow.execute':
+      iconType = HardcodedIcons['workflow.execute'];
+      break;
+    case 'workflow.executeAsync':
+      iconType = HardcodedIcons['workflow.executeAsync'];
+      break;
+    case 'workflow.output':
+      iconType = HardcodedIcons['workflow.output'];
+      break;
+    case 'workflow.fail':
+      iconType = HardcodedIcons['workflow.fail'];
       break;
 
     // flow control nodes
     case 'wait':
       iconType = 'clock';
+      break;
+    case 'waitForInput':
+      iconType = 'user';
       break;
     case 'enter-if':
     case 'exit-if':
@@ -54,15 +75,33 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
       break;
     case 'enter-foreach':
     case 'foreach':
+    case 'enter-while':
+    case 'while':
       iconType = 'refresh';
       break;
     case 'foreach-iteration':
+    case 'while-iteration':
       iconType = 'tokenNumber';
+      break;
+    case 'loop.break':
+    case 'loop.continue':
+    case 'loop-break':
+    case 'loop-continue':
+      iconType = 'controls';
+      break;
+    case 'switch':
+    case 'enter-switch':
+    case 'exit-switch':
+    case 'enter-case-branch':
+    case 'exit-case-branch':
+    case 'enter-default-branch':
+    case 'exit-default-branch':
+      iconType = 'productStreamsWired';
       break;
 
     // connectors which use EUI icons
     case 'email':
-      iconType = 'email';
+      iconType = 'mail';
       break;
     case 'slack':
     case 'slack_api':
@@ -76,9 +115,9 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     // will be handled by in getStackConnectorIcon
 
     default:
-      if (typeToMatch.startsWith('elasticsearch')) {
+      if (nodeType.startsWith('elasticsearch')) {
         iconType = 'logoElasticsearch';
-      } else if (typeToMatch.startsWith('kibana')) {
+      } else if (nodeType.startsWith('kibana')) {
         iconType = 'logoKibana';
       } else {
         iconType = 'plugs';

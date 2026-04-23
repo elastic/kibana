@@ -19,15 +19,23 @@ const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 describe('When displaying the EndpointPackageCustomExtension fleet UI extension', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
+  let mockedTestContext: AppContextTestRender;
   const artifactCards = Object.freeze([
     'trustedApps-fleetCard',
     'eventFilters-fleetCard',
+    'endpointExceptions-fleetCard',
     'hostIsolationExceptions-fleetCard',
     'blocklists-fleetCard',
   ]);
 
   beforeEach(() => {
-    const mockedTestContext = createFleetContextRendererMock();
+    mockedTestContext = createFleetContextRendererMock();
+
+    // Mock experimental feature flag
+    mockedTestContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: true,
+    });
+
     render = () => {
       renderResult = mockedTestContext.render(
         <EndpointPackageCustomExtension
@@ -61,6 +69,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
           canReadHostIsolationExceptions: false,
           canDeleteHostIsolationExceptions: false,
           canReadTrustedApplications: false,
+          canReadEndpointExceptions: false,
         }),
       });
 
@@ -82,5 +91,21 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     expect(renderResult.getByTestId('endpointExtensionLoadingSpinner')).toBeInTheDocument();
     expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).toBeNull();
     expect(renderResult.queryByTestId('noIngestPermissions')).toBeNull();
+  });
+
+  it('should hide endpoint exceptions card when feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: false,
+    });
+    render();
+
+    // Verify endpoint exceptions card is not present
+    expect(renderResult.queryByTestId('endpointExceptions-fleetCard')).toBeNull();
+
+    // Verify other cards are still visible
+    expect(renderResult.getByTestId('trustedApps-fleetCard')).toBeInTheDocument();
+    expect(renderResult.getByTestId('eventFilters-fleetCard')).toBeInTheDocument();
+    expect(renderResult.getByTestId('hostIsolationExceptions-fleetCard')).toBeInTheDocument();
+    expect(renderResult.getByTestId('blocklists-fleetCard')).toBeInTheDocument();
   });
 });

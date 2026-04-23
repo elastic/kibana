@@ -20,6 +20,7 @@ import type {
   CreateAttackDiscoveryAlertsParams,
   Replacements,
 } from '@kbn/elastic-assistant-common';
+import type { InferenceClient } from '@kbn/inference-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Document } from '@langchain/core/documents';
@@ -28,6 +29,7 @@ import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/pers
 import { reportAttackDiscoverySuccessTelemetry } from './report_attack_discovery_success_telemetry';
 import { handleGraphError } from '../public/post/helpers/handle_graph_error';
 import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import { filterHallucinatedAlerts } from './filter_hallucinated_alerts';
 import { generateAttackDiscoveries } from './generate_discoveries';
 
 export interface GenerateAndUpdateAttackDiscoveriesParams {
@@ -38,6 +40,7 @@ export interface GenerateAndUpdateAttackDiscoveriesParams {
   enableFieldRendering: boolean;
   esClient: ElasticsearchClient;
   executionUuid: string;
+  inferenceClient?: InferenceClient;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
@@ -52,6 +55,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
   enableFieldRendering,
   esClient,
   executionUuid,
+  inferenceClient,
   logger,
   savedObjectsClient,
   telemetry,
@@ -65,7 +69,8 @@ export const generateAndUpdateAttackDiscoveries = async ({
   const startTime = moment(); // start timing the generation
 
   // get parameters from the request body
-  const { apiConfig, connectorName, end, filter, replacements, size, start } = config;
+  const { alertsIndexPattern, apiConfig, connectorName, end, filter, replacements, size, start } =
+    config;
 
   let latestReplacements: Replacements = { ...replacements };
 
@@ -78,6 +83,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
       actionsClient,
       config,
       esClient,
+      inferenceClient,
       logger,
       savedObjectsClient,
     });
@@ -99,6 +105,16 @@ export const generateAndUpdateAttackDiscoveries = async ({
 
     const alertsContextCount = anonymizedAlerts.length;
 
+    // Filter out attack discoveries with hallucinated alert IDs
+    // Some LLMs will hallucinate alert IDs that don't exist in the alerts index.
+    // We query Elasticsearch to verify all alert IDs exist before persisting discoveries.
+    const validDiscoveries = await filterHallucinatedAlerts({
+      alertsIndexPattern,
+      attackDiscoveries: attackDiscoveries ?? [],
+      esClient,
+      logger,
+    });
+
     /**
      * Deduplicate attackDiscoveries before creating alerts
      *
@@ -111,7 +127,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
     const indexPattern = dataClient.getAdHocAlertsIndexPattern();
     const dedupedDiscoveries = await deduplicateAttackDiscoveries({
       esClient,
-      attackDiscoveries: attackDiscoveries ?? [],
+      attackDiscoveries: validDiscoveries,
       connectorId: apiConfig.connectorId,
       indexPattern,
       logger,
@@ -125,7 +141,11 @@ export const generateAndUpdateAttackDiscoveries = async ({
 
     const createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams = {
       alertsContextCount,
-      anonymizedAlerts,
+      anonymizedAlerts: anonymizedAlerts as Array<{
+        id?: string;
+        metadata: Record<string, never>;
+        pageContent: string;
+      }>, // TODO: remove this when the generator returns metadata: z.record(z.string(), z.unknown()) instead of metadata: z.object({}),
       apiConfig,
       attackDiscoveries: dedupedDiscoveries,
       connectorName: connectorName ?? apiConfig.connectorId,

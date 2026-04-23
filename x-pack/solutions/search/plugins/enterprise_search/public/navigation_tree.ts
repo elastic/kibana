@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
-
+import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
@@ -16,10 +15,6 @@ import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-
-const LazyIconAgents = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
 
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
@@ -35,16 +30,34 @@ const title = i18n.translate(
 );
 const icon = 'logoElasticsearch';
 
+/**
+ * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
+ * we need to maintain proper navigation state when users edit visualizations accessed
+ * from the Dashboards' Visualizations tab. This keeps the Dashboards nav item active during editing.
+ */
+function isEditingFromDashboard(
+  location: Location,
+  pathNameSerialized: string,
+  prepend: (path: string) => string
+): boolean {
+  const vizApps = ['/app/visualize', '/app/maps', '/app/lens'];
+  const isVizApp = vizApps.some((app) => pathNameSerialized.startsWith(prepend(app)));
+  const hasOriginatingApp =
+    location.search.includes('originatingApp=dashboards') ||
+    location.hash.includes('originatingApp=dashboards');
+  return isVizApp && hasOriginatingApp;
+}
+
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
   isCloudEnabled,
+  showAlertingV2 = false,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
   isCloudEnabled?: boolean;
+  showAlertingV2?: boolean;
 }): AddSolutionNavigationArg => {
   return {
-    dataTestSubj: 'searchSideNav',
-    homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -53,39 +66,59 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              link: SEARCH_HOMEPAGE,
-              title,
               icon,
+              link: SEARCH_HOMEPAGE,
               renderAs: 'home',
+              title,
             },
             {
+              icon: 'productDiscover',
               link: 'discover',
             },
             {
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-              },
+              getIsActive: ({ pathNameSerialized, prepend, location }) =>
+                pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+                isEditingFromDashboard(location, pathNameSerialized, prepend),
+              icon: 'productDashboard',
               link: 'dashboards',
             },
             {
-              badgeType: 'techPreview',
-              icon: LazyIconAgents,
+              icon: 'productAgent',
               link: 'agent_builder',
             },
             {
-              badgeType: 'techPreview' as const,
               link: 'workflows',
             },
             {
               children: [
                 {
-                  children: [{ link: 'ml:overview' }, { link: 'ml:dataVisualizer' }],
+                  children: [
+                    { link: 'ml:overview' },
+                    { link: 'ml:dataVisualizer' },
+                    { link: 'ml:dataDrift', sideNavStatus: 'hidden' },
+                    { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
+                    { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
+                    { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
+                    { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
+                  ],
                   id: 'ml_overview',
                   title: '',
                 },
                 {
                   breadcrumbStatus: 'hidden',
-                  children: [{ link: 'ml:anomalyExplorer' }, { link: 'ml:singleMetricViewer' }],
+                  children: [
+                    {
+                      link: 'management:anomaly_detection',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.machineLearning.anomalyDetection.manageJobs',
+                        {
+                          defaultMessage: 'Manage jobs',
+                        }
+                      ),
+                    },
+                    { link: 'ml:anomalyExplorer' },
+                    { link: 'ml:singleMetricViewer' },
+                  ],
                   id: 'category-anomaly_detection',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.machineLearning.anomalyDetection',
@@ -109,8 +142,11 @@ export const getNavigationTreeDefinition = ({
                   breadcrumbStatus: 'hidden',
                   children: [
                     { link: 'ml:logRateAnalysis' },
+                    { link: 'ml:logRateAnalysisPage', sideNavStatus: 'hidden' },
                     { link: 'ml:logPatternAnalysis' },
+                    { link: 'ml:logPatternAnalysisPage', sideNavStatus: 'hidden' },
                     { link: 'ml:changePointDetections' },
+                    { link: 'ml:changePointDetectionsPage', sideNavStatus: 'hidden' },
                   ],
                   id: 'category-aiops_labs',
                   title: i18n.translate(
@@ -121,7 +157,7 @@ export const getNavigationTreeDefinition = ({
                   ),
                 },
               ],
-              icon: 'machineLearningApp',
+              icon: 'productML',
               id: 'machine_learning',
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.machineLearning', {
@@ -132,19 +168,7 @@ export const getNavigationTreeDefinition = ({
               children: [
                 {
                   children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return (
-                          pathNameSerialized.startsWith(
-                            prepend('/app/elasticsearch/index_management/indices')
-                          ) ||
-                          pathNameSerialized.startsWith(
-                            prepend('/app/management/data/index_management')
-                          )
-                        );
-                      },
-                      link: 'management:index_management',
-                    },
+                    { link: 'management:index_management' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
@@ -185,7 +209,7 @@ export const getNavigationTreeDefinition = ({
           ],
           footer: [
             {
-              icon: 'launch',
+              icon: 'rocket',
               id: 'search_getting_started',
               link: 'searchGettingStarted',
             },
@@ -201,7 +225,6 @@ export const getNavigationTreeDefinition = ({
               }),
             },
             {
-              icon: 'managementApp',
               children: [
                 {
                   children: [
@@ -210,11 +233,11 @@ export const getNavigationTreeDefinition = ({
                       // https://github.com/elastic/kibana/issues/241518
                       // And that the sidenav panel opens when user lands to legacy management landing page
                       // https://github.com/elastic/kibana/issues/240275
+                      breadcrumbStatus: 'hidden',
                       link: 'management',
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.management.home', {
                         defaultMessage: 'Home',
                       }),
-                      breadcrumbStatus: 'hidden',
                     },
                     // Only show Cloud Connect in on-prem deployments (not cloud)
                     ...(isCloudEnabled
@@ -225,14 +248,29 @@ export const getNavigationTreeDefinition = ({
                             link: 'cloud_connect' as const,
                           },
                         ]),
-                    {
-                      id: 'monitoring',
-                      link: 'monitoring',
-                    },
                   ],
                   id: 'stack_management_home',
                   title: '',
                 },
+                ...(showAlertingV2
+                  ? [
+                      {
+                        id: 'v2_alerting_preview',
+                        title: i18n.translate(
+                          'xpack.enterpriseSearch.searchNav.management.v2AlertingPreview',
+                          {
+                            defaultMessage: 'V2 Alerting Preview',
+                          }
+                        ),
+                        renderAs: 'panelOpener' as const,
+                        children: [
+                          { link: 'management:rules' as const },
+                          { link: 'management:episodes' as const },
+                          { link: 'management:notification_policies' as const },
+                        ],
+                      },
+                    ]
+                  : []),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
@@ -249,10 +287,23 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
-                    { link: 'management:trained_models' },
                     {
-                      link: 'searchInferenceEndpoints:inferenceEndpoints',
+                      id: 'monitoring',
+                      link: 'monitoring',
                     },
+                    { badgeType: 'new', link: 'management:queryActivity' },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.clusterPerformance',
+                    {
+                      defaultMessage: 'Cluster performance',
+                    }
+                  ),
+                },
+                {
+                  children: [
+                    { link: 'management:overview' },
+                    { link: 'management:trained_models' },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                   ],
@@ -265,7 +316,27 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
+                    {
+                      link: 'management:elastic_inference_service',
+                    },
+                    {
+                      link: 'management:inference_endpoints',
+                    },
+                    {
+                      link: 'management:model_settings',
+                    },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.modelManagement',
+                    {
+                      defaultMessage: 'Model Management',
+                    }
+                  ),
+                },
+                {
+                  children: [
                     { link: 'management:genAiSettings' },
+                    { link: 'management:evals' },
                     { link: 'management:aiAssistantManagementSelection' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {
@@ -296,7 +367,6 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:dataViews' },
                     { link: 'management:filesManagement' },
-                    { link: 'visualize' },
                     { link: 'management:objects' },
                     { link: 'management:tags' },
                     { link: 'management:search_sessions' },
@@ -317,6 +387,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
               ],
+              icon: 'managementApp',
               id: STACK_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to open the panel programmatically
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {

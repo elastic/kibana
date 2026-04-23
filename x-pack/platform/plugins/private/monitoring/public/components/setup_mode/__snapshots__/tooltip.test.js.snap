@@ -16,7 +16,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -40,7 +39,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for beat
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -64,7 +62,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for elas
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -88,7 +85,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for kiba
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -112,7 +108,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for logs
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -136,7 +131,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for a
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -160,7 +154,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for b
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -184,7 +177,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for e
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -208,7 +200,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for k
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -232,7 +223,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for l
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -256,7 +246,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -280,7 +269,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -304,7 +292,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -328,7 +315,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -352,7 +338,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -376,7 +361,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ap
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -400,7 +384,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for be
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -424,7 +407,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for el
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -448,7 +430,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ki
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -472,7 +453,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for lo
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -496,7 +476,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>
@@ -520,7 +499,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>
@@ -544,7 +522,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>
@@ -568,7 +545,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>
@@ -592,7 +568,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>

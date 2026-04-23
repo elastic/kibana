@@ -7,32 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-// Import specific step types as needed from schema
-// import { evaluate } from '@marcbachmann/cel-js'
+import apm from 'elastic-apm-node';
+import type { ByteSizeValue } from '@kbn/config-schema';
 import type { SerializedError } from '@kbn/workflows';
+import { ExecutionError } from '@kbn/workflows/server';
+import {
+  DEFAULT_MAX_STEP_SIZE,
+  parseByteSize,
+  ResponseSizeLimitError,
+  safeOutputSize,
+} from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
-import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
-  input: any;
-  output: any;
+  input: unknown;
+  output: unknown;
   error: SerializedError | undefined;
 }
 
 // TODO: To remove it and replace with AtomicGraphNode
 // Base step interface
 export interface BaseStep {
+  stepId: string;
   name: string;
   type: string;
-  if?: string;
-  foreach?: string;
-  timeout?: number;
-  spaceId: string;
+  'max-step-size'?: string;
 }
 
 export type StepDefinition = BaseStep;
@@ -73,12 +74,33 @@ export interface MonitorableNode {
   monitor(monitoredContext: StepExecutionRuntime): Promise<void> | void;
 }
 
+/**
+ * Node implementation with explicit cancellation cleanup.
+ *
+ * Steps that hold external resources (child workflow executions, long-running
+ * connections, etc.) implement this to perform teardown when cancelled.
+ * `onCancel` is called after the abort signal fires and the step is marked
+ * as cancelled — it fires in both the running and waiting states, giving
+ * the step a guaranteed cleanup entry point without re-invoking `run()`.
+ *
+ * Implementations must be idempotent.
+ */
+export interface CancellableNode {
+  onCancel(): Promise<void> | void;
+}
+
+export const isCancellableNode = (
+  node: NodeImplementation
+): node is NodeImplementation & CancellableNode => {
+  return typeof (node as unknown as CancellableNode).onCancel === 'function';
+};
+
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   implements NodeImplementation
 {
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
-  protected connectorExecutor: ConnectorExecutor;
+  protected connectorExecutor: ConnectorExecutor | undefined;
   protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(
@@ -89,42 +111,108 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   ) {
     this.step = step;
     this.stepExecutionRuntime = stepExecutionRuntime;
-    this.connectorExecutor = connectorExecutor as any;
+    this.connectorExecutor = connectorExecutor;
     this.workflowExecutionRuntime = workflowExecutionRuntime;
+
+    // Graph nodes use `stepId` instead of `name`. When the factory passes a
+    // graph node directly (e.g. for ES/Kibana steps), bridge the gap so that
+    // error messages and APM spans always have a human-readable step name.
+    if (!this.step.name) {
+      const graphStepId = step.stepId;
+      if (graphStepId) {
+        this.step.name = graphStepId;
+      }
+    }
+
+    // Auto-populate max-step-size from the graph node configuration.
+    // This ensures every step respects the YAML limit regardless of how
+    // the subclass constructs its step object.
+    if (!this.step['max-step-size']) {
+      if (
+        'configuration' in stepExecutionRuntime.node &&
+        stepExecutionRuntime.node.configuration?.['max-step-size']
+      ) {
+        this.step['max-step-size'] = stepExecutionRuntime.node.configuration?.['max-step-size'];
+      }
+    }
   }
 
   public getName(): string {
     return this.step.name;
   }
 
-  public getInput(): any {
+  public getInput(): Record<string, unknown> {
     return {};
   }
 
   public async run(): Promise<void> {
-    let input: any;
+    // If the execution is already aborted, do not start the step, navigate to make the execution finish properly
+    if (this.stepExecutionRuntime.abortController.signal.aborted) {
+      this.workflowExecutionRuntime.navigateToNextNode();
+      return;
+    }
+
+    let input: Record<string, unknown> = {};
     this.stepExecutionRuntime.startStep();
     // flush event logs after start step
     await this.stepExecutionRuntime.flushEventLogs();
+
+    // Create APM span for step execution visibility in traces
+    const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
+    if (stepSpan) {
+      stepSpan.setLabel('step_name', this.step.name);
+      stepSpan.setLabel('step_type', this.step.type);
+      stepSpan.setLabel('step_id', this.stepExecutionRuntime.stepExecutionId);
+    }
 
     try {
       input = await this.getInput();
       this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
+      // Layer 2: Enforce output size limit before storing in execution state.
+      // This is the generic catch-all that protects every step type against context growth.
+      // Layer 1 (pre-emptive I/O enforcement) may have already caught this at the transport level.
+      if (result.output != null && !result.error) {
+        const maxBytes = this.getMaxResponseBytes();
+        if (maxBytes > 0) {
+          const outputSize = safeOutputSize(result.output);
+          if (outputSize > 0 && outputSize > maxBytes) {
+            throw new ResponseSizeLimitError(maxBytes, this.step.name);
+          }
+        }
+      }
+
       // Don't update step execution runtime if abort was initiated
       if (this.stepExecutionRuntime.abortController.signal.aborted) {
+        if (stepSpan) {
+          stepSpan.setOutcome('unknown');
+          stepSpan.end();
+        }
         return;
       }
 
       if (result.error) {
         this.stepExecutionRuntime.failStep(new ExecutionError(result.error));
+        if (stepSpan) {
+          stepSpan.setOutcome('failure');
+        }
       } else {
         this.stepExecutionRuntime.finishStep(result.output);
+        if (stepSpan) {
+          stepSpan.setOutcome('success');
+        }
       }
     } catch (error) {
       const result = this.handleFailure(input, error);
       this.stepExecutionRuntime.failStep(result.error || error);
+      if (stepSpan) {
+        stepSpan.setOutcome('failure');
+      }
+    } finally {
+      if (stepSpan) {
+        stepSpan.end();
+      }
     }
 
     // flush event logs after finishing the step
@@ -134,10 +222,48 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   // Subclasses implement this to execute the step logic
-  protected abstract _run(input?: any): Promise<RunStepResult>;
+  protected abstract _run(input: Record<string, unknown>): Promise<RunStepResult>;
+
+  /**
+   * Resolves the maximum step size in bytes.
+   * Resolution order: step-level > workflow settings > plugin config > DEFAULT_MAX_STEP_SIZE.
+   * Returns 0 if the configured value is explicitly "0" (disables the limit).
+   * Returns the default on invalid/unparseable values to avoid crashing the step.
+   */
+  protected getMaxResponseBytes(): number {
+    try {
+      // 1. Step-level override (from YAML — auto-populated in constructor)
+      const stepLimit = this.step['max-step-size'];
+      if (stepLimit) {
+        return parseByteSize(stepLimit);
+      }
+
+      // 2. Workflow-level override (from YAML settings, via runtime — not user-facing context)
+      const workflowSettings =
+        this.stepExecutionRuntime.workflowExecution?.workflowDefinition?.settings;
+      const workflowLimit = workflowSettings?.['max-step-size'];
+      if (workflowLimit) {
+        return parseByteSize(workflowLimit);
+      }
+
+      // 3. Plugin config default (from kibana.yml)
+      const pluginConfig = this.stepExecutionRuntime.contextManager.getDependencies().config;
+      if (pluginConfig?.maxResponseSize) {
+        const configValue = pluginConfig.maxResponseSize;
+        return typeof configValue === 'number'
+          ? configValue
+          : (configValue as ByteSizeValue).getValueInBytes();
+      }
+
+      // 4. Hardcoded fallback
+      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+    } catch {
+      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+    }
+  }
 
   // Helper for handling on-failure, retries, etc.
-  protected handleFailure(input: any, error: any): RunStepResult {
+  protected handleFailure(input: Record<string, unknown>, error: Error): RunStepResult {
     return {
       input,
       output: undefined,

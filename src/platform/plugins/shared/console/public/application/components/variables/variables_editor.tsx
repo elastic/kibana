@@ -211,7 +211,7 @@ export const VariablesEditor = (props: Props) => {
 
         return (
           <EuiButtonIcon
-            iconType={itemIdToExpandedRowMapValues[id] ? 'arrowUp' : 'pencil'}
+            iconType={itemIdToExpandedRowMapValues[id] ? 'chevronSingleUp' : 'pencil'}
             aria-label={i18n.translate('console.variablesPage.variablesTable.columns.editButton', {
               defaultMessage: 'Edit {variable}',
               values: { variable: variable.name },
@@ -271,6 +271,9 @@ export const VariablesEditor = (props: Props) => {
         noItemsMessage={i18n.translate('console.variablesPage.table.noItemsMessage', {
           defaultMessage: 'No variables have been added yet',
         })}
+        tableCaption={i18n.translate('console.variablesPage.variablesTable.caption', {
+          defaultMessage: 'Defined Variables',
+        })}
       />
 
       {isAddingVariable && (
@@ -282,7 +285,7 @@ export const VariablesEditor = (props: Props) => {
       <div>
         <EuiButton
           data-test-subj="variablesAddButton"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => {
             setIsAddingVariable(true);
             collapseExpandedRows();

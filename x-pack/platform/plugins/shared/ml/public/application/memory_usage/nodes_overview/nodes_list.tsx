@@ -121,7 +121,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
         />
       ),
       'data-test-subj': 'mlNodesTableRowDetailsToggle',
@@ -219,6 +219,12 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
 
       <div data-test-subj="mlNodesTableContainer">
         <EuiInMemoryTable<NodeItem>
+          tableCaption={i18n.translate(
+            'xpack.ml.trainedModels.nodesList.nodesOverviewTableCaption',
+            {
+              defaultMessage: 'Machine learning nodes overview',
+            }
+          )}
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}

@@ -21,6 +21,8 @@ import {
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { i18n } from '@kbn/i18n';
+
 import type {
   PackageInfo,
   RegistryVarsEntry,
@@ -114,7 +116,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
 
 type RegistryInputWithStreams = RegistryInput & {
   key: string;
-  streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }>;
+  streams: Array<RegistryStream & { data_stream: { type?: string; dataset: string } }>;
 };
 
 const StreamsSection: React.FunctionComponent<{
@@ -137,8 +139,8 @@ const StreamsSection: React.FunctionComponent<{
       <EuiSpacer size="m" />
       {streams.map((dataStream) => (
         <EuiAccordion
-          key={dataStream.data_stream.type + dataStream.data_stream.dataset}
-          id={dataStream.data_stream.type + dataStream.data_stream.dataset}
+          key={`${dataStream.data_stream.type ?? 'dynamic'}-${dataStream.data_stream.dataset}`}
+          id={`${dataStream.data_stream.type ?? 'dynamic'}-${dataStream.data_stream.dataset}`}
           buttonContent={
             <EuiText>
               <EuiCode>{dataStream.data_stream.dataset}</EuiCode>({dataStream.title})
@@ -292,7 +294,13 @@ const VarsTable: React.FunctionComponent<{ vars: RegistryVarsEntry[] }> = ({ var
           />
         </h6>
       </EuiTitle>
-      <EuiBasicTable columns={columns} items={vars} />
+      <EuiBasicTable
+        tableCaption={i18n.translate('xpack.fleet.epm.packageDetails.apiReference.tableCaption', {
+          defaultMessage: 'Variables',
+        })}
+        columns={columns}
+        items={vars}
+      />
     </>
   );
 };

@@ -4,5 +4,11 @@ steps:
     agents:
       machineType: n2-standard-8
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskSizeGb: 105
     key: storybooks
     timeout_in_minutes: 80
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

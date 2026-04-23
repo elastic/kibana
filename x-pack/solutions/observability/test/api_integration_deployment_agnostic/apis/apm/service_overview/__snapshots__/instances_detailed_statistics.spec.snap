@@ -272,7 +272,7 @@ Object {
       "throughput": Array [
         Object {
           "x": 1627974300000,
-          "y": 0,
+          "y": null,
         },
         Object {
           "x": 1627974360000,
@@ -332,7 +332,7 @@ Object {
         },
         Object {
           "x": 1627975200000,
-          "y": 0,
+          "y": null,
         },
       ],
     },
@@ -607,7 +607,7 @@ Object {
       "throughput": Array [
         Object {
           "x": 1627974300000,
-          "y": 0,
+          "y": null,
         },
         Object {
           "x": 1627974360000,
@@ -1187,7 +1187,7 @@ Object {
       "throughput": Array [
         Object {
           "x": 1627973400000,
-          "y": 0,
+          "y": null,
         },
         Object {
           "x": 1627973460000,
@@ -1307,7 +1307,7 @@ Object {
         },
         Object {
           "x": 1627975200000,
-          "y": 0,
+          "y": null,
         },
       ],
     },

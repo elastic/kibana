@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
-test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
+test.describe('Differential Functions page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_TEST_DATES;
   const comparisonRangeFrom = '2023-04-18T00:01:00.000Z';
   const comparisonRangeTo = '2023-04-18T00:01:30.000Z';
@@ -27,9 +28,6 @@ test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
       comparisonRangeFrom,
       comparisonRangeTo
     );
-    await page.waitForResponse((response) =>
-      response.url().includes('/internal/profiling/topn/functions')
-    );
 
     await expect(page.getByText('Baseline functions')).toBeVisible();
     await expect(page.getByText('Comparison functions')).toBeVisible();
@@ -37,33 +35,30 @@ test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
     const overallPerformanceTitle = page.getByTestId('overallPerformance_summary_title');
     await expect(overallPerformanceTitle).toContainText('Gained overall performance by');
 
-    const overallPerformanceValue = await differentialFunctionsPage.getSummaryValue(
-      'overallPerformance'
+    await expect(differentialFunctionsPage.getSummaryValue('overallPerformance')).toContainText(
+      '66.06%'
     );
-    await expect(overallPerformanceValue).toContainText('66.06%');
 
-    const annualizedCo2Value = await differentialFunctionsPage.getSummaryValue('annualizedCo2');
-    await expect(annualizedCo2Value).toContainText('76.06 lbs / 34.5 kg');
-    const annualizedCo2Comparison = await differentialFunctionsPage.getSummaryComparisonValue(
-      'annualizedCo2'
+    await expect(differentialFunctionsPage.getSummaryValue('annualizedCo2')).toContainText(
+      '76.06 lbs / 34.5 kg'
     );
-    await expect(annualizedCo2Comparison).toContainText('25.79 lbs / 11.7 kg (66.09%)');
+    await expect(
+      differentialFunctionsPage.getSummaryComparisonValue('annualizedCo2')
+    ).toContainText('25.79 lbs / 11.7 kg (66.09%)');
 
-    const annualizedCostValue = await differentialFunctionsPage.getSummaryValue('annualizedCost');
-    await expect(annualizedCostValue).toContainText('$325.27');
-    const annualizedCostComparison = await differentialFunctionsPage.getSummaryComparisonValue(
-      'annualizedCost'
+    await expect(differentialFunctionsPage.getSummaryValue('annualizedCost')).toContainText(
+      '$325.27'
     );
-    await expect(annualizedCostComparison).toContainText('$110.38 (66.06%)');
+    await expect(
+      differentialFunctionsPage.getSummaryComparisonValue('annualizedCost')
+    ).toContainText('$110.38 (66.06%)');
 
-    const totalSamplesValue = await differentialFunctionsPage.getSummaryValue(
-      'totalNumberOfSamples'
+    await expect(differentialFunctionsPage.getSummaryValue('totalNumberOfSamples')).toContainText(
+      '498'
     );
-    await expect(totalSamplesValue).toContainText('498');
-    const totalSamplesComparison = await differentialFunctionsPage.getSummaryComparisonValue(
-      'totalNumberOfSamples'
-    );
-    await expect(totalSamplesComparison).toContainText('169 (66.06%)');
+    await expect(
+      differentialFunctionsPage.getSummaryComparisonValue('totalNumberOfSamples')
+    ).toContainText('169 (66.06%)');
   });
 
   test('show lost performance when comparison data has more samples than baseline', async ({
@@ -75,9 +70,6 @@ test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
       comparisonRangeTo,
       rangeFrom,
       rangeTo
-    );
-    await page.waitForResponse((response) =>
-      response.url().includes('/internal/profiling/topn/functions')
     );
     const overallPerformanceTitle = page.getByTestId('overallPerformance_summary_title');
 
@@ -113,9 +105,6 @@ test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
       comparisonRangeTo,
       rangeFrom,
       rangeTo
-    );
-    await page.waitForResponse((response) =>
-      response.url().includes('/internal/profiling/topn/functions')
     );
 
     await expect(

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, skip } from 'rxjs';
+import { BehaviorSubject, Subject, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { initializeControlGroupManager } from './control_group_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
@@ -21,31 +20,18 @@ import { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { DashboardPanel } from '../../server';
+import type { DashboardSaveEvent } from './types';
 import { getSampleDashboardState } from '../mocks';
 
-jest.mock('../services/dashboard_backup_service', () => ({}));
+const setStateMock = () => {};
 
-const controlGroupApi = {
-  hasUnsavedChanges$: new BehaviorSubject(false),
-};
-const controlGroupManagerMock = {
-  api: {
-    controlGroupApi$: new BehaviorSubject(controlGroupApi),
-  },
-  internalApi: {
-    serializeControlGroup: () => ({
-      controlGroupInput: {},
-      controlGroupReferences: [],
-    }),
-  },
-} as unknown as ReturnType<typeof initializeControlGroupManager>;
 const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
 const layoutManagerMock = {
   api: {
     children$: new BehaviorSubject<DashboardChildren>({}),
   },
   internalApi: {
-    startComparing$: () => layoutUnsavedChanges$,
+    startComparing: () => layoutUnsavedChanges$,
     serializeLayout: () => {
       const panels = layoutUnsavedChanges$.getValue()?.panels ?? [];
       return {
@@ -62,14 +48,15 @@ const layoutManagerMock = {
     },
   },
 } as unknown as ReturnType<typeof initializeLayoutManager>;
+
 const settingsManagerMock = {
   internalApi: {
-    startComparing$: () => new BehaviorSubject<Partial<DashboardSettings>>({}),
+    startComparing: () => new BehaviorSubject<Partial<DashboardSettings>>({}),
   },
 } as unknown as ReturnType<typeof initializeSettingsManager>;
 const unifiedSearchManagerMock = {
   internalApi: {
-    startComparing$: () =>
+    startComparing: () =>
       new BehaviorSubject<
         Partial<Pick<DashboardState, 'filters' | 'query' | 'refresh_interval' | 'time_range'>>
       >({}),
@@ -77,13 +64,12 @@ const unifiedSearchManagerMock = {
 } as unknown as ReturnType<typeof initializeUnifiedSearchManager>;
 const projectRoutingManagerMock = {
   internalApi: {
-    startComparing$: () =>
-      new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
+    startComparing: () => new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
   },
 } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
-const getReferences = () => [];
 const savedObjectId$ = new BehaviorSubject<string | undefined>('dashboard1234');
 const viewMode$ = new BehaviorSubject<ViewMode>('edit');
+let onSave$: Subject<DashboardSaveEvent>;
 
 const setBackupStateMock = jest.fn();
 
@@ -91,11 +77,12 @@ describe('unsavedChangesManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setBackupStateMock.mockReset();
+    onSave$ = new Subject<DashboardSaveEvent>();
 
     layoutUnsavedChanges$.next({});
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../services/dashboard_backup_service').getDashboardBackupService = () => ({
+    require('../services/dashboard_api_services').getDashboardBackupService = () => ({
       setState: setBackupStateMock,
     });
   });
@@ -107,14 +94,14 @@ describe('unsavedChangesManager', () => {
         const unsavedChangesManager = initializeUnsavedChangesManager({
           viewMode$,
           storeUnsavedChanges: false,
-          controlGroupManager: controlGroupManagerMock,
           lastSavedState: DEFAULT_DASHBOARD_STATE,
           layoutManager: layoutManagerMock,
           savedObjectId$,
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          getReferences,
+          setState: setStateMock,
+          onSave$: onSave$.asObservable(),
         });
 
         unsavedChangesManager.api.hasUnsavedChanges$
@@ -133,14 +120,14 @@ describe('unsavedChangesManager', () => {
         initializeUnsavedChangesManager({
           viewMode$,
           storeUnsavedChanges: true,
-          controlGroupManager: controlGroupManagerMock,
           lastSavedState: DEFAULT_DASHBOARD_STATE,
           layoutManager: layoutManagerMock,
           savedObjectId$,
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          getReferences,
+          setState: setStateMock,
+          onSave$: onSave$.asObservable(),
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
@@ -152,13 +139,6 @@ describe('unsavedChangesManager', () => {
                   "config": Object {
                     "title": "New panel",
                   },
-                  "type": "testType",
-                },
-              ],
-              "references": Array [
-                Object {
-                  "id": "savedObject1",
-                  "name": "savedObjectRef",
                   "type": "testType",
                 },
               ],
@@ -189,20 +169,20 @@ describe('unsavedChangesManager', () => {
       >({});
       const customProjectRoutingManagerMock = {
         internalApi: {
-          startComparing$: () => projectRoutingChanges$,
+          startComparing: () => projectRoutingChanges$,
         },
       } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 
       const unsavedChangesManager = initializeUnsavedChangesManager({
         viewMode$,
-        controlGroupManager: controlGroupManagerMock,
         lastSavedState: getSampleDashboardState(),
         layoutManager: layoutManagerMock,
         savedObjectId$,
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        getReferences,
+        setState: setStateMock,
+        onSave$: onSave$.asObservable(),
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -224,20 +204,20 @@ describe('unsavedChangesManager', () => {
       >({});
       const customProjectRoutingManagerMock = {
         internalApi: {
-          startComparing$: () => projectRoutingChanges$,
+          startComparing: () => projectRoutingChanges$,
         },
       } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 
       const unsavedChangesManager = initializeUnsavedChangesManager({
         viewMode$,
-        controlGroupManager: controlGroupManagerMock,
         lastSavedState,
         layoutManager: layoutManagerMock,
         savedObjectId$,
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        getReferences,
+        setState: setStateMock,
+        onSave$: onSave$.asObservable(),
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -247,6 +227,32 @@ describe('unsavedChangesManager', () => {
 
       // Change to different value
       projectRoutingChanges$.next({ project_routing: 'ALL' });
+    });
+  });
+
+  describe('save events', () => {
+    it('updates the last saved state when a save event is published', () => {
+      const currentState = { ...getSampleDashboardState(), title: 'Updated title' };
+      const unsavedChangesManager = initializeUnsavedChangesManager({
+        viewMode$,
+        lastSavedState: getSampleDashboardState(),
+        layoutManager: layoutManagerMock,
+        savedObjectId$,
+        settingsManager: settingsManagerMock,
+        unifiedSearchManager: unifiedSearchManagerMock,
+        projectRoutingManager: projectRoutingManagerMock,
+        setState: setStateMock,
+        onSave$: onSave$.asObservable(),
+      });
+      const saveEvent = {
+        previousDashboardId: 'dashboard-a',
+        dashboardId: 'dashboard-b',
+        dashboardState: currentState,
+      };
+
+      onSave$.next(saveEvent);
+
+      expect(unsavedChangesManager.internalApi.getLastSavedState()).toEqual(currentState);
     });
   });
 });

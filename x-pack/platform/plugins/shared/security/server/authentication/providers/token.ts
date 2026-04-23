@@ -8,15 +8,16 @@
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import { BaseAuthenticationProvider } from './base';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
+import type { SessionValue } from '../../session_management';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 
@@ -46,7 +47,7 @@ function canStartNewSession(request: KibanaRequest) {
 /**
  * Provider that supports token-based request authentication.
  */
-export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
+export class TokenAuthenticationProvider extends BaseAuthenticationProvider<ProviderState> {
   /**
    * Type of the provider.
    */
@@ -56,13 +57,8 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * Performs initial login request using username and password.
    * @param request Request instance.
    * @param attempt User credentials.
-   * @param [state] Optional state object associated with the provider.
    */
-  public async login(
-    request: KibanaRequest,
-    { username, password }: ProviderLoginAttempt,
-    state?: ProviderState | null
-  ) {
+  public async login(request: KibanaRequest, { username, password }: ProviderLoginAttempt) {
     this.logger.debug('Trying to perform a login.');
 
     try {
@@ -100,9 +96,9 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs token-based request authentication
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
@@ -113,13 +109,13 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
-    if (state) {
-      authenticationResult = await this.authenticateViaState(request, state);
+    if (session?.state) {
+      authenticationResult = await this.authenticateViaState(request, session);
       if (
         authenticationResult.failed() &&
         Tokens.isAccessTokenExpiredError(authenticationResult.error)
       ) {
-        authenticationResult = await this.authenticateViaRefreshToken(request, state);
+        authenticationResult = await this.authenticateViaRefreshToken(request, session.state);
       }
     }
 
@@ -136,22 +132,22 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Redirects user to the login page preserving query string parameters.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+  public async logout(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
-    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // Having a `null` session means that provider was specifically called to do a logout, but when
     // session isn't defined then provider is just being probed whether or not it can perform logout.
-    if (state === undefined) {
+    if (session === undefined) {
       this.logger.debug('There are no access and refresh tokens to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
     this.logger.debug('Token-based logout has been initiated by the user.');
-    if (state) {
+    if (session?.state) {
       try {
-        await this.options.tokens.invalidate(state);
+        await this.options.tokens.invalidate(session.state);
       } catch (err) {
         this.logger.debug(
           `Failed invalidating user's access token: ${getDetailedErrorMessage(err)}`
@@ -175,16 +171,16 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to extract authorization header from the state and adds it to the request before
    * it's forwarded to Elasticsearch backend.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session value previously stored by the provider.
    */
-  private async authenticateViaState(request: KibanaRequest, { accessToken }: ProviderState) {
+  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
     this.logger.debug('Trying to authenticate via state.');
 
+    const authHeaders = {
+      authorization: new HTTPAuthorizationHeader('Bearer', session.state.accessToken).toString(),
+    };
     try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
+      const user = await this.getUser(request, authHeaders, session);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });

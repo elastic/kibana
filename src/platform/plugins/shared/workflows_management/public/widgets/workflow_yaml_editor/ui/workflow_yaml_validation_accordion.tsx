@@ -20,16 +20,20 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import { partition } from 'lodash';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
 import type {
   YamlValidationErrorSeverity,
   YamlValidationResult,
 } from '../../../features/validate_workflow_yaml/model/types';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 
-const severityOrder = ['error', 'warning', 'info'];
+const severityOrder = ['error', 'warning'];
 
 interface WorkflowYamlValidationAccordionProps {
   isMounted: boolean;
@@ -40,7 +44,56 @@ interface WorkflowYamlValidationAccordionProps {
   extraAction?: React.ReactNode;
 }
 
-export function WorkflowYamlValidationAccordion({
+function useGroupedErrors(allValidationErrors: YamlValidationResult[] | null) {
+  const [errors, warnings] = useMemo(
+    () => partition(allValidationErrors ?? [], { severity: 'error' }),
+    [allValidationErrors]
+  );
+
+  const errorCount = errors.length;
+  const warningCount = warnings.length;
+  const highestSeverity = errorCount ? 'error' : warningCount ? 'warning' : null;
+
+  const parts = useMemo(() => {
+    const arr = [];
+    if (errorCount > 0) {
+      arr.push(
+        i18n.translate('workflowsManagement.workflowYAMLValidationErrors.errorCount', {
+          defaultMessage: '{errorCount} error{errorCount, plural, one {} other {s}}',
+          values: { errorCount },
+        })
+      );
+    }
+    if (warningCount > 0) {
+      arr.push(
+        i18n.translate('workflowsManagement.workflowYAMLValidationErrors.warningCount', {
+          defaultMessage: '{warningCount} warning{warningCount, plural, one {} other {s}}',
+          values: { warningCount },
+        })
+      );
+    }
+    return arr;
+  }, [errorCount, warningCount]);
+
+  const sortedValidationErrors = useMemo(() => {
+    return allValidationErrors?.toSorted((a, b) => {
+      if (a.startLineNumber === b.startLineNumber) {
+        if (a.startColumn === b.startColumn) {
+          if (a.severity && b.severity) {
+            return severityOrder.indexOf(a.severity) - severityOrder.indexOf(b.severity);
+          }
+          return 0;
+        }
+        return a.startColumn - b.startColumn;
+      }
+      return a.startLineNumber - b.startLineNumber;
+    });
+  }, [allValidationErrors]);
+
+  return { highestSeverity, parts, sortedValidationErrors };
+}
+
+export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlValidationAccordion({
   isMounted,
   isLoading,
   error: errorValidating,
@@ -51,107 +104,110 @@ export function WorkflowYamlValidationAccordion({
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: 'wf-yaml-editor-validation-errors' });
+  const workflowId = useSelector(selectWorkflowId);
+  const telemetry = useTelemetry();
+  const previousErrorsRef = useRef<string>('');
+
   let icon: React.ReactNode | null = null;
   let buttonContent: React.ReactNode | null = null;
 
-  const allValidationErrors: YamlValidationResult[] = [
-    ...(validationErrors || []),
-    ...(errorValidating
-      ? [
-          {
-            id: 'error-validating',
-            endLineNumber: 0,
-            endColumn: 0,
-            hoverMessage: null,
-            severity: 'error' as YamlValidationErrorSeverity,
-            message: errorValidating.message,
-            owner: 'variable-validation' as YamlValidationResult['owner'],
-            startLineNumber: 0,
-            startColumn: 0,
-            afterMessage: null,
-          },
-        ]
-      : []),
-  ];
+  const allValidationErrors: YamlValidationResult[] = useMemo(
+    () => [
+      ...(validationErrors?.filter(
+        (error) => error.severity === 'error' || error.severity === 'warning'
+      ) || []),
+      ...(errorValidating
+        ? [
+            {
+              id: 'error-validating',
+              endLineNumber: 0,
+              endColumn: 0,
+              hoverMessage: null,
+              severity: 'error' as YamlValidationErrorSeverity,
+              message: errorValidating.message,
+              owner: 'variable-validation' as const,
+              startLineNumber: 0,
+              startColumn: 0,
+              afterMessage: null,
+            },
+          ]
+        : []),
+    ],
+    [validationErrors, errorValidating]
+  );
 
-  const highestSeverity = allValidationErrors?.reduce((acc: string | null, error) => {
-    if (error.severity === 'error') {
-      return 'error';
+  // Report telemetry when validation errors change (only when errors are present and stable)
+  useEffect(() => {
+    // Only report if validation is complete (not loading) and there are errors
+    if (!isLoading && isMounted && allValidationErrors.length > 0) {
+      // Create a stable key from error set to detect actual changes
+      const errorKey = allValidationErrors
+        .map((e) => `${e.owner}-${e.startLineNumber}-${e.startColumn}`)
+        .sort()
+        .join('|');
+
+      // Only report if the error set has actually changed
+      if (errorKey !== previousErrorsRef.current) {
+        previousErrorsRef.current = errorKey;
+        telemetry.reportWorkflowValidationError({
+          workflowId,
+          validationResults: allValidationErrors,
+          editorType: 'yaml', // Validation always happens in YAML editor context
+        });
+      }
+    } else if (!isLoading && isMounted && allValidationErrors.length === 0) {
+      // Clear the previous errors ref when there are no errors
+      previousErrorsRef.current = '';
     }
-    if (error.severity === 'warning' && acc !== 'error') {
-      return 'warning';
-    }
-    if (error.severity === 'info' && acc !== 'error' && acc !== 'warning') {
-      return 'info';
-    }
-    return acc;
-  }, null);
+  }, [isLoading, isMounted, allValidationErrors, workflowId, telemetry]);
+
+  const { parts, highestSeverity, sortedValidationErrors } = useGroupedErrors(allValidationErrors);
 
   if (!isMounted) {
     icon = <EuiLoadingSpinner size="m" />;
-    buttonContent = 'Loading editor...';
+    buttonContent = i18n.translate(
+      'workflowsManagement.workflowYAMLValidationErrors.loadingEditor',
+      {
+        defaultMessage: 'Loading editor...',
+      }
+    );
   } else if (!allValidationErrors || isLoading) {
     icon = <EuiLoadingSpinner size="m" />;
-    buttonContent = 'Initializing validation...';
+    buttonContent = i18n.translate(
+      'workflowsManagement.workflowYAMLValidationErrors.initializingValidation',
+      {
+        defaultMessage: 'Initializing validation...',
+      }
+    );
   } else if (allValidationErrors?.length === 0) {
     icon = (
       <EuiIcon
-        type="checkInCircleFilled"
+        type="checkCircleFill"
         color={euiTheme.colors.vis.euiColorVisSuccess0}
         size="m"
+        aria-hidden={true}
       />
     );
-    buttonContent = 'No validation errors';
+    buttonContent = i18n.translate('workflowsManagement.workflowYAMLValidationErrors.noErrors', {
+      defaultMessage: 'No validation errors',
+    });
   } else {
     icon = (
       <EuiIcon
-        type={highestSeverity === 'error' ? 'errorFilled' : 'warningFilled'}
+        type={highestSeverity === 'error' ? 'errorFill' : 'warningFill'}
         color={highestSeverity === 'error' ? 'danger' : euiTheme.colors.vis.euiColorVis8}
         size="m"
+        aria-hidden={true}
       />
     );
-    const errorCount = allValidationErrors?.filter((error) => error.severity === 'error').length;
-    const warningCount = allValidationErrors?.filter(
-      (error) => error.severity === 'warning'
-    ).length;
 
-    const parts = [];
-    if (errorCount > 0) {
-      parts.push(
-        i18n.translate('workflowsManagement.workflowYAMLValidationErrors.errorCount', {
-          defaultMessage: '{errorCount} error{errorCount, plural, one {} other {s}}',
-          values: { errorCount },
-        })
-      );
-    }
-    if (warningCount > 0) {
-      parts.push(
-        i18n.translate('workflowsManagement.workflowYAMLValidationErrors.warningCount', {
-          defaultMessage: '{warningCount} warning{warningCount, plural, one {} other {s}}',
-          values: { warningCount },
-        })
-      );
-    }
     buttonContent = parts.join(', ');
   }
-
-  const sortedValidationErrors = allValidationErrors?.sort((a, b) => {
-    if (a.startLineNumber === b.startLineNumber) {
-      if (a.startColumn === b.startColumn) {
-        if (a.severity && b.severity) {
-          return severityOrder.indexOf(a.severity) - severityOrder.indexOf(b.severity);
-        }
-        return 0;
-      }
-      return a.startColumn - b.startColumn;
-    }
-    return a.startLineNumber - b.startLineNumber;
-  });
 
   return (
     <EuiAccordion
       id={accordionId}
-      data-testid="wf-yaml-editor-validation-errors-list"
+      data-test-subj="workflowYamlEditorValidationErrorsList"
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
@@ -160,11 +216,9 @@ export function WorkflowYamlValidationAccordion({
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      arrowDisplay={
-        allValidationErrors !== null && allValidationErrors.length > 0 ? 'left' : 'none'
-      }
-      initialIsOpen={allValidationErrors !== null && allValidationErrors.length > 0}
-      isDisabled={allValidationErrors == null || allValidationErrors.length === 0}
+      arrowDisplay={allValidationErrors?.length > 0 ? 'left' : 'none'}
+      initialIsOpen={allValidationErrors?.length > 0}
+      isDisabled={allValidationErrors?.length === 0}
       css={styles.accordion}
       extraAction={extraAction}
     >
@@ -189,9 +243,9 @@ export function WorkflowYamlValidationAccordion({
                 <EuiIcon
                   type={
                     error.severity === 'error'
-                      ? 'errorFilled'
+                      ? 'errorFill'
                       : error.severity === 'warning'
-                      ? 'warningFilled'
+                      ? 'warningFill'
                       : 'iInCircle'
                   }
                   color={
@@ -203,6 +257,7 @@ export function WorkflowYamlValidationAccordion({
                   }
                   size="s"
                   css={styles.validationErrorIcon}
+                  aria-hidden={true}
                 />
               </EuiFlexItem>
               <EuiFlexItem css={styles.validationErrorText}>
@@ -233,7 +288,7 @@ export function WorkflowYamlValidationAccordion({
       </div>
     </EuiAccordion>
   );
-}
+});
 
 const componentStyles = {
   accordion: ({ euiTheme }: UseEuiTheme) =>

@@ -2,55 +2,7 @@
   "id": "aiAssistantManagementSelection",
   "client": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "aiAssistantManagementSelection",
-        "id": "def-public.AIAgentConfirmationModal",
-        "type": "Function",
-        "tags": [],
-        "label": "AIAgentConfirmationModal",
-        "description": [],
-        "signature": [
-          "({ onConfirm, onCancel, }: ",
-          {
-            "pluginId": "@kbn/ai-agent-confirmation-modal",
-            "scope": "public",
-            "docId": "kibKbnAiAgentConfirmationModalPluginApi",
-            "section": "def-public.AIAgentConfirmationModalProps",
-            "text": "AIAgentConfirmationModalProps"
-          },
-          ") => React.JSX.Element"
-        ],
-        "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "aiAssistantManagementSelection",
-            "id": "def-public.AIAgentConfirmationModal.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  onConfirm,\n  onCancel,\n}",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/ai-agent-confirmation-modal",
-                "scope": "public",
-                "docId": "kibKbnAiAgentConfirmationModalPluginApi",
-                "section": "def-public.AIAgentConfirmationModalProps",
-                "text": "AIAgentConfirmationModalProps"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [
       {
@@ -61,6 +13,8 @@
         "label": "AIAssistantType",
         "description": [],
         "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ai_assistant_type.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -73,6 +27,8 @@
         "label": "AIChatExperience",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/ai_chat_experience.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -101,6 +57,8 @@
           ".Agent"
         ],
         "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -116,6 +74,8 @@
           "\"aiAssistant:preferredAIAssistantType\""
         ],
         "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ui_setting_keys.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -131,6 +91,8 @@
           "\"aiAssistant:preferredChatExperience\""
         ],
         "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ui_setting_keys.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -145,6 +107,8 @@
       "label": "AIAssistantManagementSelectionPluginPublicSetup",
       "description": [],
       "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+      "lineNumber": 35,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -159,6 +123,8 @@
       "label": "AIAssistantManagementSelectionPluginPublicStart",
       "description": [],
       "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+      "lineNumber": 37,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -176,6 +142,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "lineNumber": 38,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -199,6 +167,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -213,6 +183,8 @@
             "() => void"
           ],
           "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "lineNumber": 40,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],

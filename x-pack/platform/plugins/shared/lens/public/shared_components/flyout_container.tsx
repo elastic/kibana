@@ -119,7 +119,7 @@ export function FlyoutContainer({
             overrideContainerCss,
           ]}
           onAnimationEnd={() => {
-            if (isOpen) {
+            if (isOpen && !isInlineEditing) {
               // EuiFocusTrap interferes with animating elements with absolute position:
               // running this onAnimationEnd, otherwise the flyout pushes content when animating.
               setFocusTrapIsEnabled(true);

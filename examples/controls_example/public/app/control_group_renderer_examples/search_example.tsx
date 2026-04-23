@@ -20,17 +20,19 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type {
-  ControlGroupRendererApi,
-  DefaultControlApi,
-  OptionsListControlApi,
-} from '@kbn/controls-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
+import type { OptionsListControlApi } from '@kbn/controls-plugin/public';
+import type { CanClearSelections } from '@kbn/controls-plugin/public/types';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
+
 import { PLUGIN_ID } from '../../constants';
+import type { ControlsExampleStartDeps } from '../../plugin';
 
 interface Props {
   data: DataPublicPluginStart;
@@ -41,6 +43,10 @@ interface Props {
 const DEST_COUNTRY_CONTROL_ID = 'DEST_COUNTRY_CONTROL_ID';
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
+  const {
+    services: { uiActions },
+  } = useKibana<{ core: CoreStart } & ControlsExampleStartDeps>();
+
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
   const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
   const [hits, setHits] = useState(0);
@@ -56,7 +62,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.filters$.subscribe((newFilters) => {
+    const subscription = controlGroupAPI.appliedFilters$.subscribe((newFilters) => {
       setControlFilters(newFilters ?? []);
     });
     return () => {
@@ -145,21 +151,28 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
             await builder.addDataControlFromField(
               initialState,
               {
-                dataViewId: dataView.id!,
+                ...DEFAULT_DATA_CONTROL_STATE,
+                data_view_id: dataView.id!,
                 title: 'Destintion country',
-                fieldName: 'geo.dest',
+                field_name: 'geo.dest',
                 width: 'medium',
                 grow: false,
               },
+              uiActions,
               DEST_COUNTRY_CONTROL_ID
             );
-            await builder.addDataControlFromField(initialState, {
-              dataViewId: dataView.id!,
-              fieldName: 'bytes',
-              width: 'medium',
-              grow: true,
-              title: 'Bytes',
-            });
+            await builder.addDataControlFromField(
+              initialState,
+              {
+                ...DEFAULT_DATA_CONTROL_STATE,
+                data_view_id: dataView.id!,
+                field_name: 'bytes',
+                width: 'medium',
+                grow: true,
+                title: 'Bytes',
+              },
+              uiActions
+            );
             return {
               initialState,
             };
@@ -180,7 +193,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           onClick={() => {
             if (controlGroupAPI) {
               Object.values(controlGroupAPI.children$.getValue()).forEach((controlApi) => {
-                (controlApi as DefaultControlApi)?.clearSelections?.();
+                (controlApi as Partial<CanClearSelections>)?.clearSelections?.();
               });
             }
           }}

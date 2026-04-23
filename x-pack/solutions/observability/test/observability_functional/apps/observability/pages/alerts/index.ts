@@ -226,9 +226,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           await actionsButton.click();
           await observability.alerts.common.viewRuleDetailsButtonClick();
 
-          expect(
-            await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
-          ).to.eql('Observability');
+          await retry.try(async () => {
+            expect(
+              await (
+                await find.byCssSelector('[data-test-subj*="breadcrumb first"]')
+              ).getVisibleText()
+            ).to.eql('Rules');
+          });
         });
       });
 
@@ -257,7 +261,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               const titleText = await (
                 await observability.alerts.common.getAlertsFlyoutTitle()
               ).getVisibleText();
-              expect(titleText).to.contain('Failed transaction rate threshold breached');
+              expect(titleText).to.contain('APM Failed Transaction Rate (one)');
             });
           });
 

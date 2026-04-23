@@ -11,7 +11,9 @@ import type {
   DashboardState,
   DashboardPanel,
   ScanDashboardsResult,
+  DashboardReadResponseBody,
 } from '@kbn/dashboard-plugin/server';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -40,9 +42,7 @@ export class RelatedDashboardsClient {
 
   constructor(
     private logger: Logger,
-    private getDashboard: (
-      id: string
-    ) => Promise<Pick<DashboardState, 'description' | 'tags' | 'title'> & { id: string }>,
+    private getDashboard: (id: string) => Promise<DashboardReadResponseBody>,
     private scanDashboards: (page: number, perPage: number) => Promise<ScanDashboardsResult>,
     private alertsClient: InvestigateAlertsClient,
     private alertId: string,
@@ -75,12 +75,12 @@ export class RelatedDashboardsClient {
     SuggestedDashboardsValidPanelType,
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
-    lens: (panel: DashboardPanel) => {
-      let references = this.isLensVizAttributes(panel.config)
+    [LENS_EMBEDDABLE_TYPE]: (panel: DashboardPanel) => {
+      let references = this.isLensVizAttributes(panel.type, panel.config)
         ? panel.config.attributes.references
         : undefined;
-      if (!references && panel.uid) {
-        references = this.referencedPanelManager.getByUid(panel.uid)?.references;
+      if (!references && panel.id) {
+        references = this.referencedPanelManager.getByUid(panel.id)?.references;
       }
       if (references?.length) {
         return new Set(
@@ -94,12 +94,12 @@ export class RelatedDashboardsClient {
     SuggestedDashboardsValidPanelType,
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
-    lens: (panel: DashboardPanel) => {
-      let state: unknown = this.isLensVizAttributes(panel.config)
+    [LENS_EMBEDDABLE_TYPE]: (panel: DashboardPanel) => {
+      let state: unknown = this.isLensVizAttributes(panel.type, panel.config)
         ? panel.config.attributes.state
         : undefined;
-      if (!state && panel.uid) {
-        state = this.referencedPanelManager.getByUid(panel.uid)?.state;
+      if (!state && panel.id) {
+        state = this.referencedPanelManager.getByUid(panel.id)?.state;
       }
       if (this.isLensAttributesState(state)) {
         const fields = new Set<string>();
@@ -301,17 +301,15 @@ export class RelatedDashboardsClient {
     return fields ?? new Set<string>();
   }
 
-  private isLensVizAttributes(config: object): config is { attributes: LensAttributes } {
+  private isLensVizAttributes(
+    type: string,
+    config: object
+  ): config is { attributes: LensAttributes } {
     const { attributes } = (config ?? {}) as Record<string, unknown>;
-    if (!attributes) {
+    if (!attributes || type !== LENS_EMBEDDABLE_TYPE) {
       return false;
     }
-    return (
-      Boolean(attributes) &&
-      typeof attributes === 'object' &&
-      'type' in attributes &&
-      attributes.type === 'lens'
-    );
+    return typeof attributes === 'object';
   }
 
   private getRuleQueryIndex(): string | null {
@@ -352,9 +350,12 @@ export class RelatedDashboardsClient {
 
   private async getLinkedDashboardById(id: string): Promise<LinkedDashboard | null> {
     try {
-      const dashboard = await this.getDashboard(id);
+      const { id: dashboardId, data: dashboard } = await this.getDashboard(id);
       return {
-        ...dashboard,
+        id: dashboardId,
+        title: dashboard.title,
+        description: dashboard.description,
+        tags: dashboard.tags,
         matchedBy: { linked: true },
       };
     } catch (error) {

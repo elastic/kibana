@@ -50,7 +50,18 @@
         "30s",
         "-1",
         "0"
-      ]
+      ],
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "allow_no_indices": "__flag__",
+      "ignore_throttled": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "allow_closed": "__flag__"
     },
     "methods": [
       "GET"

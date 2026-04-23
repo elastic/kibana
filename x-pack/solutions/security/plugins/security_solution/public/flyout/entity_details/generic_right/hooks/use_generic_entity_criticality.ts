@@ -40,7 +40,7 @@ export const useGenericEntityCriticality = ({
 
   const genericEntityAssetCriticalityQueryKey = [QUERY_KEY, idField, idValue];
 
-  const getAssetCriticality = useQuery<AssetCriticalityRecord>({
+  const getAssetCriticality = useQuery<AssetCriticalityRecord | null>({
     queryKey: genericEntityAssetCriticalityQueryKey,
     queryFn: () =>
       fetchAssetCriticality({

@@ -10,37 +10,43 @@ import {
   ALERTS,
   HOSTS,
   ENDPOINTS,
-  TRUSTED_APPS,
-  EVENT_FILTERS,
+  ARTIFACTS,
   NETWORK,
-  OVERVIEW,
   TIMELINES,
-  RULES,
   EXCEPTIONS,
   USERS,
-  DETECTION_RESPONSE,
   DASHBOARDS,
-  CSP_DASHBOARD,
   INDICATORS,
-  BLOCKLIST,
   CSP_BENCHMARKS,
   CSP_FINDINGS,
   POLICIES,
   EXPLORE,
   SETTINGS,
-  ENTITY_ANALYTICS,
+  SOLUTION_SIDE_NAV_PANEL,
+  RULES_NAV_LINK,
+  LAUNCHPAD_PANEL_BTN,
+  GET_STARTED_TEST_SUBJ,
+  SIEM_READINESS_TEST_SUBJ,
+  VALUE_REPORTS_TEST_SUBJ,
+  MANAGE_AUTOMATIC_MIGRATIONS_TEST_SUBJ,
+  LAUNCHPAD_TRANSLATED_RULES_PAGE,
+  TRANSLATED_DASHBOARDS_PAGE,
 } from '../../../screens/security_header';
 import * as ServerlessHeaders from '../../../screens/serverless_security_header';
 
 import { login } from '../../../tasks/login';
 import { visit, visitGetStartedPage, visitWithTimeRange } from '../../../tasks/navigation';
-import { navigateFromHeaderTo } from '../../../tasks/security_header';
+import {
+  verifyNavigatesFromDashboardLandingTo,
+  navigateFromHeaderTo,
+} from '../../../tasks/security_header';
 
 import {
   ALERTS_URL,
   CASES_URL,
   KIBANA_HOME,
   ENDPOINTS_URL,
+  ADMINISTRATION_URL_PREFIX,
   TRUSTED_APPS_URL,
   EVENT_FILTERS_URL,
   NETWORK_URL,
@@ -63,6 +69,15 @@ import {
   RULES_COVERAGE_URL,
   OSQUERY_URL,
   HOSTS_URL,
+  CLOUD_NATIVE_VULN_MGMT_URL,
+  DATA_QUALITY_URL,
+  KUBERNETES_URL,
+  GET_STARTED_URL,
+  SIEM_READINESS_URL,
+  VALUE_REPORTS_URL,
+  MANAGE_AUTOMATIC_MIGRATIONS_URL,
+  TRANSLATED_RULES_PAGE_URL,
+  TRANSLATED_DASHBOARDS_PAGE_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
@@ -78,6 +93,7 @@ import {
   TIMELINES_PAGE,
   FINDINGS_PAGE,
   THREAT_INTELLIGENCE_PAGE,
+  LAUNCHPAD_PAGE,
 } from '../../../screens/kibana_navigation';
 
 describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
@@ -91,24 +107,44 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('navigates to the Overview page', () => {
-    navigateFromHeaderTo(OVERVIEW);
-    cy.url().should('include', OVERVIEW_URL);
+  it('navigates to the Overview page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('overview', OVERVIEW_URL);
   });
 
-  it('navigates to the Detection & Response page', () => {
-    navigateFromHeaderTo(DETECTION_RESPONSE);
-    cy.url().should('include', DETECTION_AND_RESPONSE_URL);
+  it('navigates to the Detection & Response page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('detection_response', DETECTION_AND_RESPONSE_URL);
   });
 
-  it('navigates to the Entity Analytics page', () => {
-    navigateFromHeaderTo(ENTITY_ANALYTICS);
+  it('navigates to Kubernetes page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('kubernetes', KUBERNETES_URL);
+  });
+
+  it('navigates to the CSP page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('cloud_security_posture-dashboard', CSP_DASHBOARD_URL);
+  });
+
+  it('navigates to the Cloud Native Vulnerability Management page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo(
+      'cloud_security_posture-vulnerability_dashboard',
+      CLOUD_NATIVE_VULN_MGMT_URL
+    );
+  });
+
+  it('navigates to the Entity Analytics page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('entity_analytics', ENTITY_ANALYTICS_URL);
     cy.url().should('include', ENTITY_ANALYTICS_URL);
   });
 
-  it('navigates to the CSP dashboard page', () => {
-    navigateFromHeaderTo(CSP_DASHBOARD);
-    cy.url().should('include', CSP_DASHBOARD_URL);
+  it('navigates to Data quality page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('data_quality', DATA_QUALITY_URL);
+    cy.url().should('include', DATA_QUALITY_URL);
   });
 
   it('navigates to the Alerts page', () => {
@@ -126,9 +162,12 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', TIMELINES_URL);
   });
 
-  it('navigates to the Explore landing page', () => {
+  it('opens the Explore sub nav panel', () => {
     navigateFromHeaderTo(EXPLORE);
-    cy.url().should('include', EXPLORE_URL);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Hosts');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Network');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Users');
   });
 
   it('navigates to the Hosts page', () => {
@@ -151,9 +190,13 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', INDICATORS_URL);
   });
 
-  it('navigates to the Rules page', () => {
-    navigateFromHeaderTo(RULES);
-    cy.url().should('include', RULES_MANAGEMENT_URL);
+  it('opens the Rules sub nav panel', () => {
+    navigateFromHeaderTo(RULES_NAV_LINK);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Detection rules (SIEM)');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Benchmarks');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Shared exception lists');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'MITRE ATT&CK® Coverage');
   });
 
   it('navigates to the Exceptions page', () => {
@@ -166,9 +209,65 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Manage landing page', () => {
+  it('opens Launchpad sub nav panel', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Get started');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'SIEM Readiness');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Value report');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Manage Automatic Migrations');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Translated rules');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Translated dashboards');
+  });
+
+  it('navigates to the Get Started page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(GET_STARTED_TEST_SUBJ).click();
+    cy.url().should('include', GET_STARTED_URL);
+  });
+
+  it('navigates to SIEM Readiness page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SIEM_READINESS_TEST_SUBJ).click();
+    cy.url().should('include', SIEM_READINESS_URL);
+  });
+
+  it('navigates to the Value Report page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(VALUE_REPORTS_TEST_SUBJ).click();
+    cy.url().should('include', VALUE_REPORTS_URL);
+  });
+
+  it('navigates to the Manage Automatic Migrations page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(MANAGE_AUTOMATIC_MIGRATIONS_TEST_SUBJ).click();
+    cy.url().should('include', MANAGE_AUTOMATIC_MIGRATIONS_URL);
+  });
+
+  it('navigates to the Translated Rules page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(LAUNCHPAD_TRANSLATED_RULES_PAGE).click();
+    cy.url().should('include', TRANSLATED_RULES_PAGE_URL);
+  });
+
+  it('navigates to Translated Dashboards page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(TRANSLATED_DASHBOARDS_PAGE).click();
+    cy.url().should('include', TRANSLATED_DASHBOARDS_PAGE_URL);
+  });
+
+  it('opens the Manage sub nav panel', () => {
     navigateFromHeaderTo(SETTINGS);
-    cy.url().should('include', MANAGE_URL);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Entity analytics');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Endpoints');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Investigations');
   });
 
   it('navigates to the Endpoints page', () => {
@@ -179,16 +278,16 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     navigateFromHeaderTo(POLICIES);
     cy.url().should('include', POLICIES_URL);
   });
-  it('navigates to the Trusted Apps page', () => {
-    navigateFromHeaderTo(TRUSTED_APPS);
+  it('navigates to the Artifacts page from the Manage panel', () => {
+    navigateFromHeaderTo(ARTIFACTS);
+    cy.url().should('include', ADMINISTRATION_URL_PREFIX);
+  });
+  it('artifact tab deep links still resolve', () => {
+    visit(TRUSTED_APPS_URL);
     cy.url().should('include', TRUSTED_APPS_URL);
-  });
-  it('navigates to the Event Filters page', () => {
-    navigateFromHeaderTo(EVENT_FILTERS);
+    visit(EVENT_FILTERS_URL);
     cy.url().should('include', EVENT_FILTERS_URL);
-  });
-  it('navigates to the Blocklist page', () => {
-    navigateFromHeaderTo(BLOCKLIST);
+    visit(BLOCKLIST_URL);
     cy.url().should('include', BLOCKLIST_URL);
   });
   it('navigates to the CSP Benchmarks page', () => {
@@ -242,6 +341,11 @@ describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }
   it('navigates to the Manage page', () => {
     navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
     cy.url().should('include', MANAGE_URL);
+  });
+
+  it('navigates to Launchpad - Get started page', () => {
+    navigateFromKibanaCollapsibleTo(LAUNCHPAD_PAGE);
+    cy.url().should('include', GET_STARTED_URL);
   });
 });
 
@@ -306,6 +410,7 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   });
 
   it('navigates to the Indicators page', () => {
+    ServerlessHeaders.showMoreItems();
     navigateFromHeaderTo(ServerlessHeaders.THREAT_INTELLIGENCE, true);
     cy.url().should('include', INDICATORS_URL);
   });

@@ -6,8 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { extractDataStreamName, getErrorMessage } from '../utils';
+import { TIMESTAMP_REINDEX_SCRIPT } from './pipeline';
 
 export interface DestinationInfo {
   destIndex: string;
@@ -33,64 +35,79 @@ export function getDestinationInfo(originalIndex: string): DestinationInfo {
 
 export async function reindexThroughPipeline({
   esClient,
-  logger,
+  log,
   sourceIndex,
   destIndex,
   isDataStream,
   pipelineName,
+  maxTimestamp,
+  useInlineScript = false,
   requestTimeoutMs = DEFAULT_REINDEX_REQUEST_TIMEOUT_MS,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   sourceIndex: string;
   destIndex: string;
   isDataStream: boolean;
   pipelineName: string;
+  maxTimestamp?: string;
+  useInlineScript?: boolean;
   requestTimeoutMs?: number;
 }): Promise<ReindexJobResult> {
-  logger.debug(`Reindexing to ${destIndex}`);
+  if (useInlineScript && !maxTimestamp) {
+    throw new Error(`maxTimestamp is required when using inline script for ${destIndex}`);
+  }
+
+  log.debug(`Reindexing to ${destIndex}${useInlineScript ? ' (inline script)' : ''}`);
 
   try {
-    const response = await esClient.reindex(
+    const response: ReindexResponse = await esClient.reindex(
       {
         wait_for_completion: true,
         source: { index: sourceIndex },
         dest: {
           index: destIndex,
-          pipeline: pipelineName,
+          ...(!useInlineScript && { pipeline: pipelineName }),
           op_type: isDataStream ? 'create' : 'index',
         },
+        ...(useInlineScript && {
+          script: {
+            lang: 'painless',
+            source: TIMESTAMP_REINDEX_SCRIPT,
+            params: { max_timestamp: maxTimestamp },
+          },
+        }),
       },
       { requestTimeout: requestTimeoutMs }
     );
 
-    const failures = (response as { failures?: unknown[] }).failures ?? [];
-    const timedOut = Boolean((response as { timed_out?: boolean }).timed_out);
-    const created = Number((response as { created?: number }).created ?? 0);
-    const total = Number((response as { total?: number }).total ?? 0);
+    const failures = response.failures ?? [];
+    const timedOut = response.timed_out;
+    const created = response.created ?? 0;
+    const total = response.total ?? 0;
 
     if (timedOut) {
       throw new Error(`Reindex timed out for ${destIndex}`);
     }
 
     if (failures.length > 0) {
-      logger.warn(`Reindex had ${failures.length} failures`);
+      log.warning(`Reindex had ${failures.length} failures`);
       const sampleFailures = failures.slice(0, 3);
       for (const failure of sampleFailures) {
-        const cause = (failure as { cause?: { type?: string; reason?: string } })?.cause;
+        const cause = failure.cause;
         const reason = cause?.reason?.split('\n')[0]?.slice(0, 120) ?? 'unknown';
-        logger.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
+        log.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
       }
       if (failures.length > 3) {
-        logger.debug(`  ... and ${failures.length - 3} more`);
+        log.debug(`  ... and ${failures.length - 3} more`);
       }
       throw new Error(`Reindex had failures for ${destIndex}`);
     }
 
-    logger.debug(`Reindexed ${created} documents to ${destIndex}`);
+    log.debug(`Reindexed ${created} documents to ${destIndex}`);
     return { total, created, failures: 0, timedOut: false };
   } catch (error) {
-    logger.error(`Failed to start reindex for ${destIndex}`);
+    log.error(`Failed to start reindex for ${destIndex}`);
     throw error;
   }
 }
@@ -103,18 +120,22 @@ interface ReindexJob {
 
 export async function reindexAllIndices({
   esClient,
-  logger,
+  log,
   restoredIndices,
   originalIndices,
   concurrency,
   pipelineName,
+  maxTimestamp,
+  shouldUseInlineScript,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   restoredIndices: string[];
   originalIndices: string[];
   concurrency?: number;
   pipelineName: string;
+  maxTimestamp?: string;
+  shouldUseInlineScript?: (destIndex: string) => boolean;
 }): Promise<string[]> {
   const successfullyReindexed: string[] = [];
 
@@ -125,12 +146,12 @@ export async function reindexAllIndices({
 
   const batchSize = concurrency ?? jobs.length;
   const concurrencyLabel = concurrency ? `concurrency: ${concurrency}` : 'all at once';
-  logger.info(`Starting parallel reindex of ${jobs.length} indices (${concurrencyLabel})`);
+  log.info(`Starting parallel reindex of ${jobs.length} indices (${concurrencyLabel})`);
 
   for (let i = 0; i < jobs.length; i += batchSize) {
     const batch = jobs.slice(i, i + batchSize);
     if (concurrency) {
-      logger.debug(
+      log.debug(
         `Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(jobs.length / batchSize)}`
       );
     }
@@ -138,17 +159,23 @@ export async function reindexAllIndices({
     await Promise.all(
       batch.map(async (job) => {
         try {
-          await reindexThroughPipeline({ esClient, logger, pipelineName, ...job });
+          const useInlineScript = shouldUseInlineScript?.(job.destIndex) ?? false;
+          await reindexThroughPipeline({
+            esClient,
+            log,
+            pipelineName,
+            useInlineScript,
+            maxTimestamp,
+            ...job,
+          });
           successfullyReindexed.push(job.destIndex);
         } catch (error) {
-          logger.error(`Failed to reindex ${job.destIndex}: ${getErrorMessage(error)}`);
+          log.error(`Failed to reindex ${job.destIndex}: ${getErrorMessage(error)}`);
         }
       })
     );
   }
 
-  logger.info(
-    `Reindex completed: ${successfullyReindexed.length}/${jobs.length} indices successful`
-  );
+  log.info(`Reindex completed: ${successfullyReindexed.length}/${jobs.length} indices successful`);
   return successfullyReindexed;
 }

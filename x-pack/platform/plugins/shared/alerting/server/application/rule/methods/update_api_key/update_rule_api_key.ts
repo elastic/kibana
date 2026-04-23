@@ -6,12 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { createNewAPIKeySet, updateMeta } from '../../../../rules_client/lib';
+import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { UpdateApiKeyParams } from './types';
@@ -31,6 +33,7 @@ export async function updateRuleApiKey(
 async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateApiKeyParams) {
   let oldApiKeyToInvalidate: string | null = null;
   let oldApiKeyCreatedByUser: boolean | undefined | null = false;
+  let oldUiamApiKeyToInvalidate: string | undefined | null;
   let attributes: RawRule;
   let version: string | undefined;
 
@@ -51,6 +54,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
       );
     oldApiKeyToInvalidate = decryptedAlert.attributes.apiKey;
     oldApiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
+    oldUiamApiKeyToInvalidate = decryptedAlert.attributes.uiamApiKey;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
   } catch (e) {
@@ -99,7 +103,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   });
 
   const updateAttributes = updateMeta(context, {
-    ...attributes,
+    ...omit(attributes, API_KEY_ATTRIBUTES_TO_STRIP),
     ...apiKeyAttributes,
     updatedAt: new Date().toISOString(),
     updatedBy: username,
@@ -120,23 +124,43 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
       version,
     });
   } catch (e) {
-    // Avoid unused API key
-    await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys:
-          updateAttributes.apiKey && !updateAttributes.apiKeyCreatedByUser
-            ? [updateAttributes.apiKey]
-            : [],
-      },
-      context.logger,
-      context.unsecuredSavedObjectsClient
-    );
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updateAttributes;
+
+    const apiKeysToInvalidate = [];
+    if (apiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(apiKey);
+    }
+    if (uiamApiKey) {
+      apiKeysToInvalidate.push(uiamApiKey);
+    }
+
+    if (apiKeysToInvalidate.length > 0) {
+      // Avoid unused API key
+      await bulkMarkApiKeysForInvalidation(
+        {
+          apiKeys: apiKeysToInvalidate,
+        },
+        context.logger,
+        context.unsecuredSavedObjectsClient
+      );
+    }
+
     throw e;
   }
 
+  const oldApiKeysToInvalidate = [];
   if (oldApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
+    oldApiKeysToInvalidate.push(oldApiKeyToInvalidate);
+  }
+  if (oldUiamApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
+    oldApiKeysToInvalidate.push(oldUiamApiKeyToInvalidate);
+  }
+
+  if (oldApiKeysToInvalidate.length > 0) {
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: [oldApiKeyToInvalidate] },
+      {
+        apiKeys: oldApiKeysToInvalidate,
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

@@ -29,7 +29,7 @@ describe('Axis settings', () => {
           seriesType: 'bar',
           layerType: LayerTypes.DATA,
           layerId: 'first',
-          splitAccessor: 'baz',
+          splitAccessors: ['baz'],
           xAccessor: 'foo',
           accessors: ['bar'],
         },
@@ -147,7 +147,7 @@ describe('Axis settings', () => {
       const result = await renderAxisSettings({
         extent: undefined,
       });
-      expect(result.bounds.self).not.toBeInTheDocument();
+      expect(result.bounds.getElement()).not.toBeInTheDocument();
     });
 
     it('renders 3 options for metric bound inputs', async () => {
@@ -155,7 +155,7 @@ describe('Axis settings', () => {
         axis: 'yLeft',
         extent: { mode: 'custom', lowerBound: 123, upperBound: 456 },
       });
-      expect(result.bounds.options).toHaveLength(3);
+      expect(result.bounds.getOptions()).toHaveLength(3);
     });
 
     it('renders nice values enabled by default if mode is full for metric', async () => {
@@ -191,7 +191,7 @@ describe('Axis settings', () => {
         axis: 'x',
         extent: { mode: 'custom', lowerBound: 123, upperBound: 456 },
       });
-      expect(result.bounds.options).toHaveLength(2);
+      expect(result.bounds.getOptions()).toHaveLength(2);
     });
 
     it('should render nice values enabled by default if mode is dataBounds for bucket', async () => {
@@ -301,7 +301,7 @@ describe('Axis settings', () => {
               seriesType: 'line',
               layerType: LayerTypes.DATA,
               layerId: 'first',
-              splitAccessor: 'baz',
+              splitAccessors: ['baz'],
               xAccessor: 'foo',
               accessors: ['bar'],
             },

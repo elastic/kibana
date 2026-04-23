@@ -6,17 +6,21 @@
  */
 
 import type { RestoreConfig, LoadResult } from '../types';
-import { validateFileSnapshotUrl, getErrorMessage } from '../utils';
-import {
-  registerUrlRepository,
-  getSnapshotMetadata,
-  deleteRepository,
-  generateRepoName,
-} from './repository';
+import { getErrorMessage } from '../utils';
+import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
 import { filterIndicesToRestore, restoreIndices } from './restore';
 
 export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult> {
-  const { esClient, logger, snapshotUrl, snapshotName, indices } = config;
+  const {
+    esClient,
+    log,
+    repository,
+    snapshotName,
+    indices,
+    renamePattern,
+    renameReplacement,
+    allowNoMatches,
+  } = config;
 
   const result: LoadResult = {
     success: false,
@@ -28,22 +32,35 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
   const repoName = generateRepoName();
 
   try {
-    validateFileSnapshotUrl(snapshotUrl);
+    repository.validate();
 
-    logger.info('Step 1/3: Registering snapshot repository...');
-    await registerUrlRepository({ esClient, logger, repoName, snapshotUrl });
+    log.info('Step 1/3: Registering snapshot repository...');
+    await repository.register({ esClient, log, repoName });
 
-    logger.info('Step 2/3: Retrieving snapshot metadata...');
-    const snapshotInfo = await getSnapshotMetadata({ esClient, logger, repoName, snapshotName });
+    log.info('Step 2/3: Retrieving snapshot metadata...');
+    const snapshotInfo = await getSnapshotMetadata({
+      esClient,
+      log,
+      repoName,
+      snapshotName,
+    });
     result.snapshotName = snapshotInfo.snapshot;
 
     const indicesToRestore = indices
       ? filterIndicesToRestore(snapshotInfo.indices, indices)
       : snapshotInfo.indices;
 
-    logger.info(`Found ${indicesToRestore.length} indices to restore`);
+    log.info(`Found ${indicesToRestore.length} indices to restore`);
 
     if (indicesToRestore.length === 0) {
+      if (allowNoMatches) {
+        log.warning(
+          `No indices in snapshot match the specified patterns: ${indices?.join(', ')}. ` +
+            `Nothing to restore.`
+        );
+        result.success = true;
+        return result;
+      }
       throw new Error(
         `No indices in snapshot match the specified patterns: ${indices?.join(', ')}. ` +
           `Available indices: ${snapshotInfo.indices.slice(0, 10).join(', ')}${
@@ -52,24 +69,26 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
       );
     }
 
-    logger.info('Step 3/3: Restoring indices...');
+    log.info('Step 3/3: Restoring indices...');
     const restoredIndices = await restoreIndices({
       esClient,
-      logger,
+      log,
       repoName,
       snapshotName: snapshotInfo.snapshot,
       indices: indicesToRestore,
+      renamePattern,
+      renameReplacement,
     });
     result.restoredIndices = restoredIndices;
 
     result.success = true;
-    logger.info(`Restore completed: ${restoredIndices.length} indices restored successfully`);
+    log.info(`Restore completed: ${restoredIndices.length} indices restored successfully`);
   } catch (error) {
     result.errors.push(getErrorMessage(error));
-    logger.error(`Snapshot restore failed: ${getErrorMessage(error)}`);
+    log.error(`Snapshot restore failed: ${getErrorMessage(error)}`);
   } finally {
-    logger.debug('Cleaning up...');
-    await deleteRepository({ esClient, logger, repoName });
+    log.debug('Cleaning up...');
+    await deleteRepository({ esClient, log, repoName });
   }
 
   return result;

@@ -145,6 +145,10 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     const [headerRestrictWidth, setHeaderRestrictWidth] = useState<number | undefined>(undefined);
     const [wrapHeader, setWrapHeader] = useState<boolean>(false);
 
+    const maxInlineSizeStyles = css`
+      max-inline-size: 100%;
+    `;
+
     useEffect(() => {
       const subscriptions = new Subscription();
 
@@ -232,7 +236,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageHeaderSection>
-          <EuiPageHeaderSection>
+          <EuiPageHeaderSection css={maxInlineSizeStyles}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               {isRightSectionMounted ? (
                 <EuiFlexItem grow={false}>
@@ -240,7 +244,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
                 </EuiFlexItem>
               ) : null}
               {activeRoute.enableDatePicker ? (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
                   <DatePickerWrapper isLoading={isLoading} width="full" />
                 </EuiFlexItem>
               ) : null}
@@ -255,6 +259,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
       isLoading,
       isRightSectionMounted,
       leftHeaderPortalNode,
+      maxInlineSizeStyles,
       rightHeaderPortalNode,
       wrapHeader,
     ]);

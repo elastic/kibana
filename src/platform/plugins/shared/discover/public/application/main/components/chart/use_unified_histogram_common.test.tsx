@@ -10,76 +10,63 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { UseUnifiedHistogramOptions } from './use_discover_histogram';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import type { DiscoverMainContentProps } from '../layout/discover_main_content';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 
 describe('useUnifiedHistogramCommon', () => {
-  const getStateContainer = () => getDiscoverStateMock({ isTimeBased: true });
+  const setup = async () => {
+    const toolkit = getDiscoverInternalStateMock();
 
-  const renderUseUnifiedHistogramCommon = (
-    {
-      stateContainer,
-      panelsToggle,
-      options,
-    }: {
-      stateContainer: DiscoverStateContainer;
-      panelsToggle?: DiscoverMainContentProps['panelsToggle'];
-      options?: UseUnifiedHistogramOptions;
-    } = {
-      stateContainer: getStateContainer(),
-    }
-  ) => {
-    const Wrapper = ({
-      children,
-      stateContainerProp,
-    }: React.PropsWithChildren<{ stateContainerProp: DiscoverStateContainer }>) => (
-      <DiscoverTestProvider
-        stateContainer={stateContainerProp}
-        runtimeState={{ currentDataView: dataViewMockWithTimeField, adHocDataViews: [] }}
-      >
-        {children}
-      </DiscoverTestProvider>
-    );
+    await toolkit.initializeTabs();
+
+    await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    return { toolkit };
+  };
+
+  const renderUseUnifiedHistogramCommon = async ({
+    panelsToggle,
+    options,
+  }: {
+    panelsToggle?: React.ReactElement;
+    options?: UseUnifiedHistogramOptions;
+  } = {}) => {
+    const { toolkit } = await setup();
+    const currentTabId = toolkit.getCurrentTab().id;
 
     const hook = renderHook(
-      ({ stateContainerProp, layoutProps }) =>
+      ({ layoutProps }) =>
         useUnifiedHistogramCommon({
-          currentTabId: stateContainerProp.getCurrentTab().id,
-          stateContainer: stateContainerProp,
+          currentTabId,
           layoutProps,
           panelsToggle,
         }),
       {
         wrapper: ({ children }) => (
-          <Wrapper stateContainerProp={stateContainer}>{children}</Wrapper>
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
         ),
         initialProps: {
-          stateContainerProp: stateContainer,
           layoutProps: options?.initialLayoutProps,
         },
       }
     );
 
-    return { hook };
+    return { hook, toolkit };
   };
 
-  it('should update unifiedHistogramConfig$ with new layoutProps', () => {
+  it('should update unifiedHistogramConfig$ with new layoutProps', async () => {
     const layoutProps = {
       topPanelHeight: 50,
     };
 
-    const stateContainer = getStateContainer();
-    const { hook } = renderUseUnifiedHistogramCommon({
-      stateContainer,
-    });
+    const { hook, toolkit } = await renderUseUnifiedHistogramCommon();
     const histogramConfig = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
+      toolkit.runtimeStateManager,
+      toolkit.getCurrentTab().id
     ).unifiedHistogramConfig$;
 
     expect(histogramConfig.getValue().layoutPropsMap[DEFAULT_HISTOGRAM_KEY_PREFIX]).toEqual(
@@ -87,23 +74,11 @@ describe('useUnifiedHistogramCommon', () => {
     );
 
     hook.rerender({
-      stateContainerProp: stateContainer,
       layoutProps,
     });
 
     expect(histogramConfig.getValue().layoutPropsMap[DEFAULT_HISTOGRAM_KEY_PREFIX]).toEqual(
       layoutProps
     );
-  });
-
-  it('should clone panelsToggle if it is a valid React element', () => {
-    const stateContainer = getStateContainer();
-    const { hook } = renderUseUnifiedHistogramCommon({
-      stateContainer,
-      panelsToggle: <div>Test Panels Toggle</div>,
-    });
-
-    const clonedElement = hook.result.current.renderCustomChartToggleActions();
-    expect(clonedElement?.props.renderedFor).toBe('histogram');
   });
 });

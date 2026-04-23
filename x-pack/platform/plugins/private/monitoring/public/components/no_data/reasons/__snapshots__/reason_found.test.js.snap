@@ -19,7 +19,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -43,7 +43,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
@@ -86,7 +86,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText eui-textLeft emotion-euiText-m"
@@ -154,8 +154,8 @@ Array [
         >
           Elasticsearch Service Console
           <span
-            class="emotion-EuiExternalLinkIcon"
-            data-euiicon-type="popout"
+            class="css-1j75qc1"
+            data-euiicon-type="external"
             role="presentation"
           />
           <span
@@ -173,8 +173,8 @@ Array [
         >
           Logs and metrics
           <span
-            class="emotion-EuiExternalLinkIcon"
-            data-euiicon-type="popout"
+            class="css-1j75qc1"
+            data-euiicon-type="external"
             role="presentation"
           />
           <span
@@ -192,8 +192,8 @@ Array [
         >
           the documentation page.
           <span
-            class="emotion-EuiExternalLinkIcon"
-            data-euiicon-type="popout"
+            class="css-1j75qc1"
+            data-euiicon-type="external"
             role="presentation"
           />
           <span
@@ -206,7 +206,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText eui-textLeft emotion-euiText-m"
@@ -237,7 +237,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText emotion-euiText-m"

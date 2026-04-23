@@ -19,9 +19,11 @@
           "AlertsTableProps",
           "<AC> & React.RefAttributes<",
           "AlertsTableImperativeApi",
-          ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ">) => React.ReactElement<any>"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 157,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -36,7 +38,9 @@
             "signature": [
               "P & React.RefAttributes<T>"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 22,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -59,9 +63,11 @@
           "AlertsTableProps",
           "<AC> & React.RefAttributes<",
           "AlertsTableImperativeApi",
-          ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ">) => React.ReactElement<any>"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 157,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -76,7 +82,9 @@
             "signature": [
               "P & React.RefAttributes<T>"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 22,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -101,9 +109,11 @@
           "AlertsTableProps",
           "<AC> & React.RefAttributes<",
           "AlertsTableImperativeApi",
-          ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ">) => React.ReactElement<any>"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 699,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -118,7 +128,9 @@
             "signature": [
               "P & React.RefAttributes<T>"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 22,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -139,9 +151,11 @@
           "AlertsTableProps",
           "<AC> & React.RefAttributes<",
           "AlertsTableImperativeApi",
-          ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ">) => React.ReactElement<any>"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 699,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -156,7 +170,9 @@
             "signature": [
               "P & React.RefAttributes<T>"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 22,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }

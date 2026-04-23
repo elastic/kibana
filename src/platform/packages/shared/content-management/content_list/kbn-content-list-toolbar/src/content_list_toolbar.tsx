@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import { EuiSearchBar } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
+import { useContentListConfig, useContentListSearch } from '@kbn/content-list-provider';
+import { i18n } from '@kbn/i18n';
+import { Filters } from './filters';
+import { useFilters } from './hooks';
+import { SelectionBar } from './selection_bar';
+
+/**
+ * Props for the {@link ContentListToolbar} component.
+ */
+export interface ContentListToolbarProps {
+  /** Optional children for declarative configuration via {@link Filters}. */
+  children?: ReactNode;
+  /** Optional `data-test-subj` attribute for testing. */
+  'data-test-subj'?: string;
+}
+
+const defaultPlaceholder = i18n.translate(
+  'contentManagement.contentList.toolbar.searchPlaceholder',
+  { defaultMessage: 'Search…' }
+);
+
+/**
+ * `ContentListToolbar` component.
+ *
+ * `queryText` from state flows directly to `EuiSearchBar`'s `query` prop.
+ * When the user types, `onChange` stores `query.text` back to state.
+ * No displayText, no typingRef, no sync hacks — one source of truth.
+ */
+const ContentListToolbarComponent = ({
+  children,
+  'data-test-subj': dataTestSubj = 'contentListToolbar',
+}: ContentListToolbarProps) => {
+  const { labels, supports } = useContentListConfig();
+  const {
+    queryText,
+    setQueryFromEuiQuery,
+    isSupported: searchIsSupported,
+    fieldNames,
+  } = useContentListSearch();
+  const filters = useFilters(children);
+
+  const handleSearchChange = useCallback(
+    ({ query, error }: EuiSearchBarOnChangeArgs) => {
+      if (error || !query) {
+        // Return without updating state when EuiSearchBar reports a parse error.
+        //
+        // EuiSearchBar maintains its own internal `queryText` during error states,
+        // so the input continues to show what the user typed. Passing the raw
+        // error text to the controlled `query` prop is unsafe: EuiSearchBar's
+        // `getDerivedStateFromProps` calls `parseQuery` on any new prop value and
+        // would throw if the text is unparseable, crashing the component.
+        //
+        // Known limitation: if an external query change (e.g. a filter-toggle
+        // avatar click) fires while the user has an in-progress parse error, the
+        // input will snap to the new external query value.
+        return;
+      }
+      setQueryFromEuiQuery(query);
+    },
+    [setQueryFromEuiQuery]
+  );
+
+  // Build an EuiSearchBar schema so it recognizes registered fields (e.g., `tag`,
+  // `createdBy`) and doesn't escape the colon when the user types `field:value`.
+  const boxSchema = useMemo(() => {
+    if (fieldNames.length === 0) {
+      return undefined;
+    }
+    const schemaFields: Record<string, { type: 'string' }> = {};
+    for (const name of fieldNames) {
+      schemaFields[name] = { type: 'string' };
+    }
+    return { strict: false, fields: schemaFields };
+  }, [fieldNames]);
+
+  // Only include the selection bar when selection is supported.
+  const toolsLeft = useMemo(
+    () =>
+      supports.selection
+        ? [<SelectionBar key="selection" data-test-subj={`${dataTestSubj}-selectionBar`} />]
+        : undefined,
+    [supports.selection, dataTestSubj]
+  );
+
+  return (
+    <EuiSearchBar
+      query={queryText}
+      box={{
+        placeholder: labels.searchPlaceholder ?? defaultPlaceholder,
+        incremental: true,
+        'data-test-subj': `${dataTestSubj}-searchBox`,
+        disabled: !searchIsSupported,
+        ...(boxSchema && { schema: boxSchema }),
+      }}
+      onChange={handleSearchChange}
+      toolsLeft={toolsLeft}
+      filters={filters}
+      data-test-subj={dataTestSubj}
+    />
+  );
+};
+
+// Attach sub-components to `ContentListToolbar` namespace.
+export const ContentListToolbar = Object.assign(ContentListToolbarComponent, {
+  Filters,
+  SelectionBar,
+});

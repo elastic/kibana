@@ -12,33 +12,16 @@ import { Callout } from './callout';
 import { getCalloutConfig } from './callout.config';
 import { GRAPH_CALLOUT_TEST_ID, GRAPH_CALLOUT_LINK_TEST_ID } from '../test_ids';
 
+const mockLinks = {
+  integrationUrl: '/app/integrations/browse/security/asset_inventory',
+  entityStoreUrl: '/app/security/entity_analytics_management',
+  discoverUrl: '/app/discover',
+};
+
 describe('Callout', () => {
-  describe('missingAllRequirements variant', () => {
-    const config = getCalloutConfig('missingAllRequirements');
-
-    it('renders with correct title', () => {
-      render(<Callout {...config} />);
-
-      expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
-      expect(screen.getByText('Enrich graph experience')).toBeInTheDocument();
-    });
-
-    it('renders two links with correct text opening in new tabs', () => {
-      render(<Callout {...config} />);
-
-      const links = screen.getAllByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
-      expect(links).toHaveLength(2);
-      expect(links[0]).toHaveTextContent('Install Cloud Asset Discovery');
-      expect(links[0]).toHaveAttribute('target', '_blank');
-      expect(links[1]).toHaveTextContent('Enable Entity Store');
-      expect(links[1]).toHaveAttribute('target', '_blank');
-    });
-  });
-
   describe('uninstalledIntegration variant', () => {
-    const config = getCalloutConfig('uninstalledIntegration');
-
     it('renders with correct title', () => {
+      const config = getCalloutConfig('uninstalledIntegration', mockLinks);
       render(<Callout {...config} />);
 
       expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
@@ -46,6 +29,7 @@ describe('Callout', () => {
     });
 
     it('renders link with correct text opening in a new tab', () => {
+      const config = getCalloutConfig('uninstalledIntegration', mockLinks);
       render(<Callout {...config} />);
 
       const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
@@ -54,29 +38,9 @@ describe('Callout', () => {
     });
   });
 
-  describe('disabledEntityStore variant', () => {
-    const config = getCalloutConfig('disabledEntityStore');
-
-    it('renders with correct title', () => {
-      render(<Callout {...config} />);
-
-      expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
-      expect(screen.getByText('Enrich graph experience')).toBeInTheDocument();
-    });
-
-    it('renders link with correct text opening in a new tab', () => {
-      render(<Callout {...config} />);
-
-      const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
-      expect(link).toHaveTextContent('Enable Entity Store');
-      expect(link).toHaveAttribute('target', '_blank');
-    });
-  });
-
   describe('unavailableEntityInfo variant', () => {
-    const config = getCalloutConfig('unavailableEntityInfo');
-
     it('renders with correct title', () => {
+      const config = getCalloutConfig('unavailableEntityInfo', mockLinks);
       render(<Callout {...config} />);
 
       expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
@@ -84,18 +48,18 @@ describe('Callout', () => {
     });
 
     it('renders link with correct text opening in a new tab', () => {
+      const config = getCalloutConfig('unavailableEntityInfo', mockLinks);
       render(<Callout {...config} />);
 
       const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
-      expect(link).toHaveTextContent('Verify Cloud Asset Discovery Data');
+      expect(link).toHaveTextContent('Verify Cloud Asset Discovery data');
       expect(link).toHaveAttribute('target', '_blank');
     });
   });
 
   describe('unknownEntityType variant', () => {
-    const config = getCalloutConfig('unknownEntityType');
-
     it('renders with correct title', () => {
+      const config = getCalloutConfig('unknownEntityType', mockLinks);
       render(<Callout {...config} />);
 
       expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
@@ -103,10 +67,11 @@ describe('Callout', () => {
     });
 
     it('renders link with correct text opening in a new tab', () => {
+      const config = getCalloutConfig('unknownEntityType', mockLinks);
       render(<Callout {...config} />);
 
       const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
-      expect(link).toHaveTextContent('Verify Cloud Asset Discovery');
+      expect(link).toHaveTextContent('Verify Cloud Asset Discovery data');
       expect(link).toHaveAttribute('target', '_blank');
     });
   });
@@ -140,7 +105,7 @@ describe('Callout', () => {
   describe('dismiss functionality', () => {
     it('calls onDismiss when close button is clicked', async () => {
       const mockOnDismiss = jest.fn();
-      const config = getCalloutConfig('uninstalledIntegration');
+      const config = getCalloutConfig('uninstalledIntegration', mockLinks);
       render(<Callout {...config} onDismiss={mockOnDismiss} />);
 
       const dismissButton = screen.getByLabelText('Dismiss this callout');
@@ -150,7 +115,7 @@ describe('Callout', () => {
     });
 
     it('does not render close button when onDismiss is undefined', () => {
-      const config = getCalloutConfig('uninstalledIntegration');
+      const config = getCalloutConfig('uninstalledIntegration', mockLinks);
       render(<Callout {...config} />);
 
       expect(screen.queryByLabelText('Dismiss this callout')).not.toBeInTheDocument();

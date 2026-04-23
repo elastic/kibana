@@ -6,23 +6,13 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReplayConfig, LoadResult } from '../types';
-import {
-  extractDataStreamName,
-  getMissingDataStreams,
-  validateFileSnapshotUrl,
-  getErrorMessage,
-} from '../utils';
-import {
-  registerUrlRepository,
-  getSnapshotMetadata,
-  deleteRepository,
-  generateRepoName,
-} from '../restore/repository';
+import { extractDataStreamName, getMissingDataStreams, getErrorMessage } from '../utils';
+import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
 import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
-import { reindexAllIndices } from './reindex';
+import { getDestinationInfo, reindexAllIndices } from './reindex';
 
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
@@ -33,11 +23,11 @@ interface EsqlResponse {
 
 export async function getMaxTimestampFromData({
   esClient,
-  logger,
+  log,
   tempIndices,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   tempIndices: string[];
 }): Promise<string> {
   const indexPattern = tempIndices.join(',');
@@ -45,7 +35,7 @@ export async function getMaxTimestampFromData({
 | STATS max_ts = MAX(\`@timestamp\`)
 | KEEP max_ts`;
 
-  logger.debug(`Querying max timestamp from restored indices: ${indexPattern}`);
+  log.debug(`Querying max timestamp from restored indices: ${indexPattern}`);
 
   const response = (await esClient.esql.query({ query })) as unknown as EsqlResponse;
 
@@ -57,12 +47,21 @@ export async function getMaxTimestampFromData({
   }
 
   const maxTimestamp = String(response.values[0][0]);
-  logger.info(`Derived max timestamp from data: ${maxTimestamp}`);
+  log.info(`Derived max timestamp from data: ${maxTimestamp}`);
   return maxTimestamp;
 }
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, logger, snapshotUrl, snapshotName, patterns, concurrency } = config;
+  const {
+    esClient,
+    log,
+    repository,
+    snapshotName,
+    patterns,
+    concurrency,
+    shouldUseInlineScript,
+    beforeReindex,
+  } = config;
 
   const result: LoadResult = {
     success: false,
@@ -77,19 +76,22 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
   const pipelineName = `snapshot-loader-timestamp-pipeline-${repoName}`;
 
   try {
-    validateFileSnapshotUrl(snapshotUrl);
+    repository.validate();
 
-    logger.info('Step 1/4: Registering snapshot repository...');
-    await registerUrlRepository({ esClient, logger, repoName, snapshotUrl });
+    log.info('Step 1/4: Registering snapshot repository...');
+    await repository.register({ esClient, log, repoName });
 
-    logger.info('Step 2/4: Retrieving snapshot metadata...');
-    const snapshotInfo = await getSnapshotMetadata({ esClient, logger, repoName, snapshotName });
+    log.info('Step 2/4: Retrieving snapshot metadata...');
+    const snapshotInfo = await getSnapshotMetadata({
+      esClient,
+      log,
+      repoName,
+      snapshotName,
+    });
     result.snapshotName = snapshotInfo.snapshot;
 
     const indicesToRestore = filterIndicesToRestore(snapshotInfo.indices, patterns);
-    logger.info(
-      `Found ${indicesToRestore.length} indices matching patterns: ${patterns.join(', ')}`
-    );
+    log.info(`Found ${indicesToRestore.length} indices matching patterns: ${patterns.join(', ')}`);
 
     if (indicesToRestore.length === 0) {
       throw new Error(
@@ -100,10 +102,10 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       );
     }
 
-    logger.info('Step 3/4: Restoring to temporary indices...');
+    log.info('Step 3/4: Restoring to temporary indices...');
     const restoredIndices = await restoreIndices({
       esClient,
-      logger,
+      log,
       repoName,
       snapshotName: snapshotInfo.snapshot,
       indices: indicesToRestore,
@@ -112,27 +114,47 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     });
     result.restoredIndices = restoredIndices;
 
-    result.maxTimestamp = await getMaxTimestampFromData({
+    const destinationIndices = [
+      ...new Set(indicesToRestore.map((idx) => getDestinationInfo(idx).destIndex)),
+    ];
+
+    if (beforeReindex) {
+      await beforeReindex({
+        esClient,
+        log,
+        originalIndices: indicesToRestore,
+        restoredIndices,
+        destinationIndices,
+      });
+    }
+
+    const maxTimestamp = await getMaxTimestampFromData({
       esClient,
-      logger,
+      log,
       tempIndices: restoredIndices,
     });
+    if (!maxTimestamp) {
+      throw new Error('Failed to derive max timestamp from restored data');
+    }
+    result.maxTimestamp = maxTimestamp;
 
     await createTimestampPipeline({
       esClient,
-      logger,
+      log,
       pipelineName,
-      maxTimestamp: result.maxTimestamp!,
+      maxTimestamp,
     });
 
-    logger.info('Step 4/4: Reindexing with timestamp transformation...');
+    log.info('Step 4/4: Reindexing with timestamp transformation...');
     const reindexedIndices = await reindexAllIndices({
       esClient,
-      logger,
+      log,
       restoredIndices,
       originalIndices: indicesToRestore,
       concurrency,
       pipelineName,
+      maxTimestamp,
+      shouldUseInlineScript,
     });
     result.reindexedIndices = reindexedIndices;
 
@@ -147,7 +169,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     });
 
     if (missingDataStreams.length > 0) {
-      logger.warn(
+      log.warning(
         `Some expected data streams were not created: ${missingDataStreams.join(', ')}. ` +
           `Replay may have created regular indices instead. ` +
           `Ensure the cluster contains a matching index template with data streams enabled. ` +
@@ -157,17 +179,17 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
 
     result.success = reindexedIndices.length > 0;
 
-    logger.info(
+    log.info(
       `Replay completed: ${reindexedIndices.length}/${indicesToRestore.length} indices reindexed successfully`
     );
   } catch (error) {
     result.errors.push(getErrorMessage(error));
-    logger.error(`Snapshot replay failed: ${getErrorMessage(error)}`);
+    log.error(`Snapshot replay failed: ${getErrorMessage(error)}`);
   } finally {
-    logger.debug('Cleaning up...');
+    log.debug('Cleaning up...');
     await cleanup({
       esClient,
-      logger,
+      log,
       repoName,
       pipelineName,
       restoredIndices: result.restoredIndices,
@@ -179,13 +201,13 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
 
 async function cleanup({
   esClient,
-  logger,
+  log,
   repoName,
   pipelineName,
   restoredIndices,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   repoName: string;
   pipelineName: string;
   restoredIndices: string[];
@@ -194,9 +216,9 @@ async function cleanup({
     try {
       await esClient.indices.delete({ index, ignore_unavailable: true });
     } catch {
-      logger.debug(`Failed to delete temp index: ${index}`);
+      log.debug(`Failed to delete temp index: ${index}`);
     }
   }
-  await deletePipeline({ esClient, logger, pipelineName });
-  await deleteRepository({ esClient, logger, repoName });
+  await deletePipeline({ esClient, log, pipelineName });
+  await deleteRepository({ esClient, log, repoName });
 }

@@ -7,15 +7,16 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { render, screen, within } from '@testing-library/react';
 import { shallow, mount } from 'enzyme';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
@@ -92,7 +93,7 @@ const defaultProps = {
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
@@ -844,10 +845,10 @@ describe('terms', () => {
           displayName: 'test',
         },
       });
-      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 3 }));
+      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 9 }));
     });
 
-    it('should use a size of 5 when there are no other buckets', () => {
+    it('should use the default size when there are no other buckets', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
@@ -859,7 +860,7 @@ describe('terms', () => {
           displayName: 'test',
         },
       });
-      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 5 }));
+      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 9 }));
     });
 
     it('should set a parentFormat as "terms" if a numeric field is passed', () => {
@@ -2284,6 +2285,48 @@ describe('terms', () => {
         'significant',
         'custom',
       ]);
+    });
+
+    it('should show computed label in rank by options when metric column has an empty label', () => {
+      const layerWithEmptyLabel: FormBasedLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: {
+            label: 'Top 3 values of source',
+            dataType: 'string',
+            isBucketed: true,
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'column', columnId: 'col2' },
+              size: 3,
+              orderDirection: 'desc',
+            },
+            sourceField: 'source',
+          } as TermsIndexPatternColumn,
+          col2: {
+            label: '',
+            customLabel: false,
+            dataType: 'number',
+            isBucketed: false,
+            sourceField: '___records___',
+            operationType: 'count',
+          },
+        },
+      };
+
+      render(
+        <InlineOptions
+          {...defaultProps}
+          layer={layerWithEmptyLabel}
+          paramEditorUpdater={jest.fn()}
+          columnId="col1"
+          currentColumn={layerWithEmptyLabel.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      const select = within(screen.getByTestId('indexPattern-terms-orderBy'));
+      expect(select.getByRole('option', { name: 'Count of records' })).toBeInTheDocument();
     });
 
     it('should disable rare ordering for floating point types', () => {

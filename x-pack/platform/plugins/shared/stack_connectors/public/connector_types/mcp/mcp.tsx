@@ -16,6 +16,7 @@ export const getConnectorType = (): MCPConnector => {
   return {
     id: CONNECTOR_ID,
     actionTypeTitle: CONNECTOR_NAME,
+    isExperimental: true,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.mcp.selectMessageText', {
       defaultMessage: 'Connect to an MCP (Model Context Protocol) server.',

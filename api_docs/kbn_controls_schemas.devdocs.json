@@ -10,25 +10,551 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [
+    "functions": [
       {
         "parentPluginId": "@kbn/controls-schemas",
-        "id": "def-server.ControlsChainingSystem",
-        "type": "Type",
+        "id": "def-server.getControlsGroupSchema",
+        "type": "Function",
         "tags": [],
-        "label": "ControlsChainingSystem",
+        "label": "getControlsGroupSchema",
         "description": [],
         "signature": [
-          "\"HIERARCHICAL\" | \"NONE\""
+          "() => ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<(Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]>"
         ],
-        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/controls_group_schema.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.HasCustomPrepend",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasCustomPrepend",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.HasCustomPrepend.CustomPrependComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "CustomPrependComponent",
+            "description": [],
+            "signature": [
+              "React.FunctionComponent<{}>"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/controls-schemas",
+                "id": "def-server.HasCustomPrepend.CustomPrependComponent.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/controls-schemas",
+                "id": "def-server.HasCustomPrepend.CustomPrependComponent.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.LegacyIgnoreParentSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyIgnoreParentSettings",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyIgnoreParentSettings.ignoreFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreFilters",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyIgnoreParentSettings.ignoreQuery",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreQuery",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyIgnoreParentSettings.ignoreTimerange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreTimerange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyIgnoreParentSettings.ignoreValidations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreValidations",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.LegacyStoredDataControlState",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyStoredDataControlState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/controls-schemas",
+            "scope": "server",
+            "docId": "kibKbnControlsSchemasPluginApi",
+            "section": "def-server.LegacyStoredDataControlState",
+            "text": "LegacyStoredDataControlState"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>>"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredDataControlState.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredDataControlState.useGlobalFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useGlobalFilters",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredDataControlState.ignoreValidations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreValidations",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredDataControlState.dataViewRefName",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewRefName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredDataControlState.dataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.LegacyStoredESQLControlExplicitInput",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyStoredESQLControlExplicitInput",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.availableOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "availableOptions",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.controlType",
+            "type": "string",
+            "tags": [],
+            "label": "controlType",
+            "description": [],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.displaySettings",
+            "type": "Object",
+            "tags": [],
+            "label": "displaySettings",
+            "description": [],
+            "signature": [
+              "{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.esqlQuery",
+            "type": "string",
+            "tags": [],
+            "label": "esqlQuery",
+            "description": [],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.selectedOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "selectedOptions",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.singleSelect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "singleSelect",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.variableName",
+            "type": "string",
+            "tags": [],
+            "label": "variableName",
+            "description": [],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.variableType",
+            "type": "string",
+            "tags": [],
+            "label": "variableType",
+            "description": [],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.LegacyStoredPinnedControlState",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyStoredPinnedControlState",
+        "description": [
+          "\nThese values only exist for control saved objects prior to version 9.4.\nThey should remain isolated and not rely on other imported types, since\nthey should never change."
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredPinnedControlState.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[id: string]: { type: string; order: number; width?: string | undefined; grow?: boolean | undefined; explicitInput: LegacyStoredOptionsListExplicitInput | LegacyStoredRangeSliderExplicitInput | LegacyStoredTimeSliderExplicitInput; }",
+            "description": [],
+            "signature": [
+              "[id: string]:  { type: string; order: number; width?: string | undefined; grow?: boolean | undefined; explicitInput: ",
+              {
+                "pluginId": "@kbn/controls-schemas",
+                "scope": "server",
+                "docId": "kibKbnControlsSchemasPluginApi",
+                "section": "def-server.LegacyStoredOptionsListExplicitInput",
+                "text": "LegacyStoredOptionsListExplicitInput"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/controls-schemas",
+                "scope": "server",
+                "docId": "kibKbnControlsSchemasPluginApi",
+                "section": "def-server.LegacyStoredRangeSliderExplicitInput",
+                "text": "LegacyStoredRangeSliderExplicitInput"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/controls-schemas",
+                "scope": "server",
+                "docId": "kibKbnControlsSchemasPluginApi",
+                "section": "def-server.LegacyStoredTimeSliderExplicitInput",
+                "text": "LegacyStoredTimeSliderExplicitInput"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.LegacyStoredTimeSliderExplicitInput",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyStoredTimeSliderExplicitInput",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredTimeSliderExplicitInput.isAnchored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isAnchored",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredTimeSliderExplicitInput.timesliceEndAsPercentageOfTimeRange",
+            "type": "number",
+            "tags": [],
+            "label": "timesliceEndAsPercentageOfTimeRange",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredTimeSliderExplicitInput.timesliceStartAsPercentageOfTimeRange",
+            "type": "number",
+            "tags": [],
+            "label": "timesliceStartAsPercentageOfTimeRange",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
       {
         "parentPluginId": "@kbn/controls-schemas",
         "id": "def-server.ControlsGroupState",
@@ -37,39 +563,11 @@
         "label": "ControlsGroupState",
         "description": [],
         "signature": [
-          "{ readonly enhancements?: Record<string, any> | undefined; readonly ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; readonly controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; readonly labelPosition: \"oneLine\" | \"twoLine\"; readonly chainingSystem: \"HIERARCHICAL\" | \"NONE\"; readonly autoApplySelections: boolean; }"
+          "(Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-schemas",
-        "id": "def-server.ControlsIgnoreParentSettings",
-        "type": "Type",
-        "tags": [],
-        "label": "ControlsIgnoreParentSettings",
-        "description": [],
-        "signature": [
-          "{ readonly ignoreFilters?: boolean | undefined; readonly ignoreQuery?: boolean | undefined; readonly ignoreTimerange?: boolean | undefined; readonly ignoreValidations?: boolean | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-schemas",
-        "id": "def-server.ControlsLabelPosition",
-        "type": "Type",
-        "tags": [],
-        "label": "ControlsLabelPosition",
-        "description": [],
-        "signature": [
-          "\"oneLine\" | \"twoLine\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -82,9 +580,11 @@
         "label": "ControlState",
         "description": [],
         "signature": [
-          "{ readonly id?: string | undefined; readonly grow?: boolean | undefined; readonly width?: \"small\" | \"medium\" | \"large\" | undefined; readonly controlConfig?: Readonly<{} & {}> | undefined; readonly type: string; readonly order: number; }"
+          "{ readonly title?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -100,6 +600,294 @@
           "\"small\" | \"medium\" | \"large\""
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.DataControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "DataControlState",
+        "description": [],
+        "signature": [
+          "{ readonly title?: string | undefined; readonly field_name: string; readonly data_view_id: string; readonly use_global_filters: boolean; readonly ignore_validations: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.LegacyStoredOptionsListExplicitInput",
+        "type": "Type",
+        "tags": [],
+        "label": "LegacyStoredOptionsListExplicitInput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/controls-schemas",
+            "scope": "server",
+            "docId": "kibKbnControlsSchemasPluginApi",
+            "section": "def-server.LegacyStoredDataControlState",
+            "text": "LegacyStoredDataControlState"
+          },
+          " & { displaySettings?: { placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } | undefined; exclude?: boolean | null | undefined; existsSelected?: boolean | null | undefined; runPastTimeout?: boolean | null | undefined; searchTechnique?: string | null | undefined; selectedOptions?: (string | number)[] | null | undefined; singleSelect?: boolean | null | undefined; sort?: { by: string; direction: string; } | null | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.LegacyStoredRangeSliderExplicitInput",
+        "type": "Type",
+        "tags": [],
+        "label": "LegacyStoredRangeSliderExplicitInput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/controls-schemas",
+            "scope": "server",
+            "docId": "kibKbnControlsSchemasPluginApi",
+            "section": "def-server.LegacyStoredDataControlState",
+            "text": "LegacyStoredDataControlState"
+          },
+          " & { step?: number | undefined; value?: [string, string] | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.OptionsListControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListControlState",
+        "description": [],
+        "signature": [
+          "Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.OptionsListDisplaySettings",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListDisplaySettings",
+        "description": [],
+        "signature": [
+          "{ readonly placeholder?: string | undefined; readonly hide_action_bar?: boolean | undefined; readonly hide_exclude?: boolean | undefined; readonly hide_exists?: boolean | undefined; readonly hide_sort?: boolean | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.OptionsListDSLControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListDSLControlState",
+        "description": [],
+        "signature": [
+          "{ readonly title?: string | undefined; readonly display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; readonly sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; readonly field_name: string; readonly data_view_id: string; readonly use_global_filters: boolean; readonly ignore_validations: boolean; readonly exclude: boolean; readonly exists_selected: boolean; readonly run_past_timeout: boolean; readonly search_technique: \"prefix\" | \"wildcard\" | \"exact\"; readonly selected_options: (string | number)[]; readonly single_select: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.OptionsListESQLControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListESQLControlState",
+        "description": [],
+        "signature": [
+          "Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.OptionsListSearchTechnique",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListSearchTechnique",
+        "description": [],
+        "signature": [
+          "\"prefix\" | \"wildcard\" | \"exact\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.OptionsListSelection",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListSelection",
+        "description": [],
+        "signature": [
+          "string | number"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.OptionsListSortingType",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListSortingType",
+        "description": [],
+        "signature": [
+          "{ readonly direction: \"asc\" | \"desc\"; readonly by: \"_key\" | \"_count\"; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.PinnedControlLayoutState",
+        "type": "Type",
+        "tags": [],
+        "label": "PinnedControlLayoutState",
+        "description": [],
+        "signature": [
+          "Readonly<{ id?: string | undefined; } & { grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> & { order: number; type: string; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.PinnedControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "PinnedControlState",
+        "description": [],
+        "signature": [
+          "Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.RangeSliderControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "RangeSliderControlState",
+        "description": [],
+        "signature": [
+          "{ readonly value?: string[] | undefined; readonly title?: string | undefined; readonly field_name: string; readonly step: number; readonly data_view_id: string; readonly use_global_filters: boolean; readonly ignore_validations: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.RangeSliderValue",
+        "type": "Type",
+        "tags": [],
+        "label": "RangeSliderValue",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.TimeSlice",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeSlice",
+        "description": [],
+        "signature": [
+          "[number, number]"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.TimeSliderControlState",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeSliderControlState",
+        "description": [],
+        "signature": [
+          "{ readonly start_percentage_of_time_range: number; readonly end_percentage_of_time_range: number; readonly is_anchored: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -108,10 +896,10 @@
     "objects": [
       {
         "parentPluginId": "@kbn/controls-schemas",
-        "id": "def-server.controlsGroupSchema",
+        "id": "def-server.optionsListDSLControlSchema",
         "type": "Object",
         "tags": [],
-        "label": "controlsGroupSchema",
+        "label": "optionsListDSLControlSchema",
         "description": [],
         "signature": [
           {
@@ -121,7 +909,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<{ controls: ",
+          "<{ exclude: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -129,7 +917,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]>; labelPosition: ",
+          "<boolean>; exists_selected: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -137,7 +925,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"oneLine\" | \"twoLine\">; chainingSystem: ",
+          "<boolean>; run_past_timeout: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -145,7 +933,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"HIERARCHICAL\" | \"NONE\">; enhancements: ",
+          "<boolean>; search_technique: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -153,7 +941,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Record<string, any> | undefined>; ignoreParentSettings: ",
+          "<\"prefix\" | \"wildcard\" | \"exact\">; selected_options: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -161,7 +949,231 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined>; autoApplySelections: ",
+          "<(string | number)[]>; single_select: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; sort: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ by: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"_key\" | \"_count\">; direction: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"asc\" | \"desc\">; }>; data_view_id: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; field_name: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; use_global_filters: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; ignore_validations: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; title: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; display_settings: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined>; }>"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/options_list_schema.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.optionsListESQLControlSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "optionsListESQLControlSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>>"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/options_list_schema.ts",
+        "lineNumber": 81,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.rangeSliderControlSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "rangeSliderControlSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ value: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string[] | undefined>; step: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; data_view_id: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; field_name: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; use_global_filters: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; ignore_validations: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; title: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; }>"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/range_slider_schema.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.timeSliderControlSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "timeSliderControlSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ start_percentage_of_time_range: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; end_percentage_of_time_range: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; is_anchored: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -171,7 +1183,9 @@
           },
           "<boolean>; }>"
         ],
-        "path": "src/platform/packages/shared/controls/controls-schemas/src/controls_group_schema.ts",
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/time_slider_schema.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

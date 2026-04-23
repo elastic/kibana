@@ -4,22 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-types'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-types'
+  title: '@kbn/search-types'
   description: Moon project for @kbn/search-types
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-search-types
+  sourceRoot: src/platform/packages/shared/kbn-search-types
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-views-plugin'
+  - '@kbn/es-query'
 tags:
   - shared-common
   - package
@@ -33,16 +33,6 @@ fileGroups:
     - src/**/*
     - __mocks__/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

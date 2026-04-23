@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
 
 export class DashboardAddPanelService extends FtrService {
@@ -17,10 +18,25 @@ export class DashboardAddPanelService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
+
+  private async dismissToastsAndClick(element: WebElementWrapper) {
+    await this.toasts.dismissAll();
+    try {
+      await element.click();
+    } catch (err) {
+      if (err.name === 'ElementClickInterceptedError') {
+        await this.toasts.dismissAll();
+        await element.click();
+      } else {
+        throw err;
+      }
+    }
+  }
 
   async clickTopNavAddMenu() {
     this.log.debug('DashboardAddPanel.clickTopNavAddMenu');
-    await this.testSubjects.click('dashboardAddTopNavButton');
+    await this.appMenu.clickMenuItem('dashboardAddTopNavButton');
   }
 
   async clickAddFromLibrary() {
@@ -64,11 +80,31 @@ export class DashboardAddPanelService extends FtrService {
     await this.clickAddNewPanelFromUIActionLink('Lens');
   }
 
+  async clickAddControlPanel() {
+    this.log.debug('DashboardAddPanel.clickAddControlPanel');
+    await this.openAddPanelFlyout();
+    await this.clickAddNewPanelFromUIActionLink('Control');
+  }
+
+  async clickAddEsqlPanel() {
+    this.log.debug('DashboardAddPanel.clickAddEsqlPanel');
+    await this.openAddPanelFlyout();
+    await this.clickAddNewPanelFromUIActionLink('ES|QL');
+  }
+
+  async clickAddDiscoverPanel() {
+    this.log.debug('DashboardAddPanel.clickAddDiscoverPanel');
+    await this.openAddPanelFlyout();
+    await this.clickAddNewPanelFromUIActionLink('Discover session');
+  }
+
   async openAddPanelFlyout() {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
     await this.clickTopNavAddMenu();
     await this.testSubjects.click('dashboardOpenAddPanelFlyoutButton');
-    await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
+    });
     await this.retry.try(async () => {
       return await this.testSubjects.exists('dashboardPanelSelectionList');
     });
@@ -113,7 +149,7 @@ export class DashboardAddPanelService extends FtrService {
           // already added this one
           continue;
         }
-        await button.click();
+        await this.dismissToastsAndClick(button);
 
         embeddableList.push(name);
       }
@@ -124,9 +160,6 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickPagerNextButton() {
     this.log.debug('DashboardAddPanel.clickPagerNextButton');
-    // Clear all toasts that could hide pagination controls
-    await this.toasts.dismissAll();
-
     const addPanel = await this.testSubjects.find('dashboardAddPanel');
 
     const isNext = await this.testSubjects.descendantExists('pagination-button-next', addPanel);
@@ -145,7 +178,7 @@ export class DashboardAddPanelService extends FtrService {
     }
 
     await this.header.waitUntilLoadingHasFinished();
-    await pagerNextButton.click();
+    await this.dismissToastsAndClick(pagerNextButton);
     await this.header.waitUntilLoadingHasFinished();
     return true;
   }

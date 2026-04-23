@@ -42,6 +42,7 @@ const requestHeadersWhitelistSchemas = [
     },
   }),
   schema.arrayOf(schema.string(), {
+    maxSize: 100,
     // can't use `validate` option on union types, forced to validate each individual subtypes
     // see https://github.com/elastic/kibana/issues/64906
     validate: (headersWhitelist) => {
@@ -64,9 +65,12 @@ export const configSchema = schema.object({
     defaultValue: false,
   }),
   sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
-  hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
-    defaultValue: 'http://localhost:9200',
-  }),
+  hosts: schema.oneOf(
+    [hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1, maxSize: 100 })],
+    {
+      defaultValue: 'http://localhost:9200',
+    }
+  ),
   maxSockets: schema.number({ defaultValue: 800, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
   maxResponseSize: schema.oneOf([schema.literal(false), schema.byteSize()], {
@@ -128,7 +132,10 @@ export const configSchema = schema.object({
         { defaultValue: 'full' }
       ),
       certificateAuthorities: schema.maybe(
-        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+        ])
       ),
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
@@ -157,6 +164,7 @@ export const configSchema = schema.object({
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({
     delay: schema.duration({ defaultValue: 2500 }),
+    onFailureDelay: schema.maybe(schema.duration()),
     startupDelay: schema.duration({ defaultValue: 500 }),
     retry: schema.number({ defaultValue: DEFAULT_HEALTH_CHECK_RETRY, min: 1 }),
   }),
@@ -196,7 +204,7 @@ export const configSchema = schema.object({
       path: schema.string(),
       method: schema.maybe(schema.string()),
     }),
-    { defaultValue: [] }
+    { defaultValue: [], maxSize: 100 }
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
   publicBaseUrl: schema.maybe(hostURISchema),
@@ -353,6 +361,10 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly healthCheckDelay: Duration;
   /**
+   * The interval between health check requests Kibana sends to the Elasticsearch during failure.
+   */
+  public readonly healthCheckFailureInterval: Duration | undefined;
+  /**
    * The number of times to retry the health check request
    */
   public readonly healthCheckRetry: number;
@@ -499,6 +511,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;
     this.sniffInterval = rawConfig.sniffInterval;
     this.healthCheckDelay = rawConfig.healthCheck.delay;
+    this.healthCheckFailureInterval = rawConfig.healthCheck.onFailureDelay;
     this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
     this.healthCheckRetry = rawConfig.healthCheck.retry;
     this.username = rawConfig.username;

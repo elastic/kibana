@@ -294,14 +294,13 @@ For each step in workflow definition:
 
 ### 4. Error Handling
 
-```
-If step fails:
-  1. Log error details
-  2. Check step-level retry configuration
-  3. Retry step or fail workflow
-  4. Update execution status
-  5. Emit error events
-```
+Errors are captured at step boundaries, propagated through the scope stack, and handled by on-failure nodes (retry, fallback, continue) in order. Retry supports fixed delay or exponential backoff with optional jitter.
+
+- **Retry:** condition-based retries with configurable attempts and delay (fixed or exponential).
+- **Fallback:** alternative steps when the primary step fails (after retries exhausted if retry is configured).
+- **Continue:** condition-based continuation despite step failure.
+
+See [On-Failure Configuration](server/step/on_failure/README.md) for recovery patterns, which errors to retry, and graceful degradation (fallback + continue).
 
 ---
 
@@ -356,6 +355,17 @@ interface WorkflowsExecutionEnginePluginStart {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<void>;
+
+  /**
+   * Cancel all non-terminal executions for a workflow in a space by paging the executions
+   * index with search_after (fixed internal batch size). Uses cancelWorkflowExecution per id;
+   * failures are logged and do not stop the rest. Pagination is not point-in-time: under
+   * concurrent index updates, duplicates or gaps across pages are possible.
+   */
+  cancelAllActiveWorkflowExecutions(params: {
+    spaceId: string;
+    workflowId: string;
+  }): Promise<void>;
 }
 
 interface ExecuteWorkflowResponse {
@@ -468,6 +478,7 @@ The plugin stores data in Elasticsearch using the following indices:
   "stepId": "step-1",
   "spaceId": "default",
   "status": "completed",
+  "isTestRun": false,
   "startedAt": "2024-01-01T00:00:00Z",
   "finishedAt": "2024-01-01T00:00:05Z",
   "duration": 5000
@@ -678,15 +689,34 @@ The plugin can be configured via `kibana.yml`:
 workflowsExecutionEngine:
   # Enable/disable the plugin
   enabled: true
-  
+
+  # Event-driven execution
+  eventDriven:
+    # When false, event-triggered runs are skipped at execution time (no scheduling).
+    enabled: true
+    # When false, trigger subscriptions are not resolved and events are not written to the trigger-events data stream
+    logEvents: true
+    # Maximum depth for event-triggered chains (each emit that schedules workflows increments depth).
+    # When exceeded, matching workflows are not scheduled (warning logged). Default 10, minimum 1.
+    maxChainDepth: 10
+
+  # Maximum depth of nested workflow execution (workflow calling another via workflow.execute).
+  # When exceeded, nested execution is not started. Default 10, minimum 1 (see server/config.ts).
+  maxWorkflowDepth: 10
+
   # Enable console logging for debugging
   logging:
     console: false
-  
   # Configure allowed hosts for HTTP steps
   http:
     allowedHosts: ['*']  # Use specific hosts in production
 ```
+
+### Event-driven and depth settings
+
+- **`eventDriven.maxChainDepth`** — Maximum depth for **event-triggered** chains (each `emitEvent` that schedules workflows advances depth). Default **`10`**; minimum **`1`**. When a run would exceed this value, matching workflows are **not** scheduled and the server logs a warning.
+
+- **`maxWorkflowDepth`** — Maximum depth of **nested** workflow execution when one workflow invokes another via the **`workflow.execute`** step. Default **`10`**; minimum **`1`**. When exceeded, the nested run is not started.
 
 ---
 
@@ -842,7 +872,16 @@ await workflowsExecutionEngine.cancelWorkflowExecution(
 );
 ```
 
-**Note**: To retrieve workflow execution status and logs, use the workflows_management plugin's API. The execution engine plugin focuses on execution control and does not expose query methods in its public API.
+### Example 4: Bulk cancel non-terminal executions for a workflow
+
+```typescript
+await workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
+  workflowId: 'my-workflow-id',
+  spaceId: 'default',
+});
+```
+
+**Note**: To retrieve workflow execution status and logs, use the workflows_management plugin's API. The execution engine plugin focuses on execution control; it does not expose ad-hoc query APIs beyond execution helpers such as bulk cancel.
 
 ---
 

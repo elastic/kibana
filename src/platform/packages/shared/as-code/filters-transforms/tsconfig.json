@@ -1,0 +1,18 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/as-code-filters-schema",
+    "@kbn/es-query-server",
+    "@kbn/es-query",
+    "@kbn/es-query-constants",
+    "@kbn/logging",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/as-code-filters-constants"
+  ]
+}

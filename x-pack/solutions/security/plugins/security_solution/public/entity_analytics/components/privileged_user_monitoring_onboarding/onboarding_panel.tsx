@@ -12,7 +12,6 @@ import {
   EuiImage,
   EuiIcon,
   EuiLink,
-  EuiBetaBadge,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -54,15 +53,6 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
                         />
                       </h2>
                     </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      size="m"
-                      label={i18n.translate(
-                        'xpack.securitySolution.privilegedUserMonitoring.onboarding.betaStatus',
-                        { defaultMessage: 'TECHNICAL PREVIEW' }
-                      )}
-                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiFlexItem grow={false}>

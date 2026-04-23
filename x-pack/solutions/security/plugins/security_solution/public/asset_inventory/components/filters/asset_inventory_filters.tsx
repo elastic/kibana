@@ -11,7 +11,6 @@ import { FilterGroup } from '@kbn/alerts-ui-shared/src/alert_filter_controls/fil
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import type { Filter } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import {
   ASSET_INVENTORY_APP_NAME,
   ASSET_INVENTORY_FILTER_CRITICALITY_APPLIED,
@@ -33,19 +32,19 @@ const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.type', {
       defaultMessage: 'Type',
     }),
-    fieldName: ASSET_FIELDS.ENTITY_TYPE,
+    field_name: ASSET_FIELDS.ENTITY_TYPE,
   },
   {
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.name', {
       defaultMessage: 'Name',
     }),
-    fieldName: ASSET_FIELDS.ENTITY_NAME,
+    field_name: ASSET_FIELDS.ENTITY_NAME,
   },
   {
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.id', {
       defaultMessage: 'ID',
     }),
-    fieldName: ASSET_FIELDS.ENTITY_ID,
+    field_name: ASSET_FIELDS.ENTITY_ID,
   },
 ];
 
@@ -104,9 +103,7 @@ export const AssetInventoryFilters = ({ setQuery, query }: AssetInventoryFilters
       ruleTypeIds={ASSET_INVENTORY_RULE_TYPE_IDS}
       Storage={Storage}
       defaultControls={DEFAULT_ASSET_INVENTORY_FILTERS}
-      chainingSystem="HIERARCHICAL"
       spaceId={spaceId}
-      ControlGroupRenderer={ControlGroupRenderer}
       maxControls={4}
       query={query.query}
       filters={filters}

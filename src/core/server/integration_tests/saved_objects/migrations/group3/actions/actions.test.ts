@@ -48,6 +48,7 @@ import {
 } from '@kbn/core-saved-objects-migration-server-internal';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../../kibana_migrator_archive_utils';
 import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -137,9 +138,7 @@ describe('migration actions', () => {
     })();
   });
 
-  afterAll(async () => {
-    await esServer.stop();
-  });
+  afterAll(async () => await esServer?.stop());
 
   describe('fetchIndices', () => {
     afterAll(async () => {
@@ -1339,7 +1338,56 @@ describe('migration actions', () => {
       const pitId = pitResponse.right.pitId;
       await closePit({ client, pitId })();
 
-      const searchTask = client.search({ pit: { id: pitId } });
+      await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: 'existing_index_with_docs', _id: 'pit-invalidation-doc' } },
+          { type: 'test', value: 1 },
+        ],
+      });
+
+      let response: SearchResponse;
+      try {
+        response = await client.search({ pit: { id: pitId } });
+      } catch (err: unknown) {
+        // if the search call throws, we're likely on a non-serverless environment
+        // where the PIT simply became invalid
+        const message = err instanceof Error ? err.message : String(err);
+        expect(message).toContain('search_phase_execution_exception');
+        return;
+      }
+
+      // at this point, we're likely on a serverless environment
+      // the call succeeded but it contains failures
+      expect(response._shards?.failed).toBeGreaterThanOrEqual(1);
+      const failureReason =
+        response._shards?.failures?.[0]?.reason?.reason ??
+        response._shards?.failures?.[0]?.reason?.type ??
+        '';
+      expect(failureReason).toMatch(
+        /No search context found for id|search_context_missing_exception/
+      );
+    });
+
+    it('rejects search with closed PIT when allow_partial_search_results is false', async () => {
+      const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const pitId = pitResponse.right.pitId;
+      await closePit({ client, pitId })();
+
+      await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: 'existing_index_with_docs', _id: 'pit-invalidation-doc-2' } },
+          { type: 'test', value: 2 },
+        ],
+      });
+
+      const searchTask = client.search({
+        pit: { id: pitId },
+        allow_partial_search_results: false,
+      });
 
       await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
     });
@@ -2015,6 +2063,33 @@ describe('migration actions', () => {
             },
           }
       `);
+    });
+    it('resolves left unavailable_shards_exception when shards are not all active', async () => {
+      // Create an index with 1 replica on a single-node cluster.
+      // The replica shard will remain unassigned, so wait_for_active_shards: 'all'
+      // with a short timeout returns per-item unavailable_shards_exception errors.
+      await client.indices.create({
+        index: 'index_with_unavailable_shards',
+        settings: {
+          number_of_replicas: 1,
+          auto_expand_replicas: 'false',
+        },
+        mappings: { properties: {} },
+      });
+
+      const newDocs = [{ _source: { title: 'doc 1' } }] as unknown as SavedObjectsRawDoc[];
+
+      const result = await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'index_with_unavailable_shards',
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
+        refresh: 'wait_for',
+        timeout: '1s',
+      })();
+
+      expect(Either.isLeft(result)).toBe(true);
+      expect((result as Either.Left<any>).left.type).toEqual('unavailable_shards_exception');
+      expect((result as Either.Left<any>).left.message).toContain('index_with_unavailable_shards');
     });
   });
 });

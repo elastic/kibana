@@ -10,6 +10,8 @@ jest.mock('../constants', () => {
   return { MAIN_DATA_TYPE_DEFINITION: {}, TYPE_DEFINITION };
 });
 
+import type { EuiSelectableOption } from '@elastic/eui';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { Fields, NormalizedFields, State } from '../types';
 import {
   stripUndefinedValues,
@@ -19,7 +21,9 @@ import {
   getAllFieldTypesFromState,
   getFieldsMatchingFilterFromState,
   getStateWithCopyToFields,
+  prepareFieldsForEisUpdate,
 } from './utils';
+import type { MappingsOptionData } from '../../../sections/home/index_list/details_page/update_elser_mappings/update_elser_mappings_modal';
 
 const fieldsWithnestedFields: NormalizedFields = {
   byId: {
@@ -826,5 +830,130 @@ describe('utils', () => {
         expect(getStateWithCopyToFields(state)).toEqual(expectedState);
       });
     });
+  });
+});
+
+describe('prepareFieldsForEisUpdate', () => {
+  const flattenedFields: NormalizedFields = {
+    byId: {
+      '1': {
+        id: '1',
+        parentId: '2',
+        nestedDepth: 1,
+        isMultiField: false,
+        path: ['animal', 'name'],
+        source: {
+          name: 'name',
+          type: 'semantic_text',
+          inference_id: defaultInferenceEndpoints.ELSER,
+        },
+        childFieldsName: 'fields',
+        canHaveChildFields: false,
+        hasChildFields: false,
+        canHaveMultiFields: true,
+        hasMultiFields: false,
+        isExpanded: false,
+      },
+      '2': {
+        id: '2',
+        nestedDepth: 0,
+        isMultiField: false,
+        path: ['animal'],
+        source: {
+          name: 'animal',
+          type: 'object',
+        },
+        childFieldsName: 'properties',
+        canHaveChildFields: true,
+        hasChildFields: true,
+        canHaveMultiFields: false,
+        hasMultiFields: false,
+        isExpanded: false,
+        childFields: ['1, 4'],
+      },
+      '3': {
+        id: '3',
+        nestedDepth: 0,
+        isMultiField: false,
+        path: ['name'],
+        source: {
+          name: 'name',
+          type: 'semantic_text',
+          inference_id: defaultInferenceEndpoints.ELSER,
+        },
+        childFieldsName: 'fields',
+        canHaveChildFields: false,
+        hasChildFields: false,
+        canHaveMultiFields: true,
+        hasMultiFields: false,
+        isExpanded: false,
+      },
+      '4': {
+        id: '4',
+        parentId: '2',
+        nestedDepth: 1,
+        isMultiField: false,
+        path: ['animal', 'species'],
+        source: {
+          name: 'species',
+          type: 'semantic_text',
+          inference_id: defaultInferenceEndpoints.ELSER,
+        },
+        childFieldsName: 'fields',
+        canHaveChildFields: false,
+        hasChildFields: false,
+        canHaveMultiFields: true,
+        hasMultiFields: false,
+        isExpanded: false,
+      },
+    },
+    aliases: {},
+    rootLevelFields: ['2', '3'],
+    maxNestedDepth: 1,
+  };
+  it('updates inference_id and includes parent fields', () => {
+    const selectedOption: EuiSelectableOption<MappingsOptionData>[] = [
+      {
+        label: 'animal.name',
+        name: 'name',
+        key: '1',
+        checked: 'on',
+      },
+      {
+        label: 'name',
+        name: 'name',
+        key: '3',
+        checked: 'on',
+      },
+    ];
+    const result = prepareFieldsForEisUpdate(selectedOption, flattenedFields);
+    // The selected option is in the result
+    expect(Object.keys(result.byId)).toContain('1');
+    // The selected option has the EIS endpoint set as the inference_id
+    expect(result.byId['1'].source.inference_id).toBe(
+      defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
+    );
+    // The selected option has a parent id set
+    expect(result.byId['1'].parentId).toEqual('2');
+    // The selected option's parent is in the result
+    expect(result.byId['2']).toBeDefined();
+    // The rootLevelField array contains the grandparent of the selected option
+    expect(result.rootLevelFields).toEqual(['2', '3']);
+  });
+
+  it('prunes unselected childFields', () => {
+    const selectedOptionWithChildren: EuiSelectableOption<MappingsOptionData>[] = [
+      {
+        label: 'animal.name',
+        name: 'name',
+        key: '1',
+        checked: 'on',
+      },
+    ];
+    const result = prepareFieldsForEisUpdate(selectedOptionWithChildren, flattenedFields);
+    // The result contains the selected child option
+    expect(result.byId['1']).toBeDefined();
+    // The result does not contain the unselected sibling option
+    expect(result.byId['4']).toBeUndefined();
   });
 });

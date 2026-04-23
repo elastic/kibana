@@ -65,7 +65,7 @@ export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selec
       swimlaneType="viewBy"
       viewBy={partitionField}
       refreshConfig={REFRESH_CONFIG}
-      timeRange={formattedTimeRange}
+      time_range={formattedTimeRange}
       query={query}
     />
   );

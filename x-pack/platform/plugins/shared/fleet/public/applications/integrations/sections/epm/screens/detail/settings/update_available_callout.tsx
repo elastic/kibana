@@ -129,6 +129,7 @@ export const UpdateAvailableCallout = ({
           <EuiSpacer size="m" />
           <EuiCheckbox
             id={checkboxId}
+            data-test-subj="breakingChangeCheckbox"
             label="I've reviewed the breaking changes and understand the impact."
             onChange={breakingChanges.toggleIsUnderstood}
             checked={breakingChanges.isUnderstood}
@@ -153,7 +154,7 @@ const BreakingChangesButton = ({ href, onClick }: { href?: string; onClick: () =
           id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
           defaultMessage="Review breaking changes"
         />
-        <EuiIcon type="popout" />
+        <EuiIcon type="external" />
       </EuiButton>
     );
   }

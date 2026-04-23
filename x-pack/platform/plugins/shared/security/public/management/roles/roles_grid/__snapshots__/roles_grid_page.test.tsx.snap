@@ -30,7 +30,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
             You need permission to manage roles
           </h2>
           <div
-            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
             class="euiText emotion-euiText-m-euiTextColor-subdued"

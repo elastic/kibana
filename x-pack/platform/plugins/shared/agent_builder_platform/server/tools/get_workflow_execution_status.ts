@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
-import { getExecutionState } from '@kbn/onechat-genai-utils/tools/utils/workflows';
-import { errorResult, otherResult } from '@kbn/onechat-genai-utils/tools/utils/results';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { getExecutionState } from '@kbn/agent-builder-genai-utils/tools/utils/workflows';
+import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 
 const getWorkflowExecutionStatusSchema = z.object({
   executionId: z

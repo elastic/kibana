@@ -32,11 +32,10 @@ import { getNewRule } from '../../../../../objects/rule';
 
 const queryRule = getNewRule({ rule_id: '1', name: 'Query rule', enabled: false });
 
-// skipInServerlessMKI because of experiment feature flag
 describe(
   'Bulk Edit - Alert Suppression, Essentials Serverless tier',
   {
-    tags: ['@serverless', '@skipInServerlessMKI'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],

@@ -22,6 +22,8 @@
           "\nDeprecation Service: Internal Start contract"
         ],
         "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +47,8 @@
               "DeprecationsClient"
             ],
             "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -61,6 +65,8 @@
                   "IScopedClusterClient"
                 ],
                 "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+                "lineNumber": 42,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -78,6 +84,8 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -94,6 +102,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/deprecations/server-internal/src/deprecations_service.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

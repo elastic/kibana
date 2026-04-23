@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -24,7 +24,7 @@ import { DEFAULT_MINIMUM_TIME_RANGE_OPTION } from '../components/log_categorizat
 const parentApiIsCompatible = async (
   parentApi: unknown
 ): Promise<PresentationContainer | undefined> => {
-  const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
+  const { apiIsPresentationContainer } = await import('@kbn/presentation-publishing');
   // we cannot have an async type check, so return the casted parentApi rather than a boolean
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
@@ -36,7 +36,7 @@ export function createAddPatternAnalysisEmbeddableAction(
   return {
     id: 'create-pattern-analysis-embeddable',
     grouping: AIOPS_EMBEDDABLE_GROUPING,
-    getIconType: () => 'logPatternAnalysis',
+    getIconType: () => 'pattern',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddablePatternAnalysisDisplayName', {
         defaultMessage: 'Pattern analysis',
@@ -59,11 +59,9 @@ export function createAddPatternAnalysisEmbeddableAction(
         >({
           panelType: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
           serializedState: {
-            rawState: {
-              minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
-              randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
-              randomSamplerProbability: DEFAULT_PROBABILITY,
-            },
+            minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
+            randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
+            randomSamplerProbability: DEFAULT_PROBABILITY,
           },
         });
 

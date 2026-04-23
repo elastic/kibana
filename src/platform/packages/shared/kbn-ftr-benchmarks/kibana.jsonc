@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/ftr-benchmarks",
+  "owner": "@elastic/kibana-operations",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

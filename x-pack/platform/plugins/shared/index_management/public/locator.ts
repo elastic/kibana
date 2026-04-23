@@ -7,7 +7,10 @@
 
 import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import {
+  INDEX_MANAGEMENT_LOCATOR_ID,
+  type IndexManagementLocatorParams,
+} from '@kbn/index-management-shared-types';
 import {
   getComponentTemplateCloneLink,
   getComponentTemplateCreateLink,
@@ -15,14 +18,15 @@ import {
   getComponentTemplateEditLink,
   getComponentTemplateListLink,
   getDataStreamDetailsLink,
+  getIndexDetailsLink,
   getIndexListUri,
+  getTemplateCreateLink,
   getTemplateCloneLink,
   getTemplateDetailsLink,
   getTemplateEditLink,
 } from './application/services/routing';
 import { PLUGIN } from '../common/constants';
-
-export const INDEX_MANAGEMENT_LOCATOR_ID = 'INDEX_MANAGEMENT_LOCATOR_ID';
+export { INDEX_MANAGEMENT_LOCATOR_ID };
 
 export interface IndexManagementLocatorDefinitionDependencies {
   managementAppLocator: ManagementAppLocator;
@@ -78,6 +82,12 @@ export class IndexManagementLocatorDefinition
           path: location.path + getTemplateCloneLink(params.indexTemplate),
         };
       }
+      case 'create_template': {
+        return {
+          ...location,
+          path: location.path + getTemplateCreateLink(),
+        };
+      }
       case 'component_template': {
         return {
           ...location,
@@ -106,6 +116,12 @@ export class IndexManagementLocatorDefinition
         return {
           ...location,
           path: location.path + getComponentTemplateCreateLink(params.componentTemplate),
+        };
+      }
+      case 'index_details': {
+        return {
+          ...location,
+          path: location.path + getIndexDetailsLink(params.indexName, '', params.tab),
         };
       }
     }

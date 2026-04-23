@@ -8,8 +8,8 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -30,12 +30,6 @@ interface State {
 }
 
 export class InspectorViewChooser extends Component<Props, State> {
-  static propTypes = {
-    views: PropTypes.array.isRequired,
-    onViewSelected: PropTypes.func.isRequired,
-    selectedView: PropTypes.object.isRequired,
-  };
-
   state: State = {
     isSelectorOpen: false,
   };
@@ -73,7 +67,7 @@ export class InspectorViewChooser extends Component<Props, State> {
     return (
       <EuiButtonEmpty
         size="s"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.toggleSelector}
         data-test-subj="inspectorViewChooser"
@@ -117,6 +111,9 @@ export class InspectorViewChooser extends Component<Props, State> {
         panelPaddingSize="none"
         anchorPosition="downRight"
         repositionOnScroll
+        aria-label={i18n.translate('inspector.viewChooser.popover.ariaLabel', {
+          defaultMessage: 'Inspector view selector',
+        })}
       >
         <EuiContextMenuPanel items={views.map(this.renderView)} />
       </EuiPopover>

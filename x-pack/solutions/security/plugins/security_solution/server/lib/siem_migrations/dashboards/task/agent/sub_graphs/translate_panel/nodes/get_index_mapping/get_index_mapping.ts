@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getIndexMappings } from '@kbn/onechat-genai-utils';
+import { getIndexMappings } from '@kbn/agent-builder-genai-utils';
 import type { GraphNode, TranslatePanelGraphParams } from '../../types';
 
 export const getIndexMappingNode = (params: TranslatePanelGraphParams): GraphNode => {

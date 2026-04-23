@@ -88,7 +88,7 @@ interface RenderLayerPanelOptions {
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
 
-  let mockDatasource = createMockDatasource('testDatasource');
+  let mockDatasource = createMockDatasource('formBased');
 
   function getDefaultProps(): LayerPanelProps {
     return {
@@ -143,7 +143,7 @@ describe('LayerPanel', () => {
                 testVis: mockVisualization,
               }}
               datasourceMap={{
-                testDatasource: mockDatasource,
+                formBased: mockDatasource,
               }}
             >
               {children}
@@ -486,6 +486,45 @@ describe('LayerPanel', () => {
       expect(updateAll).toHaveBeenCalled();
     });
 
+    it('should pass dimension intent to updateAll when datasource is complete', async () => {
+      (generateId as jest.Mock).mockReturnValue(`newid`);
+      const updateAll = jest.fn();
+      const updateDatasourceAsync = jest.fn();
+
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [{ ...defaultGroup, accessors: [] }],
+      });
+
+      renderLayerPanel({
+        propsOverrides: {
+          updateAll,
+          updateDatasourceAsync,
+        },
+      });
+
+      await userEvent.click(screen.getByTestId('lns-empty-dimension'));
+      expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
+        expect.objectContaining({ columnId: 'newid' })
+      );
+      const stateFn =
+        mockDatasource.DimensionEditorComponent.mock.calls[
+          mockDatasource.DimensionEditorComponent.mock.calls.length - 1
+        ][0].setState;
+
+      const updater = jest.fn().mockReturnValue({ resolved: true });
+      act(() => {
+        stateFn(updater);
+      });
+
+      expect(updateAll).toHaveBeenCalledWith({
+        datasourceId: 'formBased',
+        newDatasourceState: updater,
+        layerId: 'first',
+        groupId: 'a',
+        columnId: 'newid',
+      });
+    });
+
     it('should remove the dimension when the datasource marks it as removed', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
@@ -597,7 +636,7 @@ describe('LayerPanel', () => {
       await userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
 
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
-      expect(updateDatasource).toHaveBeenCalledWith('testDatasource', { newState: {} });
+      expect(updateDatasource).toHaveBeenCalledWith('formBased', { newState: {} });
     });
 
     it('should display the fake final accessor if present in the group config', async () => {

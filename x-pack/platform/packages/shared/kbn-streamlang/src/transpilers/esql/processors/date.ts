@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
-import type { ESQLFunction, ESQLMapEntry, FunctionSubtype } from '@kbn/esql-ast/src/types';
+import { Builder } from '@elastic/esql';
+import type {
+  ESQLAstCommand,
+  ESQLFunction,
+  ESQLMapEntry,
+  FunctionSubtype,
+} from '@elastic/esql/types';
 import type { CommonDatePreset } from '../../../../types/formats';
 import type { DateProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';

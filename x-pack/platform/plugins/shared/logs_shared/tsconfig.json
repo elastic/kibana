@@ -8,12 +8,9 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*",
-    "emotion.d.ts"
+    "types/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -59,6 +56,6 @@
     "@kbn/discover-utils",
     "@kbn/xstate-utils",
     "@kbn/ml-plugin",
-    "@kbn/saved-search-component",
+    "@kbn/saved-search-component"
   ]
 }

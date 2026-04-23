@@ -29,6 +29,8 @@
           "[]) => void; }>; stop: () => void; preboot: ({ http }: PrebootDeps) => void; }"
         ],
         "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -43,6 +45,8 @@
         "label": "pricingServiceMock",
         "description": [],
         "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,6 +63,8 @@
               ">"
             ],
             "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -77,6 +83,8 @@
               ">"
             ],
             "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -95,6 +103,8 @@
               ">"
             ],
             "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

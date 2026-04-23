@@ -14,6 +14,8 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
+  const queryBar = getService('queryBar');
+  const dashboardSettings = getService('dashboardSettings');
 
   const { dashboard, header, dashboardControls } = getPageObjects([
     'dashboardControls',
@@ -36,13 +38,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('cat');
       await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
       await header.waitUntilLoadingHasFinished();
-      await dashboardControls.verifyApplyButtonEnabled();
+      await queryBar.verifyQueryUpdateButtonEnabled();
 
-      await dashboardControls.updateShowApplyButtonSetting(false);
+      await dashboard.openSettingsFlyout();
+      await dashboardSettings.toggleAutoApplyFilters(true);
+      await dashboardSettings.clickApplyButton();
+
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
-      await dashboard.expectUnsavedChangesBadge();
+      await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
       expect(await pieChart.getPieSliceCount()).to.be(4);
       await dashboard.clickDiscardChanges();
     });
@@ -53,17 +58,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSelectOption('cat');
         await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
       });
 
       it('waits to apply filters until button is pressed', async () => {
         expect(await pieChart.getPieSliceCount()).to.be(5);
 
-        await dashboardControls.clickApplyButton();
+        await queryBar.clickQuerySubmitButton();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(4);
       });
 
@@ -72,13 +77,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSelectOption('dog');
         await dashboardControls.optionsListEnsurePopoverIsClosed(optionsListId);
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
 
         await dashboard.clickDiscardChanges();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(5);
         expect(await dashboardControls.optionsListGetSelectionsString(optionsListId)).to.be('Any');
       });
@@ -87,17 +92,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('range slider selections', () => {
       it('making selection enables apply button', async () => {
         await dashboardControls.rangeSliderSetUpperBound(rangeSliderId, '30');
-        await dashboardControls.verifyApplyButtonEnabled();
+        await dashboardControls.hideHoverActions();
+        await queryBar.verifyQueryUpdateButtonEnabled();
       });
 
       it('waits to apply filters until apply button is pressed', async () => {
         expect(await pieChart.getPieSliceCount()).to.be(5);
 
-        await dashboardControls.clickApplyButton();
+        await queryBar.clickQuerySubmitButton();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(4);
       });
 
@@ -105,13 +111,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetLowerBound(rangeSliderId, '15');
         await dashboardControls.rangeSliderEnsurePopoverIsClosed(rangeSliderId);
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
 
         await dashboard.clickDiscardChanges();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(5);
         expect(
           await dashboardControls.rangeSliderGetLowerBoundAttribute(rangeSliderId, 'value')
@@ -133,29 +139,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.gotoNextTimeSlice();
         await dashboardControls.gotoNextTimeSlice(); // go to an empty timeslice
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
       });
 
       it('waits to apply timeslice until apply button is pressed', async () => {
         expect(await pieChart.getPieSliceCount()).to.be(5);
 
-        await dashboardControls.clickApplyButton();
+        await queryBar.clickQuerySubmitButton();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await pieChart.expectEmptyPieChart();
       });
 
       it('hitting dashboard resets selections + unapplies timeslice', async () => {
         await dashboardControls.gotoNextTimeSlice();
-        await dashboardControls.verifyApplyButtonEnabled();
+        await queryBar.verifyQueryUpdateButtonEnabled();
 
         await dashboard.clickDiscardChanges();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(5);
         const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueNow).to.equal(valueBefore);

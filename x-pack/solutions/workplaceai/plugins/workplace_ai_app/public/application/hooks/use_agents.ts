@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { UseQueryResult } from '@kbn/react-query';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { GET_AGENTS_ROUTE } from '../../../common/routes';
 import { useKibana } from './use_kibana';
 

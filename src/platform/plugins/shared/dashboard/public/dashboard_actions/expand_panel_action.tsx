@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CanExpandPanels } from '@kbn/presentation-containers';
-import { apiCanExpandPanels } from '@kbn/presentation-containers';
-import type { EmbeddableApiContext, HasParentApi, HasUniqueId } from '@kbn/presentation-publishing';
-import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
+import type {
+  CanExpandPanels,
+  IsExpandable,
+  EmbeddableApiContext,
+  HasParentApi,
+  HasUniqueId,
+} from '@kbn/presentation-publishing';
+import {
+  apiHasParentApi,
+  apiHasUniqueId,
+  apiCanExpandPanels,
+  apiCanBeExpanded,
+} from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { map, skip } from 'rxjs';
@@ -18,9 +27,10 @@ import { map, skip } from 'rxjs';
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
 import { ACTION_EXPAND_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 
-export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
+export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels> & IsExpandable;
 
 const isApiCompatible = (api: unknown | null): api is ExpandPanelActionApi =>
+  apiCanBeExpanded(api) &&
   Boolean(apiHasUniqueId(api) && apiHasParentApi(api) && apiCanExpandPanels(api.parentApi));
 
 export class ExpandPanelAction implements Action<EmbeddableApiContext> {

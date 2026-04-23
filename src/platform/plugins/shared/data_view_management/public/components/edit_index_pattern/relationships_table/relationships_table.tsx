@@ -31,7 +31,7 @@ import type {
 
 import type { SearchFilterConfig } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
-import { IPM_APP_ID } from '../../../plugin';
+import { IPM_APP_ID } from '../../../constants';
 import {
   typeFieldName,
   typeFieldDescription,
@@ -39,6 +39,7 @@ import {
   titleFieldDescription,
   filterTitle,
   managedBadge,
+  relationshipsTableCaption,
 } from './i18n';
 
 const canGoInApp = (
@@ -183,6 +184,7 @@ export const RelationshipsTable = ({
       <EuiInMemoryTable<SavedObjectRelation>
         items={relationships}
         columns={columns}
+        tableCaption={relationshipsTableCaption}
         pagination={{
           pageSize,
         }}

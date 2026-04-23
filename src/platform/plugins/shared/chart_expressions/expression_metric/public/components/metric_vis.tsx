@@ -60,7 +60,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} css={{ width, height }} />;
+    <EuiIcon type={type} fill={color} css={{ width, height }} aria-hidden="true" />;
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -72,18 +72,28 @@ export interface MetricVisComponentProps {
 }
 
 function buildTrendConfig(
-  { palette, visuals, baseline }: MetricVisParam['secondaryTrend'],
+  { palette, textPalette, visuals, baseline }: MetricVisParam['secondaryTrend'],
   value: number | string
 ): TrendConfig | undefined {
   if (!palette) return undefined;
 
+  const isPrimaryNumeric = typeof value === 'number';
+  const isNumericBaseline = Number.isFinite(baseline);
+
+  // When baseline is not a valid finite number ('primary'), but the primary value is numeric at runtime,
+  // disable compare-to-primary and fall back to baseline 0.
+  const compareToPrimary = !isNumericBaseline && isPrimaryNumeric;
+
+  const baselineValue = isNumericBaseline ? Number(baseline) : isPrimaryNumeric ? value : 0;
+
   return {
     showIcon: visuals !== 'value',
     showValue: visuals !== 'icon',
-    baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
+    baselineValue,
     palette,
+    textPalette,
     borderColor: undefined,
-    compareToPrimary: baseline === 'primary',
+    compareToPrimary,
   };
 }
 
@@ -163,8 +173,9 @@ export const MetricVis = ({
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
-    const value: number | string =
-      row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
+    const rowValue = row[primaryMetricColumn.id];
+    const value: number | string = rowValue !== null && rowValue !== undefined ? rowValue : NaN;
+
     const title = breakdownByColumn
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
@@ -188,12 +199,16 @@ export const MetricVis = ({
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
     if (secondaryMetric) {
-      // Do not call getSecondaryMetricInfo if there is no Secondary Metric
+      // When baseline is 'primary' but the primary value is non-numeric at runtime,
+      // reset the label to use the column name
+      const isNumericBaseline = Number.isFinite(config.metric.secondaryTrend.baseline);
+      const isCompareToPrimaryInvalid = !isNumericBaseline && typeof value !== 'number';
+
       const secondaryMetricInfo = getSecondaryMetricInfo({
         row,
         columns: data.columns,
         secondaryMetric,
-        secondaryLabel: config.metric.secondaryLabel,
+        secondaryLabel: isCompareToPrimaryInvalid ? undefined : config.metric.secondaryLabel,
         trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
         staticColor: config.metric.secondaryColor,
       });
@@ -202,6 +217,7 @@ export const MetricVis = ({
         value: secondaryMetricInfo.value,
         label: secondaryMetricInfo.label,
         badgeColor: secondaryMetricInfo.badgeColor,
+        badgeTextColor: secondaryMetricInfo.badgeTextColor,
         ariaDescription: secondaryMetricInfo.description,
         icon: secondaryMetricInfo.icon,
         labelPosition: config.metric.secondaryLabelPosition,
@@ -343,7 +359,6 @@ export const MetricVis = ({
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
                   valuePosition: config.metric.primaryPosition,
-                  titleWeight: config.metric.titleWeight,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)

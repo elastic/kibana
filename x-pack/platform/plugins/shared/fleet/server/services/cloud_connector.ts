@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type {
@@ -14,17 +14,27 @@ import type {
   CloudConnectorSecretReference,
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
+  GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type {
   CreateCloudConnectorRequest,
   UpdateCloudConnectorRequest,
 } from '../../common/types/rest_spec/cloud_connector';
-import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../common/constants';
+import {
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../common/constants';
 import {
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  SERVICE_ACCOUNT_VAR_NAME,
+  AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  buildPackagePolicyFilterExcludingHiddenPackages,
+  CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
 } from '../../common/constants/cloud_connector';
 
 import {
@@ -33,9 +43,13 @@ import {
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
   rethrowIfInstanceOrWrap,
+  getErrorMessage,
 } from '../errors';
 
 import { appContextService } from './app_context';
+import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
+import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
+import { deleteSecrets } from './secrets/common';
 
 export interface CloudConnectorServiceInterface {
   create(
@@ -44,8 +58,12 @@ export interface CloudConnectorServiceInterface {
   ): Promise<CloudConnector>;
   getList(
     soClient: SavedObjectsClientContract,
-    options?: CloudConnectorListOptions
+    options?: Omit<CloudConnectorListOptions, 'fields'>
   ): Promise<CloudConnector[]>;
+  getList(
+    soClient: SavedObjectsClientContract,
+    options: CloudConnectorListOptions & { fields: string[] }
+  ): Promise<Partial<CloudConnector>[]>;
   getById(soClient: SavedObjectsClientContract, cloudConnectorId: string): Promise<CloudConnector>;
   update(
     soClient: SavedObjectsClientContract,
@@ -54,6 +72,7 @@ export interface CloudConnectorServiceInterface {
   ): Promise<CloudConnector>;
   delete(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     cloudConnectorId: string,
     force?: boolean
   ): Promise<{ id: string }>;
@@ -73,6 +92,88 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
    */
   private static normalizeName(name: string): string {
     return name.trim().replace(/\s+/g, ' ');
+  }
+
+  /**
+   * Queries package policies to get a map of cloud connector IDs to their
+   * user-visible package policy counts. Hidden internal packages (e.g. verifier_otel)
+   * and non-latest revisions (e.g. `:prev` rollback snapshots) are excluded in the
+   * saved-objects filter. Uses a terms aggregation (see `package_policies_aggregation`).
+   * `size` matches {@link SO_SEARCH_LIMIT} so bucket count is not capped at ES default (10).
+   */
+  private async getPackagePolicyCountsMap(
+    soClient: SavedObjectsClientContract
+  ): Promise<Map<string, number>> {
+    const logger = this.getLogger('getPackagePolicyCountsMap');
+
+    try {
+      const filter = buildPackagePolicyFilterExcludingHiddenPackages(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`
+      );
+
+      const res = await soClient.find<
+        Record<string, unknown>,
+        {
+          count_by_cloud_connector: {
+            buckets: Array<{ key: string; doc_count: number }>;
+          };
+        }
+      >({
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter,
+        aggs: {
+          count_by_cloud_connector: {
+            terms: {
+              field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
+              size: SO_SEARCH_LIMIT,
+            },
+          },
+        },
+      });
+
+      const countMap = new Map<string, number>();
+      for (const bucket of res.aggregations?.count_by_cloud_connector?.buckets ?? []) {
+        countMap.set(bucket.key, bucket.doc_count);
+      }
+      return countMap;
+    } catch (error) {
+      logger.error(`Failed to get package policy counts: ${error.message}`);
+      return new Map();
+    }
+  }
+
+  /**
+   * Gets the package policy count for a specific cloud connector.
+   * @param soClient - Saved objects client
+   * @param cloudConnectorId - ID of the cloud connector
+   * @returns The number of package policies using this cloud connector
+   */
+  private async getPackagePolicyCount(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string
+  ): Promise<number> {
+    const logger = this.getLogger('getPackagePolicyCount');
+
+    try {
+      const filter = buildPackagePolicyFilterExcludingHiddenPackages(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`
+      );
+
+      const result = await soClient.find({
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        filter,
+        page: 1,
+        perPage: 0,
+      });
+
+      return result.total;
+    } catch (error) {
+      logger.error(
+        `Failed to get package policy count for connector ${cloudConnectorId}: ${error.message}`
+      );
+      return 0;
+    }
   }
 
   /**
@@ -101,7 +202,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (excludeId && c.id === excludeId) {
         return false;
       }
-      return CloudConnectorService.normalizeName(c.name).toLowerCase() === normalizedNameLower;
+      // c.name is guaranteed to exist since we requested the 'name' field
+      return (
+        c.name && CloudConnectorService.normalizeName(c.name).toLowerCase() === normalizedNameLower
+      );
     });
 
     if (duplicateConnectorName) {
@@ -133,10 +237,14 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       // Validate and normalize the name, checking for duplicates
       const name = await this.validateAndNormalizeName(soClient, cloudConnector.name);
 
-      // Check if space awareness is enabled for namespace handling
-      const { isSpaceAwarenessEnabled } = await import('./spaces/helpers');
-      const useSpaceAwareness = await isSpaceAwarenessEnabled();
-      const namespace = useSpaceAwareness ? '*' : undefined;
+      const namespace = cloudConnector.namespace ?? '*';
+
+      if (namespace) {
+        await validatePolicyNamespaceForSpace({
+          namespace,
+          spaceId: soClient.getCurrentNamespace(),
+        });
+      }
 
       const cloudConnectorAttributes: CloudConnectorSOAttributes = {
         name,
@@ -144,9 +252,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         cloudProvider,
         accountType: cloudConnector.accountType,
         vars,
-        packagePolicyCount: 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        verification_status: 'pending',
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
@@ -159,13 +267,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return {
         id: savedObject.id,
         ...savedObject.attributes,
+        packagePolicyCount: 0,
       };
     } catch (error) {
-      logger.error(
-        `Failed to create cloud connector: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      logger.error(`Failed to create cloud connector: ${getErrorMessage(error)}`);
       rethrowIfInstanceOrWrap(
         error,
         CloudConnectorCreateError,
@@ -174,10 +279,20 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     }
   }
 
+  // Overload signatures
+  async getList(
+    soClient: SavedObjectsClientContract,
+    options?: Omit<CloudConnectorListOptions, 'fields'>
+  ): Promise<CloudConnector[]>;
+  async getList(
+    soClient: SavedObjectsClientContract,
+    options: CloudConnectorListOptions & { fields: string[] }
+  ): Promise<Partial<CloudConnector>[]>;
+  // Implementation
   async getList(
     soClient: SavedObjectsClientContract,
     options?: CloudConnectorListOptions
-  ): Promise<CloudConnector[]> {
+  ): Promise<CloudConnector[] | Partial<CloudConnector>[]> {
     const logger = this.getLogger('getList');
     logger.debug('Getting cloud connectors list');
 
@@ -185,7 +300,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const findOptions: any = {
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: options?.page || 1,
-        perPage: options?.perPage || 20,
+        perPage: options?.perPage || CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
       };
@@ -202,11 +317,21 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>(findOptions);
 
+      // Only compute package policy counts if we're fetching all fields
+      // (not when using fields filter for internal queries like duplicate name checking)
+      const shouldComputeCounts = !options?.fields;
+      const countMap = shouldComputeCounts
+        ? await this.getPackagePolicyCountsMap(soClient)
+        : new Map<string, number>();
+
       logger.debug('Successfully retrieved cloud connectors list');
 
+      // When using fields filter (internal queries), return partial objects
+      // When fetching all fields, include computed packagePolicyCount
       return cloudConnectors.saved_objects.map((savedObject) => ({
         id: savedObject.id,
         ...savedObject.attributes,
+        ...(shouldComputeCounts && { packagePolicyCount: countMap.get(savedObject.id) || 0 }),
       }));
     } catch (error) {
       logger.error('Failed to get cloud connectors list', error.message);
@@ -230,11 +355,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         cloudConnectorId
       );
 
+      // Compute packagePolicyCount dynamically
+      const packagePolicyCount = await this.getPackagePolicyCount(soClient, cloudConnectorId);
+
       logger.info(`Successfully retrieved cloud connector ${cloudConnectorId}`);
 
       return {
         id: cloudConnector.id,
         ...cloudConnector.attributes,
+        packagePolicyCount,
       };
     } catch (error) {
       logger.error('Failed to get cloud connector', error.message);
@@ -301,6 +430,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
 
+      const packagePolicyCount = await this.getPackagePolicyCount(soClient, cloudConnectorId);
+
       // Return the updated cloud connector with merged attributes
       const mergedAttributes = {
         ...existingCloudConnector.attributes,
@@ -310,19 +441,17 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return {
         id: cloudConnectorId,
         ...mergedAttributes,
+        packagePolicyCount,
       };
     } catch (error) {
-      logger.error(
-        `Failed to update cloud connector: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      logger.error(`Failed to update cloud connector: ${getErrorMessage(error)}`);
       rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to update cloud connector');
     }
   }
 
   async delete(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     cloudConnectorId: string,
     force: boolean = false
   ): Promise<{ id: string }> {
@@ -331,23 +460,52 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     try {
       logger.info(`Deleting cloud connector ${cloudConnectorId} (force: ${force})`);
 
-      // First, get the cloud connector to check packagePolicyCount
+      // First, get the cloud connector to get its name for error messages
       const cloudConnector = await soClient.get<CloudConnectorSOAttributes>(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         cloudConnectorId
       );
 
+      // Query actual package policy count dynamically (source of truth)
+      const packagePolicyCount = await this.getPackagePolicyCount(soClient, cloudConnectorId);
+
       // Check if cloud connector is still in use by package policies (unless force is true)
-      if (!force && cloudConnector.attributes.packagePolicyCount > 0) {
-        const errorMessage = `Cannot delete cloud connector "${cloudConnector.attributes.name}" as it is being used by ${cloudConnector.attributes.packagePolicyCount} package policies`;
+      if (!force && packagePolicyCount > 0) {
+        const errorMessage = `Cannot delete cloud connector "${cloudConnector.attributes.name}" as it is being used by ${packagePolicyCount} package policies`;
         logger.error(errorMessage);
         throw new CloudConnectorDeleteError(errorMessage);
       }
 
       // Log a warning if force deleting a connector that's still in use
-      if (force && cloudConnector.attributes.packagePolicyCount > 0) {
+      if (force && packagePolicyCount > 0) {
         logger.warn(
-          `Force deleting cloud connector "${cloudConnector.attributes.name}" which is still being used by ${cloudConnector.attributes.packagePolicyCount} package policies`
+          `Force deleting cloud connector "${cloudConnector.attributes.name}" which is still being used by ${packagePolicyCount} package policies`
+        );
+      }
+
+      // Extract and delete secrets before deleting the cloud connector
+      try {
+        const secretIds = extractSecretIdsFromCloudConnectorVars(
+          cloudConnector.attributes.cloudProvider,
+          cloudConnector.attributes.vars
+        );
+
+        if (secretIds.length > 0) {
+          logger.debug(
+            `Deleting ${secretIds.length} secret(s) associated with cloud connector ${cloudConnectorId}`
+          );
+          await deleteSecrets({ esClient, ids: secretIds });
+          logger.info(
+            `Successfully deleted ${secretIds.length} secret(s) for cloud connector ${cloudConnectorId}`
+          );
+        } else {
+          logger.debug(`No secrets to delete for cloud connector ${cloudConnectorId}`);
+        }
+      } catch (secretError) {
+        // Log the error but don't fail the deletion
+        logger.warn(
+          `Failed to delete secrets for cloud connector ${cloudConnectorId}: ${secretError.message}`,
+          secretError
         );
       }
 
@@ -431,6 +589,34 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
         throw new CloudConnectorInvalidVarsError(
           `${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid string`
+        );
+      }
+    } else if (cloudConnector.cloudProvider === 'gcp') {
+      const gcpVars = vars as GcpCloudConnectorVars;
+      // service_account and audience are non-secret text fields;
+      // only gcp_credentials_cloud_connector_id is a secret reference
+      const serviceAccount = gcpVars.service_account;
+      const audience = gcpVars.audience;
+      const gcpCredentials = gcpVars.gcp_credentials_cloud_connector_id;
+
+      if (!serviceAccount?.value) {
+        logger.error(`Package policy must contain valid ${SERVICE_ACCOUNT_VAR_NAME} value`);
+        throw new CloudConnectorInvalidVarsError(
+          `${SERVICE_ACCOUNT_VAR_NAME} must be a valid string`
+        );
+      }
+
+      if (!audience?.value) {
+        logger.error(`Package policy must contain valid ${AUDIENCE_VAR_NAME} value`);
+        throw new CloudConnectorInvalidVarsError(`${AUDIENCE_VAR_NAME} must be a valid string`);
+      }
+
+      if (!gcpCredentials?.value) {
+        logger.error(
+          `Package policy must contain valid ${GCP_CREDENTIALS_CLOUD_CONNECTOR_ID} value`
+        );
+        throw new CloudConnectorInvalidVarsError(
+          `${GCP_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid string`
         );
       }
     } else {

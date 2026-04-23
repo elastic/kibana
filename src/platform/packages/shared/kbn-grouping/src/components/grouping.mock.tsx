@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 import React from 'react';
 
 export const host1Name = 'nice-host';
@@ -135,12 +132,18 @@ export const mockGroupingProps = {
   renderChildComponent: () => <p>{'child component'}</p>,
   onGroupClose: () => {},
   selectedGroup: 'host.name',
-  takeActionItems: () => ({
-    items: [
-      { key: '1', name: 'Mark as acknowledged' },
-      { key: '1', name: 'Mark as closed' },
-    ] as EuiContextMenuPanelItemDescriptor[],
-    panels: [] as EuiContextMenuPanelDescriptor[],
-  }),
+  takeActionItems: () => (
+    <EuiContextMenu
+      panels={[
+        {
+          id: 0,
+          items: [
+            { key: '1', name: 'Mark as acknowledged' },
+            { key: '1', name: 'Mark as closed' },
+          ],
+        },
+      ]}
+    />
+  ),
   tracker: () => {},
 };

@@ -107,7 +107,11 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send()
+        .send({
+          page: 1,
+          // https://github.com/elastic/kibana/pull/264443 set the max per_page limit
+          per_page: 500,
+        })
         .expect(200);
 
       expect(reviewPrebuiltRulesForInstallationResponse.rules.length).toBeGreaterThan(0);

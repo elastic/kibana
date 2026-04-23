@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Builder, type ESQLAstItem, type ESQLSingleAstItem } from '@kbn/esql-ast';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstItem, ESQLSingleAstItem } from '@elastic/esql/types';
 import {
   type Condition,
   isAlwaysCondition,
@@ -15,11 +16,11 @@ import {
   isOrCondition,
 } from '../../../types/conditions';
 
-export function esqlLiteralFromAny(value: any): ESQLAstItem {
+export function esqlLiteralFromAny(value: unknown): ESQLAstItem {
   if (Array.isArray(value)) {
     // Let the Builder handle nested structures properly
     return Builder.expression.list.literal({
-      values: value.map((item) => esqlLiteralFromAny(item)) as any,
+      values: value.map((item) => esqlLiteralFromAny(item)) as ESQLSingleAstItem[],
     });
   }
 
@@ -113,6 +114,12 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       return Builder.expression.func.call('ENDS_WITH', [
         field,
         Builder.expression.literal.string(String(condition.endsWith)),
+      ]);
+    }
+    if ('includes' in condition) {
+      return Builder.expression.func.call('MV_CONTAINS', [
+        field,
+        esqlLiteralFromAny(condition.includes),
       ]);
     }
   } else if (isAndCondition(condition)) {

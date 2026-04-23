@@ -9,7 +9,7 @@ import React from 'react';
 import { documentationService } from '../../../../../services';
 import { UIM_APP_NAME } from '../../../../../../../common/constants/ui_metric';
 import { httpService } from '../../../../../services/http';
-import { notificationService } from '../../../../../services/notification';
+import { NotificationService } from '../../../../../services/notification';
 import { UiMetricService } from '../../../../../services/ui_metric';
 import type { AppDependencies } from '../../../../..';
 import { IndexManagementAppContext } from '../../../../..';
@@ -21,7 +21,6 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
   dependencies,
   index,
   showAboutMappings,
-  hasUpdateMappingsPrivilege,
 }) => {
   // this normally happens when the index management app is rendered
   // but if components are embedded elsewhere that setup is skipped, so we have to do it here
@@ -29,8 +28,8 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
   // can't do it in an effect because then the first http call fails as the instantiation happens after first render
   if (!httpService.httpClient) {
     httpService.setup(core.http);
-    notificationService.setup(core.notifications);
   }
+  const notificationService = new NotificationService(core.notifications.toasts);
   documentationService.setup(core.docLinks);
 
   const newDependencies: AppDependencies = {
@@ -44,11 +43,7 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
   };
   return (
     <IndexManagementAppContext core={core} dependencies={newDependencies}>
-      <DetailsPageMappings
-        index={index}
-        showAboutMappings={showAboutMappings}
-        hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
-      />
+      <DetailsPageMappings index={index} showAboutMappings={showAboutMappings} />
     </IndexManagementAppContext>
   );
 };

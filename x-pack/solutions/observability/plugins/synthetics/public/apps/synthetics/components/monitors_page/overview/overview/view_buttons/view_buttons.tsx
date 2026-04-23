@@ -20,7 +20,7 @@ const toggleButtonsIcons: Array<{ id: OverviewView; iconType: IconType; label: s
   },
   {
     id: 'compactView',
-    iconType: 'tableDensityCompact',
+    iconType: 'tableDensityHigh',
     label: COMPACT_VIEW_LABEL,
   },
 ];

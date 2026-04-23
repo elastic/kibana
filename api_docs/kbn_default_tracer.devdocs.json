@@ -31,6 +31,8 @@
           "Tracer"
         ],
         "path": "src/platform/packages/shared/kbn-default-tracer/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

@@ -120,8 +120,6 @@ export function DurationDistributionChartWithScrubber({
                   iconSide="left"
                   onClick={onTrackedClearSelection}
                   onClickAriaLabel={clearSelectionAriaLabel}
-                  iconOnClick={onTrackedClearSelection}
-                  iconOnClickAriaLabel={clearSelectionAriaLabel}
                   data-test-sub="apmDurationDistributionChartWithScrubberTitleClearSelectionBadge"
                 >
                   {i18n.translate('xpack.apm.durationDistributionChartWithScrubber.selectionText', {

@@ -33,7 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
-
     await PageObjects.exports.clickExportTopNavButton();
     await retry.waitFor('the popover to be opened', async () => {
       return await PageObjects.exports.isExportPopoverOpen();
@@ -44,7 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     await PageObjects.reporting.clickGenerateReportButton();
     await PageObjects.exports.closeExportFlyout();
-    await PageObjects.exports.clickExportTopNavButton();
 
     const url = await PageObjects.reporting.getReportURL(timeout);
     // TODO: Fetch CSV client side in Serverless since `PageObjects.reporting.getResponse()`
@@ -105,7 +103,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await PageObjects.exports.isExportPopoverOpen();
         });
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await PageObjects.reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
@@ -119,13 +116,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await PageObjects.exports.isExportPopoverOpen();
         });
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await PageObjects.reporting.openExportPopover();
       });
     });
 
     describe('Generate CSV: new search', () => {
       it('generates a report from a new search with data: default', async () => {
-        await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.discover.clickNewSearchButton({ isInOverflowMenu: true });
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.reporting.setTimepickerInEcommerceDataRange();
         await PageObjects.discover.waitUntilTabIsLoaded();
@@ -147,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('generates a report with no data', async () => {
         await PageObjects.reporting.setTimepickerInEcommerceNoDataRange();
         await PageObjects.discover.waitUntilTabIsLoaded();
-        await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.discover.clickNewSearchButton({ isInOverflowMenu: true });
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
         await PageObjects.discover.waitUntilTabIsLoaded();
@@ -157,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a large export', async () => {
-        await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.discover.clickNewSearchButton({ isInOverflowMenu: true });
         await PageObjects.discover.waitUntilTabIsLoaded();
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';

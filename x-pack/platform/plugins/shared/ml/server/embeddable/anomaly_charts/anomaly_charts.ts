@@ -6,9 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { timeRangeSchema } from '@kbn/es-query-server';
 import { mlEntityFieldSchema } from '@kbn/ml-anomaly-utils/schemas';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 
 export const severityThresholdSchema = schema.object({
   min: schema.number(),
@@ -16,15 +18,15 @@ export const severityThresholdSchema = schema.object({
 });
 
 export const anomalyChartsEmbeddableRuntimeStateSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   maxSeriesToPlot: schema.number(),
-  severityThreshold: schema.maybe(schema.arrayOf(severityThresholdSchema)),
-  selectedEntities: schema.maybe(schema.arrayOf(mlEntityFieldSchema)),
+  severityThreshold: schema.maybe(schema.arrayOf(severityThresholdSchema, { maxSize: 10000 })),
+  selectedEntities: schema.maybe(schema.arrayOf(mlEntityFieldSchema, { maxSize: 10000 })),
 });
 
 export const anomalyChartsEmbeddableOverridableStateSchema = schema.object({
   ...anomalyChartsEmbeddableRuntimeStateSchema.getPropSchemas(),
-  timeRange: schema.maybe(timeRangeSchema),
+  ...serializedTimeRangeSchema.getPropSchemas(),
 });
 
 export const anomalyChartsEmbeddableStateSchema = schema.object({

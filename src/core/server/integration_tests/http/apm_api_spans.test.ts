@@ -17,6 +17,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
@@ -67,6 +68,7 @@ describe('APM HTTP API spans', () => {
   const setupDeps = {
     context: contextServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    userActivity: userActivityServiceMock.createInternalSetupContract(),
   };
 
   beforeEach(async () => {
@@ -133,8 +135,18 @@ describe('APM HTTP API spans', () => {
         {
           path: '/',
           validate: false,
-          options: { authRequired: 'optional' },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: 'optional',
+              reason:
+                'This route is part of an HTTP integration test and supports optional authentication.',
+            },
+            authz: {
+              enabled: false,
+              reason:
+                'This route is part of an HTTP integration test and does not require authorization.',
+            },
+          },
         },
         (context, req, res) => res.ok({})
       );

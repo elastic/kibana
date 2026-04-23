@@ -132,3 +132,22 @@ describe('Gen AI Params Fields renders', () => {
     );
   });
 });
+
+describe('getDefaultBody', () => {
+  it('returns Azure body without model when Azure config has no defaultModel', () => {
+    const body = getDefaultBody({
+      apiProvider: OpenAiProviderType.AzureAi,
+      apiUrl: 'https://my-resource.openai.azure.com',
+    });
+    expect(body).not.toContain('"model"');
+  });
+
+  it('returns body with model when Azure config has defaultModel', () => {
+    const body = getDefaultBody({
+      apiProvider: OpenAiProviderType.AzureAi,
+      apiUrl: 'https://my-resource.openai.azure.com',
+      defaultModel: 'gpt-4o',
+    });
+    expect(body).toContain('"model": "gpt-4o"');
+  });
+});

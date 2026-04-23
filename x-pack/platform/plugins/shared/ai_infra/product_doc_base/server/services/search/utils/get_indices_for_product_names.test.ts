@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { getProductDocIndexName } from '@kbn/product-doc-common';
-import { getIndicesForProductNames } from './get_indices_for_product_names';
+import {
+  getProductDocIndexName,
+  getSecurityLabsIndexName,
+  ResourceTypes,
+} from '@kbn/product-doc-common';
+import {
+  getIndicesForProductNames,
+  getIndicesForResourceTypes,
+} from './get_indices_for_product_names';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 describe('getIndicesForProductNames', () => {
@@ -52,5 +59,28 @@ describe('getIndicesForProductNames', () => {
       '.kibana_ai_product_doc_kibana-.anyInferenceId',
       '.kibana_ai_product_doc_elasticsearch-.anyInferenceId',
     ]);
+  });
+});
+
+describe('getIndicesForResourceTypes', () => {
+  it('defaults to product documentation indices', () => {
+    expect(getIndicesForResourceTypes(['kibana'], undefined, undefined)).toEqual(
+      getProductDocIndexName('kibana')
+    );
+  });
+
+  it('returns security labs index when only security labs is requested', () => {
+    expect(getIndicesForResourceTypes(undefined, undefined, [ResourceTypes.securityLabs])).toEqual(
+      getSecurityLabsIndexName()
+    );
+  });
+
+  it('returns both product docs and security labs indices when both are requested', () => {
+    expect(
+      getIndicesForResourceTypes(['kibana'], undefined, [
+        ResourceTypes.productDoc,
+        ResourceTypes.securityLabs,
+      ])
+    ).toEqual([getProductDocIndexName('kibana'), getSecurityLabsIndexName()]);
   });
 });

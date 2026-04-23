@@ -7,9 +7,9 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isArray } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiLink,
   EuiFlexItem,
@@ -20,7 +20,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { encode } from '@kbn/rison';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
@@ -30,8 +29,8 @@ import { getRowItemsWithActions } from '../../../../../common/components/tables/
 import { UserName } from '../../../user_name';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { TableItemType } from './types';
-import { formatRiskScoreWholeNumber } from '../../../../common/utils';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
+import { RiskScoreCell } from '../../../home/entities_table/risk_score_cell';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import {
   getAlertsByStatusQuery,
@@ -83,7 +82,7 @@ const getActionsColumn = (openUserFlyout: (userName: string) => void) => ({
   render: (record: { 'user.name': string }) => {
     return (
       <EuiButtonIcon
-        iconType="expand"
+        iconType="maximize"
         onClick={() => {
           openUserFlyout(record['user.name']);
         }}
@@ -99,67 +98,14 @@ const getActionsColumn = (openUserFlyout: (userName: string) => void) => ({
   width: COLUMN_WIDTHS.actions,
 });
 
-const getRiskScoreColumn = (euiTheme: EuiThemeComputed) => ({
+const getRiskScoreColumn = () => ({
   name: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.riskScore"
       defaultMessage="Risk score"
     />
   ),
-  render: (record: TableItemType) => {
-    const colors: { background: string; text: string } = (() => {
-      switch (record.risk_level) {
-        case 'Unknown':
-          return {
-            background: euiTheme.colors.backgroundBaseSubdued,
-            text: euiTheme.colors.textSubdued,
-          };
-        case 'Low':
-          return {
-            background: euiTheme.colors.backgroundBaseNeutral,
-            text: euiTheme.colors.textNeutral,
-          };
-        case 'Moderate':
-          return {
-            background: euiTheme.colors.backgroundLightWarning,
-            text: euiTheme.colors.textWarning,
-          };
-        case 'High':
-          return {
-            background: euiTheme.colors.backgroundLightRisk,
-            text: euiTheme.colors.textRisk,
-          };
-        case 'Critical':
-          return {
-            background: euiTheme.colors.backgroundLightDanger,
-            text: euiTheme.colors.textDanger,
-          };
-        default:
-          return {
-            background: euiTheme.colors.backgroundBaseSubdued,
-            text: euiTheme.colors.textSubdued,
-          };
-      }
-    })();
-    return (
-      <EuiBadge color={colors.background}>
-        <EuiText
-          css={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-          `}
-          size={'s'}
-          color={colors.text}
-        >
-          {record.risk_score
-            ? formatRiskScoreWholeNumber(record.risk_score)
-            : i18n.translate(
-                'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.riskScore.na',
-                { defaultMessage: 'N/A' }
-              )}
-        </EuiText>
-      </EuiBadge>
-    );
-  },
+  render: (record: TableItemType) => <RiskScoreCell riskScore={record.risk_score} />,
 });
 
 const AssetCriticalityCell: React.FC<{
@@ -257,15 +203,24 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
   const { from, to } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
 
-  const { data } = useQueryAlerts<{}, AlertsByStatusAgg>({
+  const { data, setQuery: setAlertsQuery } = useQueryAlerts<{}, AlertsByStatusAgg>({
     query: getAlertsByStatusQuery({
       from,
       to,
-      entityFilter: { field: 'user.name', value: userName },
+      identityFields: { 'user.name': userName },
     }),
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.BY_STATUS,
   });
+  useEffect(() => {
+    setAlertsQuery(
+      getAlertsByStatusQuery({
+        from,
+        to,
+        identityFields: { 'user.name': userName },
+      })
+    );
+  }, [setAlertsQuery, from, to, userName]);
   const { navigateTo } = useNavigation();
 
   if (!data) return <EuiLoadingSpinner size="m" />;
@@ -288,13 +243,13 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
   const filters = [
     {
       title: OPEN_IN_ALERTS_TITLE_USERNAME,
-      selectedOptions: [userName],
-      fieldName: 'user.name',
+      selected_options: [userName],
+      field_name: 'user.name',
     },
     {
       title: OPEN_IN_ALERTS_TITLE_STATUS,
-      selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-      fieldName: 'kibana.alert.workflow_status',
+      selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+      field_name: 'kibana.alert.workflow_status',
     },
   ];
 
@@ -337,12 +292,11 @@ const getAlertDistributionColumn = () => ({
 });
 
 export const buildPrivilegedUsersTableColumns = (
-  openUserFlyout: (userName: string) => void,
-  euiTheme: EuiThemeComputed
+  openUserFlyout: (userName: string) => void
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openUserFlyout),
   getPrivilegedUserColumn(),
-  getRiskScoreColumn(euiTheme),
+  getRiskScoreColumn(),
   getAssetCriticalityColumn(),
   getLabelColumn(),
   getDataSourceColumn(),

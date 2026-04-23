@@ -1,0 +1,85 @@
+{
+  "sha1": "76843779d2b0b762923c8f3298fe284a3aae64fb",
+  "tests": [
+    {
+      "id": "080cf4b5224e163-fcfad600a32652d",
+      "title": "Observability onboarding GET flow progress returns 404 when onboardingId does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_progress.spec.ts",
+        "line": 50,
+        "column": 12
+      }
+    },
+    {
+      "id": "080cf4b5224e163-31970d2d16833ca",
+      "title": "Observability onboarding GET flow progress returns 404 for user without access to the onboarding session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_progress.spec.ts",
+        "line": 64,
+        "column": 12
+      }
+    },
+    {
+      "id": "080cf4b5224e163-864a078fde699f4",
+      "title": "Observability onboarding GET flow progress logs-ingest progress after ea-status complete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_progress.spec.ts",
+        "line": 85,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0a8430b20670aa-f1b55455a18c7d7",
+      "title": "Observability onboarding POST flow step — missing session returns 404 when onboardingId does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_update_progress_404.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "72ae45cea3f5e36-afa9ba02fd22c45",
+      "title": "Observability onboarding POST flow step — updates saved state updates step progress (status only, then status with decoded message)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_update_progress_updates.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    }
+  ]
+}

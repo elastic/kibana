@@ -29,7 +29,7 @@ function buildCopyColumnButton({
   const copyToClipBoardButton: EuiListGroupItemProps = {
     size: 'xs',
     label,
-    iconType: 'copyClipboard',
+    iconType: 'copy',
     iconProps: { size: 'm' },
     onClick: onCopy,
     'data-test-subj': dataTestSubj,

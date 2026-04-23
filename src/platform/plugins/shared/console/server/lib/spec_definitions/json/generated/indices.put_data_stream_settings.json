@@ -24,6 +24,7 @@
       "_data_stream/{name}/_settings"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-settings",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-put-data-stream-settings",
     "availability": {
       "stack": true,
       "serverless": true

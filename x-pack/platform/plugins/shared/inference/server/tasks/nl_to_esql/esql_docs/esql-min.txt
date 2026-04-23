@@ -1,6 +1,6 @@
 # MIN
 
-The `MIN` function calculates the minimum value of a field.
+The MIN function returns the minimum value of a specified field.
 
 ## Syntax
 
@@ -8,26 +8,22 @@ The `MIN` function calculates the minimum value of a field.
 
 ### Parameters
 
-#### `field`
+#### field
 
-The field for which the minimum value is calculated.
+The column for which you want to find the minimum value.
 
 ## Examples
 
-Basic Usage
+Finds the smallest value in the `languages` column from the `employees` table:
 
 ```esql
 FROM employees
 | STATS MIN(languages)
 ```
 
-Calculate the minimum value of the `languages` field.
-
-Using Inline Functions
+Calculates the minimum of the average salary change per employee in the `employees` table:
 
 ```esql
 FROM employees
 | STATS min_avg_salary_change = MIN(MV_AVG(salary_change))
 ```
-
-Calculate the minimum value of the average salary change by first averaging the multiple values per row using the `MV_AVG` function and then applying the `MIN` function.

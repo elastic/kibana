@@ -6,7 +6,6 @@
  */
 
 import { sortBy } from 'lodash';
-import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import type { Mark } from '.';
 
 // Extends Mark without adding new properties to it.
@@ -14,14 +13,13 @@ export interface AgentMark extends Mark {
   type: 'agentMark';
 }
 
-export function getAgentMarks(transaction?: Transaction): AgentMark[] {
-  const agent = transaction?.transaction.marks?.agent;
-  if (!agent) {
+export function getAgentMarks(marks?: Record<string, number>): AgentMark[] {
+  if (!marks) {
     return [];
   }
 
   return sortBy(
-    Object.entries(agent).map(([name, ms]) => ({
+    Object.entries(marks).map(([name, ms]) => ({
       type: 'agentMark',
       id: name,
       offset: ms * 1000,

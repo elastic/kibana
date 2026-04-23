@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/onechat-common';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
-import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
+import { ToolResultType } from '@kbn/agent-builder-common';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import {
   createToolHandlerContext,
@@ -16,7 +16,7 @@ import {
 } from '../__mocks__/test_helpers';
 import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
 
-jest.mock('@kbn/onechat-genai-utils/tools', () => ({
+jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
   runSearchTool: jest.fn(),
 }));
 
@@ -29,6 +29,7 @@ describe('alertsTool', () => {
   };
   const mockEvents = {
     reportProgress: jest.fn(),
+    sendUiEvent: jest.fn(),
   };
   const tool = alertsTool(mockCore, mockLogger);
 
@@ -135,6 +136,22 @@ describe('alertsTool', () => {
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
       expect(callArgs.nlQuery).toContain('KEEP clause');
       expect(callArgs.nlQuery).toContain(fieldsList);
+    });
+
+    it('uses handler context spaceId when building default index', async () => {
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+
+      await tool.handler(
+        { query: 'find all alerts' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          events: mockEvents as ToolHandlerContext['events'],
+          spaceId: 'custom-space',
+        })
+      );
+
+      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
+      expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-custom-space`);
     });
 
     it('calls runSearchTool with explicit index when provided', async () => {

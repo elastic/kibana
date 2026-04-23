@@ -9,14 +9,8 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/onechat-server/tools';
-import type {
-  ModelProvider,
-  ToolProvider,
-  ScopedRunner,
-  ToolResultStore,
-  ToolEventEmitter,
-} from '@kbn/onechat-server';
+import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/agent-builder-server/tools';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 
 /**
  * Creates common mocks for tool tests
@@ -50,39 +44,8 @@ export const setupMockCoreStartServices = (
     asCurrentUser: mockEsClient.asCurrentUser,
   });
   mockCore.getStartServices.mockResolvedValue([mockCoreStart, {}, {}]);
+  return mockCoreStart;
 };
-
-/**
- * Creates minimal mocks for ToolHandlerContext fields
- */
-const createMockModelProvider = (): ModelProvider =>
-  ({
-    getDefaultModel: jest.fn(),
-    getModel: jest.fn(),
-    getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
-  } as unknown as ModelProvider);
-
-const createMockToolProvider = (): ToolProvider =>
-  ({
-    has: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
-  } as unknown as ToolProvider);
-
-const createMockScopedRunner = (): ScopedRunner =>
-  ({
-    runTools: jest.fn(),
-  } as unknown as ScopedRunner);
-
-const createMockToolResultStore = (): ToolResultStore =>
-  ({
-    get: jest.fn(),
-  } as unknown as ToolResultStore);
-
-const createMockToolEventEmitter = (): ToolEventEmitter =>
-  ({
-    reportProgress: jest.fn(),
-  } as unknown as ToolEventEmitter);
 
 /**
  * Creates a tool handler context object
@@ -93,16 +56,14 @@ export const createToolHandlerContext = (
   mockLogger: ReturnType<typeof loggingSystemMock.createLogger>,
   additionalContext: Partial<Omit<ToolHandlerContext, 'request' | 'esClient' | 'logger'>> = {}
 ): ToolHandlerContext => {
+  const baseMock = agentBuilderMocks.tools.createHandlerContext();
   return {
+    ...baseMock,
     request: mockRequest,
     esClient: mockEsClient,
     logger: mockLogger,
     spaceId: 'default',
-    modelProvider: additionalContext.modelProvider ?? createMockModelProvider(),
-    toolProvider: additionalContext.toolProvider ?? createMockToolProvider(),
-    runner: additionalContext.runner ?? createMockScopedRunner(),
-    resultStore: additionalContext.resultStore ?? createMockToolResultStore(),
-    events: additionalContext.events ?? createMockToolEventEmitter(),
+    ...additionalContext,
   };
 };
 

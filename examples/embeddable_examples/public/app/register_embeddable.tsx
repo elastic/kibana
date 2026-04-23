@@ -27,7 +27,7 @@ export const RegisterEmbeddable = () => {
         <h2>Register a new embeddable type</h2>
         <p>
           This plugin registers several embeddable types with{' '}
-          <strong>registerReactEmbeddableFactory</strong>. The code example below shows Search
+          <strong>registerEmbeddablePublicDefinition</strong>. The code example below shows Search
           embeddable registration. The embeddable factory is imported asynchronously to limit
           initial page load size.
         </p>
@@ -73,7 +73,7 @@ export const RegisterEmbeddable = () => {
       <EuiText>
         <h2>Configure initial dashboard placement (optional)</h2>
         <p>
-          Add an entry to <strong>registerDashboardPanelSettings</strong> provided by the Dashboard
+          Add an entry to <strong>registerPanelPlacementSettings</strong> provided by the Dashboard
           plugin start contract to configure initial dashboard placement and/or restrict the
           possible sizes of the dashboard panel.
         </p>

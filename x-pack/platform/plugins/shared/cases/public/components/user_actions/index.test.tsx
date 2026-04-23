@@ -13,7 +13,12 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import routeData from 'react-router';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
-import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
+import {
+  basicCaseWithUnifiedComments,
+  basicCommentUnified,
+  caseUserActions,
+  getUserAction,
+} from '../../containers/mock';
 import { UserActions } from '.';
 
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
@@ -27,12 +32,15 @@ import { renderWithTestingProviders } from '../../common/mock';
 import type { CaseUserActionsStats } from '../../containers/types';
 
 const onUpdateField = jest.fn();
+const unifiedCommentTestId = `comment-${basicCommentUnified.type}-${basicCommentUnified.type}`;
 
 const userActionsStats: CaseUserActionsStats = {
   total: 25,
   totalDeletions: 0,
   totalComments: 9,
   totalCommentDeletions: 0,
+  totalCommentCreations: 5,
+  totalHiddenCommentUpdates: 0,
   totalOtherActions: 16,
   totalOtherActionDeletions: 0,
 };
@@ -49,8 +57,9 @@ const builderArgs = getMockBuilderArgs();
 const defaultProps = {
   caseUserActions,
   ...builderArgs,
+  attachments: [basicCommentUnified],
   caseConnectors: getCaseConnectorsMockResponse(),
-  data: basicCase,
+  data: basicCaseWithUnifiedComments,
   manualAlertsData: { 'some-id': { _id: 'some-id' } },
   onUpdateField,
   userActivityQueryParams,
@@ -75,6 +84,13 @@ const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
+const renderUserActions = (props = defaultProps) =>
+  renderWithTestingProviders(<UserActions {...props} />, {
+    wrapperProps: {
+      unifiedAttachmentTypeRegistry: builderArgs.unifiedAttachmentTypeRegistry,
+    },
+  });
+
 describe(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
@@ -86,7 +102,13 @@ describe(`UserActions`, () => {
       isLoadingIds: [],
       mutate: patchComment,
     });
-    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: {
+        ...defaultUseFindCaseUserActions.data,
+        latestAttachments: [basicCommentUnified],
+      },
+    });
     useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: false, data: undefined });
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
@@ -110,7 +132,7 @@ describe(`UserActions`, () => {
       caseConnectors,
     };
 
-    renderWithTestingProviders(<UserActions {...props} />);
+    renderUserActions(props);
 
     await waitForComponentToUpdate();
 
@@ -130,19 +152,19 @@ describe(`UserActions`, () => {
       data: { userActions: ourActions },
     });
 
-    renderWithTestingProviders(<UserActions {...defaultProps} />);
+    renderUserActions();
 
     expect(await screen.findByTestId('top-footer')).toBeInTheDocument();
     expect(screen.queryByTestId('bottom-footer')).not.toBeInTheDocument();
   });
 
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
-    renderWithTestingProviders(<UserActions {...defaultProps} />);
+    renderUserActions();
 
     await userEvent.click(
-      await within(
-        await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
-      ).findByTestId('property-actions-user-action-ellipses')
+      await within(await screen.findByTestId(unifiedCommentTestId)).findByTestId(
+        'property-actions-user-action-ellipses'
+      )
     );
 
     await waitForEuiPopoverOpen();
@@ -150,25 +172,25 @@ describe(`UserActions`, () => {
     await userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
     await userEvent.click(
-      await within(
-        await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
-      ).findByTestId('editable-cancel-markdown')
+      await within(await screen.findByTestId(unifiedCommentTestId)).findByTestId(
+        'editable-cancel-markdown'
+      )
     );
 
     expect(
-      within(
-        await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
-      ).queryByTestId('editable-markdown-form')
+      within(await screen.findByTestId(unifiedCommentTestId)).queryByTestId(
+        'editable-markdown-form'
+      )
     ).not.toBeInTheDocument();
   });
 
   it('calls update comment when comment markdown is saved', async () => {
-    renderWithTestingProviders(<UserActions {...defaultProps} />);
+    renderUserActions();
 
     await userEvent.click(
-      await within(
-        await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
-      ).findByTestId('property-actions-user-action-ellipses')
+      await within(await screen.findByTestId(unifiedCommentTestId)).findByTestId(
+        'property-actions-user-action-ellipses'
+      )
     );
 
     await waitForEuiPopoverOpen();
@@ -182,15 +204,13 @@ describe(`UserActions`, () => {
     });
 
     await userEvent.click(
-      within(
-        screen.getByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
-      ).getByTestId('editable-save-markdown')
+      within(screen.getByTestId(unifiedCommentTestId)).getByTestId('editable-save-markdown')
     );
 
     expect(
-      within(
-        await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
-      ).queryByTestId('editable-markdown-form')
+      within(await screen.findByTestId(unifiedCommentTestId)).queryByTestId(
+        'editable-markdown-form'
+      )
     ).not.toBeInTheDocument();
 
     expect(patchComment).toBeCalledWith(
@@ -207,16 +227,16 @@ describe(`UserActions`, () => {
   it('shows quoted text in last MarkdownEditorTextArea', async () => {
     const quoteableText = `> Solve this fast! \n\n`;
 
-    renderWithTestingProviders(<UserActions {...defaultProps} />);
+    renderUserActions();
 
     expect((await screen.findByTestId(`euiMarkdownEditorTextArea`)).textContent).not.toContain(
       quoteableText
     );
 
     await userEvent.click(
-      await within(
-        await screen.findByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
-      ).findByTestId('property-actions-user-action-ellipses')
+      await within(await screen.findByTestId(unifiedCommentTestId)).findByTestId(
+        'property-actions-user-action-ellipses'
+      )
     );
 
     await waitForEuiPopoverOpen();
@@ -227,12 +247,10 @@ describe(`UserActions`, () => {
   });
 
   it('does not show add comment markdown when history filter is selected', async () => {
-    renderWithTestingProviders(
-      <UserActions
-        {...defaultProps}
-        userActivityQueryParams={{ ...userActivityQueryParams, type: 'action' }}
-      />
-    );
+    renderUserActions({
+      ...defaultProps,
+      userActivityQueryParams: { ...userActivityQueryParams, type: 'action' },
+    });
 
     expect(screen.queryByTestId('add-comment')).not.toBeInTheDocument();
   });

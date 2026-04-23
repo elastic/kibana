@@ -8,7 +8,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink, useStartServices } from '../../../hooks';
+import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
 
 import { WithHeaderLayout } from '.';
@@ -17,11 +17,11 @@ interface Props {
   section?: Section;
   children?: React.ReactNode;
   notificationsBySection?: Partial<Record<Section, number>>;
+  noSpacerInContent?: boolean;
 }
 
 export const DefaultLayout: React.FC<Props> = memo(
-  ({ section, children, notificationsBySection }) => {
-    const { automaticImport } = useStartServices();
+  ({ section, children, notificationsBySection, noSpacerInContent }) => {
     const { getHref } = useLink();
     const tabs = [
       {
@@ -46,10 +46,9 @@ export const DefaultLayout: React.FC<Props> = memo(
       },
     ];
 
-    const { CreateIntegrationCardButton } = automaticImport?.components ?? {};
-
     return (
       <WithHeaderLayout
+        noSpacerInContent={noSpacerInContent}
         leftColumn={
           <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
             <EuiText>
@@ -78,13 +77,7 @@ export const DefaultLayout: React.FC<Props> = memo(
           </EuiFlexGroup>
         }
         rightColumnGrow={false}
-        rightColumn={
-          CreateIntegrationCardButton ? (
-            <EuiFlexItem grow={false}>
-              <CreateIntegrationCardButton />
-            </EuiFlexItem>
-          ) : undefined
-        }
+        rightColumn={undefined}
         tabs={tabs.map((tab) => {
           const notificationCount = notificationsBySection?.[tab.section];
           return {

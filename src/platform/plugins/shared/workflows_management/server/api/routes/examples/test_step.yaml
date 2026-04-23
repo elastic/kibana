@@ -1,0 +1,46 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        testStepRequestExample:
+          description: 'Example request to test a single workflow step'
+          value:
+            stepId: hello_world_step
+            workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+            workflowYaml: "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+            contextOverride:
+              inputs:
+                message: 'override message'
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          testStepResponseExample:
+            description: 'Example response returning the step test execution ID'
+            value:
+              workflowExecutionId: step-test-exec-a1b2c3d4
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows/step/test" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "stepId": "hello_world_step",
+          "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "workflowYaml": "name: Example definition\nenabled: true\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"",
+          "contextOverride": { "inputs": { "message": "override message" } }
+        }'
+  - lang: Console
+    source: |
+      POST kbn://api/workflows/step/test
+      {
+        "stepId": "hello_world_step",
+        "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "workflowYaml": "name: Example definition\nenabled: true\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"",
+        "contextOverride": { "inputs": { "message": "override message" } }
+      }

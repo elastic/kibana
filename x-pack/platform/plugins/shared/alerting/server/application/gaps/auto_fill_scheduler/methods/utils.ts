@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import type { ReadOperations, WriteOperations } from '../../../../authorization';
@@ -14,6 +15,7 @@ import {
   GapAutoFillSchedulerAuditAction,
 } from '../../../../rules_client/common/audit_events';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import type { SchedulerContext } from '../../methods/utils';
 
 /**
  * Fetches the gap auto fill scheduler saved object and performs rule type based authorization.
@@ -51,15 +53,17 @@ export const getGapAutoFillSchedulerSO = async ({
     throw err;
   }
 
+  const ruleTypeIdConsumersPairs = schedulerSO.attributes.ruleTypes.map((ruleType) => ({
+    ruleTypeId: ruleType.type,
+    consumers: [ruleType.consumer],
+  }));
+
   try {
-    for (const ruleType of schedulerSO.attributes.ruleTypes) {
-      await context.authorization.ensureAuthorized({
-        ruleTypeId: ruleType.type,
-        consumer: ruleType.consumer,
-        operation,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    }
+    await context.authorization.bulkEnsureAuthorized({
+      ruleTypeIdConsumersPairs,
+      operation,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
   } catch (error) {
     context.auditLogger?.log(
       gapAutoFillSchedulerAuditEvent({
@@ -76,4 +80,29 @@ export const getGapAutoFillSchedulerSO = async ({
   }
 
   return schedulerSO;
+};
+
+/**
+ * Fetches the scheduler config (enabled + numRetries) for gap fill status calculation.
+ * Skips authorization, the caller already has permission to read gaps/rules,
+ * and the scheduler lookup is an internal detail of status computation.
+ * Returns null if the scheduler does not exist or if the lookup fails for any reason.
+ * Failures are non-fatal: the gap query will proceed without error status detection.
+ */
+export const getSchedulerContextInternal = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  schedulerId: string
+): Promise<SchedulerContext | null> => {
+  try {
+    const schedulerSO = await savedObjectsClient.get<GapAutoFillSchedulerSO>(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      schedulerId
+    );
+    return {
+      enabled: schedulerSO.attributes.enabled,
+      numRetries: schedulerSO.attributes.numRetries,
+    };
+  } catch {
+    return null;
+  }
 };

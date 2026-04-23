@@ -16,7 +16,7 @@ import {
   useNodesState,
 } from '@xyflow/react';
 import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
-import { useGeneratedHtmlId } from '@elastic/eui';
+import { useGeneratedHtmlId, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/markers';
 import {
@@ -27,11 +27,13 @@ import {
   DiamondNode,
   LabelNode,
   EdgeGroupNode,
+  RelationshipNode,
 } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
+import { isConnectorShape } from '../utils';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
@@ -66,6 +68,11 @@ export interface GraphProps extends CommonProps {
    */
   children?: React.ReactNode;
   /**
+   * Optional content to be rendered in the bottom-right corner of the graph.
+   * Typically used for callouts or other contextual messages displayed next to the controls.
+   */
+  interactiveBottomRightContent?: React.ReactNode;
+  /**
    * Callback invoked when the graph is updated with new nodes.
    * Receives one argument with the list of newly added nodes.
    * When callback is undefined, graph will center on new nodes (default behavior).
@@ -86,6 +93,7 @@ const nodeTypes = {
   diamond: DiamondNode,
   label: LabelNode,
   group: EdgeGroupNode,
+  relationship: RelationshipNode,
 };
 
 const edgeTypes = {
@@ -118,6 +126,7 @@ export const Graph = memo<GraphProps>(
     isLocked = false,
     showMinimap = false,
     children,
+    interactiveBottomRightContent,
     onCenterGraphAfterRefresh,
     ...rest
   }: GraphProps) => {
@@ -126,10 +135,33 @@ export const Graph = memo<GraphProps>(
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const isInitialRenderRef = useRef(true);
-    const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
+    const [isGraphInteractive, setIsGraphInteractive] = useState(interactive);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
     const [reactFlowKey, setReactFlowKey] = useState(0);
+
+    // Sync isGraphInteractive with interactive prop and re-process nodes when it changes
+    useEffect(() => {
+      setIsGraphInteractive(interactive);
+
+      // Re-process graph with new interactive state if nodes exist
+      if (currNodesRef.current.length > 0) {
+        const { initialNodes, initialEdges } = processGraph(
+          currNodesRef.current,
+          currEdgesRef.current,
+          interactive
+        );
+        const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
+
+        // Force ReactFlow to remount to apply new className
+        setReactFlowKey((prev) => prev + 1);
+
+        setTimeout(() => {
+          setNodes(layoutedNodes);
+          setEdges(initialEdges);
+        }, 0);
+      }
+    }, [interactive, setNodes, setEdges]);
 
     // Filter the ids of those nodes that are origin events
     const originNodeIds = useMemo(
@@ -138,7 +170,7 @@ export const Graph = memo<GraphProps>(
     );
 
     useEffect(() => {
-      // On nodes or edges changes reset the graph and re-layout
+      // On nodes or edges changes, or interactive state changes, reset the graph and re-layout
       if (
         !isArrayOfObjectsEqual(nodes, currNodesRef.current) ||
         !isArrayOfObjectsEqual(edges, currEdgesRef.current)
@@ -151,7 +183,6 @@ export const Graph = memo<GraphProps>(
 
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
-
         // Force ReactFlow to remount by changing the key first
         setReactFlowKey((prev) => prev + 1);
 
@@ -276,7 +307,12 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
+              <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd">
+                {interactiveBottomRightContent}
+                <EuiFlexItem grow={false}>
+                  <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </Panel>
           )}
           {children}
@@ -311,6 +347,7 @@ const processGraph = (
       type: nodeData.shape,
       data: { ...nodeData, interactive },
       position: { x: 0, y: 0 }, // Default position, should be updated later
+      className: interactive ? undefined : 'non-interactive',
     };
 
     if (node.type === 'group' && nodeData.shape === 'group') {
@@ -318,7 +355,10 @@ const processGraph = (
       node.targetPosition = Position.Left;
       node.resizing = false;
       node.focusable = false;
-    } else if (nodeData.shape === 'label' && nodeData.parentId) {
+    } else if (
+      (nodeData.shape === 'label' || nodeData.shape === 'relationship') &&
+      nodeData.parentId
+    ) {
       node.parentId = nodeData.parentId;
       node.extent = 'parent';
       node.expandParent = false;
@@ -331,18 +371,13 @@ const processGraph = (
   const initialEdges: Array<Edge<EdgeViewModel>> = edgesModel
     .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])
     .map((edgeData) => {
-      const isIn =
-        nodesById[edgeData.source].shape !== 'label' &&
-        nodesById[edgeData.target].shape === 'group';
-      const isInside =
-        nodesById[edgeData.source].shape === 'group' &&
-        nodesById[edgeData.target].shape === 'label';
-      const isOut =
-        nodesById[edgeData.source].shape === 'label' &&
-        nodesById[edgeData.target].shape === 'group';
-      const isOutside =
-        nodesById[edgeData.source].shape === 'group' &&
-        nodesById[edgeData.target].shape !== 'label';
+      const sourceShape = nodesById[edgeData.source].shape;
+      const targetShape = nodesById[edgeData.target].shape;
+
+      const isIn = !isConnectorShape(sourceShape) && targetShape === 'group';
+      const isInside = sourceShape === 'group' && isConnectorShape(targetShape);
+      const isOut = isConnectorShape(sourceShape) && targetShape === 'group';
+      const isOutside = sourceShape === 'group' && !isConnectorShape(targetShape);
 
       return {
         id: edgeData.id,

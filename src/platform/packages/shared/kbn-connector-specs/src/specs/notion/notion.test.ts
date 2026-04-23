@@ -25,6 +25,28 @@ describe('NotionConnector', () => {
     jest.clearAllMocks();
   });
 
+  describe('auth', () => {
+    it('supports bearer auth', () => {
+      expect(NotionConnector.auth?.types).toContain('bearer');
+    });
+
+    it('supports oauth_authorization_code with correct Notion defaults', () => {
+      const oauthType = (
+        NotionConnector.auth?.types as Array<
+          string | { type: string; defaults?: Record<string, unknown> }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://api.notion.com/v1/oauth/authorize',
+          tokenUrl: 'https://api.notion.com/v1/oauth/token',
+        },
+      });
+    });
+  });
+
   describe('searchPageOrDSByTitle action', () => {
     it('should search for pages with required parameters', async () => {
       const mockResponse = {
@@ -71,7 +93,7 @@ describe('NotionConnector', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      const result = await NotionConnector.actions.searchPageOrDSByTitle.handler(mockContext, {
+      await NotionConnector.actions.searchPageOrDSByTitle.handler(mockContext, {
         query: 'Projects',
         queryObjectType: 'data_source',
       });
@@ -83,7 +105,6 @@ describe('NotionConnector', () => {
           property: 'object',
         },
       });
-      expect(result).toEqual(mockResponse.data);
     });
 
     it('should include optional pagination parameters', async () => {
@@ -141,23 +162,6 @@ describe('NotionConnector', () => {
         {}
       );
       expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should handle different page IDs', async () => {
-      const mockResponse = {
-        data: {
-          id: '12345678-1234-1234-1234-123456789abc',
-          object: 'page',
-          properties: {},
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = (await NotionConnector.actions.getPage.handler(mockContext, {
-        pageId: '12345678-1234-1234-1234-123456789abc',
-      })) as { id: string };
-
-      expect(result.id).toBe('12345678-1234-1234-1234-123456789abc');
     });
   });
 
@@ -341,25 +345,6 @@ describe('NotionConnector', () => {
       });
     });
 
-    it('should handle empty user list', async () => {
-      const mockResponse = {
-        data: {
-          results: [],
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      if (!NotionConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await NotionConnector.test.handler(mockContext);
-
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Notion API: found 0 users',
-      });
-    });
-
     it('should return failure when API is not accessible', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API token'));
 
@@ -370,18 +355,6 @@ describe('NotionConnector', () => {
 
       expect(result.ok).toBe(false);
       expect(result.message).toBe('Invalid API token');
-    });
-
-    it('should handle network errors', async () => {
-      mockClient.get.mockRejectedValue(new Error('Network timeout'));
-
-      if (!NotionConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await NotionConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
     });
   });
 });

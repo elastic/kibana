@@ -15,12 +15,14 @@ import { ExperimentalFeaturesService } from '../../../../services';
 import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useLicense } from '../../../../../../hooks/use_license';
+import { useStartServices } from '../../../../../../hooks/use_core';
 
 import { AgentBulkActions } from './bulk_actions';
 
 jest.mock('../../../../../../services/experimental_features');
 jest.mock('../../../../../../hooks/use_license');
 jest.mock('../../../../../../hooks/use_authz');
+jest.mock('../../../../../../hooks/use_core');
 jest.mock('../../components/agent_reassign_policy_modal');
 jest.mock('../hooks/export_csv', () => ({
   useExportCSV: jest.fn().mockReturnValue({
@@ -30,6 +32,7 @@ jest.mock('../hooks/export_csv', () => ({
 
 const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+const mockUseStartServices = useStartServices as jest.Mock;
 
 const defaultProps = {
   nAgentsInTable: 10,
@@ -64,6 +67,28 @@ async function navigateToSubmenu(
 }
 
 describe('AgentBulkActions', () => {
+  const mockStartServices = (isServerlessEnabled?: boolean) => {
+    mockUseStartServices.mockReturnValue({
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+        },
+      },
+      docLinks: {
+        links: {
+          fleet: {},
+          logstash: {},
+          kibana: {},
+          observability: {},
+        },
+      },
+      cloud: {
+        isServerlessEnabled,
+      },
+      reporting: {},
+    });
+  };
+
   beforeAll(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
       enableAgentPrivilegeLevelChange: true,
@@ -75,6 +100,7 @@ describe('AgentBulkActions', () => {
       },
       integrations: {},
     } as any);
+    mockStartServices(true);
   });
 
   beforeEach(() => {
@@ -185,7 +211,9 @@ describe('AgentBulkActions', () => {
       await navigateToSubmenu(results, 'Security and removal');
 
       expect(results.getByText('Unenroll 2 agents').closest('button')!).toBeEnabled();
-      expect(results.getByText('Remove root access for 2 agents').closest('button')!).toBeEnabled();
+      expect(
+        results.getByText('Remove root privilege for 2 agents').closest('button')!
+      ).toBeEnabled();
     });
 
     it('should allow scheduled upgrades if the license allows it', async () => {
@@ -206,6 +234,90 @@ describe('AgentBulkActions', () => {
       await navigateToSubmenu(results, 'Upgrade management');
 
       expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeEnabled();
+    });
+    it('should show disabled CSV action if user does not have generateAgentReports permission', async () => {
+      mockStartServices(false);
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgents: true,
+          readAgents: true,
+          generateAgentReports: false,
+        },
+        integrations: {},
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      await navigateToSubmenu(results, 'Maintenance and diagnostics');
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeDisabled();
+    });
+
+    it('should show enabled CSV action if user has generateAgentReports permission', async () => {
+      mockStartServices(true);
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgents: true,
+          readAgents: true,
+          generateAgentReports: true,
+        },
+        integrations: {},
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      await navigateToSubmenu(results, 'Maintenance and diagnostics');
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeEnabled();
+    });
+
+    it('should show only export menu item for OPAMP agents', async () => {
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [
+          { id: 'agent1', type: 'OPAMP' },
+          { id: 'agent2', type: 'PERMANENT' },
+        ] as Agent[],
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeEnabled();
+
+      // Should not show other menu items
+      expect(results.queryByText('Add / remove tags')).toBeNull();
+      expect(results.queryByText('Assign to new policy')).toBeNull();
+      expect(results.queryByText('Upgrade')).toBeNull();
+      expect(results.queryByText('Upgrade management')).toBeNull();
+      expect(results.queryByText('Maintenance and diagnostics')).toBeNull();
+      expect(results.queryByText('Security and removal')).toBeNull();
     });
   });
 
@@ -325,6 +437,64 @@ describe('AgentBulkActions', () => {
       await navigateToSubmenu(results, 'Security and removal');
 
       expect(results.queryByText(/Remove root privilege/)).not.toBeInTheDocument();
+    });
+
+    it('should show enabled CSV action if user has generateAgentReports permission', async () => {
+      mockStartServices(false);
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgents: true,
+          readAgents: true,
+          generateAgentReports: true,
+        },
+        integrations: {},
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      await navigateToSubmenu(results, 'Maintenance and diagnostics');
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeEnabled();
+    });
+
+    it('should show disabled CSV action if user does not have generateAgentReports permission', async () => {
+      mockStartServices(true);
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgents: true,
+          readAgents: true,
+          generateAgentReports: false,
+        },
+        integrations: {},
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      await navigateToSubmenu(results, 'Maintenance and diagnostics');
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeDisabled();
     });
   });
 

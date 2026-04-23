@@ -17,8 +17,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import type { ESQLSource } from '@kbn/esql-ast';
-import type { ESQLAstBaseItem } from '@kbn/esql-ast/src/types';
+import type { ESQLSource, ESQLAstBaseItem } from '@elastic/esql/types';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
 
@@ -72,11 +71,13 @@ export const Source: React.FC<SourceProps> = ({ node, index }) => {
             comment ? (
               <EuiToolTip content={comment}>
                 <span tabIndex={0}>
-                  Source {index} <EuiIcon type="editorComment" color="subdued" />
+                  Source {index} <EuiIcon type="editorComment" color="subdued" aria-hidden={true} />
                 </span>
               </EuiToolTip>
             ) : (
-              <>Source {index}</>
+              <span style={{ color: focusedNode === node ? 'rgb(7, 16, 31)' : 'inherit' }}>
+                Source {index}
+              </span>
             )
           }
         >

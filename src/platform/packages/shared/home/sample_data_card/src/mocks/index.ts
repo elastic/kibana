@@ -33,7 +33,7 @@ export const mockDataSet: SampleDataSet = {
   previewImagePath,
   appLinks: [
     {
-      icon: 'visLine',
+      icon: 'chartLine',
       label: 'View in App',
       path: 'path-to-app',
     },
@@ -67,6 +67,10 @@ export const getStoryServices = (params: Params) => {
     addBasePath: (path) => {
       action('addBasePath')(path);
       return path;
+    },
+    fetchSampleDataSets: async () => {
+      action('fetchSampleDataSets')();
+      return [mockDataSet];
     },
     getAppNavigationHandler: (path) => () => action('getAppNavigationHandler')(path),
     installSampleDataSet: async (id, defaultIndex) => {
@@ -126,6 +130,7 @@ export const getStoryArgTypes = () => ({
 export const getMockServices = (params: Partial<Services> = {}) => {
   const services: Services = {
     addBasePath: (path) => path,
+    fetchSampleDataSets: jest.fn(async () => [mockDataSet]),
     getAppNavigationHandler: jest.fn(),
     installSampleDataSet: jest.fn(),
     notifyError: jest.fn(),

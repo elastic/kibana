@@ -8,17 +8,39 @@
 import { rootRequest } from './common';
 
 /**
- * Deletes all existing Fleet packages, package policies and agent policies.
+ * Deletes all existing Fleet packages, package policies, agent policies, and agents.
  */
 export const cleanFleet = () => {
   // NOTE: order does matter.
-  return deletePackagePolicies()
+  return deleteAgents()
     .then(() => {
-      deletePackages();
+      return deletePackagePolicies();
     })
     .then(() => {
-      deleteAgentPolicies();
+      return deletePackages();
+    })
+    .then(() => {
+      return deleteAgentPolicies();
     });
+};
+
+const deleteAgents = () => {
+  return rootRequest<{ items: Array<{ id: string }> }>({
+    method: 'GET',
+    url: 'api/fleet/agents?perPage=1000',
+  }).then((response) => {
+    if (response.body.items && response.body.items.length > 0) {
+      // Delete agents in parallel
+      const deletePromises = response.body.items.map((agent: { id: string }) =>
+        rootRequest({
+          method: 'DELETE',
+          url: `api/fleet/agents/${agent.id}`,
+          failOnStatusCode: false, // Don't fail if agent is already deleted
+        })
+      );
+      return Cypress.Promise.all(deletePromises);
+    }
+  });
 };
 
 const deleteAgentPolicies = () => {

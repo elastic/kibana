@@ -14,6 +14,8 @@ import {
   ATTACK_DESCRIPTION_TEST_ID_SUFFIX,
   ATTACK_TITLE_TEST_ID_SUFFIX,
   ATTACK_GROUP_TEST_ID_SUFFIX,
+  ATTACK_STATUS_TEST_ID_SUFFIX,
+  EXPAND_ATTACK_BUTTON_TEST_ID,
 } from '.';
 
 jest.mock(
@@ -25,12 +27,20 @@ jest.mock(
   })
 );
 
+jest.mock('./subtitle', () => ({
+  Subtitle: jest.fn(() => <div data-test-subj="mock-subtitle" />),
+}));
+
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
 describe('AttackGroupContent', () => {
   it('should render component with attack details', () => {
     const { getByTestId } = render(
-      <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" />
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_GROUP_TEST_ID_SUFFIX}`)).toBeInTheDocument();
@@ -38,55 +48,98 @@ describe('AttackGroupContent', () => {
       'Unix1 Malware and Credential Theft'
     );
     expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toBeInTheDocument();
-    expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toHaveTextContent(
-      'Malware and credential theft detected on {{ host.name SRVMAC08 }}.'
+    expect(getByTestId(`test_id${ATTACK_STATUS_TEST_ID_SUFFIX}`)).toBeInTheDocument();
+    expect(getByTestId(`test_id${ATTACK_STATUS_TEST_ID_SUFFIX}`)).toHaveTextContent(
+      mockAttack.alertWorkflowStatus!
     );
+    expect(getByTestId('mock-subtitle')).toBeInTheDocument();
+  });
+
+  it('should call openAttackDetailsFlyout when "Open attack details" button is clicked', () => {
+    const openAttackDetailsFlyoutMock = jest.fn();
+    const { getByTestId } = render(
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={openAttackDetailsFlyoutMock}
+      />
+    );
+
+    const button = getByTestId(EXPAND_ATTACK_BUTTON_TEST_ID);
+    expect(button).toBeInTheDocument();
+
+    button.click();
+
+    expect(openAttackDetailsFlyoutMock).toHaveBeenCalledTimes(1);
   });
 
   it('should render an empty state when the attack title is empty', () => {
     const attackWithEmptyTitle = { ...mockAttack, title: '' };
     const { getByTestId } = render(
-      <AttackGroupContent attack={attackWithEmptyTitle} dataTestSubj="test_id" />
+      <AttackGroupContent
+        attack={attackWithEmptyTitle}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toBeEmptyDOMElement();
   });
 
-  it('should render an empty state when the attack summary is empty', () => {
-    const attackWithEmptySummary = { ...mockAttack, summaryMarkdown: '' };
+  it('should render tags badge when attack has tags', () => {
+    const attackWithTags = { ...mockAttack, tags: ['tag1', 'tag2'] };
     const { getByTestId } = render(
-      <AttackGroupContent attack={attackWithEmptySummary} dataTestSubj="test_id" />
+      <AttackGroupContent
+        attack={attackWithTags}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
-    expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toBeInTheDocument();
-    expect(
-      getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`).firstChild
-    ).toBeEmptyDOMElement();
+    expect(getByTestId('attack-tags-badge')).toBeInTheDocument();
+    expect(getByTestId('attack-tags-badgeDisplayPopoverButton')).toHaveTextContent('2');
   });
 
-  it('should show anonymized values when showAnonymized is true', () => {
+  it('should not render tags badge when attack has no tags', () => {
+    const attackWithNoTags = { ...mockAttack, tags: [] };
+    const { queryByTestId } = render(
+      <AttackGroupContent
+        attack={attackWithNoTags}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
+    );
+
+    expect(queryByTestId('attack-tags-badge')).not.toBeInTheDocument();
+  });
+
+  it('should show anonymized values in title when showAnonymized is true', () => {
     const { getByTestId } = render(
-      <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" showAnonymized />
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        showAnonymized
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Unix1 Malware and Credential Theft'
     );
-    expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toHaveTextContent(
-      'Malware and credential theft detected on {{ host.name 3d241119-f77a-454e-8ee3-d36e05a8714f }}.'
-    );
   });
 
-  it('should show original values when showAnonymized is false', () => {
+  it('should show original values in title when showAnonymized is false', () => {
     const { getByTestId } = render(
-      <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" showAnonymized={false} />
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        showAnonymized={false}
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Unix1 Malware and Credential Theft'
-    );
-    expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toHaveTextContent(
-      'Malware and credential theft detected on {{ host.name SRVMAC08 }}.'
     );
   });
 });

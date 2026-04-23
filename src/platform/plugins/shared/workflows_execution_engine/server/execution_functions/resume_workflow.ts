@@ -10,6 +10,9 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
+import type { WorkflowsMeteringService } from '../metering';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -21,6 +24,8 @@ export async function resumeWorkflow({
   logger,
   config,
   fakeRequest,
+  workflowsExecutionEngine,
+  meteringService,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -29,6 +34,8 @@ export async function resumeWorkflow({
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  meteringService?: WorkflowsMeteringService;
 }): Promise<void> {
   const {
     workflowRuntime,
@@ -40,22 +47,63 @@ export async function resumeWorkflow({
     esClient,
     workflowTaskManager,
     workflowExecutionRepository,
-  } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
+  } = await setupDependencies(
+    workflowRunId,
+    spaceId,
+    logger,
+    config,
+    dependencies,
+    fakeRequest,
+    workflowsExecutionEngine
+  );
 
   await workflowRuntime.resume();
 
-  await workflowExecutionLoop({
-    workflowRuntime,
-    stepExecutionRuntimeFactory,
-    workflowExecutionState,
-    workflowExecutionRepository,
-    workflowLogger,
-    nodesFactory,
-    workflowExecutionGraph,
-    esClient,
-    fakeRequest,
-    coreStart: dependencies.coreStart,
-    taskAbortController,
-    workflowTaskManager,
-  });
+  try {
+    await workflowExecutionLoop({
+      workflowRuntime,
+      stepExecutionRuntimeFactory,
+      workflowExecutionState,
+      workflowExecutionRepository,
+      workflowLogger,
+      nodesFactory,
+      workflowExecutionGraph,
+      esClient,
+      fakeRequest,
+      coreStart: dependencies.coreStart,
+      taskAbortController,
+      workflowTaskManager,
+    });
+  } finally {
+    await emitWorkflowExecutionFailedEventIfFailed({
+      workflowRuntime,
+      workflowExecutionState,
+      workflowsExtensions: dependencies.workflowsExtensions,
+      spaceId,
+      request: fakeRequest,
+      logger,
+      workflowRunId,
+    });
+  }
+
+  // Report metering after execution completes and state is flushed.
+  // This is fire-and-forget: the metering service handles retries and
+  // will no-op for non-terminal states (e.g., WAITING for resume).
+  if (meteringService) {
+    try {
+      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowRunId,
+        spaceId
+      );
+      if (finalExecution) {
+        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
+      }
+    } catch (err) {
+      logger.warn(
+        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+  }
 }

@@ -23,8 +23,6 @@ import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 
-export const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
-
 export function ProfilingAppPageTemplate({
   children,
   tabs = [],
@@ -67,19 +65,6 @@ export function ProfilingAppPageTemplate({
       noDataConfig={noDataConfig}
       pageHeader={{
         'data-test-subj': 'profilingPageTemplate',
-        rightSideItems: [
-          <EuiButton
-            data-test-subj="profilingProfilingAppPageTemplateGiveFeedbackButton"
-            href={PROFILING_FEEDBACK_LINK}
-            target="_blank"
-            color="warning"
-            iconType="editorComment"
-          >
-            {i18n.translate('xpack.profiling.header.giveFeedbackLink', {
-              defaultMessage: 'Give feedback',
-            })}
-          </EuiButton>,
-        ],
         pageTitle: (
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
             <EuiFlexItem grow={false}>{pageTitle}</EuiFlexItem>

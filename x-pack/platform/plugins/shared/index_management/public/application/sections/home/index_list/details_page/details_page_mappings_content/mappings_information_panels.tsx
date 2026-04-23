@@ -19,7 +19,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EisPromotionalCallout, EisUpdateCallout } from '@kbn/search-api-panels';
+import {
+  EisCloudConnectPromoCallout,
+  EisPromotionalCallout,
+  EisUpdateCallout,
+  useCloudConnectStatus,
+} from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
 import { documentationService } from '../../../../../services';
 import { useAppContext } from '../../../../../app_context';
@@ -29,6 +35,7 @@ import {
 } from '../../../../../components/mappings_editor/lib/utils';
 import { useMappingsState } from '../../../../../components/mappings_editor/mappings_state_context';
 import { UpdateElserMappingsModal } from '../update_elser_mappings/update_elser_mappings_modal';
+import { useLicense } from '../../../../../../hooks/use_license';
 
 interface MappingsInformationPanelsProps {
   indexName: string;
@@ -42,19 +49,32 @@ export const MappingsInformationPanels = ({
   refetchMapping,
 }: MappingsInformationPanelsProps) => {
   const {
-    plugins: { cloud },
+    plugins: { cloud, cloudConnect },
+    core: { application },
   } = useAppContext();
   const state = useMappingsState();
+  const { isAtLeastEnterprise } = useLicense();
+  const {
+    isLoading: isCloudConnectStatusLoading,
+    isCloudConnected,
+    isCloudConnectedWithEisEnabled,
+  } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
+
+  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
   const showAboutMappingsStyles = css`
     ${useEuiBreakpoint(['xl'])} {
       max-width: 480px;
     }
   `;
+
   const hasSemanticText = hasSemanticTextField(state.mappingViewFields);
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
+  const shouldShowEisUpdateCallout =
+    ((cloud?.isCloudEnabled || isCloudConnectedWithEisEnabled) &&
+      (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ??
+    false;
 
-  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
   return (
     <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -64,7 +84,7 @@ export const MappingsInformationPanels = ({
               <EisUpdateCallout
                 ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
                 promoId="indexDetailsMappings"
-                isCloudEnabled={cloud?.isCloudEnabled ?? false}
+                shouldShowEisUpdateCallout={shouldShowEisUpdateCallout}
                 handleOnClick={() => setIsUpdatingElserMappings(true)}
                 direction="column"
                 hasUpdatePrivileges={hasUpdateMappingsPrivilege}
@@ -83,14 +103,25 @@ export const MappingsInformationPanels = ({
                 refetchMapping={refetchMapping}
                 setIsModalOpen={setIsUpdatingElserMappings}
                 hasUpdatePrivileges={hasUpdateMappingsPrivilege}
+                modalId="indexDetailsMappings"
               />
             )}
           </>
         )}
+        {!isCloudConnectStatusLoading && !isCloudConnected && (
+          <EisCloudConnectPromoCallout
+            promoId="indexDetailsMappings"
+            isSelfManaged={!cloud?.isCloudEnabled}
+            direction="column"
+            navigateToApp={() =>
+              application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+            }
+          />
+        )}
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="info" />
+              <EuiIcon aria-hidden={true} type="info" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">
@@ -130,7 +161,7 @@ export const MappingsInformationPanels = ({
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="info" />
+              <EuiIcon aria-hidden={true} type="info" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">

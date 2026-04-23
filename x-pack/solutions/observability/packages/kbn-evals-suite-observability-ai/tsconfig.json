@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/evals",
+    "@kbn/tooling-log",
+    "@kbn/core",
+    "@kbn/alerting-plugin",
+    "@kbn/response-ops-rule-params",
+    "@kbn/scout",
+    "@kbn/agent-builder-common",
+    "@kbn/es-snapshot-loader",
+  ]
+}

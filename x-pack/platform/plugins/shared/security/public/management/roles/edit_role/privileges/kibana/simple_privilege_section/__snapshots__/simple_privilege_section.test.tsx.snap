@@ -37,7 +37,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
               "extraSlow": "500ms",
               "fast": "150ms",
               "normal": "250ms",
-              "resistance": "cubic-bezier(.694, .0482, .335, 1)",
+              "resistance": "cubic-bezier(.32, .72, 0, 1)",
               "slow": "350ms",
             },
             "base": 16,
@@ -98,12 +98,14 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "accentText": "#EE72A6",
                 "backgroundBaseAccent": "#351725",
                 "backgroundBaseAccentSecondary": "#03282B",
+                "backgroundBaseAssistance": "#2A1E3E",
                 "backgroundBaseDanger": "#351721",
                 "backgroundBaseDisabled": "#1D2A3E",
                 "backgroundBaseFormsControlDisabled": "#2B394F",
                 "backgroundBaseFormsPrepend": "#243147",
                 "backgroundBaseHighlighted": "#172336",
                 "backgroundBaseInteractiveHover": "rgba(255,255,255, 0.08)",
+                "backgroundBaseInteractiveHoverAssistance": "#322452",
                 "backgroundBaseInteractiveOverlay": "rgba(43,57,79, 0.7)",
                 "backgroundBaseInteractiveSelect": "#0D2F5E",
                 "backgroundBaseInteractiveSelectHover": "#123778",
@@ -118,6 +120,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "backgroundBaseWarning": "#2C2721",
                 "backgroundFilledAccent": "#EE72A6",
                 "backgroundFilledAccentSecondary": "#16C5C0",
+                "backgroundFilledAssistance": "#C5A5FA",
                 "backgroundFilledDanger": "#F6726A",
                 "backgroundFilledNeutral": "#63C8E3",
                 "backgroundFilledPrimary": "#61A2FF",
@@ -127,6 +130,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "backgroundFilledWarning": "#FACB3D",
                 "backgroundLightAccent": "#481E32",
                 "backgroundLightAccentSecondary": "#023436",
+                "backgroundLightAssistance": "#3E2C63",
                 "backgroundLightDanger": "#491D27",
                 "backgroundLightNeutral": "#003447",
                 "backgroundLightPrimary": "#0D2F5E",
@@ -149,6 +153,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "body": "#07101F",
                 "borderBaseAccent": "#5E2140",
                 "borderBaseAccentSecondary": "#044949",
+                "borderBaseAssistance": "#3E2C63",
                 "borderBaseDanger": "#5E2129",
                 "borderBaseDisabled": "#485975",
                 "borderBaseFloating": "#2B394F",
@@ -166,6 +171,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "borderInteractiveFormsHoverProminent": "#8E9FBC",
                 "borderStrongAccent": "#EE72A6",
                 "borderStrongAccentSecondary": "#16C5C0",
+                "borderStrongAssistance": "#B386F9",
                 "borderStrongDanger": "#F6726A",
                 "borderStrongNeutral": "#37B8DC",
                 "borderStrongPrimary": "#61A2FF",
@@ -203,9 +209,12 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "text": "#CAD3E2",
                 "textAccent": "#EE72A6",
                 "textAccentSecondary": "#16C5C0",
+                "textAssistance": "#C5A5FA",
                 "textDanger": "#F6726A",
                 "textDisabled": "#6A7FA0",
+                "textGhost": "#FFFFFF",
                 "textHeading": "#E3E8F2",
+                "textInk": "#07101F",
                 "textInverse": "#07101F",
                 "textNeutral": "#37B8DC",
                 "textParagraph": "#CAD3E2",
@@ -239,7 +248,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   "euiColorVisBehindText9": "#FCD883",
                   "euiColorVisComplementary0": "#61A2FF",
                   "euiColorVisComplementary1": "#EAAE01",
-                  "euiColorVisCool0": "#E8F1FF",
+                  "euiColorVisCool0": "#F1F6FF",
                   "euiColorVisCool1": "#A3CBFF",
                   "euiColorVisCool2": "#61A2FF",
                   "euiColorVisDanger0": "#F6726A",
@@ -264,7 +273,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   "euiColorVisText7": "#FFC9C2",
                   "euiColorVisText8": "#EAAE01",
                   "euiColorVisText9": "#FCD883",
-                  "euiColorVisWarm0": "#FFE8E5",
+                  "euiColorVisWarm0": "#FFF3F1",
                   "euiColorVisWarm1": "#FFB5AD",
                   "euiColorVisWarm2": "#F6726A",
                   "euiColorVisWarning0": "#EAAE01",
@@ -277,28 +286,31 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "accent": "#BC1E70",
                 "accentSecondary": "#008B87",
                 "accentText": "#A11262",
-                "backgroundBaseAccent": "#FFEBF5",
-                "backgroundBaseAccentSecondary": "#E2F9F7",
-                "backgroundBaseDanger": "#FFE8E5",
+                "backgroundBaseAccent": "#FFF0F8",
+                "backgroundBaseAccentSecondary": "#EAFBFA",
+                "backgroundBaseAssistance": "#F7F2FF",
+                "backgroundBaseDanger": "#FFF3F1",
                 "backgroundBaseDisabled": "#ECF1F9",
                 "backgroundBaseFormsControlDisabled": "#CAD3E2",
                 "backgroundBaseFormsPrepend": "#ECF1F9",
                 "backgroundBaseHighlighted": "#F6F9FC",
                 "backgroundBaseInteractiveHover": "rgba(23,80,186, 0.04)",
+                "backgroundBaseInteractiveHoverAssistance": "#ECE2FE",
                 "backgroundBaseInteractiveOverlay": "rgba(72,89,117, 0.7)",
-                "backgroundBaseInteractiveSelect": "#E8F1FF",
+                "backgroundBaseInteractiveSelect": "#F1F6FF",
                 "backgroundBaseInteractiveSelectHover": "#D9E8FF",
-                "backgroundBaseNeutral": "#E5F6FA",
+                "backgroundBaseNeutral": "#ECFBFF",
                 "backgroundBasePlain": "#FFFFFF",
-                "backgroundBasePrimary": "#E8F1FF",
-                "backgroundBaseRisk": "#FFEDD6",
+                "backgroundBasePrimary": "#F1F6FF",
+                "backgroundBaseRisk": "#FFF3E3",
                 "backgroundBaseSkeletonEdge": "rgba(72,89,117, 0.16)",
                 "backgroundBaseSkeletonMiddle": "rgba(72,89,117, 0.04)",
                 "backgroundBaseSubdued": "#F6F9FC",
-                "backgroundBaseSuccess": "#E2F8F0",
-                "backgroundBaseWarning": "#FDF3D8",
+                "backgroundBaseSuccess": "#E9FFF7",
+                "backgroundBaseWarning": "#FFF7E2",
                 "backgroundFilledAccent": "#BC1E70",
                 "backgroundFilledAccentSecondary": "#008B87",
+                "backgroundFilledAssistance": "#8144CC",
                 "backgroundFilledDanger": "#C61E25",
                 "backgroundFilledNeutral": "#1C8CB5",
                 "backgroundFilledPrimary": "#0B64DD",
@@ -308,6 +320,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "backgroundFilledWarning": "#FACB3D",
                 "backgroundLightAccent": "#FDDDE9",
                 "backgroundLightAccentSecondary": "#C9F3F0",
+                "backgroundLightAssistance": "#ECE2FE",
                 "backgroundLightDanger": "#FDDDD8",
                 "backgroundLightNeutral": "#CFEEF7",
                 "backgroundLightPrimary": "#D9E8FF",
@@ -316,20 +329,21 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "backgroundLightText": "#E3E8F2",
                 "backgroundLightWarning": "#FDE9B5",
                 "backgroundTransparent": "transparent",
-                "backgroundTransparentAccent": "#FFEBF5",
-                "backgroundTransparentAccentSecondary": "#E2F9F7",
-                "backgroundTransparentDanger": "#FFE8E5",
+                "backgroundTransparentAccent": "#FFF0F8",
+                "backgroundTransparentAccentSecondary": "#EAFBFA",
+                "backgroundTransparentDanger": "#FFF3F1",
                 "backgroundTransparentHighlighted": "#ECF1F9",
-                "backgroundTransparentNeutral": "#E5F6FA",
+                "backgroundTransparentNeutral": "#ECFBFF",
                 "backgroundTransparentPlain": "#ECF1F9",
-                "backgroundTransparentPrimary": "#E8F1FF",
-                "backgroundTransparentRisk": "#FFEDD6",
+                "backgroundTransparentPrimary": "#F1F6FF",
+                "backgroundTransparentRisk": "#FFF3E3",
                 "backgroundTransparentSubdued": "#ECF1F9",
-                "backgroundTransparentSuccess": "#E2F8F0",
-                "backgroundTransparentWarning": "#FDF3D8",
+                "backgroundTransparentSuccess": "#E9FFF7",
+                "backgroundTransparentWarning": "#FFF7E2",
                 "body": "#F6F9FC",
                 "borderBaseAccent": "#FFC7DB",
                 "borderBaseAccentSecondary": "#A6EDEA",
+                "borderBaseAssistance": "#E2D3FE",
                 "borderBaseDanger": "#FFC9C2",
                 "borderBaseDisabled": "#CAD3E2",
                 "borderBaseFloating": "transparent",
@@ -347,6 +361,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "borderInteractiveFormsHoverProminent": "#798EAF",
                 "borderStrongAccent": "#BC1E70",
                 "borderStrongAccentSecondary": "#008B87",
+                "borderStrongAssistance": "#8144CC",
                 "borderStrongDanger": "#C61E25",
                 "borderStrongNeutral": "#19799F",
                 "borderStrongPrimary": "#0B64DD",
@@ -362,7 +377,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "disabledText": "#6A7FA0",
                 "emptyShade": "#FFFFFF",
                 "fullShade": "#07101F",
-                "highlight": "#E8F1FF",
+                "highlight": "#F1F6FF",
                 "lightShade": "#CAD3E2",
                 "lightestShade": "#ECF1F9",
                 "link": "#1750BA",
@@ -384,9 +399,12 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "text": "#1D2A3E",
                 "textAccent": "#A11262",
                 "textAccentSecondary": "#047471",
+                "textAssistance": "#6B3C9F",
                 "textDanger": "#A71627",
                 "textDisabled": "#798EAF",
+                "textGhost": "#FFFFFF",
                 "textHeading": "#111C2C",
+                "textInk": "#07101F",
                 "textInverse": "#FFFFFF",
                 "textNeutral": "#0F658A",
                 "textParagraph": "#1D2A3E",
@@ -420,7 +438,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   "euiColorVisBehindText9": "#FCD883",
                   "euiColorVisComplementary0": "#61A2FF",
                   "euiColorVisComplementary1": "#EAAE01",
-                  "euiColorVisCool0": "#E8F1FF",
+                  "euiColorVisCool0": "#F1F6FF",
                   "euiColorVisCool1": "#A3CBFF",
                   "euiColorVisCool2": "#61A2FF",
                   "euiColorVisDanger0": "#F6726A",
@@ -445,7 +463,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   "euiColorVisText7": "#DA3737",
                   "euiColorVisText8": "#6A4906",
                   "euiColorVisText9": "#966B03",
-                  "euiColorVisWarm0": "#FFE8E5",
+                  "euiColorVisWarm0": "#FFF3F1",
                   "euiColorVisWarm1": "#FFB5AD",
                   "euiColorVisWarm2": "#F6726A",
                   "euiColorVisWarning0": "#EAAE01",
@@ -454,8 +472,6 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "warning": "#FACB3D",
                 "warningText": "#825803",
               },
-              "ghost": "#FFFFFF",
-              "ink": "#07101F",
               "plainDark": "#07101F",
               "plainLight": "#FFFFFF",
             },
@@ -464,7 +480,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -541,9 +557,9 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "codeDeletionColor": "#F6726A",
                 "codeFunctionTitleColor": "inherit",
                 "codeInlineBackground": "#172336",
-                "codeInlineCodeKeywordColor": "#B084F5",
-                "codeInlineColor": "#B084F5",
-                "codeKeywordColor": "#B084F5",
+                "codeInlineCodeKeywordColor": "#B386F9",
+                "codeInlineColor": "#B386F9",
+                "codeKeywordColor": "#B386F9",
                 "codeMetaColor": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -771,12 +787,6 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   ],
                 },
                 "skeletonBackgroundSkeletonMiddleHighContrast": "rgba(255,255,255, 0.3)",
-                "superDatePickerBackgroundSuccees": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSuccess",
-                  ],
-                },
                 "switchBackgroundOff": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -884,6 +894,13 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#485975",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -895,7 +912,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -1018,7 +1035,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundBaseInteractiveHover",
                   ],
                 },
-                "dataGridRowBackgroundMarked": "#FDF3D8",
+                "dataGridRowBackgroundMarked": "#FFF7E2",
                 "dataGridRowBackgroundMarkedHover": "#FDE9B5",
                 "dataGridRowBackgroundSelect": Computed {
                   "computer": [Function],
@@ -1202,12 +1219,6 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   ],
                 },
                 "skeletonBackgroundSkeletonMiddleHighContrast": "rgba(72,89,117, 0.04)",
-                "superDatePickerBackgroundSuccees": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSuccess",
-                  ],
-                },
                 "switchBackgroundOff": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1275,7 +1286,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundBaseInteractiveHover",
                   ],
                 },
-                "tableRowBackgroundMarked": "#FDF3D8",
+                "tableRowBackgroundMarked": "#FFF7E2",
                 "tableRowBackgroundMarkedHover": "#FDE9B5",
                 "tableRowBackgroundSelected": Computed {
                   "computer": [Function],
@@ -1315,6 +1326,13 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#A2B1C9",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1340,6 +1358,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   },
                   "backgroundAccentSecondaryActive": "rgba(0,176,170, 0.2)",
                   "backgroundAccentSecondaryHover": "rgba(0,176,170, 0.16)",
+                  "backgroundAssistanceHover": "rgba(163,109,239, 0.12)",
                   "backgroundDanger": Computed {
                     "computer": [Function],
                     "dependencies": Array [
@@ -1388,6 +1407,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   },
                   "backgroundFilledAccentSecondaryActive": "#009E99",
                   "backgroundFilledAccentSecondaryHover": "#00B0AA",
+                  "backgroundFilledAssistanceHover": "#A36DEF",
                   "backgroundFilledDanger": Computed {
                     "computer": [Function],
                     "dependencies": Array [
@@ -1631,6 +1651,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   },
                   "backgroundAccentSecondaryActive": "rgba(0,176,170, 0.16)",
                   "backgroundAccentSecondaryHover": "rgba(0,176,170, 0.12)",
+                  "backgroundAssistanceHover": "rgba(163,109,239, 0.12)",
                   "backgroundDanger": Computed {
                     "computer": [Function],
                     "dependencies": Array [
@@ -1679,6 +1700,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                   },
                   "backgroundFilledAccentSecondaryActive": "#065B58",
                   "backgroundFilledAccentSecondaryHover": "#047471",
+                  "backgroundFilledAssistanceHover": "#6B3C9F",
                   "backgroundFilledDanger": Computed {
                     "computer": [Function],
                     "dependencies": Array [
@@ -2254,8 +2276,13 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
             "overrides": Object {
               "HCM": Object {
                 "colors": Object {
+                  "DARK": Object {
+                    "textGhost": "#FFFFFF",
+                    "textInk": "#000000",
+                  },
                   "LIGHT": Object {
                     "severity": Object {
+                      "assistance": "#A36DEF",
                       "danger": "#EE4C48",
                       "neutral": "#0dA1C9",
                       "risk": "#ED6723",
@@ -2263,6 +2290,8 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                       "unknown": "#798EAF",
                       "warning": "#AD7E00",
                     },
+                    "textGhost": "#FFFFFF",
+                    "textInk": "#000000",
                     "vis": Object {
                       "euiColorVis0": "#065B58",
                       "euiColorVis1": "#009E99",
@@ -2287,7 +2316,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                       "euiColorVisBehindText9": "#AD7E00",
                       "euiColorVisComplementary0": "#2476F0",
                       "euiColorVisComplementary1": "#AD7E00",
-                      "euiColorVisCool0": "#E8F1FF",
+                      "euiColorVisCool0": "#F1F6FF",
                       "euiColorVisCool1": "#85B7FF",
                       "euiColorVisCool2": "#1750BA",
                       "euiColorVisDanger0": "#A71627",
@@ -2312,15 +2341,15 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                       "euiColorVisText7": "#DA3737",
                       "euiColorVisText8": "#6A4906",
                       "euiColorVisText9": "#966B03",
-                      "euiColorVisWarm0": "#FFE8E5",
+                      "euiColorVisWarm0": "#FFF3F1",
                       "euiColorVisWarm1": "#FC9188",
                       "euiColorVisWarm2": "#A71627",
                       "euiColorVisWarning0": "#825803",
                       "euiColorVisWarning1": "#AD7E00",
                     },
                   },
-                  "ghost": "#FFFFFF",
-                  "ink": "#000000",
+                  "plainDark": "#000000",
+                  "plainLight": "#FFFFFF",
                 },
               },
             },
@@ -2456,133 +2485,13 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
           <EuiUtilityClasses />
         </EuiCacheProvider>
         <EuiComponentDefaultsProvider>
-          <SimplePrivilegeSection
-            canCustomizeSubFeaturePrivileges={true}
-            editable={true}
-            features={
-              Array [
-                SecuredFeature {
-                  "config": Object {
-                    "app": Array [
-                      "app",
-                    ],
-                    "category": Object {
-                      "id": "foo",
-                      "label": "foo",
-                    },
-                    "id": "feature1",
-                    "name": "Feature 1",
-                    "privileges": Object {
-                      "all": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [
-                            "foo",
-                          ],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "read": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                    },
-                  },
-                  "minimalPrimaryFeaturePrivileges": Array [
-                    PrimaryFeaturePrivilege {
-                      "actions": Array [],
-                      "config": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [
-                            "foo",
-                          ],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "id": "minimal_all",
-                    },
-                    PrimaryFeaturePrivilege {
-                      "actions": Array [],
-                      "config": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "id": "minimal_read",
-                    },
-                  ],
-                  "primaryFeaturePrivileges": Array [
-                    PrimaryFeaturePrivilege {
-                      "actions": Array [],
-                      "config": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [
-                            "foo",
-                          ],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "id": "all",
-                    },
-                    PrimaryFeaturePrivilege {
-                      "actions": Array [],
-                      "config": Object {
-                        "app": Array [
-                          "app",
-                        ],
-                        "savedObject": Object {
-                          "all": Array [],
-                          "read": Array [],
-                        },
-                        "ui": Array [
-                          "app-ui",
-                        ],
-                      },
-                      "id": "read",
-                    },
-                  ],
-                  "securedSubFeatures": Array [],
-                  "subFeaturePrivileges": Array [],
-                  "subFeatures": Array [],
-                },
-              ]
-            }
-            kibanaPrivileges={
-              KibanaPrivileges {
-                "feature": Map {
-                  "feature1" => SecuredFeature {
+          <EuiFlyoutManager>
+            <SimplePrivilegeSection
+              canCustomizeSubFeaturePrivileges={true}
+              editable={true}
+              features={
+                Array [
+                  SecuredFeature {
                     "config": Object {
                       "app": Array [
                         "app",
@@ -2660,9 +2569,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     ],
                     "primaryFeaturePrivileges": Array [
                       PrimaryFeaturePrivilege {
-                        "actions": Array [
-                          "*",
-                        ],
+                        "actions": Array [],
                         "config": Object {
                           "app": Array [
                             "app",
@@ -2680,9 +2587,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                         "id": "all",
                       },
                       PrimaryFeaturePrivilege {
-                        "actions": Array [
-                          "read",
-                        ],
+                        "actions": Array [],
                         "config": Object {
                           "app": Array [
                             "app",
@@ -2702,26 +2607,152 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "subFeaturePrivileges": Array [],
                     "subFeatures": Array [],
                   },
-                },
-                "global": Map {},
-                "spaces": Map {},
+                ]
               }
-            }
-            onChange={[MockFunction]}
-            role={
-              Object {
-                "elasticsearch": Object {
-                  "cluster": Array [
-                    "manage",
-                  ],
-                  "indices": Array [],
-                  "run_as": Array [],
-                },
-                "kibana": Array [],
-                "name": "",
+              kibanaPrivileges={
+                KibanaPrivileges {
+                  "feature": Map {
+                    "feature1" => SecuredFeature {
+                      "config": Object {
+                        "app": Array [
+                          "app",
+                        ],
+                        "category": Object {
+                          "id": "foo",
+                          "label": "foo",
+                        },
+                        "id": "feature1",
+                        "name": "Feature 1",
+                        "privileges": Object {
+                          "all": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [
+                                "foo",
+                              ],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "read": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                        },
+                      },
+                      "minimalPrimaryFeaturePrivileges": Array [
+                        PrimaryFeaturePrivilege {
+                          "actions": Array [],
+                          "config": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [
+                                "foo",
+                              ],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "id": "minimal_all",
+                        },
+                        PrimaryFeaturePrivilege {
+                          "actions": Array [],
+                          "config": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "id": "minimal_read",
+                        },
+                      ],
+                      "primaryFeaturePrivileges": Array [
+                        PrimaryFeaturePrivilege {
+                          "actions": Array [
+                            "*",
+                          ],
+                          "config": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [
+                                "foo",
+                              ],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "id": "all",
+                        },
+                        PrimaryFeaturePrivilege {
+                          "actions": Array [
+                            "read",
+                          ],
+                          "config": Object {
+                            "app": Array [
+                              "app",
+                            ],
+                            "savedObject": Object {
+                              "all": Array [],
+                              "read": Array [],
+                            },
+                            "ui": Array [
+                              "app-ui",
+                            ],
+                          },
+                          "id": "read",
+                        },
+                      ],
+                      "securedSubFeatures": Array [],
+                      "subFeaturePrivileges": Array [],
+                      "subFeatures": Array [],
+                    },
+                  },
+                  "global": Map {},
+                  "spaces": Map {},
+                }
               }
-            }
-          />
+              onChange={[MockFunction]}
+              role={
+                Object {
+                  "elasticsearch": Object {
+                    "cluster": Array [
+                      "manage",
+                    ],
+                    "indices": Array [],
+                    "run_as": Array [],
+                  },
+                  "kibana": Array [],
+                  "name": "",
+                }
+              }
+            />
+          </EuiFlyoutManager>
         </EuiComponentDefaultsProvider>
       </EuiThemeProvider>
     </EuiSystemDefaultsProvider>

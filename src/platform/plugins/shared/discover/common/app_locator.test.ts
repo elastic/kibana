@@ -315,6 +315,26 @@ describe('Discover url generator', () => {
     expect((state as Record<string, unknown>).dataViewSpec).toEqual(dataViewSpecMock);
   });
 
+  describe('when esqlControls is used', () => {
+    test('should return esqlControls', async () => {
+      const esqlControls = {};
+
+      const { locator } = await setup();
+      const { state } = await locator.getLocation({ esqlControls });
+
+      expect((state as Record<string, unknown>).esqlControls).toEqual(esqlControls);
+    });
+  });
+
+  describe('when esqlControls is not used', () => {
+    test('esqlControls shoud be undefined', async () => {
+      const { locator } = await setup();
+      const { state } = await locator.getLocation({});
+
+      expect((state as Record<string, unknown>).esqlControls).toBeUndefined();
+    });
+  });
+
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
       test('when using default, sets data view ID in the generated URL', async () => {

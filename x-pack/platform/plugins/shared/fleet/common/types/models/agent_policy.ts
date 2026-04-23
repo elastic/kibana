@@ -66,6 +66,8 @@ export interface NewAgentPolicy {
     };
   };
   required_versions?: AgentTargetVersion[] | null;
+  has_agent_version_conditions?: boolean;
+  is_verifier?: boolean;
 }
 
 export interface AgentTargetVersion {
@@ -87,9 +89,23 @@ export interface AgentlessPolicy {
   };
 }
 
+/**
+ * An agentless policy with cloud_connectors guaranteed to be present and enabled.
+ * Used by verifier agent policies that target a specific cloud provider.
+ */
+export interface VerifierAgentlessPolicy extends AgentlessPolicy {
+  cloud_connectors: Required<CloudConnectors> & { enabled: true };
+}
+
 export interface GlobalDataTag {
   name: string;
   value: string | number;
+}
+
+export interface AgentPolicyAgentVersionCondition {
+  name: string;
+  title: string;
+  version_condition: string;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
@@ -98,14 +114,18 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
+  created_at?: string;
   updated_at: string;
   updated_by: string;
   revision: number;
   agents?: number;
   unprivileged_agents?: number;
   fips_agents?: number;
+  agents_per_version?: Array<{ version: string; count: number }>;
   is_protected: boolean;
   version?: string;
+  min_agent_version?: string | null;
+  package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
 }
 
 export interface FullAgentPolicyInputStream {
@@ -140,6 +160,7 @@ export interface FullAgentPolicyMetaPackage {
   version: string;
   policy_template?: string;
   release?: string;
+  agentVersion?: string;
 }
 
 export type TemplateAgentPolicyInput = Pick<FullAgentPolicyInput, 'id' | 'type' | 'streams'>;
@@ -189,10 +210,30 @@ export interface FullAgentPolicyMonitoring {
     };
   };
 }
+export interface FullAgentPolicyDownloadAuth {
+  username?: string;
+  password?: string;
+  api_key?: string;
+  headers?: Array<{
+    key: string;
+    value: string;
+  }>;
+}
+
+export interface FullAgentPolicyDownloadAuthSecrets {
+  password?: { id: string };
+  api_key?: { id: string };
+}
+
+export interface FullAgentPolicyDownloadSecrets extends BaseSSLSecrets {
+  auth?: FullAgentPolicyDownloadAuthSecrets;
+}
+
 export interface FullAgentPolicyDownload {
   sourceURI: string;
   ssl?: BaseSSLConfig;
-  secrets?: BaseSSLSecrets;
+  auth?: FullAgentPolicyDownloadAuth;
+  secrets?: FullAgentPolicyDownloadSecrets;
   proxy_url?: string;
   proxy_headers?: any;
 }

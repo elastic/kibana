@@ -21,7 +21,7 @@ import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
-import type { MitreSubTechnique } from '../../../../detections/mitre/types';
+import type { MitreSubTechnique } from '../../../../../common/detection_engine/mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -30,7 +30,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
+    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
   );
 };
 

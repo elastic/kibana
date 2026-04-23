@@ -32,8 +32,8 @@ import {
 import { useMappingsState } from '../../../../../components/mappings_editor/mappings_state_context';
 import { documentationService } from '../../../../../services';
 import { updateIndexMappings } from '../../../../../services/api';
-import { notificationService } from '../../../../../services/notification';
 import type { NormalizedFields } from '../../../../../components/mappings_editor/types';
+import { useServices } from '../../../../../app_context';
 
 export interface MappingsOptionData {
   name: string;
@@ -44,6 +44,7 @@ export interface UpdateElserMappingsModalProps {
   refetchMapping: () => void;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   hasUpdatePrivileges: boolean | undefined;
+  modalId: string;
 }
 
 export function UpdateElserMappingsModal({
@@ -51,7 +52,9 @@ export function UpdateElserMappingsModal({
   refetchMapping,
   setIsModalOpen,
   hasUpdatePrivileges,
+  modalId,
 }: UpdateElserMappingsModalProps) {
+  const { notificationService } = useServices();
   const state = useMappingsState();
   const [options, setOptions] = useState<EuiSelectableOption<MappingsOptionData>[]>([]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -82,25 +85,31 @@ export function UpdateElserMappingsModal({
     );
   }, []);
 
-  const handleError = (error: string | undefined) => {
-    const errorToastTitle = i18n.translate(
-      'xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.title',
-      {
-        defaultMessage: 'Error updating mappings',
-      }
-    );
+  const handleError = useCallback(
+    (error: string | undefined) => {
+      const errorToastTitle = i18n.translate(
+        'xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.title',
+        {
+          defaultMessage: 'Error updating mappings',
+        }
+      );
 
-    const errorMessage = error
-      ? i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.message', {
-          defaultMessage: '{error}',
-          values: { error },
-        })
-      : i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.defaultMessage', {
-          defaultMessage: 'Mappings could not be updated. Please try again.',
-        });
+      const errorMessage = error
+        ? i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.message', {
+            defaultMessage: '{error}',
+            values: { error },
+          })
+        : i18n.translate(
+            'xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.defaultMessage',
+            {
+              defaultMessage: 'Mappings could not be updated. Please try again.',
+            }
+          );
 
-    notificationService.showDangerToast(errorToastTitle, errorMessage);
-  };
+      notificationService.showDangerToast(errorToastTitle, errorMessage);
+    },
+    [notificationService]
+  );
 
   const handleApply = useCallback(async () => {
     setIsUpdating(true);
@@ -136,7 +145,15 @@ export function UpdateElserMappingsModal({
       setIsUpdating(false);
       setIsModalOpen(false);
     }
-  }, [indexName, refetchMapping, options, setIsModalOpen, state.mappingViewFields]);
+  }, [
+    indexName,
+    refetchMapping,
+    options,
+    setIsModalOpen,
+    state.mappingViewFields,
+    handleError,
+    notificationService,
+  ]);
 
   useEffect(() => {
     const elserOptions = buildElserOptions(state.mappingViewFields);
@@ -171,6 +188,7 @@ export function UpdateElserMappingsModal({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiLink
+          data-telemetry-id={`${modalId}-updateElserMappingsModal-learnMore-link`}
           href={documentationService.docLinks.enterpriseSearch.elasticInferenceServicePricing}
           target="_blank"
           external
@@ -204,6 +222,7 @@ export function UpdateElserMappingsModal({
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
           <EuiButtonEmpty
             data-test-subj="UpdateElserMappingsModalCancelBtn"
+            data-telemetry-id={`${modalId}-updateElserMappingsModal-cancel-btn`}
             onClick={() => setIsModalOpen(false)}
             aria-label={i18n.translate(
               'xpack.idxMgmt.indexDetails.updateElserMappingsModal.cancelButtonAriaLabel',
@@ -224,6 +243,7 @@ export function UpdateElserMappingsModal({
             onClick={handleApply}
             isLoading={isUpdating}
             data-test-subj="UpdateElserMappingsModalApplyBtn"
+            data-telemetry-id={`${modalId}-updateElserMappingsModal-apply-btn`}
             isDisabled={isApplyDisabled}
           >
             {i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.applyButton', {

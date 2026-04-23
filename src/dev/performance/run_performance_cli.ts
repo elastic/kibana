@@ -41,13 +41,56 @@ interface JourneyTargetGroups {
 
 const journeyTargetGroups: JourneyTargetGroups = {
   kibanaStartAndLoad: ['login'],
+  daily: [
+    'web_logs_dashboard_long_running',
+    'web_logs_dashboard_esql_long_running',
+    'web_logs_dashboard',
+    'data_stress_test_lens_esql',
+    'web_logs_dashboard_esql',
+    'many_fields_discover_esql',
+    'data_stress_test_lens',
+    'ecommerce_dashboard_map_only',
+    'ecommerce_dashboard_saved_search_only',
+    'ecommerce_dashboard_tsvb_gauge_only',
+    'many_fields_transform',
+    'tsdb_logs_data_visualizer',
+    'many_fields_esql_editor',
+  ],
   crud: ['tags_listing_page', 'dashboard_listing_page'],
-  dashboard: ['ecommerce_dashboard', 'data_stress_test_lens', 'flight_dashboard'],
-  discover: ['many_fields_discover', 'many_fields_discover_esql'],
-  maps: ['ecommerce_dashboard_map_only'],
+  dashboard: [
+    'web_logs_dashboard',
+    'web_logs_dashboard_long_running',
+    'web_logs_dashboard_esql',
+    'web_logs_dashboard_esql_long_running',
+    'flight_dashboard',
+    'ecommerce_dashboard_map_only',
+    'ecommerce_dashboard_saved_search_only',
+    'ecommerce_dashboard_tsvb_gauge_only',
+    'promotion_tracking_dashboard',
+    'data_stress_test_lens',
+    'data_stress_test_lens_esql',
+  ],
+  discover: ['many_fields_discover', 'many_fields_discover_esql', 'many_fields_esql_editor'],
+  lens: ['many_fields_lens_editor', 'data_stress_test_lens', 'data_stress_test_lens_esql'],
+  esql: [
+    'many_fields_discover_esql',
+    'many_fields_esql_editor',
+    'web_logs_dashboard_esql',
+    'web_logs_dashboard_esql_long_running',
+    'data_stress_test_lens_esql',
+  ],
   ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
-  esql: ['many_fields_discover_esql', 'web_logs_dashboard_esql'],
-  http2: ['data_stress_test_lens_http2', 'ecommerce_dashboard_http2'],
+  observability: ['apm_service_inventory', 'infra_hosts_view_ecs', 'infra_hosts_view_semconv'],
+  security: ['cloud_security_dashboard'],
+  streams: [
+    'streams_listing_page',
+    'streams_data_quality',
+    'streams_processing_step',
+    'streams_retention',
+    'streams_field_mapping',
+    'streams_wired_hierarchy',
+  ],
+  metricsExperience: ['metrics_experience_grid'],
 };
 
 const readFilesRecursively = (dir: string, callback: Function) => {
@@ -158,6 +201,18 @@ async function runFunctionalTest(props: TestRunProps) {
   });
 }
 
+const cleanupAndExit = (procRunner: ProcRunner, eventName: string) => {
+  process.stdout.write(`\n--- Received ${eventName}, cleaning up...\n`);
+  procRunner
+    .stop('es')
+    .catch((e) => {
+      process.stderr.write(`\nError during cleanup: ${e}`);
+    })
+    .finally(() => {
+      process.exit(1);
+    });
+};
+
 run(
   async ({ log, flagsReader, procRunner }) => {
     const skipWarmup = flagsReader.boolean('skip-warmup');
@@ -172,6 +227,10 @@ run(
     if (kibanaInstallDir && !fs.existsSync(kibanaInstallDir)) {
       throw createFlagError('--kibana-install-dir must be an existing directory');
     }
+
+    ['SIGINT', 'SIGTERM', 'SIGHUP', 'unhandledRejection', 'uncaughtException'].forEach((event) => {
+      process.on(event, () => cleanupAndExit(procRunner, event));
+    });
 
     const journeys = getJourneysToRun({ journeyPath, group });
 

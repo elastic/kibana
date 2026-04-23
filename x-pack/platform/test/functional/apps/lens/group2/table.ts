@@ -24,6 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Sort by number
       await lens.changeTableSortingBy(2, 'ascending');
       await lens.waitForVisualization();
+      expect(await lens.getDatatableCellText(0, 0, false)).to.eql('1');
+      expect(await lens.getDatatableCellText(1, 0, false)).to.eql('2');
+      expect(await lens.getDatatableCellText(2, 0, false)).to.eql('3');
       expect(await lens.getDatatableCellText(0, 2)).to.eql('17,246');
       // Now sort by IP
       await lens.changeTableSortingBy(0, 'ascending');
@@ -45,6 +48,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.openStyleSettingsFlyout();
       await lens.setDataTableDensity('compact');
       expect(await lens.checkDataTableDensity('s')).to.be(true);
+      await lens.closeFlyoutWithBackButton();
+    });
+
+    it('should allow toggling row numbers from the style settings flyout', async () => {
+      await lens.openStyleSettingsFlyout();
+
+      // Disable row number
+      await lens.toggleShowRowNumbers();
+      expect(await lens.findRowNumberColumn()).to.be(false);
+
+      // Enable row number
+      await lens.toggleShowRowNumbers();
+      expect(await lens.findRowNumberColumn()).to.be(true);
+
       await lens.closeFlyoutWithBackButton();
     });
 
@@ -144,7 +161,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         from: 'lnsDatatable_rows > lns-dimensionTrigger',
         to: 'lnsDatatable_columns > lns-empty-dimension',
       });
-      // await common.sleep(100000);
       expect(await lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await lens.getDatatableHeaderText(1)).to.equal('169.228.188.120 › Average of bytes');
       expect(await lens.getDatatableHeaderText(2)).to.equal('78.83.247.30 › Average of bytes');
@@ -172,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const styleObj = await lens.getDatatableCellStyle(0, 2);
       expect(styleObj['background-color']).to.be('rgb(140, 217, 187)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+      expect(styleObj.color).to.be('rgb(7, 16, 31)');
     });
 
     it('should open the palette panel to customize the palette look', async () => {
@@ -223,10 +239,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(1, 1);
-      expect(styleObj['background-color']).to.be('rgb(200, 222, 255)');
+      expect(styleObj['background-color']).to.be('rgb(207, 225, 255)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+      expect(styleObj.color).to.be('rgb(7, 16, 31)');
       await lens.closePalettePanel();
+    });
+
+    it('should render values as badges when badge coloring is enabled', async () => {
+      await lens.setTableDynamicColoring('badge');
+      await lens.waitForVisualization();
+      const cell = await lens.getDatatableCell(0, 2);
+      const badge = await cell.findByTestSubject('lnsTableCellContentBadge');
+      const badgeText = await badge.getVisibleText();
+      expect(badgeText).to.not.be.empty();
+      const cellStyle = await lens.getDatatableCellStyle(0, 2);
+      expect(cellStyle['background-color']).to.be(undefined);
     });
 
     it('should allow to show a summary table for metric columns', async () => {

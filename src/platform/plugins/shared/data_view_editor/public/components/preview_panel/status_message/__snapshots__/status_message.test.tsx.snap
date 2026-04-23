@@ -1,140 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StatusMessage should render with exact matches 1`] = `
-<EuiCallOut
-  color="success"
+exports[`StatusMessage should render normally 1`] = `
+<div
+  class="euiPanel euiPanel--primary euiPanel--paddingSmall euiCallOut euiCallOut--primary emotion-euiPanel-none-s-primary-euiCallOut"
   data-test-subj="createIndexPatternStatusMessage"
-  iconType="check"
-  size="s"
-  title={
+>
+  <p
+    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-primary"
+  >
     <span>
-       
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Your index pattern matches {sourceCount} {sourceCount, plural, one {source} other {sources} }."
-        id="indexPatternEditor.status.successLabel.successDetail"
-        values={
-          Object {
-            "sourceCount": 1,
-          }
-        }
-      />
+      Your index pattern can match 2 sources.
     </span>
-  }
-/>
-`;
-
-exports[`StatusMessage should render with no partial matches 1`] = `
-<EuiCallOut
-  color="warning"
-  data-test-subj="createIndexPatternStatusMessage"
-  size="s"
-  title={
-    <span>
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases. You can match {strongIndices}."
-        id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
-        values={
-          Object {
-            "strongIndices": <strong>
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="{indicesLength, plural, one {# source} other {# sources} }"
-                id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
-                values={
-                  Object {
-                    "indicesLength": 2,
-                  }
-                }
-              />
-            </strong>,
-          }
-        }
-      />
-    </span>
-  }
-/>
-`;
-
-exports[`StatusMessage should render with partial matches 1`] = `
-<EuiCallOut
-  color="primary"
-  data-test-subj="createIndexPatternStatusMessage"
-  size="s"
-  title={
-    <span>
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but {strongIndices} {matchedIndicesLength, plural, one {is} other {are} } similar."
-        id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
-        values={
-          Object {
-            "matchedIndicesLength": 1,
-            "strongIndices": <strong>
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="{matchedIndicesLength, plural, one {source} other {# sources} }"
-                id="indexPatternEditor.status.partialMatchLabel.strongIndicesLabel"
-                values={
-                  Object {
-                    "matchedIndicesLength": 1,
-                  }
-                }
-              />
-            </strong>,
-          }
-        }
-      />
-    </span>
-  }
-/>
-`;
-
-exports[`StatusMessage should render without a query 1`] = `
-<EuiCallOut
-  color="primary"
-  data-test-subj="createIndexPatternStatusMessage"
-  size="s"
-  title={
-    <span>
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Your index pattern can match {sourceCount, plural, one {# source} other {# sources} }."
-        id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
-        values={
-          Object {
-            "sourceCount": 2,
-          }
-        }
-      />
-    </span>
-  }
-/>
-`;
-
-exports[`StatusMessage should show that no indices exist 1`] = `
-<EuiCallOut
-  color="primary"
-  data-test-subj="createIndexPatternStatusMessage"
-  size="s"
-  title={
-    <span>
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="No data streams, indices, or index aliases match your index pattern."
-        id="indexPatternEditor.status.noSystemIndicesLabel"
-      />
-    </span>
-  }
-/>
-`;
-
-exports[`StatusMessage should show that system indices exist 1`] = `
-<EuiCallOut
-  color="primary"
-  data-test-subj="createIndexPatternStatusMessage"
-  size="s"
-  title={
-    <span>
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="No data streams, indices, or index aliases match your index pattern."
-        id="indexPatternEditor.status.noSystemIndicesLabel"
-      />
-    </span>
-  }
-/>
+  </p>
+</div>
 `;

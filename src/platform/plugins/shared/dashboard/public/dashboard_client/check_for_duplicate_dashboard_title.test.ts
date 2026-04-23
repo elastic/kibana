@@ -9,12 +9,12 @@
 
 import { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard_title';
 import { extractTitleAndCount } from '../utils/extract_title_and_count';
-import type { DashboardSearchRequestBody } from '../../server';
+import type { DashboardSearchRequestParams } from '../../server';
 
 const mockSearchDashboards = jest.fn();
 jest.mock('./dashboard_client', () => ({
   dashboardClient: {
-    search: (searchBody: DashboardSearchRequestBody) => mockSearchDashboards(searchBody),
+    search: (searchParams: DashboardSearchRequestParams) => mockSearchDashboards(searchParams),
   },
 }));
 
@@ -43,7 +43,7 @@ describe('checkForDuplicateDashboardTitle', () => {
       isTitleDuplicateConfirmed: false,
     });
 
-    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, search: 'Shiny dashboard' });
+    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, query: 'Shiny dashboard' });
   });
 
   it('invokes onTitleDuplicate with a speculative collision free value when the new title provided is a duplicate match', async () => {
@@ -80,8 +80,35 @@ describe('checkForDuplicateDashboardTitle', () => {
       onTitleDuplicate,
     });
 
-    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, search: 'Shiny dashboard' });
+    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, query: 'Shiny dashboard' });
 
     expect(onTitleDuplicate).toHaveBeenCalledWith(`${baseDashboardName} (15)`);
+  });
+
+  it('does not warn about the duplicated title when the casing is different', async () => {
+    const baseDashboardName = 'dashboard';
+    const dashboardNameUpper = baseDashboardName.toUpperCase();
+
+    mockSearchDashboards.mockResolvedValue({
+      total: 1,
+      dashboards: [
+        {
+          data: { title: baseDashboardName },
+        },
+      ],
+    });
+
+    const onTitleDuplicate = jest.fn();
+
+    const result = await checkForDuplicateDashboardTitle({
+      title: dashboardNameUpper,
+      lastSavedTitle: baseDashboardName,
+      copyOnSave: true,
+      isTitleDuplicateConfirmed: false,
+      onTitleDuplicate,
+    });
+
+    expect(result).toBe(true);
+    expect(onTitleDuplicate).not.toHaveBeenCalled();
   });
 });

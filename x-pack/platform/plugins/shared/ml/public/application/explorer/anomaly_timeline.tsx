@@ -229,7 +229,7 @@ export const AnomalyTimeline: FC = () => {
           : {}),
         // For cases attachment, pass just the job IDs to maintain stale data
         jobIds: selectedJobs?.map((v) => v.id),
-        timeRange: globalTimeRange,
+        time_range: globalTimeRange,
         ...(isDefined(queryString) && queryString !== ''
           ? {
               query: {
@@ -404,7 +404,7 @@ export const AnomalyTimeline: FC = () => {
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput, references: [] },
+        serializedState: embeddableInput,
         type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
       };
 
@@ -459,7 +459,7 @@ export const AnomalyTimeline: FC = () => {
                     color="text"
                     display="base"
                     isSelected={isMenuOpen}
-                    iconType="boxesHorizontal"
+                    iconType="boxesVertical"
                     onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                     data-test-subj="mlAnomalyTimelinePanelMenu"
                   />
@@ -580,10 +580,10 @@ export const AnomalyTimeline: FC = () => {
             onResize={onResize}
             isLoading={loading}
             noDataWarning={
-              <EuiText textAlign={'center'}>
-                <h5>
+              <EuiText textAlign={'center'} size="s">
+                <strong>
                   <NoOverallData />
-                </h5>
+                </strong>
               </EuiText>
             }
             showTimeline={false}
@@ -625,8 +625,8 @@ export const AnomalyTimeline: FC = () => {
             isLoading={loading || viewBySwimlaneDataLoading}
             yAxisWidth={Y_AXIS_LABEL_WIDTH}
             noDataWarning={
-              <EuiText textAlign={'center'}>
-                <h5>
+              <EuiText textAlign={'center'} size="s">
+                <strong>
                   {typeof viewBySwimlaneFieldName === 'string' ? (
                     viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
                       <FormattedMessage
@@ -641,7 +641,7 @@ export const AnomalyTimeline: FC = () => {
                       />
                     )
                   ) : null}
-                </h5>
+                </strong>
               </EuiText>
             }
           />

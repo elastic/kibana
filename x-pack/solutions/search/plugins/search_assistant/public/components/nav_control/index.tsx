@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiErrorBoundary, EuiShowFor, EuiToolTip } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { useAIAssistantAppService, ChatFlyout } from '@kbn/ai-assistant';
 import { useKibana } from '@kbn/ai-assistant/src/hooks/use_kibana';
 import type { AIAssistantPluginStartDependencies } from '@kbn/ai-assistant/src/types';
-import { EuiErrorBoundary } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
-
+import { isMac } from '@kbn/shared-ux-utility';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 interface NavControlWithProviderDeps {
   coreStart: CoreStart;
   pluginsStart: AIAssistantPluginStartDependencies;
@@ -95,31 +94,62 @@ export function NavControl() {
     messages: [],
     title: undefined,
   };
-  const tooltipRef = useRef<EuiToolTip | null>(null);
-  const hideToolTip = () => tooltipRef.current?.hideToolTip();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const tooltipRef = useRef<EuiToolTip>(null);
 
+  const handleTooltipMouseOut = useCallback(() => {
+    tooltipRef.current?.hideToolTip();
+  }, []);
+
+  const handleClick = () => {
+    tooltipRef.current?.hideToolTip();
+    if (isOpen) {
+      setIsOpen(false);
+    } else {
+      service.conversations.openNewConversation({
+        messages: [],
+      });
+    }
+  };
+  const variant = isOpen ? 'accent' : 'base';
   return (
     <>
-      <EuiToolTip content={buttonLabel} ref={tooltipRef} onMouseOut={hideToolTip}>
-        <EuiButtonEmpty
-          aria-label={buttonLabel}
-          data-test-subj="AiAssistantAppNavControlButton"
-          onClick={() => {
-            hideToolTip();
-            service.conversations.openNewConversation({
-              messages: [],
-            });
-          }}
-          color="primary"
-          size="s"
-          iconType={AssistantIcon}
-          isLoading={chatService.loading}
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        <EuiToolTip content={shortcutLabel} ref={tooltipRef} onMouseOut={handleTooltipMouseOut}>
+          <AiButton
+            buttonRef={buttonRef}
+            variant={variant}
+            size="s"
+            iconType="aiAssistantLogo"
+            onClick={handleClick}
+            data-test-subj="AiAssistantAppNavControlButton"
+            isLoading={chatService.loading}
+          >
+            {buttonLabel}
+          </AiButton>
+        </EuiToolTip>
+      </EuiShowFor>
+
+      <EuiShowFor sizes={['xs', 's']}>
+        <EuiToolTip
+          content={fullTooltipContent}
+          ref={tooltipRef}
+          onMouseOut={handleTooltipMouseOut}
         >
-          {i18n.translate('xpack.searchAssistant.navControl.assistantNavLink', {
-            defaultMessage: 'AI Assistant',
-          })}
-        </EuiButtonEmpty>
-      </EuiToolTip>
+          <AiButton
+            buttonRef={buttonRef}
+            iconOnly
+            variant={variant}
+            size="s"
+            iconType="aiAssistantLogo"
+            onClick={handleClick}
+            aria-label={openAIAssistantLabel}
+            data-test-subj="AiAssistantAppNavControlButtonIcon"
+            isLoading={chatService.loading}
+          />
+        </EuiToolTip>
+      </EuiShowFor>
+
       {chatService.value &&
       Boolean(observabilityAIAssistant?.ObservabilityAIAssistantChatServiceContext) ? (
         <observabilityAIAssistant.ObservabilityAIAssistantChatServiceContext.Provider
@@ -132,6 +162,9 @@ export function NavControl() {
             initialTitle={title ?? ''}
             onClose={() => {
               setIsOpen(false);
+              if (document.activeElement?.matches(':focus-visible')) {
+                buttonRef.current?.focus();
+              }
             }}
           />
         </observabilityAIAssistant.ObservabilityAIAssistantChatServiceContext.Provider>
@@ -140,11 +173,27 @@ export function NavControl() {
   );
 }
 
-const isMac = navigator.userAgent.toLocaleLowerCase().includes('mac');
-const buttonLabel = i18n.translate(
-  'xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel',
+const buttonLabel = i18n.translate('xpack.searchAssistant.navControl.assistantNavLink', {
+  defaultMessage: 'AI Assistant',
+});
+
+const openAIAssistantLabel = i18n.translate(
+  'xpack.searchAssistant.navControl.openAIAssistantLabel',
+  { defaultMessage: 'Open the AI Assistant' }
+);
+
+const shortcutLabel = i18n.translate(
+  'xpack.searchAssistant.navControl.openTheAIAssistantKeyboardShortcutLabel',
   {
     defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
     values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
   }
+);
+
+const fullTooltipContent = (
+  <div style={{ textAlign: 'center' }}>
+    <span>{openAIAssistantLabel}</span>
+    <br />
+    <span>{shortcutLabel}</span>
+  </div>
 );

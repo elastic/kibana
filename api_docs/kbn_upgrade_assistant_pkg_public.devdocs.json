@@ -14,6 +14,8 @@
           "({ level, isResolved }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/public/src/components/deprecation_badge.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "Props"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/public/src/components/deprecation_badge.tsx",
+            "lineNumber": 30,
+            "columnNumber": 60,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

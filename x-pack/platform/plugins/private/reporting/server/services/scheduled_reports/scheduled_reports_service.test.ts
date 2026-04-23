@@ -19,7 +19,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../test_helpers';
 import type { ReportingCore } from '../..';
-import type { ScheduledReportType } from '../../types';
+import type { ReportingUser, ScheduledReportType } from '../../types';
 import {
   Frequency,
   TaskStatus,
@@ -288,7 +288,7 @@ describe('ScheduledReportsService', () => {
   describe('list', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
         search: 'cool dashboard',
@@ -430,7 +430,7 @@ describe('ScheduledReportsService', () => {
         request: fakeRawRequest,
       });
       await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -475,7 +475,7 @@ describe('ScheduledReportsService', () => {
         saved_objects: [],
       }));
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -498,7 +498,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.list({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           page: 1,
           size: 10,
         })
@@ -519,7 +519,7 @@ describe('ScheduledReportsService', () => {
       });
 
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -591,7 +591,7 @@ describe('ScheduledReportsService', () => {
         throw new Error('task manager error');
       });
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -661,7 +661,7 @@ describe('ScheduledReportsService', () => {
         return [nextRunResponse[0], { tag: 'error', error: new Error('not found') }];
       });
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -730,7 +730,7 @@ describe('ScheduledReportsService', () => {
   describe('bulkDisable', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -753,10 +753,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -827,7 +828,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -845,9 +846,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(result).toEqual({
         scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
@@ -935,7 +938,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -953,9 +956,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -1011,7 +1016,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1063,7 +1068,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1085,10 +1090,11 @@ describe('ScheduledReportsService', () => {
       );
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
       // TM still called with both in case the task was not disabled
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -1139,7 +1145,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1162,9 +1168,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(3);
       expect(auditLogger.log).toHaveBeenNthCalledWith(3, {
@@ -1217,7 +1225,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1240,10 +1248,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(result).toEqual({
         scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
@@ -1266,7 +1275,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.bulkDisable({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         })
       ).rejects.toMatchInlineSnapshot(`
@@ -1312,7 +1321,7 @@ describe('ScheduledReportsService', () => {
 
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1337,7 +1346,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
@@ -1409,7 +1419,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1429,7 +1439,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(result).toEqual({
@@ -1518,7 +1529,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1538,7 +1549,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -1595,7 +1607,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1647,7 +1659,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1671,7 +1683,8 @@ describe('ScheduledReportsService', () => {
       // TM still called with both in case the task was not disabled
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -1723,7 +1736,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1748,7 +1761,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(3);
@@ -1802,7 +1816,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1827,7 +1841,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(result).toEqual({
@@ -1851,7 +1866,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.bulkEnable({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         })
       ).rejects.toMatchInlineSnapshot(`
@@ -1866,7 +1881,7 @@ describe('ScheduledReportsService', () => {
   describe('bulkDelete', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1959,7 +1974,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2063,7 +2078,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2136,7 +2151,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2187,7 +2202,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2262,7 +2277,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2309,7 +2324,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.bulkDelete({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         })
       ).rejects.toMatchInlineSnapshot(`
@@ -2341,7 +2356,7 @@ describe('ScheduledReportsService', () => {
     };
 
     const defaultUpdateParams = {
-      user: { username: 'somebody' },
+      user: { username: 'somebody' } as ReportingUser,
       id: savedObjects[0].id,
       updateParams: {
         title: 'foobar',
@@ -2364,7 +2379,7 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
         mockSchedule,
-        { request: fakeRawRequest }
+        { request: fakeRawRequest, regenerateApiKey: true }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -2433,7 +2448,7 @@ describe('ScheduledReportsService', () => {
 
       await scheduledReportsService.update({
         ...defaultUpdateParams,
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
       });
 
       expect(soClient.update).toHaveBeenCalledTimes(1);
@@ -2451,7 +2466,7 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
         mockSchedule,
-        { request: fakeRawRequest }
+        { request: fakeRawRequest, regenerateApiKey: true }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);

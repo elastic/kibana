@@ -32,5 +32,3 @@ export const THREAT_DETAILS_VIEW =
 
 export const UPDATE_ENRICHMENT_RANGE_BUTTON =
   '[data-test-subj="securitySolutionFlyoutThreatIntelligenceDetailsEnrichmentRefreshButton"]';
-
-export const ENRICHED_DATA_ROW = `[data-test-subj='EnrichedDataRow']`;

@@ -3,7 +3,7 @@
 exports[`<ToolbarButton /> iconButton is rendered - default 1`] = `
 <button
   as="iconButton"
-  class="euiButtonIcon emotion-euiButtonIcon-m-base-text-ToolbarIconButton"
+  class="euiButtonIcon emotion-euiButtonIcon-m-base-text"
   intl="[object Object]"
   type="button"
 >
@@ -11,14 +11,14 @@ exports[`<ToolbarButton /> iconButton is rendered - default 1`] = `
     aria-hidden="true"
     class="euiButtonIcon__icon"
     color="inherit"
-    data-euiicon-type="launch"
+    data-euiicon-type="rocket"
   />
 </button>
 `;
 
 exports[`<ToolbarButton /> standard is rendered - default 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text-ToolbarStandardButton"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text"
   intl="[object Object]"
   type="button"
 >
@@ -26,13 +26,13 @@ exports[`<ToolbarButton /> standard is rendered - default 1`] = `
     class="emotion-euiButtonDisplayContent"
   >
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Create chart
     </span>
     <span
       color="inherit"
-      data-euiicon-type="arrowDown"
+      data-euiicon-type="chevronSingleDown"
     />
   </span>
 </button>
@@ -40,7 +40,7 @@ exports[`<ToolbarButton /> standard is rendered - default 1`] = `
 
 exports[`<ToolbarButton /> standard is rendered - primary 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary-ToolbarStandardButton"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
   intl="[object Object]"
   type="button"
 >
@@ -48,13 +48,13 @@ exports[`<ToolbarButton /> standard is rendered - primary 1`] = `
     class="emotion-euiButtonDisplayContent"
   >
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Create chart
     </span>
     <span
       color="inherit"
-      data-euiicon-type="arrowDown"
+      data-euiicon-type="chevronSingleDown"
     />
   </span>
 </button>
@@ -62,7 +62,7 @@ exports[`<ToolbarButton /> standard is rendered - primary 1`] = `
 
 exports[`<ToolbarButton /> standard is rendered - text wth icon 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary-ToolbarStandardButton"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
   intl="[object Object]"
   type="button"
 >
@@ -71,10 +71,10 @@ exports[`<ToolbarButton /> standard is rendered - text wth icon 1`] = `
   >
     <span
       color="inherit"
-      data-euiicon-type="plusInCircle"
+      data-euiicon-type="plusCircle"
     />
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Create chart
     </span>

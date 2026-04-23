@@ -15,7 +15,7 @@
       "data",
       "navigation",
       "dataViews",
-      "unifiedSearch",
+      "kql",
       "share",
       "fieldsMetadata"
     ],
@@ -23,6 +23,7 @@
       "usageCollection",
       "home",
       "cloud",
+      "cloudConnect",
       "triggersActionsUi",
       "charts",
       "alerting",

@@ -51,14 +51,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const spaces = getService('spaces');
 
   async function refreshLogsList() {
-    await pageObjects.common.navigateToApp('triggersActions');
+    await pageObjects.common.navigateToApp('rules');
     await testSubjects.click('logsTab');
   }
 
   describe('logs list', function () {
     before(async () => {
       await createUsersAndRoles(getService, [ONLY_S2_USER], [ONLY_S2_ROLE]);
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await testSubjects.click('logsTab');
     });
 
@@ -89,7 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.security.forceLogout();
       await pageObjects.security.login(ONLY_S2_USER.username, ONLY_S2_USER.password);
 
-      await pageObjects.common.navigateToApp('triggersActions', { basePath: `/s/${SPACE2.id}` });
+      await pageObjects.common.navigateToApp('rules', { basePath: `/s/${SPACE2.id}` });
       await testSubjects.click('logsTab');
 
       const spacesSwitchExists = await testSubjects.exists('showAllSpacesSwitch');

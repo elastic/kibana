@@ -31,7 +31,7 @@ export const getRuleAuthor: () => Omit<Role, 'name'> = () => {
             'actions_log_management_read',
             'workflow_insights_all',
           ],
-          securitySolutionRulesV1: ['all'],
+          securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

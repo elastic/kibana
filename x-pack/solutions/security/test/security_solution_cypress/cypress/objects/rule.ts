@@ -6,7 +6,7 @@
  */
 
 import type { SeverityMappingItem, Threat } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getMockThreatData } from '@kbn/security-solution-plugin/public/detections/mitre/mitre_tactics_techniques';
+import { getMockThreatData } from '@kbn/security-solution-plugin/common/detection_engine/mitre/mitre_tactics_techniques';
 import type {
   EqlRuleCreateProps,
   EsqlRuleCreateProps,
@@ -340,8 +340,8 @@ export const getMachineLearningRule = (
 ): MachineLearningRuleCreateProps => ({
   type: 'machine_learning',
   machine_learning_job_id: [
-    'v3_linux_anomalous_network_activity',
-    'v3_linux_anomalous_process_all_hosts',
+    'v3_linux_anomalous_network_activity_ea',
+    'v3_linux_anomalous_process_all_hosts_ea',
   ],
   anomaly_threshold: 20,
   name: 'New ML Rule Test',

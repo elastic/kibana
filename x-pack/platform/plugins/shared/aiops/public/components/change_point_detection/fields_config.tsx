@@ -254,7 +254,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                       : i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
                           defaultMessage: 'Attach charts',
                         }),
-                  icon: 'plusInCircle',
+                  icon: 'plusCircle',
                   panel: 'attachMainPanel',
                   'data-test-subj': 'aiopsChangePointDetectionAttachButton',
                 },
@@ -430,7 +430,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 onClick={() => {
                   setIsActionMenuOpen(false);
                   openCasesModalCallback({
-                    timeRange,
+                    time_range: timeRange,
                     viewType: caseAttachment.viewType,
                     fn: fieldConfig.fn,
                     metricField: fieldConfig.metricField,
@@ -482,19 +482,16 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
       const state = {
         serializedState: {
-          rawState: {
-            title: newTitle,
-            description: newDescription,
-            viewType: dashboardAttachment.viewType,
-            dataViewId: dataView.id,
-            metricField: fieldConfig.metricField,
-            splitField: fieldConfig.splitField,
-            fn: fieldConfig.fn,
-            ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
-            maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
-            ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
-          },
-          references: [],
+          title: newTitle,
+          description: newDescription,
+          viewType: dashboardAttachment.viewType,
+          dataViewId: dataView.id,
+          metricField: fieldConfig.metricField,
+          splitField: fieldConfig.splitField,
+          fn: fieldConfig.fn,
+          ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
+          maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
+          ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
         },
         type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
       };
@@ -528,7 +525,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             data-test-subj="aiopsChangePointDetectionExpandConfigButton"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
             aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
               defaultMessage: 'Expand configuration',
@@ -575,7 +572,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     display="base"
                     size="s"
                     isSelected={isActionMenuOpen}
-                    iconType="boxesHorizontal"
+                    iconType="boxesVertical"
                     onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
                   />
                 }
@@ -689,7 +686,7 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
       }
     >
       <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'s'}>
-        <EuiFlexItem grow={false} css={{ width: '200px' }}>
+        <EuiFlexItem grow={false} css={{ width: '224px' }}>
           <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={selectControlCss}>

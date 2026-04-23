@@ -9,13 +9,27 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import {
   LENS_SAMPLING_MIN_VALUE,
   LENS_SAMPLING_MAX_VALUE,
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from './constants';
-import { filterSchema, unifiedSearchFilterSchema } from './filter';
+import { filterSchema } from './filter';
+
+export const labelSharedProp = {
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
+};
 
 export const sharedPanelInfoSchema = {
   /**
@@ -47,7 +61,15 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
-  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema)),
+  filters: schema.maybe(
+    schema.arrayOf(asCodeFilterSchema, {
+      maxSize: 100,
+      meta: {
+        id: 'lensPanelFilters',
+        description: 'Filters applied to the panel',
+      },
+    })
+  ),
 };
 
 export const dslOnlyPanelInfoSchema = {
@@ -76,9 +98,9 @@ export const ignoringGlobalFiltersSchemaRaw = {
 
 export const layerSettingsSchema = {
   /**
-   * The sampling factor for the dataset.
+   * The sampling factor for the data source.
    *
-   * Determines the proportion of the dataset to be used. Must be a number between 0 and 1 (inclusive).
+   * Determines the proportion of the data source to be used. Must be a number between 0 and 1 (inclusive).
    * - 0: No sampling (use none of the data)
    * - 1: Full sampling (use all data)
    * - Any value between 0 and 1: Use that proportion of the data
@@ -116,16 +138,33 @@ export const collapseBySchema = schema.oneOf(
      */
     schema.literal('min'),
   ],
-  { meta: { description: 'Collapse by function description' } }
+  {
+    meta: {
+      id: 'collapseBy',
+      description: 'Collapse by function description',
+    },
+  }
 );
+
+export type CollapseBySchema = TypeOf<typeof collapseBySchema>;
 
 const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
 
 export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;
 
 export const axisTitleSchemaProps = {
-  value: schema.maybe(
-    schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })
-  ),
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the title' } })),
+  text: schema.maybe(schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })),
+  visible: schema.maybe(schema.boolean({ meta: { description: 'Show the title' } })),
 };
+
+export const legendTruncateAfterLinesSchema = schema.maybe(
+  schema.number({
+    defaultValue: 1,
+    min: 1,
+    max: 10,
+    meta: {
+      description: 'Maximum lines before truncating legend items (1-10)',
+      id: 'legendTruncateAfterLines',
+    },
+  })
+);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback } from 'react';
 import type {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
@@ -13,18 +13,23 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SimpleConnectorForm, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
 
-import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { debounce, isEmpty, isEqual } from 'lodash';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { FieldValidateResponse } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  useFormContext,
+  useFormData,
+  VALIDATION_TYPES,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { SlackApiConfig } from '@kbn/connector-schemas/slack_api';
 import * as i18n from './translations';
-import { useValidChannels } from './use_valid_channels';
 
-/** wait this many ms after the user completes typing before applying the filter input */
-const INPUT_TIMEOUT = 250;
+interface AllowedChannels {
+  id: string;
+  name: string;
+}
 
 const getSecretsFormSchema = (docLinks: DocLinksStart): SecretsFieldSchema[] => [
   {
@@ -42,152 +47,119 @@ const getSecretsFormSchema = (docLinks: DocLinksStart): SecretsFieldSchema[] => 
   },
 ];
 
-interface AllowedChannels {
-  id: string;
-  name: string;
-}
+const areChannelsValid = (channels: AllowedChannels[]) => {
+  if (channels.length === 0) {
+    return true;
+  }
 
-const getConfigFormSchemaAfterSecrets = ({
-  options,
-  isLoading,
-  isDisabled,
-  onChange,
-  onCreateOption,
-  selectedOptions,
-}: {
-  options: Array<EuiComboBoxOptionOption<AllowedChannels>>;
-  isLoading: boolean;
-  isDisabled: boolean;
-  onChange: (options: Array<EuiComboBoxOptionOption<AllowedChannels>>) => void;
-  onCreateOption: (searchValue: string, options: EuiComboBoxOptionOption[]) => void;
-  selectedOptions: Array<EuiComboBoxOptionOption<AllowedChannels>>;
-}): ConfigFieldSchema[] => [
-  {
-    id: 'allowedChannels',
-    isRequired: true,
-    label: i18n.ALLOWED_CHANNELS,
-    type: 'COMBO_BOX',
-    euiFieldProps: {
-      noSuggestions: true,
-      isDisabled,
-      isLoading,
-      options,
-      onChange,
-      onCreateOption,
-      selectedOptions,
+  const areAllValid = channels.every((channel) => channel.name.startsWith('#'));
+
+  if (areAllValid) {
+    return true;
+  }
+
+  return false;
+};
+
+const getAllowedChannlesConfigSchema = (
+  euiFieldProps: ConfigFieldSchema['euiFieldProps']
+): ConfigFieldSchema<AllowedChannels[]> => ({
+  id: 'allowedChannels',
+  isRequired: false,
+  label: i18n.ALLOWED_CHANNELS,
+  type: 'COMBO_BOX',
+  validations: [
+    {
+      isBlocking: true,
+      validator: (args) => {
+        const isValid = areChannelsValid(args.value);
+
+        if (isValid) {
+          return;
+        }
+
+        return {
+          code: 'ERR_FIELD_FORMAT',
+          formatType: 'COMBO_BOX',
+          message: i18n.CHANNEL_NAME_ERROR,
+        };
+      },
     },
+  ],
+  euiFieldProps: {
+    ...euiFieldProps,
+    noSuggestions: true,
+    autoComplete: 'off',
+    append: (
+      <EuiText size="xs" color="subdued">
+        {i18n.OPTIONAL_LABEL}
+      </EuiText>
+    ),
   },
-];
+});
 
-const NO_SCHEMA: ConfigFieldSchema[] = [];
-const SEPARATOR = ' - ';
 export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
 }) => {
   const { docLinks } = useKibana().services;
+  const { getFields } = useFormContext();
 
-  const form = useFormContext();
-  const { setFieldValue } = form;
-  const [formData] = useFormData({ form });
-  const [authToken, setAuthToken] = useState('');
-  const [channelsToValidate, setChannelsToValidate] = useState<string>('');
-  const {
-    channels: validChannels,
-    isLoading,
-    resetChannelsToValidate,
-  } = useValidChannels({
-    authToken,
-    channelId: channelsToValidate,
+  const [{ config }] = useFormData({
+    watch: ['config.allowedChannels'],
   });
 
-  const onCreateOption = useCallback((searchValue: string, options: EuiComboBoxOptionOption[]) => {
-    setChannelsToValidate(searchValue);
-  }, []);
-  const onChange = useCallback(
-    (options: Array<EuiComboBoxOptionOption<AllowedChannels>>) => {
-      const tempChannelIds: AllowedChannels[] = options.map(
-        (opt: EuiComboBoxOptionOption<AllowedChannels>) => {
-          return opt.value!;
-        }
-      );
-      setChannelsToValidate('');
-      resetChannelsToValidate(tempChannelIds);
+  const { allowedChannels = [] }: SlackApiConfig = config ?? {};
+
+  const selectedOptions = allowedChannels.map((channel) => ({
+    label: channel.name,
+    value: channel,
+  }));
+
+  const fields = getFields();
+
+  const allowedChannelsField = fields['config.allowedChannels'];
+
+  const onCreateOption = useCallback(
+    (value: string) => {
+      const finalValue = { name: value };
+
+      const { isValid } = allowedChannelsField.validate({
+        value: [finalValue],
+        validationType: VALIDATION_TYPES.ARRAY_ITEM,
+      }) as FieldValidateResponse;
+
+      if (!isValid) {
+        return false;
+      }
+
+      allowedChannelsField.setValue([...allowedChannels, finalValue]);
     },
-    [resetChannelsToValidate]
+    [allowedChannels, allowedChannelsField]
   );
 
-  const configFormSchemaAfterSecrets = useMemo(() => {
-    const validChannelsFormatted = validChannels.map((channel) => ({
-      label: `${channel.id}${SEPARATOR}${channel.name}`,
-      value: channel,
-    }));
-    return getConfigFormSchemaAfterSecrets({
-      options: validChannelsFormatted,
-      isLoading,
-      isDisabled: (authToken || '').length === 0,
-      onChange,
-      onCreateOption,
-      selectedOptions: validChannelsFormatted,
-    });
-  }, [validChannels, isLoading, authToken, onChange, onCreateOption]);
-
-  const debounceSetToken = debounce(setAuthToken, INPUT_TIMEOUT);
-  useEffect(() => {
-    if (formData.secrets && formData.secrets.token !== authToken) {
-      debounceSetToken(formData.secrets.token);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.secrets]);
-
-  useEffect(() => {
-    if (isEmpty(authToken) && validChannels.length > 0) {
-      setFieldValue('config.allowedChannels', []);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authToken]);
-
-  useEffect(() => {
-    const configAllowedChannels = formData?.config?.allowedChannels || [];
-    if (!isEqual(configAllowedChannels, validChannels)) {
-      setFieldValue('config.allowedChannels', validChannels);
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validChannels]);
-
-  const isInitialyzed = useRef(false);
-  useEffect(() => {
-    const configAllowedChannels = formData?.config?.allowedChannels || [];
-    if (
-      !isInitialyzed.current &&
-      configAllowedChannels.length > 0 &&
-      !isEqual(configAllowedChannels, validChannels)
-    ) {
-      isInitialyzed.current = true;
-      resetChannelsToValidate(formData.config.allowedChannels);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.config]);
+  const onChange = useCallback(
+    (options: EuiComboBoxOptionOption<AllowedChannels>[]) => {
+      allowedChannelsField.setValue(
+        options.map((option) => ({ name: option.value?.name, id: option.value?.id }))
+      );
+    },
+    [allowedChannelsField]
+  );
 
   return (
     <SimpleConnectorForm
       isEdit={isEdit}
       readOnly={readOnly}
-      configFormSchema={NO_SCHEMA}
+      configFormSchema={[
+        getAllowedChannlesConfigSchema({ onChange, onCreateOption, selectedOptions }),
+      ]}
       secretsFormSchema={getSecretsFormSchema(docLinks)}
-      configFormSchemaAfterSecrets={configFormSchemaAfterSecrets}
     />
   );
 };
 
-export const simpleConnectorQueryClient = new QueryClient();
-
-const SlackActionFields: React.FC<ActionConnectorFieldsProps> = (props) => (
-  <QueryClientProvider client={simpleConnectorQueryClient}>
-    <SlackActionFieldsComponents {...props} />
-  </QueryClientProvider>
-);
+const SlackActionFields = React.memo(SlackActionFieldsComponents);
 
 // eslint-disable-next-line import/no-default-export
 export { SlackActionFields as default };

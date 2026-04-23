@@ -182,7 +182,35 @@ describe('TaskScheduling', () => {
 
     const result = await taskScheduling.ensureScheduled(task);
 
-    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      undefined
+    );
+
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('forwards options to bulkUpdateSchedules when updating schedule for tasks that have already been scheduled', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const result = await taskScheduling.ensureScheduled(task, { request: mockRequest });
+
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      {
+        request: mockRequest,
+      }
+    );
 
     expect(result.id).toEqual('my-foo-id');
   });
@@ -233,7 +261,11 @@ describe('TaskScheduling', () => {
       `[Error: Tried to update schedule for existing task "my-foo-id" but failed with error: Failed to update schedule for reasons]`
     );
 
-    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      undefined
+    );
   });
 
   test('handles VERSION_CONFLICT_STATUS errors when trying to update schedule for tasks that have already been scheduled', async () => {
@@ -261,7 +293,11 @@ describe('TaskScheduling', () => {
 
     const result = await taskScheduling.ensureScheduled(task);
 
-    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      undefined
+    );
     expect(result.id).toEqual('my-foo-id');
   });
 
@@ -290,7 +326,11 @@ describe('TaskScheduling', () => {
 
     const result = await taskScheduling.ensureScheduled(task);
 
-    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      undefined
+    );
     expect(result.id).toEqual('my-foo-id');
   });
 
@@ -507,6 +547,37 @@ describe('TaskScheduling', () => {
         5 * 60 * 1000
       );
     });
+    test('should call store bulk update with request when provided', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        enabled: false,
+        schedule: { interval: '3h' },
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      const mockRequest = httpServerMock.createKibanaRequest();
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkEnable([id], false, { request: mockRequest });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [
+          {
+            ...task,
+            enabled: true,
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: undefined,
+          options: { request: mockRequest },
+        },
+      ]);
+    });
   });
 
   describe('bulkDisable', () => {
@@ -586,6 +657,38 @@ describe('TaskScheduling', () => {
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
       expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
+    test('should call store bulk update with request when provided', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        enabled: true,
+        schedule: { interval: '3h' },
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      const mockRequest = httpServerMock.createKibanaRequest();
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkDisable([id], false, { request: mockRequest });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [
+          {
+            ...task,
+            enabled: false,
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: undefined,
+          options: { request: mockRequest },
+        },
+      ]);
     });
   });
 

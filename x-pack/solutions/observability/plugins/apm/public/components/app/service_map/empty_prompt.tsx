@@ -13,7 +13,7 @@ import { SetupInstructionsLink } from '../../shared/links/setup_instructions_lin
 export function EmptyPrompt() {
   return (
     <EuiEmptyPrompt
-      iconType="eyeClosed"
+      iconType="eyeSlash"
       iconColor="subdued"
       title={
         <h2>

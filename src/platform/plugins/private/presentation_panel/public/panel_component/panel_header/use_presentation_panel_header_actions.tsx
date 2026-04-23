@@ -11,13 +11,12 @@ import { EuiBadge, EuiNotificationBadge, EuiToolTip, useEuiTheme } from '@elasti
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription, switchMap } from 'rxjs';
 
-import { uiActions } from '../../kibana_services';
 import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  panelBadgeTrigger,
-  panelNotificationTrigger,
-} from '../../panel_actions';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { triggers } from '@kbn/ui-actions-plugin/public';
+import { uiActions } from '../../kibana_services';
 import type { AnyApiAction } from '../../panel_actions/types';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
@@ -92,7 +91,7 @@ export const usePresentationPanelHeaderActions = <
             switchMap(async () => {
               return await badge.isCompatible({
                 ...apiContext,
-                trigger: panelBadgeTrigger,
+                trigger: triggers[PANEL_BADGE_TRIGGER],
               });
             })
           )
@@ -117,7 +116,7 @@ export const usePresentationPanelHeaderActions = <
               switchMap(async () => {
                 return await notification.isCompatible({
                   ...apiContext,
-                  trigger: panelNotificationTrigger,
+                  trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
                 });
               })
             )
@@ -146,14 +145,17 @@ export const usePresentationPanelHeaderActions = <
     return badges?.map((badge) => {
       const tooltipText = badge.getDisplayNameTooltip?.({
         embeddable: api,
-        trigger: panelBadgeTrigger,
+        trigger: triggers[PANEL_BADGE_TRIGGER],
       });
       const badgeElement = (
         <EuiBadge
           key={badge.id}
-          iconType={badge.getIconType({ embeddable: api, trigger: panelBadgeTrigger })}
-          onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
-          onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
+          iconType={badge.getIconType({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
+          onClick={() => badge.execute({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
+          onClickAriaLabel={badge.getDisplayName({
+            embeddable: api,
+            trigger: triggers[PANEL_BADGE_TRIGGER],
+          })}
           data-test-subj={`embeddablePanelBadge-${badge.id}`}
           {...(tooltipText ? { 'aria-label': tooltipText } : {})}
         >
@@ -161,10 +163,10 @@ export const usePresentationPanelHeaderActions = <
             ? React.createElement(badge.MenuItem, {
                 context: {
                   embeddable: api,
-                  trigger: panelBadgeTrigger,
+                  trigger: triggers[PANEL_BADGE_TRIGGER],
                 },
               })
-            : badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
+            : badge.getDisplayName({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
         </EuiBadge>
       );
 
@@ -186,7 +188,7 @@ export const usePresentationPanelHeaderActions = <
           key: notification.id,
           context: {
             embeddable: api,
-            trigger: panelNotificationTrigger,
+            trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
           },
         })
       ) : (
@@ -195,17 +197,20 @@ export const usePresentationPanelHeaderActions = <
           key={notification.id}
           css={{ marginTop: euiTheme.size.xs, marginRight: euiTheme.size.xs }}
           onClick={() =>
-            notification.execute({ embeddable: api, trigger: panelNotificationTrigger })
+            notification.execute({ embeddable: api, trigger: triggers[PANEL_NOTIFICATION_TRIGGER] })
           }
         >
-          {notification.getDisplayName({ embeddable: api, trigger: panelNotificationTrigger })}
+          {notification.getDisplayName({
+            embeddable: api,
+            trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
+          })}
         </EuiNotificationBadge>
       );
 
       if (notification.getDisplayNameTooltip) {
         const tooltip = notification.getDisplayNameTooltip({
           embeddable: api,
-          trigger: panelNotificationTrigger,
+          trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
         });
 
         if (tooltip) {

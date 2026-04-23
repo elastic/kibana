@@ -30,6 +30,10 @@ export interface IconButton {
   'data-test-subj'?: string;
   /** To disable the action **/
   isDisabled?: boolean;
+  /** Tooltip content */
+  toolTipContent?: EuiButtonGroupOptionProps['toolTipContent'];
+  /** Tooltip props */
+  toolTipProps?: EuiButtonGroupOptionProps['toolTipProps'];
   /** A11y for button */
   'aria-expanded'?: boolean;
   /** A11y for button */

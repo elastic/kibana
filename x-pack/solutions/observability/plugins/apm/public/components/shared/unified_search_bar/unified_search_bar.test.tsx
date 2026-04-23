@@ -52,7 +52,9 @@ async function setup({
   const setTimeSpy = jest.fn();
   const setRefreshIntervalSpy = jest.fn();
 
-  jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({ dataView: undefined });
+  jest
+    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
+    .mockReturnValue({ dataView: undefined, apmIndices: undefined });
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   render(

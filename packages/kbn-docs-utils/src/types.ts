@@ -187,6 +187,16 @@ export interface ApiDeclaration {
   path: string;
 
   /**
+   * Source position for easier navigation to the declaration.
+   */
+  lineNumber?: number;
+
+  /**
+   * Source position for easier navigation to the declaration.
+   */
+  columnNumber?: number;
+
+  /**
    * Other plugins that reference this API item (along with SourceLink info for each reference).
    */
   references?: ApiReference[];
@@ -283,6 +293,9 @@ export interface ApiStats {
   missingComments: ApiDeclaration[];
   isAnyType: ApiDeclaration[];
   noReferences: ApiDeclaration[];
+  paramDocMismatches: ApiDeclaration[];
+  missingComplexTypeInfo: ApiDeclaration[];
+  missingReturns: ApiDeclaration[];
   apiCount: number;
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
@@ -296,6 +309,41 @@ export interface ApiStats {
    * Number of adoption-tracked APIs that are still not referenced.
    */
   adoptionTrackedAPIsUnreferencedCount: number;
+  /**
+   * Unnamed exports found in this plugin (e.g., JSDoc comments above non-declarations).
+   */
+  unnamedExports: UnnamedExport[];
+}
+
+/**
+ * Represents an exported declaration that has no identifiable name.
+ * This typically occurs with anonymous `export default` expressions (e.g.,
+ * `export default { ... }` or `export default function() { ... }`).
+ */
+export interface UnnamedExport {
+  pluginId: string;
+  scope: ApiScope;
+  path: string;
+  lineNumber: number;
+  textSnippet: string;
+}
+
+/**
+ * A mapping of plugin id to a list of unnamed exports found in that plugin.
+ */
+export interface UnnamedExportsByPlugin {
+  [pluginId: string]: UnnamedExport[];
+}
+
+/**
+ * Collections of issues and metadata indexed by plugin ID.
+ * Used by `collectApiStatsForPlugin` to gather stats for a specific plugin.
+ */
+export interface IssuesByPlugin {
+  missingApiItems: MissingApiItemMap;
+  referencedDeprecations: ReferencedDeprecationsByPlugin;
+  adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+  unnamedExports?: UnnamedExportsByPlugin;
 }
 
 export type PluginMetaInfo = ApiStats & {

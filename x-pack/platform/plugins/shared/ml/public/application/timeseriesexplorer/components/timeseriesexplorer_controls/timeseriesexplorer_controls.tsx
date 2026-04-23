@@ -171,7 +171,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
           jobIds: [selectedJobId],
           selectedDetectorIndex,
           selectedEntities,
-          timeRange: globalTimeRange,
+          time_range: globalTimeRange,
         });
       }),
     });
@@ -193,7 +193,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput, references: [] },
+        serializedState: embeddableInput,
         type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
       };
 
@@ -290,7 +290,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
                     color="text"
                     display="base"
                     isSelected={isMenuOpen}
-                    iconType="boxesHorizontal"
+                    iconType="boxesVertical"
                     onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                     data-test-subj="mlAnomalyTimelinePanelMenu"
                     size="m"
