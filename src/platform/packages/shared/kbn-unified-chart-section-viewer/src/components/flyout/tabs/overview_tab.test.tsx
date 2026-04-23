@@ -76,7 +76,9 @@ describe('Metric Flyout Overview Tab', () => {
   describe('basic rendering', () => {
     it('renders the tab title and description', () => {
       const metricItem = createMockMetric();
-      const { getByText, getByTestId } = renderWithServices(<OverviewTab metricItem={metricItem} />);
+      const { getByText, getByTestId } = renderWithServices(
+        <OverviewTab metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutMetricName')).toBeInTheDocument();
       expect(getByText(metricItem.metricName)).toBeInTheDocument();
@@ -87,7 +89,9 @@ describe('Metric Flyout Overview Tab', () => {
         dataStream: 'my-data-stream',
         fieldTypes: [ES_FIELD_TYPES.LONG],
       });
-      const { getByTestId, getByText } = renderWithServices(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = renderWithServices(
+        <OverviewTab metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDescriptionList')).toBeInTheDocument();
       expect(getByText('my-data-stream')).toBeInTheDocument();
@@ -98,7 +102,9 @@ describe('Metric Flyout Overview Tab', () => {
   describe('unit display', () => {
     it('renders unit when present', () => {
       const metricItem = createMockMetric({ units: ['ms'] });
-      const { getByTestId, getByText } = renderWithServices(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = renderWithServices(
+        <OverviewTab metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')).toBeInTheDocument();
       expect(getByText('Milliseconds')).toBeInTheDocument();
@@ -106,7 +112,9 @@ describe('Metric Flyout Overview Tab', () => {
 
     it('renders NoValueBadge when units are empty', () => {
       const metricItem = createMockMetric({ units: [] });
-      const { getByTestId, getByText } = renderWithServices(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = renderWithServices(
+        <OverviewTab metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')).toBeInTheDocument();
       expect(getByText('No value')).toBeInTheDocument();
@@ -116,7 +124,9 @@ describe('Metric Flyout Overview Tab', () => {
   describe('instrument display', () => {
     it('renders instrument when present', () => {
       const metricItem = createMockMetric({ metricTypes: ['counter'] });
-      const { getByTestId, getByText } = renderWithServices(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = renderWithServices(
+        <OverviewTab metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')).toBeInTheDocument();
       expect(getByText('counter')).toBeInTheDocument();
@@ -124,7 +134,9 @@ describe('Metric Flyout Overview Tab', () => {
 
     it('renders NoValueBadge when metricTypes is undefined', () => {
       const metricItem = createMockMetric({ metricTypes: undefined });
-      const { getByTestId, getByText } = renderWithServices(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = renderWithServices(
+        <OverviewTab metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')).toBeInTheDocument();
       expect(getByText('No value')).toBeInTheDocument();
@@ -198,7 +210,9 @@ describe('Metric Flyout Overview Tab', () => {
         { name: 'attributes.state' },
       ];
       const metricItem = createMockMetric({ dimensionFields });
-      const { getByTestId, getByText } = renderWithServices(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = renderWithServices(
+        <OverviewTab metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDimensionsLabel')).toBeInTheDocument();
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDimensionsList')).toBeInTheDocument();
@@ -290,7 +304,9 @@ describe('Metric Flyout Overview Tab', () => {
       const metricItem = createMockMetric({
         fieldTypes: [ES_FIELD_TYPES.NULL],
       });
-      const { getByText, queryByText } = renderWithServices(<OverviewTab metricItem={metricItem} />);
+      const { getByText, queryByText } = renderWithServices(
+        <OverviewTab metricItem={metricItem} />
+      );
 
       expect(getByText('No value')).toBeInTheDocument();
       expect(queryByText('null')).not.toBeInTheDocument();
