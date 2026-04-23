@@ -201,7 +201,7 @@ export class ReportingPageObject extends FtrService {
     // Close toast so it doesn't obscure the UI.
     if (isToastPresent) {
       // If close button fails to be clicked, the toast should dismiss regardless.
-      this.toasts.dismissAll();
+      await this.toasts.dismissAll();
     }
 
     return isToastPresent;
