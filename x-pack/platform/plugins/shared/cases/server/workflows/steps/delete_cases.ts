@@ -10,7 +10,11 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { deleteCasesStepCommonDefinition } from '../../../common/workflows/steps/delete_cases';
 import type { CasesClient } from '../../client';
 import { DELETE_CASES_FAILED_MESSAGE } from './translations';
-import { getCasesClientFromStepsContext, getErrorMessage, safeParseCaseForWorkflowOutput } from './utils';
+import {
+  getCasesClientFromStepsContext,
+  getErrorMessage,
+  safeParseCaseForWorkflowOutput,
+} from './utils';
 
 export const deleteCasesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
