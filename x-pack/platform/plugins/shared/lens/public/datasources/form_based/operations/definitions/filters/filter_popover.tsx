@@ -10,6 +10,7 @@ import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type {
   LensAggFilterValue as FilterValue,
   IndexPattern,
