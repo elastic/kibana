@@ -14,6 +14,7 @@ import { Router } from '@kbn/shared-ux-router';
 import type { AppPluginStartDependencies } from './types';
 import { ElasticInferenceService } from './components/elastic_inference_service';
 import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
+import { EventTrackerProvider } from './analytics/event_tracker_context';
 
 export const renderElasticInferenceServiceApp = async (
   core: CoreStart,
@@ -26,7 +27,9 @@ export const renderElasticInferenceServiceApp = async (
         <I18nProvider>
           <InferenceEndpointsProvider>
             <Router history={services.history}>
-              <ElasticInferenceService />
+              <EventTrackerProvider analytics={core.analytics}>
+                <ElasticInferenceService />
+              </EventTrackerProvider>
             </Router>
           </InferenceEndpointsProvider>
         </I18nProvider>

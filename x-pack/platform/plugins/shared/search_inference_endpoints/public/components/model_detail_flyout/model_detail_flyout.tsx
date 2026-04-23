@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -35,6 +35,7 @@ import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_colu
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
+import { useEventTracker } from '../../analytics/event_tracker_context';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -56,6 +57,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
+  const eventTracker = useEventTracker();
+
+  useEffect(() => {
+    eventTracker.eisModelViewed(modelId);
+  }, [eventTracker, modelId]);
 
   const { endpoints, displayName, modelAuthor } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
@@ -89,19 +95,25 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   }, [endpoints]);
 
   const handleOpenAddModal = useCallback(() => {
+    eventTracker.modalOpened('add_endpoint');
     setEditingEndpoint(undefined);
     setIsModalOpen(true);
-  }, []);
+  }, [eventTracker]);
 
-  const handleOpenEditModal = useCallback((endpoint: InferenceAPIConfigResponse) => {
-    setEditingEndpoint(endpoint);
-    setIsModalOpen(true);
-  }, []);
+  const handleOpenEditModal = useCallback(
+    (endpoint: InferenceAPIConfigResponse) => {
+      eventTracker.modalOpened('edit_endpoint');
+      setEditingEndpoint(endpoint);
+      setIsModalOpen(true);
+    },
+    [eventTracker]
+  );
 
   const handleCloseModal = useCallback(() => {
+    eventTracker.modalClosed();
     setIsModalOpen(false);
     setEditingEndpoint(undefined);
-  }, []);
+  }, [eventTracker]);
 
   const descriptionListItems = [
     {

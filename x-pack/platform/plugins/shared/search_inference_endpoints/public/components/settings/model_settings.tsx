@@ -28,6 +28,7 @@ import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { useEventTracker } from '../../analytics/event_tracker_context';
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -75,6 +76,8 @@ export const ModelSettings: React.FC = () => {
     };
   }, [isDirty, history]);
 
+  const eventTracker = useEventTracker();
+
   const handleSave = useCallback(async () => {
     if (isFeatureDirty) {
       saveFeatures();
@@ -82,7 +85,8 @@ export const ModelSettings: React.FC = () => {
     if (defaultModelSettings.isDirty) {
       await defaultModelSettings.save();
     }
-  }, [isFeatureDirty, saveFeatures, defaultModelSettings]);
+    eventTracker.featureSettingsSaved();
+  }, [isFeatureDirty, saveFeatures, defaultModelSettings, eventTracker]);
 
   const handleDiscardAndLeave = useCallback(() => {
     defaultModelSettings.reset();

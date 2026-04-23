@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
+import { useEventTracker } from '../analytics/event_tracker_context';
 import type { InferenceUsageResponse } from '../types';
 
 interface ScanUsageProps {
@@ -16,17 +17,21 @@ interface ScanUsageProps {
 
 export const useScanUsage = ({ type, id }: ScanUsageProps) => {
   const { services } = useKibana();
+  const eventTracker = useEventTracker();
 
   return useQuery({
     queryKey: ['inference-endpoint-scan-usage', type, id],
-    queryFn: () =>
-      services.http.delete<InferenceUsageResponse>(
+    queryFn: async () => {
+      const response = await services.http.delete<InferenceUsageResponse>(
         `/internal/inference_endpoint/endpoints/${type}/${id}`,
         {
           query: {
             scanUsage: true,
           },
         }
-      ),
+      );
+      eventTracker.endpointUsageScanned();
+      return response;
+    },
   });
 };

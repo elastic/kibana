@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { docLinks } from '../../common/doc_links';
+import { useEventTracker } from '../analytics/event_tracker_context';
 
 interface ExternalInferenceEmptyPromptProps {
   onFlyoutOpen: () => void;
@@ -19,6 +20,10 @@ interface ExternalInferenceEmptyPromptProps {
 export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPromptProps> = ({
   onFlyoutOpen,
 }) => {
+  const eventTracker = useEventTracker();
+  useEffect(() => {
+    eventTracker.emptyStateViewed();
+  }, [eventTracker]);
   return (
     <KibanaPageTemplate.EmptyPrompt
       data-test-subj="externalInferenceEmptyPrompt"

@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { AppPluginStartDependencies } from './types';
+import { EventTrackerProvider } from './analytics/event_tracker_context';
 
 const renderMgmtApp = (
   core: CoreStart,
@@ -25,7 +26,9 @@ const renderMgmtApp = (
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
           <Router history={services.history}>
-            <Component />
+            <EventTrackerProvider analytics={core.analytics}>
+              <Component />
+            </EventTrackerProvider>
           </Router>
         </I18nProvider>
       </KibanaContextProvider>

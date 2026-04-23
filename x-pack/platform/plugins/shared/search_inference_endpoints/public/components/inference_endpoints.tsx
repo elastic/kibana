@@ -16,18 +16,22 @@ import { TabularPage } from './all_inference_endpoints/tabular_page';
 import { ExternalInferenceHeader } from './external_inference_header';
 import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
 import { ExternalInferenceEmptyPrompt } from './external_inference_empty_prompt';
+import { useEventTracker } from '../analytics/event_tracker_context';
 
 export const InferenceEndpoints: React.FC = () => {
   const { data, isLoading, refetch } = useQueryInferenceEndpoints();
   const [isAddInferenceFlyoutOpen, setIsAddInferenceFlyoutOpen] = useState<boolean>(false);
+  const eventTracker = useEventTracker();
 
   const onFlyoutOpen = useCallback(() => {
+    eventTracker.flyoutOpened('add_inference');
     setIsAddInferenceFlyoutOpen(true);
-  }, []);
+  }, [eventTracker]);
 
   const onFlyoutClose = useCallback(() => {
+    eventTracker.flyoutClosed('add_inference');
     setIsAddInferenceFlyoutOpen(false);
-  }, []);
+  }, [eventTracker]);
 
   const reload = useCallback(() => {
     refetch();

@@ -23,6 +23,8 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { WORKFLOWS_UI_SETTING_ENABLED_ID } from '../../../common';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 const PANEL_TYPES = [
   'discover',
@@ -170,12 +172,19 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
   } = useKibana();
   const assetBasePath = useAssetBasePath();
   const { euiTheme } = useEuiTheme();
+  const usageTracker = useUsageTracker();
 
-  const { getImageUrl, metricTitle, metricDescription, onPanelClick, dataTestSubj } = panel;
+  const { getImageUrl, metricTitle, metricDescription, onPanelClick, type, dataTestSubj } = panel;
   return (
     <EuiSplitPanel.Outer
       hasBorder
-      onClick={() => onPanelClick && onPanelClick({ share, application })}
+      onClick={() => {
+        usageTracker.click([
+          AnalyticsEvents.metricPanelClicked,
+          `${AnalyticsEvents.metricPanelClicked}_${type}`,
+        ]);
+        if (onPanelClick) onPanelClick({ share, application });
+      }}
       data-test-subj={dataTestSubj}
     >
       <EuiSplitPanel.Inner color="subdued" paddingSize="l">
