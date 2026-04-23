@@ -172,7 +172,7 @@ export const useEditorConfig = ({
   const codeEditorOptions: CodeEditorProps['options'] = useMemo(
     () => ({
       hover: {
-        above: false,
+        above: true,
       },
       parameterHints: {
         enabled: true,
