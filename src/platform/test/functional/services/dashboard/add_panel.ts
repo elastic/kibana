@@ -101,13 +101,13 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
     await this.clickTopNavAddMenu();
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
+      await this.testSubjects.existOrFail('dashboardAddPanel');
     });
   }
 
   async expectAddPanelFlyoutClosed() {
     this.log.debug('DashboardAddPanel.expectAddPanelFlyoutClosed');
-    await this.testSubjects.missingOrFail('dashboardPanelSelectionFlyout');
+    await this.testSubjects.missingOrFail('dashboardAddPanel');
   }
 
   async verifyEmbeddableFactoryGroupExists(groupId: string, expectExist: boolean = true) {
@@ -180,7 +180,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async isAddPanelOpen() {
     this.log.debug('DashboardAddPanel.isAddPanelOpen');
-    return await this.testSubjects.exists('dashboardPanelSelectionFlyout', { timeout: 500 });
+    return await this.testSubjects.exists('dashboardAddPanel', { timeout: 500 });
   }
 
   async ensureAddPanelIsShowing() {
@@ -285,6 +285,7 @@ export class DashboardAddPanelService extends FtrService {
     embeddableType?: string,
     closePanelWhenComplete: boolean = true
   ) {
+    if (embeddableType === 'search') debugger;
     this.log.debug(
       `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
     );

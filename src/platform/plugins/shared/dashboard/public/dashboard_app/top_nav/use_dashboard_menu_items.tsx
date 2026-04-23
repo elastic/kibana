@@ -168,7 +168,7 @@ export const useDashboardMenuItems = ({
         return <AddPanelFlyout dashboardApi={dashboardApi} ariaLabelledBy={ariaLabelledBy} />;
       },
       flyoutProps: {
-        'data-test-subj': 'dashboardPanelSelectionFlyout',
+        'data-test-subj': 'dashboardAddPanel',
         triggerId: 'dashboardAddTopNavButton',
       },
     });

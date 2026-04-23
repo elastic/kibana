@@ -113,7 +113,12 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
 
   return (
     <EuiSkeletonText isLoading={loading}>
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
+      <EuiFlexGroup
+        data-tests-subj="dashboardPanelSelectionFlyout"
+        direction="column"
+        responsive={false}
+        gutterSize="m"
+      >
         <EuiFlexItem
           grow={false}
           css={{

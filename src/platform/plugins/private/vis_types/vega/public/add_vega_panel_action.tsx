@@ -13,6 +13,7 @@ import { EuiIcon, type EuiIconProps } from '@elastic/eui';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiHasAppContext } from '@kbn/presentation-publishing';
+
 import type { VegaPluginStartDependencies } from './plugin';
 import VegaLogoSVG from './vega_logo.svg';
 import { vegaVisType } from './vega_type';
@@ -45,5 +46,5 @@ export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
 }
 
 export const VegaIcon: React.FC<EuiIconProps> = (props) => (
-  <EuiIcon type={VegaLogoSVG} title={vegaVisType.titleInWizard} {...props} />
+  <EuiIcon type={VegaLogoSVG} title={vegaVisType.titleInWizard} size="m" {...props} />
 );

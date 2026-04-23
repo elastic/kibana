@@ -48,7 +48,7 @@ export const EditorMenu: FC<Props> = ({
         const actionName = item.getDisplayName(context);
         return {
           name: actionName,
-          icon: item.getIconType(context),
+          icon: item.id === 'addVegaPanelAction' ? 'code' : item.getIconType(context),
           onClick: createNewEmbeddableFromAction(item, context, closePopover),
           'data-test-subj': `create-action-${actionName}`,
           toolTipContent: item?.getDisplayNameTooltip?.(context),

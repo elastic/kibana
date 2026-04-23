@@ -60,7 +60,7 @@ export function DashboardEmptyScreen() {
         );
       },
       flyoutProps: {
-        'data-test-subj': 'dashboardPanelSelectionFlyout',
+        'data-test-subj': 'dashboardAddPanel',
         triggerId: 'dashboardAddTopNavButton',
       },
     });
