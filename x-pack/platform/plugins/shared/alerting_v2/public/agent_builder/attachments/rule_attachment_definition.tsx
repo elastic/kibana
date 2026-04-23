@@ -50,10 +50,12 @@ interface RuleCanvasContentProps
   notifications: NotificationsStart;
 }
 
+
 const RuleCanvasContent = ({
   attachment,
   registerActionButtons,
   updateOrigin,
+  refreshAttachment,
   rulesApi,
   application,
   basePath,
@@ -116,7 +118,7 @@ const RuleCanvasContent = ({
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          await rulesApi.updateRule(ruleId, {
+          const updated = await rulesApi.updateRule(ruleId, {
             metadata: data.metadata,
             schedule: data.schedule,
             evaluation: { query: data.evaluation?.query },
@@ -126,6 +128,7 @@ const RuleCanvasContent = ({
             ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
             ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
           });
+          await refreshAttachment(updated);
           notifications.toasts.addSuccess(`Rule "${data.metadata.name}" updated`);
         },
       },
@@ -137,10 +140,14 @@ const RuleCanvasContent = ({
           if (isEnabled) {
             await rulesApi.bulkDisableRules({ ids: [ruleId] });
             setIsEnabled(false);
+            const latest = await rulesApi.getRule(ruleId);
+            await refreshAttachment(latest);
             notifications.toasts.addSuccess(`Rule "${data.metadata.name}" disabled`);
           } else {
             await rulesApi.bulkEnableRules({ ids: [ruleId] });
             setIsEnabled(true);
+            const latest = await rulesApi.getRule(ruleId);
+            await refreshAttachment(latest);
             notifications.toasts.addSuccess(`Rule "${data.metadata.name}" enabled`);
           }
         },
@@ -169,6 +176,7 @@ const RuleCanvasContent = ({
     isEnabled,
     registerActionButtons,
     updateOrigin,
+    refreshAttachment,
     rulesApi,
     application,
     basePath,

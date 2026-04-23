@@ -36,7 +36,7 @@ interface CanvasFlyoutProps {
  */
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
-  const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
+  const { canvasState, closeCanvas, setCanvasAttachmentOrigin, setCanvasAttachmentData } = useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
@@ -82,6 +82,18 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       setCanvasAttachmentOrigin,
       conversationActions,
     ]
+  );
+
+  const refreshAttachment = useCallback(
+    async (data: unknown) => {
+      if (!conversationId || !canvasState) {
+        return;
+      }
+      await attachmentsService.updateData(conversationId, canvasState.attachment.id, data);
+      setCanvasAttachmentData(data);
+      conversationActions.invalidateConversation();
+    },
+    [attachmentsService, conversationId, canvasState, setCanvasAttachmentData, conversationActions]
   );
 
   const uiDefinition = canvasState
@@ -168,6 +180,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
             {
               registerActionButtons,
               updateOrigin,
+              refreshAttachment,
               closeCanvas,
             }
           )}
