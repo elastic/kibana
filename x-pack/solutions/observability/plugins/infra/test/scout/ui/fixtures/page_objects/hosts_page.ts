@@ -135,9 +135,12 @@ export class HostsPage {
     return this.page.getByTestId('hostsViewTableEntryTitleLink');
   }
 
+  public getCellContentLocator(row: Locator, cellTestId: string): Locator {
+    return row.getByTestId(cellTestId).locator('.euiTableCellContent');
+  }
+
   private async getCellText(row: Locator, cellTestId: string) {
-    const cell = row.getByTestId(cellTestId).locator('.euiTableCellContent');
-    return (await cell.textContent())?.trim() ?? '';
+    return (await this.getCellContentLocator(row, cellTestId).textContent())?.trim() ?? '';
   }
 
   public async getRowData(row: Locator) {

@@ -78,7 +78,7 @@ test.describe(
           const row = hostsPage.getHostRow(host.hostName);
 
           for (const cellTestId of metricCells) {
-            const cell = row.getByTestId(cellTestId).locator('.euiTableCellContent');
+            const cell = hostsPage.getCellContentLocator(row, cellTestId);
             await expect(cell).not.toHaveText('N/A');
             await expect(cell).not.toHaveText('');
           }
