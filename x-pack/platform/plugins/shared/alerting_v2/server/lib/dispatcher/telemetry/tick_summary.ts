@@ -7,11 +7,7 @@
 
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { elapsedMs, roundMs } from './clock';
-import type {
-  DispatcherStageCounts,
-  DispatcherTickLogMeta,
-  DispatcherTickSummary,
-} from './types';
+import type { DispatcherStageCounts, DispatcherTickLogMeta, DispatcherTickSummary } from './types';
 
 const TICK_COMPLETE_MESSAGE = 'dispatcher tick complete';
 
