@@ -177,7 +177,7 @@ async function generateStreamInsights({
   if (queryDataList.length === 0) {
     return {
       insights: [],
-      tokens_used: { prompt: 0, completion: 0, total: 0 },
+      tokens_used: EMPTY_TOKENS,
     };
   }
 
@@ -212,7 +212,7 @@ async function generateStreamInsights({
 
     return {
       insights,
-      tokens_used: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
+      tokens_used: response.tokens ?? EMPTY_TOKENS,
     };
   } catch (error) {
     if (
@@ -224,7 +224,7 @@ async function generateStreamInsights({
       );
       return {
         insights: [],
-        tokens_used: { prompt: 0, completion: 0, total: 0 },
+        tokens_used: EMPTY_TOKENS,
       };
     }
 
