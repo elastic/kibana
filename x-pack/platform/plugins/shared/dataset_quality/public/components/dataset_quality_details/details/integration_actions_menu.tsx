@@ -69,7 +69,7 @@ export function IntegrationActionsMenu({
     <EuiButtonIcon
       title={integrationActionsText}
       aria-label={integrationActionsText}
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       onClick={handleToggleMenu}
       data-test-subj="datasetQualityDetailsIntegrationActionsButton"
     />

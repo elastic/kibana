@@ -13,6 +13,7 @@ import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_ano
 import { getAnonymizedValue } from '@kbn/elastic-assistant-common';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant';
 import type { AnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
+import { ENTITY_PROMPT } from '../../../../../agent_builder/components/prompts';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
@@ -74,7 +75,7 @@ export const AskAiAssistant = <T extends EntityType>({
         identifier: entityName,
         attachmentLabel: `${entityType}: ${entityName}`,
       },
-      attachmentPrompt: `Explain how inputs contributed to the risk score, including any risk modifiers such as asset criticality or privileged user monitoring status. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration both the risk score inputs and any modifiers that adjusted the final score.`,
+      attachmentPrompt: ENTITY_PROMPT,
     }),
     [entityName, entityType]
   );

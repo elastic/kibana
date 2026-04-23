@@ -7,21 +7,19 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { NerRule, RegexRule } from '@kbn/anonymization-common';
+import {
+  GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
+  GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
+  isGlobalAnonymizationProfileTarget,
+} from '@kbn/anonymization-common';
 import type { ProfilesRepository } from '../repository';
 
-const INTERNAL_GLOBAL_PROFILE_TARGET_TYPE = 'index' as const;
-const INTERNAL_GLOBAL_PROFILE_TARGET_ID = '__kbn_global_anonymization_profile__';
-
-export {
-  INTERNAL_GLOBAL_PROFILE_TARGET_TYPE as GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
-  INTERNAL_GLOBAL_PROFILE_TARGET_ID as GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
-};
+export { GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE, GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID };
 
 export const GLOBAL_ANONYMIZATION_PROFILE_NAME = 'Global Anonymization Profile';
 
 export const isGlobalProfileTarget = (targetType: string, targetId: string): boolean =>
-  targetType === INTERNAL_GLOBAL_PROFILE_TARGET_TYPE &&
-  targetId === INTERNAL_GLOBAL_PROFILE_TARGET_ID;
+  isGlobalAnonymizationProfileTarget(targetType, targetId);
 
 const mergeRulesById = <T extends { id: string }>(existingRules: T[], incomingRules: T[]): T[] => {
   const merged = new Map(existingRules.map((rule) => [rule.id, rule]));
@@ -53,16 +51,16 @@ export const ensureGlobalAnonymizationProfile = async ({
   try {
     const existing = await profilesRepo.findByTarget(
       namespace,
-      INTERNAL_GLOBAL_PROFILE_TARGET_TYPE,
-      INTERNAL_GLOBAL_PROFILE_TARGET_ID
+      GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
+      GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID
     );
 
     if (!existing) {
       await profilesRepo.create({
         name: GLOBAL_ANONYMIZATION_PROFILE_NAME,
         description: 'Global NER and Regex anonymization rules for all prompts in this space',
-        targetType: INTERNAL_GLOBAL_PROFILE_TARGET_TYPE,
-        targetId: INTERNAL_GLOBAL_PROFILE_TARGET_ID,
+        targetType: GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
+        targetId: GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
         rules: {
           fieldRules: [],
           regexRules,

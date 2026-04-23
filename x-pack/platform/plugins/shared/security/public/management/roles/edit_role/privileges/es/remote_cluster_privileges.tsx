@@ -115,7 +115,7 @@ export const RemoteClusterPrivileges: React.FunctionComponent<Props> = ({
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={addRemoteClusterPrivilege}
                 disabled={remoteClusterPrivilegesDisabled}
                 data-test-subj="addRemoteClusterPrivilegesButton"

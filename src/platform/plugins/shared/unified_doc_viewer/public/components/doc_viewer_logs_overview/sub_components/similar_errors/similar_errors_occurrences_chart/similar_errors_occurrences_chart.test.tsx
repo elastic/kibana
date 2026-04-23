@@ -14,10 +14,11 @@ import { where } from '@kbn/esql-composer';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { merge } from 'lodash';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 const mockUseDataSourcesContext = jest.fn(() => ({
   indexes: { logs: 'logs-*', apm: {} },
+  profileId: 'test-profile',
 }));
 
 jest.mock('../../../../../hooks/use_data_sources', () => ({
@@ -33,11 +34,14 @@ jest.mock('../../../../content_framework/chart', () => ({
   ),
 }));
 
+let capturedGetParentApi: (() => any) | undefined;
+
 jest.mock('@kbn/embeddable-plugin/public', () => {
   const original = jest.requireActual('@kbn/embeddable-plugin/public');
   return {
     ...original,
-    EmbeddableRenderer: ({ type, getParentApi, hidePanelChrome }: any) => {
+    EmbeddableRenderer: ({ type, getParentApi }: any) => {
+      capturedGetParentApi = getParentApi;
       return <div data-test-subj="lensEmbeddableSimilarErrorsChart">Lens Chart (type: {type})</div>;
     },
   };
@@ -62,7 +66,7 @@ setUnifiedDocViewerServices(
   })
 );
 
-jest.mock('@kbn/lens-embeddable-utils/config_builder', () => {
+jest.mock('@kbn/lens-embeddable-utils', () => {
   return {
     LensConfigBuilder: jest.fn().mockImplementation(() => ({
       build: mockBuild,
@@ -75,8 +79,10 @@ const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensC
 describe('SimilarErrorsOccurrencesChart', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedGetParentApi = undefined;
     mockUseDataSourcesContext.mockReturnValue({
       indexes: { logs: 'logs-*', apm: {} },
+      profileId: 'test-profile',
     });
     mockBuild.mockResolvedValue({
       visualizationType: 'lnsXY',
@@ -122,7 +128,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
       expect(screen.getByTestId('lensEmbeddableSimilarErrorsChart')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Lens Chart (type: lens)')).toBeInTheDocument();
+    expect(screen.getByText('Lens Chart (type: vis)')).toBeInTheDocument();
   });
 
   it('shows error message when build fails', async () => {
@@ -148,6 +154,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   it('does not build chart when indexes.logs is undefined', async () => {
     mockUseDataSourcesContext.mockReturnValueOnce({
       indexes: { logs: undefined, apm: {} } as any,
+      profileId: 'test-profile',
     });
     const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
@@ -180,6 +187,19 @@ describe('SimilarErrorsOccurrencesChart', () => {
     const annotationLayer = layers.find((layer: any) => layer.type === 'annotation');
     expect(annotationLayer.events[0].datetime).toBe(timestamp);
     expect(annotationLayer.events[0].name).toBe('Current document');
+  });
+
+  it('passes time_range in serialized state so Lens can resolve ?_tstart/?_tend', async () => {
+    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
+
+    await waitFor(() => {
+      expect(capturedGetParentApi).toBeDefined();
+    });
+
+    const serializedState = capturedGetParentApi!().getSerializedStateForChild();
+    expect(serializedState.time_range).toEqual({ from: 'now-15m', to: 'now' });
+    expect(serializedState).not.toHaveProperty('esqlVariables');
   });
 
   it('does not add annotation layer when currentDocumentTimestamp is not provided', async () => {

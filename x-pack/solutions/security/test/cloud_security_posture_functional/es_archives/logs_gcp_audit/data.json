@@ -12,9 +12,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin@example.com"
-        }
+        "id": "admin@example.com"
       },
       "client": {
         "user": {
@@ -152,9 +150,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin2@example.com"
-        }
+        "id": "admin2@example.com"
       },
       "client": {
         "user": {
@@ -292,9 +288,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin3@example.com"
-        }
+        "id": "admin3@example.com"
       },
       "client": {
         "user": {
@@ -432,9 +426,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin3@example.com"
-        }
+        "id": "admin3@example.com"
       },
       "client": {
         "user": {
@@ -572,9 +564,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin4@example.com"
-        }
+        "id": "admin4@example.com"
       },
       "client": {
         "user": {
@@ -721,9 +711,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin6@example.com"
-        }
+        "id": "admin6@example.com"
       },
       "client": {
         "user": {
@@ -865,11 +853,9 @@
     "source": {
       "@timestamp": "2024-09-01T12:55:00.000Z",
       "user": {
-        "entity": {
-          "id": "serviceaccount@example.com"
-        },
         "email": "serviceaccount@example.com",
-        "name": "Service Account"
+        "name": "Service Account",
+        "id": "serviceaccount@example.com"
       },
       "client": {
         "user": {
@@ -986,11 +972,9 @@
     "source": {
       "@timestamp": "2024-09-01T12:56:00.000Z",
       "user": {
-        "entity": {
-          "id": "serviceaccount@example.com"
-        },
         "email": "serviceaccount@example.com",
-        "name": "Service Account"
+        "name": "Service Account",
+        "id": "serviceaccount@example.com"
       },
       "client": {
         "user": {
@@ -1107,10 +1091,7 @@
     "source": {
       "@timestamp": "2024-09-01T13:10:00.000Z",
       "service": {
-        "entity": {
-          "id": "api-service@your-project-id.iam.gserviceaccount.com"
-        },
-        "name": "iam.googleapis.com"
+        "name": "ApiServiceAccount"
       },
       "client": {
         "user": {
@@ -1165,9 +1146,7 @@
       },
       "host": {
         "target": {
-          "entity": {
-            "id": ["host-instance-1", "host-instance-2"]
-          }
+          "id": ["host-instance-1", "host-instance-2"]
         }
       },
       "log": {
@@ -1212,20 +1191,16 @@
     "source": {
       "@timestamp": "2024-09-01T12:40:00.000Z",
       "user": {
-        "entity": {
-          "id": [
-            "admin-user1@example.com",
-            "admin-user2@example.com"
-          ]
-        },
+        "id": [
+          "admin-user1@example.com",
+          "admin-user2@example.com"
+        ],
         "target": {
-          "entity": {
-            "id": [
-              "projects/your-project-id/roles/customRole1",
-              "projects/your-project-id/roles/customRole2",
-              "projects/your-project-id/roles/customRole3"
-            ]
-          }
+          "id": [
+            "projects/your-project-id/roles/customRole1",
+            "projects/your-project-id/roles/customRole2",
+            "projects/your-project-id/roles/customRole3"
+          ]
         }
       },
       "client": {
@@ -1380,12 +1355,6 @@
     "source": {
       "@timestamp": "2024-09-01T14:00:00.000Z",
       "user": {
-        "entity": {
-          "id": [
-            "multi-actor-1@example.com",
-            "multi-actor-2@example.com"
-          ]
-        },
         "email": [
           "multi-actor-1@example.com",
           "multi-actor-2@example.com"
@@ -1393,6 +1362,10 @@
         "name": [
           "Multi Actor 1",
           "Multi Actor 2"
+        ],
+        "id": [
+          "multi-actor-1@example.com",
+          "multi-actor-2@example.com"
         ]
       },
       "client": {
@@ -1461,12 +1434,7 @@
       "service": {
         "name": "iam.googleapis.com",
         "target": {
-          "entity": {
-            "id": [
-              "projects/your-project-id/serviceAccounts/target-multi-service-1@your-project-id.iam.gserviceaccount.com",
-              "projects/your-project-id/serviceAccounts/target-multi-service-2@your-project-id.iam.gserviceaccount.com"
-            ]
-          }
+          "name": "TargetMultiService1"
         }
       },
       "log": {
@@ -1518,11 +1486,12 @@
     "source": {
       "@timestamp": "2024-09-01T15:00:00.000Z",
       "user": {
-        "entity": {
-          "id": "mv-expand-test-actor@example.com"
-        },
         "email": "mv-expand-test-actor@example.com",
-        "name": "MV Expand Test Actor"
+        "name": "MV Expand Test Actor",
+        "target": {
+          "id": "mv-expand-target-identity"
+        },
+        "id": "mv-expand-test-actor@example.com"
       },
       "client": {
         "user": {
@@ -1578,10 +1547,7 @@
       },
       "entity": {
         "target": {
-          "id": [
-            "mv-expand-target-identity",
-            "mv-expand-target-storage"
-          ]
+          "id": "mv-expand-target-storage"
         }
       },
       "service": {
@@ -1633,9 +1599,7 @@
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
         "name": "relationships-test-user",
-        "entity": {
-          "id": "relationships-test-user"
-        }
+        "id": "relationships-test-user"
       },
       "cloud": {
         "account": {
@@ -1671,11 +1635,6 @@
         ]
       },
       "service": {
-        "target": {
-          "entity": {
-            "id": "relationships-target-service"
-          }
-        },
         "name": "sts.amazonaws.com"
       },
       "tags": [],
@@ -1700,16 +1659,10 @@
       "@timestamp": "2024-09-01T12:35:00.789Z",
       "user": {
         "name": "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com",
-        "entity": {
-          "id": "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com"
-        }
-      },
-      "service": {
         "target": {
-          "entity": {
-            "id": "data-pipeline@my-gcp-project.iam.gserviceaccount.com"
-          }
-        }
+          "id": "data-pipeline@my-gcp-project.iam.gserviceaccount.com"
+        },
+        "id": "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com"
       },
       "cloud": {
         "account": {
@@ -1769,14 +1722,12 @@
     "index": ".ds-logs-gcp.audit-default-2024.09.12-000001",
     "source": {
       "@timestamp": "2024-09-01T12:40:00.789Z",
-      "service": {
-        "entity": {
-          "id": "data-pipeline@my-gcp-project.iam.gserviceaccount.com"
-        },
+      "user": {
+        "id": "data-pipeline@my-gcp-project.iam.gserviceaccount.com"
+      },
+      "host": {
         "target": {
-          "entity": {
-            "id": "projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1"
-          }
+          "id": "projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1"
         }
       },
       "cloud": {
@@ -1839,20 +1790,14 @@
       "@timestamp": "2024-09-01T12:45:00.789Z",
       "user": {
         "name": "Hierarchy Root User",
-        "entity": {
-          "id": "rel-hierarchy-root-user"
-        },
         "target": {
-          "entity": {
-            "id": "rel-hierarchy-identity-1"
-          }
-        }
+          "id": "rel-hierarchy-identity-1"
+        },
+        "id": "rel-hierarchy-root-user"
       },
       "host": {
         "target": {
-          "entity": {
-            "id": "rel-hierarchy-host-1"
-          }
+          "id": "rel-hierarchy-host-1"
         }
       },
       "cloud": {
@@ -1911,14 +1856,10 @@
       "@timestamp": "2024-09-01T12:46:00.789Z",
       "user": {
         "name": "Hierarchy Identity 1",
-        "entity": {
-          "id": "rel-hierarchy-identity-1"
-        }
-      },
-      "entity": {
         "target": {
           "id": "rel-hierarchy-delegate-1"
-        }
+        },
+        "id": "rel-hierarchy-identity-1"
       },
       "cloud": {
         "account": {
@@ -1976,14 +1917,10 @@
       "@timestamp": "2024-09-01T12:47:00.789Z",
       "user": {
         "name": "Hierarchy Identity 1",
-        "entity": {
-          "id": "rel-hierarchy-identity-1"
-        }
-      },
-      "entity": {
         "target": {
           "id": "rel-hierarchy-delegate-1"
-        }
+        },
+        "id": "rel-hierarchy-identity-1"
       },
       "cloud": {
         "account": {

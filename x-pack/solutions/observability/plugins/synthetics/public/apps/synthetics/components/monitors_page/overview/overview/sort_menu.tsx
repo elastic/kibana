@@ -51,7 +51,7 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
     <EuiButtonEmpty
       data-test-subj="syntheticsSortMenuButton"
       size="xs"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >

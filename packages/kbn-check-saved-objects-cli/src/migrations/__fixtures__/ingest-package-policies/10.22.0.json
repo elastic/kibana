@@ -1,0 +1,18 @@
+{
+  "10.21.0": [
+    {
+      "name": "test-policy",
+      "enabled": true,
+      "inputs": [],
+      "package": { "name": "test", "version": "1.0.0" }
+    }
+  ],
+  "10.22.0": [
+    {
+      "name": "test-policy",
+      "enabled": true,
+      "inputs": [],
+      "package": { "name": "test", "version": "1.0.0" }
+    }
+  ]
+}

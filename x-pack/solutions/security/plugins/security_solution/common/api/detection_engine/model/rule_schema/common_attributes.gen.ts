@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isValidDateMath, isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { UUID, NonEmptyString } from '../../../model/primitives.gen';
@@ -22,26 +22,26 @@ import { UUID, NonEmptyString } from '../../../model/primitives.gen';
 /**
  * A dynamic unique identifier for the rule object. It is randomly generated when a rule is created and cannot be changed after that. It is always a UUID. It is unique within a given Kibana space. The same prebuilt Elastic rule, when installed in two different Kibana spaces or two different Elastic environments, will have different object `id`s.
  */
+export const RuleObjectId = lazySchema(() => UUID);
 export type RuleObjectId = z.infer<typeof RuleObjectId>;
-export const RuleObjectId = UUID;
 
 /**
  * A stable unique identifier for the rule object. It can be assigned during rule creation. It can be any string, but often is a UUID. It should be unique not only within a given Kibana space, but also across spaces and Elastic environments. The same prebuilt Elastic rule, when installed in two different Kibana spaces or two different Elastic environments, will have the same `rule_id`s.
  */
+export const RuleSignatureId = lazySchema(() => z.string());
 export type RuleSignatureId = z.infer<typeof RuleSignatureId>;
-export const RuleSignatureId = z.string();
 
 /**
  * A human-readable name for the rule.
  */
+export const RuleName = lazySchema(() => z.string().min(1));
 export type RuleName = z.infer<typeof RuleName>;
-export const RuleName = z.string().min(1);
 
 /**
  * The rule’s description.
  */
+export const RuleDescription = lazySchema(() => z.string().min(1));
 export type RuleDescription = z.infer<typeof RuleDescription>;
-export const RuleDescription = z.string().min(1);
 
 /**
   * The rule's version number.
@@ -52,8 +52,8 @@ export const RuleDescription = z.string().min(1);
 > It is not incremented on each update. Compare this to the `revision` field.
 
   */
+export const RuleVersion = lazySchema(() => z.number().int().min(1));
 export type RuleVersion = z.infer<typeof RuleVersion>;
-export const RuleVersion = z.number().int().min(1);
 
 /**
   * The rule's revision number.
@@ -63,16 +63,16 @@ It represents the version of rule's object in Kibana. It is set to `0` when the 
 > Not all updates to any rule fields will increment the revision. Only those fields that are considered static `rule parameters` can trigger revision increments. For example, an update to a rule's query or index fields will increment the rule's revision by `1`. However, changes to dynamic or technical fields like enabled or execution_summary will not cause revision increments.
 
   */
+export const RuleRevision = lazySchema(() => z.number().int().min(0));
 export type RuleRevision = z.infer<typeof RuleRevision>;
-export const RuleRevision = z.number().int().min(0);
 
+export const QueryLanguage = lazySchema(() => z.enum(['kuery', 'lucene', 'eql', 'esql']));
 export type QueryLanguage = z.infer<typeof QueryLanguage>;
-export const QueryLanguage = z.enum(['kuery', 'lucene', 'eql', 'esql']);
 export type QueryLanguageEnum = typeof QueryLanguage.enum;
 export const QueryLanguageEnum = QueryLanguage.enum;
 
+export const KqlQueryLanguage = lazySchema(() => z.enum(['kuery', 'lucene']));
 export type KqlQueryLanguage = z.infer<typeof KqlQueryLanguage>;
-export const KqlQueryLanguage = z.enum(['kuery', 'lucene']);
 export type KqlQueryLanguageEnum = typeof KqlQueryLanguage.enum;
 export const KqlQueryLanguageEnum = KqlQueryLanguage.enum;
 
@@ -80,79 +80,87 @@ export const KqlQueryLanguageEnum = KqlQueryLanguage.enum;
  * This field determines whether the rule is a prebuilt Elastic rule. It will be replaced with the `rule_source` field.
  * @deprecated
  */
+export const IsRuleImmutable = lazySchema(() => z.boolean());
 export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
-export const IsRuleImmutable = z.boolean();
 
 /**
  * Determines whether an external/prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverged from the base value).
  */
+export const IsExternalRuleCustomized = lazySchema(() => z.boolean());
 export type IsExternalRuleCustomized = z.infer<typeof IsExternalRuleCustomized>;
-export const IsExternalRuleCustomized = z.boolean();
 
 /**
  * Determines whether an external/prebuilt rule has its original, unmodified version present when the calculation of its customization status is performed (`rule_source.is_customized` and `rule_source.customized_fields`).
  */
+export const ExternalRuleHasBaseVersion = lazySchema(() => z.boolean());
 export type ExternalRuleHasBaseVersion = z.infer<typeof ExternalRuleHasBaseVersion>;
-export const ExternalRuleHasBaseVersion = z.boolean();
 
 /**
  * An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
  */
-export type ExternalRuleCustomizedFields = z.infer<typeof ExternalRuleCustomizedFields>;
-export const ExternalRuleCustomizedFields = z.array(
-  z.object({
-    /**
-     * Name of a user-modified field in the rule object.
-     */
-    field_name: z.string(),
-  })
+export const ExternalRuleCustomizedFields = lazySchema(() =>
+  z.array(
+    z.object({
+      /**
+       * Name of a user-modified field in the rule object.
+       */
+      field_name: z.string(),
+    })
+  )
 );
+export type ExternalRuleCustomizedFields = z.infer<typeof ExternalRuleCustomizedFields>;
 
 /**
  * Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
  */
+export const InternalRuleSource = lazySchema(() =>
+  z.object({
+    type: z.literal('internal'),
+  })
+);
 export type InternalRuleSource = z.infer<typeof InternalRuleSource>;
-export const InternalRuleSource = z.object({
-  type: z.literal('internal'),
-});
 
 /**
  * Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
  */
+export const ExternalRuleSource = lazySchema(() =>
+  z.object({
+    type: z.literal('external'),
+    is_customized: IsExternalRuleCustomized,
+    has_base_version: ExternalRuleHasBaseVersion,
+    customized_fields: ExternalRuleCustomizedFields,
+  })
+);
 export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
-export const ExternalRuleSource = z.object({
-  type: z.literal('external'),
-  is_customized: IsExternalRuleCustomized,
-  has_base_version: ExternalRuleHasBaseVersion,
-  customized_fields: ExternalRuleCustomizedFields,
-});
 
 /**
  * Discriminated union that determines whether the rule is internally sourced (created within the Kibana app) or has an external source, such as the Elastic Prebuilt rules repo.
  */
+export const RuleSource = lazySchema(() =>
+  z.discriminatedUnion('type', [ExternalRuleSource, InternalRuleSource])
+);
 export type RuleSource = z.infer<typeof RuleSource>;
-export const RuleSource = z.discriminatedUnion('type', [ExternalRuleSource, InternalRuleSource]);
 
 /**
  * Determines whether the rule is enabled. Defaults to true.
  */
+export const IsRuleEnabled = lazySchema(() => z.boolean());
 export type IsRuleEnabled = z.infer<typeof IsRuleEnabled>;
-export const IsRuleEnabled = z.boolean();
 
 /**
  * Frequency of rule execution, using a date math range. For example, "1h" means the rule runs every hour. Defaults to 5m (5 minutes).
  */
+export const RuleInterval = lazySchema(() => z.string());
 export type RuleInterval = z.infer<typeof RuleInterval>;
-export const RuleInterval = z.string();
 
 /**
  * Time from which data is analyzed each time the rule runs, using a date math range. For example, now-4200s means the rule analyzes data from 70 minutes before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
  */
+export const RuleIntervalFrom = lazySchema(() => z.string().superRefine(isValidDateMath));
 export type RuleIntervalFrom = z.infer<typeof RuleIntervalFrom>;
-export const RuleIntervalFrom = z.string().superRefine(isValidDateMath);
 
+export const RuleIntervalTo = lazySchema(() => z.string());
 export type RuleIntervalTo = z.infer<typeof RuleIntervalTo>;
-export const RuleIntervalTo = z.string();
 
 /**
   * A numerical representation of the alert's severity from 0 to 100, where:
@@ -162,24 +170,26 @@ export const RuleIntervalTo = z.string();
 * `74` - `100` represents critical severity
 
   */
+export const RiskScore = lazySchema(() => z.number().int().min(0).max(100));
 export type RiskScore = z.infer<typeof RiskScore>;
-export const RiskScore = z.number().int().min(0).max(100);
 
 /**
  * Overrides generated alerts' risk_score with a value from the source event
  */
-export type RiskScoreMapping = z.infer<typeof RiskScoreMapping>;
-export const RiskScoreMapping = z.array(
-  z.object({
-    /**
-     * Source event field used to override the default `risk_score`.
-     */
-    field: z.string(),
-    operator: z.literal('equals'),
-    value: z.string(),
-    risk_score: RiskScore.optional(),
-  })
+export const RiskScoreMapping = lazySchema(() =>
+  z.array(
+    z.object({
+      /**
+       * Source event field used to override the default `risk_score`.
+       */
+      field: z.string(),
+      operator: z.literal('equals'),
+      value: z.string(),
+      risk_score: RiskScore.optional(),
+    })
+  )
 );
+export type RiskScoreMapping = z.infer<typeof RiskScoreMapping>;
 
 /**
   * Severity level of alerts produced by the rule, which must be one of the following:
@@ -189,32 +199,34 @@ export const RiskScoreMapping = z.array(
 * `critical`: Alerts that indicate it is highly likely a security incident has occurred
 
   */
+export const Severity = lazySchema(() => z.enum(['low', 'medium', 'high', 'critical']));
 export type Severity = z.infer<typeof Severity>;
-export const Severity = z.enum(['low', 'medium', 'high', 'critical']);
 export type SeverityEnum = typeof Severity.enum;
 export const SeverityEnum = Severity.enum;
 
 /**
  * Overrides generated alerts' severity with values from the source event
  */
-export type SeverityMapping = z.infer<typeof SeverityMapping>;
-export const SeverityMapping = z.array(
-  z.object({
-    /**
-     * Source event field used to override the default `severity`.
-     */
-    field: z.string(),
-    operator: z.literal('equals'),
-    severity: Severity,
-    value: z.string(),
-  })
+export const SeverityMapping = lazySchema(() =>
+  z.array(
+    z.object({
+      /**
+       * Source event field used to override the default `severity`.
+       */
+      field: z.string(),
+      operator: z.literal('equals'),
+      severity: Severity,
+      value: z.string(),
+    })
+  )
 );
+export type SeverityMapping = z.infer<typeof SeverityMapping>;
 
 /**
  * String array containing words and phrases to help categorize, filter, and search rules. Defaults to an empty array.
  */
+export const RuleTagArray = lazySchema(() => z.array(z.string()));
 export type RuleTagArray = z.infer<typeof RuleTagArray>;
-export const RuleTagArray = z.array(z.string());
 
 /**
   * Placeholder for metadata about the rule.
@@ -222,153 +234,161 @@ export const RuleTagArray = z.array(z.string());
 > This field is overwritten when you save changes to the rule’s settings.
 
   */
+export const RuleMetadata = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type RuleMetadata = z.infer<typeof RuleMetadata>;
-export const RuleMetadata = z.object({}).catchall(z.unknown());
 
 /**
  * The rule's license.
  */
+export const RuleLicense = lazySchema(() => z.string());
 export type RuleLicense = z.infer<typeof RuleLicense>;
-export const RuleLicense = z.string();
 
 /**
  * The rule’s author.
  */
+export const RuleAuthorArray = lazySchema(() => z.array(z.string()));
 export type RuleAuthorArray = z.infer<typeof RuleAuthorArray>;
-export const RuleAuthorArray = z.array(z.string());
 
 /**
  * String array used to describe common reasons why the rule may issue false-positive alerts. Defaults to an empty array.
  */
+export const RuleFalsePositiveArray = lazySchema(() => z.array(z.string()));
 export type RuleFalsePositiveArray = z.infer<typeof RuleFalsePositiveArray>;
-export const RuleFalsePositiveArray = z.array(z.string());
 
 /**
  * Array containing notes about or references to relevant information about the rule. Defaults to an empty array.
  */
+export const RuleReferenceArray = lazySchema(() => z.array(z.string()));
 export type RuleReferenceArray = z.infer<typeof RuleReferenceArray>;
-export const RuleReferenceArray = z.array(z.string());
 
 /**
  * Notes to help investigate alerts produced by the rule.
  */
+export const InvestigationGuide = lazySchema(() => z.string());
 export type InvestigationGuide = z.infer<typeof InvestigationGuide>;
-export const InvestigationGuide = z.string();
 
 /**
  * Populates the rule’s setup guide with instructions on rule prerequisites such as required integrations, configuration steps, and anything else needed for the rule to work correctly.
  */
+export const SetupGuide = lazySchema(() => z.string());
 export type SetupGuide = z.infer<typeof SetupGuide>;
-export const SetupGuide = z.string();
 
 /**
   * Determines if the rule acts as a building block. If yes, the value must be `default`.
 By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts.
-For more information, refer to [About building block rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
+For more information, refer to [About building block rules](https://www.elastic.co/docs/solutions/security/detect-and-alert/about-building-block-rules).
 
   */
+export const BuildingBlockType = lazySchema(() => z.string());
 export type BuildingBlockType = z.infer<typeof BuildingBlockType>;
-export const BuildingBlockType = z.string();
 
 /**
  * (deprecated) Has no effect.
  * @deprecated
  */
+export const AlertsIndex = lazySchema(() => z.string());
 export type AlertsIndex = z.infer<typeof AlertsIndex>;
-export const AlertsIndex = z.string();
 
 /**
  * Has no effect.
  */
+export const AlertsIndexNamespace = lazySchema(() => z.string());
 export type AlertsIndexNamespace = z.infer<typeof AlertsIndexNamespace>;
-export const AlertsIndexNamespace = z.string();
 
 /**
-  * Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params) value).
+  * Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value).
 > info
-> This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
+> This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
 
   */
+export const MaxSignals = lazySchema(() => z.number().int().min(1).default(100));
 export type MaxSignals = z.infer<typeof MaxSignals>;
-export const MaxSignals = z.number().int().min(1).default(100);
 
+export const ThreatSubtechnique = lazySchema(() =>
+  z.object({
+    /**
+     * Subtechnique ID
+     */
+    id: z.string(),
+    /**
+     * Subtechnique name
+     */
+    name: z.string(),
+    /**
+     * Subtechnique reference
+     */
+    reference: z.string(),
+  })
+);
 export type ThreatSubtechnique = z.infer<typeof ThreatSubtechnique>;
-export const ThreatSubtechnique = z.object({
-  /**
-   * Subtechnique ID
-   */
-  id: z.string(),
-  /**
-   * Subtechnique name
-   */
-  name: z.string(),
-  /**
-   * Subtechnique reference
-   */
-  reference: z.string(),
-});
 
-export type ThreatTechnique = z.infer<typeof ThreatTechnique>;
-export const ThreatTechnique = z.object({
-  /**
-   * Technique ID
-   */
-  id: z.string(),
-  /**
-   * Technique name
-   */
-  name: z.string(),
-  /**
-   * Technique reference
-   */
-  reference: z.string(),
-  /**
+export const ThreatTechnique = lazySchema(() =>
+  z.object({
+    /**
+     * Technique ID
+     */
+    id: z.string(),
+    /**
+     * Technique name
+     */
+    name: z.string(),
+    /**
+     * Technique reference
+     */
+    reference: z.string(),
+    /**
       * Array containing more specific information on the attack technique.
 
       */
-  subtechnique: z.array(ThreatSubtechnique).optional(),
-});
+    subtechnique: z.array(ThreatSubtechnique).optional(),
+  })
+);
+export type ThreatTechnique = z.infer<typeof ThreatTechnique>;
 
 /**
   * Object containing information on the attack type
 
   */
+export const ThreatTactic = lazySchema(() =>
+  z.object({
+    /**
+     * Tactic ID
+     */
+    id: z.string(),
+    /**
+     * Tactic name
+     */
+    name: z.string(),
+    /**
+     * Tactic reference
+     */
+    reference: z.string(),
+  })
+);
 export type ThreatTactic = z.infer<typeof ThreatTactic>;
-export const ThreatTactic = z.object({
-  /**
-   * Tactic ID
-   */
-  id: z.string(),
-  /**
-   * Tactic name
-   */
-  name: z.string(),
-  /**
-   * Tactic reference
-   */
-  reference: z.string(),
-});
 
 /**
   * > info
 > Currently, only threats described using the MITRE ATT&CK&trade; framework are supported.
 
   */
+export const Threat = lazySchema(() =>
+  z.object({
+    /**
+     * Relevant attack framework
+     */
+    framework: z.string(),
+    tactic: ThreatTactic,
+    /**
+     * Array containing information on the attack techniques (optional)
+     */
+    technique: z.array(ThreatTechnique).optional(),
+  })
+);
 export type Threat = z.infer<typeof Threat>;
-export const Threat = z.object({
-  /**
-   * Relevant attack framework
-   */
-  framework: z.string(),
-  tactic: ThreatTactic,
-  /**
-   * Array containing information on the attack techniques (optional)
-   */
-  technique: z.array(ThreatTechnique).optional(),
-});
 
+export const ThreatArray = lazySchema(() => z.array(Threat));
 export type ThreatArray = z.infer<typeof ThreatArray>;
-export const ThreatArray = z.array(Threat);
 
 /**
   * Indices on which the rule functions. Defaults to the Security Solution indices defined on the Kibana Advanced Settings page (Kibana → Stack Management → Advanced Settings → `securitySolution:defaultIndex`).
@@ -376,27 +396,27 @@ export const ThreatArray = z.array(Threat);
 > This field is not supported for ES|QL rules.
 
   */
+export const IndexPatternArray = lazySchema(() => z.array(z.string()));
 export type IndexPatternArray = z.infer<typeof IndexPatternArray>;
-export const IndexPatternArray = z.array(z.string());
 
+export const DataViewId = lazySchema(() => z.string());
 export type DataViewId = z.infer<typeof DataViewId>;
-export const DataViewId = z.string();
 
 /**
- * Kibana [saved search](https://www.elastic.co/guide/en/kibana/current/save-open-search.html) used by the rule to create alerts.
+ * Kibana [saved search](https://www.elastic.co/docs/explore-analyze/discover/search-sessions) used by the rule to create alerts.
  */
+export const SavedQueryId = lazySchema(() => z.string());
 export type SavedQueryId = z.infer<typeof SavedQueryId>;
-export const SavedQueryId = z.string();
 
 /**
-  * [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by the rule to create alerts.
+  * [Query](https://www.elastic.co/docs/explore-analyze/query-filter) used by the rule to create alerts.
 
 - For indicator match rules, only the query’s results are used to determine whether an alert is generated.
-- ES|QL rules have additional query requirements. Refer to [Create ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule) rules for more information.
+- ES|QL rules have additional query requirements. Refer to [Create ES|QL](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#create-esql-rule) rules for more information.
 
   */
+export const RuleQuery = lazySchema(() => z.string());
 export type RuleQuery = z.infer<typeof RuleQuery>;
-export const RuleQuery = z.string();
 
 /**
   * The query and filter context array used to define the conditions for when alerts are created from events. Defaults to an empty array.
@@ -404,26 +424,26 @@ export const RuleQuery = z.string();
 > This field is not supported for ES|QL rules.
 
   */
+export const RuleFilterArray = lazySchema(() => z.array(z.unknown()));
 export type RuleFilterArray = z.infer<typeof RuleFilterArray>;
-export const RuleFilterArray = z.array(z.unknown());
 
 /**
  * Sets which field in the source event is used to populate the alert's `signal.rule.name` value (in the UI, this value is displayed on the Rules page in the Rule column). When unspecified, the rule’s `name` value is used. The source field must be a string data type.
  */
+export const RuleNameOverride = lazySchema(() => z.string());
 export type RuleNameOverride = z.infer<typeof RuleNameOverride>;
-export const RuleNameOverride = z.string();
 
 /**
  * Sets the time field used to query indices. When unspecified, rules query the `@timestamp` field. The source field must be an Elasticsearch date data type.
  */
+export const TimestampOverride = lazySchema(() => z.string());
 export type TimestampOverride = z.infer<typeof TimestampOverride>;
-export const TimestampOverride = z.string();
 
 /**
  * Disables the fallback to the event's @timestamp field
  */
+export const TimestampOverrideFallbackDisabled = lazySchema(() => z.boolean());
 export type TimestampOverrideFallbackDisabled = z.infer<typeof TimestampOverrideFallbackDisabled>;
-export const TimestampOverrideFallbackDisabled = z.boolean();
 
 /**
   * Describes an Elasticsearch field that is needed for the rule to function.
@@ -449,65 +469,70 @@ const nonEcsField: RequiredField = {
 };
 
   */
+export const RequiredField = lazySchema(() =>
+  z.object({
+    /**
+     * Name of an Elasticsearch field
+     */
+    name: z.string().min(1).superRefine(isNonEmptyString),
+    /**
+     * Type of the Elasticsearch field
+     */
+    type: z.string().min(1).superRefine(isNonEmptyString),
+    /**
+     * Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.
+     */
+    ecs: z.boolean(),
+  })
+);
 export type RequiredField = z.infer<typeof RequiredField>;
-export const RequiredField = z.object({
-  /**
-   * Name of an Elasticsearch field
-   */
-  name: z.string().min(1).superRefine(isNonEmptyString),
-  /**
-   * Type of the Elasticsearch field
-   */
-  type: z.string().min(1).superRefine(isNonEmptyString),
-  /**
-   * Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.
-   */
-  ecs: z.boolean(),
-});
 
 /**
  * Input parameters to create a RequiredField. Does not include the `ecs` field, because `ecs` is calculated on the backend based on the field name and type.
  */
+export const RequiredFieldInput = lazySchema(() =>
+  z.object({
+    /**
+     * Name of an Elasticsearch field
+     */
+    name: z.string().min(1).superRefine(isNonEmptyString),
+    /**
+     * Type of the Elasticsearch field
+     */
+    type: z.string().min(1).superRefine(isNonEmptyString),
+  })
+);
 export type RequiredFieldInput = z.infer<typeof RequiredFieldInput>;
-export const RequiredFieldInput = z.object({
-  /**
-   * Name of an Elasticsearch field
-   */
-  name: z.string().min(1).superRefine(isNonEmptyString),
-  /**
-   * Type of the Elasticsearch field
-   */
-  type: z.string().min(1).superRefine(isNonEmptyString),
-});
 
+export const RequiredFieldArray = lazySchema(() => z.array(RequiredField));
 export type RequiredFieldArray = z.infer<typeof RequiredFieldArray>;
-export const RequiredFieldArray = z.array(RequiredField);
 
 /**
  * Timeline template ID
  */
+export const TimelineTemplateId = lazySchema(() => z.string());
 export type TimelineTemplateId = z.infer<typeof TimelineTemplateId>;
-export const TimelineTemplateId = z.string();
 
 /**
  * Timeline template title
  */
+export const TimelineTemplateTitle = lazySchema(() => z.string());
 export type TimelineTemplateTitle = z.infer<typeof TimelineTemplateTitle>;
-export const TimelineTemplateTitle = z.string();
 
+export const SavedObjectResolveOutcome = lazySchema(() =>
+  z.enum(['exactMatch', 'aliasMatch', 'conflict'])
+);
 export type SavedObjectResolveOutcome = z.infer<typeof SavedObjectResolveOutcome>;
-export const SavedObjectResolveOutcome = z.enum(['exactMatch', 'aliasMatch', 'conflict']);
 export type SavedObjectResolveOutcomeEnum = typeof SavedObjectResolveOutcome.enum;
 export const SavedObjectResolveOutcomeEnum = SavedObjectResolveOutcome.enum;
 
+export const SavedObjectResolveAliasTargetId = lazySchema(() => z.string());
 export type SavedObjectResolveAliasTargetId = z.infer<typeof SavedObjectResolveAliasTargetId>;
-export const SavedObjectResolveAliasTargetId = z.string();
 
+export const SavedObjectResolveAliasPurpose = lazySchema(() =>
+  z.enum(['savedObjectConversion', 'savedObjectImport'])
+);
 export type SavedObjectResolveAliasPurpose = z.infer<typeof SavedObjectResolveAliasPurpose>;
-export const SavedObjectResolveAliasPurpose = z.enum([
-  'savedObjectConversion',
-  'savedObjectImport',
-]);
 export type SavedObjectResolveAliasPurposeEnum = typeof SavedObjectResolveAliasPurpose.enum;
 export const SavedObjectResolveAliasPurposeEnum = SavedObjectResolveAliasPurpose.enum;
 
@@ -531,59 +556,62 @@ There are Fleet packages like `windows` that contain only one integration; in th
 several integrations; in this case, `integration` should be specified.
 
   */
+export const RelatedIntegration = lazySchema(() =>
+  z.object({
+    package: NonEmptyString,
+    version: NonEmptyString,
+    integration: NonEmptyString.optional(),
+  })
+);
 export type RelatedIntegration = z.infer<typeof RelatedIntegration>;
-export const RelatedIntegration = z.object({
-  package: NonEmptyString,
-  version: NonEmptyString,
-  integration: NonEmptyString.optional(),
-});
 
+export const RelatedIntegrationArray = lazySchema(() => z.array(RelatedIntegration));
 export type RelatedIntegrationArray = z.infer<typeof RelatedIntegrationArray>;
-export const RelatedIntegrationArray = z.array(RelatedIntegration);
 
 /**
   * Schema for fields relating to investigation fields. These are user defined fields we use to highlight
 in various features in the UI such as alert details flyout and exceptions auto-population from alert.
 
   */
+export const InvestigationFields = lazySchema(() =>
+  z.object({
+    field_names: z.array(NonEmptyString).min(1),
+  })
+);
 export type InvestigationFields = z.infer<typeof InvestigationFields>;
-export const InvestigationFields = z.object({
-  field_names: z.array(NonEmptyString).min(1),
-});
 
 /**
  * Defines how often rule actions are taken.
  */
+export const RuleActionThrottle = lazySchema(() =>
+  z.union([z.enum(['no_actions', 'rule']), z.string().regex(/^[1-9]\d*[smhd]$/)])
+);
 export type RuleActionThrottle = z.infer<typeof RuleActionThrottle>;
-export const RuleActionThrottle = z.union([
-  z.enum(['no_actions', 'rule']),
-  z.string().regex(/^[1-9]\d*[smhd]$/),
-]);
 
 /**
  * Defines how often rules run actions.
  */
+export const RuleActionNotifyWhen = lazySchema(() =>
+  z.enum(['onActiveAlert', 'onThrottleInterval', 'onActionGroupChange'])
+);
 export type RuleActionNotifyWhen = z.infer<typeof RuleActionNotifyWhen>;
-export const RuleActionNotifyWhen = z.enum([
-  'onActiveAlert',
-  'onThrottleInterval',
-  'onActionGroupChange',
-]);
 export type RuleActionNotifyWhenEnum = typeof RuleActionNotifyWhen.enum;
 export const RuleActionNotifyWhenEnum = RuleActionNotifyWhen.enum;
 
 /**
  * The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
  */
+export const RuleActionFrequency = lazySchema(() =>
+  z.object({
+    /**
+     * Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
+     */
+    summary: z.boolean(),
+    notifyWhen: RuleActionNotifyWhen,
+    throttle: RuleActionThrottle.nullable(),
+  })
+);
 export type RuleActionFrequency = z.infer<typeof RuleActionFrequency>;
-export const RuleActionFrequency = z.object({
-  /**
-   * Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
-   */
-  summary: z.boolean(),
-  notifyWhen: RuleActionNotifyWhen,
-  throttle: RuleActionThrottle.nullable(),
-});
 
 /**
   * Object containing an action’s conditional filters.
@@ -599,8 +627,8 @@ export const RuleActionFrequency = z.object({
     - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
 
   */
+export const RuleActionAlertsFilter = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type RuleActionAlertsFilter = z.infer<typeof RuleActionAlertsFilter>;
-export const RuleActionAlertsFilter = z.object({}).catchall(z.unknown());
 
 /**
   * Object containing the allowed connector fields, which varies according to the connector type.
@@ -632,24 +660,24 @@ For PagerDuty:
   - `class` (string, optional): Value indicating the class/type of the event.
 
   */
+export const RuleActionParams = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type RuleActionParams = z.infer<typeof RuleActionParams>;
-export const RuleActionParams = z.object({}).catchall(z.unknown());
 
 /**
  * Optionally groups actions by use cases. Use `default` for alert notifications.
  */
+export const RuleActionGroup = lazySchema(() => z.string());
 export type RuleActionGroup = z.infer<typeof RuleActionGroup>;
-export const RuleActionGroup = z.string();
 
 /**
  * The connector ID.
  */
+export const RuleActionId = lazySchema(() => z.string());
 export type RuleActionId = z.infer<typeof RuleActionId>;
-export const RuleActionId = z.string();
 
-export type RuleAction = z.infer<typeof RuleAction>;
-export const RuleAction = z.object({
-  /**
+export const RuleAction = lazySchema(() =>
+  z.object({
+    /**
       * The action type used for sending notifications, can be:
 
   - `.slack`
@@ -671,101 +699,117 @@ export const RuleAction = z.object({
   - `.d3security`
 
       */
-  action_type_id: z.string(),
-  group: RuleActionGroup.optional(),
-  id: RuleActionId,
-  params: RuleActionParams,
-  uuid: NonEmptyString.optional(),
-  alerts_filter: RuleActionAlertsFilter.optional(),
-  frequency: RuleActionFrequency.optional(),
-});
+    action_type_id: z.string(),
+    group: RuleActionGroup.optional(),
+    id: RuleActionId,
+    params: RuleActionParams,
+    uuid: NonEmptyString.optional(),
+    alerts_filter: RuleActionAlertsFilter.optional(),
+    frequency: RuleActionFrequency.optional(),
+  })
+);
+export type RuleAction = z.infer<typeof RuleAction>;
 
 /**
  * The exception type
  */
+export const ExceptionListType = lazySchema(() =>
+  z.enum([
+    'detection',
+    'rule_default',
+    'endpoint',
+    'endpoint_trusted_apps',
+    'endpoint_trusted_devices',
+    'endpoint_events',
+    'endpoint_host_isolation_exceptions',
+    'endpoint_blocklists',
+  ])
+);
 export type ExceptionListType = z.infer<typeof ExceptionListType>;
-export const ExceptionListType = z.enum([
-  'detection',
-  'rule_default',
-  'endpoint',
-  'endpoint_trusted_apps',
-  'endpoint_trusted_devices',
-  'endpoint_events',
-  'endpoint_host_isolation_exceptions',
-  'endpoint_blocklists',
-]);
 export type ExceptionListTypeEnum = typeof ExceptionListType.enum;
 export const ExceptionListTypeEnum = ExceptionListType.enum;
 
 /**
-  * Array of [exception containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
+  * Array of [exception containers](https://www.elastic.co/docs/solutions/security/detect-and-alert/detection-rule-concepts), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
 
   */
+export const RuleExceptionList = lazySchema(() =>
+  z.object({
+    /**
+     * ID of the exception container
+     */
+    id: z.string().min(1).superRefine(isNonEmptyString),
+    /**
+     * List ID of the exception container
+     */
+    list_id: z.string().min(1).superRefine(isNonEmptyString),
+    type: ExceptionListType,
+    /**
+     * Determines the exceptions validity in rule's Kibana space
+     */
+    namespace_type: z.enum(['agnostic', 'single']),
+  })
+);
 export type RuleExceptionList = z.infer<typeof RuleExceptionList>;
-export const RuleExceptionList = z.object({
-  /**
-   * ID of the exception container
-   */
-  id: z.string().min(1).superRefine(isNonEmptyString),
-  /**
-   * List ID of the exception container
-   */
-  list_id: z.string().min(1).superRefine(isNonEmptyString),
-  type: ExceptionListType,
-  /**
-   * Determines the exceptions validity in rule's Kibana space
-   */
-  namespace_type: z.enum(['agnostic', 'single']),
-});
 
 /**
  * Time unit
  */
+export const AlertSuppressionDurationUnit = lazySchema(() => z.enum(['s', 'm', 'h']));
 export type AlertSuppressionDurationUnit = z.infer<typeof AlertSuppressionDurationUnit>;
-export const AlertSuppressionDurationUnit = z.enum(['s', 'm', 'h']);
 export type AlertSuppressionDurationUnitEnum = typeof AlertSuppressionDurationUnit.enum;
 export const AlertSuppressionDurationUnitEnum = AlertSuppressionDurationUnit.enum;
 
+export const AlertSuppressionDuration = lazySchema(() =>
+  z.object({
+    value: z.number().int().min(1),
+    unit: AlertSuppressionDurationUnit,
+  })
+);
 export type AlertSuppressionDuration = z.infer<typeof AlertSuppressionDuration>;
-export const AlertSuppressionDuration = z.object({
-  value: z.number().int().min(1),
-  unit: AlertSuppressionDurationUnit,
-});
 
 /**
   * Describes how alerts will be generated for documents with missing suppress by fields:
 doNotSuppress - per each document a separate alert will be created
 suppress - only alert will be created per suppress by bucket
   */
+export const AlertSuppressionMissingFieldsStrategy = lazySchema(() =>
+  z.enum(['doNotSuppress', 'suppress'])
+);
 export type AlertSuppressionMissingFieldsStrategy = z.infer<
   typeof AlertSuppressionMissingFieldsStrategy
 >;
-export const AlertSuppressionMissingFieldsStrategy = z.enum(['doNotSuppress', 'suppress']);
 export type AlertSuppressionMissingFieldsStrategyEnum =
   typeof AlertSuppressionMissingFieldsStrategy.enum;
 export const AlertSuppressionMissingFieldsStrategyEnum = AlertSuppressionMissingFieldsStrategy.enum;
 
+export const AlertSuppressionGroupBy = lazySchema(() => z.array(z.string()).min(1).max(3));
 export type AlertSuppressionGroupBy = z.infer<typeof AlertSuppressionGroupBy>;
-export const AlertSuppressionGroupBy = z.array(z.string()).min(1).max(3);
 
 /**
  * Defines alert suppression configuration.
  */
+export const AlertSuppression = lazySchema(() =>
+  z.object({
+    group_by: AlertSuppressionGroupBy,
+    duration: AlertSuppressionDuration.optional(),
+    missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
+  })
+);
 export type AlertSuppression = z.infer<typeof AlertSuppression>;
-export const AlertSuppression = z.object({
-  group_by: AlertSuppressionGroupBy,
-  duration: AlertSuppressionDuration.optional(),
-  missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
-});
 
+export const AlertSuppressionCamel = lazySchema(() =>
+  z.object({
+    groupBy: AlertSuppressionGroupBy,
+    duration: AlertSuppressionDuration.optional(),
+    missingFieldsStrategy: AlertSuppressionMissingFieldsStrategy.optional(),
+  })
+);
 export type AlertSuppressionCamel = z.infer<typeof AlertSuppressionCamel>;
-export const AlertSuppressionCamel = z.object({
-  groupBy: AlertSuppressionGroupBy,
-  duration: AlertSuppressionDuration.optional(),
-  missingFieldsStrategy: AlertSuppressionMissingFieldsStrategy.optional(),
-});
 
+export const GapFillStatus = lazySchema(() =>
+  z.enum(['unfilled', 'in_progress', 'filled', 'error'])
+);
 export type GapFillStatus = z.infer<typeof GapFillStatus>;
-export const GapFillStatus = z.enum(['unfilled', 'in_progress', 'filled']);
 export type GapFillStatusEnum = typeof GapFillStatus.enum;
 export const GapFillStatusEnum = GapFillStatus.enum;

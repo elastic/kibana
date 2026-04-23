@@ -126,6 +126,13 @@ export const ALERTS_TABLE_UNKNOWN_ERROR_TITLE = i18n.translate(
   }
 );
 
+export const ALERTS_TABLE_SHOW_ERROR_DETAILS = i18n.translate(
+  'responseOpsAlertsTable.alertsTable.showErrorDetails',
+  {
+    defaultMessage: 'Show details',
+  }
+);
+
 export const ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE = i18n.translate(
   'responseOpsAlertsTable.alertsTable.unknownErrorBody',
   {
@@ -328,8 +335,22 @@ export const UNACKNOWLEDGE = i18n.translate('xpack.responseOpsAlertsTable.action
   defaultMessage: 'Unacknowledge',
 });
 
+export const ALERT_FLYOUT_ALERT_DETAILS_BUTTON = i18n.translate(
+  'xpack.responseOpsAlertsTable.alertFlyout.alertDetailsButton',
+  {
+    defaultMessage: 'Alert details',
+  }
+);
+
 export const getAlertFlyoutAriaLabel = (alertDescription: string) =>
   i18n.translate('xpack.responseOpsAlertsTable.alertFlyout.ariaLabel', {
     defaultMessage: 'Details for alert "{alertDescription}"',
     values: { alertDescription },
   });
+
+export const BULK_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.bulkActionsAriaLabel',
+  {
+    defaultMessage: 'Bulk actions',
+  }
+);

@@ -7,18 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+
+/**
+ * Step types whose outputs must never be evicted from in-memory state,
+ * even for non-latest iterations in a loop.
+ *
+ * - data.set: getVariables reads all executions, not just the latest
+ * - waitForInput: user-provided answers must be preserved for auditability
+ *   and downstream access across all loop iterations
+ */
+const EVICTION_EXEMPT_STEP_TYPES = new Set(['data.set', 'waitForInput']);
+
+/** Context for the step that failed during this run; used to build workflow_execution_failed event. */
+export interface FailedStepContext {
+  stepId: string;
+  stepName: string;
+  stepExecutionId: string;
+}
 
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
   private stepDocumentsChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map();
+
+  private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
   /**
    * Maps step IDs to their execution IDs in chronological order.
@@ -37,8 +53,14 @@ export class WorkflowExecutionState {
   }
 
   public async load(): Promise<void> {
-    const foundSteps = await this.workflowStepExecutionRepository.searchStepExecutionsByExecutionId(
-      this.workflowExecution.id
+    if (!this.workflowExecution.stepExecutionIds) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
+      );
+    }
+
+    const foundSteps = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
+      this.workflowExecution.stepExecutionIds
     );
     foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
     this.buildStepIdExecutionIdIndex();
@@ -46,6 +68,14 @@ export class WorkflowExecutionState {
 
   public getWorkflowExecution(): EsWorkflowExecution {
     return this.workflowExecution;
+  }
+
+  public setLastFailedStepContext(ctx: FailedStepContext): void {
+    this.lastFailedStepContext = ctx;
+  }
+
+  public getLastFailedStepContext(): FailedStepContext | undefined {
+    return this.lastFailedStepContext;
   }
 
   public updateWorkflowExecution(workflowExecution: Partial<EsWorkflowExecution>): void {
@@ -108,7 +138,7 @@ export class WorkflowExecutionState {
     if (!this.stepExecutions.has(step.id)) {
       this.createStep(step);
     } else {
-      this.updateStep(step);
+      this.updateStep(step.id, step);
     }
   }
 
@@ -136,10 +166,6 @@ export class WorkflowExecutionState {
     await this.workflowExecutionRepository.updateWorkflowExecution({
       ...changes,
       id: this.workflowExecution.id,
-      // Include all step execution IDs sorted by execution order for O(1) mget lookup on read side
-      stepExecutionIds: Array.from(this.stepExecutions.values())
-        .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
-        .map((step) => step.id),
     });
   }
 
@@ -157,33 +183,86 @@ export class WorkflowExecutionState {
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
+      isTestRun: Boolean(this.workflowExecution.isTestRun),
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(step.id as string, newStep);
     this.stepDocumentsChanges.set(step.id as string, newStep);
+    // As we are creating a new step execution, we need to update the workflow execution with the new step execution ID
+    // Due to the fact that execution and flushes are synchronous, it's safe to use incremental approach to update the step execution IDs
+    // while still keeping the order of the step execution IDs according to the global execution index
+    // At the same time it's safer because we don't rely on how many step executions are loaded in resume task.
+    this.updateWorkflowExecution({
+      stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), step.id as string],
+    });
   }
 
-  private updateStep(step: Partial<EsWorkflowStepExecution>) {
-    const existingStep = this.stepExecutions.get(step.id!);
+  private updateStep(stepId: string, step: Partial<EsWorkflowStepExecution>) {
+    const existingStep = this.stepExecutions.get(stepId);
     const updatedStep = {
       ...existingStep,
       ...step,
     } as EsWorkflowStepExecution;
-    this.stepExecutions.set(step.id!, updatedStep);
+    this.stepExecutions.set(stepId, updatedStep);
     // Accumulate changes for the next flush — merge with any pending changes
     // ES partial update (doc_as_upsert) preserves fields not included in the update
-    this.stepDocumentsChanges.set(step.id as string, {
-      ...(this.stepDocumentsChanges.get(step.id as string) || {}),
+    this.stepDocumentsChanges.set(stepId, {
+      ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,
     });
+  }
+
+  /**
+   * Nullifies `output` and `input` on non-latest in-memory step executions
+   * for the given step IDs, reducing memory pressure after a loop completes.
+   *
+   * Preserves:
+   * - The latest execution per stepId (needed by getContext → getLatestStepExecution)
+   * - All data.set step outputs (needed by getVariables which reads all executions)
+   * - All waitForInput step outputs (user-provided values that must be preserved for
+   *   auditability and downstream access across all iterations)
+   * - All metadata fields (needed by telemetry at terminal state)
+   *
+   * Note: eviction uses global-latest-wins semantics — it keeps the absolute latest
+   * execution per stepId across all loop iterations, not scoped to a specific loop scope.
+   * This means that after outer-loop eviction, only the latest execution from the last
+   * outer iteration retains its output. This is correct because getLatestStepExecution
+   * always returns the absolute latest execution.
+   *
+   * Does NOT touch ES-persisted documents — this is in-memory only.
+   * On resume, ES documents still hold the original outputs.
+   */
+  public evictStaleLoopOutputs(innerStepIds: Iterable<string>): void {
+    for (const stepId of innerStepIds) {
+      const executionIds = this.stepIdExecutionIdIndex.get(stepId);
+      if (executionIds && executionIds.length > 1) {
+        const staleIds = executionIds.slice(0, -1);
+        for (const execId of staleIds) {
+          const stepExec = this.stepExecutions.get(execId);
+          if (
+            stepExec &&
+            (stepExec.stepType == null || !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType))
+          ) {
+            // Replace with a shallow copy so any pending stepDocumentsChanges entry
+            // for this execution is not mutated (it shares the same object reference
+            // when the step was first created via createStep).
+            this.stepExecutions.set(execId, { ...stepExec, output: undefined, input: undefined });
+          }
+        }
+      }
+    }
   }
 
   private buildStepIdExecutionIdIndex(): void {
     this.stepIdExecutionIdIndex.clear();
     for (const step of this.stepExecutions.values()) {
-      if (!this.stepIdExecutionIdIndex.has(step.stepId)) {
-        this.stepIdExecutionIdIndex.set(step.stepId, []);
+      let idsList = this.stepIdExecutionIdIndex.get(step.stepId);
+
+      if (!idsList) {
+        idsList = [];
+        this.stepIdExecutionIdIndex.set(step.stepId, idsList);
       }
-      this.stepIdExecutionIdIndex.get(step.stepId)!.push(step.id);
+
+      idsList.push(step.id);
     }
 
     for (const [stepId, stepExecutionIds] of this.stepIdExecutionIdIndex.entries()) {

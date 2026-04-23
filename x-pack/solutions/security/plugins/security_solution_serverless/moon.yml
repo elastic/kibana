@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-solution-serverless'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-solution'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-serverless'
+  title: '@kbn/security-solution-serverless'
   description: Moon project for @kbn/security-solution-serverless
   channel: ''
   owner: '@elastic/security-solution'
-  metadata:
-    sourceRoot: x-pack/solutions/security/plugins/security_solution_serverless
+  sourceRoot: x-pack/solutions/security/plugins/security_solution_serverless
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -56,6 +55,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/workflows'
   - '@kbn/usage-api-plugin'
+  - '@kbn/workflows-management-plugin'
 tags:
   - plugin
   - prod

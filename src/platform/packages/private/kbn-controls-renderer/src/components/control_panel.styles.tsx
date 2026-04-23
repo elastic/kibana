@@ -11,16 +11,16 @@ import { euiBreakpoint, type UseEuiTheme } from '@elastic/eui';
 
 export const controlWidthStyles = (euiThemeContext: UseEuiTheme) => ({
   '&.controlFrameWrapper--small': {
-    width: `${euiThemeContext.euiTheme.base * 14}px`,
-    minWidth: `${euiThemeContext.euiTheme.base * 14}px`,
+    width: `min(${euiThemeContext.euiTheme.base * 14}px, 100%)`,
+    minWidth: `min(${euiThemeContext.euiTheme.base * 14}px, 100%)`,
   },
   '&.controlFrameWrapper--large': {
-    width: `${euiThemeContext.euiTheme.base * 50}px`,
-    minWidth: `${euiThemeContext.euiTheme.base * 50}px`,
+    width: `min(${euiThemeContext.euiTheme.base * 50}px, 100%)`,
+    minWidth: `min(${euiThemeContext.euiTheme.base * 50}px, 100%)`,
   },
   '&.controlFrameWrapper--medium': {
-    width: `${euiThemeContext.euiTheme.base * 25}px`,
-    minWidth: `${euiThemeContext.euiTheme.base * 25}px`,
+    width: `min(${euiThemeContext.euiTheme.base * 25}px, 100%)`,
+    minWidth: `min(${euiThemeContext.euiTheme.base * 25}px, 100%)`,
   },
   [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
     width: '100%',

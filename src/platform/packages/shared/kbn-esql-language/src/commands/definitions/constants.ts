@@ -86,7 +86,6 @@ export const FULL_TEXT_SEARCH_FUNCTIONS = [
   'match',
   'match_operator',
   'match_phrase',
-  'multi_match',
   'qstr',
   'kql',
 ];

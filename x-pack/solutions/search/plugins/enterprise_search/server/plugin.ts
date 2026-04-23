@@ -24,10 +24,9 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
   APPLICATIONS_PLUGIN,
   SEARCH_PRODUCT_NAME,
-  SEARCH_INDICES,
   SEARCH_HOMEPAGE,
-  SEARCH_INDEX_MANAGEMENT,
   SEARCH_APPS_TITLE,
+  SEARCH_INDEX_MANAGEMENT_APP_ID,
 } from '../common/constants';
 
 import { AS_TELEMETRY_NAME } from './collectors/app_search/telemetry';
@@ -98,8 +97,14 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       SEARCH_HOMEPAGE,
       SEARCH_GETTING_STARTED,
-      SEARCH_INDICES,
-      SEARCH_INDEX_MANAGEMENT,
+      SEARCH_INDEX_MANAGEMENT_APP_ID,
+    ];
+
+    const READ_ONLY_PLUGIN_IDS = [
+      ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
+      ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
+      SEARCH_HOMEPAGE,
+      SEARCH_GETTING_STARTED,
     ];
 
     if (customIntegrations) {
@@ -132,9 +137,9 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
           ui: [],
         },
         read: {
-          app: ['kibana', ...PLUGIN_IDS],
+          app: ['kibana', ...READ_ONLY_PLUGIN_IDS],
           api: [],
-          catalogue: PLUGIN_IDS,
+          catalogue: READ_ONLY_PLUGIN_IDS,
           savedObject: {
             all: [],
             read: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],

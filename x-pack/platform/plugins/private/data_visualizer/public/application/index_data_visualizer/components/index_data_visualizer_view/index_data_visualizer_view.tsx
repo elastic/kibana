@@ -30,6 +30,7 @@ import {
   DatePickerWrapper,
   FullTimeRangeSelector,
   FROZEN_TIER_PREFERENCE,
+  mlTimefilterRefresh$,
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 
@@ -137,7 +138,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data } = services;
+  const { uiSettings, data, cps } = services;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
@@ -500,6 +501,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     setDataVisualizerListState,
     dataVisualizerListState,
   ]);
+
+  useEffect(() => {
+    const subscription = cps?.cpsManager?.getProjectRouting$()?.subscribe(() => {
+      mlTimefilterRefresh$.next({ lastRefresh: Date.now() });
+    });
+    return () => subscription?.unsubscribe();
+  }, [cps?.cpsManager]);
 
   return (
     <EuiPageTemplate

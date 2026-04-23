@@ -7,12 +7,38 @@
 
 import type {
   PublicSkillDefinition,
+  PublicSkillSummary,
   PersistedSkillCreateRequest,
   PersistedSkillUpdateRequest,
+  SerializedAgentBuilderError,
 } from '@kbn/agent-builder-common';
+import type { AgentRef } from './tools';
+
+export type { AgentRef };
+
+export const SKILL_USED_BY_AGENTS_ERROR_CODE = 'SKILL_USED_BY_AGENTS';
+
+interface BulkDeleteSkillResultBase {
+  skillId: string;
+}
+
+interface BulkDeleteSkillSuccessResult extends BulkDeleteSkillResultBase {
+  success: true;
+}
+
+interface BulkDeleteSkillFailureResult extends BulkDeleteSkillResultBase {
+  success: false;
+  reason: SerializedAgentBuilderError;
+}
+
+export type BulkDeleteSkillResult = BulkDeleteSkillSuccessResult | BulkDeleteSkillFailureResult;
+
+export interface BulkDeleteSkillResponse {
+  results: BulkDeleteSkillResult[];
+}
 
 export interface ListSkillsResponse {
-  results: PublicSkillDefinition[];
+  results: PublicSkillSummary[];
 }
 
 export type GetSkillResponse = PublicSkillDefinition;

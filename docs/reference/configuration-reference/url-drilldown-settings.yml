@@ -1,0 +1,36 @@
+---
+# This file is used to generate "URL drilldown settings in Kibana" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: URL drilldown settings in Kibana
+id: url-drilldown-settings-kb
+page_description: |
+  Configure the URL drilldown settings in your `kibana.yml` configuration file.
+
+groups:
+  - group: General settings
+    id: general-url-drilldown-settings
+    settings:
+
+      - setting: externalUrl.policy
+        id: external-url-policy
+        description: |
+          Configures the external URL policies. URL drilldowns respect the global **External URL** service, which you can use to deny or allow external URLs. By default all external URLs are allowed.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+        example: |
+          For example, to allow only external URLs to the `example.com` domain with the `https` scheme, except for the `danger.example.com` sub-domain, which is denied even when `https` scheme is used:
+
+          ```yaml
+          externalUrl.policy:
+            - allow: false
+              host: danger.example.com
+            - allow: true
+              host: example.com
+              protocol: https
+          ```

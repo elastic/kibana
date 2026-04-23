@@ -29,6 +29,7 @@ export interface ChromeHelpMenuLink {
   title: string;
   href?: string;
   onClick?: () => void;
+  iconType?: string;
   dataTestSubj?: string;
 }
 
@@ -55,9 +56,6 @@ export interface ChromeNavControls {
   /** Register a nav control to be presented on the top-center side of the chrome header. */
   registerCenter(navControl: ChromeNavControl): void;
 
-  /** Register an extension to be presented to the left of the top-right side of the chrome header. */
-  registerExtension(navControl: ChromeNavControl): void;
-
   /**
    * Set the help menu links
    * @deprecated Use {@link ChromeStart.setHelpMenuLinks} instead
@@ -72,9 +70,6 @@ export interface ChromeNavControls {
 
   /** @internal */
   getCenter$(): Observable<ChromeNavControl[]>;
-
-  /** @internal */
-  getExtension$(): Observable<ChromeNavControl[]>;
 
   /** @internal */
   getHelpMenuLinks$(): Observable<ChromeHelpMenuLink[]>;

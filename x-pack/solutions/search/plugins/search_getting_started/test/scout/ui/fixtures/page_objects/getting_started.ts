@@ -19,25 +19,8 @@ export class GettingStarted {
     return this.page.testSubj.locator('gettingStartedHeader');
   }
 
-  async getAddDataButton() {
-    return this.page.testSubj.locator('gettingStartedAddDataButton');
-  }
-
-  async clickAddDataButton() {
-    await this.page.testSubj.locator('gettingStartedAddDataButton').click();
-  }
-
-  async selectAddDataOption(optionTestSubj: string) {
-    await this.clickAddDataButton();
-    await this.page.testSubj.locator(optionTestSubj).click();
-  }
-
-  async getSkipAndGoHomeButton() {
-    return this.page.testSubj.locator('skipAndGoHomeBtn');
-  }
-
-  async clickSkipAndGoHomeButton() {
-    await this.page.testSubj.locator('skipAndGoHomeBtn').click();
+  async getKibanaVersionBadge() {
+    return this.page.testSubj.locator('kibana-version-badge');
   }
 
   async getEndpointValueField() {
@@ -76,78 +59,62 @@ export class GettingStarted {
     return this.page.testSubj.locator('connectionDetailsTabBtn-apiKeys');
   }
 
+  async getAgentInstallLaunchBtn() {
+    return this.page.testSubj.locator('agentInstallLaunchBtn');
+  }
+
+  async clickAgentInstallLaunchBtn() {
+    await this.page.testSubj.locator('agentInstallLaunchBtn').click();
+  }
+
+  async getPromptModalCopyBtn() {
+    return this.page.testSubj.locator('promptModalCopyBtn');
+  }
+
+  async getAgentInstallOpenInAgentBuilderBtn() {
+    return this.page.testSubj.locator('agentInstallOpenInAgentBuilder');
+  }
+
+  async clickAgentInstallOpenInAgentBuilderBtn() {
+    await this.page.testSubj.locator('agentInstallOpenInAgentBuilder').click();
+  }
+
+  async getAgentBuilderSidebarPanel() {
+    return this.page.testSubj.locator('sidebarPanel');
+  }
+
+  async getUploadFilesButton() {
+    return this.page.testSubj.locator('uploadFilesButton');
+  }
+
+  async clickUploadFilesButton() {
+    await this.page.testSubj.locator('uploadFilesButton').click();
+  }
+
+  async getViewSampleDataButton() {
+    return this.page.testSubj.locator('viewSampleDataButton');
+  }
+
+  async clickViewSampleDataButton() {
+    await this.page.testSubj.locator('viewSampleDataButton').click();
+  }
+
   async getTutorialCard(tutorialId: string) {
     return this.page.testSubj.locator(`console_tutorials_${tutorialId}`);
   }
 
-  async getTutorialCardButton(tutorialId: string) {
-    return this.page.testSubj.locator(`console_tutorials_${tutorialId}-btn`);
-  }
-
   async getTutorialCards() {
-    // Use CSS selector to match cards starting with console_tutorials_ but exclude -btn elements
-    return this.page
-      .locator('[data-test-subj^="console_tutorials_"]:not([data-test-subj$="-btn"])')
-      .all();
+    return this.page.locator('[data-test-subj^="console_tutorials_"]').all();
   }
 
   async clickTutorialCard(tutorialId: string) {
     await this.page.testSubj.locator(`console_tutorials_${tutorialId}`).click();
   }
 
-  async clickTutorialCardButton(tutorialId: string) {
-    const button = this.page.testSubj.locator(`console_tutorials_${tutorialId}-btn`);
-    await button.scrollIntoViewIfNeeded();
-    await button.click();
-  }
-
-  async clickTutorialExpandButton() {
-    const button = this.page.testSubj.locator(
-      'searchGettingStartedConsoleTutorialsGroupExpandButton'
-    );
-    await button.scrollIntoViewIfNeeded();
-    await button.click();
-  }
-
-  async expandTutorialCards() {
-    const buttonText = await (await this.getTutorialExpandButton()).innerText();
-    if (buttonText.includes('Show less')) {
-      return; // Already expanded
-    }
-    await this.clickTutorialExpandButton();
-  }
-
-  async collapseTutorialCards() {
-    const buttonText = await (await this.getTutorialExpandButton()).innerText();
-    if (buttonText.includes('Show more')) {
-      return; // Already collapsed
-    }
-    await this.clickTutorialExpandButton();
-  }
-
-  async getTutorialExpandButton() {
-    return this.page.testSubj.locator('searchGettingStartedConsoleTutorialsGroupExpandButton');
-  }
-
-  async getLanguageSelector() {
-    return this.page.testSubj.locator('codeExampleLanguageSelect');
-  }
-
-  async selectCodingLanguage(language: string) {
-    await this.page.testSubj.locator('codeExampleLanguageSelect').click();
-    await this.page.testSubj.locator(`lang-option-${language}`).click();
-  }
-
-  async getCodeSample() {
-    return this.page.testSubj.locator('gettingStartedExampleCode');
-  }
-
-  async getFooterLink(linkId: string) {
-    return this.page.testSubj.locator(`gettingStarted${linkId}-btn`);
-  }
-
-  async getNoApiKeysAccessMessage() {
-    return this.page.locator("text=You don't have access to manage API keys");
+  async clickTutorialCardAndScrollIntoView(tutorialId: string) {
+    const card = this.page.testSubj.locator(`console_tutorials_${tutorialId}`);
+    await card.scrollIntoViewIfNeeded();
+    await card.click();
   }
 
   async getEmbeddedConsoleControlBar() {
@@ -160,5 +127,9 @@ export class GettingStarted {
 
   async getEmbeddedConsole() {
     return this.page.testSubj.locator('consoleEmbeddedBody');
+  }
+
+  async getNoApiKeysAccessMessage() {
+    return this.page.locator("text=You don't have access to manage API keys");
   }
 }

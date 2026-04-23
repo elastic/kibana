@@ -4,21 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/task-manager-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/task-manager-plugin'
+  title: '@kbn/task-manager-plugin'
   description: Moon project for @kbn/task-manager-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/task_manager
+  sourceRoot: x-pack/platform/plugins/shared/task_manager
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
   - '@kbn/usage-collection-plugin'
   - '@kbn/config-schema'
   - '@kbn/config'
@@ -55,6 +55,8 @@ dependsOn:
   - '@kbn/core-execution-context-server-mocks'
   - '@kbn/core-execution-context-common'
   - '@kbn/core-http-server'
+  - '@kbn/core-security-server'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -66,17 +68,9 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - common/**/*
+    - test/scout/**/*
+    - test/scout_task_manager_uiam/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

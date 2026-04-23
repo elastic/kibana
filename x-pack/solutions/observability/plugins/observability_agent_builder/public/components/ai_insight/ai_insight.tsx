@@ -35,7 +35,6 @@ import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 import { LoadingCursor } from './loading_cursor';
 import { FeedbackButtons, type Feedback } from './feedback_buttons';
-import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
 import {
   ObservabilityAgentBuilderTelemetryEventType,
   reportTelemetryEvent,
@@ -97,11 +96,10 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   }, [analytics, connectorInfo, error, insightType, isLoading, summary]);
 
   const handleStartConversation = useCallback(() => {
-    if (!agentBuilder?.openConversationFlyout) return;
+    if (!agentBuilder?.openChat) return;
 
-    agentBuilder.openConversationFlyout({
+    agentBuilder.openChat({
       newConversation: true,
-      agentId: OBSERVABILITY_AGENT_ID,
       attachments: buildAttachments(summary, context),
     });
   }, [agentBuilder, buildAttachments, summary, context]);
@@ -170,7 +168,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
               <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
                 <span>
                   {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.description', {
-                    defaultMessage: 'Get helpful insights from our Observability Agent',
+                    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
                   })}
                 </span>
               </EuiText>

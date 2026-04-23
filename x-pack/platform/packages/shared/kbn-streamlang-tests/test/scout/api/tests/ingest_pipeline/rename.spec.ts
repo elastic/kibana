@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { RenameProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -28,16 +29,16 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.host?.renamed).toBe('test-host');
-      expect(source?.host?.original).toBeUndefined();
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.host)?.renamed).toBe('test-host');
+      expect(asDoc(source?.host)?.original).toBeUndefined();
     });
 
     [
@@ -63,9 +64,9 @@ apiTest.describe(
           ],
         };
 
-        expect(() => {
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
 
@@ -83,15 +84,15 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'host.original' field
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.host?.renamed).toBeUndefined();
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.host)?.renamed).toBeUndefined();
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
@@ -108,7 +109,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'host.original' field
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -130,15 +131,15 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.host?.renamed).toBe('test-host');
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.host)?.renamed).toBe('test-host');
     });
 
     apiTest('should fail if target field exists and override is false', async ({ testBed }) => {
@@ -155,7 +156,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -178,7 +179,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         // Case 1: Source field missing, should fail (ignore_missing: false)
         const docsMissingSource = [{ host: { renamed: 'old-host' } }];

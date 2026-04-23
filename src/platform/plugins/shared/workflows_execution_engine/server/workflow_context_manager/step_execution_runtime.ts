@@ -8,7 +8,7 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
-import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -76,6 +76,22 @@ export class StepExecutionRuntime {
     return this.workflowGraph.topologicalOrder;
   }
 
+  private getStepName(): string {
+    if (
+      'configuration' in this.node &&
+      this.node.configuration != null &&
+      typeof this.node.configuration === 'object' &&
+      'name' in this.node.configuration
+    ) {
+      const rawName = this.node.configuration.name;
+      if (typeof rawName === 'string') {
+        return rawName;
+      }
+    }
+
+    return this.node.stepId;
+  }
+
   constructor(stepExecutionRuntimeInit: StepExecutionRuntimeInit) {
     this.workflowGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
     this.contextManager = stepExecutionRuntimeInit.contextManager;
@@ -105,13 +121,11 @@ export class StepExecutionRuntime {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getCurrentStepState(): Record<string, any> | undefined {
+  public getCurrentStepState(): Record<string, unknown> | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.state;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public setCurrentStepState(state: Record<string, any> | undefined): void {
+  public setCurrentStepState(state: Record<string, unknown> | undefined): void {
     const stepId = this.node.stepId;
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -135,8 +149,7 @@ export class StepExecutionRuntime {
     } as Partial<EsWorkflowStepExecution>;
 
     this.workflowExecutionState.upsertStep(stepExecution);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.logStepStart(stepId, stepExecution.id!);
+    this.logStepStart(stepId, this.stepExecutionId);
   }
 
   public setInput(input: Record<string, unknown>): void {
@@ -146,7 +159,7 @@ export class StepExecutionRuntime {
     });
   }
 
-  public finishStep(stepOutput?: Record<string, unknown>): void {
+  public finishStep(stepOutput?: unknown): void {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
@@ -170,6 +183,13 @@ export class StepExecutionRuntime {
     // if not, create a new step execution with fail
     const executionError = ExecutionError.fromError(error);
     const serializedError = executionError.toSerializableObject();
+
+    this.workflowExecutionState.setLastFailedStepContext({
+      stepId: this.node.stepId,
+      stepName: this.getStepName(),
+      stepExecutionId: this.stepExecutionId,
+    });
+
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
@@ -210,28 +230,39 @@ export class StepExecutionRuntime {
   }
 
   /**
-   * Attempts to enter a wait state for the step execution until a specific absolute date/time.
-   * If the step is already in a wait state, it exits the wait state instead.
+   * Attempts to enter a wait state for the step execution.
+   * If the step is already in a wait state, it clears the state and returns false (exit wait).
    *
-   * When entering a wait state, the step execution is marked with `ExecutionStatus.WAITING` and
-   * the `resumeAt` timestamp is stored in the step's state. The workflow can then resume execution
-   * at or after the specified time.
+   * "Already waiting" is detected by two complementary signals:
+   * - `state.resumeAt` is present: used by timer-based waits (e.g. `wait` step) where a resume
+   *   date is written on entry and cleared on exit.
+   * - `stepExecution.status === waitingStatus`: used by indefinite waits (e.g. `waitForInput`)
+   *   where no `resumeAt` is written but the status alone marks the wait.
    *
-   * @param resumeDate - The absolute date/time when execution should resume (Date object).
-   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   * @param resumeDate - When provided, stored as `resumeAt` so the scheduler can wake the step
+   *   at that time. Omit for indefinite waits triggered externally (e.g. resume API).
+   * @param waitingStatus - Status to set while waiting. Defaults to `ExecutionStatus.WAITING`.
+   * @returns `true` if the step has entered a wait state, `false` if it has exited one.
    */
-  public tryEnterWaitUntil(resumeDate: Date): boolean {
-    const resumeAt = this.stepExecution?.state?.resumeAt;
+  public tryEnterWaitUntil(
+    resumeDate?: Date,
+    waitingStatus: ExecutionStatus = ExecutionStatus.WAITING
+  ): boolean {
+    // For timer-based waits, resumeAt is the sole sentinel (written on entry, cleared on exit).
+    // For indefinite waits (no resumeDate), status is the sentinel since no resumeAt is written.
+    const alreadyWaiting =
+      resumeDate != null
+        ? this.stepExecution?.state?.resumeAt != null
+        : this.stepExecution?.status === waitingStatus;
 
-    if (resumeAt) {
-      // already in wait state
+    if (alreadyWaiting) {
       const newState = { ...(this.stepExecution?.state || {}) };
       delete newState.resumeAt;
       this.workflowExecutionState.upsertStep({
         id: this.stepExecutionId,
         state: Object.keys(newState).length ? newState : undefined,
       });
-      return false; // was already waiting, now exiting wait state
+      return false;
     }
 
     this.workflowExecutionState.upsertStep({
@@ -241,13 +272,29 @@ export class StepExecutionRuntime {
       scopeStack: this.workflowExecution.scopeStack,
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       startedAt: this.stepExecution?.startedAt || new Date().toISOString(),
-      status: ExecutionStatus.WAITING,
-      state: {
-        ...(this.stepExecution?.state || {}),
-        resumeAt: resumeDate.toISOString(),
-      },
+      status: waitingStatus,
+      state: this.buildWaitState(resumeDate),
     });
-    return true; // successfully entered wait state
+    return true;
+  }
+
+  /**
+   * Builds the step state for entering a wait. When a resumeDate is provided (timer-based),
+   * adds resumeAt to existing state. When omitted (indefinite), explicitly strips any residual
+   * resumeAt so a prior timer sentinel cannot leak into an indefinite wait record.
+   */
+  private buildWaitState(resumeDate: Date | undefined): Record<string, unknown> | undefined {
+    const existing = this.stepExecution?.state ?? {};
+    if (resumeDate) {
+      return { ...existing, resumeAt: resumeDate.toISOString() };
+    }
+    const { resumeAt: _stripped, ...rest } = existing;
+    return Object.keys(rest).length ? rest : undefined;
+  }
+
+  /** Modifies workflow-level execution state. Use sparingly — prefer step output for step-scoped data. */
+  public updateWorkflowExecution(update: Partial<EsWorkflowExecution>): void {
+    this.workflowExecutionState.updateWorkflowExecution(update);
   }
 
   private logStepStart(stepId: string, stepExecutionId: string): void {
@@ -294,10 +341,15 @@ export class StepExecutionRuntime {
 
     const message = `Step '${stepName}' failed: ${executionError.message}`;
 
+    const tags = ['workflow', 'step', 'fail'];
+    if (executionError.type === 'StepSizeLimitExceeded') {
+      tags.push('response-size-exceeded');
+    }
+
     this.stepLogger?.logError(message, executionError, {
       workflow: { step_id: this.node.stepId, step_execution_id: this.stepExecutionId },
       event: { action: 'step-fail', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'fail'],
+      tags,
       labels: {
         step_type: stepType,
         connector_type: stepType,

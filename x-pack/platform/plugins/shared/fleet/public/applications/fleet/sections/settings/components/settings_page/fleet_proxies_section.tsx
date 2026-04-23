@@ -70,7 +70,7 @@ export const FleetProxiesSection: React.FunctionComponent<FleetProxiesSectionPro
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
-            iconType="plusInCircle"
+            iconType="plusCircle"
             href={getHref('settings_create_fleet_proxy')}
             data-test-subj="addProxyBtn"
           >

@@ -1,5 +1,5 @@
 {
-  "sha1": "d0bd24d5de564361dc06d1d0fd1efd125c785ed4",
+  "sha1": "141ee12ba7c6d8ac5dd2c654f776a257139dd4bc",
   "tests": [
     {
       "id": "b77b3725a7cda3a-a405bc5e45e74c0",
@@ -71,6 +71,38 @@
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
         "line": 73,
         "column": 7
+      }
+    },
+    {
+      "id": "d0c1f04cf9e25c8-8345f73a5865487",
+      "title": "Explore from SLO Details - APM Navigation Source panel renders with APM links for APM-based SLO",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/explore_from_slo_details.spec.ts",
+        "line": 75,
+        "column": 9
+      }
+    },
+    {
+      "id": "3789b2ba4b5abe6-f1d0e5a2143a659",
+      "title": "Health Scan pagination paginates through health scan results and shows correct content per page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/health_scan_pagination.spec.ts",
+        "line": 71,
+        "column": 9
       }
     },
     {

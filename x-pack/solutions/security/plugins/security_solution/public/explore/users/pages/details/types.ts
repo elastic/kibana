@@ -18,11 +18,15 @@ import type { usersModel } from '../../store';
 interface UsersDetailsComponentReduxProps {
   query: Query;
   filters: Filter[];
+  entityId?: string;
+  identityFields?: Record<string, string>;
 }
 
 interface UserBodyComponentDispatchProps {
   detailName: string;
   usersDetailsPagePath: string;
+  entityId?: string;
+  identityFields?: Record<string, string>;
 }
 
 interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchProps {
@@ -32,6 +36,8 @@ interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchPr
 export interface UsersDetailsProps {
   detailName: string;
   usersDetailsPagePath: string;
+  entityId?: string;
+  identityFields?: Record<string, string>;
 }
 
 export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
@@ -46,6 +52,14 @@ export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {
     indexNames: string[];
     userDetailFilter: Filter[];
+    /**
+     * Serialized ES query built with {@link UsersDetailsTabsProps.userDetailFilter} (identity fields
+     * when Entity Store v2). Used for the Events histogram, Authentications tab, and Risk tab; other
+     * tabs use {@link UsersDetailsTabsProps.filterQuery} only.
+     */
+    userDetailsIdentityFilterQuery?: string;
     filterQuery?: string;
     type: usersModel.UsersType;
+    entityId?: string;
+    identityFields?: Record<string, string>;
   };

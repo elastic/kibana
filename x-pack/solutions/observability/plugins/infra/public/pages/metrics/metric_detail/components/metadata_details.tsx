@@ -142,7 +142,7 @@ export const MetadataDetails = (props: Props) => {
         <Controls>
           <EuiButtonIcon
             data-test-subj="infraMetadataDetailsButton"
-            iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+            iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
             onClick={toggleIsOpen}
             aria-label={i18n.translate('xpack.infra.nodeDetails.labels.showMoreDetails', {
               defaultMessage: 'Show more details',

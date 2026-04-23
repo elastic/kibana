@@ -222,7 +222,7 @@ export const PageRouter: FC = () => {
               actions={[
                 <EuiButtonEmpty
                   data-test-subj="syntheticsPageRouterGoToSyntheticsHomePageButton"
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   flush="both"
                   onClick={() => {
                     application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID);

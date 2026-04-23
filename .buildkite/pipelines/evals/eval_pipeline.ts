@@ -19,6 +19,7 @@ export interface EvalsSuiteMetadataEntry {
   ciLabels?: string[];
   configPath?: string;
   serverConfigSet?: string;
+  weeklyEisModelGroups?: string[];
 }
 
 function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
@@ -67,6 +68,32 @@ function parseGithubPrLabels(raw: string): string[] {
     .filter(Boolean);
 }
 
+/**
+ * Default weekly EIS model set (core tier). Suites without a `weeklyEisModelGroups`
+ * override in evals.suites.json use this set when `models:weekly-eis-models` is applied.
+ *
+ * Keep in sync with &weekly_eis_core_models in llm_evals.yml.
+ */
+const DEFAULT_WEEKLY_EIS_MODELS: string[] = [
+  'eis/anthropic-claude-4.6-sonnet',
+  'eis/anthropic-claude-4.6-opus',
+  'eis/google-gemini-3.0-flash',
+  'eis/google-gemini-3.1-pro',
+  'eis/openai-gpt-5.4',
+  'eis/openai-gpt-oss-120b',
+];
+
+const WEEKLY_EIS_MODELS_ALIAS = 'weekly-eis-models';
+
+/**
+ * Named model group aliases. These allow a single label (e.g. `models:<alias>`)
+ * to expand into multiple individual model groups for the eval fanout.
+ *
+ * NOTE: `weekly-eis-models` is handled separately — it resolves per-suite via
+ * `weeklyEisModelGroups` in evals.suites.json, falling back to DEFAULT_WEEKLY_EIS_MODELS.
+ */
+const MODEL_GROUP_ALIASES: Record<string, string[]> = {};
+
 function normalizeEvaluationConnectorId(raw: string): string {
   // Support `models:judge:eis/<modelId>` where the judge value is a model id, not a connector id.
   if (raw.startsWith('eis/')) {
@@ -84,26 +111,29 @@ function normalizeEvaluationConnectorId(raw: string): string {
 
 function buildEvalsYaml({
   selectedSuites,
-  modelGroups,
+  resolveModelGroups,
   evaluationConnectorId,
-  includeEisModels,
+  hasEisJudge,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
-  modelGroups: string[] | undefined;
+  resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
   evaluationConnectorId: string | undefined;
-  includeEisModels: boolean;
+  hasEisJudge: boolean;
 }): string {
   const suiteSteps = selectedSuites
     .map((suite) => {
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
       const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
+      const suiteModelGroups = resolveModelGroups(suite);
       const modelGroupsEnv =
-        modelGroups && modelGroups.length > 0
-          ? `          EVAL_MODEL_GROUPS: '${modelGroups.join(',')}'`
+        suiteModelGroups.length > 0
+          ? `          EVAL_MODEL_GROUPS: '${suiteModelGroups.join(',')}'`
           : null;
       const evaluationConnectorIdEnv = evaluationConnectorId
         ? `          EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`
         : null;
+      const includeEisModels =
+        hasEisJudge || suiteModelGroups.some((group) => group.startsWith('eis/'));
       const includeEisModelsEnv = includeEisModels
         ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
         : null;
@@ -168,11 +198,11 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
         const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
         return labels.some((label) => parsedLabels.includes(label));
       });
-  // Optional model filtering for eval fanout (models:* labels).
-  // - No `models:*` labels => run all models returned by LiteLLM (current behavior).
+  // Model filtering for eval fanout (models:* labels).
+  // - No `models:*` labels => evals are skipped (explicit model selection is required).
   // - One or more `models:<model-group>` labels => only run connectors whose `defaultModel`
   //   matches one of those model groups.
-  // - `models:all` can be used to explicitly opt into all models (ignored if combined with specifics).
+  // - Alias labels (e.g. `models:weekly-eis-models`) expand to their predefined model groups.
   const rawEvaluationConnectorId = parsedLabels
     .find((label) => label.startsWith('models:judge:'))
     ?.slice('models:judge:'.length)
@@ -180,25 +210,46 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
   const evaluationConnectorId = rawEvaluationConnectorId
     ? normalizeEvaluationConnectorId(rawEvaluationConnectorId)
     : undefined;
-  const includeEisModels =
-    parsedLabels.some((label) => label === 'models:all' || label.startsWith('models:eis/')) ||
-    !!rawEvaluationConnectorId?.startsWith('eis/') ||
-    !!evaluationConnectorId?.startsWith('eis-');
-  const selectedModelGroups = parsedLabels
+
+  // Extract model groups from labels and expand any aliases.
+  // `weekly-eis-models` is handled separately — it resolves per-suite via
+  // `weeklyEisModelGroups` in evals.suites.json with DEFAULT_WEEKLY_EIS_MODELS fallback.
+  const rawModelSelectors = parsedLabels
     .filter((label) => label.startsWith('models:') && !label.startsWith('models:judge:'))
     .map((label) => label.slice('models:'.length))
     .map((value) => value.trim())
-    .filter(Boolean)
-    .filter((value) => value !== 'all');
+    .filter(Boolean);
+
+  const useWeeklyEisModels = rawModelSelectors.includes(WEEKLY_EIS_MODELS_ALIAS);
+
+  const explicitModelGroups = rawModelSelectors
+    .filter((value) => value !== WEEKLY_EIS_MODELS_ALIAS)
+    .flatMap((value) => MODEL_GROUP_ALIASES[value] ?? [value]);
+
+  const resolveModelGroups = (suite: EvalsSuiteMetadataEntry): string[] => {
+    const weeklyModels = useWeeklyEisModels
+      ? suite.weeklyEisModelGroups ?? DEFAULT_WEEKLY_EIS_MODELS
+      : [];
+    return [...new Set([...explicitModelGroups, ...weeklyModels])];
+  };
+
+  const hasEisJudge =
+    !!rawEvaluationConnectorId?.startsWith('eis/') || !!evaluationConnectorId?.startsWith('eis-');
 
   if (selectedEvalSuites.length === 0) {
     return null;
   }
 
+  // Require explicit model selection — without models:* labels, evals are skipped
+  // to avoid accidentally running against all models (which is expensive).
+  if (explicitModelGroups.length === 0 && !useWeeklyEisModels) {
+    return null;
+  }
+
   return buildEvalsYaml({
     selectedSuites: selectedEvalSuites,
-    modelGroups: selectedModelGroups.length > 0 ? selectedModelGroups : undefined,
+    resolveModelGroups,
     evaluationConnectorId,
-    includeEisModels,
+    hasEisJudge,
   });
 }

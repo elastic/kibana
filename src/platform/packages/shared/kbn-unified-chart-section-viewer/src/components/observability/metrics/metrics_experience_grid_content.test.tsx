@@ -17,15 +17,26 @@ import type {
   UnifiedHistogramFetchParams,
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { MetricField, Dimension } from '../../../types';
+import type { ParsedMetricItem, MetricUnit, Dimension } from '../../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./hooks');
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
+}));
+
+jest.mock('./metrics_grid', () => ({
+  MetricsGrid: jest.fn((props: { metricItems: any[] }) =>
+    props.metricItems.length === 0 ? (
+      <div data-test-subj="metricsExperienceNoData" />
+    ) : (
+      <div data-test-subj="unifiedMetricsExperienceGrid" />
+    )
+  ),
 }));
 
 /**
@@ -46,23 +57,24 @@ const useMetricsExperienceStateMock =
 
 const usePaginationMock = hooks.usePagination as jest.MockedFunction<typeof hooks.usePagination>;
 
-const dimensions: Dimension[] = [
-  { name: 'foo', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'qux', type: ES_FIELD_TYPES.KEYWORD },
-];
+const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 
-const allFields: MetricField[] = [
+const metricItems: ParsedMetricItem[] = [
   {
-    name: 'field1',
-    dimensions: [dimensions[0]],
-    index: 'metrics-*',
-    type: ES_FIELD_TYPES.LONG,
+    metricName: 'field1',
+    dataStream: 'metrics-*',
+    units: ['ms'],
+    metricTypes: ['counter'],
+    fieldTypes: [ES_FIELD_TYPES.LONG],
+    dimensionFields: [dimensions[0]],
   },
   {
-    name: 'field2',
-    dimensions: [dimensions[1]],
-    index: 'metrics-*',
-    type: ES_FIELD_TYPES.LONG,
+    metricName: 'field2',
+    dataStream: 'metrics-*',
+    units: ['ms'],
+    metricTypes: ['counter'],
+    fieldTypes: [ES_FIELD_TYPES.LONG],
+    dimensionFields: [dimensions[1]],
   },
 ];
 
@@ -86,7 +98,8 @@ describe('MetricsExperienceGridContent', () => {
     fetch$ = getFetch$Mock(fetchParams);
 
     defaultProps = {
-      fields: allFields,
+      metricItems,
+      activeDimensions: [],
       services: {} as any,
       discoverFetch$: fetch$,
       fetchParams,
@@ -108,10 +121,11 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     usePaginationMock.mockReturnValue({
-      currentPageItems: [allFields[0]],
+      currentPageItems: [metricItems[0]],
       totalPages: 1,
       totalCount: 1,
     });
@@ -137,9 +151,12 @@ describe('MetricsExperienceGridContent', () => {
       totalCount: 0,
     });
 
-    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} fields={[]} />, {
-      wrapper: IntlProvider,
-    });
+    const { getByTestId } = render(
+      <MetricsExperienceGridContent {...defaultProps} metricItems={[]} />,
+      {
+        wrapper: IntlProvider,
+      }
+    );
 
     expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
   });
@@ -147,10 +164,12 @@ describe('MetricsExperienceGridContent', () => {
   it('filters fields by search term and respects page size', () => {
     // 20 fields, 10 with "cpu" in the name
     const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => ({
-      name: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
-      dimensions: [dimensions[0]],
-      index: 'metrics-*',
-      type: ES_FIELD_TYPES.LONG,
+      metricName: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
+      dimensionFields: [dimensions[0]],
+      dataStream: 'metrics-*',
+      units: ['ms'] as MetricUnit[],
+      metricTypes: ['counter'] as MappingTimeSeriesMetricType[],
+      fieldTypes: [ES_FIELD_TYPES.LONG] as ES_FIELD_TYPES[],
     }));
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -162,18 +181,19 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
-    const cpuFields = allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu'));
+    const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));
 
     usePaginationMock.mockReturnValue({
-      currentPageItems: cpuFields.slice(0, 5),
+      currentPageItems: cpuMetricItems.slice(0, 5),
       totalPages: 2,
-      totalCount: cpuFields.length,
+      totalCount: cpuMetricItems.length,
     });
 
     const { getByText } = render(
-      <MetricsExperienceGridContent {...defaultProps} fields={allFieldsSomeWithCpu} />,
+      <MetricsExperienceGridContent {...defaultProps} metricItems={allFieldsSomeWithCpu} />,
       {
         wrapper: IntlProvider,
       }
@@ -190,15 +210,6 @@ describe('MetricsExperienceGridContent', () => {
     expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument();
   });
 
-  it('renders the technical preview badge', () => {
-    const { getByText, getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    expect(getByTestId('metricsExperienceTechnicalPreviewBadge')).toBeInTheDocument();
-    expect(getByText('Technical preview')).toBeInTheDocument();
-  });
-
   it('renders the loading state when Discover is reloading', () => {
     const { getByTestId } = render(
       <MetricsExperienceGridContent {...defaultProps} isDiscoverLoading />,
@@ -208,5 +219,18 @@ describe('MetricsExperienceGridContent', () => {
     );
 
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
+  });
+
+  it('passes activeDimensions prop to MetricsGrid', () => {
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+
+    render(<MetricsExperienceGridContent {...defaultProps} activeDimensions={[dimensions[0]]} />, {
+      wrapper: IntlProvider,
+    });
+
+    const lastCall = (MetricsGrid as jest.Mock).mock.calls[
+      (MetricsGrid as jest.Mock).mock.calls.length - 1
+    ][0];
+    expect(lastCall.dimensions).toEqual([dimensions[0]]);
   });
 });

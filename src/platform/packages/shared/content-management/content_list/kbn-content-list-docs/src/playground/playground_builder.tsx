@@ -29,7 +29,17 @@ import { ContentListTable } from '@kbn/content-list-table';
 import { ContentListToolbar } from '@kbn/content-list-toolbar';
 import { ContentListFooter } from '@kbn/content-list-footer';
 
-import { createStoryFindItems, mockTagsService, toJsx } from '../stories_helpers';
+import {
+  buildMockItems,
+  createMockFavoritesClient,
+  createStoryFindItems,
+  createMockTagFacetProvider,
+  createMockUserProfileFacetProvider,
+  mockTagsService,
+  mockContentListUserProfilesServices,
+  toJsx,
+  useInspectFlyout,
+} from '../stories_helpers';
 import { BuilderPanel } from './builder_panel';
 import type { PlaygroundState } from './playground_state';
 import { INITIAL_STATE, playgroundReducer } from './playground_state';
@@ -98,7 +108,7 @@ const { Filters } = ContentListToolbar;
  * - `consumerJsx` — a lightweight element tree (without EUI layout wrappers)
  *   used solely for JSX serialization via {@link toJsx}.
  */
-const usePreview = (state: PlaygroundState) => {
+const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) => void) => {
   const { provider, features, item: itemConfig, table, toolbar, data } = state;
 
   const labels = useMemo(
@@ -106,8 +116,31 @@ const usePreview = (state: PlaygroundState) => {
     [provider.entity, provider.entityPlural]
   );
 
+  const sortFields = useMemo(() => buildSortFields(state.table.columns), [state.table.columns]);
+
+  // Feature toggles are master switches: the service and provider feature
+  // are only enabled when the toggle is on. Columns and filters for a
+  // disabled feature render silently empty.
+  const hasTags = features.tags;
+  const hasStarred = features.starred;
+  const hasUserProfiles = features.userProfiles;
+
+  // Memoized before `dataSource` so both the provider and findItems share the same
+  // in-memory favorites set — starring an item is immediately reflected when the
+  // `starred` filter is toggled.
+  const favoritesClient = useMemo(
+    () => (hasStarred ? createMockFavoritesClient() : undefined),
+    [hasStarred]
+  );
+
+  const mockItems = useMemo(() => buildMockItems(data.totalItems), [data.totalItems]);
+
   const dataSource = useMemo(() => {
-    const baseOptions = { totalItems: data.totalItems, isEmpty: !data.hasItems };
+    const baseOptions = {
+      totalItems: data.totalItems,
+      isEmpty: !data.hasItems,
+      favoritesClient,
+    };
     if (data.isLoading) {
       return {
         findItems: createStoryFindItems({ ...baseOptions, delay: 800 }),
@@ -116,11 +149,7 @@ const usePreview = (state: PlaygroundState) => {
     return {
       findItems: createStoryFindItems(baseOptions),
     };
-  }, [data.totalItems, data.isLoading, data.hasItems]);
-
-  const sortFields = useMemo(() => buildSortFields(state.table.columns), [state.table.columns]);
-
-  const hasTagsFilter = toolbar.filters.some((f) => f.type === 'tags');
+  }, [data.totalItems, data.isLoading, data.hasItems, favoritesClient]);
 
   const providerFeatures = useMemo(
     () => ({
@@ -131,7 +160,11 @@ const usePreview = (state: PlaygroundState) => {
         ? { initialPageSize: features.initialPageSize }
         : (false as const),
       search: features.search ? {} : (false as const),
-      tags: hasTagsFilter ? true : (false as const),
+      tags: hasTags ? createMockTagFacetProvider(mockItems) : (false as const),
+      starred: hasStarred ? true : (false as const),
+      userProfiles: hasUserProfiles
+        ? createMockUserProfileFacetProvider(mockItems)
+        : (false as const),
     }),
     [
       features.sorting,
@@ -139,7 +172,10 @@ const usePreview = (state: PlaygroundState) => {
       features.initialPageSize,
       features.search,
       sortFields,
-      hasTagsFilter,
+      hasTags,
+      hasStarred,
+      hasUserProfiles,
+      mockItems,
     ]
   );
 
@@ -159,8 +195,11 @@ const usePreview = (state: PlaygroundState) => {
         await new Promise((resolve) => setTimeout(resolve, 300));
       };
     }
+    if (itemConfig.onInspect && onInspect) {
+      config.onInspect = onInspect;
+    }
     return Object.keys(config).length > 0 ? config : undefined;
-  }, [itemConfig, provider.entity]);
+  }, [itemConfig, provider.entity, onInspect]);
 
   const columns = useMemo(
     () =>
@@ -170,10 +209,14 @@ const usePreview = (state: PlaygroundState) => {
         );
 
         switch (col.type) {
+          case 'starred':
+            return <Column.Starred key={col.instanceId} {...cleanProps} />;
           case 'name':
             return <Column.Name key={col.instanceId} {...cleanProps} />;
           case 'updatedAt':
             return <Column.UpdatedAt key={col.instanceId} {...cleanProps} />;
+          case 'createdBy':
+            return <Column.CreatedBy key={col.instanceId} {...cleanProps} />;
           case 'type': {
             const { columnTitle, ...rest } = cleanProps;
             return (
@@ -195,6 +238,8 @@ const usePreview = (state: PlaygroundState) => {
                   switch (act.type) {
                     case 'edit':
                       return <Action.Edit key={act.instanceId} />;
+                    case 'inspect':
+                      return <Action.Inspect key={act.instanceId} />;
                     case 'delete':
                       return <Action.Delete key={act.instanceId} />;
                     case 'export':
@@ -221,35 +266,50 @@ const usePreview = (state: PlaygroundState) => {
   );
 
   const toolbarElement = useMemo(() => {
-    if (toolbar.filters.length === 0) {
-      return <ContentListToolbar />;
-    }
+    // Always render explicit Filters children so the toolbar shows exactly what
+    // the user has configured. Falling back to framework defaults would include
+    // the starred filter whenever supports.starred is true, even if the user
+    // hasn't added Filters.Starred.
+    const filterParts =
+      toolbar.filters.length > 0
+        ? toolbar.filters.map((f) => {
+            switch (f.type) {
+              case 'starred':
+                return <Filters.Starred key={f.instanceId} />;
+              case 'sort':
+                return <Filters.Sort key={f.instanceId} />;
+              case 'tags':
+                return <Filters.Tags key={f.instanceId} />;
+              case 'createdBy':
+                return <Filters.CreatedBy key={f.instanceId} />;
+              default:
+                return null;
+            }
+          })
+        : [<Filters.Sort key="sort" />];
+
     return (
       <ContentListToolbar>
-        <Filters>
-          {toolbar.filters.map((f) => {
-            if (f.type === 'sort') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Sort />
-                </React.Fragment>
-              );
-            }
-            if (f.type === 'tags') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Tags />
-                </React.Fragment>
-              );
-            }
-            return null;
-          })}
-        </Filters>
+        <Filters>{filterParts}</Filters>
       </ContentListToolbar>
     );
   }, [toolbar.filters]);
 
   const tableTitle = `${provider.entityPlural} table`;
+
+  const services = useMemo(() => {
+    const s: Record<string, unknown> = {};
+    if (hasTags) {
+      s.tags = mockTagsService;
+    }
+    if (hasStarred && favoritesClient) {
+      s.favorites = favoritesClient;
+    }
+    if (hasUserProfiles) {
+      s.userProfiles = mockContentListUserProfilesServices;
+    }
+    return Object.keys(s).length > 0 ? s : undefined;
+  }, [hasTags, hasStarred, favoritesClient, hasUserProfiles]);
 
   const providerProps = useMemo(
     () => ({
@@ -258,9 +318,9 @@ const usePreview = (state: PlaygroundState) => {
       features: providerFeatures,
       isReadOnly: provider.isReadOnly,
       item: providerItemConfig,
-      ...(hasTagsFilter && { services: { tags: mockTagsService } }),
+      ...(services && { services }),
     }),
-    [labels, dataSource, providerFeatures, provider.isReadOnly, providerItemConfig, hasTagsFilter]
+    [labels, dataSource, providerFeatures, provider.isReadOnly, providerItemConfig, services]
   );
 
   const consumerJsx = useMemo(
@@ -290,7 +350,11 @@ const usePreview = (state: PlaygroundState) => {
  */
 export const PlaygroundBuilder = () => {
   const [state, dispatch] = useReducer(playgroundReducer, INITIAL_STATE);
-  const { providerProps, toolbarElement, columns, tableTitle, consumerJsx } = usePreview(state);
+  const { onInspect, flyout } = useInspectFlyout();
+  const { providerProps, toolbarElement, columns, tableTitle, consumerJsx } = usePreview(
+    state,
+    onInspect
+  );
 
   const stateKey = JSON.stringify(state);
   const actionsCol = state.table.columns.find((c) => c.type === 'actions');
@@ -353,6 +417,7 @@ export const PlaygroundBuilder = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </ContentListProvider>
+            {flyout}
             <EuiSpacer size="l" />
             <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s" overflowHeight={300}>
               {jsx}
@@ -361,7 +426,7 @@ export const PlaygroundBuilder = () => {
         ),
       },
     ],
-    [stateKey, providerProps, toolbarElement, tableTitle, columns, jsx]
+    [stateKey, providerProps, toolbarElement, tableTitle, columns, jsx, flyout]
   );
 
   return (

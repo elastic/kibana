@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { gapAutoFillSchedulerLimits } from '../../../../../../../common/constants';
+import { optionalExcludedGapReasonsSchema } from '../../../../../../../common/schemas';
 
 const { maxBackfills, numRetries } = gapAutoFillSchedulerLimits;
 
@@ -22,6 +23,7 @@ export const createGapAutoFillSchedulerSchema = schema.object({
   }),
   request: schema.any(),
   scope: schema.arrayOf(schema.string()),
+  excludedReasons: optionalExcludedGapReasonsSchema,
   ruleTypes: schema.arrayOf(
     schema.object({
       type: schema.string(),

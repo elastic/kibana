@@ -74,27 +74,27 @@ spaceTest.describe(
           });
 
           await spaceTest.step('verify About section is visible', async () => {
-            await expect(pageObjects.tracesExperience.flyout.aboutSection).toBeVisible();
+            await expect(pageObjects.tracesExperience.flyout.about.section).toBeVisible();
           });
 
           await spaceTest.step('verify Similar Spans section is visible', async () => {
-            await expect(pageObjects.tracesExperience.flyout.similarSpansSection).toBeVisible();
+            await expect(pageObjects.tracesExperience.flyout.similarSpans.section).toBeVisible();
           });
 
           await spaceTest.step('verify Trace Summary section is visible', async () => {
-            await expect(pageObjects.tracesExperience.flyout.traceSummarySection).toBeVisible();
+            await expect(pageObjects.tracesExperience.flyout.traceSummary.section).toBeVisible();
           });
 
           await spaceTest.step('verify Logs section is visible', async () => {
-            await expect(pageObjects.tracesExperience.flyout.logsSection).toBeVisible();
+            await expect(pageObjects.tracesExperience.flyout.logs.section).toBeVisible();
           });
 
           await spaceTest.step('verify Errors section is hidden', async () => {
-            await expect(pageObjects.tracesExperience.flyout.errorsSection).toBeHidden();
+            await expect(pageObjects.tracesExperience.flyout.errors.section).toBeHidden();
           });
 
           await spaceTest.step('verify Span Links section is hidden', async () => {
-            await expect(pageObjects.tracesExperience.flyout.spanLinksSection).toBeHidden();
+            await expect(pageObjects.tracesExperience.flyout.spanLinks.section).toBeHidden();
           });
         }
       );
@@ -114,14 +114,43 @@ spaceTest.describe(
           });
 
           await spaceTest.step('verify Errors section is visible', async () => {
-            await expect(pageObjects.tracesExperience.flyout.errorsSection).toBeVisible();
+            await expect(pageObjects.tracesExperience.flyout.errors.section).toBeVisible();
           });
 
           await spaceTest.step('verify Span Links section is visible', async () => {
-            await expect(pageObjects.tracesExperience.flyout.spanLinksSection).toBeVisible();
+            await expect(pageObjects.tracesExperience.flyout.spanLinks.section).toBeVisible();
           });
         }
       );
     }
+
+    spaceTest(
+      'ES|QL mode - logs section shows only logs correlated to the opened trace',
+      async ({ pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('filter for minimal trace transaction', async () => {
+          await pageObjects.discover.writeAndSubmitEsqlQuery(
+            `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${MINIMAL_TRACE.TRANSACTION_NAME}"`
+          );
+        });
+
+        await spaceTest.step('open Overview tab', async () => {
+          await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+        });
+
+        await spaceTest.step('expand the Logs section', async () => {
+          await flyout.logs.section.click();
+        });
+
+        await spaceTest.step(
+          'logs count reflects only this trace — not all logs in the index',
+          async () => {
+            await expect(flyout.logs.totalDocuments).toBeVisible();
+            await expect(flyout.logs.totalDocuments).toHaveText('2');
+          }
+        );
+      }
+    );
   }
 );

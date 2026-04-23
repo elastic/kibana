@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 
 export type EsQuery = GraphRequest['query']['esQuery'];
@@ -12,6 +13,15 @@ export type EsQuery = GraphRequest['query']['esQuery'];
 export interface OriginEventId {
   id: string;
   isAlert: boolean;
+}
+
+/**
+ * Common services interface for document details context.
+ * Used by graph_entities and graph_events routes.
+ */
+export interface DocumentDetailsContextServices {
+  logger: Logger;
+  esClient: IScopedClusterClient;
 }
 
 // Constants for non-enriched entity types
@@ -80,6 +90,14 @@ export interface RelationshipEdge extends GraphEdge {
   // Target entity grouping (relationship-specific)
   targetNodeId: string; // Override to make non-nullable for relationships
   targetIds: string[]; // All target entity IDs in this group
+}
+
+export interface EntityRecord {
+  id: string;
+  name: string;
+  type: string;
+  sub_type: string;
+  docData: string;
 }
 
 /**

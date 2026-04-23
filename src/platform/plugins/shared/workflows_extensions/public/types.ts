@@ -18,7 +18,11 @@ export type PublicStepDefinitionOrLoader<
   Config extends z.ZodObject = z.ZodObject
 > =
   | PublicStepDefinition<Input, Output, Config>
-  | (() => Promise<PublicStepDefinition<Input, Output, Config>>);
+  | (() => Promise<PublicStepDefinition<Input, Output, Config> | undefined>);
+
+export type PublicTriggerDefinitionOrLoader<EventSchema extends z.ZodType = z.ZodType> =
+  | PublicTriggerDefinition<EventSchema>
+  | (() => Promise<PublicTriggerDefinition<EventSchema>>);
 
 /**
  * Public-side plugin setup contract.
@@ -49,7 +53,7 @@ export interface WorkflowsExtensionsPublicPluginSetup {
    * @throws Error if definition for the same trigger id is already registered
    */
   registerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType>(
-    definition: PublicTriggerDefinition<EventSchema>
+    definition: PublicTriggerDefinitionOrLoader<EventSchema>
   ): void;
 }
 
@@ -67,14 +71,7 @@ export interface TriggerRegistryStartContract {
  * Exposes methods for retrieving registered step and trigger definitions.
  */
 export type WorkflowsExtensionsPublicPluginStart =
-  WorkflowsExtensionsStartContract<PublicStepDefinition> &
-    TriggerRegistryStartContract & {
-      /**
-       * Resolves when all async loaders have settled.
-       * Use before rendering the workflows UI to guarantee the registries are ready.
-       */
-      isReady(): Promise<void>;
-    };
+  WorkflowsExtensionsStartContract<PublicStepDefinition> & TriggerRegistryStartContract;
 
 /**
  * Dependencies for the public plugin setup phase.

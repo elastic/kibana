@@ -10,6 +10,10 @@
 import { pick } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 
+import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasLibraryTransforms,
@@ -19,10 +23,10 @@ import type {
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 
 import type { DashboardState } from '../../../common';
+import { getSampleDashboardState } from '../../mocks';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { initializeLayoutManager } from './layout_manager';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
@@ -48,24 +52,26 @@ describe('layout manager', () => {
     grid: { w: 1, h: 1, x: 0, y: 0 },
     type: 'testPanelType',
     config: { title: 'Panel One' },
-    uid: PANEL_ONE_ID,
+    id: PANEL_ONE_ID,
   };
 
   const pinnedControls: DashboardState['pinned_panels'] = [
     {
-      uid: 'control1',
-      type: 'optionsListControl',
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      id: 'control1',
+      type: 'options_list_control',
       config: {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         data_view_id: '',
         field_name: '',
       },
     },
     {
-      uid: 'control2',
-      grow: true,
-      width: 'small',
-      type: 'optionsListControl',
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      id: 'control2',
+      type: 'options_list_control',
       config: {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         data_view_id: '',
         field_name: '',
       },
@@ -79,12 +85,13 @@ describe('layout manager', () => {
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     ...titleManager.api,
     serializeState: () => titleManager.getLatestState(),
+    applySerializedState: jest.fn(),
   };
 
   const section1 = {
     title: 'Section one',
     collapsed: false,
-    uid: 'section1',
+    id: 'section1',
     grid: {
       y: 1,
     },
@@ -101,6 +108,55 @@ describe('layout manager', () => {
     );
     layoutManager.api.registerChildApi(panel1Api);
     expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(panel1Api);
+  });
+
+  test('should apply incoming serialized child state during reset when supported', async () => {
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      undefined,
+      [panel1],
+      [],
+      trackPanelMock
+    );
+    const applySerializedState = jest.fn().mockResolvedValue(undefined);
+
+    layoutManager.api.registerChildApi({
+      ...panel1Api,
+      applySerializedState,
+      hasUnsavedChanges$: new BehaviorSubject(false),
+    } as DefaultEmbeddableApi);
+
+    layoutManager.internalApi.reset(
+      getSampleDashboardState({
+        panels: [{ ...panel1, config: { title: 'Updated title' } }],
+        pinned_panels: [],
+      })
+    );
+
+    expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated title' });
+  });
+
+  test('should ignore child state application when child does not support it', async () => {
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      undefined,
+      [panel1],
+      [],
+      trackPanelMock
+    );
+    layoutManager.api.registerChildApi({
+      ...panel1Api,
+      hasUnsavedChanges$: new BehaviorSubject(false),
+    } as DefaultEmbeddableApi);
+
+    layoutManager.internalApi.reset(
+      getSampleDashboardState({
+        panels: [{ ...panel1, config: { title: 'Updated title' } }],
+        pinned_panels: [],
+      })
+    );
+
+    expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBeDefined();
   });
 
   test('should append incoming embeddables to existing panels', () => {
@@ -342,8 +398,8 @@ describe('layout manager', () => {
         [
           panel1,
           {
-            uid: 'control3',
-            type: 'optionsListControl',
+            id: 'control3',
+            type: 'options_list_control',
             config: {},
             grid: { x: 0, y: 2, h: 1, w: 1 },
           },
@@ -366,14 +422,13 @@ describe('layout manager', () => {
           order: 1,
         },
         ['control3']: {
-          type: 'optionsListControl',
-          grow: DEFAULT_CONTROL_GROW,
-          width: DEFAULT_CONTROL_WIDTH,
+          ...DEFAULT_PINNED_CONTROL_STATE,
+          type: 'options_list_control',
           order: 2,
         },
       });
       expect(layoutManager.api.layout$.getValue().panels).toEqual({
-        [panel1.uid]: pick(panel1, ['grid', 'type']),
+        [panel1.id]: pick(panel1, ['grid', 'type']),
         // control3 gets removed as a panel
       });
     });
@@ -408,12 +463,12 @@ describe('layout manager', () => {
         },
       });
       expect(layoutManager.api.layout$.getValue().panels).toEqual({
-        [panel1.uid]: {
+        [panel1.id]: {
           type: 'testPanelType',
           grid: { ...panel1.grid, y: 2 }, // push panel 1 down,
         },
         ['control1']: {
-          type: 'optionsListControl',
+          type: 'options_list_control',
           grid: { x: 0, y: 0, w: 12, h: 2 },
         },
       });
@@ -427,7 +482,7 @@ describe('layout manager', () => {
           panel1,
           {
             ...pinnedControls[1],
-            uid: 'control2',
+            id: 'control2',
             grid: { x: 0, y: 0, w: 12, h: 12 },
             config: { title: 'Control' },
           },

@@ -16,13 +16,12 @@ import { createDataViewDataSource, DataSourceType } from '../../../../../common/
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { internalStateActions, type TabState } from '../redux';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 
 describe('buildStateSubscribe', () => {
   let toolkit: ReturnType<typeof getDiscoverInternalStateMock>;
   let services: ReturnType<typeof createDiscoverServicesMock>;
-  let stateContainer: Awaited<
-    ReturnType<ReturnType<typeof getDiscoverInternalStateMock>['initializeSingleTab']>
-  >['stateContainer'];
+  let dataState: DiscoverDataStateContainer;
 
   const setup = async () => {
     services = createDiscoverServicesMock();
@@ -36,17 +35,18 @@ describe('buildStateSubscribe', () => {
       tabId: toolkit.getCurrentTab().id,
       skipWaitForDataFetching: true,
     });
-    stateContainer = result.stateContainer;
+    dataState = result.dataStateContainer;
 
-    stateContainer.dataState.refetch$.next = jest.fn();
-    stateContainer.dataState.reset = jest.fn();
+    dataState.refetch$.next = jest.fn();
+    dataState.reset = jest.fn();
     jest.spyOn(internalStateActions, 'assignNextDataView');
   };
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
-      dataState: stateContainer.dataState,
-      internalState: toolkit.internalState,
+      dataState,
+      dispatch: toolkit.internalState.dispatch,
+      getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
       getCurrentTab: toolkit.getCurrentTab,
@@ -80,14 +80,14 @@ describe('buildStateSubscribe', () => {
       tabId: toolkit.getCurrentTab().id,
       dataView: dataViewComplexMock,
     });
-    expect(stateContainer.dataState.reset).toHaveBeenCalled();
-    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    expect(dataState.reset).toHaveBeenCalled();
+    expect(dataState.refetch$.next).toHaveBeenCalled();
   });
 
   it('should not call refetch$ if nothing changes', async () => {
     await getSubscribeFn()(getNextState());
 
-    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+    expect(dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if viewMode changes', async () => {
@@ -100,32 +100,32 @@ describe('buildStateSubscribe', () => {
       })
     );
 
-    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
-    expect(stateContainer.dataState.reset).not.toHaveBeenCalled();
+    expect(dataState.refetch$.next).not.toHaveBeenCalled();
+    expect(dataState.reset).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if the chart is hidden', async () => {
     await getSubscribeFn()(getNextState({ appState: { hideChart: true } }));
 
-    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+    expect(dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if the chart interval has changed', async () => {
     await getSubscribeFn()(getNextState({ appState: { interval: 's' } }));
 
-    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+    expect(dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if breakdownField has changed', async () => {
     await getSubscribeFn()(getNextState({ appState: { breakdownField: '💣' } }));
 
-    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+    expect(dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should call refetch$ if sort has changed', async () => {
     await getSubscribeFn()(getNextState({ appState: { sort: [['field', 'test']] } }));
 
-    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    expect(dataState.refetch$.next).toHaveBeenCalled();
   });
 
   it('should not call refetch$ if filters have changed', async () => {
@@ -142,12 +142,12 @@ describe('buildStateSubscribe', () => {
       })
     );
 
-    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+    expect(dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
-    stateContainer.dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
+    dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
     await stateSubscribeFn(
       getNextState({
         appState: {
@@ -156,7 +156,7 @@ describe('buildStateSubscribe', () => {
       })
     );
 
-    expect(stateContainer.dataState.reset).toHaveBeenCalled();
+    expect(dataState.reset).toHaveBeenCalled();
   });
 
   it('should not execute setState twice if the identical data view change is propagated twice', async () => {
@@ -164,10 +164,10 @@ describe('buildStateSubscribe', () => {
 
     await getSubscribeFn()(getNextState({ appState: { dataSource: newDataSource } }));
 
-    expect(stateContainer.dataState.reset).toBeCalledTimes(1);
+    expect(dataState.reset).toBeCalledTimes(1);
 
     toolkit.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.resetAppState)({
+      toolkit.injectCurrentTab(internalStateActions.resetAppState)({
         appState: {
           dataSource: newDataSource,
         },
@@ -175,6 +175,6 @@ describe('buildStateSubscribe', () => {
     );
 
     await getSubscribeFn()(getNextState({ appState: { dataSource: newDataSource } }));
-    expect(stateContainer.dataState.reset).toBeCalledTimes(1);
+    expect(dataState.reset).toBeCalledTimes(1);
   });
 });

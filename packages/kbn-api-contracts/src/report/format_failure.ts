@@ -55,12 +55,16 @@ const formatBreakingChange = (change: BreakingChange, idx: number): string[] => 
 
 const formatTerraformImpact = (impact: TerraformImpact): string[] => {
   const method = impact.change.method ? ` ${impact.change.method.toUpperCase()}` : '';
-  return [
+  const lines = [
     `• ${impact.change.path}${method}`,
     `  Terraform Resource: ${impact.terraformResource}`,
     `  Reason: ${impact.change.reason}`,
-    '',
   ];
+  if (impact.owners.length > 0) {
+    lines.push(`  Owners: ${impact.owners.join(', ')}`);
+  }
+  lines.push('');
+  return lines;
 };
 
 export function formatFailure(

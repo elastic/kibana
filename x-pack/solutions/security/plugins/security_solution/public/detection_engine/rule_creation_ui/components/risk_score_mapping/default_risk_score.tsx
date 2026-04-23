@@ -16,6 +16,7 @@ interface DefaultRiskScoreProps {
   onChange: (newValue: number) => void;
   errorMessage?: string;
   idAria?: string;
+  isDisabled?: boolean;
   dataTestSubj?: string;
 }
 
@@ -24,6 +25,7 @@ export function DefaultRiskScore({
   onChange,
   errorMessage,
   idAria,
+  isDisabled = false,
   dataTestSubj = 'defaultRiskScore',
 }: DefaultRiskScoreProps) {
   const handleChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
@@ -58,6 +60,7 @@ export function DefaultRiskScore({
           showTicks
           tickInterval={25}
           data-test-subj={`${dataTestSubj}-defaultRiskRange`}
+          disabled={isDisabled}
         />
       </EuiFormRow>
     </EuiFlexItem>

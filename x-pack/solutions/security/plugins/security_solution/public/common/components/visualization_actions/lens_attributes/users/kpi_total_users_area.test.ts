@@ -52,4 +52,35 @@ describe('getKpiTotalUsersAreaLensAttributes', () => {
 
     expect(result?.current).toMatchSnapshot();
   });
+
+  it('uses Entity Store v2 latest index as ad-hoc data source when entityStoreV2Enabled', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          extraOptions: { entityStoreV2Enabled: true, spaceId: 'my_space' },
+          getLensAttributes: getKpiTotalUsersAreaLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    const attrs = result.current;
+    expect(attrs?.references).toEqual([]);
+    expect(attrs?.state.internalReferences).toHaveLength(2);
+    const spec = Object.values(attrs?.state.adHocDataViews ?? {})[0];
+    expect(spec?.title).toBe('.entities.v2.latest.security_my_space-00001');
+    const userTypeFilter = attrs?.state.filters?.find(
+      (f) => f.meta?.key === 'entity.EngineMetadata.Type'
+    );
+    expect(userTypeFilter).toBeDefined();
+    expect(userTypeFilter?.meta?.index).toBe('b8e3f2a1-6c4d-5e7f-8a9b-0c1d2e3f4a5b');
+
+    const formBased = attrs?.state.datasourceStates?.formBased;
+    const layer = formBased?.layers && Object.values(formBased.layers)[0];
+    const metricColumn =
+      layer?.columns && Object.values(layer.columns).find((c) => c.isBucketed === false);
+    expect(
+      metricColumn && 'sourceField' in metricColumn ? metricColumn.sourceField : undefined
+    ).toBe('entity.id');
+  });
 });

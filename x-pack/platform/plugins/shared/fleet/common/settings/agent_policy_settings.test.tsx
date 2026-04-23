@@ -6,9 +6,12 @@
  */
 
 import {
+  getAgentPolicyAdvancedSettings,
   zodStringWithDurationValidation,
   zodStringWithYamlValidation,
 } from './agent_policy_settings';
+
+const AGENT_POLICY_ADVANCED_SETTINGS = getAgentPolicyAdvancedSettings();
 
 describe('agent_policy_settings', () => {
   describe('zodStringWithDurationValidation', () => {
@@ -30,18 +33,36 @@ describe('agent_policy_settings', () => {
   });
 
   describe('zodStringWithYamlValidation', () => {
-    it('should accept valid YAML string', () => {
-      const result = zodStringWithYamlValidation.safeParse(
+    it('should accept valid YAML string', async () => {
+      const result = await zodStringWithYamlValidation.safeParseAsync(
         'nested:\n  key1: value1\n  key2: value2'
       );
       expect(result.success).toBe(true);
     });
 
-    it('should reject invalid YAML string', () => {
-      const result = zodStringWithYamlValidation.safeParse(
-        'nested:\n  key1: value1\n  key1: value2'
-      );
+    it('should reject invalid YAML string', async () => {
+      const result = await zodStringWithYamlValidation.safeParseAsync('invalidyaml: [unclosed');
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('disable_policy_change_acks setting', () => {
+    it('should include agent.features.disable_policy_change_acks.enabled in AGENT_POLICY_ADVANCED_SETTINGS', () => {
+      const setting = AGENT_POLICY_ADVANCED_SETTINGS.find(
+        (s) => s.name === 'agent.features.disable_policy_change_acks.enabled'
+      );
+      expect(setting).toBeDefined();
+      expect(setting?.api_field.name).toBe('agent_features_disable_policy_change_acks_enabled');
+    });
+
+    it('should accept boolean values and default to false', () => {
+      const setting = AGENT_POLICY_ADVANCED_SETTINGS.find(
+        (s) => s.name === 'agent.features.disable_policy_change_acks.enabled'
+      )!;
+      expect(setting.schema.safeParse(true).success).toBe(true);
+      expect(setting.schema.safeParse(false).success).toBe(true);
+      expect(setting.schema.safeParse(undefined).success).toBe(true);
+      expect(setting.schema.parse(undefined)).toBe(false);
     });
   });
 });

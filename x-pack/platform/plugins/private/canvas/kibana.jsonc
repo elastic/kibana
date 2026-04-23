@@ -38,9 +38,9 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "lens",
       "maps",
-      "fieldFormats"
+      "fieldFormats",
+      "savedSearch"
     ]
   }
 }

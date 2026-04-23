@@ -9,18 +9,35 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import type { KnownParameters, OpenAPIConverter } from '../type';
+import type { Env } from '../generate_oas';
 
 import { kbnConfigSchemaConverter } from './kbn_config_schema';
 import { zodConverter } from './zod';
 import { catchAllConverter } from './catch_all';
 
 export class OasConverter {
+  readonly #env: Env;
   readonly #converters: OpenAPIConverter[] = [
     kbnConfigSchemaConverter,
     zodConverter,
     catchAllConverter,
   ];
   readonly #sharedSchemas = new Map<string, OpenAPIV3.SchemaObject>();
+
+  constructor(env: Env = { serverless: false }) {
+    this.#env = env;
+  }
+
+  /**
+   * Unwrap a RouteValidationFunction produced by buildRouteValidationWithZod
+   * so the original Zod schema is visible to the converter chain.
+   */
+  #unwrapSchema(schema: unknown): unknown {
+    if (typeof schema === 'function' && '_sourceSchema' in schema && schema._sourceSchema != null) {
+      return schema._sourceSchema;
+    }
+    return schema;
+  }
 
   #getConverter(schema: unknown) {
     return this.#converters.find((c) => c.is(schema))!;
@@ -37,7 +54,9 @@ export class OasConverter {
   }
 
   public convert(schema: unknown) {
-    const { schema: oasSchema, shared } = this.#getConverter(schema)!.convert(schema, {
+    const unwrapped = this.#unwrapSchema(schema);
+    const { schema: oasSchema, shared } = this.#getConverter(unwrapped)!.convert(unwrapped, {
+      env: this.#env,
       sharedSchemas: this.#sharedSchemas,
     });
     this.#addComponents(shared);
@@ -45,8 +64,9 @@ export class OasConverter {
   }
 
   public convertPathParameters(schema: unknown, pathParameters: KnownParameters) {
-    const { params, shared } = this.#getConverter(schema).convertPathParameters(
-      schema,
+    const unwrapped = this.#unwrapSchema(schema);
+    const { params, shared } = this.#getConverter(unwrapped).convertPathParameters(
+      unwrapped,
       pathParameters
     );
     this.#addComponents(shared);
@@ -54,7 +74,8 @@ export class OasConverter {
   }
 
   public convertQuery(schema: unknown) {
-    const { query, shared } = this.#getConverter(schema).convertQuery(schema);
+    const unwrapped = this.#unwrapSchema(schema);
+    const { query, shared } = this.#getConverter(unwrapped).convertQuery(unwrapped);
     this.#addComponents(shared);
     return query;
   }

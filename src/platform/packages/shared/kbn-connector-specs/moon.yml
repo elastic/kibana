@@ -4,25 +4,25 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/connector-specs'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/connector-specs'
+  title: '@kbn/connector-specs'
   description: Moon project for @kbn/connector-specs
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-connector-specs
+  sourceRoot: src/platform/packages/shared/kbn-connector-specs
 dependsOn:
   - '@kbn/zod'
   - '@kbn/logging'
   - '@kbn/licensing-types'
   - '@kbn/actions-utils'
   - '@kbn/i18n'
+  - '@kbn/mcp-client'
 tags:
   - shared-common
   - package
@@ -35,16 +35,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

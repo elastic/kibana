@@ -66,7 +66,7 @@ export const SearchResponseWarningsBadgePopoverContent = (props: Props) => {
               color="primary"
               flush="left"
               iconSide={props.warnings.length > 1 ? 'right' : undefined}
-              iconType={props.warnings.length > 1 ? 'arrowRight' : undefined}
+              iconType={props.warnings.length > 1 ? 'chevronSingleRight' : undefined}
               onClick={() => {
                 if (props.warnings.length > 1) {
                   setOpenPanel(VIEW_DETAILS_PANEL_ID);

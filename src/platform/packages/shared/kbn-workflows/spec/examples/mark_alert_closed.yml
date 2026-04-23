@@ -1,0 +1,20 @@
+version: '1'
+name: Mark Alert as Closed
+description: Closes a security alert as a false positive using the Kibana Detection Engine API.
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: alertid
+    type: string
+    default: 'abc123'
+
+steps:
+  - name: kibana_SetAlertsStatus_step
+    type: kibana.SetAlertsStatus
+    with:
+      status: 'closed'
+      signal_ids: ['{{inputs.alertid}}']
+      reason: 'false_positive'

@@ -21,8 +21,11 @@ import type {
   PackageInfo,
   RegistryVarsEntry,
   RegistryDataStream,
+  InputOnlyRegistryDataStream,
   InstallablePackage,
   NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackagePolicyInput,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
@@ -40,7 +43,7 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   show_user: true,
 };
 
-const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
+export const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
   name: USE_APM_VAR_NAME,
   type: 'bool',
   title: i18n.translate('xpack.fleet.policyTemplate.useAPMVar.title', {
@@ -89,16 +92,102 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
     title: policyTemplate.title,
     description: policyTemplate.description,
     ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
+    // Propagate dynamic_signal_types from input-only template into the normalized RegistryInput
+    // so downstream helpers (registryInputAllowsDynamicSignalTypes, etc.) work uniformly
+    // regardless of whether the source is an input-only or composable integration package.
+    ...(policyTemplate.dynamic_signal_types !== undefined
+      ? { dynamic_signal_types: policyTemplate.dynamic_signal_types }
+      : {}),
   };
 
   return [input];
 };
 
-export const getNormalizedDataStreams = (
+/**
+ * Returns the `RegistryInput` definition for a given policy template and input type.
+ * - Input-only templates: the single synthesized RegistryInput (from template fields).
+ * - Integration templates: the matching entry from `inputs[]`.
+ */
+export function getPolicyTemplateInputDefinition(
+  policyTemplate: RegistryPolicyTemplate,
+  inputType?: string
+): RegistryInput | undefined {
+  if (isInputOnlyPolicyTemplate(policyTemplate)) {
+    const [def] = getNormalizedInputs(policyTemplate);
+    return def;
+  }
+  if (!inputType) return undefined;
+  return (policyTemplate.inputs ?? []).find((input) => input.type === inputType);
+}
+
+/**
+ * Returns true when the given RegistryInput declares dynamic signal types.
+ * The package-spec governs which inputs may set this flag; Fleet trusts the
+ * boolean without gating on the input type so future non-OTel inputs can use
+ * the same mechanism without requiring a Fleet change.
+ */
+export function registryInputAllowsDynamicSignalTypes(input: RegistryInput): boolean {
+  return input.dynamic_signal_types === true;
+}
+
+/**
+ * Returns true when any policy template in the package contains an input that
+ * declares dynamic signal types (dynamic_signal_types: true).
+ *
+ * Optionally, you can scope the query to a specific policy template and/or input type.
+ *
+ * Covers both:
+ *   - Input-only packages (top-level `input` key on the policy template)
+ *   - Composable integration packages (nested `inputs[]` entries)
+ */
+export const hasDynamicSignalTypes = (
+  packageInfo: PackageInfo | undefined,
+  scope?: { policyTemplateName?: string; inputType?: string }
+): boolean =>
+  (packageInfo?.policy_templates ?? []).some((template) => {
+    if (scope?.policyTemplateName && template.name !== scope.policyTemplateName) return false;
+    const inputs = getNormalizedInputs(template);
+    const relevant = scope?.inputType
+      ? inputs.filter((input) => input.type === scope.inputType)
+      : inputs;
+    return relevant.some(registryInputAllowsDynamicSignalTypes);
+  });
+
+/**
+ * Returns true when the given package policy input corresponds to a registry input
+ * that allows undefined data_stream.type (i.e. dynamic_signal_types).
+ *
+ * Works for both:
+ *   - Input-only packages (policy template with top-level `input` key)
+ *   - Composable integration packages (policy template with `inputs[]`)
+ */
+export function packagePolicyInputAllowsUndefinedDataStreamType(
+  packageInfo: PackageInfo,
+  packagePolicyInput: Pick<NewPackagePolicyInput | PackagePolicyInput, 'type' | 'policy_template'>
+): boolean {
+  return hasDynamicSignalTypes(packageInfo, {
+    policyTemplateName: packagePolicyInput.policy_template,
+    inputType: packagePolicyInput.type,
+  });
+}
+
+export function getNormalizedDataStreams(
+  packageInfo: { type: 'input' } & (PackageInfo | InstallablePackage),
+  datasetName?: string,
+  dataStreamType?: string
+): InputOnlyRegistryDataStream[];
+
+export function getNormalizedDataStreams(
   packageInfo: PackageInfo | InstallablePackage,
   datasetName?: string,
   dataStreamType?: string
-): RegistryDataStream[] => {
+): RegistryDataStream[];
+
+export function getNormalizedDataStreams(
+  packageInfo: PackageInfo | InstallablePackage,
+  datasetName?: string,
+  dataStreamType?: string
+): RegistryDataStream[] | InputOnlyRegistryDataStream[] {
   if (packageInfo.type !== 'input') {
     return packageInfo.data_streams || [];
   }
@@ -114,13 +203,16 @@ export const getNormalizedDataStreams = (
 
     let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
     if (
-      policyTemplate.input === OTEL_COLLECTOR_INPUT_TYPE &&
-      (dataStreamType || policyTemplate.type) === dataTypes.Traces
+      shouldIncludeUseAPMVar(
+        policyTemplate.input,
+        dataStreamType || policyTemplate.type,
+        policyTemplate.dynamic_signal_types === true
+      )
     ) {
       vars = addUseAPMVarIfNotPresent(vars);
     }
 
-    const dataStream: RegistryDataStream = {
+    const dataStream: InputOnlyRegistryDataStream = {
       type: dataStreamType || policyTemplate.type,
       dataset,
       title: policyTemplate.title + ' Dataset',
@@ -132,7 +224,9 @@ export const getNormalizedDataStreams = (
         {
           input: policyTemplate.input,
           vars,
-          template_path: policyTemplate.template_path,
+          ...(policyTemplate.template_paths?.length
+            ? { template_paths: policyTemplate.template_paths }
+            : { template_path: policyTemplate.template_path }),
           title: policyTemplate.title,
           description: policyTemplate.title,
           enabled: true,
@@ -140,19 +234,15 @@ export const getNormalizedDataStreams = (
       ],
     };
 
-    if (packageInfo.type === 'input') {
-      dataStream.elasticsearch = {
-        ...dataStream.elasticsearch,
-        ...{
-          dynamic_dataset: true,
-          dynamic_namespace: true,
-        },
-      };
-    }
+    dataStream.elasticsearch = {
+      ...dataStream.elasticsearch,
+      dynamic_dataset: true,
+      dynamic_namespace: true,
+    };
 
     return dataStream;
   });
-};
+}
 
 // Input only packages must provide a dataset name in order to differentiate their data streams
 // here we add the dataset var if it is not defined in the package already.
@@ -176,7 +266,15 @@ const addDatasetVarIfNotPresent = (
   }
 };
 
-const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
+export const shouldIncludeUseAPMVar = (
+  inputType: string,
+  dataStreamType: string | undefined,
+  isDynamicSignalTypes: boolean
+): boolean =>
+  inputType === OTEL_COLLECTOR_INPUT_TYPE &&
+  (dataStreamType === dataTypes.Traces || isDynamicSignalTypes);
+
+export const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
   const newVars = vars ?? [];
 
   const isUseAPMVarAlreadyAdded = newVars.find(

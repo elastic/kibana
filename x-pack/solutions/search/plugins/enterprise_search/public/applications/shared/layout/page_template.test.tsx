@@ -9,16 +9,19 @@ import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
+import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { FlashMessages } from '../flash_messages';
 import { Loading } from '../loading';
 
+import type { PageTemplateProps } from './page_template';
 import { EnterpriseSearchPageTemplateWrapper } from './page_template';
 
 describe('EnterpriseSearchPageTemplateWrapper', () => {
@@ -294,6 +297,83 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       );
 
       expect(wrapper.find(consolePlugin.EmbeddableConsole).exists()).toBe(false);
+    });
+  });
+
+  describe('solution nav footer', () => {
+    const MockFooter = () => <div data-test-subj="mockSolutionNavFooter">footer</div>;
+
+    const renderTemplate = (props: Partial<PageTemplateProps> = {}) =>
+      render(
+        <I18nProvider>
+          <EnterpriseSearchPageTemplateWrapper {...props} />
+        </I18nProvider>
+      );
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('merges SolutionViewSwitchCallout into solutionNav when available', () => {
+      setMockValues({
+        capabilities: { spaces: { manage: true } },
+        notifications: {
+          tours: { isEnabled: () => true },
+        },
+        spaces: {
+          ui: {
+            components: {
+              getSolutionViewSwitchCallout: MockFooter,
+            },
+          },
+        },
+      });
+
+      const { getByTestId } = renderTemplate({
+        solutionNav: { items: [], name: 'Elasticsearch' },
+      });
+
+      expect(getByTestId('mockSolutionNavFooter')).toBeInTheDocument();
+    });
+
+    it('does not set footer when announcements are disabled', () => {
+      setMockValues({
+        notifications: {
+          tours: { isEnabled: () => false },
+        },
+        spaces: {
+          ui: {
+            components: {
+              getSolutionViewSwitchCallout: MockFooter,
+            },
+          },
+        },
+      });
+
+      const { queryByTestId } = renderTemplate({
+        solutionNav: { items: [], name: 'Elasticsearch' },
+      });
+
+      expect(queryByTestId('mockSolutionNavFooter')).not.toBeInTheDocument();
+    });
+
+    it('does not set footer when canManageSpaces is false', () => {
+      setMockValues({
+        capabilities: { spaces: { manage: false } },
+        spaces: {
+          ui: {
+            components: {
+              getSolutionViewSwitchCallout: MockFooter,
+            },
+          },
+        },
+      });
+
+      const { queryByTestId } = renderTemplate({
+        solutionNav: { items: [], name: 'Elasticsearch' },
+      });
+
+      expect(queryByTestId('mockSolutionNavFooter')).not.toBeInTheDocument();
     });
   });
 });

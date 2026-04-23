@@ -5,32 +5,25 @@
  * 2.0.
  */
 
-export {
-  DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANELS_REMOVED_EVENT,
-} from './constants';
+export { DASHBOARD_ATTACHMENT_TYPE } from './constants';
 
 export {
   panelGridSchema,
-  lensAttachmentPanelSchema,
-  genericAttachmentPanelSchema,
-  attachmentPanelSchema,
-  dashboardSectionSchema,
+  sectionGridSchema,
   dashboardAttachmentDataSchema,
-  dashboardAttachmentOriginSchema,
-  isLensAttachmentPanel,
-  isGenericAttachmentPanel,
+  isSection,
 } from './types';
 
 export type {
-  LensAttachmentPanel,
-  GenericAttachmentPanel,
   AttachmentPanel,
   DashboardSection,
   DashboardAttachmentData,
-  DashboardAttachmentOrigin,
-  PanelAddedEventData,
-  PanelsRemovedEventData,
-  DashboardUiEvent,
+  DashboardAttachment,
+  PendingDashboardAttachment,
 } from './types';
+
+export { dashboardStateToAttachmentData, attachmentDataToDashboardState } from './converters';
+
+export { DEFAULT_TIME_RANGE, EMPTY_DASHBOARD_STATE } from './dashboard_state_helpers';
+
+export { isDashboardAttachment } from './is_dashboard_attachment';

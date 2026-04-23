@@ -8,7 +8,6 @@
 import { useQuery } from '@kbn/react-query';
 
 import type { UserStartPrivilegesResponse } from '../../../common/types';
-import { QueryKeys } from '../../constants';
 
 import { useKibana } from '../use_kibana';
 import { GET_USER_PRIVILEGES_ROUTE } from '../../../common/routes';
@@ -16,7 +15,7 @@ import { GET_USER_PRIVILEGES_ROUTE } from '../../../common/routes';
 export const useUserPrivilegesQuery = (indexName: string) => {
   const { http } = useKibana().services;
   return useQuery({
-    queryKey: [QueryKeys.FetchUserStartPrivileges],
+    queryKey: ['fetchUserStartPrivileges'],
     queryFn: () =>
       http.get<UserStartPrivilegesResponse>(
         GET_USER_PRIVILEGES_ROUTE.replace('{indexName}', indexName)

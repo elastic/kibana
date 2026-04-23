@@ -50,6 +50,10 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 ### Visualizations [ec_visualizations]
 
 
+#### Version 8.0+ [ec_vis_supported_versions_8_0_0]
+
+`vis_type_timelion.enable`
+:   For 8.0 version and later, set to `false` to disable Timelion vizualizations. **Default: `true`**
 
 #### Supported versions before 8.0.0 [ec_vis_supported_versions_before_8_0_0]
 
@@ -85,6 +89,14 @@ stack: ga 9.4+
 ## X-Pack configuration settings [ec-xpack-config]
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
+
+### Version 9.4+ [ec_version_9_4]
+```{applies_to}
+stack: ga 9.4
+```
+
+`xpack.securitySolution.maxEndpointScriptFileSize`
+:    The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
 
 ### Version 9.3+ [ec_version_9_3]
 ```{applies_to}

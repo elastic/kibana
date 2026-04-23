@@ -21,6 +21,7 @@ export class OnboardingHomePage {
   readonly awsCollectionCard: Locator;
   readonly firehoseQuickstartCard: Locator;
   readonly cloudforwarderQuickstartCard: Locator;
+  readonly introducingAIAgentModalContinueBtn: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -50,6 +51,9 @@ export class OnboardingHomePage {
     this.cloudforwarderQuickstartCard = this.page.getByTestId(
       'integration-card:cloudforwarder-quick-start'
     );
+    this.introducingAIAgentModalContinueBtn = this.page.getByTestId(
+      'agentBuilderAnnouncementContinueButton'
+    );
   }
 
   public async selectHostUseCase() {
@@ -74,5 +78,15 @@ export class OnboardingHomePage {
 
   public async selectOtelHostQuickstart() {
     await this.otelHostCard.click();
+  }
+
+  public async maybeClickIntroducingAIAgentModalContinueBtn() {
+    await this.page.addLocatorHandler(
+      this.introducingAIAgentModalContinueBtn,
+      async (btn) => {
+        await btn.click();
+      },
+      { times: 1 }
+    );
   }
 }

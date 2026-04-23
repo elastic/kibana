@@ -17,20 +17,20 @@ export const lensSearchRequestQuerySchema = schema.object({
   query: schema.maybe(
     schema.string({
       meta: {
-        description: 'The text to search for Lens visualizations',
+        description: 'Text to match against `search_fields`.',
       },
     })
   ),
   page: schema.number({
     meta: {
-      description: 'Specifies the current page number of the paginated result.',
+      description: 'Page number.',
     },
     min: 1,
     defaultValue: 1,
   }),
   per_page: schema.number({
     meta: {
-      description: 'Maximum number of Lens visualizations included in a single response',
+      description: 'Results per page.',
     },
     defaultValue: 20,
     min: 1,
@@ -41,8 +41,10 @@ export const lensSearchRequestQuerySchema = schema.object({
 const lensSearchResponseMetaSchema = schema.object(
   {
     page: searchOptionsSchemas.page,
-    perPage: searchOptionsSchemas.perPage,
-    total: schema.number(), // TODO use shared definition
+    per_page: searchOptionsSchemas.perPage,
+    total: schema.number({
+      meta: { description: 'Total number of matching visualizations.' },
+    }),
   },
   { unknowns: 'forbid' }
 );

@@ -1,6 +1,0 @@
-{
-  "appId": 26774,
-  "envVars": {
-    "appKey": "KIBANA_CI_REPORTER_KEY"
-  }
-}

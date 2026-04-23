@@ -49,6 +49,19 @@ export interface RestoreConfig extends BaseConfig {
 export interface ReplayConfig extends BaseConfig {
   patterns: string[];
   concurrency?: number;
+  /** Predicate that determines whether a given destination index should use an inline
+   * Painless script instead of the ingest pipeline for timestamp transformation. Return
+   * `true` for destinations whose index templates are managed externally and reject
+   * explicit pipelines in bulk/reindex requests. */
+  shouldUseInlineScript?: (destIndex: string) => boolean;
+  /** Called after temp indices are restored, before reindexing to final destinations. */
+  beforeReindex?: (params: {
+    esClient: Client;
+    log: ToolingLog;
+    originalIndices: string[];
+    restoredIndices: string[];
+    destinationIndices: string[];
+  }) => Promise<void>;
 }
 
 // Create configuration

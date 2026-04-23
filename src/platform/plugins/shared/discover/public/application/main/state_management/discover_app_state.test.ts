@@ -12,7 +12,6 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
-import { omit } from 'lodash';
 import { fromTabStateToSavedObjectTab, internalStateActions } from './redux';
 import type { DiscoverServices } from '../../../build_services';
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
@@ -107,85 +106,77 @@ describe('Test discover app state', () => {
     expect(getCurrentTab().appState.dataSource?.type).toBe('esql');
   });
 
+  test('should not allow both chart and table hidden when setting app state', async () => {
+    const { internalState, getCurrentTab } = await setup();
+    internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId: getCurrentTab().id,
+        appState: {
+          ...getCurrentTab().appState,
+          hideChart: true,
+          hideTable: true,
+        },
+      })
+    );
+
+    expect(getCurrentTab().appState.hideChart).toBe(true);
+    expect(getCurrentTab().appState.hideTable).toBe(false);
+  });
+
   describe('initializeAndSync', () => {
-    it('should call setResetDefaultProfileState correctly with no initial state', async () => {
+    it('should call setProfileStateFieldsToReset correctly with no initial state', async () => {
       const { initializeSingleTab, getCurrentTab } = await setupNoTab();
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        hideChart: false,
-        rowHeight: false,
-        breakdownField: false,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
       await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        hideChart: true,
-        rowHeight: true,
-        breakdownField: true,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual('all');
     });
 
-    it('should call setResetDefaultProfileState correctly with initial columns', async () => {
+    it('should call setProfileStateFieldsToReset correctly with initial columns', async () => {
       const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'] });
       const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        hideChart: false,
-        rowHeight: false,
-        breakdownField: false,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
       await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        hideChart: true,
-        rowHeight: true,
-        breakdownField: true,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual([
+        'rowHeight',
+        'breakdownField',
+        'hideChart',
+        'hideTable',
+      ]);
     });
 
-    it('should call setResetDefaultProfileState correctly with initial rowHeight', async () => {
+    it('should call setProfileStateFieldsToReset correctly with initial rowHeight', async () => {
       const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ rowHeight: 5 });
       const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        hideChart: false,
-        rowHeight: false,
-        breakdownField: false,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
       await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        hideChart: true,
-        rowHeight: false,
-        breakdownField: true,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual([
+        'columns',
+        'breakdownField',
+        'hideChart',
+        'hideTable',
+      ]);
     });
 
-    it('should call setResetDefaultProfileState correctly with initial hide chart', async () => {
+    it('should call setProfileStateFieldsToReset correctly with initial hide chart', async () => {
       const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ hideChart: true });
       const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        hideChart: false,
-        rowHeight: false,
-        breakdownField: false,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
       await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        hideChart: false,
-        rowHeight: true,
-        breakdownField: true,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual([
+        'columns',
+        'rowHeight',
+        'breakdownField',
+        'hideTable',
+      ]);
     });
 
-    it('should call setResetDefaultProfileState correctly with persisted Discover session', async () => {
+    it('should call setProfileStateFieldsToReset correctly with persisted Discover session', async () => {
       const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'], rowHeight: 5 });
@@ -193,19 +184,9 @@ describe('Test discover app state', () => {
         persistedDiscoverSession: getPersistedDiscoverSession({ services: discoverServiceMock }),
         stateStorage,
       });
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        hideChart: false,
-        rowHeight: false,
-        breakdownField: false,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
       await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        hideChart: false,
-        rowHeight: false,
-        breakdownField: false,
-      });
+      expect(getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
     });
   });
 });
