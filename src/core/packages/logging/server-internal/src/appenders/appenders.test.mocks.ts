@@ -44,7 +44,7 @@ jest.mock('@elastic/opentelemetry-node/sdk', () => {
 });
 jest.mock('@opentelemetry/api', () => ({
   ROOT_CONTEXT: 'root-context',
-  TraceFlags: { SAMPLED: 1 },
+  TraceFlags: { NONE: 0, SAMPLED: 1 },
   trace: { setSpanContext: jest.fn() },
 }));
 jest.mock('@kbn/apm-config-loader', () => ({

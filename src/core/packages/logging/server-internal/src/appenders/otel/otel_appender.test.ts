@@ -364,7 +364,7 @@ describe('OtelAppender.append() — trace context', () => {
     expect(trace.setSpanContext).toHaveBeenCalledWith('root-context', {
       traceId: 'abc123',
       spanId: 'def456',
-      traceFlags: undefined, // TraceFlags.NONE
+      traceFlags: 0, // TraceFlags.NONE
     });
     const emittedContext = mockEmit.mock.calls[0][0].context;
     expect(emittedContext).toBeDefined();

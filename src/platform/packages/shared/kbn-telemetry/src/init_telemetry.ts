@@ -44,7 +44,7 @@ export const initTelemetry = (
   }
 
   // resource.attributes.*
-  const resource = buildOtelResources();
+  const resource = buildOtelResources(serviceName);
 
   if (telemetryConfig.enabled) {
     if (telemetryConfig.tracing.enabled) {

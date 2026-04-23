@@ -117,6 +117,7 @@ describe('initTelemetry', () => {
 
       initTelemetry([], REPO_ROOT, false, 'test-service');
 
+      expect(getConfiguration).toHaveBeenCalledWith('test-service');
       expect(resourceFromAttributesSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           // Using expect.objectContaining to ignore other attributes introduced by CI adding apmConfig.globalLabels
@@ -128,6 +129,53 @@ describe('initTelemetry', () => {
           'telemetry.sdk.language': 'nodejs',
         })
       );
+    });
+
+    test('uses the provided serviceName (not a hardcoded "kibana") to look up APM config', () => {
+      const { loadConfiguration, getConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => new ApmConfiguration(REPO_ROOT, {}, false));
+      getConfiguration.mockImplementationOnce(() => ({
+        serviceName: 'my-worker',
+        serviceVersion: '1.2.3',
+        environment: 'staging',
+      }));
+
+      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+
+      initTelemetry([], REPO_ROOT, false, 'my-worker');
+
+      expect(getConfiguration).toHaveBeenCalledWith('my-worker');
+      expect(resourceFromAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          'service.name': 'my-worker',
+          'service.version': '1.2.3',
+          'deployment.environment.name': 'staging',
+        })
+      );
+    });
+
+    test('does not emit literal "null" or "undefined" strings for nullish globalLabels entries', () => {
+      const { loadConfiguration, getConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => new ApmConfiguration(REPO_ROOT, {}, false));
+      getConfiguration.mockImplementationOnce(() => ({
+        serviceName: 'test-service',
+        globalLabels: {
+          validLabel: 'ok',
+          nullLabel: null,
+          undefinedLabel: undefined,
+        },
+      }));
+
+      const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
+
+      initTelemetry([], REPO_ROOT, false, 'test-service');
+
+      const capturedAttrs = resourceFromAttributesSpy.mock.calls[0][0];
+      expect(capturedAttrs).toMatchObject({ validLabel: 'ok', 'labels.validLabel': 'ok' });
+      expect(capturedAttrs).not.toMatchObject({ nullLabel: 'null' });
+      expect(capturedAttrs).not.toMatchObject({ 'labels.nullLabel': 'null' });
+      expect(capturedAttrs).not.toMatchObject({ undefinedLabel: 'undefined' });
+      expect(capturedAttrs).not.toMatchObject({ 'labels.undefinedLabel': 'undefined' });
     });
   });
 });

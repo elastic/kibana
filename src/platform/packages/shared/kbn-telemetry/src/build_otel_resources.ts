@@ -17,9 +17,10 @@ import {
 
 /**
  * Unified function to build the OpenTelemetry resource for all services.
+ * @param serviceName The service name used to look up APM config (defaults to 'kibana').
  * @returns The OpenTelemetry resource
  */
-export function buildOtelResources() {
+export function buildOtelResources(serviceName: string = 'kibana') {
   const resource = resources
     .detectResources({
       detectors: [
@@ -29,7 +30,7 @@ export function buildOtelResources() {
         resources.processDetector,
       ],
     })
-    .merge(resources.resourceFromAttributes(deriveAttributesFromApmConfig()));
+    .merge(resources.resourceFromAttributes(deriveAttributesFromApmConfig(serviceName)));
   // TODO: Merge resource from attributes from the telemetry config (when available)
 
   return resource;
@@ -39,12 +40,12 @@ export function buildOtelResources() {
  * Derives OTel service resource attributes from the APM configuration that was
  * already loaded at bootstrap time.
  */
-const deriveAttributesFromApmConfig = (): Record<string, string> => {
+const deriveAttributesFromApmConfig = (serviceName: string): Record<string, string> => {
   // telemetry.sdk.language is always known for this Node.js process.
   const attrs: Record<string, string> = { 'telemetry.sdk.language': 'nodejs' };
 
   // TODO: Since we are deprecating `elastic.apm.*` settings, we should provide a way to set these attributes in the `telemetry.*` config.
-  const apmConfig = getConfiguration('kibana');
+  const apmConfig = getConfiguration(serviceName);
   if (!apmConfig) {
     return attrs;
   }
@@ -62,6 +63,7 @@ const deriveAttributesFromApmConfig = (): Record<string, string> => {
   const { globalLabels } = apmConfig;
   if (globalLabels && typeof globalLabels === 'object' && !Array.isArray(globalLabels)) {
     for (const [key, value] of Object.entries(globalLabels)) {
+      if (value == null) continue;
       attrs[key] = String(value);
       // For backward compatibility, we prefix the global labels with "labels."
       attrs[`labels.${key}`] = String(value);

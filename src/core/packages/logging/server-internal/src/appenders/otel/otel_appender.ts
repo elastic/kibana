@@ -25,7 +25,7 @@ import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
 import { resources } from '@elastic/opentelemetry-node/sdk';
 import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
 import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-server';
-import { buildOtelResources } from '@kbn/telemetry/src/build_otel_resources';
+import { buildOtelResources } from '@kbn/telemetry';
 import { getFlattenedObject } from '@kbn/std';
 import { Layouts } from '../../layouts/layouts';
 
@@ -33,8 +33,7 @@ const DISPOSE_TIMEOUT_MS = 5_000;
 
 /**
  * Maps a Kibana log level to the corresponding OTel SeverityNumber.
- * Returns `undefined` for filter-only levels ('all', 'off') that should never
- * appear on an actual log record, causing the record to be silently dropped.
+ * Returns `0` for filter-only levels ('all', 'off') so even though the level is incorrect, the record is still logged.
  */
 const toSeverityNumber = (level: LogLevel): SeverityNumber => {
   switch (level.id) {
@@ -155,11 +154,11 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
       service: { version, type, state, node: { roles } = {}, id, ...serviceRest } = {},
       ...rest
     } = record.meta;
-    attrs['service.version'] = version;
-    attrs['service.type'] = type;
-    attrs['service.state'] = state;
-    attrs['service.node.roles'] = roles;
-    attrs['service.id'] = id;
+    if (version !== undefined) attrs['service.version'] = version;
+    if (type !== undefined) attrs['service.type'] = type;
+    if (state !== undefined) attrs['service.state'] = state;
+    if (roles !== undefined) attrs['service.node.roles'] = roles;
+    if (id !== undefined) attrs['service.id'] = id;
     // Flatten anything that we don't know about into the service object (ideally, nothing).
     Object.entries(getFlattenedObject(serviceRest)).forEach(([key, value]) => {
       attrs[key] = value;
@@ -231,9 +230,6 @@ export class OtelAppender implements DisposableAppender {
 
   public append(record: LogRecord): void {
     const severityNumber = toSeverityNumber(record.level);
-    if (severityNumber === undefined) {
-      return;
-    }
 
     this.logger.emit({
       timestamp: record.timestamp,
