@@ -81,6 +81,7 @@ import {
   registerRuleAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
+import { registerWorkflowSteps } from './workflows/step_types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -133,20 +134,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       share.url.locators.create(new AIValueReportLocatorDefinition());
     }
 
-    // Register workflow steps
     if (workflowsExtensions) {
-      import('./workflows/step_types')
-        .then(async ({ registerWorkflowSteps }) => {
-          const [coreStart] = await core.getStartServices();
-          return registerWorkflowSteps(workflowsExtensions, coreStart);
-        })
-        .catch((error) => {
-          this.logger.error(
-            `Error registering security workflow steps: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        });
+      registerWorkflowSteps(workflowsExtensions, core);
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -448,8 +437,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const cellRendererFeature: SecuritySolutionCellRendererFeature = {
       id: 'security-solution-cell-renderer',
       getRenderer: async () => {
-        const { getCellRendererForGivenRecord } = await this.getLazyDiscoverSharedDeps();
-        return getCellRendererForGivenRecord;
+        const [{ getCellRendererForGivenRecord }, services, store] = await Promise.all([
+          this.getLazyDiscoverSharedDeps(),
+          this.getDiscoverFlyoutServices(core),
+          this.getDiscoverFlyoutStore(core),
+        ]);
+        return getCellRendererForGivenRecord(services, store);
       },
     };
     discoverFeatureRegistry.register(cellRendererFeature);

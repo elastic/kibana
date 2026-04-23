@@ -8,10 +8,10 @@ components:
     AttackDiscoveryGenericResponse:
       type: object
       additionalProperties: true
-      description: Object containing Attack Discovery schedule.
+      description: Response body shape for Attack discovery schedule create, read, update, enable, and disable operations. Fields vary by endpoint; refer to each operation’s schema and examples.
     AttackDiscoveryGenericError:
       type: object
-      description: Generic error response for Attack Discovery schedule operations
+      description: Error response for Attack discovery schedule operations when the request is rejected. Uses `status_code` (snake_case), `error`, and `message` to match the implementation.
       properties:
         status_code:
           type: number
@@ -30,7 +30,7 @@ paths:
   /api/attack_discovery/schedules:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Create an Attack Discovery schedule
           source: |
@@ -139,7 +139,7 @@ paths:
   /api/attack_discovery/schedules/{id}:
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Get an Attack Discovery schedule by ID
           source: |
@@ -202,7 +202,7 @@ paths:
                 message: "Invalid request parameters."
     put:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Update an Attack Discovery schedule
           source: |
@@ -300,7 +300,7 @@ paths:
                 message: "Invalid request parameters."
     delete:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Delete an Attack Discovery schedule
           source: |
@@ -349,7 +349,7 @@ paths:
   /api/attack_discovery/schedules/{id}/_enable:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Enable an Attack Discovery schedule
           source: |
@@ -398,7 +398,7 @@ paths:
   /api/attack_discovery/schedules/{id}/_disable:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Disable an Attack Discovery schedule
           source: |
