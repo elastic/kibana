@@ -86,13 +86,7 @@ export function reportMetrics(
       'stats'
     );
 
-    reporter.metrics([
-      {
-        id,
-        meta: { pluginTeam },
-        group: 'Unreferenced deprecated APIs',
-        value: referencedDeprecations[id] ? referencedDeprecations[id].length : 0,
-      },
+    const metrics = [
       {
         id,
         meta: { pluginTeam },
@@ -120,35 +114,6 @@ export function reportMetrics(
       {
         id,
         meta: { pluginTeam },
-        group: 'References to deprecated APIs',
-        value: pluginStats.deprecatedAPIsReferencedCount,
-      },
-      {
-        id,
-        meta: {
-          pluginTeam,
-          // `meta` only allows primitives or string[]
-          // Also, each string is allowed to have a max length of 2056,
-          // so it's safer to stringify each element in the array over sending the entire array as stringified.
-          // My internal tests with 4 plugins using the same API gets to a length of 156 chars,
-          // so we should have enough room for tracking popular APIs.
-          // TODO: We can do a follow-up improvement to split the report if we find out we might hit the limit.
-          adoptionTrackedAPIs: pluginStats.adoptionTrackedAPIs.map((metric) =>
-            JSON.stringify(metric)
-          ),
-        },
-        group: 'Adoption-tracked APIs',
-        value: pluginStats.adoptionTrackedAPIsCount,
-      },
-      {
-        id,
-        meta: { pluginTeam },
-        group: 'Adoption-tracked APIs that are not used anywhere',
-        value: pluginStats.adoptionTrackedAPIsUnreferencedCount,
-      },
-      {
-        id,
-        meta: { pluginTeam },
         group: 'ESLint disabled line counts',
         value: pluginStats.eslintDisableLineCount,
       },
@@ -170,7 +135,49 @@ export function reportMetrics(
         group: 'Enzyme imports',
         value: pluginStats.enzymeImportCount,
       },
-    ]);
+    ];
+
+    if (!options.skipDeprecatedRefs) {
+      metrics.push(
+        {
+          id,
+          meta: { pluginTeam },
+          group: 'Unreferenced deprecated APIs',
+          value: referencedDeprecations[id] ? referencedDeprecations[id].length : 0,
+        },
+        {
+          id,
+          meta: { pluginTeam },
+          group: 'References to deprecated APIs',
+          value: pluginStats.deprecatedAPIsReferencedCount,
+        },
+        {
+          id,
+          meta: {
+            pluginTeam,
+            // `meta` only allows primitives or string[]
+            // Also, each string is allowed to have a max length of 2056,
+            // so it's safer to stringify each element in the array over sending the entire array as stringified.
+            // My internal tests with 4 plugins using the same API gets to a length of 156 chars,
+            // so we should have enough room for tracking popular APIs.
+            // TODO: We can do a follow-up improvement to split the report if we find out we might hit the limit.
+            adoptionTrackedAPIs: pluginStats.adoptionTrackedAPIs.map((metric) =>
+              JSON.stringify(metric)
+            ),
+          },
+          group: 'Adoption-tracked APIs',
+          value: pluginStats.adoptionTrackedAPIsCount,
+        },
+        {
+          id,
+          meta: { pluginTeam },
+          group: 'Adoption-tracked APIs that are not used anywhere',
+          value: pluginStats.adoptionTrackedAPIsUnreferencedCount,
+        }
+      );
+    }
+
+    reporter.metrics(metrics);
 
     if (options.collectReferences && options.pluginFilter?.includes(plugin.id)) {
       if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
