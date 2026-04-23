@@ -145,7 +145,12 @@ describe('SubFeatureCard', () => {
   const renderCard = (
     endpointIds: string[],
     overrides?: Partial<InferenceFeatureConfig>,
-    invalidEndpointIds: Set<string> = new Set()
+    extra?: {
+      invalidEndpointIds?: Set<string>;
+      globalDefaultId?: string;
+      hasSavedObject?: boolean;
+      isFeatureDirty?: boolean;
+    }
   ) =>
     render(
       <Wrapper>
@@ -154,7 +159,10 @@ describe('SubFeatureCard', () => {
           feature={{ ...feature, ...overrides }}
           endpointIds={endpointIds}
           onEndpointsChange={onEndpointsChange}
-          invalidEndpointIds={invalidEndpointIds}
+          invalidEndpointIds={extra?.invalidEndpointIds ?? new Set()}
+          globalDefaultId={extra?.globalDefaultId ?? 'NO_DEFAULT_MODEL'}
+          hasSavedObject={extra?.hasSavedObject ?? true}
+          isFeatureDirty={extra?.isFeatureDirty ?? false}
         />
       </Wrapper>
     );
@@ -335,6 +343,60 @@ describe('SubFeatureCard', () => {
       renderCard(['azure-1']);
 
       expect(screen.getByText('Azure GPT')).toBeInTheDocument();
+    });
+  });
+
+  describe('global default row', () => {
+    it('does not render greyed row when feature has a saved object', () => {
+      renderCard(['ep-1'], undefined, {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: true,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('does not render greyed row when global default is unset', () => {
+      renderCard(['ep-1'], undefined, {
+        globalDefaultId: 'NO_DEFAULT_MODEL',
+        hasSavedObject: false,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('renders greyed row with badge when no saved object, default set, and not dirty', () => {
+      renderCard(['ep-1'], undefined, {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: false,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+      expect(screen.getByTestId('global-default-badge-test_feature')).toBeInTheDocument();
+    });
+
+    it('renders greyed row without badge when feature has been edited', () => {
+      renderCard(['ep-1'], undefined, {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: false,
+        isFeatureDirty: true,
+      });
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+      expect(screen.queryByTestId('global-default-badge-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('hides the per-endpoint Default badge when the global default row is shown', () => {
+      renderCard(['ep-1', 'ep-2'], undefined, {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: false,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.queryByText('Default')).not.toBeInTheDocument();
     });
   });
 });

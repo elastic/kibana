@@ -33,7 +33,8 @@ const getAlertAttrs = async (
   return (_source as Record<string, unknown>)?.alert as Record<string, unknown>;
 };
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/264184
+apiTest.describe.skip(
   'API key invalidation on rule operations',
   { tag: tags.serverless.observability.complete },
   () => {
@@ -41,11 +42,13 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      for (const ruleId of ruleIds) {
-        await apiClient.delete(`api/alerting/rule/${ruleId}`, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-        });
-      }
+      await Promise.allSettled(
+        ruleIds.map((ruleId) =>
+          apiClient.delete(`api/alerting/rule/${ruleId}`, {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+          })
+        )
+      );
       await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
     });
 

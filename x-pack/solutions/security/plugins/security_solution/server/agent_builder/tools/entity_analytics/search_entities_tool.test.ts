@@ -618,6 +618,20 @@ describe('searchEntitiesTool', () => {
       expect(query).not.toContain('KEEP');
     });
 
+    it('omits snapshot index from FROM clause when snapshot index does not exist', async () => {
+      mockEsClient.asCurrentUser.indices.exists.mockResolvedValueOnce(false);
+      mockSingleEntityResponse();
+
+      await tool.handler(
+        { riskScoreChangeInterval: '30d' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(query).toContain('FROM entities-latest-default');
+      expect(query).not.toContain('.entities.v2.history.security_default');
+    });
+
     it('uses start-of-day truncation for the timestamp filter', async () => {
       mockSingleEntityResponse();
 

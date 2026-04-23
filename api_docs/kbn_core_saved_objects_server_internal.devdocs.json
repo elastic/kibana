@@ -124,7 +124,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
-            "lineNumber": 252,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -140,7 +140,7 @@
                   "SavedObjectsStartDeps"
                 ],
                 "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
-                "lineNumber": 252,
+                "lineNumber": 250,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -160,7 +160,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
-            "lineNumber": 475,
+            "lineNumber": 482,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -574,10 +574,10 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { kibanaIndex, kibanaVersion }: RouteDependencies) => void"
+          ", { kibanaVersion }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
-        "lineNumber": 19,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -593,7 +593,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
-            "lineNumber": 20,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -604,13 +604,13 @@
             "id": "def-server.registerDeleteUnknownTypesRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ kibanaIndex, kibanaVersion }",
+            "label": "{ kibanaVersion }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
-            "lineNumber": 21,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1103,7 +1103,7 @@
         "label": "SAVED_OBJECT_TYPES_COUNT",
         "description": [],
         "signature": [
-          "155"
+          "156"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
         "lineNumber": 14,
