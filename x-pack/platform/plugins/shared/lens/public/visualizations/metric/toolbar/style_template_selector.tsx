@@ -159,7 +159,7 @@ function StyleTemplateCard({
 function MetricPreview({ position }: { position: MetricStyleTemplate }) {
   const { euiTheme } = useEuiTheme();
 
-  const value = (fontSize: string) => (
+  const value = (fontSize: string, textAlign: 'left' | 'center' | 'right' = 'left') => (
     <EuiFlexItem grow={false}>
       <EuiText
         size="relative"
@@ -167,6 +167,7 @@ function MetricPreview({ position }: { position: MetricStyleTemplate }) {
           font-weight: ${euiTheme.font.weight.bold};
           font-size: ${fontSize};
           line-height: 1.2;
+          text-align: ${textAlign};
         `}
       >
         0,000
@@ -174,15 +175,28 @@ function MetricPreview({ position }: { position: MetricStyleTemplate }) {
     </EuiFlexItem>
   );
 
-  const title = (
+  const title = (textAlign: 'left' | 'center' | 'right' = 'left') => (
     <EuiFlexItem grow={false}>
-      <EuiText size="xs">Title</EuiText>
+      <EuiText
+        size="xs"
+        css={css`
+          text-align: ${textAlign};
+        `}
+      >
+        Title
+      </EuiText>
     </EuiFlexItem>
   );
 
-  const secondary = (
+  const secondary = (textAlign: 'left' | 'center' | 'right' = 'left') => (
     <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">
+      <EuiText
+        size="xs"
+        color="subdued"
+        css={css`
+          text-align: ${textAlign};
+        `}
+      >
         {'<0,000>'}
       </EuiText>
     </EuiFlexItem>
@@ -192,29 +206,29 @@ function MetricPreview({ position }: { position: MetricStyleTemplate }) {
     top: (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {value(euiTheme.size.l)}
-        {title}
-        {secondary}
+        {title()}
+        {secondary()}
       </EuiFlexGroup>
     ),
     middle: (
-      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        {title}
+      <EuiFlexGroup direction="column" gutterSize="none" alignItems="center" responsive={false}>
+        {title()}
         {value(euiTheme.size.l)}
-        {secondary}
+        {secondary()}
       </EuiFlexGroup>
     ),
     bottom: (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        {title}
-        {secondary}
-        {value(euiTheme.size.l)}
+        {title()}
+        {secondary('right')}
+        {value(euiTheme.size.l, 'right')}
       </EuiFlexGroup>
     ),
     custom: (
       <EuiFlexGroup direction="column" gutterSize="none" alignItems="center" responsive={false}>
-        {title}
+        {title()}
         {value(euiTheme.size.l)}
-        {secondary}
+        {secondary()}
       </EuiFlexGroup>
     ),
   };
