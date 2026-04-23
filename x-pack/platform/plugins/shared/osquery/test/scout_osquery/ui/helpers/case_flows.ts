@@ -7,7 +7,11 @@
 
 import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { OsqueryBrowserAuthFixture, OsqueryUiApiServicesFixture, OsqueryUiTestFixtures } from '../fixtures';
+import type {
+  OsqueryBrowserAuthFixture,
+  OsqueryUiApiServicesFixture,
+  OsqueryUiTestFixtures,
+} from '../fixtures';
 import { waitForAtLeastOneAgentOnline } from './fleet_agents';
 import { waitForLiveQueryComplete } from './poll_live_query_history';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';

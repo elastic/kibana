@@ -26,9 +26,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     if (packagePolicyId) {
       await apiServices.fleet.package_policies
         .delete(packagePolicyId)
-        .catch((err: Error) =>
-          log.debug(`fleet.package_policies.delete failed: ${err.message}`)
-        );
+        .catch((err: Error) => log.debug(`fleet.package_policies.delete failed: ${err.message}`));
       packagePolicyId = undefined;
     }
 
@@ -110,9 +108,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     // The create-policy flyout closes and routes to the policy detail page;
     // from there we open the integration flyout and add osquery_manager.
     await pageObjects.osqueryFleetIntegration.openAgentPolicy(policyName);
-    await pageObjects.osqueryFleetIntegration.addOsqueryManagerIntegrationToPolicy(
-      integrationName
-    );
+    await pageObjects.osqueryFleetIntegration.addOsqueryManagerIntegrationToPolicy(integrationName);
     uiCreatedIntegrationNames.push(integrationName);
 
     // Look up the created IDs via kbnClient for afterEach cleanup. The Fleet
@@ -156,6 +152,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     if (await gotItButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await pageObjects.osqueryFleetIntegration.dismissFleetTour();
     }
+
     await expect(page.testSubj.locator('createAgentPolicyButton')).toBeVisible({
       timeout: 30_000,
     });

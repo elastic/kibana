@@ -83,8 +83,7 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     await pageObjects.osqueryPackForm.confirmPolicyChangeModal();
 
     const afterToggle = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
-    const items = (afterToggle.data as { items: Array<{ name: string; enabled?: boolean }> })
-      .items;
+    const items = (afterToggle.data as { items: Array<{ name: string; enabled?: boolean }> }).items;
     const match = items.find((p) => p.name === `Policy for Default policy`);
     expect(match).toBeDefined();
 
@@ -138,8 +137,7 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     // Find the persisted duplicate saved object so cleanup can remove it —
     // relying on the UI toast alone would leak the copy across CI runs.
     const packs = await apiServices.osquery.packs.list();
-    const items = (packs.data as { data: Array<{ name?: string; saved_object_id: string }> })
-      .data;
+    const items = (packs.data as { data: Array<{ name?: string; saved_object_id: string }> }).data;
     const duplicatePackId = items.find((p) => p.name === `${packName}_copy`)?.saved_object_id;
     if (duplicatePackId) transientPackIds.push(duplicatePackId);
   });

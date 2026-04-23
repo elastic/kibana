@@ -159,10 +159,9 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     await pageObjects.osqueryRuleEditor
       .responseActionItem(0)
       .waitFor({ state: 'visible', timeout: 60_000 });
-    await expect(pageObjects.osqueryRuleEditor.responseActionItem(0)).toContainText(
-      'os_version',
-      { timeout: 30_000 }
-    );
+    await expect(pageObjects.osqueryRuleEditor.responseActionItem(0)).toContainText('os_version', {
+      timeout: 30_000,
+    });
     await pageObjects.osqueryRuleEditor.clickSaveChanges();
     await expect(page.getByText(`${seededRuleName} was saved`)).toBeVisible({
       timeout: 60_000,
@@ -174,9 +173,8 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     await pageObjects.osqueryRuleEditor
       .responseActionItem(0)
       .waitFor({ state: 'visible', timeout: 60_000 });
-    await expect(pageObjects.osqueryRuleEditor.responseActionItem(0)).toContainText(
-      'os_version',
-      { timeout: 30_000 }
-    );
+    await expect(pageObjects.osqueryRuleEditor.responseActionItem(0)).toContainText('os_version', {
+      timeout: 30_000,
+    });
   });
 });

@@ -77,7 +77,6 @@ export class LiveQueryFormPage {
   }
 
   async selectAllAgents(): Promise<void> {
-
     const agentInput = this.agentSelection.getByTestId('comboBoxSearchInput');
     await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
     await agentInput.click();

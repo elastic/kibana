@@ -135,9 +135,9 @@ export class RuleEditorPage {
     await this.page.waitForFunction(
       ({ itemSubj, expectedValue }) => {
         const row = document.querySelector(`[data-test-subj="${itemSubj}"]`);
-        const input = row?.querySelector('[data-test-subj="comboBoxSearchInput"]') as
-          | HTMLInputElement
-          | null;
+        const input = row?.querySelector(
+          '[data-test-subj="comboBoxSearchInput"]'
+        ) as HTMLInputElement | null;
 
         return input?.value === expectedValue;
       },
@@ -171,7 +171,7 @@ export class RuleEditorPage {
     // expressed as a single `waitFor` so we stay out of the `expect.poll`
     // page-object anti-pattern. Targeting the (N-1)-th row is safe because
     // EuiBasicTable mounts rows in order.
-    // eslint-disable-next-line playwright/no-nth-methods -- target the Nth row to confirm at least N rows have rendered
+
     await packQueriesTable
       .locator('tbody tr.euiTableRow')
       .nth(expectedRowCount - 1)

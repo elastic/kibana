@@ -88,6 +88,7 @@ apiTest.describe(
           if (packId) {
             await apiServices.osquery.packs.delete(packId);
           }
+
           await kbnClient.request({
             method: 'DELETE',
             path: `${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${testPkgPolicyId}`,
