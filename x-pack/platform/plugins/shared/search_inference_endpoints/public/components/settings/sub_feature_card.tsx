@@ -33,6 +33,7 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { css } from '@emotion/react';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getProviderKeyForCreator } from '../../utils/eis_utils';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
@@ -70,6 +71,9 @@ interface SubFeatureCardProps {
   endpointIds: string[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
+  globalDefaultId: string;
+  hasSavedObject: boolean;
+  isFeatureDirty: boolean;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -78,6 +82,9 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   endpointIds,
   onEndpointsChange,
   invalidEndpointIds,
+  globalDefaultId,
+  hasSavedObject,
+  isFeatureDirty,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
@@ -116,6 +123,9 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const hasOverflow = endpointIds.length > COLLAPSED_COUNT;
   const visibleEndpoints = isExpanded ? endpointIds : endpointIds.slice(0, COLLAPSED_COUNT);
   const hiddenCount = endpointIds.length - COLLAPSED_COUNT;
+  const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
+  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
+    endpointDisplayMap.get(globalDefaultId) ?? {};
   const canAddMore =
     !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
 
@@ -235,6 +245,60 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             <EuiDragDropContext onDragEnd={handleDragEnd}>
               <div ref={listRef}>
                 <EuiSplitPanel.Outer hasBorder>
+                  {showGlobalDefaultRow && (
+                    <>
+                      <EuiSplitPanel.Inner
+                        paddingSize="s"
+                        color="subdued"
+                        data-test-subj={`global-default-row-${featureId}`}
+                      >
+                        <EuiFlexGroup alignItems="center" gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiPanel color="transparent" paddingSize="none">
+                              <EuiIcon type="lock" size="s" color="subdued" aria-hidden />
+                            </EuiPanel>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type={globalDefaultIcon} size="m" aria-hidden />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow>
+                            <EuiToolTip
+                              title={globalDefaultLabel}
+                              content={globalDefaultId}
+                              position="top"
+                            >
+                              <EuiText
+                                size="s"
+                                color="subdued"
+                                tabIndex={0}
+                                css={css`
+                                  overflow: hidden;
+                                  text-overflow: ellipsis;
+                                  white-space: nowrap;
+                                `}
+                              >
+                                <span>{globalDefaultLabel}</span>
+                              </EuiText>
+                            </EuiToolTip>
+                          </EuiFlexItem>
+                          {!isFeatureDirty && (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge
+                                color="hollow"
+                                data-test-subj={`global-default-badge-${featureId}`}
+                              >
+                                {i18n.translate(
+                                  'xpack.searchInferenceEndpoints.settings.globalDefaultBadge',
+                                  { defaultMessage: 'Global default' }
+                                )}
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          )}
+                        </EuiFlexGroup>
+                      </EuiSplitPanel.Inner>
+                      <EuiHorizontalRule margin="none" />
+                    </>
+                  )}
                   <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
                     {visibleEndpoints.map((endpointId, index) => (
                       <EuiDraggable
@@ -314,7 +378,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                       </EuiText>
                                     </EuiToolTip>
                                   </EuiFlexItem>
-                                  {index === 0 && (
+                                  {index === 0 && !showGlobalDefaultRow && (
                                     <EuiFlexItem grow={false}>
                                       <EuiBadge color="hollow">
                                         {i18n.translate(

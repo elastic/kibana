@@ -92,6 +92,7 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-notifications-browser'
   - '@kbn/ai-assistant-common'
+  - '@kbn/elastic-assistant-common'
   - '@kbn/ui-theme'
   - '@kbn/ai-assistant-management-plugin'
   - '@kbn/inference-endpoint-ui-common'
