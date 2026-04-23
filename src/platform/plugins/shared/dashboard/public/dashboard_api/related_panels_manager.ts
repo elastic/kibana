@@ -32,6 +32,11 @@ const getBlankSectionFilterEntry = () =>
 interface PublishesESQLQuery {
   query$: PublishingSubject<AggregateQuery>;
 }
+/**
+ * Type guard to check if an embeddable publishes an ES|QL query.
+ * Some embeddables publish `query$` but the value may be undefined or a non-ES|QL query object.
+ * The `in` operator throws if the right-hand side is not an object, so we must guard against that.
+ */
 const apiPublishesESQLQuery = (api: unknown): api is PublishesESQLQuery => {
   const query = (api as PublishesESQLQuery).query$?.value;
   return Boolean(query) && typeof query === 'object' && 'esql' in query;
