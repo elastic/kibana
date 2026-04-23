@@ -28,16 +28,17 @@ actions:
   # Inject a minimal placeholder GET that keeps the tag alive in the Bump nav.
   # No description or responses — the notice is already shown via the tag-level description above.
   - target: "$.paths['/api/dashboards']"
-    description: "Add placeholder GET /api/dashboards to keep tag in Bump nav"
+    description: "Add placeholder GET /api/dashboards (x-internal hides it from Bump but keeps the tag in the nav)"
     update:
       get:
         tags:
           - Dashboards
         summary: "Dashboards API — full reference available externally"
         operationId: placeholder-dashboards-external
+        x-internal: true
         responses:
           '308':
-            description: "See the [full Dashboards API reference](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)."
+            description: "See external documentation."
 
   # ──────────────────────────────────────────────
   # VISUALIZATIONS
@@ -57,16 +58,17 @@ actions:
 
   # No description — the notice is already shown via the tag-level description above.
   - target: "$.paths['/api/visualizations']"
-    description: "Add placeholder GET /api/visualizations to keep tag in Bump nav"
+    description: "Add placeholder GET /api/visualizations (x-internal hides it from Bump but keeps the tag in the nav)"
     update:
       get:
         tags:
           - Visualizations
         summary: "Visualizations API — full reference available externally"
         operationId: placeholder-visualizations-external
+        x-internal: true
         responses:
           '308':
-            description: "See the [full Visualizations API reference](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)."
+            description: "See external documentation."
 
   # ──────────────────────────────────────────────
   # Update the tag-level descriptions (shown as section intros in Bump).
