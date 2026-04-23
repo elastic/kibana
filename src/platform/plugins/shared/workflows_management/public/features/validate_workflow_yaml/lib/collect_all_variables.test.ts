@@ -455,6 +455,191 @@ steps:
     expect(result.map((v) => v.key)).toEqual(['realVar1', 'realVar2']);
   });
 
+  it('should collect variables from single-quoted scalars with correct offsets', () => {
+    const yaml = `name: Test Workflow
+steps:
+  - name: Test Step
+    action: test
+    params:
+      value: '{{myVar}}'`;
+
+    const model = createMockModel(yaml);
+    const yamlDocument = parseDocument(yaml);
+    const workflowDefinition: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'Test Step',
+          type: 'test.action',
+          with: { value: '{{myVar}}' },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+
+    const result = collectAllVariables(model, yamlDocument, workflowGraph);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('myVar');
+    const varOffset = yaml.indexOf("'{{myVar}}'") + 1;
+    expect(result[0].offset).toBe(varOffset);
+    expect(result[0]).toMatchObject({
+      startLineNumber: 6,
+      startColumn: 15,
+      endLineNumber: 6,
+      endColumn: 24,
+    });
+  });
+
+  it('should collect variables from double-quoted scalars with correct offsets', () => {
+    const yaml = `name: Test Workflow
+steps:
+  - name: Test Step
+    action: test
+    params:
+      value: "{{doubleVar}}"`;
+
+    const model = createMockModel(yaml);
+    const yamlDocument = parseDocument(yaml);
+    const workflowDefinition: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'Test Step',
+          type: 'test.action',
+          with: { value: '{{doubleVar}}' },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+
+    const result = collectAllVariables(model, yamlDocument, workflowGraph);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('doubleVar');
+    const varOffset = yaml.indexOf('{{doubleVar}}');
+    expect(result[0].offset).toBe(varOffset);
+  });
+
+  it('should collect variables from block literal scalars (|) with correct offsets', () => {
+    const yaml = `name: Test Workflow
+steps:
+  - name: Test Step
+    action: test
+    params:
+      value: |
+        Hello {{blockVar1}}
+        World {{blockVar2}}`;
+
+    const model = createMockModel(yaml);
+    const yamlDocument = parseDocument(yaml);
+    const workflowDefinition: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'Test Step',
+          type: 'test.action',
+          with: { value: 'Hello {{blockVar1}}\nWorld {{blockVar2}}\n' },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+
+    const result = collectAllVariables(model, yamlDocument, workflowGraph);
+
+    expect(result).toHaveLength(2);
+    expect(result[0].key).toBe('blockVar1');
+    expect(result[1].key).toBe('blockVar2');
+    const firstVarDocOffset = yaml.indexOf('{{blockVar1}}');
+    const secondVarDocOffset = yaml.indexOf('{{blockVar2}}');
+    expect(result[0].offset).toBe(firstVarDocOffset);
+    expect(result[1].offset).toBe(secondVarDocOffset);
+    expect(result[0].startLineNumber).toBe(7);
+    expect(result[1].startLineNumber).toBe(8);
+  });
+
+  it('should collect variables from block folded scalars (>) with correct offsets', () => {
+    const yaml = `name: Test Workflow
+steps:
+  - name: Test Step
+    action: test
+    params:
+      value: >
+        Folded {{foldedVar1}}
+        line {{foldedVar2}}`;
+
+    const model = createMockModel(yaml);
+    const yamlDocument = parseDocument(yaml);
+    const workflowDefinition: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'Test Step',
+          type: 'test.action',
+          with: { value: 'Folded {{foldedVar1}} line {{foldedVar2}}\n' },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+
+    const result = collectAllVariables(model, yamlDocument, workflowGraph);
+
+    expect(result).toHaveLength(2);
+    expect(result[0].key).toBe('foldedVar1');
+    expect(result[1].key).toBe('foldedVar2');
+    const firstVarDocOffset = yaml.indexOf('{{foldedVar1}}');
+    const secondVarDocOffset = yaml.indexOf('{{foldedVar2}}');
+    expect(result[0].offset).toBe(firstVarDocOffset);
+    expect(result[1].offset).toBe(secondVarDocOffset);
+    expect(result[0].startLineNumber).toBe(7);
+    expect(result[1].startLineNumber).toBe(8);
+  });
+
+  it('should handle block literal scalar with extra indentation', () => {
+    const yaml = `name: Test
+steps:
+  - name: s1
+    action: test
+    params:
+      value: |
+            deep {{deepVar}} here`;
+
+    const model = createMockModel(yaml);
+    const yamlDocument = parseDocument(yaml);
+    const workflowDefinition: WorkflowYaml = {
+      name: 'Test',
+      version: '1',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 's1',
+          type: 'test.action',
+          with: { value: 'deep {{deepVar}} here\n' },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+
+    const result = collectAllVariables(model, yamlDocument, workflowGraph);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('deepVar');
+    expect(result[0].offset).toBe(yaml.indexOf('{{deepVar}}'));
+  });
+
   it('should NOT collect variables from inline YAML comments', () => {
     const yaml = `name: Test Workflow
 steps:

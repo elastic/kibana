@@ -7,65 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document } from 'yaml';
+import { Output, type PropertyAccessToken, TokenKind } from 'liquidjs';
+import type { Document, Scalar as YamlScalar } from 'yaml';
 import { visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import { createWorkflowLiquidEngine } from '@kbn/workflows/common/utils';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { VariableItem } from '../model/types';
 
-interface ScalarEntry {
-  start: number;
-  end: number;
-  path: Array<string | number>;
+const liquidEngine = createWorkflowLiquidEngine();
+
+interface ScalarVariable {
+  key: string;
+  startOffset: number;
+  endOffset: number;
+  yamlPath: Array<string | number>;
 }
 
-const scalarIndexCache = new WeakMap<Document, ScalarEntry[]>();
+function extractVariablesFromScalar(
+  yamlString: string,
+  node: YamlScalar,
+  yamlPath: Array<string | number>
+): ScalarVariable[] {
+  if (typeof node.value !== 'string' || node.value === '' || !node.range) return [];
 
-/**
- * Builds a sorted index of every scalar in the document in a single `visit()`,
- * pre-computing both ranges and YAML paths.
- */
-function getScalarIndex(document: Document): ScalarEntry[] {
-  const cached = scalarIndexCache.get(document);
-  if (cached) {
-    return cached;
-  }
+  const rangeStart = node.range[0];
+  const rawSource = yamlString.slice(rangeStart, node.range[1]);
+  const results: ScalarVariable[] = [];
 
-  const entries: ScalarEntry[] = [];
-  visit(document, {
-    Scalar(_k, node, ancestors) {
-      if (node.range && node.value !== '') {
-        entries.push({
-          start: node.range[0],
-          end: node.range[1],
-          path: getPathFromAncestors(ancestors, node),
-        });
+  try {
+    const tokens = liquidEngine.parse(rawSource);
+    for (const token of tokens) {
+      if (!(token instanceof Output)) {
+        // skip HTML nodes and other non-output tokens
+      } else {
+        const first = token.value?.initial?.postfix?.[0];
+        if (first && first.kind === TokenKind.PropertyAccess) {
+          const propertyAccess = first as PropertyAccessToken;
+          results.push({
+            key: propertyAccess.getText(),
+            startOffset: rangeStart + token.token.begin,
+            endOffset: rangeStart + token.token.end,
+            yamlPath,
+          });
+        }
       }
-    },
-  });
-
-  entries.sort((a, b) => a.start - b.start);
-  scalarIndexCache.set(document, entries);
-  return entries;
-}
-
-function findScalarAtOffset(entries: ScalarEntry[], offset: number): ScalarEntry | null {
-  let lo = 0;
-  let hi = entries.length - 1;
-  while (lo <= hi) {
-    const mid = Math.floor((lo + hi) / 2);
-    const entry = entries[mid];
-    if (offset < entry.start) {
-      hi = mid - 1;
-    } else if (offset >= entry.end) {
-      lo = mid + 1;
-    } else {
-      return entry;
     }
+  } catch {
+    // LiquidJS couldn't parse this scalar — skip it
   }
-  return null;
+
+  return results;
 }
 
 export function collectAllVariables(
@@ -74,34 +67,34 @@ export function collectAllVariables(
   workflowGraph: WorkflowGraph
 ): VariableItem[] {
   const yamlString = model.getValue();
-  const scalarIndex = getScalarIndex(yamlDocument);
-  const variableItems: VariableItem[] = [];
+  const variables: ScalarVariable[] = [];
 
-  for (const match of yamlString.matchAll(VARIABLE_REGEX_GLOBAL)) {
-    const startOffset = match.index ?? 0;
-    const entry = findScalarAtOffset(scalarIndex, startOffset);
-    if (entry) {
-      const endOffset = startOffset + (match[0].length ?? 0);
-      const startPosition = model.getPositionAt(startOffset);
-      const endPosition = model.getPositionAt(endOffset);
-      const { path: yamlPath } = entry;
-      const type =
-        yamlPath.length > 1 && yamlPath[yamlPath.length - 1] === 'foreach' ? 'foreach' : 'regexp';
-      variableItems.push({
-        id: `${match.groups?.key ?? null}-${startPosition.lineNumber}-${startPosition.column}-${
-          endPosition.lineNumber
-        }-${endPosition.column}`,
-        startLineNumber: startPosition.lineNumber,
-        startColumn: startPosition.column,
-        endLineNumber: endPosition.lineNumber,
-        endColumn: endPosition.column,
-        key: match.groups?.key ?? null,
-        type,
-        yamlPath,
-        offset: startOffset,
-      });
-    }
-  }
+  visit(yamlDocument, {
+    Scalar(_k, node, ancestors) {
+      if (!node.range || node.value === '') return;
+      const yamlPath = getPathFromAncestors(ancestors, node);
+      variables.push(...extractVariablesFromScalar(yamlString, node, yamlPath));
+    },
+  });
 
-  return variableItems;
+  return variables.map((v) => {
+    const startPosition = model.getPositionAt(v.startOffset);
+    const endPosition = model.getPositionAt(v.endOffset);
+    const type =
+      v.yamlPath.length > 1 && v.yamlPath[v.yamlPath.length - 1] === 'foreach'
+        ? 'foreach'
+        : 'regexp';
+
+    return {
+      id: `${v.key}-${startPosition.lineNumber}-${startPosition.column}-${endPosition.lineNumber}-${endPosition.column}`,
+      startLineNumber: startPosition.lineNumber,
+      startColumn: startPosition.column,
+      endLineNumber: endPosition.lineNumber,
+      endColumn: endPosition.column,
+      key: v.key,
+      type,
+      yamlPath: v.yamlPath,
+      offset: v.startOffset,
+    };
+  });
 }
