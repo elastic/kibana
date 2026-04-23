@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiButtonEmpty,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -129,7 +128,7 @@ const EntityAnalyticsDashboardInlineContent: React.FC<
           defaultMessage:
             '{entityCount, plural, one {# entity in snapshot} other {# entities in snapshot}}{riskSuffix}',
           values: {
-            entityCount: entities.length,
+            entityCount: entities.length ?? 0,
             riskSuffix: showRiskInSnapshot ? ' · Risk chart from snapshot' : '',
           },
         })}
@@ -185,46 +184,17 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
   return (
     <div css={rootCanvasStyles}>
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false} css={{ overflow: 'auto' }}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={true}>
-            <EuiTitle size="m">
-              <h2>{title}</h2>
-            </EuiTitle>
-            {data.time_range_label ? (
-              <>
-                <EuiSpacer size="xs" />
-                <EuiText size="s" color="subdued">
-                  {data.time_range_label}
-                </EuiText>
-              </>
-            ) : null}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="popout"
-              onClick={() => {
-                navigateToEntityAnalyticsHomePageInApp({
-                  application,
-                  appId: APP_UI_ID,
-                  agentBuilder,
-                  chrome,
-                  openSidebarConversation,
-                  watchlistId: data.watchlist_id,
-                  watchlistName: data.watchlist_name,
-                  searchSession,
-                });
-              }}
-            >
-              {i18n.translate(
-                'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.openInSecurity',
-                {
-                  defaultMessage: 'Open Entity Analytics in Security',
-                }
-              )}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="m">
+          <h2>{title}</h2>
+        </EuiTitle>
+        {data.time_range_label ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              {data.time_range_label}
+            </EuiText>
+          </>
+        ) : null}
 
         {data.summary ? (
           <>
@@ -495,6 +465,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
               agentBuilder={agentBuilder}
               chrome={chrome}
               searchSession={searchSession}
+              openSidebarConversation={openSidebarConversation}
             />
           ) : (
             <EuiText size="s" color="subdued">
@@ -563,8 +534,35 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
       searchSession={searchSession}
     />
   ),
-  getActionButtons: ({ openCanvas, isCanvas }) => {
-    if (isCanvas || !openCanvas) {
+  getActionButtons: ({ attachment, openCanvas, isCanvas, openSidebarConversation }) => {
+    if (isCanvas) {
+      const data = attachment.data;
+      return [
+        {
+          label: i18n.translate(
+            'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.openInSecurity',
+            {
+              defaultMessage: 'Open Entity Analytics in Security',
+            }
+          ),
+          icon: 'popout',
+          type: ActionButtonType.SECONDARY,
+          handler: () => {
+            navigateToEntityAnalyticsHomePageInApp({
+              application,
+              appId: APP_UI_ID,
+              agentBuilder,
+              chrome,
+              openSidebarConversation,
+              watchlistId: data.watchlist_id,
+              watchlistName: data.watchlist_name,
+              searchSession,
+            });
+          },
+        },
+      ];
+    }
+    if (!openCanvas) {
       return [];
     }
     return [

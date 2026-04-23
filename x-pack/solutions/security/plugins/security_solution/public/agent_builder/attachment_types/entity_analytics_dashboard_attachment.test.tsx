@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import type { ISessionService } from '@kbn/data-plugin/public';
@@ -139,15 +139,51 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
     (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
   });
 
-  it('forwards the searchSession to navigateToEntityAnalyticsHomePageInApp on "Open Entity Analytics"', () => {
+  it('returns an "Open in Security" action from getActionButtons in canvas mode and forwards searchSession', () => {
     const searchSession = { clear: jest.fn() } as unknown as ISessionService;
-    renderCanvas({ searchSession });
-    fireEvent.click(screen.getByRole('button', { name: /open entity analytics in security/i }));
+    const application = applicationServiceMock.createStartContract();
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      searchSession,
+    });
+
+    const buttons = definition.getActionButtons!({
+      attachment: makeAttachment(),
+      isSidebar: false,
+      isCanvas: true,
+      updateOrigin: jest.fn(),
+    });
+
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0].icon).toBe('popout');
+    expect(buttons[0].label).toMatch(/open entity analytics in security/i);
+
+    buttons[0].handler();
 
     expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledTimes(1);
     expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledWith(
       expect.objectContaining({ searchSession })
     );
+  });
+
+  it('returns a Preview action from getActionButtons when not in canvas mode', () => {
+    const application = applicationServiceMock.createStartContract();
+    const openCanvas = jest.fn();
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({ application });
+
+    const buttons = definition.getActionButtons!({
+      attachment: makeAttachment(),
+      isSidebar: false,
+      isCanvas: false,
+      openCanvas,
+      updateOrigin: jest.fn(),
+    });
+
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0].icon).toBe('eye');
+    expect(buttons[0].label).toMatch(/preview/i);
+    buttons[0].handler();
+    expect(openCanvas).toHaveBeenCalledTimes(1);
   });
 
   it('renders the risk breakdown table and the donut chart side-by-side by default', () => {

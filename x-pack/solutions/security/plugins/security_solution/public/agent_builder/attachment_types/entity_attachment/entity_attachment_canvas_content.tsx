@@ -6,15 +6,13 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { APP_UI_ID } from '../../../../common/constants';
 import type { EntityAttachment } from './types';
 import { isFlyoutCapableIdentifierType } from './types';
 import { normaliseEntityAttachment } from './payload';
@@ -25,15 +23,7 @@ import {
   type SecurityCanvasEmbeddedBundle,
 } from '../../components/security_redux_embedded_provider';
 import { EntityCardFlyoutOverviewCanvas } from '../../components/entity_card_flyout_overview_canvas';
-import {
-  navigateToSecurityEntityInApp,
-  type SecurityAgentBuilderChrome,
-} from '../entity_explore_navigation';
-
-const OPEN_IN_SECURITY_LABEL = i18n.translate(
-  'xpack.securitySolution.agentBuilder.attachments.entity.openInSecurity',
-  { defaultMessage: 'Open in Security' }
-);
+import type { SecurityAgentBuilderChrome } from '../entity_explore_navigation';
 
 export interface EntityAttachmentCanvasContentProps
   extends AttachmentRenderProps<EntityAttachment> {
@@ -107,39 +97,9 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
     );
   }
 
-  const handleOpenInSecurity = () => {
-    navigateToSecurityEntityInApp({
-      application,
-      appId: APP_UI_ID,
-      row: {
-        entity_type: identifier.identifierType,
-        entity_id: identifier.entityStoreId ?? identifier.identifier,
-        entity_name: identifier.identifier,
-      },
-      agentBuilder,
-      chrome,
-      openSidebarConversation,
-      searchSession,
-    });
-  };
-
   return (
     <SecurityReduxEmbeddedProvider resolveCanvasContext={resolveSecurityCanvasContext}>
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="popout"
-              iconSide="right"
-              onClick={handleOpenInSecurity}
-              data-test-subj="entityAttachmentCanvasOpenInSecurity"
-            >
-              {OPEN_IN_SECURITY_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
         <QueryClientProvider client={entityAttachmentQueryClient}>
           <EntityCardFlyoutOverviewCanvas
             identifier={identifier}

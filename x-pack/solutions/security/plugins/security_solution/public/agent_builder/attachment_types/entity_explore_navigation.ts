@@ -131,9 +131,6 @@ export const getUserNameForUserDetailsUrl = (row: SecurityEntityExploreRow): str
   if (local && hostName) {
     return `${local}@${hostName}`;
   }
-  if (trimmed) {
-    return trimmed;
-  }
   if (local) {
     return local;
   }

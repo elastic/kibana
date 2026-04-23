@@ -102,11 +102,6 @@ describe('EntityAttachmentCanvasContent', () => {
     }
   });
 
-  it('exposes an "Open in Security" action button when rendering a flyout-capable entity', () => {
-    renderCanvas({ identifierType: 'host', identifier: 'host-1' });
-    expect(screen.getByTestId('entityAttachmentCanvasOpenInSecurity')).toBeInTheDocument();
-  });
-
   it('falls back to the EntityCard (no flyout provider) for a single generic entity', () => {
     renderCanvas({ identifierType: 'generic', identifier: 'some-resource' });
     expect(screen.getByTestId('entityCardMock')).toBeInTheDocument();

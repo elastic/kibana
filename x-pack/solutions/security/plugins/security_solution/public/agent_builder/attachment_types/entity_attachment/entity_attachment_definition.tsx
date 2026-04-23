@@ -22,11 +22,15 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { APP_UI_ID } from '../../../../common/constants';
 import type { EntityAttachment } from './types';
 import { isFlyoutCapableIdentifierType } from './types';
 import { normaliseEntityAttachment } from './payload';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import type { SecurityAgentBuilderChrome } from '../entity_explore_navigation';
+import {
+  navigateToSecurityEntityInApp,
+  type SecurityAgentBuilderChrome,
+} from '../entity_explore_navigation';
 
 const DEFAULT_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.attachments.entity.label',
@@ -42,6 +46,11 @@ const DEFAULT_LABEL_PLURAL = (count: number) =>
 const PREVIEW_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.attachments.entity.preview',
   { defaultMessage: 'Preview' }
+);
+
+const OPEN_IN_SECURITY_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.attachments.entity.openInSecurity',
+  { defaultMessage: 'Open in Security' }
 );
 
 /**
@@ -145,16 +154,40 @@ export const createEntityAttachmentDefinition = ({
               />
             </React.Suspense>
           ),
-          getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
-            if (isCanvas || !openCanvas) {
-              return [];
-            }
+          getActionButtons: ({ attachment, isCanvas, openCanvas, openSidebarConversation }) => {
             const parsed = normaliseEntityAttachment(attachment);
             if (!parsed || !parsed.isSingle) {
               return [];
             }
             const identifier = parsed.entities[0];
             if (!isFlyoutCapableIdentifierType(identifier.identifierType)) {
+              return [];
+            }
+            if (isCanvas) {
+              return [
+                {
+                  label: OPEN_IN_SECURITY_LABEL,
+                  icon: 'popout',
+                  type: ActionButtonType.SECONDARY,
+                  handler: () => {
+                    navigateToSecurityEntityInApp({
+                      application: application!,
+                      appId: APP_UI_ID,
+                      row: {
+                        entity_type: identifier.identifierType,
+                        entity_id: identifier.entityStoreId ?? identifier.identifier,
+                        entity_name: identifier.identifier,
+                      },
+                      agentBuilder,
+                      chrome,
+                      openSidebarConversation,
+                      searchSession,
+                    });
+                  },
+                },
+              ];
+            }
+            if (!openCanvas) {
               return [];
             }
             return [

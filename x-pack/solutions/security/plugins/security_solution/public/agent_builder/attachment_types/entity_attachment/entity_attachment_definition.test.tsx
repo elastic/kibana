@@ -12,6 +12,11 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EntityAttachment } from './types';
 import { createEntityAttachmentDefinition } from './entity_attachment_definition';
+import { navigateToSecurityEntityInApp } from '../entity_explore_navigation';
+
+jest.mock('../entity_explore_navigation', () => ({
+  navigateToSecurityEntityInApp: jest.fn(),
+}));
 
 const experimentalFeatures = {
   entityAttachmentRichRenderer: true,
@@ -102,14 +107,59 @@ describe('createEntityAttachmentDefinition', () => {
       expect(buttons).toEqual([]);
     });
 
-    it('returns no buttons when rendered already in Canvas (no re-entry into Preview)', () => {
-      const def = buildDefinition();
+    it('returns an "Open in Security" action when rendered in Canvas (replaces Preview re-entry)', () => {
+      (navigateToSecurityEntityInApp as jest.Mock).mockClear();
+      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const def = buildDefinition({ searchSession });
       const buttons = def.getActionButtons!({
         attachment: attachmentOf({ identifierType: 'host', identifier: 'alpha' }),
         isSidebar: false,
         isCanvas: true,
         updateOrigin: jest.fn(),
         openCanvas: jest.fn(),
+      });
+
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0].icon).toBe('popout');
+      expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
+
+      buttons[0].handler!();
+
+      expect(navigateToSecurityEntityInApp).toHaveBeenCalledTimes(1);
+      expect(navigateToSecurityEntityInApp).toHaveBeenCalledWith(
+        expect.objectContaining({
+          searchSession,
+          row: expect.objectContaining({
+            entity_type: 'host',
+            entity_name: 'alpha',
+          }),
+        })
+      );
+    });
+
+    it('returns no buttons in Canvas mode for multi-entity attachments', () => {
+      const def = buildDefinition();
+      const buttons = def.getActionButtons!({
+        attachment: attachmentOf({
+          entities: [
+            { identifierType: 'host', identifier: 'a' },
+            { identifierType: 'user', identifier: 'b' },
+          ],
+        }),
+        isSidebar: false,
+        isCanvas: true,
+        updateOrigin: jest.fn(),
+      });
+      expect(buttons).toEqual([]);
+    });
+
+    it('returns no buttons in Canvas mode for a generic single entity (not flyout-capable)', () => {
+      const def = buildDefinition();
+      const buttons = def.getActionButtons!({
+        attachment: attachmentOf({ identifierType: 'generic', identifier: 'some-resource' }),
+        isSidebar: false,
+        isCanvas: true,
+        updateOrigin: jest.fn(),
       });
       expect(buttons).toEqual([]);
     });

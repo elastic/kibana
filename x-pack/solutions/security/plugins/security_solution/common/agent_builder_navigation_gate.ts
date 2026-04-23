@@ -26,7 +26,8 @@ export const readLastAgentBuilderAgentIdForSecuritySession = (): string => {
     return agentBuilderDefaultAgentId;
   }
   try {
-    return JSON.parse(stored) as string;
+    const parsed = JSON.parse(stored);
+    return typeof parsed === 'string' ? parsed : stored;
   } catch {
     return stored;
   }

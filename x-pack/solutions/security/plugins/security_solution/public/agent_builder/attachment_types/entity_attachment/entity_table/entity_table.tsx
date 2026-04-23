@@ -73,12 +73,44 @@ const MAX_VISIBLE_SOURCES = 3;
  * narrower than the sum of the table's columns, so we keep the table at a
  * readable minimum width and let it overflow with a scrollbar instead of
  * squeezing the Name column into character-by-character wrapping.
+ *
+ * Pagination overrides: when the attachment is rendered inside a chat round,
+ * the message content sits inside an `EuiText` scope that forces
+ * `ul { list-style: disc; }` onto every nested list. EuiPagination renders
+ * its buttons inside a `<ul class="euiPagination__list">`, so the inherited
+ * rule turns each `<li>` into a visible bullet — the stray dark dot that
+ * shows up between the "previous" chevron and the first page button. We also
+ * zero out any background/outline on the active-page `EuiPaginationButton`
+ * so that chat-scope styles (e.g. disabled-button tints inherited from
+ * ancestor themes) do not render as a circular "disc" behind the active
+ * page number. Scoped to this wrapper so the overrides only affect the
+ * entity attachment table's pagination.
  */
 const tableScrollStyles = css`
   overflow-x: auto;
 
   .euiTable {
     min-width: 800px;
+  }
+
+  .euiPagination__list,
+  .euiPagination__list .euiPagination__item {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .euiPagination__list .euiPagination__item::marker,
+  .euiPagination__list .euiPagination__item::before {
+    content: none;
+  }
+
+  .euiPaginationButton[aria-current='page'],
+  .euiPaginationButton[aria-current='page']::before,
+  .euiPaginationButton[aria-current='page']::after {
+    background: transparent;
+    background-color: transparent;
+    box-shadow: none;
+    outline: none;
   }
 `;
 
