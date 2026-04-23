@@ -6,23 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-
-/**
- * Response shape for `POST /internal/semantic_layer/sml/_search`.
- * Mirrors `SmlSearchHttpResponse` from `@kbn/semantic-layer-plugin/common/http_api/sml`.
- * Declared inline because the semantic_layer plugin is server-only (`browser: false`).
- */
-interface SmlSearchHttpResponse {
-  total: number;
-  results: Array<{
-    id: string;
-    type: string;
-    origin_id: string;
-    title: string;
-    score: number;
-    content?: string;
-  }>;
-}
+import type { SmlSearchHttpResponse } from '@kbn/semantic-layer-plugin/common/http_api/sml';
 
 /**
  * Must stay in sync with the route registered in

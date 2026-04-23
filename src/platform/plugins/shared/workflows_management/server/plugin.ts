@@ -270,20 +270,15 @@ export class WorkflowsPlugin
     api: WorkflowsManagementApi,
     aiTelemetryClient: WorkflowsAiTelemetryClient
   ): void {
-    void Promise.all([
-      core.plugins.onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder'),
-      core.plugins.onSetup<{ semanticLayer: Pick<import('@kbn/semantic-layer-plugin/server').SemanticLayerPluginSetup, 'registerType'> }>('semanticLayer'),
-    ])
-      .then(([{ agentBuilder }, { semanticLayer }]) => {
+    void core.plugins
+      .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
+      .then(({ agentBuilder }) => {
         if (agentBuilder.found) {
           this.logger.debug(
             'Workflows Management: Agent Builder found, registering AI integration'
           );
           registerWorkflowAgentBuilderIntegration({
             agentBuilder: agentBuilder.contract,
-            semanticLayerRegisterType: semanticLayer.found
-              ? semanticLayer.contract.registerType
-              : undefined,
             logger: this.logger,
             api,
             aiTelemetryClient,
@@ -294,6 +289,24 @@ export class WorkflowsPlugin
         const message = err instanceof Error ? err.message : String(err);
         this.logger.warn(
           `Workflows Management: Failed to register AI integration with Agent Builder: ${message}`
+        );
+      });
+
+    void core.plugins
+      .onSetup<{ semanticLayer: Pick<import('@kbn/semantic-layer-plugin/server').SemanticLayerPluginSetup, 'registerType'> }>('semanticLayer')
+      .then(({ semanticLayer }) => {
+        if (semanticLayer.found) {
+          const { createWorkflowSmlType } = require('./agent_builder/sml_types/workflow');
+          semanticLayer.contract.registerType(createWorkflowSmlType(api));
+          this.logger.debug('Workflows Management: Workflow SML type registered with Semantic Layer');
+        } else {
+          this.logger.warn('Workflows Management: semanticLayer not available — workflow SML type not registered');
+        }
+      })
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.warn(
+          `Workflows Management: Failed to register workflow SML type: ${message}`
         );
       });
 

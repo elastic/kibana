@@ -21,6 +21,7 @@ import {
   registerSmlCrawlerTaskDefinition,
   scheduleSmlCrawlerTasks,
 } from './services/sml/sml_task_definitions';
+import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
 
 export class SemanticLayerPlugin
@@ -109,7 +110,12 @@ export class SemanticLayerPlugin
     });
 
     return {
-      getSmlService: () => smlService,
+      search: smlService.search,
+      checkItemsAccess: smlService.checkItemsAccess,
+      getDocuments: smlService.getDocuments,
+      getTypeDefinition: smlService.getTypeDefinition,
+      resolveSmlAttachItems: (params) =>
+        resolveSmlAttachItems({ ...params, sml: smlService }),
       indexAttachment: async (params) => {
         const soClient = savedObjects.getScopedClient(params.request);
         const spaceId =

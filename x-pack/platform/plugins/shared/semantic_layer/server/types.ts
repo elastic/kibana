@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -13,7 +16,13 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { SmlTypeDefinition, SmlService, SmlIndexAction } from './services/sml/types';
+import type {
+  SmlTypeDefinition,
+  SmlSearchResult,
+  SmlDocument,
+  SmlIndexAction,
+} from './services/sml/types';
+import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
 export interface SemanticLayerSetupDependencies {
   features: FeaturesPluginSetup;
@@ -31,7 +40,39 @@ export interface SemanticLayerPluginSetup {
 }
 
 export interface SemanticLayerPluginStart {
-  getSmlService: () => SmlService;
+  search: (params: {
+    query: string;
+    size?: number;
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    request: KibanaRequest;
+    skipContent?: boolean;
+  }) => Promise<{ results: SmlSearchResult[]; total: number }>;
+
+  checkItemsAccess: (params: {
+    ids: string[];
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    request: KibanaRequest;
+  }) => Promise<Map<string, boolean>>;
+
+  getDocuments: (params: {
+    ids: string[];
+    spaceId: string;
+    esClient: IScopedClusterClient;
+  }) => Promise<Map<string, SmlDocument>>;
+
+  getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;
+
+  resolveSmlAttachItems: (params: {
+    chunkIds: string[];
+    esClient: IScopedClusterClient;
+    request: KibanaRequest;
+    spaceId: string;
+    savedObjectsClient: SavedObjectsClientContract;
+    logger: Logger;
+  }) => Promise<SmlResolvedItemResult[]>;
+
   indexAttachment: (params: {
     request: KibanaRequest;
     originId: string;

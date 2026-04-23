@@ -19,7 +19,7 @@ import type { SemanticLayerPluginStart } from '@kbn/semantic-layer-plugin/server
 interface ConnectorLifecycleHandlerDeps {
   logger: Logger;
   getStartServices: () => Promise<
-    [CoreStart, { spaces?: SpacesPluginStart; semanticLayer?: SemanticLayerPluginStart }, unknown]
+    [CoreStart, { spaces?: SpacesPluginStart; semanticLayer: SemanticLayerPluginStart }, unknown]
   >;
 }
 
@@ -47,23 +47,20 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         );
         if (!isExperimentalFeaturesEnabled) return;
 
-        const semanticLayer = startDeps.semanticLayer;
-        if (semanticLayer) {
-          try {
-            await semanticLayer.indexAttachment({
-              request,
-              originId: connectorId,
-              attachmentType: AttachmentType.connector,
-              action: 'create',
-            });
-            logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
-          } catch (smlError) {
-            logger.warn(
-              `Connector lifecycle: failed to index connector ${connectorId} into SML: ${
-                (smlError as Error).message
-              }`
-            );
-          }
+        try {
+          await startDeps.semanticLayer.indexAttachment({
+            request,
+            originId: connectorId,
+            attachmentType: AttachmentType.connector,
+            action: 'create',
+          });
+          logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
+        } catch (smlError) {
+          logger.warn(
+            `Connector lifecycle: failed to index connector ${connectorId} into SML: ${
+              (smlError as Error).message
+            }`
+          );
         }
       } catch (error) {
         logger.error(
@@ -91,23 +88,20 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         );
         if (!isExperimentalFeaturesEnabled) return;
 
-        const semanticLayer = startDeps.semanticLayer;
-        if (semanticLayer) {
-          try {
-            await semanticLayer.indexAttachment({
-              request,
-              originId: connectorId,
-              attachmentType: AttachmentType.connector,
-              action: 'delete',
-            });
-            logger.info(`Connector lifecycle: removed connector ${connectorId} from SML`);
-          } catch (smlError) {
-            logger.warn(
-              `Connector lifecycle: failed to remove connector ${connectorId} from SML: ${
-                (smlError as Error).message
-              }`
-            );
-          }
+        try {
+          await startDeps.semanticLayer.indexAttachment({
+            request,
+            originId: connectorId,
+            attachmentType: AttachmentType.connector,
+            action: 'delete',
+          });
+          logger.info(`Connector lifecycle: removed connector ${connectorId} from SML`);
+        } catch (smlError) {
+          logger.warn(
+            `Connector lifecycle: failed to remove connector ${connectorId} from SML: ${
+              (smlError as Error).message
+            }`
+          );
         }
       } catch (error) {
         logger.error(

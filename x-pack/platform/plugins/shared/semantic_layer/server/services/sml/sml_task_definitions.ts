@@ -166,7 +166,7 @@ export const scheduleSmlCrawlerTasks = async ({
       );
     } catch (error) {
       logger.error(
-        `Failed to schedule SML crawler task for type '${definition.id}': ${error.message}`
+        `Failed to schedule SML crawler task for type '${definition.id}': ${(error as Error).message}`
       );
     }
   }

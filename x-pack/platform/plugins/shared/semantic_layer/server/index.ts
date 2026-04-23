@@ -33,7 +33,7 @@ export type {
   SmlService,
 } from './services/sml/types';
 
-export { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
+export type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
 
 export const plugin: PluginInitializer<

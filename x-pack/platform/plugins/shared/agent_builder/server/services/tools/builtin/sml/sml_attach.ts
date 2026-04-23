@@ -11,8 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { resolveSmlAttachItems } from '@kbn/semantic-layer-plugin/server';
+import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
 const smlAttachSchema = z.object({
@@ -30,7 +29,7 @@ const smlAttachSchema = z.object({
  * Converts SML search results into conversation attachments.
  */
 export const createSmlAttachTool = ({
-  getSmlService,
+  getSemanticLayer,
 }: SmlToolsOptions): BuiltinToolDefinition<typeof smlAttachSchema> => ({
   id: platformCoreTools.smlAttach,
   type: ToolType.builtin,
@@ -46,7 +45,7 @@ export const createSmlAttachTool = ({
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      const enabled = await uiSettings.get<boolean>(SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID);
       return enabled
         ? { status: 'available' }
         : {
@@ -56,12 +55,11 @@ export const createSmlAttachTool = ({
     },
   },
   handler: async ({ chunk_ids: chunkIds }, context) => {
-    const smlService = getSmlService();
+    const semanticLayer = getSemanticLayer();
     const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
 
-    const resolvedItems = await resolveSmlAttachItems({
+    const resolvedItems = await semanticLayer.resolveSmlAttachItems({
       chunkIds,
-      sml: smlService,
       esClient,
       request,
       spaceId,

@@ -12,7 +12,6 @@ import {
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { resolveSmlAttachItems } from '@kbn/semantic-layer-plugin/server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
@@ -72,7 +71,7 @@ export function registerInternalSmlRoutes({
         } = getInternalServices();
         const { conversation_id: conversationId, chunk_ids: chunkIds } = request.body;
         const [coreStart, startDeps] = await coreSetup.getStartServices();
-        const sml = startDeps.semanticLayer.getSmlService();
+        const semanticLayer = startDeps.semanticLayer;
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
         const esClient = (await ctx.core).elasticsearch.client;
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
@@ -87,9 +86,8 @@ export function registerInternalSmlRoutes({
           });
         }
 
-        const resolvedItems = await resolveSmlAttachItems({
+        const resolvedItems = await semanticLayer.resolveSmlAttachItems({
           chunkIds,
-          sml,
           esClient,
           request,
           spaceId,
