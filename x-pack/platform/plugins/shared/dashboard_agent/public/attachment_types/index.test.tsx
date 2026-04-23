@@ -181,6 +181,13 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         filterManager: {
           setFilters: jest.fn(),
         },
+        timefilter: {
+          timefilter: {
+            getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
+            getTimeUpdate$: jest.fn(() => new Subject<void>().asObservable()),
+            setTime: jest.fn(),
+          },
+        },
       },
     } as unknown as DataPublicPluginStart;
 
@@ -193,6 +200,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       addAttachment: mockAddAttachment,
       canWriteDashboards: true,
       filterManager: data.query.filterManager,
+      timefilter: data.query.timefilter.timefilter,
       dashboardPlugin,
       unifiedSearch,
       dashboardLocator: undefined,

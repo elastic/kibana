@@ -20,6 +20,7 @@ interface UseDashboardPreviewUnifiedSearchParams {
   dashboardApi: DashboardApi | undefined;
   dashboardState: DashboardState;
   filterManager: DataPublicPluginStart['query']['filterManager'];
+  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
 }
 
 const DEFAULT_EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -40,6 +41,7 @@ export const useDashboardPreviewUnifiedSearch = ({
   dashboardApi,
   dashboardState,
   filterManager,
+  timefilter,
 }: UseDashboardPreviewUnifiedSearchParams) => {
   const [timeRange, setTimeRange] = useState<TimeRange>(
     dashboardState.time_range ?? DEFAULT_TIME_RANGE
@@ -110,6 +112,19 @@ export const useDashboardPreviewUnifiedSearch = ({
     };
   }, [filterManager]);
 
+  useEffect(() => {
+    const timefilterSubscription = timefilter.getTimeUpdate$().subscribe(() => {
+      const nextTimeRange = timefilter.getTime();
+      setTimeRange((currentTimeRange) =>
+        isEqual(currentTimeRange, nextTimeRange) ? currentTimeRange : nextTimeRange
+      );
+    });
+
+    return () => {
+      timefilterSubscription.unsubscribe();
+    };
+  }, [timefilter]);
+
   const onRefresh = useCallback(() => {
     dashboardApi?.forceRefresh();
   }, [dashboardApi]);
@@ -141,7 +156,7 @@ export const useDashboardPreviewUnifiedSearch = ({
       onQuerySubmit,
       onFiltersUpdated,
       onRefresh,
-      useDefaultBehaviors: true,
+      useDefaultBehaviors: false,
       disableQueryLanguageSwitcher: true,
       isDisabled: !dashboardApi,
       dataTestSubj: 'dashboardCanvasSearchBar',

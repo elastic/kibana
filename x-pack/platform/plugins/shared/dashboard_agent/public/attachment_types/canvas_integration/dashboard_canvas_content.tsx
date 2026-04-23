@@ -59,6 +59,7 @@ export const DashboardCanvasContent = ({
   dashboardLocator,
   searchBarComponent: SearchBar,
   filterManager,
+  timefilter,
   checkSavedDashboardExist,
   canWriteDashboards,
 }: AttachmentRenderProps<DashboardAttachment> & {
@@ -70,6 +71,7 @@ export const DashboardCanvasContent = ({
   openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   filterManager: DataPublicPluginStart['query']['filterManager'];
+  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   canWriteDashboards: boolean;
 }) => {
@@ -112,6 +114,7 @@ export const DashboardCanvasContent = ({
     dashboardApi,
     dashboardState,
     filterManager,
+    timefilter,
   });
 
   const getCreationOptions = useCallback(

@@ -32,6 +32,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   dashboardLocator,
   unifiedSearch,
   filterManager,
+  timefilter,
   dashboardPlugin,
   canWriteDashboards,
 }: {
@@ -39,6 +40,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
   filterManager: DataPublicPluginStart['query']['filterManager'];
+  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   dashboardPlugin: DashboardStart;
   canWriteDashboards: boolean;
 }): (() => void) => {
@@ -106,6 +108,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         dashboardLocator={dashboardLocator}
         searchBarComponent={unifiedSearch.ui.SearchBar}
         filterManager={filterManager}
+        timefilter={timefilter}
         checkSavedDashboardExist={checkSavedDashboardExist}
         canWriteDashboards={canWriteDashboards}
       />
