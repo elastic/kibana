@@ -36,6 +36,7 @@ import {
   tap,
   type Subscription,
 } from 'rxjs';
+import { apm, type Span } from '@elastic/apm-rum';
 import { getEditPath } from '../../common/constants';
 import { prepareCallbacks } from './expressions/callbacks';
 import { getExpressionRendererParams } from './expressions/expression_params';
@@ -148,9 +149,48 @@ export function loadEmbeddableData(
     updateMessages(getUserMessages('embeddableBadge'));
     // No issues so far, blocking errors are handled directly by Lens from this point on
     if (!dispatchBlockingErrorIfAny()) {
+      endChartSpan('success');
       internalApi.dispatchRenderComplete();
     }
   };
+
+  // Track the current APM span for the lens chart render lifecycle
+  let currentChartSpan: Span | undefined;
+
+  function startChartSpan() {
+    // End any previous span that wasn't completed (e.g., a reload triggered before completion)
+    if (currentChartSpan) {
+      currentChartSpan.end();
+    }
+    const currentState = getState();
+    const parentContext = getParentContext(parentApi);
+    const meta = parentContext?.meta as Record<string, string | undefined> | undefined;
+
+    currentChartSpan =
+      apm.startSpan('lens-chart-render', 'lens-embeddable', {
+        blocking: true,
+        sync: false,
+      }) ?? undefined;
+
+    if (currentChartSpan) {
+      currentChartSpan.addLabels({
+        kibana_meta_lens_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
+        kibana_meta_lens_profile_id: meta?.profile_id ?? 'unknown',
+        kibana_meta_lens_metric_id: meta?.metric_id ?? 'unknown',
+      });
+    }
+  }
+
+  function endChartSpan(outcome: 'success' | 'failure', error?: Error) {
+    if (!currentChartSpan) return;
+    if (error) {
+      apm.captureError(error);
+    }
+    // @ts-expect-error RUM types don't include outcome
+    currentChartSpan.outcome = outcome;
+    currentChartSpan.end();
+    currentChartSpan = undefined;
+  }
 
   async function reload(
     // make reload easier to debug
@@ -160,6 +200,9 @@ export function loadEmbeddableData(
     addLog(`Embeddable reload reason: ${sourceId}`);
 
     resetMessages();
+
+    // Start APM span for this render cycle
+    startChartSpan();
 
     // reset the render on reload
     internalApi.dispatchRenderStart();
@@ -326,6 +369,12 @@ export function loadEmbeddableData(
       .pipe(debounceTime(0))
       .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
+    // End the APM span as failure when a blocking error occurs
+    internalApi.blockingError$
+      .pipe(filter((error): error is Error => error != null))
+      .subscribe((error) => {
+        endChartSpan('failure', error);
+      }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
