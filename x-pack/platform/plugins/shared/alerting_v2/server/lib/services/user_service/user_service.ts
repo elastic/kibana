@@ -6,9 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import { inject, injectable } from 'inversify';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import { EsServiceScopedToken } from '../es_service/tokens';
 
 export interface UserServiceContract {
   getCurrentUserProfileUid(): Promise<string | null>;
@@ -21,11 +23,12 @@ export class UserService implements UserServiceContract {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('userProfile'))
-    private readonly userProfile: UserProfileServiceStart
+    private readonly userProfile: UserProfileServiceStart,
+    @inject(EsServiceScopedToken) private readonly esClient: ElasticsearchClient
   ) {}
 
   public async getCurrentUserProfileUid(): Promise<string | null> {
-    if (!this.request.auth.isAuthenticated) {
+    if (this.request.isFakeRequest || !this.request.auth.isAuthenticated) {
       return null;
     }
     const profile = await this.userProfile.getCurrent({ request: this.request });
@@ -33,8 +36,9 @@ export class UserService implements UserServiceContract {
   }
 
   public async getCurrentUserProfile(): Promise<{ uid: string | null; username: string | null }> {
-    if (!this.request.auth.isAuthenticated) {
-      return { uid: null, username: null };
+    if (this.request.isFakeRequest) {
+      const auth = await this.esClient.security.authenticate();
+      return { uid: null, username: auth.username };
     }
     const profile = await this.userProfile.getCurrent({ request: this.request });
     return profile
@@ -43,8 +47,9 @@ export class UserService implements UserServiceContract {
   }
 
   public async getCurrentUsername(): Promise<string | null> {
-    if (!this.request.auth.isAuthenticated) {
-      return null;
+    if (this.request.isFakeRequest) {
+      const auth = await this.esClient.security.authenticate();
+      return auth.username;
     }
     const profile = await this.userProfile.getCurrent({ request: this.request });
     return profile?.user.username ?? null;

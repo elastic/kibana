@@ -7,7 +7,9 @@
 
 import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { UserService } from './user_service';
 
@@ -23,18 +25,24 @@ const mockProfile: UserProfileWithSecurity = {
   labels: {},
 };
 
-export function createUserService({ isAuthenticated = true }: { isAuthenticated?: boolean } = {}): {
+export function createUserService({ isFakeRequest = false }: { isFakeRequest?: boolean } = {}): {
   userService: UserService;
   userProfileService: jest.Mocked<UserProfileServiceStart>;
+  esClient: jest.Mocked<ElasticsearchClient>;
 } {
-  const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated } });
+  const request = isFakeRequest
+    ? httpServerMock.createFakeKibanaRequest({})
+    : httpServerMock.createKibanaRequest();
   const userProfileService = userProfileServiceMock.createStart();
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   userProfileService.getCurrent.mockResolvedValue(createUserProfile());
+  esClient.security.authenticate.mockResolvedValue({ username: 'elastic_api_key_user' } as any);
 
   return {
-    userService: new UserService(request, userProfileService),
+    userService: new UserService(request, userProfileService, esClient),
     userProfileService,
+    esClient,
   };
 }
 

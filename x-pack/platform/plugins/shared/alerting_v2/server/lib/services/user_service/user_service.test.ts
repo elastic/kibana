@@ -60,30 +60,30 @@ describe('UserService', () => {
     });
   });
 
-  describe('when request is not authenticated (Task Manager fakeRequest)', () => {
+  describe('when request is a fake request (Task Manager / Agent Builder)', () => {
     it('returns null uid without calling userProfile service', async () => {
-      const { userService, userProfileService } = createUserService({ isAuthenticated: false });
+      const { userService, userProfileService } = createUserService({ isFakeRequest: true });
 
       await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
 
       expect(userProfileService.getCurrent).not.toHaveBeenCalled();
     });
 
-    it('returns null user profile without calling userProfile service', async () => {
-      const { userService, userProfileService } = createUserService({ isAuthenticated: false });
+    it('returns username from ES authenticate without calling userProfile service', async () => {
+      const { userService, userProfileService } = createUserService({ isFakeRequest: true });
 
       await expect(userService.getCurrentUserProfile()).resolves.toEqual({
         uid: null,
-        username: null,
+        username: 'elastic_api_key_user',
       });
 
       expect(userProfileService.getCurrent).not.toHaveBeenCalled();
     });
 
-    it('returns null username without calling userProfile service', async () => {
-      const { userService, userProfileService } = createUserService({ isAuthenticated: false });
+    it('returns username from ES authenticate without calling userProfile service', async () => {
+      const { userService, userProfileService } = createUserService({ isFakeRequest: true });
 
-      await expect(userService.getCurrentUsername()).resolves.toBeNull();
+      await expect(userService.getCurrentUsername()).resolves.toBe('elastic_api_key_user');
 
       expect(userProfileService.getCurrent).not.toHaveBeenCalled();
     });
