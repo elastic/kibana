@@ -3,7 +3,7 @@ navigation_title: "Snowflake"
 type: reference
 description: "Use the Snowflake connector to execute SQL, discover databases, schemas, tables and views, and run semantic searches via Cortex Search."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.5
   serverless: preview
 ---
 
