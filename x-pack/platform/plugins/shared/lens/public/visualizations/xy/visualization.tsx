@@ -736,8 +736,9 @@ export const getXyVisualization = ({
         newLayer.splitAccessors = newLayer.splitAccessors.filter((a) => a !== columnId);
         if (newLayer.splitAccessors.length === 0) {
           delete newLayer.splitAccessors;
-          // as the palette is associated with the break down by dimension, remove it together with the dimension
+          // as palette and colorMapping are associated with the breakdown dimension, remove them together with the breakdown dimension
           delete newLayer.palette;
+          delete newLayer.colorMapping;
         }
       }
     }
