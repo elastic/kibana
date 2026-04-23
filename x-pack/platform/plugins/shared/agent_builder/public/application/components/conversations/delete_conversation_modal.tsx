@@ -12,24 +12,20 @@ import { useConversationContext } from '../../context/conversation/conversation_
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useConversationTitle } from '../../hooks/use_conversation';
 
-interface DeleteConversationModalProps {
-  isOpen: boolean;
+export interface BaseDeleteConversationModalProps {
   onClose: () => void;
-  // Override conversation to be deleted
-  conversation?: { id: string; title: string };
+  conversationId: string;
+  title: string;
+  onDelete: (conversationId: string) => Promise<void>;
 }
 
-export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = ({
-  isOpen,
+export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalProps> = ({
   onClose,
-  conversation,
+  conversationId,
+  title,
+  onDelete,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const currentConversationId = useConversationId();
-  const { title: currentTitle } = useConversationTitle();
-  const conversationId = conversation?.id ?? currentConversationId;
-  const title = conversation?.title ?? currentTitle;
-  const { conversationActions } = useConversationContext();
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
 
   const handleDelete = useCallback(async () => {
@@ -37,12 +33,15 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
       return;
     }
     setIsLoading(true);
-    await conversationActions.deleteConversation(conversationId);
-    setIsLoading(false);
-    onClose();
-  }, [conversationId, conversationActions, onClose]);
+    try {
+      await onDelete(conversationId);
+      onClose();
+    } catch {
+      setIsLoading(false);
+    }
+  }, [conversationId, onDelete, onClose]);
 
-  if (!isOpen || !conversationId) {
+  if (!conversationId) {
     return null;
   }
 
@@ -85,5 +84,32 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
         />
       </p>
     </EuiConfirmModal>
+  );
+};
+
+interface DeleteConversationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
+  const conversationId = useConversationId();
+  const { title } = useConversationTitle();
+  const { conversationActions } = useConversationContext();
+
+  if (!isOpen || !conversationId) {
+    return null;
+  }
+
+  return (
+    <BaseDeleteConversationModal
+      onClose={onClose}
+      conversationId={conversationId}
+      title={title || ''}
+      onDelete={conversationActions.deleteConversation}
+    />
   );
 };

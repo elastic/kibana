@@ -15,7 +15,6 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiText,
   EuiTextTruncate,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -37,9 +36,6 @@ const labels = {
     'xpack.agentBuilder.conversationSearchModal.searchPlaceholder',
     { defaultMessage: 'Search chats' }
   ),
-  latestChats: i18n.translate('xpack.agentBuilder.conversationSearchModal.latestChats', {
-    defaultMessage: 'Latest chats',
-  }),
 };
 
 const MODAL_WIDTH = 480;
@@ -85,7 +81,7 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
   const listStyles = css`
     overflow-y: auto;
     max-height: ${LIST_MAX_HEIGHT}px;
-    margin-top: ${euiTheme.size.s};
+    margin-top: ${euiTheme.size.m};
   `;
 
   const renderList = () => {
@@ -147,16 +143,6 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
           onChange={(e) => setSearchValue(e.target.value)}
           data-test-subj="agentBuilderConversationSearchInput"
         />
-
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={css`
-            margin-top: ${euiTheme.size.m};
-          `}
-        >
-          <p>{labels.latestChats}</p>
-        </EuiText>
 
         <div css={listStyles}>{renderList()}</div>
       </EuiModalBody>

@@ -16,7 +16,7 @@ export const registerSyntheticsEmbeddables = (
   core: CoreSetup<ClientPluginsStart, unknown>,
   pluginsSetup: ClientPluginsSetup
 ) => {
-  pluginsSetup.embeddable.registerReactEmbeddableFactory(
+  pluginsSetup.embeddable.registerEmbeddablePublicDefinition(
     SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     async () => {
       const { getStatsOverviewEmbeddableFactory } = await import(
@@ -35,7 +35,7 @@ export const registerSyntheticsEmbeddables = (
     }
   );
 
-  pluginsSetup.embeddable.registerReactEmbeddableFactory(
+  pluginsSetup.embeddable.registerEmbeddablePublicDefinition(
     SYNTHETICS_MONITORS_EMBEDDABLE,
     async () => {
       const { getMonitorsEmbeddableFactory } = await import(

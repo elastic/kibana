@@ -4715,10 +4715,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-v2-fixture@link:x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture":
-  version "0.0.0"
-  uid ""
-
 "@kbn/alerting-v2-plugin@link:x-pack/platform/plugins/shared/alerting_v2":
   version "0.0.0"
   uid ""
@@ -4804,6 +4800,10 @@
   uid ""
 
 "@kbn/apm-data-view@link:src/platform/packages/shared/kbn-apm-data-view":
+  version "0.0.0"
+  uid ""
+
+"@kbn/apm-embeddable-common@link:x-pack/solutions/observability/packages/kbn-apm-embeddable-common":
   version "0.0.0"
   uid ""
 
@@ -7732,6 +7732,10 @@
   uid ""
 
 "@kbn/mcp-dev-server@link:src/platform/packages/shared/kbn-mcp-dev-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/measure-component@link:src/platform/packages/shared/kbn-measure-component":
   version "0.0.0"
   uid ""
 
