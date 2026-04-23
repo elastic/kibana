@@ -8,6 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
+import chroma from 'chroma-js';
 import type { monaco } from '../..';
 
 export function createTheme(
@@ -99,6 +100,8 @@ export function createTheme(
       'list.hoverBackground': euiTheme.colors.backgroundBaseSubdued,
       'list.highlightForeground': euiTheme.colors.primary,
       'editor.lineHighlightBorder': euiTheme.colors.lightestShade,
+      'editor.wordHighlightBackground': chroma(euiTheme.colors.backgroundLightWarning).hex(),
+      'editor.wordHighlightStrongBackground': chroma(euiTheme.colors.backgroundLightWarning).hex(),
       'editorHoverWidget.foreground': euiTheme.colors.darkestShade,
       'editorHoverWidget.background': euiTheme.colors.backgroundBaseSubdued,
       'diffEditor.insertedTextBackground': euiTheme.colors.borderBaseSuccess,
