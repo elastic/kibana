@@ -21,7 +21,6 @@ import {
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { SortOrder } from '@kbn/unified-data-table';
 import {
@@ -52,6 +51,8 @@ import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
+import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
+import * as i18n from './translations';
 
 const PAGE_SIZE = 1000;
 
@@ -60,6 +61,7 @@ const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection
 const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
     duration: { width: 100 },
+    assignees: { width: 120 },
     actions: { width: 360 },
     'episode.status': { width: 220 },
   },
@@ -126,6 +128,7 @@ export const AlertEpisodesListPage = () => {
     'rule.id',
     'duration',
     'tags',
+    'assignees',
     'actions',
   ]);
   const [rowHeight, setRowHeight] = useState(2);
@@ -221,12 +224,7 @@ export const AlertEpisodesListPage = () => {
         min-width: 0;
       `}
     >
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={i18n.translate('xpack.alertingV2.episodes.listPageTitle', {
-          defaultMessage: 'Alert episodes',
-        })}
-      />
+      <EuiPageHeader bottomBorder pageTitle={i18n.EPISODES_LIST_PAGE_TITLE} />
       <EuiSpacer size="m" />
 
       <EuiFlexGroup
@@ -259,11 +257,7 @@ export const AlertEpisodesListPage = () => {
             getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
           >
             <EuiScreenReaderOnly>
-              <span id="alertingEpisodesTableAriaLabel">
-                {i18n.translate('xpack.alertingV2.episodes.tableAriaLabel', {
-                  defaultMessage: 'Alerting episodes table',
-                })}
-              </span>
+              <span id="alertingEpisodesTableAriaLabel">{i18n.EPISODES_LIST_TABLE_ARIA_LABEL}</span>
             </EuiScreenReaderOnly>
             {!dataView ? (
               <EuiLoadingSpinner />
@@ -285,15 +279,15 @@ export const AlertEpisodesListPage = () => {
                 customGridColumnsConfiguration={{
                   actions: ({ column }) => ({
                     ...column,
-                    displayAsText: i18n.translate('xpack.alertingV2.episodes.columns.actions', {
-                      defaultMessage: 'Actions',
-                    }),
+                    displayAsText: i18n.EPISODES_LIST_COLUMN_ACTIONS,
                   }),
                   tags: ({ column }) => ({
                     ...column,
-                    displayAsText: i18n.translate('xpack.alertingV2.episodes.columns.tags', {
-                      defaultMessage: 'Tags',
-                    }),
+                    displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
+                  }),
+                  assignees: ({ column }) => ({
+                    ...column,
+                    displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
                   }),
                 }}
                 externalCustomRenderers={{
@@ -336,6 +330,18 @@ export const AlertEpisodesListPage = () => {
                             ? services.http.basePath.prepend(paths.alertEpisodeDetails(episodeId))
                             : undefined
                         }
+                        lastAssigneeUid={episodeActionsMap?.get(episodeId)?.lastAssigneeUid}
+                      />
+                    );
+                  },
+                  assignees: (props) => {
+                    const episodeId = props.row.flattened['episode.id'] as string;
+                    const assigneeUid = episodeActionsMap?.get(episodeId)?.lastAssigneeUid;
+
+                    return (
+                      <EpisodeAssigneeCell
+                        assigneeUid={assigneeUid}
+                        userProfile={services.userProfile}
                       />
                     );
                   },
