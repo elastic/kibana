@@ -38,27 +38,17 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 ## 9.4.0 [kibana-9.4.0-breaking-changes]
 
-$$$kibana-255122$$$
+$$$kibana-255122-9.4.0$$$
 ::::{dropdown} The `_source` field mode is now saved to the template index settings
 **Details**<br> The index and component template forms in **Index Management** previously saved the `_source` field mode (`stored` and `synthetic`) in the `mappings._source.mode` setting. This path is deprecated and has no effect in {{es}}. The form now uses the correct `settings.index.mapping.source.mode` setting. Other `_source` options (`enabled`, `includes`, and `excludes`) remain in mappings.
 
 **Impact**<br> When you edit a template in the UI, any existing `mappings._source.mode` setting is automatically moved to the index settings and removed from mappings.
 
-**Action**<br> No action required. The migration happens automatically when you edit a template in the **Index Management** UI. If you manage templates outside the UI (via API or configuration files), update them to use `settings.index.mapping.source.mode` instead of `mappings._source.mode`.
+**Action**<br> The migration happens automatically when you edit a template in the **Index Management** UI. If you manage templates outside the UI (via API or configuration files), update them to use `settings.index.mapping.source.mode` instead of `mappings._source.mode`.
 
 View [#255122]({{kib-pull}}255122).
 ::::
 
-$$$kibana-250111$$$
-::::{dropdown} Removed `serializer` and `deserializer` parameters from value lists API
-**Details**<br> The unused `serializer` and `deserializer` parameters have been removed from the Security Solution value lists plugin API.
-
-**Impact**<br> API requests that include these parameters will no longer accept them.
-
-**Action**<br> Remove any references to `serializer` or `deserializer` parameters when calling the value lists API endpoints.
-
-View [#250111]({{kib-pull}}250111).
-::::
 
 $$$kibana-249855$$$
 ::::{dropdown} {{esql}} tool parameter types simplified in Agent Builder API

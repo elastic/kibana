@@ -238,23 +238,21 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Adds sparkline charts for `CATEGORIZE` in Discover [#254269]({{kib-pull}}254269).
 * Adds a link to manage anomaly detection jobs in the Machine Learning left navigation [#260605]({{kib-pull}}260605).
 * Anomaly detection now automatically closes the job when stopping a datafeed [#259603]({{kib-pull}}259603).
-* Adds aria labels to job wizard combo boxes [#258509]({{kib-pull}}258509).
+* Adds aria labels to anomaly detection job wizard combo boxes [#258509]({{kib-pull}}258509).
 * Updates the `v3_rare_process_by_host_windows` bucket span to two hours [#255855]({{kib-pull}}255855).
 * Changes the rare process by host Windows job bucket span from 15m to 4h [#255385]({{kib-pull}}255385).
 * Adds a new single APM Correlations endpoint for latency and failed transactions [#254607]({{kib-pull}}254607).
 * Adds Gemini 2.5 Flash Lite, Claude 4.5 Haiku, and Claude 4.6 Sonnet preconfigured connectors [#253109]({{kib-pull}}253109).
 * Adds a dynamic default connector in GenAI settings [#252861]({{kib-pull}}252861).
-* Replaces the custom RobotIcon (Agent) with the EUI productAgent icon in the Agent Opt-in flow [#252526]({{kib-pull}}252526).
 * Adds a zoom in button to the date picker [#252252]({{kib-pull}}252252).
 * Adds Anthropic Claude Opus 4.6 preconfigured connector [#252177]({{kib-pull}}252177).
 * Uses the `location` field to correctly set provider config in AI/Inference Connector creation [#250838]({{kib-pull}}250838).
-* Adds the `artifactRepositoryProxyUrl` setting [#250771]({{kib-pull}}250771).
+* Adds the proxy URL setting for product documentation artifact [#250771]({{kib-pull}}250771).
 * Adds new preconfigured connectors [#249379]({{kib-pull}}249379).
 * Moves the results view buttons closer to the job selection controls in Anomaly Detection [#249261]({{kib-pull}}249261).
 * Adds missing {{esql}} commands and functions documentation for inference tasks [#249089]({{kib-pull}}249089).
 * Enhances model memory estimation for supplied configurations in anomaly detection [#248479]({{kib-pull}}248479).
 * Adds the `timeout` parameter to InferenceChatModel [#248326]({{kib-pull}}248326).
-* Removes usage of the AJV library and replaces it with zod [#248317]({{kib-pull}}248317).
 * Adds time window buttons to the date picker [#248142]({{kib-pull}}248142).
 * Adds a button to synchronize saved objects in trained models [#247691]({{kib-pull}}247691).
 * Refreshes the Overview page [#247573]({{kib-pull}}247573).
@@ -286,9 +284,8 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Updates the Search homepage design [#246777]({{kib-pull}}246777).
 
 **Workflows**:
-* Creates an initialization endpoint and migrates the list index creation flow [#258891]({{kib-pull}}258891).
 * Adds import and export features for workflows [#257976]({{kib-pull}}257976).
-* Adds the `workflows.executionFailed` trigger so you can run workflows when another workflow fails. Use it to send notifications (e.g., Slack), run cleanup, or trigger retries [#257633]({{kib-pull}}257633).
+* Adds the `workflows.executionFailed` trigger so you can run workflows when another workflow fails. Use it to send notifications (for example, Slack), run cleanup, or trigger retries [#257633]({{kib-pull}}257633).
 * Adds a server-side workflow validation endpoint [#254502]({{kib-pull}}254502).
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
@@ -478,7 +475,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Avoids duplications on icon announcement in **Edit policy** for accessibility [#261324]({{kib-pull}}261324).
 * Fixes policy list actions tooltip screen reader duplication for accessibility [#261322]({{kib-pull}}261322).
 * Fixes copy buttons announcement duplications for accessibility [#261311]({{kib-pull}}261311).
-* Fixes the grey color announcement in the Transform list for accessibility [#261307]({{kib-pull}}261307).
+* Fixes the gray color announcement in the Transform list for accessibility [#261307]({{kib-pull}}261307).
 * Announces an invalid field for accessibility [#260673]({{kib-pull}}260673).
 * Introduces polling for the summary extension [#260447]({{kib-pull}}260447).
 * Returns **Create Transform** focus to button [#258095]({{kib-pull}}258095).
