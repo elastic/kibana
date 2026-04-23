@@ -25,7 +25,7 @@ const bodySchema = z.object({
   indexPatterns: z.array(z.string()).min(1),
   fromDateISO: z.string().datetime(),
   toDateISO: z.string().datetime(),
-  docsLimit: z.number().int().positive().optional(),
+  docsLimit: z.number().int().min(1).optional(),
 });
 
 export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter) {

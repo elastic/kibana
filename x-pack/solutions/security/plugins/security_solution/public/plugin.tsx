@@ -120,11 +120,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, usageCollection, management, cases, share } = plugins;
+    const { home, usageCollection, management, cases, share, workflowsExtensions } = plugins;
     const { productFeatureKeys$ } = this.contract;
 
     if (share) {
       share.url.locators.create(new AIValueReportLocatorDefinition());
+    }
+
+    // Register workflow steps
+    if (workflowsExtensions) {
+      import('./workflows/step_types')
+        .then(async ({ registerWorkflowSteps }) => {
+          const [coreStart] = await core.getStartServices();
+          return registerWorkflowSteps(workflowsExtensions, coreStart);
+        })
+        .catch((error) => {
+          this.logger.error(
+            `Error registering security workflow steps: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -378,8 +394,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const cellRendererFeature: SecuritySolutionCellRendererFeature = {
       id: 'security-solution-cell-renderer',
       getRenderer: async () => {
-        const { getCellRendererForGivenRecord } = await this.getLazyDiscoverSharedDeps();
-        return getCellRendererForGivenRecord;
+        const [{ getCellRendererForGivenRecord }, services, store] = await Promise.all([
+          this.getLazyDiscoverSharedDeps(),
+          this.getDiscoverFlyoutServices(core),
+          this.getDiscoverFlyoutStore(core),
+        ]);
+        return getCellRendererForGivenRecord(services, store);
       },
     };
     discoverFeatureRegistry.register(cellRendererFeature);

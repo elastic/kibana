@@ -7,23 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { registerRoutes } from './routes';
 import type { ConfigType } from './config';
 
-export class FtrApisPlugin implements Plugin {
+interface FtrApisStartDeps {
+  taskManager: TaskManagerStartContract;
+}
+
+export class FtrApisPlugin implements Plugin<void, void, {}, FtrApisStartDeps> {
   private readonly config: ConfigType;
+  private taskManagerStart?: TaskManagerStartContract;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigType>();
   }
 
-  public setup({ http, savedObjects }: CoreSetup) {
+  public setup({ http }: CoreSetup) {
     const router = http.createRouter();
     if (!this.config.disableApis) {
-      registerRoutes(router);
+      registerRoutes(router, () => this.taskManagerStart);
     }
   }
 
-  public start() {}
+  public start(_core: CoreStart, { taskManager }: FtrApisStartDeps) {
+    this.taskManagerStart = taskManager;
+  }
 }
