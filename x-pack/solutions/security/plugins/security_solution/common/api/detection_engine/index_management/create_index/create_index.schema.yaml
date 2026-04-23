@@ -26,6 +26,10 @@ paths:
                   acknowledged:
                     type: boolean
                 required: [acknowledged]
+              examples:
+                created:
+                  value:
+                    acknowledged: true
         401:
           description: Unsuccessful authentication response
           content:

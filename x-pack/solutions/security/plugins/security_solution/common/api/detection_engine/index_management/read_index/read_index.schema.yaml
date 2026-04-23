@@ -9,6 +9,9 @@ paths:
       operationId: ReadAlertsIndex
       x-codegen-enabled: true
       summary: Reads the alert index name if it exists
+      description: |
+        Returns the name of the Elastic Security alerts backing index when it exists in the
+        current cluster, and whether the index mapping is outdated relative to the expected schema.
       tags:
         - Alert index API
       responses:

@@ -30,6 +30,24 @@ paths:
                 - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistWindows'
                 - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistLinux'
                 - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistMac'
+            examples:
+              updateSimpleItem:
+                summary: Update fields on a simple exception item
+                value:
+                  id: 459c5e7e-f8b2-4f0b-b136-c1fc702f72da
+                  item_id: simple_list_item
+                  list_id: simple_list
+                  type: simple
+                  name: Updated name
+                  description: Updated description
+                  entries:
+                    - type: match
+                      field: host.name
+                      value: rock01
+                      operator: included
+                  namespace_type: single
+                  os_types: []
+                  tags: []
       responses:
         200:
           description: Successful response

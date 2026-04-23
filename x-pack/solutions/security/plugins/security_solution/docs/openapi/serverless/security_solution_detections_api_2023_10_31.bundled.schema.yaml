@@ -131,6 +131,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deletedRule:
+                  summary: Deleted detection rule
+                  value:
+                    enabled: true
+                    id: bfeaf89b-a2a7-48a3-817f-e41829dc61ee
+                    name: MS Office child process
+                    rule_id: process_started_by_ms_office_program
+                    type: query
               schema:
                 $ref: '#/components/schemas/RuleResponse'
           description: Indicates a successful call.
@@ -854,6 +863,11 @@ paths:
                   type: query
             schema:
               $ref: '#/components/schemas/RuleCreateProps'
+        description: >
+          Full definition of the detection rule to create, including rule type,
+          query or machine
+
+          learning configuration, schedule, and optional actions.
         required: true
       responses:
         '200':
@@ -1989,6 +2003,12 @@ paths:
                 - $ref: '#/components/schemas/BulkManualRuleRun'
                 - $ref: '#/components/schemas/BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/BulkEditRules'
+        description: >
+          Bulk action to perform (for example enable, disable, delete, export,
+          duplicate, run, or
+
+          edit) and either a KQL `query` that selects rules or an explicit list
+          of rule `ids`.
       responses:
         '200':
           content:
@@ -2759,6 +2779,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              exportAllRules:
+                summary: Export all rules
+                value: null
+              exportSelectedRules:
+                summary: Export specific rules by rule_id
+                value:
+                  objects:
+                    - rule_id: 343580b5-c811-447c-8d2d-2ccf052c6900
+                    - rule_id: 2938c9fa-53eb-4c04-b79c-33cbf041b18d
             schema:
               nullable: true
               type: object
@@ -2777,11 +2807,25 @@ paths:
                   type: array
               required:
                 - objects
+        description: >
+          Optional filter for which rules to export. Omit the body or send
+          `null` to export all
+
+          rules; otherwise provide each rule's stable `rule_id` (not the saved
+          object `id`).
         required: false
       responses:
         '200':
           content:
             application/ndjson:
+              examples:
+                ndjsonExport:
+                  summary: NDJSON lines for rules and export summary
+                  value: >
+                    {"rule_id":"343580b5-c811-447c-8d2d-2ccf052c6900","name":"Example
+                    rule","type":"query"}
+
+                    {"exported_count":1,"missing_rules":[],"missing_rule_count":0}
               schema:
                 description: >
                   An `.ndjson` file containing the returned rules.
@@ -2821,7 +2865,12 @@ paths:
         is returned, with 20 results per page.
       operationId: FindRules
       parameters:
-        - in: query
+        - description: >
+            Optional list of rule response fields to include. When omitted, the
+            API returns the
+
+            default field set for each rule.
+          in: query
           name: fields
           required: false
           schema:
@@ -3135,8 +3184,16 @@ paths:
               properties:
                 file:
                   description: The `.ndjson` file containing the rules.
+                  example: >
+                    {"rule_id":"example-rule","name":"Imported
+                    rule","type":"query","risk_score":21}
                   format: binary
                   type: string
+        description: >
+          Multipart upload of the `.ndjson` file produced by a rule export (or
+          compatible format),
+
+          including optional actions and exception list objects.
         required: true
       responses:
         '200':
@@ -3217,6 +3274,14 @@ paths:
             --form "file=@<link to file>"
   /api/detection_engine/rules/preview:
     post:
+      description: >
+        Executes a temporary run of a rule configuration over a bounded time
+        window and returns
+
+        preview logs (and optional Elasticsearch request traces) without
+        creating a saved rule or
+
+        persisting alerts.
       operationId: RulePreview
       parameters:
         - description: >-
@@ -3230,6 +3295,24 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              queryRulePreview:
+                summary: Preview a KQL query rule
+                value:
+                  description: Sample preview run
+                  enabled: false
+                  from: now-24h
+                  index:
+                    - logs-*
+                  interval: 5m
+                  invocationCount: 1
+                  language: kuery
+                  name: Preview sample
+                  query: 'process.name : "cmd.exe"'
+                  risk_score: 50
+                  severity: low
+                  timeframeEnd: '2025-01-15T12:00:00.000Z'
+                  type: query
             schema:
               anyOf:
                 - allOf:
@@ -3258,14 +3341,31 @@ paths:
                     - $ref: '#/components/schemas/RulePreviewParams'
               discriminator:
                 propertyName: type
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: >
+          Rule create fields for the selected rule type, merged with preview
+          parameters
+
+          `invocationCount` (how many rule executions to simulate) and
+          `timeframeEnd` (upper bound
+
+          of the preview time range).
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                previewResponse:
+                  summary: Preview logs for one invocation
+                  value:
+                    isAborted: false
+                    logs:
+                      - duration: 42
+                        errors: []
+                        requests: []
+                        startedAt: '2025-01-15T11:59:58.000Z'
+                        warnings: []
+                    previewId: 8f3c2a1b9e7d4c2a
               schema:
                 type: object
                 properties:
@@ -3321,6 +3421,9 @@ paths:
                 $ref: '#/components/examples/SetAlertAssigneesBodyRemove'
             schema:
               $ref: '#/components/schemas/SetAlertAssigneesBody'
+        description: >
+          Alert identifiers to update and the user profile IDs to assign or
+          unassign on those alerts.
         required: true
       responses:
         '200':

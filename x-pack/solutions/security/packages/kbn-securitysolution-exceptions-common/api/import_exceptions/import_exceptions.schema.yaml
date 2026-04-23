@@ -12,6 +12,9 @@ paths:
       description: Import an exception list and its associated items from an NDJSON file.
       requestBody:
         required: true
+        description: |
+          Multipart upload of an NDJSON file produced by an exception list export, containing the
+          list container and item documents to import.
         content:
           multipart/form-data:
             schema:

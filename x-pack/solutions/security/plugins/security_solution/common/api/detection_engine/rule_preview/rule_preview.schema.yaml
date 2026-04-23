@@ -9,6 +9,10 @@ paths:
       operationId: RulePreview
       x-codegen-enabled: true
       summary: Preview rule alerts generated on specified time range
+      description: |
+        Executes a temporary run of a rule configuration over a bounded time window and returns
+        preview logs (and optional Elasticsearch request traces) without creating a saved rule or
+        persisting alerts.
       tags:
         - Rule preview API
       parameters:
@@ -19,7 +23,10 @@ paths:
           schema:
             type: boolean
       requestBody:
-        description: An object containing tags to add or remove and alert ids the changes will be applied
+        description: |
+          Rule create fields for the selected rule type, merged with preview parameters
+          `invocationCount` (how many rule executions to simulate) and `timeframeEnd` (upper bound
+          of the preview time range).
         required: true
         content:
           application/json:
@@ -51,6 +58,24 @@ paths:
                 - allOf:
                     - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/EsqlRuleCreateProps'
                     - $ref: '#/components/schemas/RulePreviewParams'
+            examples:
+              queryRulePreview:
+                summary: Preview a KQL query rule
+                value:
+                  type: query
+                  name: Preview sample
+                  description: Sample preview run
+                  risk_score: 50
+                  severity: low
+                  language: kuery
+                  query: 'process.name : "cmd.exe"'
+                  index:
+                    - logs-*
+                  from: now-24h
+                  interval: 5m
+                  enabled: false
+                  invocationCount: 1
+                  timeframeEnd: '2025-01-15T12:00:00.000Z'
       responses:
         200:
           description: Successful response
@@ -68,6 +93,18 @@ paths:
                   isAborted:
                     type: boolean
                 required: [logs]
+              examples:
+                previewResponse:
+                  summary: Preview logs for one invocation
+                  value:
+                    logs:
+                      - errors: []
+                        warnings: []
+                        duration: 42
+                        startedAt: '2025-01-15T11:59:58.000Z'
+                        requests: []
+                    previewId: 8f3c2a1b9e7d4c2a
+                    isAborted: false
         400:
           description: Invalid input data response
           content:

@@ -35,6 +35,9 @@ paths:
           schema:
             type: boolean
       requestBody:
+        description: |
+          Bulk action to perform (for example enable, disable, delete, export, duplicate, run, or
+          edit) and either a KQL `query` that selects rules or an explicit list of rule `ids`.
         content:
           application/json:
             schema:

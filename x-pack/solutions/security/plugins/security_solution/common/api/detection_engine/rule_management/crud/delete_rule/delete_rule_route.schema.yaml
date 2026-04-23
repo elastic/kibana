@@ -46,3 +46,12 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+              examples:
+                deletedRule:
+                  summary: Deleted detection rule
+                  value:
+                    id: bfeaf89b-a2a7-48a3-817f-e41829dc61ee
+                    rule_id: process_started_by_ms_office_program
+                    name: MS Office child process
+                    enabled: true
+                    type: query

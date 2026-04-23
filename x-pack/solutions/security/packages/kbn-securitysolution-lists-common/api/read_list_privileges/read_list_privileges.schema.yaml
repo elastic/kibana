@@ -9,6 +9,9 @@ paths:
       operationId: ReadListPrivileges
       x-codegen-enabled: true
       summary: Get value list privileges
+      description: |
+        Returns Elasticsearch cluster and index privileges for the current user for value lists
+        (`.lists-*`) and list items (`.items-*`), plus whether the user is authenticated.
       responses:
         200:
           description: Successful response

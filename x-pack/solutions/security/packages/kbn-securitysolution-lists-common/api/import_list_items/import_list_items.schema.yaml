@@ -15,6 +15,9 @@ paths:
         You can import items to a new or existing list.
       requestBody:
         required: true
+        description: |
+          Multipart upload of a newline-separated `.txt` or `.csv` file whose lines become list
+          items for a new or existing list (see query parameters).
         content:
           multipart/form-data:
             schema:

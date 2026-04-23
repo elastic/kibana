@@ -192,7 +192,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >
+            Whether the list is scoped to the current Kibana space (`single`) or
+            shared across
+
+            all spaces (`agnostic`).
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -326,7 +331,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >
+            Whether the list is scoped to the current Kibana space (`single`) or
+            shared across
+
+            all spaces (`agnostic`).
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -807,12 +817,18 @@ paths:
       description: Duplicate an existing exception list.
       operationId: DuplicateExceptionList
       parameters:
-        - in: query
+        - description: The `list_id` of the exception list to duplicate.
+          in: query
           name: list_id
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >
+            Whether the source list is scoped to the current Kibana space
+            (`single`) or shared
+
+            across all spaces (`agnostic`).
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -946,17 +962,24 @@ paths:
       description: Export an exception list and its associated items to an NDJSON file.
       operationId: ExportExceptionList
       parameters:
-        - in: query
+        - description: Saved-object identifier of the exception list container to export.
+          in: query
           name: id
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionListId'
-        - in: query
+        - description: Human-readable `list_id` of the exception list to export.
+          in: query
           name: list_id
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >
+            Whether the list is scoped to the current Kibana space (`single`) or
+            shared across
+
+            all spaces (`agnostic`).
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -1333,6 +1356,11 @@ paths:
                     tag","malware"],"tie_breaker_id":"4ca3ef3e-9721-42c0-8107-cf47e094d40f","type":"simple","updated_at":"2025-01-09T16:18:42.308Z","updated_by":"elastic"}
                   format: binary
                   type: string
+        description: >
+          Multipart upload of an NDJSON file produced by an exception list
+          export, containing the
+
+          list container and item documents to import.
         required: true
       responses:
         '200':
@@ -1477,7 +1505,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemHumanId'
-        - examples:
+        - description: >
+            Whether the item's list is scoped to the current Kibana space
+            (`single`) or shared
+
+            across all spaces (`agnostic`).
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -1621,7 +1654,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemHumanId'
-        - examples:
+        - description: >
+            Whether the item's list is scoped to the current Kibana space
+            (`single`) or shared
+
+            across all spaces (`agnostic`).
+          examples:
             agnostic:
               value: agnostic
             single:
@@ -1756,6 +1794,30 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              simpleDetectionItem:
+                summary: Create a simple detection exception item
+                value:
+                  description: This is a sample detection type exception item.
+                  entries:
+                    - field: actingProcess.file.signer
+                      operator: excluded
+                      type: exists
+                    - field: host.name
+                      operator: included
+                      type: match_any
+                      value:
+                        - saturn
+                        - jupiter
+                  item_id: simple_list_item
+                  list_id: simple_list
+                  name: Sample Exception List Item
+                  namespace_type: single
+                  os_types:
+                    - linux
+                  tags:
+                    - malware
+                  type: simple
             schema:
               oneOf:
                 - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
@@ -2049,6 +2111,24 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateSimpleItem:
+                summary: Update fields on a simple exception item
+                value:
+                  description: Updated description
+                  entries:
+                    - field: host.name
+                      operator: included
+                      type: match
+                      value: rock01
+                  id: 459c5e7e-f8b2-4f0b-b136-c1fc702f72da
+                  item_id: simple_list_item
+                  list_id: simple_list
+                  name: Updated name
+                  namespace_type: single
+                  os_types: []
+                  tags: []
+                  type: simple
             schema:
               oneOf:
                 - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
@@ -2220,7 +2300,12 @@ paths:
             items:
               $ref: '#/components/schemas/ExceptionNamespaceType'
             type: array
-        - in: query
+        - description: >
+            Free-text search applied to exception list items (for example a
+            field name such as
+
+            `host.name` or another substring matched by the implementation).
+          in: query
           name: search
           required: false
           schema:
@@ -2413,7 +2498,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListHumanId'
-        - examples:
+        - description: >
+            Whether the list is scoped to the current Kibana space (`single`) or
+            shared across
+
+            all spaces (`agnostic`).
+          examples:
             agnostic:
               value: agnostic
             single:

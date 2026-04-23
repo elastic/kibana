@@ -21,6 +21,10 @@ paths:
                   acknowledged:
                     type: boolean
                 required: [acknowledged]
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
         400:
           description: Invalid input data response
           content:

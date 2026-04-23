@@ -55,6 +55,9 @@ paths:
             }
       requestBody:
         required: false
+        description: |
+          Optional filter for which rules to export. Omit the body or send `null` to export all
+          rules; otherwise provide each rule's stable `rule_id` (not the saved object `id`).
         content:
           application/json:
             schema:
@@ -73,6 +76,16 @@ paths:
                       rule_id:
                         $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
                   description: Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
+            examples:
+              exportAllRules:
+                summary: Export all rules
+                value: null
+              exportSelectedRules:
+                summary: Export specific rules by rule_id
+                value:
+                  objects:
+                    - rule_id: 343580b5-c811-447c-8d2d-2ccf052c6900
+                    - rule_id: 2938c9fa-53eb-4c04-b79c-33cbf041b18d
       responses:
         200:
           description: Indicates a successful call.
@@ -85,3 +98,9 @@ paths:
                   An `.ndjson` file containing the returned rules.
 
                   Each line in the file represents an object (a rule, exception list parent container, or exception list item), and the last line includes a summary of what was exported.
+              examples:
+                ndjsonExport:
+                  summary: NDJSON lines for rules and export summary
+                  value: |
+                    {"rule_id":"343580b5-c811-447c-8d2d-2ccf052c6900","name":"Example rule","type":"query"}
+                    {"exported_count":1,"missing_rules":[],"missing_rule_count":0}
