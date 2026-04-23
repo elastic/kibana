@@ -189,7 +189,7 @@ export const useEditorConfig = ({
         enabled: false,
       },
       lineDecorationsWidth: 20,
-      lineNumbers: 'on' as const,
+      lineNumbers: 'on',
       lineNumbersMinChars: 3,
       minimap: { enabled: false },
       overviewRulerLanes: 0,
