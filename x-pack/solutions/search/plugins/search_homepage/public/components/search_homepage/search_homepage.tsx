@@ -15,6 +15,7 @@ import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
+import { BillingUsageBadge } from './billing_usage_badge';
 import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
 import { docLinks } from '../../../common/doc_links';
@@ -75,6 +76,11 @@ export const SearchHomepagePage = () => {
               {(!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
                 <EuiFlexItem grow={false}>
                   <LicenseBadge />
+                </EuiFlexItem>
+              )}
+              {cloud?.isCloudEnabled && !cloud?.isInTrial() && (
+                <EuiFlexItem grow={false}>
+                  <BillingUsageBadge />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
