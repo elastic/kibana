@@ -38,9 +38,9 @@ describe('HeaderHelpMenu', () => {
   it('should only render the default content', async () => {
     await renderAndOpenMenu();
 
-    expect(screen.getByText('Ask support')).toBeInTheDocument();
     expect(screen.getByText('Open GitHub issue')).toBeInTheDocument();
     expect(screen.getByText('Kibana documentation')).toBeInTheDocument();
+    expect(screen.getByText('Ask support')).toBeInTheDocument();
   });
 
   it('should not render the version details when serverless', () => {

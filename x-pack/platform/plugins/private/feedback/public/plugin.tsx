@@ -12,13 +12,12 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
+import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
-import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
-import type { FeedbackFormData } from '../common';
 import { getAppDetails } from './src/utils';
+import type { FeedbackFormData } from '../common';
 
 interface FeedbackPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -72,8 +71,10 @@ export class FeedbackPlugin implements Plugin {
 
     const getAppDetailsWrapper = () => getAppDetails(core);
 
-    const getQuestions = (appId: string): FeedbackRegistryEntry[] =>
-      getFeedbackQuestionsForApp(appId);
+    const getQuestions = async (appId: string): Promise<FeedbackRegistryEntry[]> => {
+      const { getFeedbackQuestionsForApp } = await import('@kbn/feedback-registry');
+      return getFeedbackQuestionsForApp(appId);
+    };
 
     const getCurrentUserEmail = async (): Promise<string | undefined> => {
       if (!core.security) return undefined;

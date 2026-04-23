@@ -8,7 +8,6 @@
  */
 
 export { FeedbackTriggerButton } from './feedback_trigger_button';
-export { FeedbackContainer } from './feedback_container';
 
 export { FeedbackHeader } from './header';
 
@@ -22,3 +21,6 @@ export { FeedbackBody } from './body';
 
 export { SendFeedbackButton } from './footer';
 export { FeedbackFooter } from './footer';
+
+export { FeedbackContainerSkeleton } from './feedback_container_skeleton';
+export { FeedbackContainer } from './feedback_container';
