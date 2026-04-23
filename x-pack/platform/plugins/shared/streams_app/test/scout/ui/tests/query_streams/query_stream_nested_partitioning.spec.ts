@@ -218,9 +218,11 @@ test.describe(
 
       // verify the child and grandchild query stream was deleted from the streams list view
       await pageObjects.streams.gotoStreamMainPage();
-      await expect(page.getByTestId(`queryStream-${DELETE_TEST_PARENT_STREAM_NAME}`)).toBeVisible();
-      await expect(page.getByTestId(`queryStream-${childFullName}`)).toBeHidden();
-      await expect(page.getByTestId(`queryStream-${grandchildFullName}`)).toBeHidden();
+      await expect(
+        page.getByTestId(`streamsNameLink-${DELETE_TEST_PARENT_STREAM_NAME}`)
+      ).toBeVisible();
+      await expect(page.getByTestId(`streamsNameLink-${childFullName}`)).toBeHidden();
+      await expect(page.getByTestId(`streamsNameLink-${grandchildFullName}`)).toBeHidden();
     });
 
     test.fixme(
