@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { RiskScoreFields } from '../../../search_strategy/security_solution/risk_score/all';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
@@ -14,24 +14,26 @@ import { timerange } from '../model/timerange';
 import { EntityRiskQueries } from '../model/factory_query_type';
 import { riskScoreEntity } from './model/risk_score_entity';
 
-const baseRiskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  alertsTimerange: timerange.optional(),
-  riskScoreEntity,
-  includeAlertsCount: z.boolean().optional(),
-  onlyLatest: z.boolean().optional(),
-  pagination: z
-    .object({
-      cursorStart: z.number(),
-      querySize: z.number(),
-    })
-    .optional(),
-  sort: sort
-    .removeDefault()
-    .extend({
-      field: z.nativeEnum(RiskScoreFields),
-    })
-    .optional(),
-});
+const baseRiskScoreRequestOptionsSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    alertsTimerange: timerange.optional(),
+    riskScoreEntity,
+    includeAlertsCount: z.boolean().optional(),
+    onlyLatest: z.boolean().optional(),
+    pagination: z
+      .object({
+        cursorStart: z.number(),
+        querySize: z.number(),
+      })
+      .optional(),
+    sort: sort
+      .removeDefault()
+      .extend({
+        field: z.nativeEnum(RiskScoreFields),
+      })
+      .optional(),
+  })
+);
 
 export const riskScoreRequestOptionsSchema = baseRiskScoreRequestOptionsSchema.extend({
   factoryQueryType: z.literal(EntityRiskQueries.list),
