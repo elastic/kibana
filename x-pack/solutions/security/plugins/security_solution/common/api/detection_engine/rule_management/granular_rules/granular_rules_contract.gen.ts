@@ -14,38 +14,42 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
   * Search mode for free-text search combined with the KQL `filter`.
 
   */
+export const GranularRulesSearchMode = lazySchema(() => z.literal('legacy').default('legacy'));
 export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
-export const GranularRulesSearchMode = z.literal('legacy').default('legacy');
 
 /**
   * Free-text search combined with the KQL `filter`. Interpreted according to search mode.
 
   */
+export const GranularRulesSearch = lazySchema(() =>
+  z
+    .object({
+      term: z.string(),
+      mode: GranularRulesSearchMode.optional(),
+    })
+    .strict()
+);
 export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
-export const GranularRulesSearch = z
-  .object({
-    term: z.string(),
-    mode: GranularRulesSearchMode.optional(),
-  })
-  .strict();
 
+export const GranularRulesFacetCategory = lazySchema(() =>
+  z.enum([
+    'tags',
+    'type',
+    'enabled',
+    'updatedBy',
+    'createdBy',
+    'lastRunOutcome',
+    'lastRunStatus',
+    'lastRunStatusReasonType',
+  ])
+);
 export type GranularRulesFacetCategory = z.infer<typeof GranularRulesFacetCategory>;
-export const GranularRulesFacetCategory = z.enum([
-  'tags',
-  'type',
-  'enabled',
-  'updatedBy',
-  'createdBy',
-  'lastRunOutcome',
-  'lastRunStatus',
-  'lastRunStatusReasonType',
-]);
 export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.enum;
 export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
 
@@ -53,29 +57,31 @@ export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
   * A rule attribute that can be requested via the `fields` parameter on `_search`.
 
   */
+export const SearchRulesField = lazySchema(() =>
+  z.enum([
+    'id',
+    'name',
+    'tags',
+    'enabled',
+    'alertTypeId',
+    'params',
+    'schedule',
+    'actions',
+    'createdBy',
+    'updatedBy',
+    'createdAt',
+    'updatedAt',
+    'revision',
+    'executionStatus',
+    'lastRun',
+    'monitoring',
+    'snoozeSchedule',
+    'muteAll',
+    'running',
+    'nextRun',
+  ])
+);
 export type SearchRulesField = z.infer<typeof SearchRulesField>;
-export const SearchRulesField = z.enum([
-  'id',
-  'name',
-  'tags',
-  'enabled',
-  'alertTypeId',
-  'params',
-  'schedule',
-  'actions',
-  'createdBy',
-  'updatedBy',
-  'createdAt',
-  'updatedAt',
-  'revision',
-  'executionStatus',
-  'lastRun',
-  'monitoring',
-  'snoozeSchedule',
-  'muteAll',
-  'running',
-  'nextRun',
-]);
 export type SearchRulesFieldEnum = typeof SearchRulesField.enum;
 export const SearchRulesFieldEnum = SearchRulesField.enum;
 
@@ -83,19 +89,23 @@ export const SearchRulesFieldEnum = SearchRulesField.enum;
   * Aggregation options on `_search`.
 
   */
+export const SearchRulesAggregations = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Facet categories for which to compute counts over the filtered + searched set.
+       */
+      counts: z.array(GranularRulesFacetCategory).optional(),
+    })
+    .strict()
+);
 export type SearchRulesAggregations = z.infer<typeof SearchRulesAggregations>;
-export const SearchRulesAggregations = z
-  .object({
-    /**
-     * Facet categories for which to compute counts over the filtered + searched set.
-     */
-    counts: z.array(GranularRulesFacetCategory).optional(),
-  })
-  .strict();
 
 /**
   * Per-category facet counts. Each key is a facet category from `aggregations.counts`, each value is an object that maps a filter value to its count.
 
   */
+export const FacetCounts = lazySchema(() =>
+  z.object({}).catchall(z.object({}).catchall(z.number().int().min(0)))
+);
 export type FacetCounts = z.infer<typeof FacetCounts>;
-export const FacetCounts = z.object({}).catchall(z.object({}).catchall(z.number().int().min(0)));

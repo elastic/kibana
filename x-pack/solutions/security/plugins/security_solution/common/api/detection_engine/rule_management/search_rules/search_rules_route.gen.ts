@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   SearchRulesField,
@@ -28,96 +28,100 @@ import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
+export const SearchRulesValidationErrorResponse = lazySchema(() =>
+  z
+    .object({
+      message: z.array(z.string()),
+      status_code: z.number().int(),
+    })
+    .strict()
+);
 export type SearchRulesValidationErrorResponse = z.infer<typeof SearchRulesValidationErrorResponse>;
-export const SearchRulesValidationErrorResponse = z
-  .object({
-    message: z.array(z.string()),
-    status_code: z.number().int(),
-  })
-  .strict();
 
 /**
   * One value in a `search_after` array. Elasticsearch sort values may be a
 string, number, boolean, or null.
 
   */
-export const SearchRulesSearchAfterItemInternal = z.union([
-  z.string().nullable(),
-  z.number().nullable(),
-  z.boolean().nullable(),
-]);
+export const SearchRulesSearchAfterItemInternal = lazySchema(() =>
+  z.union([z.string().nullable(), z.number().nullable(), z.boolean().nullable()])
+);
 
 export type SearchRulesSearchAfterItem = z.infer<typeof SearchRulesSearchAfterItemInternal>;
 export const SearchRulesSearchAfterItem =
   SearchRulesSearchAfterItemInternal as z.ZodType<SearchRulesSearchAfterItem>;
 
-export type SearchRulesRequestBody = z.infer<typeof SearchRulesRequestBody>;
-export const SearchRulesRequestBody = z
-  .object({
-    /**
-     * Subset of rule attributes to return.
-     */
-    fields: z.array(SearchRulesField).optional(),
-    /**
+export const SearchRulesRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Subset of rule attributes to return.
+       */
+      fields: z.array(SearchRulesField).optional(),
+      /**
       * KQL filter string.
 
       */
-    filter: z.string().optional(),
-    aggregations: SearchRulesAggregations.optional(),
-    search: GranularRulesSearch.optional(),
-    sort_field: FindRulesSortField.optional(),
-    sort_order: SortOrder.optional(),
-    /**
-     * Page number. Ignored when `search_after` is provided.
-     */
-    page: z.number().int().min(1).optional().default(1),
-    /**
-     * Page size.
-     */
-    per_page: z.number().int().min(0).max(10000).optional().default(20),
-    /**
+      filter: z.string().optional(),
+      aggregations: SearchRulesAggregations.optional(),
+      search: GranularRulesSearch.optional(),
+      sort_field: FindRulesSortField.optional(),
+      sort_order: SortOrder.optional(),
+      /**
+       * Page number. Ignored when `search_after` is provided.
+       */
+      page: z.number().int().min(1).optional().default(1),
+      /**
+       * Page size.
+       */
+      per_page: z.number().int().min(0).max(10000).optional().default(20),
+      /**
       * For pagination beyond elasticsearch's default 10,000 result window, requires `sort_field` and `sort_order`. When set, `page` is ignored.
 
       */
-    search_after: z.array(SearchRulesSearchAfterItem).min(1).optional(),
-    /**
+      search_after: z.array(SearchRulesSearchAfterItem).min(1).optional(),
+      /**
       * Filter rules to specific gap fill statuses.
 When active, the result set is capped and `search_after` is not supported. Use
 offset pagination (`page` / `per_page`) instead.
 
       */
-    gap_fill_statuses: z.array(GapFillStatus).optional(),
-    /**
-     * Gap range start.
-     */
-    gaps_range_start: z.string().optional(),
-    /**
-     * Gap range end.
-     */
-    gaps_range_end: z.string().optional(),
-    /**
-     * Gap auto fill scheduler ID used to determine gap fill status for rules
-     */
-    gap_auto_fill_scheduler_id: z.string().optional(),
-  })
-  .strict();
+      gap_fill_statuses: z.array(GapFillStatus).optional(),
+      /**
+       * Gap range start.
+       */
+      gaps_range_start: z.string().optional(),
+      /**
+       * Gap range end.
+       */
+      gaps_range_end: z.string().optional(),
+      /**
+       * Gap auto fill scheduler ID used to determine gap fill status for rules
+       */
+      gap_auto_fill_scheduler_id: z.string().optional(),
+    })
+    .strict()
+);
+export type SearchRulesRequestBody = z.infer<typeof SearchRulesRequestBody>;
 export type SearchRulesRequestBodyInput = z.input<typeof SearchRulesRequestBody>;
 
-export type SearchRulesResponse = z.infer<typeof SearchRulesResponse>;
-export const SearchRulesResponse = z
-  .object({
-    page: z.number().int(),
-    perPage: z.number().int(),
-    total: z.number().int(),
-    data: z.array(RuleResponse),
-    warnings: z.array(WarningSchema).optional(),
-    /**
+export const SearchRulesResponse = lazySchema(() =>
+  z
+    .object({
+      page: z.number().int(),
+      perPage: z.number().int(),
+      total: z.number().int(),
+      data: z.array(RuleResponse),
+      warnings: z.array(WarningSchema).optional(),
+      /**
       * Sort values of the last hit on this page, for use as `search_after` on the next
 request. Only included when deep pagination applies (offset
 at or past the default 10,000-result max) or the request used `search_after`.
 
       */
-    search_after: z.array(SearchRulesSearchAfterItem).optional(),
-    counts: FacetCounts.optional(),
-  })
-  .strict();
+      search_after: z.array(SearchRulesSearchAfterItem).optional(),
+      counts: FacetCounts.optional(),
+    })
+    .strict()
+);
+export type SearchRulesResponse = z.infer<typeof SearchRulesResponse>;
