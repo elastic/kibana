@@ -35,6 +35,8 @@ spec:
               - .buildkite
               - .node-version
               - package.json
+              - tsconfig.base.json
+              - versions.json
             cleanup_sparse_state: true
             verbose: true
       provider_settings:
