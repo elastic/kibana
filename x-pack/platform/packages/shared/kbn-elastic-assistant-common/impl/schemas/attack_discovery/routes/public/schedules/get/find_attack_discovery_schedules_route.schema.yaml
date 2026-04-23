@@ -6,7 +6,7 @@ paths:
   /api/attack_discovery/schedules/_find:
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
