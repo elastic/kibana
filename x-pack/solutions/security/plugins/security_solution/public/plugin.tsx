@@ -76,6 +76,7 @@ import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
 import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
+import { registerWorkflowSteps } from './workflows/step_types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -127,20 +128,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       share.url.locators.create(new AIValueReportLocatorDefinition());
     }
 
-    // Register workflow steps
     if (workflowsExtensions) {
-      import('./workflows/step_types')
-        .then(async ({ registerWorkflowSteps }) => {
-          const [coreStart] = await core.getStartServices();
-          return registerWorkflowSteps(workflowsExtensions, coreStart);
-        })
-        .catch((error) => {
-          this.logger.error(
-            `Error registering security workflow steps: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        });
+      registerWorkflowSteps(workflowsExtensions, core);
     }
 
     // Lazily instantiate subPlugins and initialize services
