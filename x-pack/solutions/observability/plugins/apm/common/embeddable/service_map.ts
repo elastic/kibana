@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const APM_SERVICE_MAP_EMBEDDABLE = 'apm_service_map';
+export { APM_SERVICE_MAP_EMBEDDABLE } from '@kbn/apm-embeddable-common';

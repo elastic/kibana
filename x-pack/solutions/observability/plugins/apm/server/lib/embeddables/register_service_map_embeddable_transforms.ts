@@ -6,7 +6,7 @@
  */
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { APM_SERVICE_MAP_EMBEDDABLE } from '../../../common/embeddable/service_map';
+import { APM_SERVICE_MAP_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import { getServiceMapEmbeddableSchema } from './service_map_embeddable_schema';
 
 export const registerServiceMapEmbeddableTransforms = (embeddable: EmbeddableSetup): void => {
