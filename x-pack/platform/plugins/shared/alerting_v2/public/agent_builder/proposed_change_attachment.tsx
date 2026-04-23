@@ -68,7 +68,10 @@ interface ParsedDiff {
   proposed: unknown;
 }
 
-type DescItem = { title: NonNullable<React.ReactNode>; description: NonNullable<React.ReactNode> };
+interface DescItem {
+  title: NonNullable<React.ReactNode>;
+  description: NonNullable<React.ReactNode>;
+}
 
 const FINDING_TYPE_COLORS: Record<string, string> = {
   deduplication: '#F5A623',
@@ -453,10 +456,7 @@ const CanvasFullView: React.FC<{
             !isError &&
             rules.map((rule) => (
               <React.Fragment key={rule.id}>
-                <RuleDetailCard
-                  rule={rule}
-                  action={actionById.get(rule.id) ?? 'delete'}
-                />
+                <RuleDetailCard rule={rule} action={actionById.get(rule.id) ?? 'delete'} />
                 <EuiSpacer size="s" />
               </React.Fragment>
             ))}
@@ -515,42 +515,40 @@ export const registerRuleSuggestionAttachment = ({
   let openCanvasRef: (() => void) | undefined;
   let focusedRuleId: string | undefined;
 
-  attachments.addAttachmentType<RuleSuggestionAttachment>(
-    RULE_SUGGESTION_ATTACHMENT_TYPE,
-    {
-      getLabel: (attachment) => attachment.data.summary ?? attachment.data.ruleName ?? 'Rule Suggestion',
-      getIcon: () => 'sparkles',
-      renderInlineContent: (props) => (
-        <SuggestionInlineContent
-          {...props}
-          onRuleClick={(ruleId) => {
-            focusedRuleId = ruleId;
-            openCanvasRef?.();
-          }}
-        />
-      ),
-      renderCanvasContent: (props) => (
-        <Context.Provider value={container}>
-          <SuggestionCanvasContent {...props} focusedRuleId={focusedRuleId} />
-        </Context.Provider>
-      ),
-      getActionButtons: ({ openCanvas, isCanvas }) => {
-        if (!isCanvas) {
-          openCanvasRef = openCanvas;
-        }
-        if (isCanvas || !openCanvas) return [];
-        return [
-          {
-            label: 'View details',
-            icon: 'expand',
-            type: ActionButtonType.SECONDARY,
-            handler: () => {
-              focusedRuleId = undefined;
-              openCanvas();
-            },
+  attachments.addAttachmentType<RuleSuggestionAttachment>(RULE_SUGGESTION_ATTACHMENT_TYPE, {
+    getLabel: (attachment) =>
+      attachment.data.summary ?? attachment.data.ruleName ?? 'Rule Suggestion',
+    getIcon: () => 'sparkles',
+    renderInlineContent: (props) => (
+      <SuggestionInlineContent
+        {...props}
+        onRuleClick={(ruleId) => {
+          focusedRuleId = ruleId;
+          openCanvasRef?.();
+        }}
+      />
+    ),
+    renderCanvasContent: (props) => (
+      <Context.Provider value={container}>
+        <SuggestionCanvasContent {...props} focusedRuleId={focusedRuleId} />
+      </Context.Provider>
+    ),
+    getActionButtons: ({ openCanvas, isCanvas }) => {
+      if (!isCanvas) {
+        openCanvasRef = openCanvas;
+      }
+      if (isCanvas || !openCanvas) return [];
+      return [
+        {
+          label: 'View details',
+          icon: 'expand',
+          type: ActionButtonType.SECONDARY,
+          handler: () => {
+            focusedRuleId = undefined;
+            openCanvas();
           },
-        ];
-      },
-    } satisfies AttachmentUIDefinition<RuleSuggestionAttachment>
-  );
+        },
+      ];
+    },
+  } satisfies AttachmentUIDefinition<RuleSuggestionAttachment>);
 };

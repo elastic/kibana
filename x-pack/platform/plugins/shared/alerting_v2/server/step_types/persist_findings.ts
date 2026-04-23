@@ -22,7 +22,18 @@ export const persistFindingsStepDefinition = createServerStepDefinition({
     let dropped = 0;
 
     for (const entry of rules) {
-      const meta = (entry.meta ?? entry) as Record<string, unknown>;
+      const rawMeta = (entry.meta ?? entry) as Record<string, unknown>;
+
+      // The correction loop can produce double-nested meta: remap_to_rules
+      // wraps each item as {id, rule, meta: item}, but if the LLM returned
+      // the validation structure ({id, rule, meta}) instead of the flat
+      // finding structure, the real finding fields end up in meta.meta.
+      const innerMeta =
+        rawMeta.meta != null && typeof rawMeta.meta === 'object' && !Array.isArray(rawMeta.meta)
+          ? (rawMeta.meta as Record<string, unknown>)
+          : null;
+
+      const meta = innerMeta ? { ...rawMeta, ...innerMeta } : rawMeta;
       const findingId = (entry.id ?? (meta.id as string) ?? '') as string;
 
       const candidate = {
@@ -40,7 +51,10 @@ export const persistFindingsStepDefinition = createServerStepDefinition({
         rule_ids: Array.isArray(meta.ruleIds) ? meta.ruleIds : [],
         details: (meta.details as Record<string, unknown>) ?? undefined,
         current: (meta.current as Record<string, unknown>) ?? null,
-        proposed: (meta.proposed ?? entry.rule ?? null) as Record<string, unknown> | null,
+        proposed: (meta.proposed ??
+          entry.rule ??
+          (rawMeta.rule as Record<string, unknown>) ??
+          null) as Record<string, unknown> | null,
         diffs: Array.isArray(meta.diffs) ? meta.diffs : undefined,
       };
 

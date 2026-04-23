@@ -1,0 +1,178 @@
+## Alerting v2 rule model
+
+An alerting v2 rule is a JSON object with this structure:
+
+```json
+{
+  "kind": "alert",
+  "metadata": {
+    "name": "Rule name (1-256 chars, required)",
+    "description": "Optional description (max 1024 chars)",
+    "tags": ["optional", "max-100-tags"]
+  },
+  "time_field": "@timestamp",
+  "schedule": {
+    "every": "1m",
+    "lookback": "5m"
+  },
+  "evaluation": {
+    "query": {
+      "base": "FROM index-pattern | WHERE ... | STATS ... BY ..."
+    }
+  },
+  "recovery_policy": {
+    "type": "no_breach"
+  },
+  "state_transition": {
+    "pending_count": 3
+  },
+  "grouping": {
+    "fields": ["host.name"]
+  }
+}
+```
+
+Field reference:
+- `kind`: "alert" (threshold-based) or "signal" (event-based). Use "alert" for metric rules.
+- `metadata.name`: required, 1-256 characters.
+- `metadata.tags`: optional array, max 100 tags, each max 64 chars.
+- `time_field`: defaults to "@timestamp". The executor uses this for automatic time bounding.
+- `schedule.every`: evaluation frequency. Duration format: number + unit (e.g. "1m", "5m", "30s"). Minimum "5s".
+- `schedule.lookback`: optional time window override. Same duration format.
+- `evaluation.query.base`: the FULL ES|QL query. 1-10,000 chars. This IS the rule's entire evaluation logic.
+- `recovery_policy`: optional. `type` is "query" (custom recovery query) or "no_breach" (recover when condition stops firing). If type is "query", `query.base` must contain a valid ES|QL query.
+- `state_transition`: optional, only valid when kind is "alert". `pending_count` (0-1000) sets the debounce — how many consecutive breaches before alerting.
+- `grouping.fields`: optional array of field names (max 16). EVERY field listed here MUST appear as an output column of `evaluation.query.base`.
+- `no_data`: optional. `behavior` is "no_data", "last_status", or "recover".
+
+### Critical execution semantics
+
+1. `evaluation.query.base` is the ENTIRE evaluation logic. There is NO separate `evaluation.condition` field — that field does not exist.
+2. The executor automatically applies a time range filter using `time_field` and `schedule.lookback`. Do NOT add `WHERE @timestamp > NOW() - ...` unless custom windowing is needed beyond what `schedule.lookback` provides.
+3. The query should produce rows when the alert condition is met. No rows = no alert.
+4. Every field in `grouping.fields` must be a column name in the output of the evaluation query. If the query uses `STATS ... BY host.name`, then `grouping.fields` can include `"host.name"`.
+
+## ES|QL syntax reference
+
+ES|QL (Elasticsearch Query Language) is a pipe-based query language. It is NOT SQL.
+
+### Query structure
+
+A query is a source command followed by processing commands separated by pipe (`|`):
+
+```
+FROM index-pattern
+| WHERE condition
+| STATS aggregation BY grouping
+| SORT column DESC
+| LIMIT 100
+```
+
+Every processing command MUST be preceded by `|`. Only the source command (FROM) has no pipe.
+
+### Source command
+
+- `FROM`: selects indices, data streams, or aliases. Example: `FROM metrics-*`, `FROM logs-*`
+
+### Processing commands
+
+- `WHERE`: filters rows based on a boolean condition.
+- `STATS ... BY`: groups rows and calculates aggregations. Aliasing uses `name = expr` syntax.
+- `EVAL`: adds a computed column. Uses `name = expr` syntax.
+- `KEEP`: retains only listed columns (drops everything else).
+- `DROP`: removes listed columns.
+- `SORT`: sorts rows by a column. Supports `ASC` (default) and `DESC`.
+- `LIMIT`: returns the first N rows. Maximum 10,000.
+- `RENAME`: renames a column. Syntax: `RENAME old AS new`.
+
+### Aggregation functions (use inside STATS)
+
+COUNT(*), COUNT(field), COUNT_DISTINCT(field), AVG(field), SUM(field), MAX(field), MIN(field), MEDIAN(field), PERCENTILE(field, pct), STD_DEV(field), VARIANCE(field), VALUES(field), TOP(field, n, order)
+
+### Grouping functions (use inside STATS ... BY)
+
+BUCKET(field, interval): creates buckets. For datetime: `BUCKET(@timestamp, 1 hour)`. For numeric: `BUCKET(value, 10)`.
+
+### Date/time functions
+
+NOW(): current timestamp. DATE_DIFF(unit, start, end): difference between dates. DATE_TRUNC(interval, date): rounds down. DATE_FORMAT(format, date): formats as string.
+
+### Conditional functions
+
+CASE(condition1, value1, condition2, value2, ..., default): returns the value for the first true condition. COALESCE(a, b, ...): returns the first non-null argument.
+
+### Operators
+
+- Comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`
+- Logical: `AND`, `OR`, `NOT`
+- Predicates: `IS NULL`, `IS NOT NULL`
+- Set membership: `IN (value1, value2, ...)`
+- Pattern matching: `LIKE "pattern*"`, `RLIKE "regex"`
+- Arithmetic: `+`, `-`, `*`, `/`, `%`
+
+### Syntax rules
+
+- String literals use double quotes: `"error"`, `"my-service"`
+- Identifiers with special characters use backticks: `` `my.field` ``
+- Aliasing in STATS/EVAL uses `name = expression`: `STATS avg_cpu = AVG(cpu)`
+- Duration literals: number + unit, e.g. `1 day`, `24 hours`, `5 minutes`
+- Comments: `//` for single-line, `/* */` for block comments
+
+## Common mistakes — do NOT make these errors
+
+1. **No `AS` keyword for aliasing.** ES|QL uses `name = expr`, not `expr AS name`.
+   CORRECT: `STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY host.name`
+   WRONG:   `STATS AVG(system.cpu.total.norm.pct) AS avg_cpu BY host.name`
+
+2. **No SQL commands.** These do NOT exist in ES|QL:
+   - `SELECT` → use `KEEP` or just let STATS define output columns
+   - `GROUP BY` → use `STATS ... BY`
+   - `JOIN` → not available
+   - `HAVING` → use `WHERE` after `STATS`
+   - `ORDER BY` → use `SORT`
+
+3. **Pipe is mandatory between commands.** Every command after FROM must be preceded by `|`.
+   CORRECT: `FROM logs-* | WHERE log.level == "ERROR"`
+   WRONG:   `FROM logs-* WHERE log.level == "ERROR"`
+
+4. **No subqueries or nested queries.** ES|QL does not support subqueries.
+
+5. **No `evaluation.condition`.** This field does not exist in alerting v2. The query itself IS the condition.
+
+6. **`grouping.fields` must match query output columns.** If a STATS query produces columns `avg_cpu` and `host.name`, then grouping.fields can only contain those exact names.
+
+7. **Use only documented functions.** Do not guess functions from SQL (e.g. no `LENGTH`, `SUBSTR`, `IFNULL`). Use ES|QL equivalents from the reference above.
+
+## Alerting rule ES|QL examples
+
+### CPU monitoring by host
+```
+FROM metrics-*
+| WHERE system.cpu.total.norm.pct IS NOT NULL
+| STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY host.name
+```
+grouping.fields: ["host.name"]
+
+### Error rate by service
+```
+FROM logs-*
+| WHERE log.level == "ERROR"
+| STATS error_count = COUNT(*) BY service.name
+```
+grouping.fields: ["service.name"]
+
+### Memory utilization with multiple aggregations
+```
+FROM metrics-*
+| WHERE system.memory.actual.used.pct IS NOT NULL
+| STATS avg_mem = AVG(system.memory.actual.used.pct), max_mem = MAX(system.memory.actual.used.pct) BY host.name
+```
+grouping.fields: ["host.name"]
+
+### Disk usage percentage
+```
+FROM metrics-*
+| WHERE system.filesystem.used.pct IS NOT NULL
+| STATS max_disk = MAX(system.filesystem.used.pct) BY host.name, system.filesystem.mount_point
+```
+grouping.fields: ["host.name", "system.filesystem.mount_point"]

@@ -40,9 +40,7 @@ const ruleSuggestionDataSchema = z.object({
     .string()
     .describe('Recommended action (merge, tune, delete, disable, re_enable_and_tune, create)'),
   impact: z.enum(['low', 'medium', 'high']).describe('Estimated impact of the suggestion'),
-  confidence: z
-    .enum(['low', 'medium', 'high'])
-    .describe('Confidence level of the suggestion'),
+  confidence: z.enum(['low', 'medium', 'high']).describe('Confidence level of the suggestion'),
   summary: z.string().describe('One-line summary of the suggestion'),
   explanation: z.string().describe('Detailed rationale for the suggestion'),
   proposed: z.string().describe('JSON-serialised proposed rule configuration'),
@@ -95,7 +93,9 @@ export const registerRuleSuggestionAttachmentType = (agentBuilder: AgentBuilderP
             parsed
               .map(
                 (d) =>
-                  `- **${d.field}**: \`${JSON.stringify(d.previous)}\` → \`${JSON.stringify(d.proposed)}\``
+                  `- **${d.field}**: \`${JSON.stringify(d.previous)}\` → \`${JSON.stringify(
+                    d.proposed
+                  )}\``
               )
               .join('\n');
         }
@@ -115,7 +115,9 @@ export const registerRuleSuggestionAttachmentType = (agentBuilder: AgentBuilderP
               rules
                 .map(
                   (r) =>
-                    `| ${r.action.toUpperCase()} | ${r.name} | ${r.kind} | ${r.schedule} | ${r.enabled ? 'Yes' : 'No'} | ${r.id} |`
+                    `| ${r.action.toUpperCase()} | ${r.name} | ${r.kind} | ${r.schedule} | ${
+                      r.enabled ? 'Yes' : 'No'
+                    } | ${r.id} |`
                 )
                 .join('\n') +
               '\n\nRules marked DELETE should be removed after the retained rule is updated.';

@@ -166,9 +166,12 @@ steps:
           prompt: |
             You are Rule Doctor's rule correction agent.
 
+            __ALERTING_V2_REFERENCE__
+
             ## Task
             Some proposed alerting rules failed validation against Elasticsearch.
-            Fix each invalid rule using the validation errors and real field schemas below.
+            Fix each invalid rule using the validation errors, field schemas, and the
+            alerting v2 / ES|QL reference above.
 
             ## Invalid rules with errors
             {{ variables.invalid_rules | json }}
@@ -188,14 +191,21 @@ steps:
             {{ inputs.rules | json }}
 
             ## Instructions
-            - Fix the ES|QL query in each invalid rule's `evaluation.query.base`.
+            - Fix the ES|QL query in each invalid rule's `evaluation.query.base` using
+              correct ES|QL syntax as described in the reference above.
             - If a rule has `recovery_policy.query.base`, fix that too if invalid.
-            - If grouping fields are invalid, update them to match available columns.
+            - If grouping fields are invalid, update them to match available query output columns.
+            - Do NOT add `evaluation.condition` — it does not exist. The query IS the condition.
             - Keep everything else about the finding unchanged.
             - Remove the `_validationErrors` from each corrected rule.
             - If a rule cannot be fixed (e.g., the required fields do not exist), omit that finding entirely.
 
-            Return the corrected findings array (the `meta` field from each entry contains the original finding).
+            ## Output format
+            Return the corrected findings as a FLAT structure. Each finding must have these
+            top-level keys: id, type, action, impact, confidence, summary, explanation,
+            details, proposed (the corrected rule object), diffs, and optionally ruleIds.
+            Do NOT wrap findings in {id, rule, meta} — return the flat finding directly.
+            The `proposed` field must contain the corrected rule definition.
           schema:
             type: object
             properties:

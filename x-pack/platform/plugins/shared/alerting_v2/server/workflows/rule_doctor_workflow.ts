@@ -14,11 +14,25 @@ import type {
   ExecutionStatusUnion,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import DEDUPLICATION_WORKFLOW_YAML from './rule_doctor_deduplication.yaml';
-import THRESHOLD_TUNING_WORKFLOW_YAML from './rule_doctor_threshold_tuning.yaml';
-import STALE_RULES_WORKFLOW_YAML from './rule_doctor_stale_rules.yaml';
-import COVERAGE_GAP_WORKFLOW_YAML from './rule_doctor_coverage_gap.yaml';
-import COVERAGE_GAP_DV_WORKFLOW_YAML from './rule_doctor_coverage_gap_dv.yaml';
+import RAW_DEDUPLICATION_WORKFLOW_YAML from './rule_doctor_deduplication.yaml';
+import RAW_THRESHOLD_TUNING_WORKFLOW_YAML from './rule_doctor_threshold_tuning.yaml';
+import RAW_STALE_RULES_WORKFLOW_YAML from './rule_doctor_stale_rules.yaml';
+import RAW_COVERAGE_GAP_WORKFLOW_YAML from './rule_doctor_coverage_gap.yaml';
+import RAW_COVERAGE_GAP_DV_WORKFLOW_YAML from './rule_doctor_coverage_gap_dv.yaml';
+import ALERTING_V2_REFERENCE from './alerting_v2_reference.text';
+
+const injectReference = (yaml: string): string =>
+  yaml.replace(/^( *)__ALERTING_V2_REFERENCE__/gm, (_match, indent: string) => {
+    return ALERTING_V2_REFERENCE.split('\n')
+      .map((line) => (line.length > 0 ? `${indent}${line}` : line))
+      .join('\n');
+  });
+
+const DEDUPLICATION_WORKFLOW_YAML = injectReference(RAW_DEDUPLICATION_WORKFLOW_YAML);
+const THRESHOLD_TUNING_WORKFLOW_YAML = injectReference(RAW_THRESHOLD_TUNING_WORKFLOW_YAML);
+const STALE_RULES_WORKFLOW_YAML = injectReference(RAW_STALE_RULES_WORKFLOW_YAML);
+const COVERAGE_GAP_WORKFLOW_YAML = injectReference(RAW_COVERAGE_GAP_WORKFLOW_YAML);
+const COVERAGE_GAP_DV_WORKFLOW_YAML = injectReference(RAW_COVERAGE_GAP_DV_WORKFLOW_YAML);
 
 export const RULE_DOCTOR_WORKFLOW_ID = 'workflow-rule-doctor-a1b2c3d4-e5f6-7890-abcd-ef1234567890';
 
