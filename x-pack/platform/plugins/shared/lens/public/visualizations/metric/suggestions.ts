@@ -60,7 +60,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       ...(state?.styleTemplate
         ? { styleTemplate: state.styleTemplate }
         : !isActive
-        ? { styleTemplate: 'bottom' }
+        ? { styleTemplate: 'bottom' as const }
         : {}),
     },
     title: metricColumns[0]?.operation.label || metricLabel,

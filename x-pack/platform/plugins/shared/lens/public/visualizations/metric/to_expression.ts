@@ -178,9 +178,10 @@ export const toExpression = (
     theme.getTheme()
   );
 
-  const templateLayout = state.styleTemplate
-    ? LENS_METRIC_STYLE_TEMPLATE[state.styleTemplate]
-    : undefined;
+  const templateLayout =
+    state.styleTemplate && state.styleTemplate !== 'custom'
+      ? LENS_METRIC_STYLE_TEMPLATE[state.styleTemplate]
+      : undefined;
   const primaryPosition =
     templateLayout?.primaryPosition ??
     state.primaryPosition ??

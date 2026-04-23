@@ -214,6 +214,7 @@ export type {
   Alignment,
   PrimaryMetricPosition,
   MetricStyleTemplateId,
+  MetricStyleTemplatePresetId,
   MetricLayoutWithDefault,
 } from './visualizations/metric/types';
 export type {

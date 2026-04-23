@@ -15,6 +15,7 @@ import type {
   MetricLayoutWithDefault,
   MetricVisualizationState,
   MetricStyleTemplateId,
+  MetricStyleTemplatePresetId,
 } from '@kbn/lens-common';
 import {
   LENS_LEGACY_METRIC_STATE_DEFAULTS,
@@ -23,7 +24,6 @@ import {
 } from '@kbn/lens-common';
 
 import { metricIconsSet } from '../../../shared_components/icon_set';
-import type { MetricStyleTemplate } from './type';
 import { AppearanceOption, AppearanceOptionGroup, SubtitleOption } from './appearance_option';
 import {
   alignmentOptions,
@@ -34,7 +34,7 @@ import {
 import { StyleTemplateSelector } from './style_template_selector';
 
 const getDefaultLayoutConfig = (
-  primaryMetricPosition: MetricStyleTemplateId,
+  primaryMetricPosition: MetricStyleTemplatePresetId,
   { hasMetricIcon, hasSecondaryMetric }: { hasMetricIcon: boolean; hasSecondaryMetric: boolean }
 ): MetricLayoutWithDefault => {
   let config = { ...LENS_METRIC_STYLE_TEMPLATE[primaryMetricPosition] };
@@ -91,9 +91,10 @@ export function MetricAppearanceSettings({
 }) {
   const hasSecondaryMetric = !!state.secondaryMetricAccessor;
   const hasMetricIcon = hasIcon(state.icon);
-  const selectedTemplateLayout = state.styleTemplate
-    ? LENS_METRIC_STYLE_TEMPLATE[state.styleTemplate]
-    : undefined;
+  const selectedTemplateLayout =
+    state.styleTemplate && state.styleTemplate !== 'custom'
+      ? LENS_METRIC_STYLE_TEMPLATE[state.styleTemplate]
+      : undefined;
 
   const disabledStates = {
     subtitle:
@@ -105,7 +106,7 @@ export function MetricAppearanceSettings({
     iconAlign: !hasMetricIcon,
   } satisfies Record<string, boolean | string>;
 
-  const selectedTemplate: MetricStyleTemplate = state.styleTemplate ?? 'custom';
+  const selectedTemplate: MetricStyleTemplateId = state.styleTemplate ?? 'custom';
 
   return (
     <>
@@ -113,7 +114,7 @@ export function MetricAppearanceSettings({
         selectedTemplate={selectedTemplate}
         onSelectTemplate={(template) => {
           if (template === 'custom') {
-            setState({ ...state, styleTemplate: undefined });
+            setState({ ...state, styleTemplate: 'custom' });
             return;
           }
 
@@ -148,13 +149,13 @@ export function MetricAppearanceSettings({
                 defaultMessage: 'Position',
               })}
               value={
-                state.styleTemplate ??
+                (state.styleTemplate !== 'custom' ? state.styleTemplate : undefined) ??
                 state.primaryPosition ??
                 LENS_METRIC_STATE_DEFAULTS.primaryPosition
               }
               options={primaryMetricPositionOptions}
               onChange={(id) => {
-                setState({ ...state, primaryPosition: id, styleTemplate: undefined });
+                setState({ ...state, primaryPosition: id, styleTemplate: 'custom' });
               }}
               dataTestSubj="lens-metric-appearance-primary-metric-position-btn"
             />
@@ -169,7 +170,7 @@ export function MetricAppearanceSettings({
               }
               options={alignmentOptions}
               onChange={(id) => {
-                setState({ ...state, primaryAlign: id, styleTemplate: undefined });
+                setState({ ...state, primaryAlign: id, styleTemplate: 'custom' });
               }}
               isIconOnly
               dataTestSubj="lens-metric-appearance-primary-metric-alignment-btn"
@@ -181,7 +182,7 @@ export function MetricAppearanceSettings({
               value={state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode}
               options={fontSizeOptions}
               onChange={(id) => {
-                setState({ ...state, valueFontMode: id, styleTemplate: undefined });
+                setState({ ...state, valueFontMode: id, styleTemplate: 'custom' });
               }}
               dataTestSubj="lens-metric-appearance-primary-metric-font-size-btn"
             />
@@ -195,7 +196,7 @@ export function MetricAppearanceSettings({
             <SubtitleOption
               value={state.subtitle}
               onChange={(subtitle) => {
-                setState({ ...state, subtitle, styleTemplate: undefined });
+                setState({ ...state, subtitle, styleTemplate: 'custom' });
               }}
               isDisabled={disabledStates.subtitle}
             />
@@ -210,7 +211,7 @@ export function MetricAppearanceSettings({
               }
               options={alignmentOptions}
               onChange={(id) => {
-                setState({ ...state, titlesTextAlign: id, styleTemplate: undefined });
+                setState({ ...state, titlesTextAlign: id, styleTemplate: 'custom' });
               }}
               isIconOnly
               dataTestSubj="lens-metric-appearance-title-and-subtitle-alignment-btn"
@@ -233,7 +234,7 @@ export function MetricAppearanceSettings({
               }
               options={alignmentOptions}
               onChange={(id) => {
-                setState({ ...state, secondaryAlign: id, styleTemplate: undefined });
+                setState({ ...state, secondaryAlign: id, styleTemplate: 'custom' });
               }}
               isDisabled={disabledStates.secondaryAlign}
               isIconOnly
@@ -260,7 +261,7 @@ export function MetricAppearanceSettings({
                 onChange={(newIcon) => {
                   const newState = applyIconChange(state, newIcon);
                   if (newState) {
-                    setState({ ...newState, styleTemplate: undefined });
+                    setState({ ...newState, styleTemplate: 'custom' });
                   }
                 }}
               />
@@ -276,7 +277,7 @@ export function MetricAppearanceSettings({
               }
               options={iconPositionOptions}
               onChange={(id) => {
-                setState({ ...state, iconAlign: id, styleTemplate: undefined });
+                setState({ ...state, iconAlign: id, styleTemplate: 'custom' });
               }}
               isDisabled={disabledStates.iconAlign}
               dataTestSubj="lens-metric-appearance-other-icon-position-btn"

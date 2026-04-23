@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { MetricStyleTemplate } from './type';
+import type { MetricStyleTemplateId } from '@kbn/lens-common';
 
 const styleTemplates: Array<{
-  id: MetricStyleTemplate;
+  id: MetricStyleTemplateId;
   label: string;
   preview: ReactNode;
 }> = [
@@ -50,8 +50,8 @@ export function StyleTemplateSelector({
   selectedTemplate,
   onSelectTemplate,
 }: {
-  selectedTemplate: MetricStyleTemplate;
-  onSelectTemplate: (template: MetricStyleTemplate) => void;
+  selectedTemplate: MetricStyleTemplateId;
+  onSelectTemplate: (template: MetricStyleTemplateId) => void;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -156,7 +156,7 @@ function StyleTemplateCard({
   );
 }
 
-function MetricPreview({ position }: { position: MetricStyleTemplate }) {
+function MetricPreview({ position }: { position: MetricStyleTemplateId }) {
   const { euiTheme } = useEuiTheme();
 
   const value = (fontSize: string, textAlign: 'left' | 'center' | 'right' = 'left') => (
@@ -202,7 +202,7 @@ function MetricPreview({ position }: { position: MetricStyleTemplate }) {
     </EuiFlexItem>
   );
 
-  const content: Record<MetricStyleTemplate, ReactNode> = {
+  const content: Record<MetricStyleTemplateId, ReactNode> = {
     top: (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {value(euiTheme.size.l)}

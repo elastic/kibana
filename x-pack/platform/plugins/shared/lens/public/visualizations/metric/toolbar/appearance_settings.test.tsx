@@ -280,7 +280,7 @@ describe('appearance settings', () => {
   });
 
   it('persists selected style template in state', () => {
-    renderComponent({ styleTemplate: undefined });
+    renderComponent({ styleTemplate: 'custom' });
 
     fireEvent.click(screen.getByTestId('lens-metric-style-template-top'));
 
@@ -303,7 +303,7 @@ describe('appearance settings', () => {
     expect(mockSetState).toHaveBeenCalledWith(
       expect.objectContaining({
         primaryAlign: 'right',
-        styleTemplate: undefined,
+        styleTemplate: 'custom',
       })
     );
   });

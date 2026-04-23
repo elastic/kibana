@@ -11,7 +11,7 @@ import type {
   MetricLayoutWithDefault,
   MetricStateDefaults,
   PrimaryMetricPosition,
-  MetricStyleTemplateId,
+  MetricStyleTemplatePresetId,
 } from './types';
 
 export const LENS_METRIC_ID = 'lnsMetric';
@@ -34,7 +34,10 @@ export const LENS_LEGACY_METRIC_STATE_DEFAULTS: Pick<MetricStateDefaults, 'iconA
 /**
  * Style template presets by primary metric position
  */
-export const LENS_METRIC_STYLE_TEMPLATE: Record<MetricStyleTemplateId, MetricLayoutWithDefault> = {
+export const LENS_METRIC_STYLE_TEMPLATE: Record<
+  MetricStyleTemplatePresetId,
+  MetricLayoutWithDefault
+> = {
   bottom: {
     titlesTextAlign: 'left',
     primaryPosition: 'bottom',
