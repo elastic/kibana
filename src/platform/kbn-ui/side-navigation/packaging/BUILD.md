@@ -47,7 +47,7 @@ Artifacts in `src/platform/kbn-ui/side-navigation/target/`:
 ## Consumer smoke test
 
 ```bash
-cd /tmp && mkdir one-nav-check && cd one-nav-check
+cd /tmp && mkdir side-nav-check && cd side-nav-check
 npm init -y
 npm i <path-to>/kbn-ui-side-navigation-<version>.tgz \
       @elastic/eui react react-dom @emotion/react @emotion/css
