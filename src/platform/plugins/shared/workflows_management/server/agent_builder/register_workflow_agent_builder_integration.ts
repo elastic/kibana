@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { SmlTypeDefinition } from '@kbn/semantic-layer-plugin/server';
 import { registerWorkflowYamlAttachment } from './attachments/workflow_yaml_attachment';
 import { registerWorkflowYamlDiffAttachment } from './attachments/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
@@ -24,6 +25,7 @@ import type { AgentBuilderPluginSetupContract } from '../types';
 
 interface RegisterWorkflowAgentBuilderIntegrationParams {
   agentBuilder: AgentBuilderPluginSetupContract;
+  semanticLayerRegisterType?: (definition: SmlTypeDefinition) => void;
   logger: Logger;
   api: WorkflowsManagementApi;
   aiTelemetryClient: WorkflowsAiTelemetryClient;
@@ -31,6 +33,7 @@ interface RegisterWorkflowAgentBuilderIntegrationParams {
 
 export function registerWorkflowAgentBuilderIntegration({
   agentBuilder,
+  semanticLayerRegisterType,
   logger,
   api,
   aiTelemetryClient,
@@ -50,7 +53,9 @@ export function registerWorkflowAgentBuilderIntegration({
 
   agentBuilder.skills.register(workflowAuthoringSkill);
 
-  agentBuilder.sml.registerType(createWorkflowSmlType(api));
+  if (semanticLayerRegisterType) {
+    semanticLayerRegisterType(createWorkflowSmlType(api));
+  }
 
   logger.debug('Workflow Agent Builder integration components registered');
 }

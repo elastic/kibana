@@ -270,15 +270,20 @@ export class WorkflowsPlugin
     api: WorkflowsManagementApi,
     aiTelemetryClient: WorkflowsAiTelemetryClient
   ): void {
-    void core.plugins
-      .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
-      .then(({ agentBuilder }) => {
+    void Promise.all([
+      core.plugins.onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder'),
+      core.plugins.onSetup<{ semanticLayer: { registerType: (def: unknown) => void } }>('semanticLayer'),
+    ])
+      .then(([{ agentBuilder }, { semanticLayer }]) => {
         if (agentBuilder.found) {
           this.logger.debug(
             'Workflows Management: Agent Builder found, registering AI integration'
           );
           registerWorkflowAgentBuilderIntegration({
             agentBuilder: agentBuilder.contract,
+            semanticLayerRegisterType: semanticLayer.found
+              ? semanticLayer.contract.registerType
+              : undefined,
             logger: this.logger,
             api,
             aiTelemetryClient,
@@ -293,11 +298,11 @@ export class WorkflowsPlugin
       });
 
     void core.plugins
-      .onStart<{ agentBuilder: { sml: { indexAttachment: SmlIndexAttachmentFn } } }>('agentBuilder')
-      .then(({ agentBuilder }) => {
-        if (agentBuilder.found) {
+      .onStart<{ semanticLayer: { indexAttachment: SmlIndexAttachmentFn } }>('semanticLayer')
+      .then(({ semanticLayer }) => {
+        if (semanticLayer.found) {
           api.setSmlIndexAttachment(
-            agentBuilder.contract.sml.indexAttachment,
+            semanticLayer.contract.indexAttachment,
             this.logger.get('sml')
           );
           this.logger.debug(
@@ -308,7 +313,7 @@ export class WorkflowsPlugin
       .catch((err) => {
         const message = err instanceof Error ? err.message : String(err);
         this.logger.warn(
-          `Workflows Management: Failed to wire SML indexing with Agent Builder: ${message}`
+          `Workflows Management: Failed to wire SML indexing with Semantic Layer: ${message}`
         );
       });
   }
