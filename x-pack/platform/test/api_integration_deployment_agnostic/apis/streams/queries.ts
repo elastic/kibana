@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import { expect } from '@kbn/expect';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
@@ -497,7 +497,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('deletes queries across multiple streams in one request', async () => {
         const firstQuery = {
           id: v4(),
-          type: 'match' as const,
           title: 'cross-stream bulk delete 1',
           description: '',
           esql: {
@@ -506,7 +505,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         const secondQuery = {
           id: v4(),
-          type: 'match' as const,
           title: 'cross-stream bulk delete 2',
           description: '',
           esql: {
