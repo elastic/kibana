@@ -1279,7 +1279,7 @@ export function runHeapSnapshotAnalyzerCli(): void {
         if (fnIdx >= 0 && fnIdx * tfiStride + tfiScriptIdx < tfi.length) {
           const scriptStrId = tfi[fnIdx * tfiStride + tfiScriptIdx];
           const pid = scriptStrId >= 0 && scriptStrId < strPkg.length ? strPkg[scriptStrId] : -1;
-          if (pid !== -1 && pluginPkgIdSet.has(pid)) {
+          if (pid !== -1 && pluginPkgIdSet.has(pid) && !frameMatchesFilter(scriptStrId)) {
             // Found a plugin frame here. Backfill the path below it with this pid.
             for (const p of path) traceFirstPlugin[p] = pid;
             return pid;
