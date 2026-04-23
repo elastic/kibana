@@ -25,7 +25,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   useContentListItems,
@@ -70,34 +69,33 @@ export { mockTagsService, createMockFavoritesClient, mockContentListUserProfiles
  * real Kibana content editor flyout (`@kbn/content-management-content-editor`)
  * which requires Kibana core services not available in Storybook.
  */
-const InspectFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () => void }) => {
-  const flyoutTitleId = useGeneratedHtmlId();
-  return (
-    <EuiFlyout onClose={onClose} size="s" ownFocus aria-labelledby={flyoutTitleId}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{item.title}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiDescriptionList
-          type="column"
-          compressed
-          listItems={[
-            { title: 'ID', description: item.id },
-            { title: 'Description', description: item.description || '—' },
-            { title: 'Type', description: item.type || '—' },
-            {
-              title: 'Updated',
-              description: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '—',
-            },
-            { title: 'Tags', description: item.tags?.join(', ') || '—' },
-          ]}
-        />
-      </EuiFlyoutBody>
-    </EuiFlyout>
-  );
-};
+const inspectFlyoutTitleId = 'inspect-flyout-title';
+
+const InspectFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () => void }) => (
+  <EuiFlyout onClose={onClose} size="s" ownFocus aria-labelledby={inspectFlyoutTitleId}>
+    <EuiFlyoutHeader hasBorder>
+      <EuiTitle size="m">
+        <h2 id={inspectFlyoutTitleId}>{item.title}</h2>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <EuiDescriptionList
+        type="column"
+        compressed
+        listItems={[
+          { title: 'ID', description: item.id },
+          { title: 'Description', description: item.description || '—' },
+          { title: 'Type', description: item.type || '—' },
+          {
+            title: 'Updated',
+            description: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '—',
+          },
+          { title: 'Tags', description: item.tags?.join(', ') || '—' },
+        ]}
+      />
+    </EuiFlyoutBody>
+  </EuiFlyout>
+);
 
 /**
  * Hook that manages the open/close state for a mock inspect flyout.
