@@ -209,8 +209,8 @@ export const discoverEisConnectors = async (log: Log): Promise<EisConnectorResul
   const es: EisElasticsearchConnection = {
     baseUrl: 'http://localhost:9200',
     credentials: {
-      username: process.env.KIBANA_EIS_ES_USERNAME || 'elastic',
-      password: process.env.KIBANA_EIS_ES_PASSWORD || 'changeme',
+      username: process.env.KBN_EIS_ES_USERNAME || 'elastic',
+      password: process.env.KBN_EIS_ES_PASSWORD || 'changeme',
     },
     ssl: false,
   };

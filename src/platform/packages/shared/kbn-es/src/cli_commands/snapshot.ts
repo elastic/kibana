@@ -163,6 +163,12 @@ export const snapshot: Command = {
         });
 
         try {
+          if (!eisApiKey) {
+            throw new Error(
+              'EIS: CCM API key was not resolved before starting Elasticsearch. This is a bug in the --eis flow.'
+            );
+          }
+
           const protocol = options.ssl ? 'https' : 'http';
           const es = {
             baseUrl: `${protocol}://localhost:${options.port || 9200}`,
@@ -170,7 +176,7 @@ export const snapshot: Command = {
             ssl: !!options.ssl,
           };
 
-          await setCcmApiKey(eisApiKey as string, es, log);
+          await setCcmApiKey(eisApiKey, es, log);
           log.success('EIS: CCM API key set in Elasticsearch');
         } catch (error) {
           log.error('EIS setup failed, stopping Elasticsearch...');
