@@ -6,24 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiLoadingSpinner,
-  EuiSelectable,
-  EuiSpacer,
-  EuiTitle,
-  euiFullHeight,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiSelectable, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -32,15 +15,8 @@ import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
 import { useFetchAlertEpisodeTagSuggestions } from '../../hooks/use_fetch_alert_episode_tag_suggestions';
 import { EpisodeTagsFlyoutActionBar } from './episode_tags_flyout_action_bar';
+import { EpisodeActionFlyout, EpisodeActionFlyoutFooter } from './episode_action_flyout_layout';
 import * as i18n from './translations';
-
-const flyoutBodyCss = css`
-  ${euiFullHeight()}
-
-  .euiFlyoutBody__overflowContent {
-    ${euiFullHeight()}
-  }
-`;
 
 const NEW_KEY_PREFIX = '__new__:';
 
@@ -156,108 +132,87 @@ export function AlertEpisodeTagsFlyout({
   }, [createAlertAction, groupHash, onClose, saveBlocked, selectedTags]);
 
   return (
-    <EuiFlyout
-      ownFocus
+    <EpisodeActionFlyout
       onClose={onClose}
-      aria-labelledby="alertingEpisodeTagsFlyoutTitle"
-      data-test-subj="alertingEpisodeTagsFlyout"
-      size="s"
-      paddingSize="m"
+      dataTestSubj="alertingEpisodeTagsFlyout"
+      ariaLabelledBy="alertingEpisodeTagsFlyoutTitle"
+      titleId="alertingEpisodeTagsFlyoutTitle"
+      title={i18n.TAGS_ACTION_FLYOUT_TITLE}
+      titleDataTestSubj="alertingEpisodeTagsFlyoutTitle"
+      footer={
+        <EpisodeActionFlyoutFooter
+          onClose={onClose}
+          onPrimaryClick={handleSave}
+          cancelLabel={i18n.TAGS_ACTION_CANCEL}
+          primaryLabel={i18n.TAGS_ACTION_SAVE}
+          cancelTestSubj="alertingEpisodeTagsFlyoutCancel"
+          primaryTestSubj="alertingEpisodeTagsFlyoutSave"
+          isPrimaryLoading={isSaving}
+          isPrimaryDisabled={saveBlocked}
+        />
+      }
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="alertingEpisodeTagsFlyoutTitle" data-test-subj="alertingEpisodeTagsFlyoutTitle">
-            {i18n.TAGS_ACTION_FLYOUT_TITLE}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody css={flyoutBodyCss}>
-        {isLoadingSuggestions ? (
-          <EuiLoadingSpinner size="l" data-test-subj="alertingEpisodeTagsFlyoutLoading" />
-        ) : (
-          <EuiSelectable
-            options={selectableOptions}
-            searchable
-            searchProps={{
-              value: searchValue,
-              onChange: setSearchValue,
-              placeholder: i18n.TAGS_ACTION_SEARCH_PLACEHOLDER,
-              'data-test-subj': 'alertingEpisodeTagsFlyoutSearch',
-            }}
-            onChange={handleSelectableChange}
-            emptyMessage={i18n.TAGS_ACTION_EMPTY_TAGS}
-            noMatchesMessage={i18n.TAGS_ACTION_NO_MATCHES}
-            data-test-subj="alertingEpisodeTagsFlyoutSelectable"
-            height={360}
+      {isLoadingSuggestions ? (
+        <EuiLoadingSpinner size="l" data-test-subj="alertingEpisodeTagsFlyoutLoading" />
+      ) : (
+        <EuiSelectable
+          options={selectableOptions}
+          searchable
+          searchProps={{
+            value: searchValue,
+            onChange: setSearchValue,
+            placeholder: i18n.TAGS_ACTION_SEARCH_PLACEHOLDER,
+            'data-test-subj': 'alertingEpisodeTagsFlyoutSearch',
+          }}
+          onChange={handleSelectableChange}
+          emptyMessage={i18n.TAGS_ACTION_EMPTY_TAGS}
+          noMatchesMessage={i18n.TAGS_ACTION_NO_MATCHES}
+          data-test-subj="alertingEpisodeTagsFlyoutSelectable"
+          height={360}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              <EpisodeTagsFlyoutActionBar
+                euiTheme={euiTheme}
+                totalTagCount={allKnownTags.length}
+                selectedCount={selectedTags.length}
+                onSelectAll={() => setSelectedTags(tagsForSelectAll)}
+                onSelectNone={() => setSelectedTags([])}
+              />
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      )}
+      {tagTooLong ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            title={i18n.TAGS_ACTION_TAG_TOO_LONG_TITLE}
+            color="danger"
+            iconType="error"
+            data-test-subj="alertingEpisodeTagsFlyoutTagTooLongError"
           >
-            {(list, search) => (
-              <>
-                {search}
-                <EpisodeTagsFlyoutActionBar
-                  euiTheme={euiTheme}
-                  totalTagCount={allKnownTags.length}
-                  selectedCount={selectedTags.length}
-                  onSelectAll={() => setSelectedTags(tagsForSelectAll)}
-                  onSelectNone={() => setSelectedTags([])}
-                />
-                {list}
-              </>
-            )}
-          </EuiSelectable>
-        )}
-        {tagTooLong ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              announceOnMount
-              title={i18n.TAGS_ACTION_TAG_TOO_LONG_TITLE}
-              color="danger"
-              iconType="error"
-              data-test-subj="alertingEpisodeTagsFlyoutTagTooLongError"
-            >
-              <p>{i18n.getTagsActionTagTooLongBody(MAX_TAG_LENGTH)}</p>
-            </EuiCallOut>
-          </>
-        ) : null}
-        {tooManyTagsWarning ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              announceOnMount
-              title={i18n.TAGS_ACTION_TOO_MANY_TAGS_TITLE}
-              color="warning"
-              iconType="warning"
-              data-test-subj="alertingEpisodeTagsFlyoutTooManyTagsWarning"
-            >
-              <p>{i18n.getTagsActionTooManyTagsBody(MAX_TAGS_PER_EPISODE)}</p>
-            </EuiCallOut>
-          </>
-        ) : null}
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onClose}
-              flush="left"
-              data-test-subj="alertingEpisodeTagsFlyoutCancel"
-            >
-              {i18n.TAGS_ACTION_CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={handleSave}
-              fill
-              isLoading={isSaving}
-              isDisabled={saveBlocked}
-              data-test-subj="alertingEpisodeTagsFlyoutSave"
-            >
-              {i18n.TAGS_ACTION_SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+            <p>{i18n.getTagsActionTagTooLongBody(MAX_TAG_LENGTH)}</p>
+          </EuiCallOut>
+        </>
+      ) : null}
+      {tooManyTagsWarning ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            title={i18n.TAGS_ACTION_TOO_MANY_TAGS_TITLE}
+            color="warning"
+            iconType="warning"
+            data-test-subj="alertingEpisodeTagsFlyoutTooManyTagsWarning"
+          >
+            <p>{i18n.getTagsActionTooManyTagsBody(MAX_TAGS_PER_EPISODE)}</p>
+          </EuiCallOut>
+        </>
+      ) : null}
+    </EpisodeActionFlyout>
   );
 }

@@ -5,35 +5,36 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { PageScope } from '../../../data_view_manager/constants';
-import { PageLoader } from '../../../common/components/page_loader';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
-import { IpOverview } from '../../../explore/network/components/details';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { networkToCriteria } from '../../../common/components/ml/criteria/network_to_criteria';
-import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/kuery';
-import { inputsSelectors } from '../../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useNetworkDetails } from '../../../explore/network/containers/details';
-import { networkModel } from '../../../explore/network/store';
-import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use_anomalies_table_data';
-import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
-import { EmptyPrompt } from '../../../common/components/empty_prompt';
-import type { NarrowDateRange } from '../../../common/components/ml/types';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { PageScope } from '../../data_view_manager/constants';
+import { PageLoader } from '../../common/components/page_loader';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import type { FlowTargetSourceDest } from '../../../common/search_strategy';
+import { IpOverview } from '../../explore/network/components/details';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import { networkToCriteria } from '../../common/components/ml/criteria/network_to_criteria';
+import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_interval_to_datetime';
+import { useKibana } from '../../common/lib/kibana';
+import { convertToBuildEsQuery } from '../../common/lib/kuery';
+import { inputsSelectors } from '../../common/store';
+import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
+import { useSourcererDataView } from '../../sourcerer/containers';
+import { useNetworkDetails } from '../../explore/network/containers/details';
+import { networkModel } from '../../explore/network/store';
+import { useAnomaliesTableData } from '../../common/components/ml/anomaly/use_anomalies_table_data';
+import { useInstalledSecurityJobNameById } from '../../common/components/ml/hooks/use_installed_security_jobs';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
+import type { NarrowDateRange } from '../../common/components/ml/types';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
-export interface NetworkDetailsProps {
+export interface ContentProps {
   /**
    * IP value
    */
@@ -45,9 +46,9 @@ export interface NetworkDetailsProps {
 }
 
 /**
- * Component rendering all the network details for the expandable flyout
+ * Network details flyout content section.
  */
-export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
+export const Content: FC<ContentProps> = memo(({ ip, flowTarget }: ContentProps) => {
   const dispatch = useDispatch();
   const { to, from, isInitializing } = useGlobalTime();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -153,4 +154,6 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
   ) : (
     <EmptyPrompt />
   );
-};
+});
+
+Content.displayName = 'Content';

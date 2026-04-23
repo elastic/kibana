@@ -7,12 +7,12 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { NetworkDetails } from './components/network_details';
-import { FlyoutBody } from '../shared/components/flyout_body';
+import { EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
+import { Header } from './header';
+import { Content } from './content';
 
-export interface PanelContentProps {
+export interface NetworkProps {
   /**
    * IP value
    */
@@ -24,15 +24,19 @@ export interface PanelContentProps {
 }
 
 /**
- * Network details expandable flyout right section
+ * Network details flyout content.
  */
-export const PanelContent: FC<PanelContentProps> = memo(({ ip, flowTarget }: PanelContentProps) => {
+export const Network: FC<NetworkProps> = memo(({ ip, flowTarget }) => {
   return (
-    <FlyoutBody>
-      <EuiSpacer size="m" />
-      <NetworkDetails ip={ip} flowTarget={flowTarget} />
-    </FlyoutBody>
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <Header ip={ip} flowTarget={flowTarget} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <Content ip={ip} flowTarget={flowTarget} />
+      </EuiFlyoutBody>
+    </>
   );
 });
 
-PanelContent.displayName = 'PanelContent';
+Network.displayName = 'Network';
