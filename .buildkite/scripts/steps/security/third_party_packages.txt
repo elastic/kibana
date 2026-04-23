@@ -46,3 +46,5 @@ react-day-picker
 jszip
 patch-package
 @opentelemetry/resources
+@opentelemetry/exporter-logs-otlp-grpc
+@opentelemetry/exporter-logs-otlp-proto
