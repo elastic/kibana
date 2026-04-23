@@ -15,16 +15,16 @@ export const EMPTY_TOKENS: ChatCompletionTokenCount = {
 };
 
 export function sumTokens({
-  total = EMPTY_TOKENS,
+  accumulated = EMPTY_TOKENS,
   added,
 }: {
-  total?: ChatCompletionTokenCount;
+  accumulated?: ChatCompletionTokenCount;
   added?: ChatCompletionTokenCount;
 }): ChatCompletionTokenCount {
   return {
-    completion: total.completion + (added?.completion ?? 0),
-    prompt: total.prompt + (added?.prompt ?? 0),
-    total: total.total + (added?.total ?? 0),
-    cached: (total.cached ?? 0) + (added?.cached ?? 0),
+    completion: accumulated.completion + (added?.completion ?? 0),
+    prompt: accumulated.prompt + (added?.prompt ?? 0),
+    total: accumulated.total + (added?.total ?? 0),
+    cached: (accumulated.cached ?? 0) + (added?.cached ?? 0),
   };
 }

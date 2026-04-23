@@ -11,8 +11,8 @@ describe('sumTokens', () => {
   const a = { prompt: 10, completion: 20, total: 30, cached: 5 };
   const b = { prompt: 3, completion: 7, total: 10, cached: 2 };
 
-  it('sums total and added', () => {
-    expect(sumTokens({ total: a, added: b })).toEqual({
+  it('sums accumulated and added', () => {
+    expect(sumTokens({ accumulated: a, added: b })).toEqual({
       prompt: 13,
       completion: 27,
       total: 40,
@@ -20,12 +20,12 @@ describe('sumTokens', () => {
     });
   });
 
-  it('defaults total to EMPTY_TOKENS when only added is provided', () => {
+  it('defaults accumulated to EMPTY_TOKENS when only added is provided', () => {
     expect(sumTokens({ added: b })).toEqual(b);
   });
 
-  it('returns total unchanged when only total is provided', () => {
-    expect(sumTokens({ total: a })).toEqual(a);
+  it('returns accumulated unchanged when only accumulated is provided', () => {
+    expect(sumTokens({ accumulated: a })).toEqual(a);
   });
 
   it('returns EMPTY_TOKENS when neither param is provided', () => {
@@ -34,7 +34,7 @@ describe('sumTokens', () => {
 
   it('treats missing cached on added as 0', () => {
     const noCached = { prompt: 1, completion: 2, total: 3 };
-    expect(sumTokens({ total: a, added: noCached })).toEqual({
+    expect(sumTokens({ accumulated: a, added: noCached })).toEqual({
       prompt: 11,
       completion: 22,
       total: 33,
@@ -42,9 +42,9 @@ describe('sumTokens', () => {
     });
   });
 
-  it('treats missing cached on total as 0', () => {
+  it('treats missing cached on accumulated as 0', () => {
     const noCached = { prompt: 1, completion: 2, total: 3 };
-    expect(sumTokens({ total: noCached, added: b })).toEqual({
+    expect(sumTokens({ accumulated: noCached, added: b })).toEqual({
       prompt: 4,
       completion: 9,
       total: 13,
