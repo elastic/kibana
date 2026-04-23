@@ -12,6 +12,9 @@ import {
   requestContextMock,
   requestMock,
 } from '../../../../detection_engine/routes/__mocks__';
+import { WATCHLIST_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
+import { createMockTelemetryEventsSender } from '../../../../telemetry/__mocks__';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
 const mockWatchlistCreate = jest.fn();
 const mockWatchlistDelete = jest.fn();
@@ -43,6 +46,8 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let logger: ReturnType<typeof loggerMock.create>;
+  let telemetrySenderMock: ITelemetryEventsSender;
+  let reportEBT: jest.Mock;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -55,7 +60,13 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
     mockAddEntitySourceReference.mockReset();
     mockCreateEntitySource.mockReset();
 
-    createWatchlistRoute(server.router, logger);
+    reportEBT = jest.fn();
+    telemetrySenderMock = {
+      ...createMockTelemetryEventsSender(),
+      reportEBT,
+    } as unknown as ITelemetryEventsSender;
+
+    createWatchlistRoute(server.router, logger, telemetrySenderMock);
   });
 
   afterEach(() => {
@@ -96,6 +107,18 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       });
       expect(mockCreateEntitySource).not.toHaveBeenCalled();
       expect(mockAddEntitySourceReference).not.toHaveBeenCalled();
+      expect(reportEBT).toHaveBeenCalledTimes(1);
+      expect(reportEBT).toHaveBeenCalledWith(
+        WATCHLIST_API_CALL_EVENT,
+        expect.objectContaining({
+          endpoint: WATCHLISTS_URL,
+          watchlist_id: 'wl-1',
+          watchlist_name: 'custom watchlist',
+          risk_modifier: 10,
+          is_managed: false,
+          entity_source_count: 0,
+        })
+      );
     });
   });
 
@@ -151,6 +174,19 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       expect(mockAddEntitySourceReference).toHaveBeenCalledTimes(2);
       expect(mockAddEntitySourceReference).toHaveBeenCalledWith('wl-1', 'es-1');
       expect(mockAddEntitySourceReference).toHaveBeenCalledWith('wl-1', 'es-2');
+      expect(reportEBT).toHaveBeenCalledTimes(1);
+      expect(reportEBT).toHaveBeenCalledWith(
+        WATCHLIST_API_CALL_EVENT,
+        expect.objectContaining({
+          endpoint: WATCHLISTS_URL,
+          watchlist_id: 'wl-1',
+          watchlist_name: 'custom watchlist',
+          risk_modifier: 10,
+          is_managed: false,
+          entity_source_count: 2,
+          entity_source_types: ['index', 'index'],
+        })
+      );
     });
 
     it('creates the watchlist and a single entity source', async () => {
@@ -177,6 +213,15 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       expect(mockCreateEntitySource).toHaveBeenCalledTimes(1);
       expect(mockCreateEntitySource).toHaveBeenCalledWith(entitySourceInputA);
       expect(mockAddEntitySourceReference).toHaveBeenCalledWith('wl-1', 'es-1');
+      expect(reportEBT).toHaveBeenCalledTimes(1);
+      expect(reportEBT).toHaveBeenCalledWith(
+        WATCHLIST_API_CALL_EVENT,
+        expect.objectContaining({
+          watchlist_id: 'wl-1',
+          entity_source_count: 1,
+          entity_source_types: ['index'],
+        })
+      );
     });
 
     it('rolls back the watchlist when entity source creation fails', async () => {
@@ -199,6 +244,10 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Entity source creation failed, rolling back watchlist wl-1'
       );
+      expect(reportEBT).toHaveBeenCalledWith(
+        WATCHLIST_API_CALL_EVENT,
+        expect.objectContaining({ error: 'source creation failed' })
+      );
     });
 
     it('rolls back the watchlist when addEntitySourceReference fails', async () => {
@@ -220,6 +269,10 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
 
       expect(response.status).toEqual(500);
       expect(mockWatchlistDelete).toHaveBeenCalledWith('wl-1');
+      expect(reportEBT).toHaveBeenCalledWith(
+        WATCHLIST_API_CALL_EVENT,
+        expect.objectContaining({ error: 'linking failed' })
+      );
     });
 
     it('throws when watchlist creation returns no id', async () => {
@@ -240,6 +293,12 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
         status_code: 500,
       });
       expect(mockCreateEntitySource).not.toHaveBeenCalled();
+      expect(reportEBT).toHaveBeenCalledWith(
+        WATCHLIST_API_CALL_EVENT,
+        expect.objectContaining({
+          error: 'Watchlist creation succeeded but no ID was returned',
+        })
+      );
     });
   });
 
@@ -256,6 +315,10 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
         status_code: 500,
       });
       expect(logger.error).toHaveBeenCalledWith('Failed to create watchlist: something went wrong');
+      expect(reportEBT).toHaveBeenCalledWith(
+        WATCHLIST_API_CALL_EVENT,
+        expect.objectContaining({ error: 'something went wrong' })
+      );
     });
   });
 });
