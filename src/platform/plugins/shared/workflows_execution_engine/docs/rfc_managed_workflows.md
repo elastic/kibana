@@ -79,7 +79,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | **S1** | **Version/hash tracking** | Track a content hash so the platform can determine if updates are needed without fetching and string-comparing full YAML. Also drives the reconciliation lifecycle (create-if-absent, update-if-changed, skip-if-matching) — see [Lifecycle](#5-lifecycle-provisioning-updates-cleanup). | Security (andrew-goldstein) |
 | **S2** | **Caller-provided execution ID** | Support a caller-specified unique execution ID for correlation and deduplication. | O11y (ruflin, cesco-f) |
 | **S3** | **Caller-provided execution metadata** | Allow callers to attach arbitrary metadata to an execution for debugging and correlation. | — |
-| **S4** | **Plugin-controlled install decision** | `shouldInstall(ctx)` hook called during provisioning with the full context (space, license tier, deployment type, feature flags, etc.). The registering plugin decides whether to install the workflow based on any condition. Enables per-space decisions, tier gating, deployment-type filtering, and progressive rollout without separate mechanisms. | Security AB (KDKHD) |
+| **S4** | **Plugin-controlled install decision** | Achieved out of the box with the imperative `install()` API — the consuming plugin explicitly decides whether to call `install()` based on any condition (license tier, deployment type, feature flags, space, etc.). No separate `shouldInstall` hook is needed; the plugin owns the decision logic and only calls `install()` when its conditions are met. | Security AB (KDKHD) |
 
 ### Nice to Have / Deferred
 
@@ -87,7 +87,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 |---|-------------|---------|--------------|
 | **N1** | **Post-start / dynamic registration** | Support registration after plugin `start()`, not just `setup()`. Enables user-action-triggered managed workflows. Creation and deletion are straightforward (plugin calls an API). See [Registration > §3.2](#3-registration) and [Lifecycle > §5.2](#5-lifecycle-provisioning-updates-cleanup). | Security AB (KDKHD) |
 | **N3** | **Registration health / introspection** | Registry view: what's registered, what's installed per space, version/hash. | Security AB (KDKHD) |
-| **N4** | **Standardized gating + rollout controls** | Feature flags for progressive enablement of managed workflows. Achievable via S4 — the `shouldInstall` hook receives the full provisioning context (feature flags, space, deployment type, etc.), so the registering plugin can gate installation on any condition without a separate rollout mechanism. | Security AB (KDKHD) |
+| **N4** | **Standardized gating + rollout controls** | Feature flags for progressive enablement of managed workflows. Achievable via S4 — the consuming plugin gates its `install()` call on any condition (feature flags, space, deployment type, etc.) without a separate rollout mechanism. | Security AB (KDKHD) |
 | **N5** | **Out-of-band updates** | Update managed workflow definitions outside of Kibana release cycles. Related to integration-based distribution (N7). | Security AB (KDKHD) |
 | **N6** | **Type safety for code-defined workflows** | The centralized `@kbn/workflows/managed` package exports typed ID constants and `ManagedWorkflowDefinition` objects. Consumers import typed IDs and pass them to `managedWorkflows.install(id)` — unknown IDs are compile-time errors. See [Registration > §3.1](#3-registration). | Security AB (KDKHD) |
 | **N7** | **Integration-based distribution** | Ship managed workflows as part of integrations. Registration happens through the integration lifecycle (install/uninstall). | O11y (ruflin), Search (pgayvallet) |
@@ -194,7 +194,7 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 ### Lifecycle
 
 6. **~~What happens if a workflow references a step or trigger from an unavailable plugin?~~** — **Resolved.**
-   Cross-solution workflows are against Kibana best practices, and products are available/not based on tiering, so filtering at registration time (via `shouldInstall` or the platform tier gate in R9) is sufficient — a managed workflow should only be installed where its dependencies are available.
+   Cross-solution workflows are against Kibana best practices, and products are available/not based on tiering, so the consuming plugin gates its `install()` call accordingly (combined with the platform tier gate in R9) — a managed workflow should only be installed where its dependencies are available.
 
 ### Space Behavior
 
