@@ -6,7 +6,7 @@
  */
 
 import { Logger, OnStart, PluginStart } from '@kbn/core-di';
-import { PluginInitializer } from '@kbn/core-di-server';
+import { CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
@@ -17,6 +17,7 @@ import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/experimental_features';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
@@ -30,10 +31,19 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       .get<PluginInitializerContext<PluginConfig>['config']>(PluginInitializer('config'))
       .get<PluginConfig>();
 
+    const savedObjects = container.get(CoreStart('savedObjects'));
+    const uiSettingsService = container.get(CoreStart('uiSettings'));
+    const soClient = savedObjects.createInternalRepository();
+    const uiSettingsClient = uiSettingsService.globalAsScopedToClient(soClient);
+    const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+      ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
+
     initializeResources({
       resourceManager,
       esClient,
       logger,
+      experimentalFeaturesEnabled,
     });
 
     scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {
