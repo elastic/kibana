@@ -210,7 +210,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
-      await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+      await retry.try(async () => {
+        await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+        await testSubjects.existOrFail('executeActionButton');
+      });
 
       // test success
       await find.setValueByClass('kibanaCodeEditor', '{ "key": "value" }');
@@ -241,7 +244,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
-      await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+      await retry.try(async () => {
+        await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+        await testSubjects.existOrFail('executeActionButton');
+      });
 
       await find.setValueByClass('kibanaCodeEditor', '"test"');
 
