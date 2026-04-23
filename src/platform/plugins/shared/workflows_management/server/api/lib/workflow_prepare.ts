@@ -147,8 +147,9 @@ export const applyYamlUpdate = (params: {
 export const applyFieldUpdates = (
   workflow: Partial<EsWorkflow>,
   existingSource: WorkflowProperties
-): Partial<WorkflowProperties> => {
+): { patch: Partial<WorkflowProperties>; validationErrors: string[] } => {
   const patch: Partial<WorkflowProperties> = {};
+  const validationErrors: string[] = [];
   let yamlUpdated = false;
 
   if (workflow.name !== undefined) {
@@ -158,10 +159,18 @@ export const applyFieldUpdates = (
   if (workflow.enabled !== undefined) {
     if (workflow.enabled && existingSource?.definition) {
       patch.enabled = true;
+      yamlUpdated = true;
     } else if (!workflow.enabled) {
       patch.enabled = false;
+      yamlUpdated = true;
+    } else {
+      // enable requested but workflow has no valid definition — silently ignoring
+      // would leave the caller believing the flip succeeded, so surface a validation
+      // error and do not touch the stored YAML.
+      validationErrors.push(
+        'Cannot enable a workflow without a valid definition. Provide valid YAML first.'
+      );
     }
-    yamlUpdated = true;
   }
   if (workflow.description !== undefined) {
     patch.description = workflow.description;
@@ -180,5 +189,5 @@ export const applyFieldUpdates = (
     );
   }
 
-  return patch;
+  return { patch, validationErrors };
 };

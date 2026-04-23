@@ -232,6 +232,28 @@ describe('WorkflowCrudService', () => {
       const searchCall = client.search.mock.calls[0][0];
       expect(searchCall._source).toBe(true);
     });
+
+    it('returns only the fields present on the narrowed _source (no fabricated undefineds)', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: { name: 'only-name' },
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.getWorkflowsSourceByIds(['wf-1'], 'default', ['name']);
+
+      expect(result).toEqual([{ id: 'wf-1', name: 'only-name' }]);
+      expect('yaml' in result[0]).toBe(false);
+      expect('definition' in result[0]).toBe(false);
+      expect('enabled' in result[0]).toBe(false);
+    });
   });
 
   describe('createWorkflow', () => {

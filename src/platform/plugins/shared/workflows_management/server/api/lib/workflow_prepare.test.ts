@@ -11,6 +11,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 
 import {
   applyFieldUpdates,
+  applyYamlUpdate,
   getTriggerTypesFromDefinition,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
@@ -89,47 +90,79 @@ describe('applyFieldUpdates', () => {
   };
 
   it('returns empty patch when no fields are provided', () => {
-    const result = applyFieldUpdates({}, baseSource);
-    expect(result).toEqual({});
+    const { patch, validationErrors } = applyFieldUpdates({}, baseSource);
+    expect(patch).toEqual({});
+    expect(validationErrors).toEqual([]);
   });
 
   it('patches name and synchronizes YAML', () => {
-    const result = applyFieldUpdates({ name: 'New Name' }, baseSource);
-    expect(result.name).toBe('New Name');
-    expect(result.yaml).toBeDefined();
+    const { patch } = applyFieldUpdates({ name: 'New Name' }, baseSource);
+    expect(patch.name).toBe('New Name');
+    expect(patch.yaml).toBeDefined();
   });
 
   it('patches description', () => {
-    const result = applyFieldUpdates({ description: 'New desc' }, baseSource);
-    expect(result.description).toBe('New desc');
+    const { patch } = applyFieldUpdates({ description: 'New desc' }, baseSource);
+    expect(patch.description).toBe('New desc');
   });
 
   it('patches tags', () => {
-    const result = applyFieldUpdates({ tags: ['a', 'b'] }, baseSource);
-    expect(result.tags).toEqual(['a', 'b']);
+    const { patch } = applyFieldUpdates({ tags: ['a', 'b'] }, baseSource);
+    expect(patch.tags).toEqual(['a', 'b']);
   });
 
   it('allows disabling a workflow', () => {
-    const result = applyFieldUpdates({ enabled: false }, baseSource);
-    expect(result.enabled).toBe(false);
+    const { patch } = applyFieldUpdates({ enabled: false }, baseSource);
+    expect(patch.enabled).toBe(false);
   });
 
   it('allows enabling a workflow only if it has a definition', () => {
     const sourceWithDefinition = { ...baseSource, enabled: false, definition: {} as WorkflowYaml };
-    const result = applyFieldUpdates({ enabled: true }, sourceWithDefinition);
-    expect(result.enabled).toBe(true);
+    const { patch, validationErrors } = applyFieldUpdates(
+      { enabled: true },
+      sourceWithDefinition
+    );
+    expect(patch.enabled).toBe(true);
+    expect(validationErrors).toEqual([]);
   });
 
-  it('does not enable a workflow without a definition', () => {
+  it('surfaces a validation error and does not rewrite YAML when enabling a workflow without a definition', () => {
     const sourceWithoutDef = { ...baseSource, enabled: false, definition: null };
-    const result = applyFieldUpdates({ enabled: true }, sourceWithoutDef);
-    expect(result.enabled).toBeUndefined();
+    const { patch, validationErrors } = applyFieldUpdates({ enabled: true }, sourceWithoutDef);
+    expect(patch.enabled).toBeUndefined();
+    expect(patch.yaml).toBeUndefined();
+    expect(validationErrors).toEqual([
+      'Cannot enable a workflow without a valid definition. Provide valid YAML first.',
+    ]);
   });
 
   it('does not update YAML when source has no yaml', () => {
     const sourceNoYaml = { ...baseSource, yaml: '' };
-    const result = applyFieldUpdates({ name: 'New' }, sourceNoYaml);
-    expect(result.name).toBe('New');
-    expect(result.yaml).toBeUndefined();
+    const { patch } = applyFieldUpdates({ name: 'New' }, sourceNoYaml);
+    expect(patch.name).toBe('New');
+    expect(patch.yaml).toBeUndefined();
+  });
+});
+
+describe('applyYamlUpdate', () => {
+  const failingSchema = {
+    parse: () => {
+      throw new Error('invalid');
+    },
+    safeParse: () => ({ success: false, error: { issues: [] } }),
+  } as any;
+
+  it('coerces definition to null (not undefined) on the invalid branch so full-replace index does not drop the field', () => {
+    const result = applyYamlUpdate({
+      workflowYaml: 'not: valid: yaml:',
+      zodSchema: failingSchema,
+      triggerDefinitions: [],
+    });
+    expect(result.updatedDataPatch).toHaveProperty('definition', null);
+    // Guard the specific regression: `undefined` would be silently dropped by JSON.stringify.
+    expect(result.updatedDataPatch.definition).not.toBeUndefined();
+    expect(result.updatedDataPatch.enabled).toBe(false);
+    expect(result.updatedDataPatch.valid).toBe(false);
+    expect(result.updatedDataPatch.triggerTypes).toEqual([]);
   });
 });

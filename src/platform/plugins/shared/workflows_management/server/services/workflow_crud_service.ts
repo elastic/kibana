@@ -22,7 +22,10 @@ import { WorkflowConflictError } from '../../common/lib/errors';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { deleteWorkflows } from '../api/lib/workflow_deletion';
 import { disableAllWorkflows } from '../api/lib/workflow_disable_all';
-import { transformStorageDocumentToWorkflowDto } from '../api/lib/workflow_dto_transform';
+import {
+  transformStorageDocumentToWorkflowDto,
+  transformStoragePartialToWorkflowDto,
+} from '../api/lib/workflow_dto_transform';
 import {
   applyFieldUpdates,
   applyYamlUpdate,
@@ -125,7 +128,7 @@ export class WorkflowCrudService {
     });
 
     return response.hits.hits.map((hit) =>
-      transformStorageDocumentToWorkflowDto(hit._id, hit._source)
+      transformStoragePartialToWorkflowDto(hit._id, hit._source)
     );
   }
 
@@ -359,7 +362,9 @@ export class WorkflowCrudService {
           }
         }
       } else {
-        updatedData = { ...updatedData, ...applyFieldUpdates(workflow, existingSource) };
+        const fieldResult = applyFieldUpdates(workflow, existingSource);
+        updatedData = { ...updatedData, ...fieldResult.patch };
+        validationErrors.push(...fieldResult.validationErrors);
       }
 
       const finalData: WorkflowProperties = { ...existingSource, ...updatedData };
