@@ -46,11 +46,13 @@ export class SmlCrawlerImpl implements SmlCrawler {
     esClient,
     savedObjectsClient,
     abortSignal,
+    scopedEsClient,
   }: {
     definition: SmlTypeDefinition;
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
     abortSignal?: AbortSignal;
+    scopedEsClient?: ElasticsearchClient;
   }): Promise<void> {
     const crawlerStateStorage = createSmlCrawlerStateStorage({
       logger: this.logger,
@@ -59,7 +61,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
     const stateClient = crawlerStateStorage.getClient();
 
     const context: SmlContext = {
-      esClient,
+      esClient: scopedEsClient ?? esClient,
       savedObjectsClient,
       logger: this.logger,
     };
@@ -143,6 +145,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
       esClient,
       savedObjectsClient,
       stateClient,
+      scopedEsClient,
     });
   }
 
@@ -294,11 +297,13 @@ export class SmlCrawlerImpl implements SmlCrawler {
     esClient,
     savedObjectsClient,
     stateClient,
+    scopedEsClient,
   }: {
     attachmentType: string;
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
     stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
+    scopedEsClient?: ElasticsearchClient;
   }): Promise<void> {
     const pageSize = 1000;
     const limit = pLimit(10);
@@ -372,6 +377,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
                 esClient,
                 savedObjectsClient,
                 logger: this.logger,
+                scopedEsClient,
               });
 
               if (action === 'delete') {

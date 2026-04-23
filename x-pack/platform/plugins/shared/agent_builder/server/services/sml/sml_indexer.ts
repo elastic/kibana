@@ -14,7 +14,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type { SmlIndexAction, SmlContext } from './types';
-import { createSmlStorage, smlIndexName } from './sml_storage';
+import { smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 
 export interface SmlIndexerDeps {
@@ -34,6 +34,7 @@ export interface SmlIndexer {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
+    scopedEsClient?: ElasticsearchClient;
   }) => Promise<void>;
 }
 
@@ -58,6 +59,7 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient,
     savedObjectsClient,
     logger: contextLogger,
+    scopedEsClient,
   }: {
     originId: string;
     attachmentType: string;
@@ -66,6 +68,7 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
+    scopedEsClient?: ElasticsearchClient;
   }): Promise<void> {
     this.logger.info(
       `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(
@@ -91,7 +94,7 @@ class SmlIndexerImpl implements SmlIndexer {
     }
 
     const context: SmlContext = {
-      esClient,
+      esClient: scopedEsClient ?? esClient,
       savedObjectsClient,
       logger: contextLogger,
     };
@@ -118,39 +121,38 @@ class SmlIndexerImpl implements SmlIndexer {
 
     await this.deleteChunks({ originId, esClient });
 
-    const storage = createSmlStorage({ logger: this.logger, esClient });
-    const smlClient = storage.getClient();
-
     const now = new Date().toISOString();
-    const bulkOps = smlData.chunks.map((chunk) => {
+    const bulkBody = smlData.chunks.flatMap((chunk) => {
       const chunkId = `${attachmentType}:${originId}:${uuidv4()}`;
-      return {
-        index: {
-          _id: chunkId,
-          document: {
-            id: chunkId,
-            type: chunk.type,
-            title: chunk.title,
-            origin_id: originId,
-            content: chunk.content,
-            created_at: now,
-            updated_at: now,
-            spaces,
-            permissions: chunk.permissions ?? [],
-          },
+      return [
+        { index: { _index: smlIndexName, _id: chunkId } },
+        {
+          id: chunkId,
+          type: chunk.type,
+          title: chunk.title,
+          origin_id: originId,
+          content: chunk.content,
+          created_at: chunk.created_at ?? now,
+          updated_at: now,
+          spaces,
+          permissions: chunk.permissions ?? [],
         },
-      };
+      ];
     });
 
-    if (bulkOps.length > 0) {
+    if (bulkBody.length > 0) {
       this.logger.info(
-        `SML indexer: writing ${bulkOps.length} chunk(s) to index '${smlIndexName}' for origin '${originId}'`
+        `SML indexer: writing ${smlData.chunks.length} chunk(s) to index '${smlIndexName}' for origin '${originId}'`
       );
       try {
-        const response = await smlClient.bulk({
-          refresh: 'wait_for',
-          operations: bulkOps,
-        });
+        const response = await esClient.bulk(
+          {
+            refresh: 'wait_for',
+            operations: bulkBody,
+            timeout: '5m',
+          },
+          { requestTimeout: 300_000 }
+        );
 
         if (response.errors) {
           const errorItems = response.items.filter((item) => item.index?.error);

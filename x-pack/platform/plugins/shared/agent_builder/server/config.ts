@@ -15,6 +15,12 @@ export const configSchema = schema.object({
     numSnippets: schema.number({ defaultValue: 2, min: 1, max: 10 }),
     numWords: schema.number({ defaultValue: 750, min: 1, max: 5000 }),
   }),
+  tracing: schema.object({
+    elasticsearch: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      scheduled_delay: schema.number({ defaultValue: 5000, min: 100 }),
+    }),
+  }),
 });
 
 export type AgentBuilderConfig = TypeOf<typeof configSchema>;

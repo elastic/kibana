@@ -13,14 +13,16 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
+const CONTENT_PREVIEW_LENGTH = 200;
+
 const smlSearchSchema = z.object({
   query: z
     .string()
     .min(1)
     .max(512)
     .describe(
-      'Search string matched against asset titles and types (search-as-you-type / bool_prefix; Elasticsearch analyzes the text). ' +
-        'Example: "cpu usage" or "error rate service". Pass "*" to return all available assets.'
+      'Natural-language search string. Matched via hybrid search (lexical on titles + semantic on content with ELSER embeddings, fused via RRF). ' +
+        'Pass "*" to return all available assets.'
     ),
   size: z
     .number()
@@ -28,6 +30,23 @@ const smlSearchSchema = z.object({
     .max(50)
     .optional()
     .describe('Maximum number of results to return (defaults to 10)'),
+  type: z
+    .string()
+    .optional()
+    .describe(
+      'Filter results to a specific SML type (e.g. "conversation", "visualization", "dashboard", "workflow")'
+    ),
+  item_id: z
+    .string()
+    .optional()
+    .describe('Filter to chunks of a specific item (origin_id). Use to browse all chunks of one asset.'),
+  around_id: z
+    .string()
+    .optional()
+    .describe(
+      'Return chunks chronologically around this chunk_id (size/2 before + size/2 after, same item). ' +
+        'Useful for browsing conversation turns around a specific result. The query parameter is ignored when around_id is set.'
+    ),
 });
 
 /**
@@ -40,11 +59,12 @@ export const createSmlSearchTool = ({
   id: platformCoreTools.smlSearch,
   type: ToolType.builtin,
   description:
-    'Search the Semantic Metadata Layer (SML) for Kibana assets such as saved visualizations, dashboards, workflows, and more. ' +
-    'Provide a natural-language query string; titles and types are matched using Elasticsearch text analysis (bool_prefix on search_as_you_type fields). ' +
+    'Search the Semantic Metadata Layer (SML) for Kibana assets such as saved visualizations, dashboards, workflows, conversations, and more. ' +
+    'Uses hybrid search (lexical title matching + semantic content search with ELSER, fused via RRF) for high-quality results. ' +
     'Pass "*" to return all available assets. ' +
-    'Each result includes a title, content snippet, attachment_id, attachment_type, and chunk_id. ' +
-    'To bring a result into the conversation as an attachment, pass its chunk_id to sml_attach.',
+    'Each result includes chunk_id, item_id, type, title, a content preview (200 chars), has_more flag, created_at, score, and attachable (boolean). ' +
+    'Only items with attachable=true can be passed to sml_attach. ' +
+    'Use around_id to browse conversation turns chronologically around a specific chunk.',
   schema: smlSearchSchema,
   tags: ['sml', 'search'],
   availability: {
@@ -59,7 +79,7 @@ export const createSmlSearchTool = ({
           };
     },
   },
-  handler: async ({ query, size }, context) => {
+  handler: async ({ query, size, type, item_id: itemId, around_id: aroundId }, context) => {
     const smlService = getSmlService();
     const { spaceId, esClient, request } = context;
 
@@ -71,6 +91,9 @@ export const createSmlSearchTool = ({
         spaceId,
         esClient: esClient.asCurrentUser,
         request,
+        type,
+        itemId,
+        aroundId,
       });
     } catch (error) {
       return {
@@ -107,15 +130,22 @@ export const createSmlSearchTool = ({
           type: ToolResultType.other,
           data: {
             total: searchResult.total,
-            items: searchResult.results.map((hit) => ({
-              chunk_id: hit.id,
-              attachment_id: hit.origin_id,
-              attachment_type: hit.type,
-              type: hit.type,
-              title: hit.title,
-              content: hit.content,
-              score: hit.score,
-            })),
+            items: searchResult.results.map((hit) => {
+              const fullContent = hit.content ?? '';
+              return {
+                chunk_id: hit.id,
+                item_id: hit.origin_id,
+                attachment_id: hit.origin_id,
+                attachment_type: hit.type,
+                type: hit.type,
+                title: hit.title,
+                content: fullContent.substring(0, CONTENT_PREVIEW_LENGTH),
+                has_more: fullContent.length > CONTENT_PREVIEW_LENGTH,
+                created_at: hit.created_at,
+                score: hit.score,
+                attachable: hit.attachable,
+              };
+            }),
           },
         },
       ],

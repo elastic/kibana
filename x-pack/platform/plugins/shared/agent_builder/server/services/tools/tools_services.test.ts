@@ -39,6 +39,7 @@ describe('ToolsService', () => {
           enabled: true,
           githubBaseUrl: 'https://github.com',
           topSnippets: { numSnippets: 2, numWords: 750 },
+          tracing: { elasticsearch: { enabled: false, scheduled_delay: 5000 } },
         },
       });
 
@@ -54,6 +55,7 @@ describe('ToolsService', () => {
           enabled: true,
           githubBaseUrl: 'https://github.com',
           topSnippets: { numSnippets: 2, numWords: 750 },
+          tracing: { elasticsearch: { enabled: false, scheduled_delay: 5000 } },
         },
       });
 

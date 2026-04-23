@@ -26,6 +26,8 @@ export interface SmlChunk {
   title: string;
   /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
   permissions?: string[];
+  /** Optional creation timestamp. Falls back to indexing time if not provided. */
+  created_at?: string;
 }
 
 /**
@@ -91,8 +93,9 @@ export interface SmlTypeDefinition {
 
   /**
    * Convert an SML document into a conversation attachment.
+   * When omitted, the SML type is search-only and cannot be attached.
    */
-  toAttachment: (
+  toAttachment?: (
     item: SmlDocument,
     context: SmlToAttachmentContext
   ) => Promise<AttachmentInput<string, unknown> | undefined>;
@@ -135,6 +138,8 @@ export interface SmlDocument {
 export type SmlSearchResult = Omit<SmlDocument, 'content'> & {
   content?: string;
   score: number;
+  /** Whether this item can be attached to a conversation via sml_attach. */
+  attachable: boolean;
 };
 
 /**
@@ -182,6 +187,12 @@ export interface SmlCrawler {
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
     abortSignal?: AbortSignal;
+    /**
+     * Optional scoped ES client with broader index permissions (e.g. from an admin API key).
+     * When provided, used for type hook calls (list, getSmlData) instead of the internal client.
+     * Infrastructure writes (crawler state, SML data index) always use `esClient`.
+     */
+    scopedEsClient?: ElasticsearchClient;
   }) => Promise<void>;
 }
 
@@ -200,6 +211,12 @@ export interface SmlService {
     request: KibanaRequest;
     /** When true, Elasticsearch omits `content` from `_source` (smaller payloads for autocomplete). */
     skipContent?: boolean;
+    /** Filter results to a specific SML type (e.g. 'conversation', 'visualization'). */
+    type?: string;
+    /** Filter to chunks of a specific item (origin_id). */
+    itemId?: string;
+    /** Return chunks chronologically around this chunk ID (size/2 before + size/2 after, same item). */
+    aroundId?: string;
   }) => Promise<{ results: SmlSearchResult[]; total: number }>;
 
   /**

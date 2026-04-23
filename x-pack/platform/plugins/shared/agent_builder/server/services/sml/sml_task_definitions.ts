@@ -71,7 +71,7 @@ export const registerSmlCrawlerTaskDefinition = ({
       maxAttempts: 3,
       priority: TaskPriority.Low,
       createTaskRunner: (context) => {
-        const { taskInstance, abortController } = context;
+        const { taskInstance, fakeRequest, abortController } = context;
         const { attachmentType } = (taskInstance.params ?? {}) as Partial<SmlCrawlerTaskParams>;
 
         return {
@@ -109,6 +109,9 @@ export const registerSmlCrawlerTaskDefinition = ({
             }
 
             const esClient = elasticsearch.client.asInternalUser;
+            const scopedEsClient = fakeRequest
+              ? elasticsearch.client.asScoped(fakeRequest).asCurrentUser
+              : undefined;
             const soRepository = savedObjects.createInternalRepository();
 
             try {
@@ -117,6 +120,7 @@ export const registerSmlCrawlerTaskDefinition = ({
                 esClient,
                 savedObjectsClient: soRepository,
                 abortSignal: abortController.signal,
+                scopedEsClient,
               });
               logger.info(`SML crawler task completed for type '${attachmentType}'`);
             } catch (error) {

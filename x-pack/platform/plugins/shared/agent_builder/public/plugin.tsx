@@ -116,6 +116,19 @@ export class AgentBuilderPlugin
       appUpdater$: this.appUpdater$,
     });
 
+    deps.management.sections.section.ai.registerApp({
+      id: 'agentBuilderSmlCrawlers',
+      title: 'SML Crawlers',
+      order: 3,
+      keywords: ['sml', 'crawler', 'agent', 'ai', 'conversations'],
+      mount: async (mountParams) => {
+        const { mountManagementSection } = await import(
+          './management_section/sml_crawlers/mount_section'
+        );
+        return mountManagementSection({ core, mountParams });
+      },
+    });
+
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 

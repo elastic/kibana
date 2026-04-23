@@ -42,6 +42,8 @@ import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './ser
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { LateBindingSpanProcessor } from '@kbn/tracing';
+import { ElasticsearchInferenceSpanProcessor } from './tracing/elasticsearch';
 
 export class AgentBuilderPlugin
   implements
@@ -59,6 +61,8 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private unregisterEsSpanProcessor?: () => Promise<void>;
+
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -306,6 +310,16 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
     });
 
+    if (this.config.tracing.elasticsearch.enabled) {
+      const esSpanProcessor = new ElasticsearchInferenceSpanProcessor(
+        elasticsearch.client.asInternalUser,
+        this.logger.get('tracing.elasticsearch'),
+        { scheduledDelayMillis: this.config.tracing.elasticsearch.scheduled_delay }
+      );
+      this.unregisterEsSpanProcessor = LateBindingSpanProcessor.register(esSpanProcessor);
+      this.logger.info('Registered OTel Elasticsearch span processor for agent builder traces');
+    }
+
     // Schedule SML crawler tasks for all registered types
     scheduleSmlCrawlerTasks({
       taskManager,
@@ -369,5 +383,9 @@ export class AgentBuilderPlugin
     };
   }
 
-  stop() {}
+  stop() {
+    if (this.unregisterEsSpanProcessor) {
+      this.unregisterEsSpanProcessor().catch(() => {});
+    }
+  }
 }

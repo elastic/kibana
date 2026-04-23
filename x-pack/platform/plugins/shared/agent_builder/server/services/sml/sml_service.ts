@@ -75,7 +75,11 @@ class SmlServiceImpl implements SmlServiceInstance {
 
     return {
       getCrawler: () => crawler,
-      search: async ({ query, size = 10, spaceId, esClient, request, skipContent }) => {
+      search: async ({ query, size = 10, spaceId, esClient, request, skipContent, type: typeFilter, itemId, aroundId }) => {
+        const isAttachable = (smlType: string) => {
+          const def = this.registry.get(smlType);
+          return def?.toAttachment != null;
+        };
         const rawResults = await searchSml({
           query,
           size,
@@ -83,6 +87,10 @@ class SmlServiceImpl implements SmlServiceInstance {
           esClient,
           logger,
           skipContent,
+          typeFilter,
+          itemId,
+          aroundId,
+          isAttachable,
         });
         return filterResultsByPermissions({
           searchResult: rawResults,
@@ -315,27 +323,28 @@ const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
   'type.autocomplete._index_prefix',
 ] as const;
 
-/**
- * Build the search query from a single string. Only `type` and `title` (search_as_you_type + bool_prefix) are searched.
- * After trim: empty string or `*` → `match_all` (return everything)
- */
-const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
+const spaceFilter = (spaceId: string) => ({
+  bool: {
+    should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
+    minimum_should_match: 1,
+  },
+});
+
+const isWildcard = (query: string) => {
   const trimmed = query.trim();
-  if (trimmed === '' || trimmed === '*') {
-    return { match_all: {} };
-  }
-  return {
-    multi_match: {
-      query: trimmed,
-      type: 'bool_prefix',
-      fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
-    },
-  };
+  return trimmed === '' || trimmed === '*';
 };
 
 /**
- * Search the SML index. When the index hasn't been created yet,
- * the function returns empty results silently.
+ * Search the SML index using hybrid RRF + reranking.
+ *
+ * Wildcard / empty queries use `match_all` (no RRF needed).
+ * Text queries combine two retriever legs via reciprocal rank fusion:
+ *  - Lexical: `bool_prefix` on title and type (fast, exact title matches)
+ *  - Semantic: `semantic` query on content (meaning-based, ELSER embeddings)
+ *  - RRF: merges both result sets via reciprocal rank fusion (top 100)
+ *
+ * When the index hasn't been created yet, returns empty results silently.
  */
 const searchSml = async ({
   query,
@@ -344,6 +353,10 @@ const searchSml = async ({
   esClient,
   logger,
   skipContent,
+  typeFilter,
+  itemId,
+  aroundId,
+  isAttachable,
 }: {
   query: string;
   size: number;
@@ -351,6 +364,10 @@ const searchSml = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   skipContent?: boolean;
+  typeFilter?: string;
+  itemId?: string;
+  aroundId?: string;
+  isAttachable: (type: string) => boolean;
 }): Promise<{ results: SmlSearchResult[]; total: number }> => {
   logger.debug(
     `SML search: query=${JSON.stringify(
@@ -358,56 +375,70 @@ const searchSml = async ({
     )}, size=${size}, spaceId='${spaceId}', index='${smlIndexName}'`
   );
 
-  try {
-    const smlQuery = buildSmlSearchQuery(query);
+  if (aroundId) {
+    return searchSmlAround({ aroundId, size, spaceId, esClient, logger, isAttachable });
+  }
 
-    const response = await esClient.search<SmlDocument>({
+  try {
+    const extraFilters: Record<string, unknown>[] = [];
+    if (typeFilter) extraFilters.push({ term: { type: typeFilter } });
+    if (itemId) extraFilters.push({ term: { origin_id: itemId } });
+
+    const combinedFilter = {
+      bool: {
+        filter: [spaceFilter(spaceId), ...extraFilters],
+      },
+    };
+
+    const sourceConfig = skipContent ? { excludes: ['content'] } : undefined;
+
+    const searchParams: Record<string, unknown> = {
       index: smlIndexName,
       size,
       allow_no_indices: true,
       ignore_unavailable: true,
-      query: {
+      _source: sourceConfig ?? true,
+    };
+
+    if (isWildcard(query)) {
+      searchParams.query = {
         bool: {
-          must: [smlQuery],
-          filter: [
+          must: [{ match_all: {} }],
+          filter: [spaceFilter(spaceId), ...extraFilters],
+        },
+      };
+    } else {
+      const trimmed = query.trim();
+      searchParams.retriever = {
+        rrf: {
+          retrievers: [
             {
-              bool: {
-                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
+              standard: {
+                query: {
+                  multi_match: {
+                    query: trimmed,
+                    type: 'bool_prefix',
+                    fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
+                  },
+                },
+              },
+            },
+            {
+              standard: {
+                query: {
+                  semantic: { field: 'content', query: trimmed },
+                },
               },
             },
           ],
+          filter: combinedFilter,
+          rank_window_size: 100,
         },
-      },
-      _source: skipContent ? { excludes: ['content'] } : true,
-    });
+      };
+    }
 
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? 0;
-
-    const results: SmlSearchResult[] = response.hits.hits
-      .filter((hit) => hit._source != null)
-      .map((hit) => {
-        const source = hit._source!;
-        return {
-          id: source.id ?? '',
-          type: source.type ?? '',
-          title: source.title ?? '',
-          origin_id: source.origin_id ?? '',
-          content: source.content,
-          created_at: source.created_at ?? '',
-          updated_at: source.updated_at ?? '',
-          spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
-          score: hit._score ?? 0,
-        };
-      });
-
-    logger.debug(`SML search: returned ${results.length} result(s), total=${total}`);
-
-    return { results, total };
+    const response = await esClient.search<SmlDocument>(searchParams);
+    return mapSearchResponse(response, isAttachable);
   } catch (error) {
     if (isNotFoundError(error)) {
       logger.debug('SML index does not exist yet — returning empty results');
@@ -416,6 +447,145 @@ const searchSml = async ({
     logger.warn(`SML search failed: ${(error as Error).message}`);
     throw error;
   }
+};
+
+/**
+ * Fetch chunks chronologically around a specific chunk ID.
+ * Returns size/2 chunks before + the anchor + size/2 chunks after,
+ * all within the same origin_id, sorted by created_at.
+ */
+const searchSmlAround = async ({
+  aroundId,
+  size,
+  spaceId,
+  esClient,
+  logger,
+  isAttachable,
+}: {
+  aroundId: string;
+  size: number;
+  spaceId: string;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  isAttachable: (type: string) => boolean;
+}): Promise<{ results: SmlSearchResult[]; total: number }> => {
+  try {
+    const anchorResponse = await esClient.search<SmlDocument>({
+      index: smlIndexName,
+      size: 1,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      query: { bool: { filter: [{ term: { id: aroundId } }, spaceFilter(spaceId)] } },
+    });
+
+    const anchorHit = anchorResponse.hits.hits[0];
+    if (!anchorHit?._source) {
+      return { results: [], total: 0 };
+    }
+
+    const anchor = anchorHit._source;
+    const originId = anchor.origin_id;
+    const anchorTime = anchor.created_at;
+    const half = Math.max(1, Math.floor(size / 2));
+
+    const baseFilter = [
+      spaceFilter(spaceId),
+      { term: { origin_id: originId } },
+    ];
+
+    const [beforeResponse, afterResponse] = await Promise.all([
+      esClient.search<SmlDocument>({
+        index: smlIndexName,
+        size: half,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            filter: [...baseFilter, { range: { created_at: { lt: anchorTime } } }],
+          },
+        },
+        sort: [{ created_at: { order: 'desc' } }],
+      }),
+      esClient.search<SmlDocument>({
+        index: smlIndexName,
+        size: half,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            filter: [...baseFilter, { range: { created_at: { gt: anchorTime } } }],
+          },
+        },
+        sort: [{ created_at: { order: 'asc' } }],
+      }),
+    ]);
+
+    const allHits = [
+      ...beforeResponse.hits.hits.reverse(),
+      anchorHit,
+      ...afterResponse.hits.hits,
+    ];
+
+    const results: SmlSearchResult[] = allHits
+      .filter((hit) => hit._source != null)
+      .map((hit) => {
+        const source = hit._source!;
+        const smlType = source.type ?? '';
+        return {
+          id: source.id ?? '',
+          type: smlType,
+          title: source.title ?? '',
+          origin_id: source.origin_id ?? '',
+          content: source.content,
+          created_at: source.created_at ?? '',
+          updated_at: source.updated_at ?? '',
+          spaces: source.spaces ?? [],
+          permissions: source.permissions ?? [],
+          score: hit._score ?? 0,
+          attachable: isAttachable(smlType),
+        };
+      });
+
+    return { results, total: results.length };
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return { results: [], total: 0 };
+    }
+    logger.warn(`SML around search failed: ${(error as Error).message}`);
+    throw error;
+  }
+};
+
+const mapSearchResponse = (
+  response: { hits: { total?: number | { value: number }; hits: Array<{ _source?: SmlDocument | null; _score?: number | null }> } },
+  isAttachable: (type: string) => boolean
+): { results: SmlSearchResult[]; total: number } => {
+  const total =
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : response.hits.total?.value ?? 0;
+
+  const results: SmlSearchResult[] = response.hits.hits
+    .filter((hit) => hit._source != null)
+    .map((hit) => {
+      const source = hit._source!;
+      const smlType = source.type ?? '';
+      return {
+        id: source.id ?? '',
+        type: smlType,
+        title: source.title ?? '',
+        origin_id: source.origin_id ?? '',
+        content: source.content,
+        created_at: source.created_at ?? '',
+        updated_at: source.updated_at ?? '',
+        spaces: source.spaces ?? [],
+        permissions: source.permissions ?? [],
+        score: hit._score ?? 0,
+        attachable: isAttachable(smlType),
+      };
+    });
+
+  return { results, total };
 };
 
 /**

@@ -144,12 +144,13 @@ describe('PluginsService', () => {
     start = service.start({
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,
-      getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
       config: {
         enabled: true,
         githubBaseUrl: 'https://github.com',
         topSnippets: { numSnippets: 2, numWords: 750 },
+        tracing: { elasticsearch: { enabled: false, scheduled_delay: 5000 } },
       },
+      getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
     });
   });
 

@@ -87,7 +87,7 @@ export const resolveSmlAttachItems = async ({
       }
 
       const typeDefinition = sml.getTypeDefinition(smlDoc.type);
-      if (!typeDefinition) {
+      if (!typeDefinition || !typeDefinition.toAttachment) {
         return {
           success: false,
           chunk_id: chunkId,

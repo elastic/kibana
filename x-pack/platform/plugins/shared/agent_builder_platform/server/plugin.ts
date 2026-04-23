@@ -19,6 +19,7 @@ import { registerAttachmentTypes } from './attachment_types';
 import { registerSkills } from './skills';
 import { visualizationSmlType } from './sml_types/visualization';
 import { createConnectorSmlType } from './sml_types/connector';
+import { conversationSmlType } from './sml_types/conversation';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -58,6 +59,7 @@ export class AgentBuilderPlatformPlugin
       logger: this.logger.get('sml-connector'),
     });
     setupDeps.agentBuilder.sml.registerType(connectorSmlType);
+    setupDeps.agentBuilder.sml.registerType(conversationSmlType);
 
     return {};
   }

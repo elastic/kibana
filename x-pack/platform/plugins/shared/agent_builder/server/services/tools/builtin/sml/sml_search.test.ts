@@ -78,6 +78,7 @@ describe('createSmlSearchTool', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
+        attachable: true,
       },
     ];
     mockSearch.mockResolvedValue({ results: hits, total: 1 });

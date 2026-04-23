@@ -25,6 +25,9 @@ import {
 import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
 import { resolveSmlAttachItems } from '../../services/sml/execute_sml_attach_items';
 import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
+import { SML_CRAWLER_TASK_TYPE } from '../../services/sml/sml_task_definitions';
+import { smlCrawlerStateIndexName } from '../../services/sml/sml_crawler_state_storage';
+import { smlIndexName } from '../../services/sml/sml_storage';
 
 /** Max page size for SML HTTP search (separate from default UI size). */
 const SML_SEARCH_SIZE_MAX = 1000;
@@ -223,5 +226,215 @@ export function registerInternalSmlRoutes({
         featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
       }
     )
+  );
+
+  router.get(
+    {
+      path: `${internalApiPath}/sml/crawlers`,
+      validate: {},
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_READ_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { sml } = getInternalServices();
+      const crawlers = sml.listTypeDefinitions().map((def) => ({
+        type_id: def.id,
+        fetch_frequency: def.fetchFrequency?.() ?? '10m',
+      }));
+      return response.ok({ body: { crawlers } });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/sml/crawlers/{type_id}/_activate`,
+      validate: {
+        params: schema.object({
+          type_id: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_WRITE_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { sml } = getInternalServices();
+      const typeId = request.params.type_id;
+
+      const definition = sml.getTypeDefinition(typeId);
+      if (!definition) {
+        return response.notFound({
+          body: {
+            message: `SML type '${typeId}' not found. Available types: [${sml
+              .listTypeDefinitions()
+              .map((t) => t.id)
+              .join(', ')}]`,
+          },
+        });
+      }
+
+      const [, startDeps] = await coreSetup.getStartServices();
+      const taskManager = startDeps.taskManager;
+      const taskId = `${SML_CRAWLER_TASK_TYPE}:${typeId}`;
+      const interval = definition.fetchFrequency?.() ?? '10m';
+
+      await taskManager.removeIfExists(taskId);
+
+      await taskManager.schedule(
+        {
+          id: taskId,
+          taskType: SML_CRAWLER_TASK_TYPE,
+          params: { attachmentType: typeId },
+          schedule: { interval },
+          scope: ['agentBuilder'],
+          state: {},
+        },
+        { request }
+      );
+
+      logger.info(
+        `SML crawler for type '${typeId}' activated with admin API key (interval: ${interval})`
+      );
+
+      return response.ok({
+        body: { activated: true, type_id: typeId },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/sml/crawlers/{type_id}/_run`,
+      validate: {
+        params: schema.object({
+          type_id: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_WRITE_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { sml } = getInternalServices();
+      const typeId = request.params.type_id;
+
+      if (!sml.getTypeDefinition(typeId)) {
+        return response.notFound({
+          body: { message: `SML type '${typeId}' not found` },
+        });
+      }
+
+      const [, startDeps] = await coreSetup.getStartServices();
+      const taskId = `${SML_CRAWLER_TASK_TYPE}:${typeId}`;
+
+      try {
+        await startDeps.taskManager.runSoon(taskId);
+      } catch (e) {
+        if ((e as Error).message?.includes('currently running')) {
+          return response.ok({
+            body: { success: true, type_id: typeId, message: 'Crawler is already running' },
+          });
+        }
+        throw e;
+      }
+
+      logger.info(`SML crawler for type '${typeId}' triggered manually`);
+
+      return response.ok({ body: { success: true, type_id: typeId } });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/sml/crawlers/{type_id}/_schedule`,
+      validate: {
+        params: schema.object({
+          type_id: schema.string(),
+        }),
+        body: schema.object({
+          interval: schema.string({ minLength: 2 }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_WRITE_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { sml } = getInternalServices();
+      const typeId = request.params.type_id;
+
+      if (!sml.getTypeDefinition(typeId)) {
+        return response.notFound({
+          body: { message: `SML type '${typeId}' not found` },
+        });
+      }
+
+      const [, startDeps] = await coreSetup.getStartServices();
+      const taskId = `${SML_CRAWLER_TASK_TYPE}:${typeId}`;
+      const { interval } = request.body;
+
+      await startDeps.taskManager.bulkUpdateSchedules([taskId], { interval });
+
+      logger.info(
+        `SML crawler for type '${typeId}' schedule updated to interval '${interval}'`
+      );
+
+      return response.ok({ body: { updated: true, type_id: typeId, interval } });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/sml/crawlers/{type_id}/_clean`,
+      validate: {
+        params: schema.object({
+          type_id: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_WRITE_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { sml } = getInternalServices();
+      const typeId = request.params.type_id;
+
+      if (!sml.getTypeDefinition(typeId)) {
+        return response.notFound({
+          body: { message: `SML type '${typeId}' not found` },
+        });
+      }
+
+      const [coreStart] = await coreSetup.getStartServices();
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
+      const typeFilter = { term: { type_id: typeId } };
+
+      const [stateResult, dataResult] = await Promise.all([
+        esClient.deleteByQuery({
+          index: smlCrawlerStateIndexName,
+          query: typeFilter,
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+        esClient.deleteByQuery({
+          index: smlIndexName,
+          query: { term: { type: typeId } },
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+      ]);
+
+      const stateDeleted = stateResult.deleted ?? 0;
+      const dataDeleted = dataResult.deleted ?? 0;
+
+      logger.info(
+        `SML crawler clean for type '${typeId}': deleted ${stateDeleted} state doc(s), ${dataDeleted} data chunk(s)`
+      );
+
+      return response.ok({
+        body: {
+          cleaned: true,
+          type_id: typeId,
+          state_deleted: stateDeleted,
+          data_deleted: dataDeleted,
+        },
+      });
+    })
   );
 }
