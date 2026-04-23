@@ -28,7 +28,11 @@ export function getPluginApiMap(
   plugins: PluginOrPackage[],
   allPlugins: PluginOrPackage[],
   log: ToolingLog,
-  { collectReferences, pluginFilter }: { collectReferences: boolean; pluginFilter?: string[] }
+  {
+    collectReferences,
+    skipDeprecatedRefs,
+    pluginFilter,
+  }: { collectReferences: boolean; skipDeprecatedRefs: boolean; pluginFilter?: string[] }
 ): {
   pluginApiMap: { [key: string]: PluginApi };
   missingApiItems: MissingApiItemMap;
@@ -51,7 +55,8 @@ export function getPluginApiMap(
       plugin,
       allPlugins,
       log,
-      captureReferences
+      captureReferences,
+      skipDeprecatedRefs
     );
     pluginApiMap[plugin.id] = pluginApi;
     if (warnings.unnamedExports.length > 0) {

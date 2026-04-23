@@ -119,13 +119,15 @@ export function runBuildApiDocsCli() {
       },
       flags: {
         string: ['plugin', 'package', 'stats'],
-        boolean: ['references'],
+        boolean: ['references', 'skipDeprecatedRefs'],
         help: `
-          --plugin           Optionally, run for only a specific plugin by its plugin ID (plugin.id in kibana.jsonc).
-          --package          Optionally, run for only a specific package by its package ID (id in kibana.jsonc, e.g., @kbn/core).
-          --stats            Deprecated. Use check_package_docs_cli instead. When provided, validation is routed
-                             to the new CLI and build outputs are skipped. Must be one or more of: any, comments or exports.
-          --references       Collect references for API items.
+          --plugin              Optionally, run for only a specific plugin by its plugin ID (plugin.id in kibana.jsonc).
+          --package             Optionally, run for only a specific package by its package ID (id in kibana.jsonc, e.g., @kbn/core).
+          --stats               Deprecated. Use check_package_docs_cli instead. When provided, validation is routed
+                                to the new CLI and build outputs are skipped. Must be one or more of: any, comments or exports.
+          --references          Collect references for API items.
+          --skipDeprecatedRefs  Skip reference collection for deprecated and adoption-tracked APIs.
+                                Speeds up builds by avoiding expensive repo-wide reference scans.
         `,
       },
     }

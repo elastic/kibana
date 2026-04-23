@@ -64,6 +64,7 @@ interface MaybeCollectReferencesOpt {
   log: ToolingLog;
   apiDec: ApiDeclaration;
   captureReferences: boolean;
+  skipDeprecatedRefs: boolean;
   node: Node;
 }
 
@@ -74,8 +75,17 @@ export function maybeCollectReferences({
   log,
   apiDec,
   captureReferences,
+  skipDeprecatedRefs,
 }: MaybeCollectReferencesOpt): ApiReference[] | undefined {
-  const shouldCaptureReferences = captureReferences || apiDec.deprecated || apiDec.trackAdoption;
+  if (captureReferences && Node.isReferenceFindable(node)) {
+    return getReferences({ node, plugins, currentPluginId, log });
+  }
+
+  if (skipDeprecatedRefs) {
+    return undefined;
+  }
+
+  const shouldCaptureReferences = apiDec.deprecated || apiDec.trackAdoption;
   if (shouldCaptureReferences && Node.isReferenceFindable(node)) {
     return getReferences({ node, plugins, currentPluginId, log });
   }

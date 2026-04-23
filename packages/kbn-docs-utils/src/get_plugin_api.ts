@@ -40,7 +40,8 @@ export function getPluginApi(
   plugin: PluginOrPackage,
   plugins: PluginOrPackage[],
   log: ToolingLog,
-  captureReferences: boolean
+  captureReferences: boolean,
+  skipDeprecatedRefs: boolean = false
 ): PluginApiResult {
   const clientResult = getDeclarations(
     project,
@@ -48,7 +49,8 @@ export function getPluginApi(
     ApiScope.CLIENT,
     plugins,
     log,
-    captureReferences
+    captureReferences,
+    skipDeprecatedRefs
   );
   const serverResult = getDeclarations(
     project,
@@ -56,7 +58,8 @@ export function getPluginApi(
     ApiScope.SERVER,
     plugins,
     log,
-    captureReferences
+    captureReferences,
+    skipDeprecatedRefs
   );
   const commonResult = getDeclarations(
     project,
@@ -64,7 +67,8 @@ export function getPluginApi(
     ApiScope.COMMON,
     plugins,
     log,
-    captureReferences
+    captureReferences,
+    skipDeprecatedRefs
   );
 
   const unnamedExports = [
@@ -102,7 +106,8 @@ function getDeclarations(
   scope: ApiScope,
   plugins: PluginOrPackage[],
   log: ToolingLog,
-  captureReferences: boolean
+  captureReferences: boolean,
+  skipDeprecatedRefs: boolean
 ): DeclarationResult {
   const { nodes, unnamedExports } = getDeclarationNodesForPluginScope(project, plugin, scope, log);
 
@@ -115,6 +120,7 @@ function getDeclarations(
       currentPluginId: plugin.id,
       scope,
       captureReferences,
+      skipDeprecatedRefs,
     });
     // Filter out apis with the @internal flag on them.
     if (!apiDec.tags || apiDec.tags.indexOf('internal') < 0) {

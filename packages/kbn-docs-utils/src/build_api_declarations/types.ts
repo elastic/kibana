@@ -19,6 +19,12 @@ export interface BuildApiDecOpts {
    */
   captureReferences: boolean;
   /**
+   * When true, skip the expensive findReferencesAsNodes() calls for deprecated
+   * and adoption-tracked APIs. Used on PR builds where deprecation cross-reference
+   * reports are not needed.
+   */
+  skipDeprecatedRefs: boolean;
+  /**
    * User facing name of the API item.
    */
   name: string;

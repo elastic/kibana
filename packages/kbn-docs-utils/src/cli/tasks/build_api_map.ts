@@ -50,6 +50,7 @@ export function buildApiMap(
     unnamedExports,
   } = getPluginApiMap(project, plugins, allPlugins, log, {
     collectReferences: options.collectReferences,
+    skipDeprecatedRefs: options.skipDeprecatedRefs,
     pluginFilter: options.pluginFilter,
   });
 

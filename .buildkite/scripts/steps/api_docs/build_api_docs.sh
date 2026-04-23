@@ -5,7 +5,14 @@ set -euo pipefail
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Build API Docs"
-node --max-old-space-size=24000 scripts/build_api_docs
+
+BUILD_API_DOCS_FLAGS=""
+if [[ "${SKIP_DEPRECATED_REFS:-}" == "true" ]]; then
+  echo "Skipping deprecated/adoption reference collection (PR build)"
+  BUILD_API_DOCS_FLAGS="--skipDeprecatedRefs"
+fi
+
+node --max-old-space-size=24000 scripts/build_api_docs $BUILD_API_DOCS_FLAGS
 
 if [[ "${PUBLISH_API_DOCS_CHANGES:-}" == "true" ]]; then
   echo "--- Store API Docs changes in Buildkite"

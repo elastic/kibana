@@ -30,6 +30,8 @@ import type { EnzymeImportCounts } from '../count_enzyme_imports';
 export interface CliFlags {
   /** Whether to collect references for API items. */
   references?: boolean;
+  /** Skip reference collection for deprecated and adoption-tracked APIs. */
+  skipDeprecatedRefs?: boolean;
   /** Stats flags: 'any', 'comments', and/or 'exports'. */
   stats?: string | string[];
   /** Validation checks: 'any', 'comments', 'exports', or 'all'. */
@@ -48,6 +50,8 @@ export interface CliFlags {
 export interface CliOptions {
   /** Whether to collect references for API items. */
   collectReferences: boolean;
+  /** Skip reference collection for deprecated and adoption-tracked APIs. */
+  skipDeprecatedRefs: boolean;
   /** Stats flags to display. */
   stats?: string[];
   /** Plugin filter IDs (plugin.id from kibana.jsonc). */

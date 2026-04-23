@@ -108,6 +108,7 @@ const normalizeStats = (value: unknown | string[]) => {
  */
 export function parseCliFlags(flags: CliFlags): CliOptions {
   const collectReferences = flags.references === true;
+  const skipDeprecatedRefs = flags.skipDeprecatedRefs === true;
   const writeStats = flags.write === true;
   const pluginFilter = dedupe(normalizeStringList(flags.plugin, 'plugin'));
   const packageFilter = dedupe(normalizeStringList(flags.package, 'package'));
@@ -120,6 +121,7 @@ export function parseCliFlags(flags: CliFlags): CliOptions {
 
   return {
     collectReferences,
+    skipDeprecatedRefs,
     stats,
     pluginFilter,
     packageFilter,
