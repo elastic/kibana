@@ -101,7 +101,7 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
   return (
-    <div data-test-subj="sloSingleOverviewPanel" data-shared-item="" style={{ width: '100%' }}>
+    <div data-test-subj="sloSingleOverviewPanel" style={{ width: '100%' }}>
       <SloCardChart
         slo={slo}
         historicalSliData={historicalSliData ?? []}

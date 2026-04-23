@@ -69,7 +69,7 @@ export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: Embe
   const hasMoreThanOneGrouping = Object.keys(slo.groupings).length > 1;
 
   return (
-    <div data-shared-item="" ref={containerRef} style={{ width: '100%', padding: 10 }}>
+    <div ref={containerRef} style={{ width: '100%', padding: 10 }}>
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>

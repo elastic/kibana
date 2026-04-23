@@ -162,7 +162,6 @@ export const getMonitorsEmbeddableFactory = (
                 maxHeight: '70vh',
                 overflowY: 'auto',
               }}
-              data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
               <StatusGridComponent
                 reload$={reload$}

@@ -55,7 +55,6 @@ export function TileMapVisualization(props: Props) {
           }
         });
       }}
-      isSharable={false}
     />
   );
 }

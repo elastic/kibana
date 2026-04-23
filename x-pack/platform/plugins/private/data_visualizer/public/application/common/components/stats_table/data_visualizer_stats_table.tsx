@@ -497,7 +497,6 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         <div
           data-test-subj="dataVisualizerTableContainer"
           ref={resizeRef}
-          data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
         >
           <EuiInMemoryTable<T>
             noItemsMessage={message}

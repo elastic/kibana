@@ -134,10 +134,8 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
     );
   }, [manualReload$]);
 
-  // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <div
-      data-shared-item=""
       data-test-subj="aiopsEmbeddableChangePointChart"
       css={css`
         width: 100%;

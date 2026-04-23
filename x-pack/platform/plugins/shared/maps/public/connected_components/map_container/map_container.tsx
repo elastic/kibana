@@ -53,12 +53,6 @@ export interface Props {
   settings: MapSettings;
   layerList: ILayer[];
   waitUntilTimeLayersLoad$: Observable<void>;
-  /*
-   * Set to false to exclude sharing attributes 'data-*'.
-   * An example usage is tile_map and region_map visualizations. The visualizations use MapEmbeddable for rendering.
-   * Visualize Embeddable handles sharing attributes so sharing attributes are not needed in the children.
-   */
-  isSharable: boolean;
   euiTheme?: any;
 }
 
@@ -92,7 +86,6 @@ export class MapContainer extends Component<Props, State> {
     this._loadShowFitToBoundsButton();
     this._loadShowTimesliderButton();
     if (
-      this.props.isSharable &&
       !this.props.isMapLoading &&
       !this._isInitalLoadRenderTimerStarted
     ) {
@@ -174,23 +167,16 @@ export class MapContainer extends Component<Props, State> {
 
     if (mapInitError) {
       return (
-        <div
-          data-render-complete
-          data-shared-item
-          data-title={this.props.title}
-          data-description={this.props.description}
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
+            defaultMessage: 'Unable to initialize map',
+          })}
+          color="danger"
+          iconType="cross"
         >
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
-              defaultMessage: 'Unable to initialize map',
-            })}
-            color="danger"
-            iconType="cross"
-          >
-            <p>{mapInitError}</p>
-          </EuiCallOut>
-        </div>
+          <p>{mapInitError}</p>
+        </EuiCallOut>
       );
     }
 
@@ -198,18 +184,9 @@ export class MapContainer extends Component<Props, State> {
     if (isFullScreen) {
       exitFullScreenButton = <ExitFullScreenButton onExit={exitFullScreen} />;
     }
-    const shareAttributes = this.props.isSharable
-      ? {
-          ['data-dom-id']: this.state.domId,
-          ['data-render-complete']: this.state.isInitialLoadRenderTimeoutComplete,
-          ['data-shared-item']: true,
-          ['data-title']: this.props.title,
-          ['data-description']: this.props.description,
-        }
-      : {};
 
     return (
-      <EuiFlexGroup gutterSize="none" responsive={false} {...shareAttributes}>
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem
           css={mapWrapperStyles}
           style={{ backgroundColor: this.props.settings.backgroundColor }}

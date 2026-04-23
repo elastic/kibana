@@ -55,7 +55,6 @@ export function RegionMapVisualization(props: Props) {
           }
         });
       }}
-      isSharable={false}
     />
   );
 }
