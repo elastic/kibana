@@ -11,11 +11,12 @@ import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
-import { useLogsIndexPattern } from '../../../../hooks/use_logs_index_pattern';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { FullTraceWaterfallRenderer } from '../../../shared/trace_waterfall/full_trace_waterfall_renderer';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { useAdHocApmDataView } from '../../../../../hooks/use_adhoc_apm_data_view';
+import { TraceWaterfallFlyoutFooter } from './flyout_footer';
+import { useLogsIndexPattern } from '../../../../../hooks/use_logs_index_pattern';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
+import { FullTraceWaterfallRenderer } from '../../../../shared/trace_waterfall/full_trace_waterfall_renderer';
 
 const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
 
@@ -119,6 +120,7 @@ export function TraceWaterfallFlyout({
           onErrorClick={onErrorClick}
         />
       </EuiFlyoutBody>
+      <TraceWaterfallFlyoutFooter traceId={traceId} rangeFrom={rangeFrom} rangeTo={rangeTo} />
       {selectedDocId && dataView && (
         <UnifiedDocViewerObservabilityTraceDocFlyout
           type={activeFlyoutType}
