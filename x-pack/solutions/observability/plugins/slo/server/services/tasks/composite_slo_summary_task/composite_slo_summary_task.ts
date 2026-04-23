@@ -43,7 +43,7 @@ export class CompositeSloSummaryTask {
       [TYPE]: {
         title: 'Composite SLO summary task',
         description: 'Periodically recomputes and persists composite SLO summaries',
-        timeout: '5m',
+        timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
