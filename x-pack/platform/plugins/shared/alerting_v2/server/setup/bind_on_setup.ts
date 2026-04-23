@@ -66,7 +66,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
     if (container.isBound(agentBuilderToken)) {
       const agentBuilder = container.get(agentBuilderToken);
-      
+
       const getInjection = () => container.get(CoreStart('injection'));
       registerAlertingV2Tools({ agentBuilder, getInjection });
     }
