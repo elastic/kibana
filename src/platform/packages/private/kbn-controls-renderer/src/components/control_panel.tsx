@@ -19,7 +19,6 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiIcon,
-  transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -74,8 +73,7 @@ export const ControlPanel = ({
 
   const indicateControl = useMemo(
     () =>
-      indicateRelatedPanelsId !== undefined &&
-      arePanelsRelated(id, indicateRelatedPanelsId, { relatedByFilter: false }),
+      indicateRelatedPanelsId !== undefined && arePanelsRelated.byESQL(id, indicateRelatedPanelsId),
     [arePanelsRelated, id, indicateRelatedPanelsId]
   );
   const {
@@ -176,11 +174,7 @@ export const ControlPanel = ({
       }}
       grow={Boolean(grow)}
       data-test-subj="control-frame"
-      css={css([
-        isDragging && styles.draggingItem,
-        styles.controlWidthStyles,
-        indicateControl && styles.controlIndicated,
-      ])}
+      css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
       className={`controlFrameWrapper--${width}`}
     >
       <FloatingActions
@@ -204,6 +198,7 @@ export const ControlPanel = ({
             fullWidth
             className={classNames('controlFrame__formControlLayout', {
               'controlFrame__formControlLayout--edit': isEditable,
+              'controlFrame__formControlLayout--focused': indicateControl,
               'controlFrame__formControlLayout--selected': isIndicatingRelatedPanels,
               type,
             })}
@@ -289,9 +284,13 @@ const controlPanelStyles = {
           paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
         },
       },
+      '&.controlFrame__formControlLayout--focused': {
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
+      },
       '&.controlFrame__formControlLayout--selected': {
-        '.euiFormControlLayout__prepend': {
-          backgroundColor: euiTheme.colors.vis.euiColorVis0,
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
+        '&, & div, & button': {
+          backgroundColor: euiTheme.colors.vis.euiColorVis1,
         },
       },
       '.controlPanel--label': {
@@ -303,19 +302,4 @@ const controlPanelStyles = {
         },
       },
     }),
-  controlIndicated: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      borderColor: euiTheme.colors.vis.euiColorVis0,
-      boxShadow: `${transparentize(
-        euiTheme.colors.vis.euiColorVis0,
-        BASE_SHADOW_OPACITY * 1.6
-      )} 0px 0px 2px 0px, ${transparentize(
-        euiTheme.colors.vis.euiColorVis0,
-        BASE_SHADOW_OPACITY
-      )} 0px 3px 10px 0px, ${transparentize(
-        euiTheme.colors.vis.euiColorVis0,
-        BASE_SHADOW_OPACITY * 0.6
-      )} 0px 6px 14px 0px`,
-    }),
 };
-const BASE_SHADOW_OPACITY = 0.5;

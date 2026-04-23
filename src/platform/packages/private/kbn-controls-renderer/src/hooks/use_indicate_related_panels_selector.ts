@@ -41,8 +41,8 @@ export const useIndicateRelatedPanelsSelector = (
     // Don't trigger expensive subscriptions if the API can't indicate related panels
     if (!parentApiLoaded || !apiCanBeSelectedToIndicateRelated(api)) return;
     if (!parentApiSubscription.current) {
-      const numberOfRelatedPanels$ = parentApiLoaded
-        .getRelatedPanelIds$(id ?? '', api.indicateRelatedPanelsOptions ?? undefined)
+      const numberOfRelatedPanels$ = parentApiLoaded.getRelatedPanelIds$
+        .byESQLVariable(id ?? '')
         .pipe(
           debounceTime(skipDebounce ? 0 : 250), // Prevent a flash of 0 related panels on initial load
           distinctUntilChanged(),

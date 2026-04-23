@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
@@ -80,23 +80,43 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
-    const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
-    const blurPanel =
-      focusedPanelId !== undefined &&
-      focusedPanelId !== id &&
-      !arePanelsRelated(id, focusedPanelId);
+
+    const isIndicatingRelatedPanels =
+      indicateRelatedPanelsId !== undefined && indicateRelatedPanelsId === id;
+
+    // Focus the panel if it is the focused panel, or if it is being indicated as a related panel
     const indicatePanel =
-      !focusPanel &&
       viewMode === 'edit' &&
       indicateRelatedPanelsId !== undefined &&
       arePanelsRelated(id, indicateRelatedPanelsId);
+    const focusPanel =
+      isIndicatingRelatedPanels ||
+      indicatePanel ||
+      (focusedPanelId !== undefined && focusedPanelId === id);
+    const focusedForEdit = focusedPanelId !== undefined && focusedPanelId === id;
+
+    // To decide whether to blur the panel, a panel in focus takes precedence over something indicating related panels
+    const idToCompareForBlur =
+      focusedPanelId !== undefined && focusedPanelId !== id
+        ? focusedPanelId
+        : indicateRelatedPanelsId !== undefined && indicateRelatedPanelsId !== id
+        ? indicateRelatedPanelsId
+        : null;
+
+    const blurPanel =
+      !focusPanel &&
+      !indicatePanel &&
+      idToCompareForBlur &&
+      !arePanelsRelated(id, idToCompareForBlur);
+
     const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
       'dshDashboardGrid__item--focused': focusPanel,
       'dshDashboardGrid__item--blurred': blurPanel,
-      'dshDashboardGrid__item--indicated': indicatePanel,
+      'dshDashboardGrid__item--selected': isIndicatingRelatedPanels,
+      'dshDashboardGrid__item--hideHoverActions': blurPanel || focusedForEdit,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: viewMode === 'print',
     });
@@ -235,7 +255,6 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
  * There's no easy way to override CSS box shadow color while preserving opacity and pixel size,
  * so set a base shadow opacity and adjust it to the same proportions that EuiPanel does it
  */
-const BASE_SHADOW_OPACITY = 0.5;
 const dashboardGridItemStyles = {
   item: (context: UseEuiTheme) =>
     css([
@@ -252,22 +271,11 @@ const dashboardGridItemStyles = {
         '&.dshDashboardGrid__item--focused .embPanel': {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
-        // To indicate related panels, use a teal shadow
-        '&.dshDashboardGrid__item--indicated .embPanel': {
-          outline: `${context.euiTheme.border.width.thin} solid ${transparentize(
-            context.euiTheme.colors.vis.euiColorVis0,
-            BASE_SHADOW_OPACITY * 1.6
-          )}`,
-          boxShadow: `${transparentize(
-            context.euiTheme.colors.vis.euiColorVis0,
-            BASE_SHADOW_OPACITY * 1.6
-          )} 0px 0px 2px 0px, ${transparentize(
-            context.euiTheme.colors.vis.euiColorVis0,
-            BASE_SHADOW_OPACITY
-          )} 0px 3px 10px 0px, ${transparentize(
-            context.euiTheme.colors.vis.euiColorVis0,
-            BASE_SHADOW_OPACITY * 0.6
-          )} 0px 6px 14px 0px`,
+        // Call out panels that are selected to indicate their related panels with the same border plus a semitransparent overlay
+        '&.dshDashboardGrid__item--selected .embPanel': {
+          '&, & div, & button': {
+            backgroundColor: context.euiTheme.colors.vis.euiColorVis1,
+          },
         },
       },
       getHighlightStyles(context),

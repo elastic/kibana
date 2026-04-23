@@ -35,7 +35,6 @@ export const apiCanBePinned = (unknownApi: unknown | null): unknownApi is IsPinn
 
 export interface CanBeRelatedPanelsIndicator {
   canBeRelatedPanelsIndicator: boolean;
-  indicateRelatedPanelsOptions?: { relatedByESQL?: boolean; relatedByFilter?: boolean };
 }
 
 export const apiCanBeSelectedToIndicateRelated = (

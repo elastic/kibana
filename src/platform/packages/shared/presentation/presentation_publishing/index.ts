@@ -203,6 +203,7 @@ export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/containers/
 export {
   apiCanIndicateRelatedPanels,
   type CanIndicateRelatedPanels,
+  type PanelRelationshipFunction,
 } from './interfaces/containers/can_indicate_related_panels';
 
 export {

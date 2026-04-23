@@ -56,10 +56,7 @@ export const ConditionalLabelWrapper = ({
         */}
       {/* eslint-disable-next-line @elastic/eui/accessible-interactive-element */}
       <EuiLink
-        css={[
-          styles.clickableLabel,
-          isIndicatingRelatedPanels ? styles.clickableLabelSelected : null,
-        ]}
+        css={[styles.clickableLabel]}
         color={isIndicatingRelatedPanels ? 'text' : 'subdued'}
         onClick={enableIndicateRelatedPanels ? onToggleIndicateRelatedPanels : undefined}
         tabIndex={-1}
@@ -144,15 +141,12 @@ const labelWrapperStyles = {
       margin-bottom: -${euiTheme.size.xxs};
       z-index: 1;
       /* Style the button as focused when the inner span is in focus */
+      &:focus-visible,
       &:has(:focus-visible) {
         outline: 2px solid ${euiTheme.colors.primary};
         outline-offset: -${euiTheme.size.xxs};
       }
     `,
-  clickableLabelSelected: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis0,
-    }),
   clickableLabelInner: ({ euiTheme }: UseEuiTheme) =>
     css`
       /* Apply focus outline to the button instead */

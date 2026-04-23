@@ -8,7 +8,15 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import type { CanBeRelatedPanelsIndicator } from './panel_capabilities';
+
+/**
+ * Interface for a base panel relationship function that also includes several subtypes that narrow down its criteria
+ */
+export type PanelRelationshipFunction<T extends Function> = T & {
+  byFilter: T;
+  byESQL: T;
+  byESQLVariable: T;
+};
 
 /**
  * This API can indicate panels related to a certain child panel. We are calling this "indicating" because "highlight" refers to something else and
@@ -17,17 +25,8 @@ import type { CanBeRelatedPanelsIndicator } from './panel_capabilities';
 export interface CanIndicateRelatedPanels {
   setIndicateRelatedPanelsId: (panelId?: string) => void;
   indicateRelatedPanelsId$: BehaviorSubject<string | undefined>;
-  arePanelsRelated$: BehaviorSubject<
-    (
-      a: string,
-      b: string,
-      options?: CanBeRelatedPanelsIndicator['indicateRelatedPanelOptions']
-    ) => boolean
-  >;
-  getRelatedPanelIds$: (
-    panelId: string,
-    options?: CanBeRelatedPanelsIndicator['indicateRelatedPanelOptions']
-  ) => BehaviorSubject<string[]>;
+  arePanelsRelated$: BehaviorSubject<PanelRelationshipFunction<(a: string, b: string) => boolean>>;
+  getRelatedPanelIds$: PanelRelationshipFunction<(panelId: string) => BehaviorSubject<string[]>>;
 }
 
 /**
