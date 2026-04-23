@@ -160,7 +160,7 @@ export const buildShareOptions = async ({
           defaultMessage: 'Untitled Discover session',
         }),
       totalHits: totalHitsState.result || 0,
-      absoluteTimeRange,
+      absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined,
     },
     isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
   };

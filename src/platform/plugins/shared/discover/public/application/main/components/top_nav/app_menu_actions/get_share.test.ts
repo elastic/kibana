@@ -39,7 +39,7 @@ describe('getShare', () => {
     );
   });
 
-  it('should return the correct share options', async () => {
+  it('should return the correct share options, without absolute time range set when in classic mode', async () => {
     const shareOptions = await buildShareOptions({
       services: mockDiscoverService,
       discoverParams: {
@@ -63,6 +63,54 @@ describe('getShare', () => {
         shareableUrl: 'http://localhost/',
         shareableUrlForSavedObject: '#?_g=()',
         sharingData: expect.objectContaining({
+          isTextBased: false,
+          absoluteTimeRange: undefined,
+          locatorParams: expect.arrayContaining([
+            expect.objectContaining({
+              id: undefined,
+              version: 'major.minor.patch',
+              params: expect.objectContaining({
+                timeRange: expect.objectContaining({
+                  from: expect.any(String),
+                  to: expect.any(String),
+                }),
+                dataViewId: dataViewMock.id,
+              }),
+            }),
+          ]),
+        }),
+        objectId: undefined,
+        objectType: 'search',
+        objectTypeAlias: 'Discover session',
+      })
+    );
+  });
+
+  it('should return the correct share options, with absolute time range set when in ES|QL mode', async () => {
+    const shareOptions = await buildShareOptions({
+      services: mockDiscoverService,
+      discoverParams: {
+        dataView: dataViewMock,
+        isEsqlMode: true,
+        adHocDataViews: [],
+        authorizedRuleTypeIds: [],
+        actions: {
+          updateAdHocDataViews: jest.fn(),
+        },
+      },
+      currentTab: toolkit.getCurrentTab(),
+      persistedDiscoverSession: undefined,
+      totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
+      hasUnsavedChanges: false,
+    });
+
+    expect(shareOptions).toEqual(
+      expect.objectContaining({
+        allowShortUrl: false,
+        shareableUrl: 'http://localhost/',
+        shareableUrlForSavedObject: '#?_g=()',
+        sharingData: expect.objectContaining({
+          isTextBased: true,
           absoluteTimeRange: expect.objectContaining({
             from: expect.any(String),
             to: expect.any(String),
