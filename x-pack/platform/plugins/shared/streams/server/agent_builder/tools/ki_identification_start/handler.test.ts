@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { startKiIdentificationToolHandler } from './handler';
+import { OnboardingStep } from '@kbn/streams-schema';
 
 describe('startKiIdentificationToolHandler', () => {
   const setup = () => {
@@ -25,7 +26,7 @@ describe('startKiIdentificationToolHandler', () => {
 
     const result = await startKiIdentificationToolHandler({
       streamName: 'logs.nginx',
-      steps: ['features_identification', 'queries_generation'],
+      steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
       taskClient: taskClient as never,
       request,
     });

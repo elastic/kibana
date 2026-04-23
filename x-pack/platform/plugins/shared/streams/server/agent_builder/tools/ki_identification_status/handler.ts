@@ -22,7 +22,7 @@ export async function getKiIdentificationStatusToolHandler({
   streamName,
   taskClient,
 }: GetKiIdentificationStatusHandlerParams) {
-  const taskId = getOnboardingTaskId(streamName, true);
+  const taskId = getOnboardingTaskId(streamName);
   const status = await taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
 
   return {

@@ -25,7 +25,7 @@ export async function cancelKiIdentificationToolHandler({
   stream_name: streamName,
   task_client: taskClient,
 }: CancelKiIdentificationHandlerParams): Promise<CancelKiIdentificationHandlerResult> {
-  const taskId = getOnboardingTaskId(streamName, true);
+  const taskId = getOnboardingTaskId(streamName);
 
   await taskClient.cancel(taskId);
 

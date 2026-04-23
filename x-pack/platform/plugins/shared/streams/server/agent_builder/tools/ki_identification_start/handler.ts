@@ -40,7 +40,7 @@ export async function startKiIdentificationToolHandler({
   taskClient,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
-  const taskId = getOnboardingTaskId(streamName, true);
+  const taskId = getOnboardingTaskId(streamName);
   const now = Date.now();
 
   await taskClient.schedule<OnboardingTaskParams>({
@@ -54,7 +54,6 @@ export async function startKiIdentificationToolHandler({
       from: now - DEFAULT_LOOKBACK_MS,
       to: now,
       steps,
-      saveQueries: true,
       connectors,
     },
     request,
