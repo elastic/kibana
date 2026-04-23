@@ -1,5 +1,5 @@
 {
-  "sha1": "776c83ec2cbd8d1513a3a8fcf7962eb19ca51c21",
+  "sha1": "d6c8ebadd9b52cbb08f9c41ae6db3e4ff54b5b52",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -3349,6 +3349,22 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
         "line": 126,
+        "column": 9
+      }
+    },
+    {
+      "id": "caff8dcf425ad2d-d68cdb7b08b22ef",
+      "title": "ES|QL source enrichment - stream description in autocomplete popup shows stream description and management link in ES|QL autocomplete popup",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/esql_source_enrichment.spec.ts",
+        "line": 30,
         "column": 9
       }
     },

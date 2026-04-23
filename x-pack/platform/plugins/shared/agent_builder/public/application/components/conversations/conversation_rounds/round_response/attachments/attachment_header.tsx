@@ -60,12 +60,14 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   const textStyles = css`
     font-weight: ${euiTheme.font.weight.semiBold};
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   `;
 
   const headerStyles = css`
     position: relative;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     border-bottom: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
@@ -91,20 +93,31 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
           {PREVIEW_ONLY_LABEL}
         </EuiBadge>
       )}
-      <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup
+        responsive={false}
+        justifyContent="spaceBetween"
+        alignItems="center"
+        style={{ width: '100%' }}
+      >
+        <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
           <EuiText css={textStyles} size="s">
             {title}
           </EuiText>
         </EuiFlexItem>
-        {previewBadgeState !== 'previewing' && <AttachmentActions buttons={actionButtons} />}
+        {previewBadgeState !== 'previewing' && (
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+            <AttachmentActions buttons={actionButtons} />
+          </EuiFlexItem>
+        )}
         {previewBadgeState === 'previewing' && (
-          <EuiBadge iconType="eye" color="success">
-            {CURRENTLY_PREVIEWING_LABEL}
-          </EuiBadge>
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+            <EuiBadge iconType="eye" color="success">
+              {CURRENTLY_PREVIEWING_LABEL}
+            </EuiBadge>
+          </EuiFlexItem>
         )}
         {onClose && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiButtonIcon
               aria-label={CLOSE_BUTTON_ARIA_LABEL}
               iconType="cross"
