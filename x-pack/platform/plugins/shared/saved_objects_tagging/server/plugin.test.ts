@@ -19,7 +19,7 @@ describe('SavedObjectTaggingPlugin', () => {
   let usageCollectionSetup: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
 
   beforeEach(() => {
-    plugin = new SavedObjectTaggingPlugin();
+    plugin = new SavedObjectTaggingPlugin(coreMock.createPluginInitializerContext());
     featuresPluginSetup = featuresPluginMock.createSetup();
     usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
     // `usageCollection` 'mocked' implementation use the real `CollectorSet` implementation
