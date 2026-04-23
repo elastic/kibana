@@ -12,7 +12,7 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { untilPluginStartServicesReady } from '../../services/kibana_services';
 
 export function registerESQLControl(embeddable: EmbeddableSetup) {
-  embeddable.registerReactEmbeddableFactory(ESQL_CONTROL, async () => {
+  embeddable.registerEmbeddablePublicDefinition(ESQL_CONTROL, async () => {
     const [{ getESQLControlFactory }] = await Promise.all([
       import('../../controls_module'),
       untilPluginStartServicesReady(),

@@ -242,6 +242,8 @@ export {
   featureStatusSchema,
 } from './src/feature';
 
+export { FeatureAccumulator } from './src/feature_accumulator';
+
 export {
   type BaseSimulationError,
   type SimulationError,
@@ -260,6 +262,7 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
+export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type GenerateInsightsResult,
