@@ -120,7 +120,8 @@ export const EpmPackagesSchemaV9 = EpmPackagesSchemaV8.extends({
           ),
         },
         { unknowns: 'ignore' }
-      )
+      ),
+      { maxSize: 1000 }
     )
   ),
 });
