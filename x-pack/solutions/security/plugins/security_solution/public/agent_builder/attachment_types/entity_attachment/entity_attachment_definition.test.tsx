@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EntityAttachment } from './types';
@@ -22,11 +24,13 @@ const resolveSecurityCanvasContext = jest.fn();
 
 const buildDefinition = ({
   withCanvas = true,
-}: { withCanvas?: boolean } = {}) =>
+  searchSession,
+}: { withCanvas?: boolean; searchSession?: ISessionService } = {}) =>
   createEntityAttachmentDefinition({
     experimentalFeatures,
     application: withCanvas ? application : undefined,
     resolveSecurityCanvasContext: withCanvas ? resolveSecurityCanvasContext : undefined,
+    searchSession,
   });
 
 const attachmentOf = (data: unknown): EntityAttachment =>
@@ -134,6 +138,42 @@ describe('createEntityAttachmentDefinition', () => {
       const def = buildDefinition();
       expect(def.renderCanvasContent).toBeInstanceOf(Function);
       expect(def.getActionButtons).toBeInstanceOf(Function);
+    });
+  });
+
+  describe('searchSession threading', () => {
+    const renderProps = {
+      attachment: attachmentOf({ identifierType: 'host', identifier: 'alpha' }),
+      isSidebar: false,
+      isCanvas: true,
+      updateOrigin: jest.fn(),
+    } as unknown as Parameters<
+      NonNullable<ReturnType<typeof buildDefinition>['renderInlineContent']>
+    >[0];
+    const renderCallbacks = {} as unknown as Parameters<
+      NonNullable<ReturnType<typeof buildDefinition>['renderCanvasContent']>
+    >[1];
+
+    it('forwards searchSession into the canvas content element', () => {
+      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const def = buildDefinition({ searchSession });
+
+      const element = def.renderCanvasContent!(renderProps, renderCallbacks) as ReactElement<{
+        searchSession?: ISessionService;
+      }>;
+
+      expect(element.props.searchSession).toBe(searchSession);
+    });
+
+    it('forwards searchSession into the inline content element', () => {
+      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const def = buildDefinition({ searchSession });
+
+      const element = def.renderInlineContent!(renderProps) as ReactElement<{
+        searchSession?: ISessionService;
+      }>;
+
+      expect(element.props.searchSession).toBe(searchSession);
     });
   });
 

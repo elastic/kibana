@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
@@ -107,6 +108,7 @@ const useOpenHostInvestigationInEntityAnalytics = ({
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
   entityStoreEntityId,
+  searchSession,
 }: {
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
@@ -121,6 +123,7 @@ const useOpenHostInvestigationInEntityAnalytics = ({
   hasVulnerabilitiesFindings: boolean;
   hasNonClosedAlerts: boolean;
   entityStoreEntityId?: string;
+  searchSession?: ISessionService;
 }): ((path?: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
 
@@ -135,6 +138,7 @@ const useOpenHostInvestigationInEntityAnalytics = ({
         agentBuilder,
         chrome,
         openSidebarConversation,
+        searchSession,
         flyout: {
           preview: [],
           left: {
@@ -177,6 +181,7 @@ const useOpenHostInvestigationInEntityAnalytics = ({
       safeContextID,
       scopeId,
       entityStoreEntityId,
+      searchSession,
       telemetry,
     ]
   );
@@ -189,7 +194,16 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
-}> = ({ hostName, entityId, application, agentBuilder, chrome, openSidebarConversation }) => {
+  searchSession?: ISessionService;
+}> = ({
+  hostName,
+  entityId,
+  application,
+  agentBuilder,
+  chrome,
+  openSidebarConversation,
+  searchSession,
+}) => {
   const euidApi = useEntityStoreEuidApi();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
@@ -344,6 +358,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
     entityStoreEntityId,
+    searchSession,
   });
 
   const noEntityInStore =
@@ -424,6 +439,7 @@ const useOpenUserInvestigationInEntityAnalytics = ({
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
   entityStoreEntityId,
+  searchSession,
 }: {
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
@@ -438,6 +454,7 @@ const useOpenUserInvestigationInEntityAnalytics = ({
   hasMisconfigurationFindings: boolean;
   hasNonClosedAlerts: boolean;
   entityStoreEntityId?: string;
+  searchSession?: ISessionService;
 }): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
 
@@ -452,6 +469,7 @@ const useOpenUserInvestigationInEntityAnalytics = ({
         agentBuilder,
         chrome,
         openSidebarConversation,
+        searchSession,
         flyout: {
           preview: [],
           left: {
@@ -494,6 +512,7 @@ const useOpenUserInvestigationInEntityAnalytics = ({
       safeContextID,
       scopeId,
       entityStoreEntityId,
+      searchSession,
       telemetry,
       userName,
     ]
@@ -507,6 +526,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
+  searchSession?: ISessionService;
 }> = ({
   userName,
   entityId: entityIdProp,
@@ -514,6 +534,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
   agentBuilder,
   chrome,
   openSidebarConversation,
+  searchSession,
 }) => {
   const euidApi = useEntityStoreEuidApi();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -645,6 +666,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     entityStoreEntityId,
+    searchSession,
   });
 
   const riskScoreStateFromStore =
@@ -748,6 +770,7 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
   safeContextID,
   isRiskScoreExist,
   entityStoreEntityId,
+  searchSession,
 }: {
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
@@ -760,6 +783,7 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
   safeContextID: string;
   isRiskScoreExist: boolean;
   entityStoreEntityId?: string;
+  searchSession?: ISessionService;
 }): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
 
@@ -774,6 +798,7 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
         agentBuilder,
         chrome,
         openSidebarConversation,
+        searchSession,
         flyout: {
           preview: [],
           left: {
@@ -812,6 +837,7 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
       safeContextID,
       scopeId,
       serviceName,
+      searchSession,
       telemetry,
     ]
   );
@@ -824,7 +850,16 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
-}> = ({ serviceName, entityId, application, agentBuilder, chrome, openSidebarConversation }) => {
+  searchSession?: ISessionService;
+}> = ({
+  serviceName,
+  entityId,
+  application,
+  agentBuilder,
+  chrome,
+  openSidebarConversation,
+  searchSession,
+}) => {
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const isPreviewMode = false;
@@ -915,6 +950,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     safeContextID,
     isRiskScoreExist,
     entityStoreEntityId,
+    searchSession,
   });
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
@@ -989,6 +1025,12 @@ export interface EntityCardFlyoutOverviewCanvasProps {
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
+  /**
+   * Optional search session service. Forwarded to the per-type flyout canvas so the
+   * `navigateToEntityAnalyticsWithFlyoutInApp` helper can clear the active search session
+   * before the legitimate `agent_builder → securitySolutionUI` navigation.
+   */
+  searchSession?: ISessionService;
 }
 
 /**
@@ -1007,6 +1049,7 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
   agentBuilder,
   chrome,
   openSidebarConversation,
+  searchSession,
 }) => {
   const { data, isLoading } = useEntityForAttachment(identifier);
 
@@ -1034,6 +1077,7 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
         agentBuilder={agentBuilder}
         chrome={chrome}
         openSidebarConversation={openSidebarConversation}
+        searchSession={searchSession}
       />
     );
   }
@@ -1048,6 +1092,7 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
         agentBuilder={agentBuilder}
         chrome={chrome}
         openSidebarConversation={openSidebarConversation}
+        searchSession={searchSession}
       />
     );
   }
@@ -1062,6 +1107,7 @@ export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCa
         agentBuilder={agentBuilder}
         chrome={chrome}
         openSidebarConversation={openSidebarConversation}
+        searchSession={searchSession}
       />
     );
   }

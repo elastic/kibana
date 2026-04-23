@@ -327,6 +327,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
+        searchSession: plugins.data.search.session,
       });
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -335,6 +336,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         chrome: core.chrome,
         experimentalFeatures: this.experimentalFeatures,
         resolveSecurityCanvasContext: () => this.getSecurityCanvasContext(core, plugins),
+        searchSession: plugins.data.search.session,
       });
     }
 

@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import type { EntityAnalyticsDashboardAttachment } from './entity_analytics_dashboard_attachment';
 import { createEntityAnalyticsDashboardAttachmentDefinition } from './entity_analytics_dashboard_attachment';
+import { navigateToEntityAnalyticsHomePageInApp } from './entity_explore_navigation';
 
 type ResizeDimensions = { width: number; height: number };
 
@@ -116,9 +118,12 @@ const makeAttachment = (): EntityAnalyticsDashboardAttachment =>
     },
   } as unknown as EntityAnalyticsDashboardAttachment);
 
-const renderCanvas = () => {
+const renderCanvas = (overrides: { searchSession?: ISessionService } = {}) => {
   const application = applicationServiceMock.createStartContract();
-  const definition = createEntityAnalyticsDashboardAttachmentDefinition({ application });
+  const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+    application,
+    searchSession: overrides.searchSession,
+  });
   return render(
     <I18nProvider>
       {definition.renderCanvasContent({
@@ -131,6 +136,18 @@ const renderCanvas = () => {
 describe('EntityAnalyticsDashboardCanvasContent', () => {
   afterEach(() => {
     delete (global as unknown as Record<string, unknown>)[RESIZE_CALLBACK_KEY];
+    (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
+  });
+
+  it('forwards the searchSession to navigateToEntityAnalyticsHomePageInApp on "Open Entity Analytics"', () => {
+    const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+    renderCanvas({ searchSession });
+    fireEvent.click(screen.getByRole('button', { name: /open entity analytics in security/i }));
+
+    expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledTimes(1);
+    expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledWith(
+      expect.objectContaining({ searchSession })
+    );
   });
 
   it('renders the risk breakdown table and the donut chart side-by-side by default', () => {

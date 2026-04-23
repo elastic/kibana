@@ -14,6 +14,7 @@ import type {
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
@@ -66,6 +67,7 @@ export interface EntityAttachmentCanvasContentProps
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+  searchSession?: ISessionService;
 }
 
 /**
@@ -85,6 +87,7 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
   chrome,
   resolveSecurityCanvasContext,
   openSidebarConversation,
+  searchSession,
 }) => {
   const parsed = normaliseEntityAttachment(attachment);
   const watchlistsEnabled = experimentalFeatures.entityAnalyticsWatchlistEnabled;
@@ -137,6 +140,7 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
       agentBuilder,
       chrome,
       openSidebarConversation,
+      searchSession,
     });
   };
 
@@ -164,6 +168,7 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
             agentBuilder={agentBuilder}
             chrome={chrome}
             openSidebarConversation={openSidebarConversation}
+            searchSession={searchSession}
           />
         </QueryClientProvider>
       </EuiPanel>
@@ -187,12 +192,14 @@ export const createEntityAttachmentDefinition = ({
   agentBuilder,
   chrome,
   resolveSecurityCanvasContext,
+  searchSession,
 }: {
   experimentalFeatures: ExperimentalFeatures;
   application?: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   resolveSecurityCanvasContext?: () => Promise<SecurityCanvasEmbeddedBundle>;
+  searchSession?: ISessionService;
 }): AttachmentUIDefinition<EntityAttachment> => {
   const canRenderCanvas = application != null && resolveSecurityCanvasContext != null;
 
@@ -213,6 +220,7 @@ export const createEntityAttachmentDefinition = ({
         application={application}
         agentBuilder={agentBuilder}
         chrome={chrome}
+        searchSession={searchSession}
       />
     ),
     ...(canRenderCanvas
@@ -225,6 +233,7 @@ export const createEntityAttachmentDefinition = ({
               agentBuilder={agentBuilder}
               chrome={chrome}
               resolveSecurityCanvasContext={resolveSecurityCanvasContext!}
+              searchSession={searchSession}
             />
           ),
           getActionButtons: ({ attachment, isCanvas, openCanvas }) => {

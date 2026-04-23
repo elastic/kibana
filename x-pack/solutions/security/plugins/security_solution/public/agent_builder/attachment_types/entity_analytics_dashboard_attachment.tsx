@@ -32,6 +32,7 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { APP_UI_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { EMPTY_SEVERITY_COUNT, RiskSeverity } from '../../../common/search_strategy';
 import type { SeverityCount } from '../../entity_analytics/components/severity/types';
@@ -142,8 +143,16 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
     application: ApplicationStart;
     agentBuilder?: AgentBuilderPluginStart;
     chrome?: SecurityAgentBuilderChrome;
+    searchSession?: ISessionService;
   }
-> = ({ attachment, application, agentBuilder, chrome, openSidebarConversation }) => {
+> = ({
+  attachment,
+  application,
+  agentBuilder,
+  chrome,
+  openSidebarConversation,
+  searchSession,
+}) => {
   const data = attachment.data;
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const [isRiskPanelNarrow, setIsRiskPanelNarrow] = useState(false);
@@ -210,6 +219,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
                   openSidebarConversation,
                   watchlistId: data.watchlist_id,
                   watchlistName: data.watchlist_name,
+                  searchSession,
                 });
               }}
             >
@@ -491,6 +501,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
               application={application}
               agentBuilder={agentBuilder}
               chrome={chrome}
+              searchSession={searchSession}
             />
           ) : (
             <EuiText size="s" color="subdued">
@@ -513,15 +524,22 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
+  searchSession,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  searchSession?: ISessionService;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.entityAnalyticsDashboard,
-    createEntityAnalyticsDashboardAttachmentDefinition({ application, agentBuilder, chrome })
+    createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      agentBuilder,
+      chrome,
+      searchSession,
+    })
   );
 };
 
@@ -529,10 +547,12 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
   application,
   agentBuilder,
   chrome,
+  searchSession,
 }: {
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  searchSession?: ISessionService;
 }): AttachmentUIDefinition<EntityAnalyticsDashboardAttachment> => ({
   getLabel: (attachment) =>
     attachment.data.attachmentLabel ??
@@ -547,6 +567,7 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
       application={application}
       agentBuilder={agentBuilder}
       chrome={chrome}
+      searchSession={searchSession}
     />
   ),
   getActionButtons: ({ openCanvas, isCanvas }) => {

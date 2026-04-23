@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { APP_UI_ID, ENTITY_ANALYTICS_PATH } from '../../../../../common/constants';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
@@ -51,6 +52,11 @@ export interface EntityTableProps {
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
+  /**
+   * Optional search session service. Forwarded to `navigateToSecurityEntityInApp` so the active
+   * Agent Builder-tagged search session is cleared before the cross-app jump into Security.
+   */
+  searchSession?: ISessionService;
 }
 
 interface EntityRow {
@@ -246,6 +252,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({
   agentBuilder,
   chrome,
   openSidebarConversation,
+  searchSession,
 }) => {
   const { services } = useKibana<{ application: ApplicationStart }>();
   const exploreApplication = application ?? services.application;
@@ -325,9 +332,10 @@ export const EntityTable: React.FC<EntityTableProps> = ({
         agentBuilder,
         chrome,
         openSidebarConversation,
+        searchSession,
       });
     },
-    [agentBuilder, chrome, exploreApplication, openSidebarConversation]
+    [agentBuilder, chrome, exploreApplication, openSidebarConversation, searchSession]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<EntityRow>>>(

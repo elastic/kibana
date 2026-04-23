@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import type { CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import type { EntityType } from '../../../common/entity_analytics/types';
 import { RiskSeverity } from '../../../common/search_strategy';
@@ -73,7 +74,8 @@ export const EntityListTable: React.FC<{
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
-}> = ({ entities, application, agentBuilder, chrome, openSidebarConversation }) => {
+  searchSession?: ISessionService;
+}> = ({ entities, application, agentBuilder, chrome, openSidebarConversation, searchSession }) => {
   const { euiTheme } = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<EntityListRow>> = useMemo(
@@ -106,6 +108,7 @@ export const EntityListTable: React.FC<{
                       agentBuilder,
                       chrome,
                       openSidebarConversation,
+                      searchSession,
                     });
                   }}
                 />
@@ -206,7 +209,14 @@ export const EntityListTable: React.FC<{
         ),
       },
     ],
-    [agentBuilder, application, chrome, euiTheme.font.familyCode, openSidebarConversation]
+    [
+      agentBuilder,
+      application,
+      chrome,
+      euiTheme.font.familyCode,
+      openSidebarConversation,
+      searchSession,
+    ]
   );
 
   return (

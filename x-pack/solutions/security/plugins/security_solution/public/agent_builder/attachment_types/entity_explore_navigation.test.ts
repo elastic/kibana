@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { SecurityPageName } from '../../../common/constants';
 import { parseEntityResolutionFromUrlState } from '../../common/components/link_to/entity_resolution_query_params';
@@ -13,6 +15,9 @@ import {
   getSecurityEntityExploreNavigateTarget,
   getUserNameForUserDetailsUrl,
   isAgentBuilderSidebarOpen,
+  navigateToEntityAnalyticsHomePageInApp,
+  navigateToEntityAnalyticsWithFlyoutInApp,
+  navigateToSecurityEntityInApp,
 } from './entity_explore_navigation';
 
 const queryFromPath = (pathWithQuery: string): string | undefined => {
@@ -119,6 +124,120 @@ describe('entity_explore_navigation', () => {
       });
       expect(deepLinkId).toBe(SecurityPageName.entityAnalyticsHomePage);
       expect(path).toBeUndefined();
+    });
+  });
+
+  describe('search session clearing on cross-app navigation', () => {
+    const buildApplicationMock = (): jest.Mocked<ApplicationStart> =>
+      ({
+        navigateToApp: jest.fn(),
+      } as unknown as jest.Mocked<ApplicationStart>);
+
+    const buildSearchSessionMock = (): jest.Mocked<Pick<ISessionService, 'clear'>> => ({
+      clear: jest.fn(),
+    });
+
+    const hostRow = {
+      entity_type: 'host',
+      entity_id: 'host:1',
+      entity_name: 'host-1',
+    };
+
+    describe('navigateToSecurityEntityInApp', () => {
+      it('clears the search session before navigateToApp is called', () => {
+        const application = buildApplicationMock();
+        const searchSession = buildSearchSessionMock();
+
+        navigateToSecurityEntityInApp({
+          application,
+          appId: 'securitySolutionUI',
+          row: hostRow,
+          searchSession: searchSession as unknown as ISessionService,
+        });
+
+        expect(searchSession.clear).toHaveBeenCalledTimes(1);
+        expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+        const clearOrder = searchSession.clear.mock.invocationCallOrder[0];
+        const navigateOrder = application.navigateToApp.mock.invocationCallOrder[0];
+        expect(clearOrder).toBeLessThan(navigateOrder);
+      });
+
+      it('does not throw when searchSession is undefined (backward-compat)', () => {
+        const application = buildApplicationMock();
+
+        expect(() =>
+          navigateToSecurityEntityInApp({
+            application,
+            appId: 'securitySolutionUI',
+            row: hostRow,
+          })
+        ).not.toThrow();
+        expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('navigateToEntityAnalyticsWithFlyoutInApp', () => {
+      it('clears the search session before navigateToApp is called', () => {
+        const application = buildApplicationMock();
+        const searchSession = buildSearchSessionMock();
+
+        navigateToEntityAnalyticsWithFlyoutInApp({
+          application,
+          appId: 'securitySolutionUI',
+          flyout: { left: { id: 'l' }, right: { id: 'r' }, preview: [] },
+          searchSession: searchSession as unknown as ISessionService,
+        });
+
+        expect(searchSession.clear).toHaveBeenCalledTimes(1);
+        expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+        const clearOrder = searchSession.clear.mock.invocationCallOrder[0];
+        const navigateOrder = application.navigateToApp.mock.invocationCallOrder[0];
+        expect(clearOrder).toBeLessThan(navigateOrder);
+      });
+
+      it('does not throw when searchSession is undefined (backward-compat)', () => {
+        const application = buildApplicationMock();
+
+        expect(() =>
+          navigateToEntityAnalyticsWithFlyoutInApp({
+            application,
+            appId: 'securitySolutionUI',
+            flyout: { left: { id: 'l' }, right: { id: 'r' }, preview: [] },
+          })
+        ).not.toThrow();
+        expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('navigateToEntityAnalyticsHomePageInApp', () => {
+      it('clears the search session before navigateToApp is called', () => {
+        const application = buildApplicationMock();
+        const searchSession = buildSearchSessionMock();
+
+        navigateToEntityAnalyticsHomePageInApp({
+          application,
+          appId: 'securitySolutionUI',
+          searchSession: searchSession as unknown as ISessionService,
+        });
+
+        expect(searchSession.clear).toHaveBeenCalledTimes(1);
+        expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+        const clearOrder = searchSession.clear.mock.invocationCallOrder[0];
+        const navigateOrder = application.navigateToApp.mock.invocationCallOrder[0];
+        expect(clearOrder).toBeLessThan(navigateOrder);
+      });
+
+      it('does not throw when searchSession is undefined (backward-compat)', () => {
+        const application = buildApplicationMock();
+
+        expect(() =>
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+          })
+        ).not.toThrow();
+        expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

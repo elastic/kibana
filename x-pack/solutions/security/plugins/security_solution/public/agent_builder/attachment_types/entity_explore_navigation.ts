@@ -8,6 +8,7 @@
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { encodeFlyout } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation,
@@ -192,6 +193,7 @@ export const navigateToSecurityEntityInApp = ({
   agentBuilder,
   chrome,
   openSidebarConversation,
+  searchSession,
 }: {
   application: ApplicationStart;
   appId: string;
@@ -200,12 +202,18 @@ export const navigateToSecurityEntityInApp = ({
   chrome?: SecurityAgentBuilderChrome;
   /** When rendering from Agent Builder canvas, pass this for the same restore path as "Edit in Dashboards". */
   openSidebarConversation?: () => void;
+  /**
+   * Optional search session service. When provided, the active session is cleared before
+   * navigating. See `clearSearchSessionBeforeSecurityNavigation` below for the rationale.
+   */
+  searchSession?: ISessionService;
 }): void => {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
   const { deepLinkId, path } = getSecurityEntityExploreNavigateTarget(row);
   if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
     agentBuilder.toggleChat();
   }
+  clearSearchSessionBeforeSecurityNavigation(searchSession);
   application.navigateToApp(appId, { deepLinkId, path, replace: true });
   scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
 };
@@ -225,6 +233,7 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   agentBuilder,
   chrome,
   openSidebarConversation,
+  searchSession,
 }: {
   application: ApplicationStart;
   appId: string;
@@ -232,6 +241,11 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
+  /**
+   * Optional search session service. When provided, the active session is cleared before
+   * navigating. See `clearSearchSessionBeforeSecurityNavigation` below for the rationale.
+   */
+  searchSession?: ISessionService;
 }): void => {
   const encoded = encodeFlyout(flyout);
   if (encoded == null) {
@@ -241,6 +255,7 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
     agentBuilder.toggleChat();
   }
+  clearSearchSessionBeforeSecurityNavigation(searchSession);
   application.navigateToApp(appId, {
     deepLinkId: SecurityPageName.entityAnalyticsHomePage,
     path: `?${encoded}`,
@@ -257,6 +272,7 @@ export const navigateToEntityAnalyticsHomePageInApp = ({
   openSidebarConversation,
   watchlistId,
   watchlistName,
+  searchSession,
 }: {
   application: ApplicationStart;
   appId: string;
@@ -265,6 +281,11 @@ export const navigateToEntityAnalyticsHomePageInApp = ({
   openSidebarConversation?: () => void;
   watchlistId?: string;
   watchlistName?: string;
+  /**
+   * Optional search session service. When provided, the active session is cleared before
+   * navigating. See `clearSearchSessionBeforeSecurityNavigation` below for the rationale.
+   */
+  searchSession?: ISessionService;
 }): void => {
   const params = new URLSearchParams();
   if (watchlistId) {
@@ -280,10 +301,28 @@ export const navigateToEntityAnalyticsHomePageInApp = ({
   if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
     agentBuilder.toggleChat();
   }
+  clearSearchSessionBeforeSecurityNavigation(searchSession);
   application.navigateToApp(appId, {
     deepLinkId: SecurityPageName.entityAnalyticsHomePage,
     path,
     replace: true,
   });
   scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
+};
+
+/**
+ * Navigating from `agent_builder` to `securitySolutionUI` is a legitimate cross-app jump
+ * triggered from the Canvas preview (Graph / Resolution / Open in Security / Open in Entity
+ * Analytics). Lens embeddables rendered inside the Canvas start a search session tagged with
+ * `appName: 'agent_builder'`; leaving it open when `currentAppId$` flips to
+ * `securitySolutionUI` trips the platform guard in
+ * `data/public/search/session/session_service.ts` and throws a fatal in dev.
+ *
+ * Clearing the session here keeps the navigation honest without regressing the
+ * minimized-sidebar case: when called from within Security the owner and current app match,
+ * so `SessionService.clear()` either succeeds as a benign reset (matching the Security
+ * `renderApp` unmount hygiene) or is a no-op when no session is active.
+ */
+const clearSearchSessionBeforeSecurityNavigation = (searchSession?: ISessionService): void => {
+  searchSession?.clear();
 };

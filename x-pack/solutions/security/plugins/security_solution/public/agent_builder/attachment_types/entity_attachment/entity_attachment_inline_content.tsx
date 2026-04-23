@@ -13,6 +13,7 @@ import { QueryClientProvider } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { normaliseEntityAttachment } from './payload';
 import type { EntityAttachment } from './types';
@@ -32,6 +33,7 @@ export interface EntityAttachmentInlineContentProps
   application?: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  searchSession?: ISessionService;
 }
 
 /**
@@ -54,6 +56,7 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
   agentBuilder,
   chrome,
   openSidebarConversation,
+  searchSession,
 }) => {
   const parsed = normaliseEntityAttachment(attachment);
   const { euiTheme } = useEuiTheme();
@@ -128,6 +131,8 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
               resolutionRiskStats={parsed.resolutionRiskStats}
               watchlistsEnabled={watchlistsEnabled}
               privmonModifierEnabled={privmonModifierEnabled}
+              application={application}
+              searchSession={searchSession}
             />
           ) : (
             <EntityTable
@@ -136,6 +141,7 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
               agentBuilder={agentBuilder}
               chrome={chrome}
               openSidebarConversation={openSidebarConversation}
+              searchSession={searchSession}
             />
           )}
         </QueryClientProvider>

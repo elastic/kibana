@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { EntityForAttachment } from '../use_entity_for_attachment';
 import { EntityTable } from './entity_table';
@@ -156,6 +157,22 @@ describe('EntityTable', () => {
       expect(args.agentBuilder).toBe(agentBuilder);
       expect(args.chrome).toBe(chrome);
       expect(args.openSidebarConversation).toBe(openSidebarConversation);
+    });
+
+    it('forwards the searchSession prop to navigateToSecurityEntityInApp when clicked', () => {
+      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+
+      renderTable({
+        entities: [{ identifierType: 'host', identifier: 'host-1' }],
+        application,
+        searchSession,
+      });
+
+      fireEvent.click(screen.getAllByTestId('entityAttachmentTableOpenEntity')[0]);
+
+      expect(mockedNavigateToSecurityEntityInApp).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToSecurityEntityInApp.mock.calls[0][0].searchSession).toBe(searchSession);
     });
 
     it('falls back to the raw identifier when useEntityForAttachment has not resolved yet', () => {

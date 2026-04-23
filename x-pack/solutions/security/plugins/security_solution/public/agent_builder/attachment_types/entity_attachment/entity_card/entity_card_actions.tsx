@@ -10,11 +10,27 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { APP_UI_ID, ENTITY_ANALYTICS_PATH } from '../../../../../common/constants';
+import type { ISessionService } from '@kbn/data-plugin/public';
+import { APP_UI_ID } from '../../../../../common/constants';
 import type { EntityAttachmentIdentifier } from '../types';
+import { navigateToEntityAnalyticsHomePageInApp } from '../../entity_explore_navigation';
 
 interface EntityCardActionsProps {
   identifier: EntityAttachmentIdentifier;
+  /**
+   * Optional core `ApplicationStart`. When provided, the "Open in Entity Analytics" button
+   * routes through `navigateToEntityAnalyticsHomePageInApp`, which clears any active
+   * Agent Builder-tagged search session before the cross-app jump. When omitted, falls back
+   * to `useKibana()` so existing call sites / tests without an explicit `application` prop
+   * keep working (they still reach Entity Analytics via the shared helper).
+   */
+  application?: ApplicationStart;
+  /**
+   * Optional search session service. Forwarded to `navigateToEntityAnalyticsHomePageInApp`
+   * so the active search session tagged with `appName: 'agent_builder'` is cleared before
+   * the legitimate cross-app navigation to `securitySolutionUI`.
+   */
+  searchSession?: ISessionService;
 }
 
 const OPEN_ENTITY_ANALYTICS_LABEL = i18n.translate(
@@ -29,12 +45,22 @@ const OPEN_ENTITY_ANALYTICS_LABEL = i18n.translate(
  */
 export const EntityCardActions: React.FC<EntityCardActionsProps> = ({
   identifier: _identifier,
+  application,
+  searchSession,
 }) => {
   const { services } = useKibana<{ application: ApplicationStart }>();
+  const effectiveApplication = application ?? services.application;
 
   const handleOpenEntityAnalytics = useCallback(() => {
-    services.application?.navigateToApp(APP_UI_ID, { path: ENTITY_ANALYTICS_PATH });
-  }, [services.application]);
+    if (!effectiveApplication) {
+      return;
+    }
+    navigateToEntityAnalyticsHomePageInApp({
+      application: effectiveApplication,
+      appId: APP_UI_ID,
+      searchSession,
+    });
+  }, [effectiveApplication, searchSession]);
 
   return (
     <div data-test-subj="entityAttachmentCardActions">

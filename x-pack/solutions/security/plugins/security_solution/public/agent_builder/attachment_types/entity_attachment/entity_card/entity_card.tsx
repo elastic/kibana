@@ -8,6 +8,8 @@
 import React, { useMemo } from 'react';
 import { EuiCallOut, EuiPanel, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import type { RiskSeverity, RiskStats } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { useEntityForAttachment } from '../use_entity_for_attachment';
@@ -35,6 +37,17 @@ interface EntityCardProps {
   resolutionRiskStats?: EntityAttachmentRiskStats;
   watchlistsEnabled: boolean;
   privmonModifierEnabled: boolean;
+  /**
+   * Optional core `ApplicationStart`. Forwarded to `EntityCardActions` so "Open in Entity
+   * Analytics" goes through the shared `navigateTo…InApp` helpers (which clear the search
+   * session before cross-app navigation) instead of a raw `navigateToApp` call.
+   */
+  application?: ApplicationStart;
+  /**
+   * Optional search session service. Forwarded to `EntityCardActions` to enable the
+   * session-clearing hook in the shared `navigateTo…InApp` helpers.
+   */
+  searchSession?: ISessionService;
 }
 
 /**
@@ -83,6 +96,8 @@ export const EntityCard: React.FC<EntityCardProps> = ({
   resolutionRiskStats: attachmentResolutionRiskStats,
   watchlistsEnabled,
   privmonModifierEnabled,
+  application,
+  searchSession,
 }) => {
   const { isLoading, error, data } = useEntityForAttachment(identifier);
 
@@ -156,7 +171,11 @@ export const EntityCard: React.FC<EntityCardProps> = ({
           isEntityInStore={false}
           hasLastSeenDate={false}
         />
-        <EntityCardActions identifier={identifier} />
+        <EntityCardActions
+          identifier={identifier}
+          application={application}
+          searchSession={searchSession}
+        />
       </EuiPanel>
     );
   }
@@ -232,7 +251,11 @@ export const EntityCard: React.FC<EntityCardProps> = ({
           )}
         </>
       )}
-      <EntityCardActions identifier={identifier} />
+      <EntityCardActions
+        identifier={identifier}
+        application={application}
+        searchSession={searchSession}
+      />
     </EuiPanel>
   );
 };
