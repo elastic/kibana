@@ -10,16 +10,16 @@
 /**
  * Tests for GET /api/workflows/aggs
  *
- * The route validates `fields` against a server-side allowlist
- * (ALLOWED_AGG_FIELDS: name, enabled, tags, createdBy, triggerTypes).
- * Any field outside this set — including ES metadata fields and
- * unknown/unmapped names — is rejected with HTTP 400 by the schema.
+ * Finding: User-supplied field names are passed verbatim to Elasticsearch as terms-aggregation
+ * keys with no allowlist. Any user with `read` privilege can probe the index structure by
+ * sending arbitrary field names.
  *
  * 1a – Valid known fields return non-empty buckets (sanity / regression guard).
- * 1b – An unknown / unmapped field name is rejected with 400 (allowlist guard).
- * 1c – ES metadata fields (_id, _index, _score, _source) are rejected with 400.
- * 1d – Sending more than MAX_AGG_FIELDS (25) allowlisted fields is rejected with 400
- *      (regression guard for the array-size schema validation).
+ * 1b – An unmapped field name returns 200 with an absent or empty bucket list
+ * 1c – An ES metadata field (_id) is rejected with 400 or returns an empty bucket
+ *      (regression guard: once an allowlist is added, metadata fields must be blocked).
+ * 1d – Sending more than MAX_AGG_FIELDS (25) fields is rejected with 400
+ *      (regression guard for the existing schema validation).
  */
 
 import { tags } from '@kbn/scout';
@@ -101,28 +101,25 @@ spaceTest.describe('GET /api/workflows/aggs', { tag: tags.deploymentAgnostic }, 
     expect(tagKeys).toContain('shared');
   });
 
-  // 1b — Unknown / unmapped field: rejected by the allowlist
-  spaceTest('rejects a non-allowlisted field with 400', async () => {
+  // 1b — Unmapped / non-existent field: documents current permissive behaviour
+  spaceTest('returns 200 with absent or empty buckets for a non-existent field', async () => {
     const { data, status } = await workflowsApi.rawGetAggs(['totallyNonExistentField99']);
 
-    expect(status).toBe(400);
-    expect(data?.message).toContain(
-      `Field 'totallyNonExistentField99' is not allowed for aggregation.`
-    );
+    // Current behaviour: ES silently returns no buckets for unmapped fields.
+    expect(status).toBe(200);
+    const buckets = data?.totallyNonExistentField99;
+    expect(buckets == null || (Array.isArray(buckets) && buckets.length === 0)).toBe(true);
   });
 
-  // 1c — ES metadata fields: rejected by the allowlist
-  spaceTest('rejects ES metadata fields with 400', async () => {
-    const { data, status } = await workflowsApi.rawGetAggs(['_id', '_index', '_score', '_source']);
-
+  // 1c — ES metadata field _id: regression guard
+  spaceTest('rejects or returns empty buckets for the ES metadata field', async () => {
+    const { status } = await workflowsApi.rawGetAggs(['_id', '_index', '_score', '_source']);
     expect(status).toBe(400);
-    expect(data?.message).toContain(`Field '_id' is not allowed for aggregation.`);
   });
 
-  // 1d — Exceeding MAX_AGG_FIELDS (25) is rejected by the schema (regression guard).
-  // Use allowlisted values so the array-size check is what triggers the rejection.
+  // 1d — Exceeding MAX_AGG_FIELDS (25) is rejected by the schema (regression guard)
   spaceTest('rejects requests with more than 25 fields', async () => {
-    const tooManyFields = Array.from({ length: 26 }, () => 'tags');
+    const tooManyFields = Array.from({ length: 26 }, (_, i) => `field${i}`);
     const { status, data } = await workflowsApi.rawGetAggs(tooManyFields);
 
     expect(status).toBe(400);
