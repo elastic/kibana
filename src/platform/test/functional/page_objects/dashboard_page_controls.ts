@@ -99,18 +99,9 @@ export class DashboardPageControls extends FtrService {
     }
   }
 
-  public async openControlsMenu() {
-    const isOpen = await this.testSubjects.exists(`controls-create-button`, { timeout: 2500 });
-    if (!isOpen) {
-      await this.dashboardAddPanel.clickTopNavAddMenu();
-      await this.testSubjects.click('dashboard-controls-menu-button');
-    }
-  }
-
   public async openCreateControlFlyout() {
     this.log.debug(`Opening flyout for creating a control`);
-    await this.openControlsMenu();
-    await this.testSubjects.click('controls-create-button');
+    await this.dashboardAddPanel.clickAddControlPanel();
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
@@ -270,6 +261,7 @@ export class DashboardPageControls extends FtrService {
     additionalSettings?: OptionsListAdditionalSettings | RangeSliderAdditionalSettings;
     skipOpenFlyout?: boolean;
   }) {
+    debugger;
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
     if (!skipOpenFlyout) {
       await this.openCreateControlFlyout();
