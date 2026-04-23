@@ -321,6 +321,54 @@ describe('RiskInputsTab', () => {
     expect(queryByTestId('risk-input-score-view-toggle')).not.toBeInTheDocument();
   });
 
+  it('does not show score view toggle when resolution group has a single member', () => {
+    const resolutionRiskScore = {
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+        },
+      },
+    };
+
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+        },
+        aliases: [],
+        group_size: 1,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown }) =>
+      isResolutionFilter(params)
+        ? {
+            loading: false,
+            error: false,
+            data: [resolutionRiskScore],
+          }
+        : {
+            loading: false,
+            error: false,
+            data: [riskScore],
+          }
+    );
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          scopeId={'scopeId'}
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-score-view-toggle')).not.toBeInTheDocument();
+  });
+
   it('shows score view toggle and switches to resolution contributions', () => {
     const resolutionRiskScore = {
       '@timestamp': '2021-08-19T16:00:00.000Z',
@@ -363,7 +411,7 @@ describe('RiskInputsTab', () => {
             asset: { criticality: 'extreme_impact' },
           },
         ],
-        group_size: 1,
+        group_size: 2,
       },
     });
     mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown }) =>
