@@ -398,7 +398,7 @@ describe('DashboardCanvasAttachment', () => {
       });
     });
 
-    expect(mockApi.setQuery).toHaveBeenCalledWith(undefined);
+    expect(mockApi.setQuery).toHaveBeenCalledWith({ query: '', language: 'kuery' });
     expect(mockApi.forceRefresh).toHaveBeenCalled();
   });
 
