@@ -308,7 +308,7 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       display: none;
     }
     .monaco-editor .action-widget {
-      min-width: 200px !important;
+      min-width: calc(${theme.euiTheme.size.xl} * 6);
     }
 
     .margin-view-overlays .line-numbers {
@@ -472,17 +472,9 @@ export const trackSuggestionPopupState = (
  * @returns
  */
 export const isCodeActionMenuVisible = (editor: monaco.editor.IStandaloneCodeEditor): boolean => {
-  const editorDomNode = editor.getDomNode();
-  const contextKeyService = (
-    editor as monaco.editor.IStandaloneCodeEditor & {
-      _contextKeyService?: {
-        getContext: (target: HTMLElement | null) => {
-          getValue: (key: string) => unknown;
-        };
-      };
-    }
-  )._contextKeyService;
-  return (
-    contextKeyService?.getContext(editorDomNode ?? null)?.getValue('codeActionMenuVisible') === true
-  );
+  const actionWidgetList = editor.getDomNode()?.querySelector('.action-widget .actionList');
+  if (actionWidgetList) {
+    return Array.from(actionWidgetList.children).length > 0;
+  }
+  return false;
 };
