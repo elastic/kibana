@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * generate_required_field_fixes.js
  *
@@ -17,8 +26,6 @@
  * Or via make:
  *   make api-docs-fix-required
  */
-
-'use strict';
 
 const fs = require('fs');
 const path = require('path');
@@ -56,7 +63,9 @@ function collectBugs(spec) {
     if (!node || typeof node !== 'object' || Array.isArray(node)) return;
 
     if (node.properties && Array.isArray(node.required) && node.required.length > 0) {
-      const buggy = node.required.filter((f) => optionalRefName(node.properties[f], optionalSchemas));
+      const buggy = node.required.filter((f) =>
+        optionalRefName(node.properties[f], optionalSchemas)
+      );
       if (buggy.length > 0) {
         const correct = node.required.filter(
           (f) => !optionalRefName(node.properties[f], optionalSchemas)
@@ -97,7 +106,9 @@ function generateActions(bugs) {
   for (const { jsonpath, buggyFields, correctRequired } of bugs) {
     const target = toTarget(jsonpath);
     lines.push(`  - target: "${target}.required"`);
-    lines.push(`    description: "Remove x-oas-optional fields from required: ${buggyFields.join(', ')}"`);
+    lines.push(
+      `    description: "Remove x-oas-optional fields from required: ${buggyFields.join(', ')}"`
+    );
     lines.push('    remove: true');
     lines.push(`  - target: "${target}"`);
     lines.push('    description: "Restore required array without x-oas-optional fields"');
