@@ -129,6 +129,7 @@ describe('metric visualization', () => {
       expect(visualization.initialize(() => 'some-id')).toEqual({
         layerId: 'some-id',
         layerType: LayerTypes.DATA,
+        styleTemplate: 'bottom',
       });
     });
 

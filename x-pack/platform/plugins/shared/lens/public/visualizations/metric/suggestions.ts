@@ -57,6 +57,11 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       ...state,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
+      ...(state?.styleTemplate
+        ? { styleTemplate: state.styleTemplate }
+        : !isActive
+        ? { styleTemplate: 'bottom' }
+        : {}),
     },
     title: metricColumns[0]?.operation.label || metricLabel,
     previewIcon: IconChartMetric,

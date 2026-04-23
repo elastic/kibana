@@ -43,11 +43,11 @@ export const LENS_METRIC_STYLE_TEMPLATE: Record<MetricStyleTemplateId, MetricLay
     secondaryAlign: 'right',
   },
   middle: {
-    titlesTextAlign: 'left',
+    titlesTextAlign: 'center',
     primaryPosition: 'middle',
     primaryAlign: 'center',
     iconAlign: 'right',
-    secondaryAlign: 'right',
+    secondaryAlign: 'center',
   },
   top: {
     titlesTextAlign: 'left',
@@ -58,7 +58,7 @@ export const LENS_METRIC_STYLE_TEMPLATE: Record<MetricStyleTemplateId, MetricLay
   },
 } as const;
 
-const DEFAULT_STYLE_TEMPLATE: PrimaryMetricPosition = 'top';
+const DEFAULT_STYLE_TEMPLATE: PrimaryMetricPosition = 'bottom';
 const defaultStyleTemplate = LENS_METRIC_STYLE_TEMPLATE[DEFAULT_STYLE_TEMPLATE];
 
 /**
@@ -69,7 +69,7 @@ export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   iconAlign: defaultStyleTemplate.iconAlign ?? 'right',
   secondaryAlign: defaultStyleTemplate.secondaryAlign ?? 'right',
   valueFontMode: 'default',
-  primaryPosition: DEFAULT_STYLE_TEMPLATE,
+  primaryPosition: defaultStyleTemplate.primaryPosition ?? 'bottom',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
 };

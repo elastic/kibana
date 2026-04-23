@@ -353,6 +353,7 @@ describe('metric suggestions', () => {
           state: {
             layerId: 'first',
             layerType: LayerTypes.DATA,
+            styleTemplate: 'bottom',
             metricAccessor: metricColumn.columnId,
             breakdownByAccessor: bucketColumn.columnId,
           },

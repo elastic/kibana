@@ -468,6 +468,7 @@ export const getMetricVisualization = ({
     return {
       layerId: addNewLayer(),
       layerType: layerTypes.DATA,
+      styleTemplate: 'bottom',
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
   },
