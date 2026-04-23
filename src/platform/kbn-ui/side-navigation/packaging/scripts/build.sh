@@ -20,17 +20,17 @@ TOOLING_DIR="$KBN_UI_ROOT/_tooling"
 TARGET_DIR="${BUILD_OUTPUT_DIR:-$NAV_ROOT/target}"
 
 echo "==> Step 1: Type validation"
-npx tsc --project "$PACKAGING_DIR/tsconfig.json" --noEmit
+yarn -s tsc --project "$PACKAGING_DIR/tsconfig.json" --noEmit
 echo "    Types OK"
 
 echo "==> Step 2: Webpack bundle"
-npx webpack --config "$PACKAGING_DIR/webpack.config.js"
+yarn -s webpack --config "$PACKAGING_DIR/webpack.config.js"
 echo "    Bundle OK"
 
 echo "==> Step 3: TypeScript declarations"
 # Emit as a regular module (not --outFile ambient wrapper) so consumers can
 # `import { NavigationProps } from '@kbn/ui-side-navigation'`.
-npx tsc "$PACKAGING_DIR/react/types.ts" \
+yarn -s tsc "$PACKAGING_DIR/react/types.ts" \
   --declaration --emitDeclarationOnly \
   --outDir "$TARGET_DIR" \
   --rootDir "$PACKAGING_DIR/react" \
