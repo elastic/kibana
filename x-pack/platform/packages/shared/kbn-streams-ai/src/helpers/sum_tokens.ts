@@ -7,6 +7,13 @@
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 
+export const EMPTY_TOKENS: ChatCompletionTokenCount = {
+  prompt: 0,
+  completion: 0,
+  total: 0,
+  cached: 0,
+};
+
 export function sumTokens(
   a: ChatCompletionTokenCount,
   b?: ChatCompletionTokenCount

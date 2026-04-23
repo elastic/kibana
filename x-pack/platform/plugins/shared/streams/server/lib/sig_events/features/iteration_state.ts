@@ -7,16 +7,9 @@
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { Feature, IterationResult } from '@kbn/streams-schema';
-import { sumTokens } from '@kbn/streams-ai';
+import { EMPTY_TOKENS, sumTokens } from '@kbn/streams-ai';
 
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-export const EMPTY_TOKENS: ChatCompletionTokenCount = {
-  prompt: 0,
-  completion: 0,
-  total: 0,
-  cached: 0,
-};
 
 export interface AccumulatedIterationState {
   discoveredFeatures: Feature[];
