@@ -11,25 +11,33 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflow } from '@kbn/workflows';
 
 import { hasScheduledTriggers } from '../lib/schedule_utils';
-import type { WorkflowProperties } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 /**
  * Syncs scheduler state after a workflow document is saved (update path).
- * Unschedules tasks if the workflow is not schedulable, or updates them otherwise.
+ * Re-reads the workflow from storage via `getWorkflow` so the scheduler is always
+ * programmed against the last persisted state. Under concurrent writes this
+ * guarantees the scheduler reflects the latest committed document, not an
+ * in-memory copy that may have been superseded.
  */
 export const syncSchedulerAfterSave = async (params: {
   workflowId: string;
   spaceId: string;
   request: KibanaRequest;
-  finalData: WorkflowProperties;
+  getWorkflow: (id: string, spaceId: string) => Promise<EsWorkflow | null>;
   taskScheduler: WorkflowTaskScheduler;
   logger: Logger;
 }): Promise<void> => {
-  const { workflowId, spaceId, request, finalData, taskScheduler, logger } = params;
+  const { workflowId, spaceId, request, getWorkflow, taskScheduler, logger } = params;
 
-  const workflowIsSchedulable = finalData.definition && finalData.valid && finalData.enabled;
-  if (!workflowIsSchedulable) {
+  const workflow = await getWorkflow(workflowId, spaceId);
+  if (!workflow) {
+    logger.warn(`syncSchedulerAfterSave: workflow ${workflowId} not found after save`);
+    return;
+  }
+
+  const schedulable = workflow.definition && workflow.valid && workflow.enabled;
+  if (!schedulable) {
     await taskScheduler.unscheduleWorkflowTasks(workflowId);
     logger.debug(
       `Removed all scheduled tasks for workflow ${workflowId} (workflow disabled or invalid)`
@@ -37,28 +45,12 @@ export const syncSchedulerAfterSave = async (params: {
     return;
   }
 
-  const triggers = finalData.definition?.triggers ?? [];
-  if (!hasScheduledTriggers(triggers)) {
+  if (!hasScheduledTriggers(workflow.definition?.triggers ?? [])) {
     await taskScheduler.unscheduleWorkflowTasks(workflowId);
     logger.debug(`Removed scheduled tasks for workflow ${workflowId} (no scheduled triggers)`);
     return;
   }
 
-  const workflowForScheduler: EsWorkflow = {
-    id: workflowId,
-    name: finalData.name,
-    description: finalData.description,
-    enabled: finalData.enabled,
-    tags: finalData.tags,
-    yaml: finalData.yaml,
-    definition: finalData.definition ?? undefined,
-    createdBy: finalData.createdBy,
-    lastUpdatedBy: finalData.lastUpdatedBy,
-    valid: finalData.valid,
-    deleted_at: finalData.deleted_at,
-    createdAt: new Date(finalData.created_at),
-    lastUpdatedAt: new Date(finalData.updated_at),
-  };
-  await taskScheduler.updateWorkflowTasks(workflowForScheduler, spaceId, request);
+  await taskScheduler.updateWorkflowTasks(workflow, spaceId, request);
   logger.debug(`Updated scheduled tasks for workflow ${workflowId}`);
 };
