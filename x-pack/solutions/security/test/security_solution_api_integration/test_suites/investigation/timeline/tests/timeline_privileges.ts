@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import type { CreateTimelinesResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TIMELINE_EXPORT_URL } from '@kbn/security-solution-plugin/common/constants';
+import type { Role } from '@kbn/security-plugin-types-common';
+import type TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import {
   getTimelines,
@@ -23,8 +25,6 @@ import {
 } from '../../utils/timelines';
 import * as users from '../../../../config/privileges/users';
 import { roles } from '../../../../config/privileges/roles';
-import { Role } from '@kbn/security-plugin-types-common';
-import TestAgent from 'supertest/lib/agent';
 
 const canOnlyReadUsers = [users.secReadV1User, users.secTimelineReadUser];
 const canWriteUsers = [users.secAllV1User, users.secTimelineAllUser];
