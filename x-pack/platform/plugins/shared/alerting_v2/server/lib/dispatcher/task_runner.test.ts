@@ -22,6 +22,18 @@ function stubExecutionResult(startedAt: Date): DispatcherExecutionResult {
       completed: true,
       halt_reason: null,
       stages: [],
+      totals: {
+        episodes: 0,
+        suppressions: 0,
+        dispatchable: 0,
+        suppressed: 0,
+        rules: 0,
+        policies: 0,
+        matched: 0,
+        groups: 0,
+        dispatch: 0,
+        throttled: 0,
+      },
     },
   };
 }
