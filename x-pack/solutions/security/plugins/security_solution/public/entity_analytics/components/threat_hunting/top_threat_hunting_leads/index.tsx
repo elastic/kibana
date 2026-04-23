@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   EuiBetaBadge,
   useResizeObserver,
@@ -30,7 +31,6 @@ import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { noop } from 'lodash/fp';
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import type { HuntingLead } from './types';
 import { LeadCard } from './lead_card';
 import * as i18n from './translations';
@@ -55,7 +55,9 @@ interface TopThreatHuntingLeadsProps {
   onHuntInChat: () => void;
   onGenerate: () => void;
   connectorId: string | undefined;
+  hasValidConnector: boolean;
   onConnectorIdSelected: (id: string) => void;
+  isAgentChatExperienceEnabled: boolean;
 }
 
 export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
@@ -72,7 +74,9 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   onHuntInChat,
   onGenerate,
   connectorId,
+  hasValidConnector,
   onConnectorIdSelected,
+  isAgentChatExperienceEnabled,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -95,7 +99,6 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
 
   const { getUrlForApp } = useKibana().services.application;
   const genAiSettingsUrl = getUrlForApp('management', { path: '/ai/genAiSettings' });
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const showHeaderGenerate = !isOpen && leads.length === 0 && !hasGenerated;
   const renderCount = Math.min(leads.length, visibleCardCount);
@@ -113,17 +116,12 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             size="xs"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-              <EuiToolTip
-                content={i18n.TOP_THREAT_HUNTING_LEADS_TITLE}
-                anchorClassName="eui-textTruncate"
-              >
-                <EuiText tabIndex={0} size="m">
-                  <h3 className="eui-textTruncate">{i18n.TOP_THREAT_HUNTING_LEADS_TITLE}</h3>
-                </EuiText>
-              </EuiToolTip>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h2>{i18n.TOP_THREAT_HUNTING_LEADS_TITLE}</h2>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AiIcon iconType="sparkles" size="m" aria-label="AI Assistant" />
@@ -187,22 +185,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             )}
             {showHeaderGenerate && (
               <EuiFlexItem grow={false}>
-                {isAgentChatExperienceEnabled ? (
-                  <EuiToolTip
-                    content={!connectorId ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined}
-                  >
-                    <AiButton
-                      size="s"
-                      iconType="sparkles"
-                      isLoading={isGenerating}
-                      onClick={onGenerate}
-                      isDisabled={!connectorId}
-                      data-test-subj="headerGenerateLeadsButton"
-                    >
-                      {i18n.GENERATE_LEADS}
-                    </AiButton>
-                  </EuiToolTip>
-                ) : (
+                {!isAgentChatExperienceEnabled ? (
                   <EuiButton
                     size="s"
                     fill
@@ -214,6 +197,23 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                   >
                     {i18n.OPEN_GENAI_SETTINGS}
                   </EuiButton>
+                ) : (
+                  <EuiToolTip
+                    content={
+                      !hasValidConnector ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined
+                    }
+                  >
+                    <AiButton
+                      size="s"
+                      iconType="sparkles"
+                      isLoading={isGenerating}
+                      isDisabled={!hasValidConnector}
+                      onClick={onGenerate}
+                      data-test-subj="headerGenerateLeadsButton"
+                    >
+                      {i18n.GENERATE_LEADS}
+                    </AiButton>
+                  </EuiToolTip>
                 )}
               </EuiFlexItem>
             )}
@@ -309,24 +309,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                   title={<h3>{i18n.NO_DATA_TITLE}</h3>}
                   body={<p>{i18n.NO_DATA_DESCRIPTION}</p>}
                   actions={
-                    isAgentChatExperienceEnabled ? (
-                      <EuiToolTip
-                        content={
-                          !connectorId ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined
-                        }
-                      >
-                        <AiButton
-                          size="s"
-                          iconType="sparkles"
-                          isLoading={isGenerating}
-                          onClick={onGenerate}
-                          isDisabled={!connectorId}
-                          data-test-subj="generateLeadsButton"
-                        >
-                          {i18n.GENERATE_LEADS}
-                        </AiButton>
-                      </EuiToolTip>
-                    ) : (
+                    !isAgentChatExperienceEnabled ? (
                       <EuiButton
                         size="s"
                         fill
@@ -338,6 +321,25 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                       >
                         {i18n.OPEN_GENAI_SETTINGS}
                       </EuiButton>
+                    ) : (
+                      <EuiToolTip
+                        content={
+                          !hasValidConnector
+                            ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
+                            : undefined
+                        }
+                      >
+                        <AiButton
+                          size="s"
+                          iconType="sparkles"
+                          isLoading={isGenerating}
+                          isDisabled={!hasValidConnector}
+                          onClick={onGenerate}
+                          data-test-subj="generateLeadsButton"
+                        >
+                          {i18n.GENERATE_LEADS}
+                        </AiButton>
+                      </EuiToolTip>
                     )
                   }
                   data-test-subj="leadsEmptyPrompt"
@@ -349,30 +351,13 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                   style={{ maxWidth: 620 }}
                   body={
                     <p>
-                      {isAgentChatExperienceEnabled
-                        ? i18n.NO_LEADS_DESCRIPTION
-                        : i18n.NO_AI_AGENT_DESCRIPTION}
+                      {!isAgentChatExperienceEnabled
+                        ? i18n.NO_CONNECTOR_DESCRIPTION
+                        : i18n.NO_LEADS_DESCRIPTION}
                     </p>
                   }
                   actions={
-                    isAgentChatExperienceEnabled ? (
-                      <EuiToolTip
-                        content={
-                          !connectorId ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined
-                        }
-                      >
-                        <AiButton
-                          size="s"
-                          iconType="sparkles"
-                          isLoading={isGenerating}
-                          onClick={onGenerate}
-                          isDisabled={!connectorId}
-                          data-test-subj="generateLeadsButton"
-                        >
-                          {i18n.GENERATE_LEADS}
-                        </AiButton>
-                      </EuiToolTip>
-                    ) : (
+                    !isAgentChatExperienceEnabled ? (
                       <EuiButton
                         size="s"
                         fill
@@ -384,6 +369,25 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                       >
                         {i18n.OPEN_GENAI_SETTINGS}
                       </EuiButton>
+                    ) : (
+                      <EuiToolTip
+                        content={
+                          !hasValidConnector
+                            ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
+                            : undefined
+                        }
+                      >
+                        <AiButton
+                          size="s"
+                          iconType="sparkles"
+                          isLoading={isGenerating}
+                          isDisabled={!hasValidConnector}
+                          onClick={onGenerate}
+                          data-test-subj="generateLeadsButton"
+                        >
+                          {i18n.GENERATE_LEADS}
+                        </AiButton>
+                      </EuiToolTip>
                     )
                   }
                   icon={<EuiImage size={128} alt="" url={illustrationGenAi} />}
@@ -392,7 +396,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
               )}
             </EuiPanel>
           ) : (
-            <div ref={setCardsContainer} style={{ overflow: 'hidden', padding: 16, margin: -8 }}>
+            <div ref={setCardsContainer} style={{ overflow: 'hidden' }}>
               <EuiFlexGroup
                 gutterSize="m"
                 responsive={false}
