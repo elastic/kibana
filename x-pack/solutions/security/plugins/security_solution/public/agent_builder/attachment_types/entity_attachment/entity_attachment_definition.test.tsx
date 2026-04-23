@@ -182,12 +182,18 @@ describe('createEntityAttachmentDefinition', () => {
       const def = buildDefinition({ withCanvas: false });
       expect(def.renderCanvasContent).toBeUndefined();
       expect(def.getActionButtons).toBeUndefined();
+      expect(def.canvasWidth).toBeUndefined();
     });
 
     it('registers renderCanvasContent + getActionButtons when both application and resolver are provided', () => {
       const def = buildDefinition();
       expect(def.renderCanvasContent).toBeInstanceOf(Function);
       expect(def.getActionButtons).toBeInstanceOf(Function);
+    });
+
+    it('sets a narrower canvasWidth so the entity flyout overview matches the in-app flyout rail', () => {
+      const def = buildDefinition();
+      expect(def.canvasWidth).toBe('640px');
     });
   });
 

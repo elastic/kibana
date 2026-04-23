@@ -49,6 +49,15 @@ const OPEN_IN_SECURITY_LABEL = i18n.translate(
 );
 
 /**
+ * Preferred width for the entity flyout canvas. The rendered content is the Security
+ * expandable-flyout overview (`HostPanelContent` / `UserPanelContent` / `ServicePanelContent`)
+ * which is designed for a narrow rail; at the default `50vw` the entity summary grid and
+ * highlights look over-stretched on wide monitors. Narrowing the canvas keeps parity with
+ * the in-app flyout look.
+ */
+const ENTITY_CANVAS_WIDTH = '640px';
+
+/**
  * Lazy-loaded inline renderer — pulls `EntityAttachmentInlineContent` (entity card / table)
  * into its own chunk so the main `securitySolution` entry bundle doesn't pick up the entity
  * analytics card + table dependencies until an attachment is actually rendered in the chat.
@@ -131,6 +140,7 @@ export const createEntityAttachmentDefinition = ({
 
   return {
     ...baseDefinition,
+    canvasWidth: ENTITY_CANVAS_WIDTH,
     renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>) => (
       <React.Suspense
         fallback={

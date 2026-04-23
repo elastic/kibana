@@ -72,6 +72,15 @@ const rootCanvasStyles = css({
  */
 const RISK_LEVEL_PANEL_STACK_WIDTH_THRESHOLD = 500;
 
+/**
+ * Preferred width for the Entity Analytics dashboard canvas. The layout has side-by-side
+ * risk breakdown + donut + anomaly highlights panels, plus an entity list below, so it
+ * benefits from as much width as the canvas flyout will allow. This matches the default
+ * max (`50vw`) but is set explicitly to signal intent and survive any future change to
+ * `DEFAULT_CANVAS_WIDTH`.
+ */
+const EA_DASHBOARD_CANVAS_WIDTH = '50vw';
+
 const mergeSeverityCount = (partial?: SeverityCount): SeverityCount => ({
   ...EMPTY_SEVERITY_COUNT,
   ...partial,
@@ -524,6 +533,7 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
       defaultMessage: 'Entity Analytics dashboard',
     }),
   getIcon: () => 'dashboardApp',
+  canvasWidth: EA_DASHBOARD_CANVAS_WIDTH,
   renderInlineContent: (props) => <EntityAnalyticsDashboardInlineContent {...props} />,
   renderCanvasContent: (props) => (
     <EntityAnalyticsDashboardCanvasContent

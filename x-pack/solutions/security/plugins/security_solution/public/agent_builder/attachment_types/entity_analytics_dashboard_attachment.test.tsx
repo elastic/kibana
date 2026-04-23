@@ -224,4 +224,10 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
     const innerRow = screen.getByTestId('riskLevelPanelInnerRow');
     expect(innerRow.getAttribute('data-direction')).toBe('row');
   });
+
+  it('sets canvasWidth to 50vw so the dashboard uses the full canvas flyout width', () => {
+    const application = applicationServiceMock.createStartContract();
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({ application });
+    expect(definition.canvasWidth).toBe('50vw');
+  });
 });
