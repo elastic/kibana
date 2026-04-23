@@ -14705,6 +14705,14 @@
                 "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/inference.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/common/schema.ts"
+              },
+              {
                 "plugin": "@kbn/connector-schemas",
                 "path": "src/platform/packages/shared/kbn-connector-schemas/openai/schemas/v1.ts"
               },
@@ -14735,14 +14743,6 @@
               {
                 "plugin": "@kbn/sample-log-parser",
                 "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/inference.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/common/schema.ts"
               },
               {
                 "plugin": "@kbn/connector-schemas",
@@ -29787,7 +29787,12 @@
         "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
-        "references": [],
+        "references": [
+          {
+            "plugin": "@kbn/streams-ai",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/format_zod_pipeline_errors.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -30861,40 +30866,40 @@
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts"
           },
           {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
-          },
-          {
-            "plugin": "@kbn/alerting-v2-schemas",
-            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
-          },
-          {
-            "plugin": "@kbn/entities-schema",
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
-          },
-          {
-            "plugin": "@kbn/entities-schema",
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
-          },
-          {
-            "plugin": "@kbn/entities-schema",
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
-          },
-          {
             "plugin": "@kbn/connector-schemas",
             "path": "src/platform/packages/shared/kbn-connector-schemas/common/auth/schemas/v1.ts"
           },
           {
             "plugin": "@kbn/connector-schemas",
             "path": "src/platform/packages/shared/kbn-connector-schemas/http/schemas/v1.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/common.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-v2-schemas",
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts"
+          },
+          {
+            "plugin": "@kbn/entities-schema",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
+          },
+          {
+            "plugin": "@kbn/entities-schema",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
+          },
+          {
+            "plugin": "@kbn/entities-schema",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts"
           },
           {
             "plugin": "@kbn/connector-schemas",
