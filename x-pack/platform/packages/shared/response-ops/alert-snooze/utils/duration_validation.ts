@@ -22,7 +22,10 @@ export const validateDuration = (duration: CustomDurationState | null): Duration
   const isDurationInvalid =
     duration.mode === 'duration' && (duration.value < 1 || !Number.isInteger(duration.value));
 
-  const isPastDateTime = duration.dateTime !== null && duration.dateTime.isBefore(moment());
+  const isPastDateTime =
+    duration.mode === 'datetime' &&
+    duration.dateTime !== null &&
+    duration.dateTime.isBefore(moment());
 
   const isDateTimeMissing = duration.mode === 'datetime' && duration.dateTime === null;
 

@@ -66,22 +66,13 @@ describe('validateDuration', () => {
       expect(result.isDateTimeMissing).toBe(false);
     });
 
-    it('marks isPastDateTime when dateTime is set to a past time', () => {
+    it('ignores a stale past dateTime value — isPastDateTime is false in duration mode', () => {
       const result = validateDuration({
         ...baseDuration,
         dateTime: moment(MOCKED_NOW).subtract(1, 'h'),
       });
-      expect(result.isPastDateTime).toBe(true);
-      expect(result.isDurationInvalid).toBe(false);
-      expect(result.isDateTimeMissing).toBe(false);
-    });
-
-    it('does not mark isPastDateTime when dateTime is in the future', () => {
-      const result = validateDuration({
-        ...baseDuration,
-        dateTime: moment(MOCKED_NOW).add(1, 'h'),
-      });
       expect(result.isPastDateTime).toBe(false);
+      expect(result.isDurationInvalid).toBe(false);
       expect(result.isDateTimeMissing).toBe(false);
     });
   });
@@ -94,6 +85,16 @@ describe('validateDuration', () => {
       expect(result.isDurationInvalid).toBe(false);
       expect(result.isPastDateTime).toBe(false);
       expect(result.isDateTimeMissing).toBe(true);
+    });
+
+    it('marks isPastDateTime when dateTime is set to a past time', () => {
+      const result = validateDuration({
+        ...datetimeBase,
+        dateTime: moment(MOCKED_NOW).subtract(1, 'h'),
+      });
+      expect(result.isPastDateTime).toBe(true);
+      expect(result.isDurationInvalid).toBe(false);
+      expect(result.isDateTimeMissing).toBe(false);
     });
 
     it('returns all false for a valid future dateTime', () => {

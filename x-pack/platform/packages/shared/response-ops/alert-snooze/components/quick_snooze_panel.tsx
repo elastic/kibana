@@ -95,7 +95,6 @@ export const QuickSnoozePanel = ({ onScheduleChange }: QuickSnoozePanelProps) =>
         idSelected={selectedDuration}
         onChange={(id) => setSelectedDuration(id as QuickDurationId)}
         buttonSize="m"
-        isFullWidth
         data-test-subj="quickSnoozeDurationOptions"
       />
 
