@@ -21,10 +21,6 @@ describe('createKiIdentificationStatusTool', () => {
     const { tool, context, taskClient } = setup();
     taskClient.getStatus.mockResolvedValueOnce({
       status: TaskStatus.Completed,
-      queriesTaskResult: {
-        status: TaskStatus.Completed,
-        queries: [],
-      },
     });
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
@@ -38,10 +34,6 @@ describe('createKiIdentificationStatusTool', () => {
           stream_name: 'logs.nginx',
           task_id: 'streams_onboarding_logs.nginx',
           status: TaskStatus.Completed,
-          queriesTaskResult: {
-            status: TaskStatus.Completed,
-            queries: [],
-          },
         })
       );
     }

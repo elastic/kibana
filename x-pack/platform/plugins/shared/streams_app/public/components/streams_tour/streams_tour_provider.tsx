@@ -37,7 +37,10 @@ import type { TourStepConfig } from './tour_steps_config';
 import { getTourStepsConfig } from './tour_steps_config';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useKibana } from '../../hooks/use_kibana';
-import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../../common/locators';
+import type {
+  StreamsAppLocator,
+  StreamsAppLocatorDefinitionParams,
+} from '../../../common/locators';
 
 export type StreamsTourStepProps = Omit<EuiTourStepProps, 'children' | 'anchor'> & {
   stepId: StreamsTourStepId;
@@ -160,7 +163,9 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
 
   const streamsLocator = useMemo(
     () =>
-      share.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID) as StreamsAppLocator,
+      share.url.locators.get<StreamsAppLocatorDefinitionParams>(
+        STREAMS_APP_LOCATOR_ID
+      ) as StreamsAppLocator,
     [share.url.locators]
   );
   const attachmentsEnabled = features.attachments.enabled;

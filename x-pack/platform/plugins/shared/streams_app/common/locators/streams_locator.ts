@@ -10,6 +10,7 @@ import { getStreamsLocation } from '@kbn/streams-plugin/common';
 import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { v4 as uuidv4 } from 'uuid';
 import {
   CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX,
@@ -20,9 +21,11 @@ import type {
   EnrichmentUrlState,
 } from '../url_schema/enrichment_url_schema';
 
-export type StreamsAppLocatorDefinitionParams = StreamsAppLocationParams & {
-  pageState?: EnrichmentUrlState;
-};
+export interface StreamsAppLocatorDefinitionParams
+  extends SerializableRecord,
+    Pick<StreamsAppLocationParams, 'name' | 'managementTab'> {
+  pageState?: SerializableRecord & EnrichmentUrlState;
+}
 
 export type StreamsAppLocator = LocatorPublic<StreamsAppLocatorDefinitionParams>;
 
