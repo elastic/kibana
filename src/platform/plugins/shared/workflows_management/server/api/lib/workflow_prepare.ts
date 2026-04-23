@@ -115,7 +115,7 @@ export const applyYamlUpdate = (params: {
 
   if (!validation.valid || !validation.parsedWorkflow) {
     return {
-      updatedDataPatch: { definition: undefined, enabled: false, valid: false, triggerTypes: [] },
+      updatedDataPatch: { definition: null, enabled: false, valid: false, triggerTypes: [] },
       validationErrors: validation.diagnostics
         .filter((d) => d.severity === 'error')
         .map((d) => d.message),
