@@ -6,9 +6,6 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": [
-    "@kbn/config",
-    "@kbn/shared-ux-utility",
-    "@kbn/core-theme-browser-internal-types"
-  ]
+  "kbn_references": ["@kbn/config", "@kbn/shared-ux-utility", 
+  "@kbn/core-theme-browser-internal-types", "@kbn/core-hotkeys-browser"]
 }
