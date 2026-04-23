@@ -75,11 +75,17 @@ export const writeSavedObjects = async ({
   }
 };
 
+const toKebabCase = (str: string): string =>
+  str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
+    .toLowerCase();
+
 export const generateStableId = ({ promptGroupId, promptId, provider, model }: Prompt): string => {
-  const parts = [SAVED_OBJECT_ID_PREFIX + promptGroupId, promptId];
-  if (provider) parts.push(provider);
-  if (model) parts.push(model);
-  return parts.join('-').toLowerCase();
+  const parts = [SAVED_OBJECT_ID_PREFIX + toKebabCase(promptGroupId), toKebabCase(promptId)];
+  if (provider) parts.push(toKebabCase(provider));
+  if (model) parts.push(toKebabCase(model));
+  return parts.join('-');
 };
 
 export const generateSavedObject = (prompt: Prompt): SecurityAiPromptSavedObject => ({

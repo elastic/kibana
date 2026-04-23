@@ -20,27 +20,32 @@ const basePrompt: Prompt = {
 };
 
 describe('generateStableId', () => {
-  it('produces a stable id from promptGroupId and promptId', () => {
+  it('converts camelCase to kebab-case', () => {
     const id = generateStableId(basePrompt);
-    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}aiassistant-systemprompt`);
+    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}ai-assistant-system-prompt`);
+  });
+
+  it('handles acronyms correctly (e.g. ESQL stays grouped)', () => {
+    const id = generateStableId({ ...basePrompt, promptId: 'NaturalLanguageESQLTool' });
+    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}ai-assistant-natural-language-esql-tool`);
   });
 
   it('appends provider when present', () => {
     const id = generateStableId({ ...basePrompt, provider: 'openai' });
-    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}aiassistant-systemprompt-openai`);
+    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}ai-assistant-system-prompt-openai`);
   });
 
   it('appends model when present', () => {
     const id = generateStableId({ ...basePrompt, provider: 'openai', model: 'gpt-4o' });
-    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}aiassistant-systemprompt-openai-gpt-4o`);
+    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}ai-assistant-system-prompt-openai-gpt-4o`);
   });
 
   it('omits model segment when provider is absent', () => {
     const id = generateStableId({ ...basePrompt, model: 'gpt-4o' });
-    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}aiassistant-systemprompt-gpt-4o`);
+    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}ai-assistant-system-prompt-gpt-4o`);
   });
 
-  it('lowercases the entire id', () => {
+  it('is fully lowercase', () => {
     const id = generateStableId({ ...basePrompt, promptGroupId: 'AttackDiscovery', promptId: 'SystemPrompt', provider: 'OpenAI' });
     expect(id).toBe(id.toLowerCase());
   });
