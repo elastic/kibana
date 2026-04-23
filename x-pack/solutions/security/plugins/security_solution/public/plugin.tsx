@@ -303,9 +303,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
     if (plugins.agentBuilder?.attachments) {
-      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments, {
-        experimentalFeatures: this.experimentalFeatures,
-      });
+      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
       registerRuleAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,

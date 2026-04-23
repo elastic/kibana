@@ -19,7 +19,6 @@ jest.mock('../entity_explore_navigation', () => ({
 }));
 
 const experimentalFeatures = {
-  entityAttachmentRichRenderer: true,
   entityAnalyticsWatchlistEnabled: false,
   enableRiskScorePrivmonModifier: false,
 } as unknown as ExperimentalFeatures;

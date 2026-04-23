@@ -7,7 +7,6 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { registerAttachmentUiDefinitions } from '.';
 
 describe('registerAttachmentUiDefinitions', () => {
@@ -16,16 +15,12 @@ describe('registerAttachmentUiDefinitions', () => {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
 
-  const experimentalFeatures = {
-    entityAttachmentRichRenderer: false,
-  } as unknown as ExperimentalFeatures;
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns attachmentLabel when provided in alert attachment data', () => {
-    registerAttachmentUiDefinitions(mockAttachments, { experimentalFeatures });
+    registerAttachmentUiDefinitions(mockAttachments);
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -41,7 +36,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions(mockAttachments, { experimentalFeatures });
+    registerAttachmentUiDefinitions(mockAttachments);
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -54,5 +49,14 @@ describe('registerAttachmentUiDefinitions', () => {
       data: { text: '{}' },
     };
     expect(config.getLabel(attachment)).toBe('Security Alert');
+  });
+
+  it('does not register the security.entity attachment type (owned by registerEntityAttachment)', () => {
+    registerAttachmentUiDefinitions(mockAttachments);
+
+    const entityCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity
+    );
+    expect(entityCall).toBeUndefined();
   });
 });

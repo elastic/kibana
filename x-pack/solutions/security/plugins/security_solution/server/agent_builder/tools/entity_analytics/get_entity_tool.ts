@@ -694,7 +694,6 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
         };
 
         const shouldCreateAttachment =
-          experimentalFeatures.entityAttachmentRichRenderer &&
           values.length === 1 &&
           (source === 'exact_id' || source === 'exact_name' || isRlikeIdPrefixMatch());
 

@@ -38,14 +38,6 @@ const ALERT_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
   icon: 'bell',
 };
 
-const ENTITY_ATTACHMENT_LABEL_ONLY_CONFIG: AttachmentTypeConfig = {
-  type: SecurityAgentBuilderAttachments.entity,
-  label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.entity.label', {
-    defaultMessage: 'Risk Entity',
-  }),
-  icon: 'user',
-};
-
 const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getLabel: (attachment: UnknownAttachmentWithLabel) => {
     const attachmentLabel = attachment?.data?.attachmentLabel;
@@ -58,29 +50,16 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
  * Registers the baseline attachment UI definitions that do not require Security Solution runtime
  * context:
  *   - `security.alert` — label + icon only (no rich renderer yet).
- *   - `security.entity` — label-only fallback used when the `entityAttachmentRichRenderer`
- *     experimental flag is off. The rich entity renderer (card/table + Canvas) is installed via
- *     the separate `registerEntityAttachment` entry point below so the plugin's `start()` can
- *     supply `application`, `chrome`, `agentBuilder`, and the lazy Redux/services bundle.
+ *
+ * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
+ * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
+ * `application`, `chrome`, `agentBuilder`, and the lazy Redux/services bundle.
  */
-export const registerAttachmentUiDefinitions = (
-  attachments: AttachmentServiceStartContract,
-  { experimentalFeatures }: { experimentalFeatures: ExperimentalFeatures }
-) => {
+export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(
     ALERT_ATTACHMENT_CONFIG.type,
     createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
   );
-
-  if (!experimentalFeatures.entityAttachmentRichRenderer) {
-    attachments.addAttachmentType<UnknownAttachmentWithLabel>(
-      ENTITY_ATTACHMENT_LABEL_ONLY_CONFIG.type,
-      createAttachmentTypeConfig(
-        ENTITY_ATTACHMENT_LABEL_ONLY_CONFIG.label,
-        ENTITY_ATTACHMENT_LABEL_ONLY_CONFIG.icon
-      )
-    );
-  }
 };
 
 /**
@@ -90,8 +69,11 @@ export const registerAttachmentUiDefinitions = (
  * `registerEntityAnalyticsDashboardAttachment` once the Security sub-plugins and services are
  * available.
  *
- * Noops when the `entityAttachmentRichRenderer` experimental flag is off — in that case the
- * label-only fallback registered by {@link registerAttachmentUiDefinitions} stays active.
+ * The lazy `security_entity_attachment_rich` chunk keeps bundle impact at zero until the first
+ * `security.entity` attachment is rendered. The `security.entity` attachment itself is only
+ * ever emitted by the Entity Store V2 tools (`security.get_entity` /
+ * `security.search_entities`), which are gated on `entityAnalyticsEntityStoreV2`, so non-V2
+ * environments never exercise this renderer even though it's registered unconditionally.
  */
 export const registerEntityAttachment = ({
   attachments,
@@ -110,9 +92,6 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
 }): void => {
-  if (!experimentalFeatures.entityAttachmentRichRenderer) {
-    return;
-  }
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
     './entity_attachment'

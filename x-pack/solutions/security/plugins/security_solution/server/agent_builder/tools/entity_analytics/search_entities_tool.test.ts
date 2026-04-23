@@ -1279,14 +1279,6 @@ describe('searchEntitiesTool', () => {
   });
 
   describe('entity attachment side effect', () => {
-    // Uses a dedicated tool instance so we can flip the experimental flag
-    // without disturbing the rest of the suite, which asserts the legacy
-    // (flag-off) shape of `result.results`.
-    const richTool = searchEntitiesTool(mockCore, mockLogger, {
-      ...mockExperimentalFeatures,
-      entityAttachmentRichRenderer: true,
-    } as ExperimentalFeatures);
-
     const multiRowResponse = {
       columns: [
         { name: 'entity.id', type: 'keyword' },
@@ -1340,7 +1332,7 @@ describe('searchEntitiesTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
+      const result = (await tool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
       expect(context.attachments.add).toHaveBeenCalledWith({
@@ -1386,7 +1378,7 @@ describe('searchEntitiesTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
+      const result = (await tool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
       expect(context.attachments.add).toHaveBeenCalledWith({
@@ -1433,7 +1425,7 @@ describe('searchEntitiesTool', () => {
         current_version: 2,
       });
 
-      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
+      const result = (await tool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.update).toHaveBeenCalledTimes(1);
       expect(context.attachments.update).toHaveBeenCalledWith(expectedSingleAttachmentId, {
@@ -1498,7 +1490,7 @@ describe('searchEntitiesTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
+      const result = (await tool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
       expect(context.attachments.add).toHaveBeenCalledWith(
@@ -1546,7 +1538,7 @@ describe('searchEntitiesTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await richTool.handler({}, context)) as ToolHandlerStandardReturn;
+      const result = (await tool.handler({}, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.add).not.toHaveBeenCalled();
       expect(context.attachments.update).not.toHaveBeenCalled();
@@ -1576,7 +1568,7 @@ describe('searchEntitiesTool', () => {
         current_version: 1,
       });
 
-      await richTool.handler({}, context);
+      await tool.handler({}, context);
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
       const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
@@ -1586,23 +1578,6 @@ describe('searchEntitiesTool', () => {
         attachmentLabel: 'host: server1',
       });
       expect(addCall.data).not.toHaveProperty('entityStoreId');
-    });
-
-    it('does not create an attachment when the rich renderer experimental flag is off', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce(multiRowResponse);
-
-      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-
-      // The top-level `tool` is built from `mockExperimentalFeatures`, which
-      // does NOT include `entityAttachmentRichRenderer`, so the flag is off.
-      const result = (await tool.handler({}, context)) as ToolHandlerStandardReturn;
-
-      expect(context.attachments.add).not.toHaveBeenCalled();
-      expect(context.attachments.update).not.toHaveBeenCalled();
-      expect(result.results).toHaveLength(3);
-      result.results.forEach((r) => {
-        expect(r.type).toBe(ToolResultType.esqlResults);
-      });
     });
 
     it('does not create an attachment when riskScoreChangeInterval is set (STATS branch limitation)', async () => {
@@ -1621,7 +1596,7 @@ describe('searchEntitiesTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { riskScoreChangeInterval: '30d' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1642,7 +1617,7 @@ describe('searchEntitiesTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { riskLevels: ['Critical'] },
         context
       )) as ToolHandlerStandardReturn;

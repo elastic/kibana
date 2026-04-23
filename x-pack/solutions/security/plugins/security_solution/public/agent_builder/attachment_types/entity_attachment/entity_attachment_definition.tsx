@@ -84,9 +84,6 @@ const LazyEntityAttachmentCanvasContent = React.lazy(() =>
 
 /**
  * Builds the rich `AttachmentUIDefinition` for `security.entity` attachments.
- * Only installed when the `entityAttachmentRichRenderer` experimental flag is
- * on; otherwise the minimal label-only config in `attachment_types/index.ts`
- * remains active.
  *
  * When `application` + `resolveSecurityCanvasContext` are provided, the definition also adds a
  * Canvas (Preview) view for single host/user/service entities. Multi-entity attachments keep the

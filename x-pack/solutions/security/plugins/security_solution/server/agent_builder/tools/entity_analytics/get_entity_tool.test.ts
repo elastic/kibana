@@ -974,14 +974,6 @@ describe('getEntityTool', () => {
   });
 
   describe('entity attachment side effect', () => {
-    // Uses a dedicated tool instance so we can flip the experimental flag
-    // without disturbing the rest of the suite, which asserts the legacy
-    // (flag-off) shape of `result.results`.
-    const richTool = getEntityTool(mockCore, mockLogger, {
-      ...mockExperimentalFeatures,
-      entityAttachmentRichRenderer: true,
-    } as ExperimentalFeatures);
-
     const expectedAttachmentId = buildSingleEntityAttachmentId('host', 'server1');
 
     const exactHitResponse = {
@@ -1003,7 +995,7 @@ describe('getEntityTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1053,7 +1045,7 @@ describe('getEntityTool', () => {
         current_version: 2,
       });
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1109,7 +1101,7 @@ describe('getEntityTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityId: 'server1' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1168,7 +1160,7 @@ describe('getEntityTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityId: 'LAPTOP-SALES04' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1234,7 +1226,7 @@ describe('getEntityTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityId: 'John Doe' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1289,7 +1281,7 @@ describe('getEntityTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityId: 'LAPTOP-SALES04' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1342,7 +1334,7 @@ describe('getEntityTool', () => {
         current_version: 1,
       });
 
-      await richTool.handler({ entityId: compositeEntityName }, context);
+      await tool.handler({ entityId: compositeEntityName }, context);
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
       expect(context.attachments.add).toHaveBeenCalledWith({
@@ -1377,7 +1369,7 @@ describe('getEntityTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityId: 'bob' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1409,7 +1401,7 @@ describe('getEntityTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityId: 'server' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1440,7 +1432,7 @@ describe('getEntityTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1460,24 +1452,6 @@ describe('getEntityTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await richTool.handler(
-        { entityType: 'host', entityId: 'server1' },
-        context
-      )) as ToolHandlerStandardReturn;
-
-      expect(context.attachments.add).not.toHaveBeenCalled();
-      expect(context.attachments.update).not.toHaveBeenCalled();
-      expect(result.results).toHaveLength(1);
-      expect(result.results[0].type).toBe(ToolResultType.error);
-    });
-
-    it('does not create an attachment when the rich renderer experimental flag is off', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce(exactHitResponse);
-
-      // The top-level `tool` is built from `mockExperimentalFeatures`, which
-      // does NOT include `entityAttachmentRichRenderer`, so the flag is off.
-      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-
       const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1' },
         context
@@ -1486,7 +1460,7 @@ describe('getEntityTool', () => {
       expect(context.attachments.add).not.toHaveBeenCalled();
       expect(context.attachments.update).not.toHaveBeenCalled();
       expect(result.results).toHaveLength(1);
-      expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+      expect(result.results[0].type).toBe(ToolResultType.error);
     });
 
     it('skips the attachment when the resolved row has an unknown entity type', async () => {
@@ -1501,7 +1475,7 @@ describe('getEntityTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityId: 'd1' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1534,7 +1508,7 @@ describe('getEntityTool', () => {
         current_version: 1,
       });
 
-      const result = (await richTool.handler(
+      const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1' },
         context
       )) as ToolHandlerStandardReturn;
@@ -1621,7 +1595,7 @@ describe('getEntityTool', () => {
           current_version: 1,
         });
 
-        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+        await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
         expect(context.attachments.add).toHaveBeenCalledTimes(1);
         const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
@@ -1657,7 +1631,7 @@ describe('getEntityTool', () => {
           current_version: 1,
         });
 
-        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+        await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
         expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
         const searchCall = mockEsClient.asCurrentUser.search.mock.calls[0][0] as {
@@ -1736,7 +1710,7 @@ describe('getEntityTool', () => {
           current_version: 1,
         });
 
-        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+        await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
         expect(entityStoreStart.createResolutionClient).toHaveBeenCalledTimes(1);
         // Resolution group is keyed on the entity-store `entity.id`, not
@@ -1801,7 +1775,7 @@ describe('getEntityTool', () => {
           current_version: 1,
         });
 
-        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+        await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
         // Only the primary risk-index query should run for a solo group.
         expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -1821,7 +1795,7 @@ describe('getEntityTool', () => {
           current_version: 1,
         });
 
-        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+        await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
         const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
         expect(addCall.data.riskStats).toBeUndefined();
@@ -1842,7 +1816,7 @@ describe('getEntityTool', () => {
           current_version: 1,
         });
 
-        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+        await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
         expect(context.attachments.add).toHaveBeenCalledTimes(1);
         const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
@@ -1876,7 +1850,7 @@ describe('getEntityTool', () => {
           current_version: 1,
         });
 
-        await richTool.handler({ entityType: 'host', entityId: 'server1' }, context);
+        await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
         const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
         expect(addCall.data.riskStats).toBeDefined();

@@ -578,27 +578,24 @@ const MULTI_ENTITY_ATTACHMENT_LABEL = 'Entity search results';
  * Builds the optional `ToolResultType.other` side-effect results that
  * announce the inline `security.entity` attachment for this search call.
  *
- * The attachment is skipped when the rich renderer flag is off, when the
- * `riskScoreChangeInterval` branch is active (the STATS projection drops the
- * identity columns, so descriptors cannot be derived reliably), or when no
- * row yields a valid descriptor. When exactly one descriptor is produced we
- * reuse the single-entity id scheme used by `security.get_entity` so the two
- * tools converge on the same attachment/version instead of creating
- * duplicates.
+ * The attachment is skipped when the `riskScoreChangeInterval` branch is
+ * active (the STATS projection drops the identity columns, so descriptors
+ * cannot be derived reliably), or when no row yields a valid descriptor.
+ * When exactly one descriptor is produced we reuse the single-entity id
+ * scheme used by `security.get_entity` so the two tools converge on the
+ * same attachment/version instead of creating duplicates.
  */
 const buildAttachmentSideEffectResults = async ({
   params,
   columns,
   values,
   attachments,
-  experimentalFeatures,
   logger,
 }: {
   params: ToolParams;
   columns: Array<{ name: string }>;
   values: unknown[][];
   attachments: AttachmentStateManager;
-  experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
 }): Promise<
   Array<{
@@ -607,9 +604,6 @@ const buildAttachmentSideEffectResults = async ({
     data: { attachmentId: string; version: number; renderTag: string };
   }>
 > => {
-  if (!experimentalFeatures.entityAttachmentRichRenderer) {
-    return [];
-  }
   if (params.riskScoreChangeInterval) {
     return [];
   }
@@ -787,7 +781,6 @@ export const searchEntitiesTool = (
           columns,
           values,
           attachments,
-          experimentalFeatures,
           logger,
         });
 
