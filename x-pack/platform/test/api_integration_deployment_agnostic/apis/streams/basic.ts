@@ -1413,7 +1413,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('fails to create a wired stream with angle brackets in the name', async () => {
           const response = await putStream(apiClient, 'logs.with<brackets>', validStreamBody, 400);
           expect((response as unknown as { message: string }).message).to.contain(
-            'Stream name cannot contain "<".'
+            'Stream name cannot contain "<", ">".'
           );
         });
 
