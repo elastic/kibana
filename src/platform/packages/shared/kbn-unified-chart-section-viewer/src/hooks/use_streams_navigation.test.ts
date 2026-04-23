@@ -110,5 +110,11 @@ describe('useStreamsNavigation', () => {
         '/app/streams/metrics-local-default'
       );
     });
+
+    it('returns undefined when called without externalServices (no host injection)', () => {
+      const { result } = renderHook(() => useStreamsNavigation(undefined));
+
+      expect(result.current.getStreamUrl('metrics-system.cpu-default')).toBeUndefined();
+    });
   });
 });

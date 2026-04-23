@@ -13,17 +13,18 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import React, { useMemo } from 'react';
 import { getUnitLabel } from '../../../common/utils';
-import type { ExternalServices, ParsedMetricItem } from '../../../types';
+import type { ParsedMetricItem } from '../../../types';
 import { BadgeGroup, DataStreamLink, MetricTypeBadge } from '../components';
 import { useStreamsNavigation } from '../../../hooks/use_streams_navigation';
+import { useExternalServices } from '../../../context/external_services';
 
 export interface OverviewTabMetadataProps {
   metricItem: ParsedMetricItem;
-  externalServices?: ExternalServices;
 }
 
-export const OverviewTabMetadata = ({ metricItem, externalServices }: OverviewTabMetadataProps) => {
+export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) => {
   const { euiTheme } = useEuiTheme();
+  const externalServices = useExternalServices();
   const { getStreamUrl } = useStreamsNavigation(externalServices);
   const isDataStream = metricItem.sourceKind === 'data_stream';
   const streamUrl = isDataStream ? getStreamUrl(metricItem.dataStream) : undefined;

@@ -14,15 +14,18 @@ import { withRestorableState } from '../../../restorable_state';
 import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 import { ChartSectionInspectorProvider } from '../../../context/chart_section_inspector';
+import { ExternalServicesProvider } from '../../../context/external_services';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
   return (
     <PerformanceContextProvider>
       <EventBasedTelemetryProvider analytics={props.services.analytics}>
-        <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
-          <MetricsExperienceGrid {...props} />
-        </ChartSectionInspectorProvider>
+        <ExternalServicesProvider externalServices={props.externalServices}>
+          <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
+            <MetricsExperienceGrid {...props} />
+          </ChartSectionInspectorProvider>
+        </ExternalServicesProvider>
       </EventBasedTelemetryProvider>
     </PerformanceContextProvider>
   );

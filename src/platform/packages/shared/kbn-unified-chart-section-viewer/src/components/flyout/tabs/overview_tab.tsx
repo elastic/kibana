@@ -24,18 +24,17 @@ import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { TabTitleAndDescription } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
-import type { Dimension, ParsedMetricItem, ExternalServices } from '../../../types';
+import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
   description?: string;
-  externalServices?: ExternalServices;
 }
 
 const DEFAULT_PAGINATION_SIZE = 20;
 
-export const OverviewTab = ({ metricItem, description, externalServices }: OverviewTabProps) => {
+export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const { euiTheme } = useEuiTheme();
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
@@ -83,7 +82,7 @@ export const OverviewTab = ({ metricItem, description, externalServices }: Overv
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      <OverviewTabMetadata metricItem={metricItem} externalServices={externalServices} />
+      <OverviewTabMetadata metricItem={metricItem} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>

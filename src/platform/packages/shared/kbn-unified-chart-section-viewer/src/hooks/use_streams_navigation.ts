@@ -20,6 +20,12 @@ export interface UseStreamsNavigationResult {
  * Encapsulates Streams app navigation logic: permission gating, CCS filtering,
  * wildcard rejection, and URL generation via the Streams locator.
  *
+ * The hook is intentionally agnostic of how `externalServices` are obtained;
+ * callers are expected to pass them in (typically read from
+ * `useExternalServices()` at the call site). When `externalServices` is
+ * `undefined`, every call to `getStreamUrl` returns `undefined` and the UI is
+ * expected to degrade gracefully (e.g. render plain text instead of a link).
+ *
  * `getStreamUrl(name)` returns a URL when the given name is navigable in the
  * Streams app, or `undefined` when the name is invalid (empty, wildcard, CCS)
  * or the user lacks permissions / the locator is unavailable.
