@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Skills CRUD API', function () {
     this.tags(['skipServerless']);
     const createdSkillIds: string[] = [];
-    const BUILTIN_SKILL_ID = 'data-exploration';
+    const BUILTIN_SKILL_ID = 'visualization-creation';
 
     const mockSkill = {
       id: 'test-skill',
