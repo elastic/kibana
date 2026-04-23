@@ -33,7 +33,10 @@ spec:
         - sparse-checkout#v1.6.0:
             paths:
               - .buildkite
+              - .node-version
               - package.json
+            cleanup_sparse_state: true
+            verbose: true
       provider_settings:
         build_branches: false
         build_pull_requests: true
