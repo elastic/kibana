@@ -57,9 +57,7 @@ describe('getAvailableConnectors', () => {
   it('includes action types that have no connector instances with an empty instances array', async () => {
     const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
     const actionsClientWithRequest = {
-      listTypes: jest
-        .fn()
-        .mockResolvedValue([mockActionType({ id: '.email', name: 'Email' })]),
+      listTypes: jest.fn().mockResolvedValue([mockActionType({ id: '.email', name: 'Email' })]),
     };
 
     const result = await getAvailableConnectors({
@@ -75,10 +73,12 @@ describe('getAvailableConnectors', () => {
 
   it('drops connectors whose actionTypeId is not in the allowed action-types list', async () => {
     const actionsClient = {
-      getAll: jest.fn().mockResolvedValue([
-        mockConnector(),
-        mockConnector({ id: 'legacy-1', actionTypeId: '.legacy' }),
-      ]),
+      getAll: jest
+        .fn()
+        .mockResolvedValue([
+          mockConnector(),
+          mockConnector({ id: 'legacy-1', actionTypeId: '.legacy' }),
+        ]),
     };
     const actionsClientWithRequest = {
       listTypes: jest.fn().mockResolvedValue([mockActionType()]),
@@ -133,9 +133,9 @@ describe('getAvailableConnectors', () => {
       ]),
     };
     const actionsClientWithRequest = {
-      listTypes: jest.fn().mockResolvedValue([
-        mockActionType({ id: '.inference', name: 'Inference' }),
-      ]),
+      listTypes: jest
+        .fn()
+        .mockResolvedValue([mockActionType({ id: '.inference', name: 'Inference' })]),
     };
 
     const result = await getAvailableConnectors({
