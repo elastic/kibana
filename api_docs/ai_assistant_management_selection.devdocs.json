@@ -2,60 +2,102 @@
   "id": "aiAssistantManagementSelection",
   "client": {
     "classes": [],
-    "functions": [
+    "functions": [],
+    "interfaces": [
       {
         "parentPluginId": "aiAssistantManagementSelection",
-        "id": "def-public.AIAgentConfirmationModal",
-        "type": "Function",
+        "id": "def-public.AIAssistantManagementSelectionPluginPublicSetup",
+        "type": "Interface",
         "tags": [],
-        "label": "AIAgentConfirmationModal",
+        "label": "AIAssistantManagementSelectionPluginPublicSetup",
         "description": [],
-        "signature": [
-          "({ onConfirm, onCancel, docLinks, }: ",
-          {
-            "pluginId": "@kbn/ai-agent-confirmation-modal",
-            "scope": "public",
-            "docId": "kibKbnAiAgentConfirmationModalPluginApi",
-            "section": "def-public.AIAgentConfirmationModalProps",
-            "text": "AIAgentConfirmationModalProps"
-          },
-          ") => React.JSX.Element"
-        ],
-        "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
-        "lineNumber": 28,
-        "columnNumber": 14,
+        "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiAssistantManagementSelection",
+        "id": "def-public.AIAssistantManagementSelectionPluginPublicStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "AIAssistantManagementSelectionPluginPublicStart",
+        "description": [],
+        "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "aiAssistantManagementSelection",
-            "id": "def-public.AIAgentConfirmationModal.$1",
+            "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.aiAssistantType$",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onConfirm,\n  onCancel,\n  docLinks,\n}",
+            "label": "aiAssistantType$",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/ai-agent-confirmation-modal",
-                "scope": "public",
-                "docId": "kibKbnAiAgentConfirmationModalPluginApi",
-                "section": "def-public.AIAgentConfirmationModalProps",
-                "text": "AIAgentConfirmationModalProps"
-              }
+              "Observable",
+              "<",
+              "AIAssistantType",
+              ">"
             ],
-            "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
-            "lineNumber": 28,
-            "columnNumber": 83,
+            "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiAssistantManagementSelection",
+            "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.openChat$",
+            "type": "Object",
+            "tags": [],
+            "label": "openChat$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "aiAssistantManagementSelection",
+                "scope": "public",
+                "docId": "kibAiAssistantManagementSelectionPluginApi",
+                "section": "def-public.AIExperienceSelection",
+                "text": "AIExperienceSelection"
+              },
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiAssistantManagementSelection",
+            "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.completeOpenChat",
+            "type": "Function",
+            "tags": [],
+            "label": "completeOpenChat",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "children": [],
+            "returnComment": []
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
     "enums": [
       {
         "parentPluginId": "aiAssistantManagementSelection",
@@ -150,102 +192,7 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
-    "setup": {
-      "parentPluginId": "aiAssistantManagementSelection",
-      "id": "def-public.AIAssistantManagementSelectionPluginPublicSetup",
-      "type": "Interface",
-      "tags": [],
-      "label": "AIAssistantManagementSelectionPluginPublicSetup",
-      "description": [],
-      "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
-      "lineNumber": 35,
-      "columnNumber": 1,
-      "deprecated": false,
-      "trackAdoption": false,
-      "children": [],
-      "lifecycle": "setup",
-      "initialIsOpen": true
-    },
-    "start": {
-      "parentPluginId": "aiAssistantManagementSelection",
-      "id": "def-public.AIAssistantManagementSelectionPluginPublicStart",
-      "type": "Interface",
-      "tags": [],
-      "label": "AIAssistantManagementSelectionPluginPublicStart",
-      "description": [],
-      "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
-      "lineNumber": 37,
-      "columnNumber": 1,
-      "deprecated": false,
-      "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "aiAssistantManagementSelection",
-          "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.aiAssistantType$",
-          "type": "Object",
-          "tags": [],
-          "label": "aiAssistantType$",
-          "description": [],
-          "signature": [
-            "Observable",
-            "<",
-            "AIAssistantType",
-            ">"
-          ],
-          "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
-          "lineNumber": 38,
-          "columnNumber": 3,
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "aiAssistantManagementSelection",
-          "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.openChat$",
-          "type": "Object",
-          "tags": [],
-          "label": "openChat$",
-          "description": [],
-          "signature": [
-            "Observable",
-            "<",
-            {
-              "pluginId": "aiAssistantManagementSelection",
-              "scope": "public",
-              "docId": "kibAiAssistantManagementSelectionPluginApi",
-              "section": "def-public.AIExperienceSelection",
-              "text": "AIExperienceSelection"
-            },
-            ">"
-          ],
-          "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
-          "lineNumber": 39,
-          "columnNumber": 3,
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "aiAssistantManagementSelection",
-          "id": "def-public.AIAssistantManagementSelectionPluginPublicStart.completeOpenChat",
-          "type": "Function",
-          "tags": [],
-          "label": "completeOpenChat",
-          "description": [],
-          "signature": [
-            "() => void"
-          ],
-          "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
-          "lineNumber": 40,
-          "columnNumber": 3,
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
-        }
-      ],
-      "lifecycle": "start",
-      "initialIsOpen": true
-    }
+    "objects": []
   },
   "server": {
     "classes": [],
