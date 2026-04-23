@@ -56,6 +56,7 @@ export type LogsOverviewProps = DocViewRenderProps &
     indexes: ObservabilityIndexes;
     showTraceWaterfall?: boolean;
     docViewActions?: DocViewActions;
+    profileId: string;
   };
 
 export interface LogsOverviewApi {
@@ -82,6 +83,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       docViewActions,
       initialState,
       onInitialStateChange,
+      profileId,
     },
     ref
   ) => {
@@ -144,7 +146,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             onRemoveColumn={onRemoveColumn}
             dataView={dataView}
           />
-          <DataSourcesProvider indexes={indexes}>
+          <DataSourcesProvider indexes={indexes} profileId={profileId}>
             <DocViewerExtensionActionsProvider actions={docViewActions}>
               {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
               <div>
