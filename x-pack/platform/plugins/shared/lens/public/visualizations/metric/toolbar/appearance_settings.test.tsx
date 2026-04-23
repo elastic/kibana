@@ -22,7 +22,10 @@ const palette: PaletteOutput<CustomPaletteParams> = {
 
 // Remove legacy state properties as they should be removed in the initialize method
 const fullState: Required<
-  Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
+  Omit<
+    MetricVisualizationState,
+    'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight' | 'styleTemplate'
+  >
 > = {
   layerId: 'first',
   layerType: 'data',
@@ -265,5 +268,43 @@ describe('appearance settings', () => {
     renderComponent({ icon });
 
     expect(screen.queryByTestId('lens-metric-appearance-other-icon-position-btn')).toBeDisabled();
+  });
+
+  it('defaults to custom template when styleTemplate is not set', () => {
+    renderComponent({ styleTemplate: undefined });
+
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('persists selected style template in state', () => {
+    renderComponent({ styleTemplate: undefined });
+
+    fireEvent.click(screen.getByTestId('lens-metric-style-template-top'));
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        styleTemplate: 'top',
+        primaryPosition: 'top',
+      })
+    );
+  });
+
+  it('clears style template when editing layout options manually', () => {
+    renderComponent({ styleTemplate: 'top' });
+
+    const btnGroup = new EuiButtonGroupTestHarness(
+      'lens-metric-appearance-primary-metric-alignment-btn'
+    );
+    btnGroup.select('Right');
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryAlign: 'right',
+        styleTemplate: undefined,
+      })
+    );
   });
 });

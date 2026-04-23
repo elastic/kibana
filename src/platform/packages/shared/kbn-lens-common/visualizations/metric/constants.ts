@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricLayoutWithDefault, MetricStateDefaults, PrimaryMetricPosition } from './types';
+import type {
+  MetricLayoutWithDefault,
+  MetricStateDefaults,
+  PrimaryMetricPosition,
+  MetricStyleTemplateId,
+} from './types';
 
 export const LENS_METRIC_ID = 'lnsMetric';
 
@@ -29,26 +34,29 @@ export const LENS_LEGACY_METRIC_STATE_DEFAULTS: Pick<MetricStateDefaults, 'iconA
 /**
  * Style template presets by primary metric position
  */
-export const LENS_METRIC_STYLE_TEMPLATE: Record<PrimaryMetricPosition, MetricLayoutWithDefault> = {
+export const LENS_METRIC_STYLE_TEMPLATE: Record<MetricStyleTemplateId, MetricLayoutWithDefault> = {
   bottom: {
     titlesTextAlign: 'left',
-    primaryAlign: 'left',
-    iconAlign: 'left',
-    secondaryAlign: 'left',
+    primaryPosition: 'bottom',
+    primaryAlign: 'right',
+    iconAlign: 'right',
+    secondaryAlign: 'right',
   },
   middle: {
     titlesTextAlign: 'left',
-    primaryAlign: 'left',
-    iconAlign: 'left',
-    secondaryAlign: 'left',
+    primaryPosition: 'middle',
+    primaryAlign: 'center',
+    iconAlign: 'right',
+    secondaryAlign: 'right',
   },
   top: {
     titlesTextAlign: 'left',
+    primaryPosition: 'top',
     primaryAlign: 'left',
-    iconAlign: 'left',
+    iconAlign: 'right',
     secondaryAlign: 'left',
   },
-};
+} as const;
 
 const DEFAULT_STYLE_TEMPLATE: PrimaryMetricPosition = 'top';
 const defaultStyleTemplate = LENS_METRIC_STYLE_TEMPLATE[DEFAULT_STYLE_TEMPLATE];

@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export type MetricStyleTemplate = 'top' | 'middle' | 'bottom' | 'custom';
+import type { MetricStyleTemplateId } from '@kbn/lens-common/visualizations/metric/types';
+
+export type MetricStyleTemplate = MetricStyleTemplateId | 'custom';

@@ -78,6 +78,7 @@ describe('metric visualization', () => {
       | 'secondaryPrefix'
       | 'valuesTextAlign'
       | 'titleWeight'
+      | 'styleTemplate'
     >
   > = {
     layerId: 'first',
@@ -109,7 +110,12 @@ describe('metric visualization', () => {
   const fullStateWTrend: Required<
     Omit<
       MetricVisualizationState,
-      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'
+      | 'secondaryTrend'
+      | 'secondaryColor'
+      | 'secondaryPrefix'
+      | 'valuesTextAlign'
+      | 'titleWeight'
+      | 'styleTemplate'
     >
   > = {
     ...fullState,
@@ -687,6 +693,34 @@ describe('metric visualization', () => {
           "type": "expression",
         }
       `);
+    });
+
+    it('prioritizes styleTemplate over conflicting style fields', () => {
+      const expression = visualization.toExpression(
+        {
+          ...fullState,
+          icon: 'sortUp',
+          styleTemplate: 'top',
+          titlesTextAlign: 'right',
+          primaryAlign: 'right',
+          secondaryAlign: 'right',
+          iconAlign: 'right',
+          primaryPosition: 'bottom',
+          breakdownByAccessor: undefined,
+          collapseFn: undefined,
+        },
+        datasourceLayers
+      ) as ExpressionAstExpression;
+
+      const metricVisFn = expression.chain.find(
+        (fn): fn is ExpressionAstFunction => fn.type === 'function' && fn.function === 'metricVis'
+      );
+
+      expect(metricVisFn?.arguments.titlesTextAlign).toEqual(['left']);
+      expect(metricVisFn?.arguments.primaryAlign).toEqual(['left']);
+      expect(metricVisFn?.arguments.secondaryAlign).toEqual(['left']);
+      expect(metricVisFn?.arguments.iconAlign).toEqual(['right']);
+      expect(metricVisFn?.arguments.primaryPosition).toEqual(['top']);
     });
 
     describe('trendline expression', () => {
