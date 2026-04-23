@@ -201,7 +201,7 @@ apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic 
   });
 
   apiTest(
-    'should accept last_execution sort and filter for rules that have not run yet',
+    'should accept sort by lastExecutionAt for rules that have not run yet',
     async ({ apiClient }) => {
       const res = await apiClient.post(RULE_API_PATH, {
         headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
@@ -217,8 +217,6 @@ apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic 
       expect(res.statusCode).toBe(200);
       ruleIds.push(res.body.id);
 
-      // Sort by last execution timestamp — rule has never run, last_execution
-      // should be null/absent and the call should succeed.
       const sortedResponse = await apiClient.get(
         `${RULE_API_PATH}?perPage=100&sortField=lastExecutionAt&sortOrder=desc`,
         {
@@ -229,8 +227,26 @@ apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic 
       expect(sortedResponse).toHaveStatusCode(200);
       expect(sortedResponse.body.items).toHaveLength(1);
       expect(sortedResponse.body.items[0].last_execution ?? null).toBeNull();
+    }
+  );
 
-      // Filter by last_execution.outcome — the unran rule should not match.
+  apiTest(
+    'should return empty results when filtering by last_execution.outcome for unrun rules',
+    async ({ apiClient }) => {
+      const res = await apiClient.post(RULE_API_PATH, {
+        headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
+        body: {
+          kind: 'alert',
+          metadata: { name: 'pre-execution-rule' },
+          time_field: '@timestamp',
+          schedule: { every: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        },
+        responseType: 'json',
+      });
+      expect(res.statusCode).toBe(200);
+      ruleIds.push(res.body.id);
+
       const filteredResponse = await apiClient.get(
         `${RULE_API_PATH}?perPage=100&filter=${encodeURIComponent(
           'last_execution.outcome: success'
