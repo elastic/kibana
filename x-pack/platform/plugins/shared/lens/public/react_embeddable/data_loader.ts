@@ -151,6 +151,8 @@ export function loadEmbeddableData(
     if (!dispatchBlockingErrorIfAny()) {
       endChartSpan('success');
       internalApi.dispatchRenderComplete();
+    } else {
+      endChartSpan('failure', internalApi.blockingError$.getValue() ?? undefined);
     }
   };
 
@@ -160,17 +162,19 @@ export function loadEmbeddableData(
   function startChartSpan() {
     // End any previous span that wasn't completed (e.g., a reload triggered before completion)
     if (currentChartSpan) {
+      // @ts-expect-error RUM types don't include outcome
+      currentChartSpan.outcome = 'unknown';
       currentChartSpan.end();
+      currentChartSpan = undefined;
     }
     const currentState = getState();
     const parentContext = getParentContext(parentApi);
     const meta = parentContext?.meta as Record<string, string | undefined> | undefined;
 
-    currentChartSpan =
-      apm.startSpan('lens-chart-render', 'lens-embeddable', {
-        blocking: true,
-        sync: false,
-      }) ?? undefined;
+    currentChartSpan = apm.startSpan('lens-chart-render', 'lens-embeddable', {
+      blocking: true,
+      sync: false,
+    });
 
     if (currentChartSpan) {
       currentChartSpan.addLabels({
@@ -424,6 +428,7 @@ export function loadEmbeddableData(
 
   return {
     cleanup: () => {
+      endChartSpan('success');
       for (const subscription of subscriptions) {
         subscription.unsubscribe();
       }
