@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TIMELINE_EXPORT_URL } from '@kbn/security-solution-plugin/common/constants';
-import { Role } from '@kbn/security-plugin-types-common';
 import TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import {
@@ -22,14 +21,15 @@ import {
   resolveTimeline,
   installPrepackedTimelines,
 } from '../../utils/timelines';
-import * as users from '../../../../config/privileges/users';
 import { roles } from '../../../../config/privileges/roles';
+import * as users from '../../../../config/privileges/users';
 
 const canOnlyReadUsers = [users.secReadV1User, users.secTimelineReadUser];
 const canWriteUsers = [users.secAllV1User, users.secTimelineAllUser];
 const canWriteOrReadUsers = [...canOnlyReadUsers, ...canWriteUsers];
 const cannotAccessUsers = [users.secNoneV1User, users.secTimelineNoneUser];
 const cannotWriteUsers = [...canOnlyReadUsers, ...cannotAccessUsers];
+const MAX_TIMELINE_EXPORT_IDS = 1000;
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const utils = getService('securitySolutionUtils');
@@ -37,18 +37,6 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const isServerless = config.get('serverless');
   const isEss = !isServerless;
 
-  // map roles by name for easier access in tests
-  const rolesByName = Object.fromEntries(
-    roles.map((role) => [role.name, role])
-  ) as unknown as Record<Role['name'], Role>;
-
-  const canOnlyReadRoles = [rolesByName.secReadV1, rolesByName.secTimelineReadV2];
-  const canWriteRoles = [rolesByName.secAllV1, rolesByName.secTimelineAllV2];
-  const canWriteOrReadRoles = [...canOnlyReadRoles, ...canWriteRoles];
-  const cannotAccessRoles = [rolesByName.secNoneV1, rolesByName.secTimelineNoneV2];
-  const MAX_TIMELINE_EXPORT_IDS = 1000;
-
-  const supertestCache = new Map<(typeof roles)[number]['name'], TestAgent>();
   const exportTimeline = async (supertest: TestAgent, ids: string[]) =>
     supertest
       .post(`${TIMELINE_EXPORT_URL}?file_name=timelines_export.ndjson`)
@@ -129,31 +117,31 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       let getTimelineId = () => '';
 
       before(async () => {
-        const superTest = supertestCache.get(rolesByName.secTimelineAllV2.name)!;
+        const superTest = await utils.createSuperTestWithUser(users.secTimelineAllUser);
         const {
           body: { savedObjectId },
         } = await createBasicTimeline(superTest, 'timeline for export');
         getTimelineId = () => savedObjectId;
       });
 
-      canWriteOrReadRoles.forEach((role) => {
-        it(`role "${role.name}" can export timelines`, async () => {
-          const superTest = supertestCache.get(role.name)!;
+      canWriteOrReadUsers.forEach((user) => {
+        it(`user "${user.username}" can export timelines`, async () => {
+          const superTest = await utils.createSuperTestWithUser(user);
           const exportTimelineResponse = await exportTimeline(superTest, [getTimelineId()]);
           expect(exportTimelineResponse.status).to.be(200);
         });
       });
 
-      cannotAccessRoles.forEach((role) => {
-        it(`role "${role.name}" cannot export timelines`, async () => {
-          const superTest = supertestCache.get(role.name)!;
+      cannotAccessUsers.forEach((user) => {
+        it(`user "${user.username}" cannot export timelines`, async () => {
+          const superTest = await utils.createSuperTestWithUser(user);
           const exportTimelineResponse = await exportTimeline(superTest, [getTimelineId()]);
           expect(exportTimelineResponse.status).to.be(403);
         });
       });
 
       it('rejects export requests above the max ids limit for read roles', async () => {
-        const superTest = supertestCache.get(rolesByName.secTimelineReadV2.name)!;
+        const superTest = await utils.createSuperTestWithUser(users.secTimelineReadUser);
         const oversizedIds = Array.from(
           { length: MAX_TIMELINE_EXPORT_IDS + 1 },
           (_, index) => `non-existent-timeline-${index}`
@@ -163,7 +151,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
 
       it('accepts duplicate timeline ids for read roles', async () => {
-        const superTest = supertestCache.get(rolesByName.secTimelineReadV2.name)!;
+        const superTest = await utils.createSuperTestWithUser(users.secTimelineReadUser);
         const timelineId = getTimelineId();
         const exportTimelineResponse = await exportTimeline(superTest, [
           timelineId,
