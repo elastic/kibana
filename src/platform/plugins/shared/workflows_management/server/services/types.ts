@@ -15,12 +15,11 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import type { z } from '@kbn/zod/v4';
 
-import type { SearchWorkflowExecutionsParams } from '../api/workflows_management_service';
+import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
+import type { WorkflowValidationService } from './workflow_validation_service';
 import type { WorkflowStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
@@ -30,20 +29,14 @@ export interface WorkflowStorageDeps {
   workflowStorage: WorkflowStorage;
 }
 
-/** Deps for WorkflowCrudService. */
+/** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
 export interface WorkflowCrudDeps extends WorkflowStorageDeps {
+  esClient: ElasticsearchClient;
   getSecurity: () => SecurityServiceStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getTaskScheduler: () => WorkflowTaskScheduler | null;
-  getWorkflowExecutions: (
-    params: SearchWorkflowExecutionsParams,
-    spaceId: string
-  ) => Promise<WorkflowExecutionListDto>;
-  getWorkflowZodSchema: (
-    options: { loose?: false },
-    spaceId: string,
-    request: KibanaRequest
-  ) => Promise<z.ZodType>;
+  executionQueryService: WorkflowExecutionQueryService;
+  validationService: WorkflowValidationService;
 }
 
 /** Deps for WorkflowSearchService. */
@@ -63,14 +56,4 @@ export interface WorkflowValidationDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
-}
-
-/** Deps for WorkflowDeletionService. */
-export interface WorkflowDeletionDeps extends WorkflowStorageDeps {
-  esClient: ElasticsearchClient;
-  getTaskScheduler: () => WorkflowTaskScheduler | null;
-  getWorkflowExecutions: (
-    params: SearchWorkflowExecutionsParams,
-    spaceId: string
-  ) => Promise<WorkflowExecutionListDto>;
 }
