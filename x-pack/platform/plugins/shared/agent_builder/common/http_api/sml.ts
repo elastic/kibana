@@ -6,7 +6,7 @@
  */
 
 /**
- * Max length of `query` for POST `/internal/agent_builder/sml/_search` (route validation + UI).
+ * Max length of `query` for POST `/internal/semantic_layer/sml/_search` (route validation + UI).
  * The agent `sml_search` tool uses its own separate limit in its Zod schema.
  */
 export const SML_HTTP_SEARCH_QUERY_MAX_LENGTH = 512;
@@ -15,7 +15,7 @@ export const SML_HTTP_SEARCH_QUERY_MAX_LENGTH = 512;
 export const SML_HTTP_ATTACH_ITEMS_MAX = 50;
 
 /**
- * Response body for `POST /internal/agent_builder/sml/_search` (internal only).
+ * Response body for `POST /internal/semantic_layer/sml/_search` (internal only).
  */
 export interface SmlSearchHttpResponse {
   total: number;

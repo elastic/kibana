@@ -8,7 +8,7 @@
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
-import type { SmlSearchResult } from '../../../sml';
+import type { SmlSearchResult } from '@kbn/semantic-layer-plugin/server';
 import { createSmlSearchTool } from './sml_search';
 
 const mockSearch = jest.fn();

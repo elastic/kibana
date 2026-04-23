@@ -12,7 +12,7 @@ import {
   type OtherResult,
 } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
-import type { SmlDocument } from '../../../sml';
+import type { SmlDocument } from '@kbn/semantic-layer-plugin/server';
 import { createSmlAttachTool } from './sml_attach';
 
 const mockCheckItemsAccess = jest.fn();
