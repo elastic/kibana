@@ -30,12 +30,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Alerting**:
 * Makes `maximumCasesToOpen` a runtime property [#259255]({{kib-pull}}259255).
-* Adds cases workflow steps for automation [#253119]({{kib-pull}}253119).
 * Adds an auto-push case option to the case connector [#249251]({{kib-pull}}249251).
 * Exposes the `maximumCasesToOpen` parameter in the case action connection [#247990]({{kib-pull}}247990).
 * Adds additional workflow steps [#256922]({{kib-pull}}256922).
 * Alert deletion is now generally available [#247465]({{kib-pull}}247465).
-* Adds a gap scheduler error callout [#250393]({{kib-pull}}250393).
 
 **Elastic Agent Builder**:
 * Updates Test tool flyout to support datetime picker [#249549]({{kib-pull}}249549).
@@ -290,6 +288,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Makes the manual run API public [#253010]({{kib-pull}}253010).
 * Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
 * Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
+* Adds cases workflow steps [#253119]({{kib-pull}}253119),[#256922]({{kib-pull}}256922).
 
 ### Fixes [kibana-9.4.0-fixes]
 
@@ -445,20 +444,20 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Formats `time_of_day` / `time_of_week` values in anomaly detection alerting rule notifications and results preview [#261034]({{kib-pull}}261034).
 * Fixes the anomaly swim lane embeddable refresh in Anomaly Detection [#259962]({{kib-pull}}259962).
 * Fixes a jobs list console error in Data frame analytics [#258591]({{kib-pull}}258591).
-* Disables Start/Update deployment actions for Rerank models in trained models [#257400]({{kib-pull}}257400).
+* Disables start and update deployment actions for Rerank models in trained models [#257400]({{kib-pull}}257400).
 * Fixes the field statistics saved search not updating when the dashboard changes filter [#257241]({{kib-pull}}257241).
 * Fixes the update of the job rules flyout in Anomaly Detection Single Metric Viewer [#257196]({{kib-pull}}257196).
 * Fixes screen reader announcements for flyouts [#256409]({{kib-pull}}256409).
 * Improves Smart Grouping performance and re-enables it in Log rate analysis [#253704]({{kib-pull}}253704).
-* Fixes headings in Log rate/pattern analysis and Change point detection for accessibility [#253266]({{kib-pull}}253266).
-* Fixes the today and this week filters for Log Rate / Pattern Analysis embeddables [#252925]({{kib-pull}}252925).
+* Fixes headings in Log rate and pattern analysis and Change point detection for accessibility [#253266]({{kib-pull}}253266).
+* Fixes the today and this week filters for Log Rate and Pattern Analysis embeddables [#252925]({{kib-pull}}252925).
 * Fixes the file size limit check in file upload [#251515]({{kib-pull}}251515).
 * Fixes occasional file preview corruption in file upload [#250532]({{kib-pull}}250532).
 * Fixes word break in Anomaly Detection page titles [#250058]({{kib-pull}}250058).
 * Passes abort signal to Elasticsearch in file upload [#249623]({{kib-pull}}249623).
-* Updates the packetbeat dns tunneling datafeed to include runtime mappings [#249317]({{kib-pull}}249317).
+* Updates the Packetbeat DNS tunneling datafeed to include runtime mappings [#249317]({{kib-pull}}249317).
 * Fixes counter metric fields being missing in the Anomaly detection dropdown [#248187]({{kib-pull}}248187).
-* Fixes broken Data Visualizer and AIOps navigation breadcrumbs / sidebar in solutions [#248167]({{kib-pull}}248167).
+* Fixes broken Data Visualizer and AIOps navigation breadcrumbs and sidebar in solutions [#248167]({{kib-pull}}248167).
 * Disables {{esql}} field stats for TS command [#247641]({{kib-pull}}247641).
 * Fixes the display of the map view for small screen sizes in Data Visualizer [#247615]({{kib-pull}}247615).
 * Fixes an anomaly chart empty query bug [#246841]({{kib-pull}}246841).
