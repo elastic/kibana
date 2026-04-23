@@ -45,7 +45,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject updates and deletions of managed workflows. The only permitted user mutation is the enable/disable toggle, which requires a `--force` flag to ensure intentionality (see R3). For any other changes, the user must clone the workflow into a user-owned copy and edit the clone. Enforcement is server-side — UI-only restrictions are insufficient since API callers can still mutate. |
 | **R3** | **Enabled by default, with opt-out** | Registered managed workflows are active by default (`management.defaultEnabled: true`). The registration contract supports `management.defaultEnabled: false` for opt-in patterns where a product feature activates the workflow on the user's behalf. On reconciliation (new version), the platform's behavior depends on `management.enablement`: `'restorable'` (default) preserves the user's current enabled state; `'enforced'` resets to `management.defaultEnabled`. |
 | **R4** | **Ownership metadata** | Every managed workflow identifies its owning plugin, team, or feature. Visible when inspecting the workflow. |
-| **R5** | **Registration mechanism** | Managed workflow definitions live in a centralized package (`@kbn/workflows/managed`) owned by the workflows team via CODEOWNERS. Consuming plugins interact via an imperative `install` / `uninstall` / `enable` / `disable` API on `workflows_extensions`, referencing workflows by typed ID only. The platform resolves definitions from the package, handles provisioning and reconciliation. See [Registration](#3-registration) in the technical design. |
+| **R5** | **Registration mechanism** | A way for solution teams to register managed workflows with the platform, including the workflow definition and ownership metadata. The workflow plugin handles installation and activation. See [Registration](#3-registration) in the technical design. |
 | **R6** | **Caller-provided workflow ID with uniqueness guarantee** | Plugins can specify stable, deterministic IDs instead of auto-generated IDs. IDs must be globally unique so all existing APIs continue to serve both managed and user-defined workflows unambiguously. See [Open Questions > Registration #3](#id-uniqueness) for enforcement approaches. |
 | **R7** | **Custom triggers and custom steps** | Managed workflows support custom step types and custom triggers registered via `workflows_extensions`. Same engine, same capabilities. |
 | **R8** | **Existing guardrails apply** | All existing concurrency strategies, execution limits, and guardrails apply to managed workflows. |
@@ -85,11 +85,11 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 
 | # | Requirement | Details | Requested By |
 |---|-------------|---------|--------------|
-| **N1** | **~~Post-start / dynamic registration~~** | **Resolved.** First-class support via `management.lifecycle: 'dynamic'`. Definitions live in the package; plugins call `managedWorkflows.install(id, { values })` at any time post-start. Cleanup via explicit `uninstall()`. See [Registration > §3.2](#3-registration) and [Lifecycle > §5.2](#5-lifecycle-provisioning-updates-cleanup). | Security AB (KDKHD) |
+| **N1** | **Post-start / dynamic registration** | Support registration after plugin `start()`, not just `setup()`. Enables user-action-triggered managed workflows. Creation and deletion are straightforward (plugin calls an API). See [Registration > §3.2](#3-registration) and [Lifecycle > §5.2](#5-lifecycle-provisioning-updates-cleanup). | Security AB (KDKHD) |
 | **N3** | **Registration health / introspection** | Registry view: what's registered, what's installed per space, version/hash. | Security AB (KDKHD) |
 | **N4** | **Standardized gating + rollout controls** | Feature flags for progressive enablement of managed workflows. Achievable via S4 — the `shouldInstall` hook receives the full provisioning context (feature flags, space, deployment type, etc.), so the registering plugin can gate installation on any condition without a separate rollout mechanism. | Security AB (KDKHD) |
 | **N5** | **Out-of-band updates** | Update managed workflow definitions outside of Kibana release cycles. Related to integration-based distribution (N7). | Security AB (KDKHD) |
-| **N6** | **~~Type safety for code-defined workflows~~** | **Resolved.** The centralized `@kbn/workflows/managed` package exports typed ID constants and `ManagedWorkflowDefinition` objects. Consumers import typed IDs and pass them to `managedWorkflows.install(id)` — unknown IDs are compile-time errors. See [Registration > §3.1](#3-registration). | Security AB (KDKHD) |
+| **N6** | **Type safety for code-defined workflows** | The centralized `@kbn/workflows/managed` package exports typed ID constants and `ManagedWorkflowDefinition` objects. Consumers import typed IDs and pass them to `managedWorkflows.install(id)` — unknown IDs are compile-time errors. See [Registration > §3.1](#3-registration). | Security AB (KDKHD) |
 | **N7** | **Integration-based distribution** | Ship managed workflows as part of integrations. Registration happens through the integration lifecycle (install/uninstall). | O11y (ruflin), Search (pgayvallet) |
 | **N8** | **Partial user editability** | Allow the registering plugin to declare specific properties as user-editable while keeping the rest read-only. See [Open Questions > Mutability #4](#mutability) for the full design discussion, upgrade conflict analysis, and the recommended first-phase approach. | — |
 
@@ -394,7 +394,7 @@ The `--force` flag is scoped to the **enable/disable toggle only**. Updates and 
 
 ### 3. Registration
 
-Registration is split into two concerns: **where managed workflow definitions live** (a centralized package) and **how consuming plugins interact with them** (an imperative API on `workflows_extensions`). This mirrors the existing pattern for event-driven triggers: trigger definitions are declared in a package, and plugins emit events by ID via the `workflows_extensions` contract without touching the definition directly.
+Registration is split into two concerns: **where managed workflow definitions live** (a centralized package) and **how consuming plugins interact with them** (an imperative API on `workflows_extensions`). This mirrors the existing pattern for event-driven triggers: workflows definitions are declared in a package, and plugins install them by ID via the `workflows_extensions` contract without touching the definition directly.
 
 #### 3.1 The centralized package: `@kbn/workflows/managed`
 
@@ -586,19 +586,11 @@ interface ManagedWorkflowManagement {
 }
 ```
 
-**Ownership model — CODEOWNERS replaces the approval gate:**
-
-The `approved_managed_workflows.ts` approval gate (hash file + Scout test) is eliminated. Instead:
-
-- The **package** is owned by the workflows team via CODEOWNERS. Any PR that adds or modifies a managed workflow definition requires workflows team review by construction.
-- Each managed workflow file can list the consuming team as a co-owner via CODEOWNERS sub-paths, so both teams are auto-requested on changes.
-- This replaces a fragile two-file-in-lockstep mechanism (YAML hash in one place, definition in another, CI test to catch drift) with normal code review on a single artifact.
-
-The package owns **the artifact and the ID**. The plugin owns **the policy and the lifecycle decision** (when to install, whether to install, when to uninstall).
+The **package** is owned by the workflows team via CODEOWNERS, and owns **the artifact and the ID**. The plugin owns **the policy and the lifecycle decision** (when to install, whether to install, when to uninstall).
 
 #### 3.2 Plugin contract: `install` / `uninstall` / `enable` / `disable`
 
-Consuming plugins interact with managed workflows through an imperative API on the `workflows_extensions` start contract. This follows the same pattern as event-driven triggers: plugins call `emitEvent(triggerId, payload)` by ID without touching the trigger definition — and similarly, plugins call `install(workflowId)` by ID without touching the YAML definition.
+Consuming plugins interact with managed workflows through an imperative API on the `workflows_extensions` start contract. This follows the same pattern as event-driven triggers, plugins call `install(workflowId)` by ID without touching the YAML definition.
 
 **Why `workflows_extensions`:**
 
@@ -658,7 +650,7 @@ Notes:
 
 **Request-scoped client (post-start, with request context):**
 
-For dynamic workflows installed in response to user actions or from route handlers, the same `getClient(request)` pattern used for `emitEvent` provides a request-scoped managed workflows client:
+For dynamic workflows installed in response to user actions or from route handlers, the `getClient(request)` pattern provides a request-scoped managed workflows client:
 
 ```typescript
 // In a route handler — same pattern as emitting events
@@ -727,17 +719,6 @@ await managedWorkflows.install(ATTACK_DISCOVERY_MAINTENANCE_WORKFLOW_ID);
                               └─ Dynamic: managedWorkflows.uninstall(ID)
                                    (removes the workflow when no longer needed)
 ```
-
-#### 3.4 Comparison: managed workflows vs. steps vs. triggers
-
-| | Custom steps | Event-driven triggers | Managed workflows |
-|---|---|---|---|
-| **Definition lives in** | Consumer plugin code | Consumer plugin + common package | `@kbn/workflows/managed` (centralized) |
-| **Registered via** | `registerStepDefinition()` at setup | `registerTriggerDefinition()` at setup | Package loaded at startup (automatic) |
-| **Consumed via** | Engine resolves by step type ID | `emitEvent(triggerId, payload)` by ID | `install(workflowId)` / `uninstall(workflowId)` by ID |
-| **Approval gate** | `approved_step_definitions.ts` + hash | `approved_trigger_definitions.ts` + hash | CODEOWNERS on package (no hash file) |
-| **Storage** | In-memory registry | In-memory registry + event dispatch | Persisted to `.workflows-workflows` |
-| **Scope** | Global (types) | Global (types) + space-scoped (events) | Space-scoped (documents) |
 
 **What about integrations?**
 
