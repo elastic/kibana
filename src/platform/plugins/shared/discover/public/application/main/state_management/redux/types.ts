@@ -240,6 +240,16 @@ export interface DiscoverInternalState {
   defaultProfileAdHocDataViewIds: string[];
   defaultProfileEsqlQuery: DefaultEsqlQueryConfig | undefined;
   isESQLToDataViewTransitionModalVisible: boolean;
+  /**
+   * When set, the Discover ES|QL editor may emphasize the query (e.g. while the ES|QL rule v2 flyout is open).
+   * Cleared when the flyout closes or the user switches tabs.
+   */
+  esqlRuleV2FlyoutOpenForTabId: string | null;
+  /**
+   * Optional character range (0-based offsets into the query) highlighted as CONDITION while the rule flyout is open.
+   * `null` uses automatic `| WHERE` detection. Set from the editor context menu.
+   */
+  esqlAlertRuleConditionRangeOverride: { start: number; end: number } | null;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;

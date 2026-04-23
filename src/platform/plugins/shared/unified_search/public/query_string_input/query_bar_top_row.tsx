@@ -251,6 +251,12 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Optional ES|QL prop - Enable data source browser in ESQL editor
    */
   enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
+  /**
+   * Optional ES|QL prop — emphasize the query when a related flow is open (e.g. alert rule from Discover).
+   */
+  highlightQueryForAlertRuleContext?: ESQLEditorProps['highlightQueryForAlertRuleContext'];
+  alertRuleConditionRangeOverride?: ESQLEditorProps['alertRuleConditionRangeOverride'];
+  onAlertRuleConditionRangeOverrideChange?: ESQLEditorProps['onAlertRuleConditionRangeOverrideChange'];
   useBackgroundSearchButton?: boolean;
   /**
    * Opt-in to the new DateRangePicker. The new picker is shown only when both
@@ -1213,6 +1219,9 @@ export const QueryBarTopRow = React.memo(
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
+            highlightQueryForAlertRuleContext={props.highlightQueryForAlertRuleContext}
+            alertRuleConditionRangeOverride={props.alertRuleConditionRangeOverride}
+            onAlertRuleConditionRangeOverrideChange={props.onAlertRuleConditionRangeOverrideChange}
           />
         )
       );

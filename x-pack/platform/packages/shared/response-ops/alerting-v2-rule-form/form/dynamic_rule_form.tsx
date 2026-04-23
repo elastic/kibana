@@ -38,6 +38,10 @@ export interface DynamicRuleFormProps {
   includeSubmission?: boolean;
   submitLabel?: React.ReactNode;
   cancelLabel?: React.ReactNode;
+  /**
+   * When true, the ES|QL BASE/CONDITION legend is omitted from Rule evaluation (e.g. rendered in the DynamicRuleFormFlyout header callout).
+   */
+  omitEsqlQuerySplitLegend?: boolean;
 }
 
 /**
@@ -65,6 +69,7 @@ export const DynamicRuleForm = ({
   onCancel,
   submitLabel,
   cancelLabel,
+  omitEsqlQuerySplitLegend = false,
 }: DynamicRuleFormProps) => {
   // Get default form values derived from the query
   const formValues = useFormDefaults({ query });
@@ -97,6 +102,7 @@ export const DynamicRuleForm = ({
         onSubmit={onSubmit}
         onSuccess={onSuccess}
         includeQueryEditor={false}
+        omitEsqlQuerySplitLegend={omitEsqlQuerySplitLegend}
         includeYaml={includeYaml}
         isDisabled={isDisabled}
         isSubmitting={isSubmitting}

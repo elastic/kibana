@@ -11,7 +11,8 @@ import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
+import { ENABLE_ESQL, getInitialESQLQuery, prettifyQuery } from '@kbn/esql-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { AppMenuRegistry, dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
@@ -38,6 +39,7 @@ import {
 import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
+  selectTab,
   selectTabSavedSearchByValueAttributes,
   useCurrentDataView,
   useCurrentTabAction,
@@ -134,6 +136,34 @@ export const useTopNavLinks = ({
   const canCreateESQLRule = !!services.capabilities.alertingVTwo;
   const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
 
+  const onEsqlRuleV2FlyoutOpenChange = useCallback(
+    async (openForTabId: string | null) => {
+      if (openForTabId) {
+        try {
+          const state = getState();
+          const tab = selectTab(state, openForTabId);
+          const q = tab?.appState.query;
+          if (q && isOfAggregateQueryType(q)) {
+            const raw = q.esql;
+            const pretty = prettifyQuery(raw);
+            if (pretty !== raw) {
+              await dispatch(
+                internalStateActions.updateESQLQuery({
+                  tabId: openForTabId,
+                  queryOrUpdater: pretty,
+                })
+              );
+            }
+          }
+        } catch {
+          // Unparseable or invalid query — open the flyout without mutating the editor text.
+        }
+      }
+      dispatch(internalStateActions.setEsqlRuleV2FlyoutOpenForTabId(openForTabId));
+    },
+    [dispatch, getState]
+  );
+
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
 
@@ -150,6 +180,7 @@ export const useTopNavLinks = ({
         getState,
         subscribe,
         showCreateRuleV2,
+        onEsqlRuleV2FlyoutOpenChange,
       });
       items.push(alertsAppMenuItem);
     }
@@ -237,6 +268,7 @@ export const useTopNavLinks = ({
     totalHitsState,
     intl,
     showCreateRuleV2,
+    onEsqlRuleV2FlyoutOpenChange,
   ]);
 
   const transitionFromDataViewToESQL = useCurrentTabAction(

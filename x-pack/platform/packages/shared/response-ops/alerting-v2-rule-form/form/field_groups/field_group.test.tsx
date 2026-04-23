@@ -133,6 +133,17 @@ describe('FieldGroup', () => {
       expect(screen.getByRole('button', { name: 'Test Section' })).toBeInTheDocument();
     });
 
+    it('renders children without an accordion when flyoutDisplay is plain', () => {
+      renderFieldGroup(
+        <FieldGroup title="Test Section" flyoutDisplay="plain">
+          <div>Plain child</div>
+        </FieldGroup>
+      );
+
+      expect(screen.queryByRole('button', { name: 'Test Section' })).not.toBeInTheDocument();
+      expect(screen.getByText('Plain child')).toBeInTheDocument();
+    });
+
     it('renders children when initially open (static variant)', () => {
       renderFieldGroup(
         <FieldGroup title="Test Section">

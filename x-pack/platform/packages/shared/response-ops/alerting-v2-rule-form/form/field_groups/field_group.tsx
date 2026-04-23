@@ -23,6 +23,11 @@ import { useRuleFormMeta } from '../contexts';
 interface BaseFieldGroupProps {
   title: string;
   children: React.ReactNode;
+  /**
+   * Flyout layout only. When `plain`, skips the accordion and renders `children` directly
+   * (no section title), keeping the same trailing spacer and divider as other flyout groups.
+   */
+  flyoutDisplay?: 'accordion' | 'plain';
 }
 
 type StaticFieldGroupProps = BaseFieldGroupProps & {
@@ -61,7 +66,7 @@ const isUncontrolledFieldGroup = (
 };
 
 export const FieldGroup = (props: FieldGroupProps) => {
-  const { title, children } = props;
+  const { title, children, flyoutDisplay = 'accordion' } = props;
   const { layout } = useRuleFormMeta();
   const id = useGeneratedHtmlId({ prefix: 'fieldGroup' });
   const isControlled = isControlledFieldGroup(props);
@@ -84,6 +89,16 @@ export const FieldGroup = (props: FieldGroupProps) => {
       setUncontrolledIsOpen((prev) => !prev);
     }
   }, [isControlled, isUncontrolled, props]);
+
+  if (layout === 'flyout' && flyoutDisplay === 'plain') {
+    return (
+      <>
+        {children}
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="xs" />
+      </>
+    );
+  }
 
   if (layout === 'flyout') {
     const accordionProps = isControlled

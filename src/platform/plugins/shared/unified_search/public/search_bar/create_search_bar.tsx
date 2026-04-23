@@ -308,6 +308,9 @@ export function createSearchBar({
             useBackgroundSearchButton={props.useBackgroundSearchButton}
             esqlQueryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
+            highlightQueryForAlertRuleContext={props.highlightQueryForAlertRuleContext}
+            alertRuleConditionRangeOverride={props.alertRuleConditionRangeOverride}
+            onAlertRuleConditionRangeOverrideChange={props.onAlertRuleConditionRangeOverrideChange}
             enableDateRangePicker={props.enableDateRangePicker}
           />
         </core.i18n.Context>

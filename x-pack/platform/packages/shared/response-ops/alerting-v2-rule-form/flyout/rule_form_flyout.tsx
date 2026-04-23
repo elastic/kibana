@@ -27,6 +27,11 @@ export interface RuleFormFlyoutProps {
   onClose?: () => void;
   isLoading?: boolean;
   children: React.ReactNode;
+  /**
+   * Renders in `EuiFlyoutBody`’s banner region: flush under the header divider, full width,
+   * outside the body’s padded scroll content (intended for `EuiCallOut`).
+   */
+  bodyBanner?: React.ReactNode;
 }
 
 /**
@@ -47,6 +52,7 @@ export const RuleFormFlyout = ({
   onClose,
   isLoading = false,
   children,
+  bodyBanner,
 }: RuleFormFlyoutProps) => {
   const clickedRef = useRef(false);
 
@@ -74,6 +80,7 @@ export const RuleFormFlyout = ({
       aria-labelledby={FLYOUT_TITLE_ID}
       size="l"
       maxWidth={600}
+      paddingSize="m"
     >
       <div
         style={{ display: 'contents' }}
@@ -86,16 +93,16 @@ export const RuleFormFlyout = ({
         onFocusCapture={onFocusCapture}
       >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
-            <h2>
+          <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
+            <h3>
               <FormattedMessage
                 id="xpack.alertingV2.ruleForm.flyoutTitle"
                 defaultMessage="Create Alert Rule"
               />
-            </h2>
+            </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{children}</EuiFlyoutBody>
+        <EuiFlyoutBody banner={bodyBanner}>{children}</EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>

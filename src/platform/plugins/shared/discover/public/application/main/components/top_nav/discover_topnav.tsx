@@ -163,6 +163,22 @@ export const DiscoverTopNav = ({
     (state) => state.persistedDiscoverSession
   );
   const isEsqlMode = useIsEsqlMode();
+  const esqlRuleV2FlyoutOpenForTabId = useInternalStateSelector(
+    (state) => state.esqlRuleV2FlyoutOpenForTabId
+  );
+  const highlightQueryForAlertRuleContext =
+    isEsqlMode &&
+    esqlRuleV2FlyoutOpenForTabId !== null &&
+    esqlRuleV2FlyoutOpenForTabId === currentTabId;
+  const esqlAlertRuleConditionRangeOverride = useInternalStateSelector(
+    (state) => state.esqlAlertRuleConditionRangeOverride
+  );
+  const onAlertRuleConditionRangeOverrideChange = useCallback(
+    (range: { start: number; end: number } | null) => {
+      dispatch(internalStateActions.setEsqlAlertRuleConditionRangeOverride(range));
+    },
+    [dispatch]
+  );
   const showDatePicker = useMemo(() => {
     // always show the timepicker for ES|QL mode
     return (
@@ -496,6 +512,9 @@ export const DiscoverTopNav = ({
         }
         esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
+        highlightQueryForAlertRuleContext={highlightQueryForAlertRuleContext}
+        alertRuleConditionRangeOverride={esqlAlertRuleConditionRangeOverride}
+        onAlertRuleConditionRangeOverrideChange={onAlertRuleConditionRangeOverrideChange}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

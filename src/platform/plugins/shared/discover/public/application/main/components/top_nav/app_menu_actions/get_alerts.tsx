@@ -129,6 +129,7 @@ export const getAlertsAppMenuItem = ({
   getState,
   subscribe,
   showCreateRuleV2,
+  onEsqlRuleV2FlyoutOpenChange,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
@@ -136,6 +137,8 @@ export const getAlertsAppMenuItem = ({
   getState: () => DiscoverInternalState;
   subscribe: (listener: () => void) => () => void;
   showCreateRuleV2?: boolean;
+  /** Fired when the ES|QL rule v2 flyout opens (`tabId`) or closes (`null`). Used for Discover editor emphasis and optional prettify on open. */
+  onEsqlRuleV2FlyoutOpenChange?: (tabId: string | null) => void | Promise<void>;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -163,6 +166,7 @@ export const getAlertsAppMenuItem = ({
             getState={getState}
             subscribe={subscribe}
             onClose={onFinishAction}
+            onFlyoutPresenceChange={onEsqlRuleV2FlyoutOpenChange}
           />
         );
       },

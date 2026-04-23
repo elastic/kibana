@@ -28,12 +28,15 @@ export function CreateESQLRuleFlyout({
   getState,
   subscribe,
   onClose,
+  onFlyoutPresenceChange,
 }: {
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
   subscribe: (listener: () => void) => () => void;
   onClose: () => void;
+  /** Notifies when this flyout is mounted (Discover editor highlight) or unmounted. */
+  onFlyoutPresenceChange?: (openForTabId: string | null) => void;
 }) {
   const getQuery = useCallback(() => getEsqlQuery(getState, tabId), [getState, tabId]);
 
@@ -76,6 +79,14 @@ export function CreateESQLRuleFlyout({
       appChangeSubscription.unsubscribe();
     };
   }, [history, core.application.currentAppId$]);
+
+  useEffect(() => {
+    if (query === null) {
+      return;
+    }
+    onFlyoutPresenceChange?.(tabId);
+    return () => onFlyoutPresenceChange?.(null);
+  }, [onFlyoutPresenceChange, tabId, query]);
 
   if (query === null) {
     return null;

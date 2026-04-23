@@ -6,9 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RuleFormFlyout } from './rule_form_flyout';
 import { DynamicRuleForm } from '../form/dynamic_rule_form';
+import { EsqlQuerySplitLegend } from '../form/fields/esql_query_split_legend';
 import { useCreateRule } from '../form/hooks/use_create_rule';
 import type { FormValues } from '../form/types';
 import type { RuleFormServices } from '../form/contexts';
@@ -50,13 +53,31 @@ const DynamicRuleFormFlyoutInner = ({
   };
 
   return (
-    <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
+    <RuleFormFlyout
+      push={push}
+      onClose={onClose}
+      isLoading={isLoading}
+      bodyBanner={
+        <EuiCallOut
+          color="accent"
+          iconType="popper"
+          size="s"
+          title={i18n.translate('xpack.alertingV2.ruleForm.esqlQuerySplitCalloutTitle', {
+            defaultMessage: 'Alerting v2: Create alert rules from Discover',
+          })}
+          data-test-subj="alertingV2EsqlQuerySplitCallout"
+        >
+          <EsqlQuerySplitLegend />
+        </EuiCallOut>
+      }
+    >
       <DynamicRuleForm
         onSubmit={handleSubmit}
         isSubmitting={isLoading}
         query={query}
         services={services}
         layout="flyout"
+        omitEsqlQuerySplitLegend
       />
     </RuleFormFlyout>
   );

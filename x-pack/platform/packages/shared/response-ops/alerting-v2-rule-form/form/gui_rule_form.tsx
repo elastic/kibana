@@ -21,6 +21,10 @@ export interface GuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
   /** Whether to include the ES|QL query editor (default: true) */
   includeQueryEditor?: boolean;
+  /**
+   * When true, the ES|QL BASE/CONDITION legend is not rendered in Rule evaluation (e.g. it is shown in a flyout `EuiCallOut` instead).
+   */
+  omitEsqlQuerySplitLegend?: boolean;
 }
 
 /**
@@ -35,14 +39,21 @@ export interface GuiRuleFormProps {
  *
  * Requires a FormProvider context with FormValues type to be present in the component tree.
  */
-export const GuiRuleForm = ({ onSubmit, includeQueryEditor = true }: GuiRuleFormProps) => {
+export const GuiRuleForm = ({
+  onSubmit,
+  includeQueryEditor = true,
+  omitEsqlQuerySplitLegend = false,
+}: GuiRuleFormProps) => {
   const { handleSubmit } = useFormContext<FormValues>();
 
   return (
     <EuiForm id={RULE_FORM_ID} component="form" onSubmit={handleSubmit(onSubmit)}>
       <RuleDetailsFieldGroup />
       <EuiSpacer size="m" />
-      <ConditionFieldGroup includeBase={includeQueryEditor} />
+      <ConditionFieldGroup
+        includeBase={includeQueryEditor}
+        omitEsqlQuerySplitLegend={omitEsqlQuerySplitLegend}
+      />
       <EuiSpacer size="m" />
       <RuleExecutionFieldGroup />
       <EuiSpacer size="m" />

@@ -43,6 +43,10 @@ export interface RuleFormProps {
   onCancel?: () => void;
   /** Whether to include the ES|QL query editor (default: true) */
   includeQueryEditor?: boolean;
+  /**
+   * When true, the ES|QL BASE/CONDITION legend is not rendered in Rule evaluation (e.g. shown in a flyout `EuiCallOut` instead).
+   */
+  omitEsqlQuerySplitLegend?: boolean;
   /** Whether to include YAML editor toggle (default: false) */
   includeYaml?: boolean;
   isDisabled?: boolean;
@@ -68,6 +72,7 @@ const RuleFormContent = ({
   onSubmit: externalOnSubmit,
   onSuccess,
   includeQueryEditor = true,
+  omitEsqlQuerySplitLegend = false,
   includeYaml = false,
   isDisabled = false,
   isSubmitting: externalIsSubmitting = false,
@@ -170,7 +175,11 @@ const RuleFormContent = ({
           isSubmitting={isSubmitting}
         />
       ) : (
-        <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />
+        <GuiRuleForm
+          onSubmit={onSubmit}
+          includeQueryEditor={includeQueryEditor}
+          omitEsqlQuerySplitLegend={omitEsqlQuerySplitLegend}
+        />
       )}
 
       {includeSubmission && (

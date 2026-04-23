@@ -85,6 +85,10 @@ import { useEsqlCallbacks } from './hooks/use_esql_callbacks';
 import { useMemoizedCaches } from './hooks/use_memoized_caches';
 import { useQueryActions } from './hooks/use_query_actions';
 import { useQueryValidation } from './hooks/use_query_validation';
+import { AlertRuleQueryRegionLabels } from './alert_rule_query_region_labels';
+import { AlertRuleQueryContextMenu } from './alert_rule_query_context_menu';
+import { registerAlertRuleSplitEditorActions } from './alert_rule_split_context_menu';
+import { useAlertRuleContextHighlight } from './hooks/use_alert_rule_context_highlight';
 import { useEditorConfig } from './hooks/use_editor_config';
 import { useTimePickerPopover } from './hooks/use_time_picker_popover';
 import { useDataSourceBrowser } from './resource_browser/use_data_source_browser';
@@ -119,6 +123,9 @@ const ESQLEditorInternal = function ESQLEditor({
   hideQuickSearch,
   queryStats,
   enableResourceBrowser = false,
+  highlightQueryForAlertRuleContext = false,
+  alertRuleConditionRangeOverride = null,
+  onAlertRuleConditionRangeOverrideChange,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -575,6 +582,49 @@ const ESQLEditorInternal = function ESQLEditor({
     onOpenQueryInNewTab
   );
 
+  const { alertRuleContextHighlightStyle, regionMeta } = useAlertRuleContextHighlight({
+    active: highlightQueryForAlertRuleContext,
+    editorModel,
+    queryText: code,
+    conditionRangeOverride: alertRuleConditionRangeOverride ?? null,
+  });
+
+  const onAlertRuleRangeOverrideChangeRef = useRef(onAlertRuleConditionRangeOverrideChange);
+  onAlertRuleRangeOverrideChangeRef.current = onAlertRuleConditionRangeOverrideChange;
+
+  const alertRuleConditionRangeOverrideRef = useRef(alertRuleConditionRangeOverride);
+  alertRuleConditionRangeOverrideRef.current = alertRuleConditionRangeOverride ?? null;
+
+  useEffect(() => {
+    if (
+      !highlightQueryForAlertRuleContext ||
+      typeof onAlertRuleConditionRangeOverrideChange !== 'function'
+    ) {
+      return;
+    }
+    let cancelled = false;
+    let menuDisposable: { dispose: () => void } | undefined;
+    const tryAttach = () => {
+      const editor = editorRef.current;
+      if (!editor) {
+        requestAnimationFrame(tryAttach);
+        return;
+      }
+      if (cancelled) {
+        return;
+      }
+      menuDisposable = registerAlertRuleSplitEditorActions(editor, {
+        setConditionRangeOverride: (range) => onAlertRuleRangeOverrideChangeRef.current?.(range),
+        getConditionRangeOverride: () => alertRuleConditionRangeOverrideRef.current ?? null,
+      });
+    };
+    tryAttach();
+    return () => {
+      cancelled = true;
+      menuDisposable?.dispose();
+    };
+  }, [highlightQueryForAlertRuleContext]);
+
   const {
     esqlDepsByModelUri,
     suggestionProvider,
@@ -606,6 +656,7 @@ const ESQLEditorInternal = function ESQLEditor({
         styles={css`
           ${lookupIndexBadgeStyle}
           ${sourcesBadgeStyle}
+          ${alertRuleContextHighlightStyle}
         `}
       />
       {Boolean(editorIsInline) && !hideRunQueryButton ? (
@@ -655,6 +706,24 @@ const ESQLEditorInternal = function ESQLEditor({
             `}
           >
             <div css={styles.editorContainer}>
+              <AlertRuleQueryRegionLabels
+                active={highlightQueryForAlertRuleContext}
+                editorRef={editorRef}
+                meta={regionMeta}
+              />
+              {highlightQueryForAlertRuleContext &&
+                typeof onAlertRuleConditionRangeOverrideChange === 'function' && (
+                  <AlertRuleQueryContextMenu
+                    active
+                    editorRef={editorRef}
+                    callbacks={{
+                      setConditionRangeOverride: (range) =>
+                        onAlertRuleConditionRangeOverrideChange?.(range),
+                      getConditionRangeOverride: () =>
+                        alertRuleConditionRangeOverrideRef.current ?? null,
+                    }}
+                  />
+                )}
               <CodeEditor
                 htmlId={htmlId}
                 aria-label={i18n.translate('esqlEditor.ariaLabel', {

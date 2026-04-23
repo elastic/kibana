@@ -154,6 +154,11 @@ export const useEditorConfig = ({
 
   const codeEditorOptions: CodeEditorProps['options'] = useMemo(
     () => ({
+      /**
+       * Disabled so Monaco’s default context menu never shows. Alert-rule mode uses a custom EUI menu
+       * (`alert_rule_query_context_menu.tsx`) with capture-phase `contextmenu` on the editor DOM.
+       */
+      contextmenu: false,
       hover: {
         above: false,
       },

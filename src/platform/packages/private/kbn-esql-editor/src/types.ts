@@ -90,6 +90,22 @@ export interface ESQLEditorProps {
   enableResourceBrowser?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
+  /**
+   * When true, applies a subtle background highlight to the full query in the editor.
+   * Intended for contexts where the query is referenced by another surface (e.g. creating an alert rule from Discover).
+   */
+  highlightQueryForAlertRuleContext?: boolean;
+  /**
+   * When {@link highlightQueryForAlertRuleContext} is active, optional character range (0-based offsets)
+   * highlighted as CONDITION. `null` uses automatic detection (first `| WHERE`). Set via context menu in Discover.
+   */
+  alertRuleConditionRangeOverride?: { start: number; end: number } | null;
+  /**
+   * Updates {@link alertRuleConditionRangeOverride} from the editor context menu (for example “Set as rule condition” or “Reset to automatic split”).
+   */
+  onAlertRuleConditionRangeOverrideChange?: (
+    range: { start: number; end: number } | null
+  ) => void;
 }
 
 interface ESQLVariableService {

@@ -78,6 +78,8 @@ const initialState: DiscoverInternalState = {
   defaultProfileEsqlQuery: undefined,
   savedDataViews: [],
   isESQLToDataViewTransitionModalVisible: false,
+  esqlRuleV2FlyoutOpenForTabId: null,
+  esqlAlertRuleConditionRangeOverride: null,
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
     areInitializing: false,
@@ -222,6 +224,23 @@ export const internalStateSlice = createSlice({
 
     setTabsBarVisibility: (state, action: PayloadAction<TabsBarVisibility>) => {
       state.tabsBarVisibility = action.payload;
+    },
+
+    setEsqlRuleV2FlyoutOpenForTabId: (
+      state,
+      action: PayloadAction<DiscoverInternalState['esqlRuleV2FlyoutOpenForTabId']>
+    ) => {
+      state.esqlRuleV2FlyoutOpenForTabId = action.payload;
+      if (action.payload === null) {
+        state.esqlAlertRuleConditionRangeOverride = null;
+      }
+    },
+
+    setEsqlAlertRuleConditionRangeOverride: (
+      state,
+      action: PayloadAction<DiscoverInternalState['esqlAlertRuleConditionRangeOverride']>
+    ) => {
+      state.esqlAlertRuleConditionRangeOverride = action.payload;
     },
 
     markNonActiveTabsForRefetch: (state) => {
@@ -672,8 +691,9 @@ const createMiddleware = (options: InternalStateDependencies) => {
 
   startListening({
     actionCreator: discardFlyoutsOnTabChange,
-    effect: () => {
+    effect: (_action, listenerApi) => {
       dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
+      listenerApi.dispatch(internalStateSlice.actions.setEsqlRuleV2FlyoutOpenForTabId(null));
     },
   });
 

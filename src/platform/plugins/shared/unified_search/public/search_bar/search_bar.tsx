@@ -176,6 +176,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Enable data source browser suggestion in ES|QL editor.
    */
   enableResourceBrowser?: boolean;
+  /** When true, emphasize the ES|QL query in the editor (e.g. while an alert-rule flyout is open). */
+  highlightQueryForAlertRuleContext?: boolean;
+  /** Discover alert-rule flow: manual CONDITION character range (0-based offsets). */
+  alertRuleConditionRangeOverride?: { start: number; end: number } | null;
+  onAlertRuleConditionRangeOverrideChange?: (range: { start: number; end: number } | null) => void;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -808,6 +813,11 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableDateRangePicker={this.props.enableDateRangePicker}
           enableResourceBrowser={this.props.enableResourceBrowser}
+          highlightQueryForAlertRuleContext={this.props.highlightQueryForAlertRuleContext}
+          alertRuleConditionRangeOverride={this.props.alertRuleConditionRangeOverride}
+          onAlertRuleConditionRangeOverrideChange={
+            this.props.onAlertRuleConditionRangeOverrideChange
+          }
         />
       </div>
     );

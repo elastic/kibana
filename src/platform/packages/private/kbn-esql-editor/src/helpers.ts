@@ -305,8 +305,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .hover-row.status-bar {
       display: none;
     }
+    // Breathing room between digits and the line-decoration column (e.g. alert-rule BASE/CONDITION bars)
     .margin-view-overlays .line-numbers {
       color: ${theme.euiTheme.colors.textDisabled};
+      padding-right: ${theme.euiTheme.size.s};
     }
     .current-line ~ .line-numbers {
       color: ${theme.euiTheme.colors.textSubdued};

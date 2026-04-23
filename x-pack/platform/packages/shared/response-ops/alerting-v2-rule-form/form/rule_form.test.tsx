@@ -45,13 +45,16 @@ jest.mock('./gui_rule_form', () => ({
   GuiRuleForm: ({
     onSubmit,
     includeQueryEditor,
+    omitEsqlQuerySplitLegend,
   }: {
     onSubmit: () => void;
     includeQueryEditor?: boolean;
+    omitEsqlQuerySplitLegend?: boolean;
   }) => (
     <form
       id="ruleV2Form"
       data-test-subj="mockGuiRuleForm"
+      data-omit-esql-legend={String(omitEsqlQuerySplitLegend)}
       onSubmit={(e) => {
         e.preventDefault();
         onSubmit();
@@ -124,6 +127,20 @@ describe('RuleForm', () => {
       render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
       expect(screen.getByText('Query Editor')).toBeInTheDocument();
+    });
+
+    it('passes omitEsqlQuerySplitLegend to GuiRuleForm', () => {
+      render(<RuleForm {...defaultProps} omitEsqlQuerySplitLegend />, {
+        wrapper: createFormWrapper(),
+      });
+
+      expect(screen.getByTestId('mockGuiRuleForm')).toHaveAttribute('data-omit-esql-legend', 'true');
+    });
+
+    it('defaults omitEsqlQuerySplitLegend to false on GuiRuleForm', () => {
+      render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByTestId('mockGuiRuleForm')).toHaveAttribute('data-omit-esql-legend', 'false');
     });
   });
 

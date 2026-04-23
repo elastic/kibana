@@ -13,8 +13,12 @@ import { RULE_FORM_ID } from './constants';
 
 // Mock field groups to avoid complex dependencies
 jest.mock('./field_groups/condition_field_group', () => ({
-  ConditionFieldGroup: (props: { includeBase?: boolean }) => (
-    <div data-test-subj="mockConditionFieldGroup" data-include-base={String(props.includeBase)}>
+  ConditionFieldGroup: (props: { includeBase?: boolean; omitEsqlQuerySplitLegend?: boolean }) => (
+    <div
+      data-test-subj="mockConditionFieldGroup"
+      data-include-base={String(props.includeBase)}
+      data-omit-esql-legend={String(props.omitEsqlQuerySplitLegend)}
+    >
       Condition Field Group
     </div>
   ),
@@ -121,6 +125,24 @@ describe('GuiRuleForm', () => {
 
       const conditionGroup = screen.getByTestId('mockConditionFieldGroup');
       expect(conditionGroup).toHaveAttribute('data-include-base', 'true');
+    });
+
+    it('passes omitEsqlQuerySplitLegend to ConditionFieldGroup', () => {
+      render(<GuiRuleForm {...defaultProps} includeQueryEditor={false} omitEsqlQuerySplitLegend />, {
+        wrapper: createFormWrapper(),
+      });
+
+      const conditionGroup = screen.getByTestId('mockConditionFieldGroup');
+      expect(conditionGroup).toHaveAttribute('data-omit-esql-legend', 'true');
+    });
+
+    it('defaults omitEsqlQuerySplitLegend to false', () => {
+      render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByTestId('mockConditionFieldGroup')).toHaveAttribute(
+        'data-omit-esql-legend',
+        'false'
+      );
     });
   });
 
