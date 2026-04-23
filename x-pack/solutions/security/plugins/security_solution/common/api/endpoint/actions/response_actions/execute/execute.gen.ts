@@ -14,34 +14,36 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ResponseActionCreateSuccessResponse,
   BaseActionSchema,
 } from '../../../model/schema/common.gen';
 
-export type ExecuteRouteRequestBody = z.infer<typeof ExecuteRouteRequestBody>;
-export const ExecuteRouteRequestBody = BaseActionSchema.merge(
-  z.object({
-    parameters: z.object({
-      /**
-       * The shell command to execute on the endpoint.
-       */
-      command: z.string().min(1),
-      /**
-       * The maximum timeout value in seconds before the command is terminated.
-       */
-      timeout: z.number().int().min(1).optional(),
-    }),
-  })
+export const ExecuteRouteRequestBody = lazySchema(() =>
+  BaseActionSchema.merge(
+    z.object({
+      parameters: z.object({
+        /**
+         * The shell command to execute on the endpoint.
+         */
+        command: z.string().min(1),
+        /**
+         * The maximum timeout value in seconds before the command is terminated.
+         */
+        timeout: z.number().int().min(1).optional(),
+      }),
+    })
+  )
 );
+export type ExecuteRouteRequestBody = z.infer<typeof ExecuteRouteRequestBody>;
 
+export const EndpointExecuteActionRequestBody = lazySchema(() => ExecuteRouteRequestBody);
 export type EndpointExecuteActionRequestBody = z.infer<typeof EndpointExecuteActionRequestBody>;
-export const EndpointExecuteActionRequestBody = ExecuteRouteRequestBody;
 export type EndpointExecuteActionRequestBodyInput = z.input<
   typeof EndpointExecuteActionRequestBody
 >;
 
+export const EndpointExecuteActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
 export type EndpointExecuteActionResponse = z.infer<typeof EndpointExecuteActionResponse>;
-export const EndpointExecuteActionResponse = ResponseActionCreateSuccessResponse;
