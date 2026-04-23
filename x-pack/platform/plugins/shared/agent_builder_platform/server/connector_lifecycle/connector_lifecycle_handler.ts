@@ -67,7 +67,9 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         }
       } catch (error) {
         logger.error(
-          `Connector lifecycle: failed to handle post-create for connector ${connectorId} (type: ${connectorType}): ${(error as Error).message}`
+          `Connector lifecycle: failed to handle post-create for connector ${connectorId} (type: ${connectorType}): ${
+            (error as Error).message
+          }`
         );
       }
     },
@@ -80,8 +82,14 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
       );
 
       try {
-        const [, startDeps] = await getStartServices();
+        const [coreStart, startDeps] = await getStartServices();
         const request = params.request;
+        const soClient = coreStart.savedObjects.getScopedClient(request);
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+        const isExperimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+          SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+        if (!isExperimentalFeaturesEnabled) return;
 
         const semanticLayer = startDeps.semanticLayer;
         if (semanticLayer) {
@@ -103,7 +111,9 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         }
       } catch (error) {
         logger.error(
-          `Connector lifecycle: failed to clean up for connector ${connectorId}: ${(error as Error).message}`
+          `Connector lifecycle: failed to clean up for connector ${connectorId}: ${
+            (error as Error).message
+          }`
         );
       }
     },

@@ -28,22 +28,11 @@ export type {
   SmlListItem,
   SmlSearchResult,
   SmlDocument,
-  SmlCrawlerStateDocument,
-  SmlCrawler,
   SmlIndexAction,
   SmlIndexAttachmentParams,
   SmlService,
 } from './services/sml/types';
 
-export type { SmlServiceSetup, SmlServiceInstance } from './services/sml/sml_service';
-export { createSmlService, isNotFoundError } from './services/sml/sml_service';
-export { createSmlTypeRegistry, type SmlTypeRegistry } from './services/sml/sml_type_registry';
-export { createSmlIndexer, type SmlIndexer } from './services/sml/sml_indexer';
-export {
-  registerSmlCrawlerTaskDefinition,
-  scheduleSmlCrawlerTasks,
-  SML_CRAWLER_TASK_TYPE,
-} from './services/sml/sml_task_definitions';
 export { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
 

@@ -8,7 +8,6 @@
     "id": "semanticLayer",
     "server": true,
     "browser": false,
-    "configPath": ["xpack", "semanticLayer"],
     "requiredPlugins": ["features", "taskManager"],
     "optionalPlugins": ["security", "spaces"]
   }

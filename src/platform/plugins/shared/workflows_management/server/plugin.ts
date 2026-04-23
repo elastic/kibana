@@ -272,7 +272,7 @@ export class WorkflowsPlugin
   ): void {
     void Promise.all([
       core.plugins.onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder'),
-      core.plugins.onSetup<{ semanticLayer: { registerType: (def: unknown) => void } }>('semanticLayer'),
+      core.plugins.onSetup<{ semanticLayer: Pick<import('@kbn/semantic-layer-plugin/server').SemanticLayerPluginSetup, 'registerType'> }>('semanticLayer'),
     ])
       .then(([{ agentBuilder }, { semanticLayer }]) => {
         if (agentBuilder.found) {

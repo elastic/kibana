@@ -57,7 +57,7 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
-  private startDeps?: [unknown, AgentBuilderStartDependencies];
+  private startDeps?: AgentBuilderStartDependencies;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -182,8 +182,10 @@ export class AgentBuilderPlugin
 
     const smlTools = createSmlTools({
       getSmlService: () => {
-        const [, startDeps] = this.startDeps!;
-        return startDeps.semanticLayer.getSmlService();
+        if (!this.startDeps) {
+          throw new Error('SML service not available — plugin has not started');
+        }
+        return this.startDeps.semanticLayer.getSmlService();
       },
     });
     smlTools.forEach((tool) => {
@@ -223,20 +225,15 @@ export class AgentBuilderPlugin
     };
   }
 
-  start(
-    coreStart: CoreStart,
-    startDeps: AgentBuilderStartDependencies
-  ): AgentBuilderPluginStart {
-    this.startDeps = [coreStart, startDeps];
-    const {
-      inference,
-      spaces,
-      actions,
-      taskManager,
-      searchInferenceEndpoints,
-    } = startDeps;
+  start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
+    this.startDeps = startDeps;
+    const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
+
+    this.cleanupLegacySmlResources(elasticsearch, taskManager).catch((error) => {
+      this.logger.warn(`Failed to clean up legacy SML resources: ${(error as Error).message}`);
+    });
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
@@ -304,6 +301,48 @@ export class AgentBuilderPlugin
         },
       },
     };
+  }
+
+  /**
+   * One-time cleanup of legacy SML resources that were migrated to the
+   * semantic_layer plugin. Removes the old `.chat-sml-*` indices and
+   * orphaned `agent_builder:sml_crawler` tasks.
+   */
+  private async cleanupLegacySmlResources(
+    elasticsearch: CoreStart['elasticsearch'],
+    taskManager: AgentBuilderStartDependencies['taskManager']
+  ) {
+    const esClient = elasticsearch.client.asInternalUser;
+    const logger = this.logger.get('sml-migration');
+
+    try {
+      const exists = await esClient.indices.exists({
+        index: ['.chat-sml-data', '.chat-sml-crawler-state'],
+      });
+      if (exists) {
+        await esClient.indices.delete({
+          index: ['.chat-sml-data', '.chat-sml-crawler-state'],
+          ignore_unavailable: true,
+        });
+        logger.info('Deleted legacy SML indices (.chat-sml-data, .chat-sml-crawler-state)');
+      }
+    } catch (error) {
+      logger.warn(`Failed to delete legacy SML indices: ${(error as Error).message}`);
+    }
+
+    try {
+      const legacyTaskType = 'agent_builder:sml_crawler';
+      const result = await esClient.deleteByQuery({
+        index: '.kibana_task_manager',
+        ignore_unavailable: true,
+        query: { term: { 'task.taskType': legacyTaskType } },
+      });
+      if (result.deleted && result.deleted > 0) {
+        logger.info(`Removed ${result.deleted} orphaned '${legacyTaskType}' task(s)`);
+      }
+    } catch (error) {
+      logger.warn(`Failed to remove orphaned SML crawler tasks: ${(error as Error).message}`);
+    }
   }
 
   stop() {}

@@ -11,7 +11,7 @@ import {
   ATTACHMENT_REF_ACTOR,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { resolveSmlAttachItems } from '@kbn/semantic-layer-plugin/server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -166,7 +166,7 @@ export function registerInternalSmlRoutes({
         return response.ok({ body });
       },
       {
-        featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+        featureFlag: SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID,
       }
     )
   );

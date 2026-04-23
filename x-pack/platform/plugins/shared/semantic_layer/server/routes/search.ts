@@ -55,8 +55,8 @@ export const registerSearchRoute = ({
           SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (!isEnabled) {
-          return response.notFound({
-            body: { message: 'Semantic Layer experimental features are not enabled' },
+          return response.forbidden({
+            body: { message: 'Feature not available' },
           });
         }
 

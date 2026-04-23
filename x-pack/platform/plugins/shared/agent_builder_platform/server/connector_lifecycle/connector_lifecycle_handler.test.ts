@@ -19,7 +19,6 @@ const createMockUiSettingsClient = (experimentalFeaturesEnabled = true) => ({
 
 const createMockSemanticLayer = () => ({
   indexAttachment: jest.fn().mockResolvedValue(undefined),
-  getSmlService: jest.fn(),
 });
 
 const createMockGetStartServices = (

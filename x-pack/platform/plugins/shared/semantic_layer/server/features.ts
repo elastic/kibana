@@ -6,13 +6,16 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SEMANTIC_LAYER_FEATURE_ID, apiPrivileges } from '../common/features';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
     id: SEMANTIC_LAYER_FEATURE_ID,
-    name: 'Semantic Layer',
+    name: i18n.translate('xpack.semanticLayer.feature.name', {
+      defaultMessage: 'Semantic Layer',
+    }),
     minimumLicense: 'enterprise',
     order: 1001,
     category: DEFAULT_APP_CATEGORIES.kibana,
