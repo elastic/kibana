@@ -104,7 +104,7 @@
     "cypress:run:qa:serverless:rule_management:maintenance_windows": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/maintenance_windows/**/*.cy.ts'",
     "cypress:run:qa:serverless:rule_management:prebuilt_rules": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/**/*.cy.ts'",
     "cypress:run:qa:serverless:rule_management:related_integrations": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/related_integrations/**/*.cy.ts'",
-    "cypress:run:qa:serverless:rule_management:rule_actions": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/rule_actions/**/*.cy.ts'",
+    "cypress:run:qa:serverless:rule_management:rule_actions": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/rule_actions/bulk_actions/bulk_edit_rules_suppression_essentials_serverless.cy.ts'",
     "cypress:run:qa:serverless:rule_management:rule_details": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/rule_details/**/*.cy.ts'",
     "cypress:run:qa:serverless:rule_management:rules_table": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/rules_table/**/*.cy.ts'"
   }
