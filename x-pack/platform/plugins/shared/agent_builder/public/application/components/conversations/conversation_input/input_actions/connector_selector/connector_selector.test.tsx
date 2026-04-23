@@ -34,10 +34,6 @@ jest.mock('../../../../../hooks/use_ui_privileges', () => ({
   useUiPrivileges: () => ({ write: true }),
 }));
 
-jest.mock('../../../../../../../common/recommended_connectors', () => ({
-  isRecommendedConnector: () => false,
-}));
-
 jest.mock('../input_actions.styles', () => ({
   getMaxListHeight: () => 200,
   selectorPopoverPanelStyles: undefined,

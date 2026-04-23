@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { UrlInputsModel } from '../../store/inputs/model';
 import { inputsSelectors } from '../../store/inputs';
 import { useUpdateUrlParam } from '../../utils/global_query_string';
@@ -16,23 +16,9 @@ export const useSyncTimerangeUrlParam = () => {
   const updateTimerangeUrlParam = useUpdateUrlParam<UrlInputsModel>(URL_PARAM_KEY.timerange);
   const getInputSelector = useMemo(() => inputsSelectors.inputsSelector(), []);
   const inputState = useSelector(getInputSelector);
-  const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
 
   const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
   const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
-  const socTrendsUrlParams = useMemo(() => {
-    if (isSocTrendsEnabled && inputState.socTrends) {
-      const { linkTo: socTrendsLinkTo, timerange: socTrendsTimerange } = inputState.socTrends;
-      return {
-        socTrends: {
-          [URL_PARAM_KEY.timerange]: socTrendsTimerange,
-          linkTo: socTrendsLinkTo,
-        },
-      };
-    }
-    return {};
-  }, [inputState.socTrends, isSocTrendsEnabled]);
 
   const valueReportUrlParams = useMemo(() => {
     const { linkTo: valueReportLinkTo, timerange: valueReportTimerange } = inputState.valueReport;
@@ -55,7 +41,6 @@ export const useSyncTimerangeUrlParam = () => {
         linkTo: timelineLinkTo,
       },
       ...valueReportUrlParams,
-      ...socTrendsUrlParams,
     });
   }, [
     updateTimerangeUrlParam,
@@ -63,7 +48,6 @@ export const useSyncTimerangeUrlParam = () => {
     globalTimerange,
     timelineLinkTo,
     timelineTimerange,
-    socTrendsUrlParams,
     valueReportUrlParams,
   ]);
 };
