@@ -50,7 +50,7 @@ export const EntityInsight = <T,>({
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const insightContent: React.ReactElement[] = [];
 
   const cspPreviewEntityType = inferEntityTypeFromIdentityFields(identityFields);

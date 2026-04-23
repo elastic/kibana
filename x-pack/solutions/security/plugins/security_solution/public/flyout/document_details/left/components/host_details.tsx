@@ -220,7 +220,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     });
   }, [openPreviewPanel, hostName, entityId, scopeId, telemetry]);
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
   const hostIdentityFieldsForStore = useMemo(
