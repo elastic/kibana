@@ -155,7 +155,7 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
-  describe('base64_encode filter with Buffer support', () => {
+  describe('base64_encode filter', () => {
     it('should base64 encode a plain string', () => {
       const template = '{{ text | base64_encode }}';
       const context = { text: 'Hello World' };
