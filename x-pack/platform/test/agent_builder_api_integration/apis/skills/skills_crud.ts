@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('GET /api/agent_builder/skills', () => {
-      it('should list skills including the built-in data-exploration skill', async () => {
+      it('should list skills including the test built-in skill', async () => {
         const response = await supertest.get('/api/agent_builder/skills').expect(200);
 
         expect(response.body).to.have.property('results');
@@ -131,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(response.body).to.have.property('id', BUILTIN_SKILL_ID);
-        expect(response.body).to.have.property('name', 'data-exploration');
+        expect(response.body).to.have.property('name', BUILTIN_SKILL_ID);
         expect(response.body).to.have.property('description');
         expect(response.body).to.have.property('content');
       });
