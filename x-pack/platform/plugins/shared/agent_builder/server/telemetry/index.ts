@@ -14,6 +14,8 @@ export {
   trackLLMUsage,
   trackConversationRound,
   trackQueryToResultTime,
+  trackSkillInvocation,
+  trackPluginImport,
   AGENTBUILDER_USAGE_DOMAIN,
 } from './usage_counters';
 export { registerTelemetryCollector, type AgentBuilderTelemetry } from './telemetry_collector';
