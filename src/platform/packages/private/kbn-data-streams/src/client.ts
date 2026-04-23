@@ -14,7 +14,7 @@ import type api from '@elastic/elasticsearch/lib/api/types';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type { BaseSearchRuntimeMappings, IDataStreamClient, DataStreamDefinition } from './types';
 import type { ClientHelpers } from './types/client';
-import type { ClientSearchRequest, ClientCreateRequest, SpaceAwareDocument } from './types/es_api';
+import type { ClientSearchRequest, ClientCreateRequest } from './types/es_api';
 
 import { initialize } from './initialize';
 import { validateClientArgs } from './validate_client_args';
@@ -129,26 +129,16 @@ export class DataStreamClient<
     });
   }
 
-  public search<Agg extends Record<string, api.AggregationsAggregate> = {}>(
-    args: ClientSearchRequest<SRM> & { space: string },
-    transportOpts?: TransportRequestOptionsWithOutMeta
-  ): Promise<api.SearchResponse<SpaceAwareDocument<FullDocumentType>, Agg>>;
-
-  public search<Agg extends Record<string, api.AggregationsAggregate> = {}>(
-    args: ClientSearchRequest<SRM> & { space?: undefined },
-    transportOpts?: TransportRequestOptionsWithOutMeta
-  ): Promise<api.SearchResponse<FullDocumentType, Agg>>;
-
   public async search<Agg extends Record<string, api.AggregationsAggregate> = {}>(
     args: ClientSearchRequest<SRM>,
     transportOpts?: TransportRequestOptionsWithOutMeta
-  ): Promise<api.SearchResponse<SpaceAwareDocument<FullDocumentType> | FullDocumentType, Agg>> {
+  ) {
     const { space: rawSpace, query, ...restArgs } = args;
     const space = rawSpace === '' ? DEFAULT_SPACE : rawSpace;
 
     // Build the space-aware query
     const spaceQuery = this.buildSpaceAwareQuery(query, space);
-    return this.client.search<SpaceAwareDocument<FullDocumentType> | FullDocumentType, Agg>(
+    const response = await this.client.search<FullDocumentType, Agg>(
       {
         index: this.dataStreamDefinition.name,
         runtime_mappings: this.dataStreamDefinition.searchRuntimeMappings,
@@ -158,6 +148,33 @@ export class DataStreamClient<
       },
       transportOpts
     );
+
+    // Strip the system-managed kibana.space_ids property from all hits
+    if (space !== undefined && response.hits?.hits) {
+      return {
+        ...response,
+        hits: {
+          ...response.hits,
+          hits: response.hits.hits.map((hit) => ({
+            ...hit,
+            _source: this.stripSpaceProperty(hit._source),
+          })),
+        },
+      };
+    }
+
+    return response;
+  }
+
+  /**
+   * Remove the system-managed `kibana` property from a document before returning to the caller.
+   */
+  private stripSpaceProperty(doc?: FullDocumentType): FullDocumentType | undefined {
+    if (typeof doc !== 'object' || doc === null) {
+      return doc;
+    }
+    const { kibana: _, ...rest } = doc as Record<string, unknown>;
+    return rest as FullDocumentType;
   }
 
   /**

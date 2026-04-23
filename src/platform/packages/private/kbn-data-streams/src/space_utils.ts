@@ -8,7 +8,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SpaceAwareDocument } from './types';
 
 // Using '::' as separator - unlikely to appear in normal IDs (UUIDs use '-')
 export const SPACE_ID_SEPARATOR = '::';
@@ -40,7 +39,10 @@ export function generateSpacePrefixedId(space: string, id?: string): string {
 }
 
 /** Add kibana.space_ids property to document. Only called when space is defined. */
-export function decorateDocumentWithSpace<T>(doc: T, space: string): SpaceAwareDocument<T> {
+export function decorateDocumentWithSpace<T>(
+  doc: T,
+  space: string
+): T & { kibana: { space_ids: string[] } } {
   return { ...doc, kibana: { space_ids: [space] } };
 }
 

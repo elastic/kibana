@@ -14,7 +14,6 @@ export type {
   ClientSearchResponse,
   ClientCreateRequest,
   ClientCreateResponse,
-  SpaceAwareDocument,
 } from './es_api';
 
 export type { IDataStreamClient, AnyIDataStreamClient } from './client';
