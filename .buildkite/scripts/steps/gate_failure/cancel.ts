@@ -9,16 +9,13 @@
 
 import { BuildkiteClient } from '#pipeline-utils';
 
-const LEGACY_PREFIX = 'cancel_on_gate_failure:';
 const BATCH_PREFIX = 'cancel_on_gate_failure_batch:';
 
 function run(): void {
   const bk = new BuildkiteClient();
 
-  const allMetadataKeys = bk.getMetadataKeys();
-
-  // New format: each batch key holds a JSON array of step keys
-  const batchStepKeys = allMetadataKeys
+  const stepKeys = bk
+    .getMetadataKeys()
     .filter((key) => key.startsWith(BATCH_PREFIX))
     .flatMap((key) => {
       const value = bk.getMetadata(key);
@@ -28,13 +25,6 @@ function run(): void {
         return [];
       }
     });
-
-  // Legacy format: each key is a single step key
-  const legacyStepKeys = allMetadataKeys
-    .filter((key) => key.startsWith(LEGACY_PREFIX))
-    .map((key) => key.slice(LEGACY_PREFIX.length));
-
-  const stepKeys = [...new Set([...batchStepKeys, ...legacyStepKeys])];
 
   if (stepKeys.length === 0) {
     return;
