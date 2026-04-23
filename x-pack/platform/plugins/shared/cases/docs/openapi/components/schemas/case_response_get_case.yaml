@@ -91,6 +91,14 @@ properties:
   id:
     type: string
     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+  incremental_id:
+    type: integer
+    description: >
+      A monotonically increasing number assigned to each case, unique per space.
+      This value is generated asynchronously after the case is created and may
+      not be present immediately in the response.
+    nullable: true
+    example: 1
   observables:
     type: array
     description: Observables attached to the case.
