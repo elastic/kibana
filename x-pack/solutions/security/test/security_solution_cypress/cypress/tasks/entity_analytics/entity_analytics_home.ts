@@ -6,14 +6,19 @@
  */
 
 import {
+  ENTITY_ANALYTICS_HOME_PAGE_LOADER,
   IS_LOADING_GROUPING_TABLE,
   GROUPING_LEVEL_0,
   GROUP_SELECTOR_DROPDOWN,
   GLOBAL_LOADING_INDICATOR_HIDDEN,
   GLOBAL_LOADING_INDICATOR,
+  PAGE_TITLE,
 } from '../../screens/entity_analytics/entity_analytics_home';
 
 const ENTITY_STORE_SEARCH_API = '/internal/search/ese';
+
+/** Time for global nav, Entity Analytics shell, and sourcerer to settle (CI can be slow). */
+const ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS = 120_000;
 
 /**
  * Sets the grouping via localStorage before navigating to avoid flaky
