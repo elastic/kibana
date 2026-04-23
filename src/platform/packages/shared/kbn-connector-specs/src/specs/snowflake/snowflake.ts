@@ -541,7 +541,7 @@ export const Snowflake: ConnectorSpec = {
     'For unstructured text retrieval (product catalogs, support docs, chat logs), use Cortex Search instead of `LIKE`/`CONTAINS` in SQL:',
     '',
     '1. `listCortexSearchServices` for the target schema → pick a service.',
-    '2. `cortexSearch` with a natural-language `query`. Optionally restrict results with `filter` (operators: `@eq`, `@contains`, `@gte`, `@lte`, `@and`, `@or`, `@not`) and request extra columns via `columns`.',
+    '2. `cortexSearch` with a natural-language `query`. ,
     '',
     'Prefer `limit <= 20` and request only the columns you actually need to keep LLM context small.',
     '',
