@@ -14,77 +14,83 @@
  *   version: 1.0.0
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Properties of a Microsoft Sentinel Scheduled Analytics Rule
  */
+export const SentinelRuleProperties = lazySchema(() =>
+  z.object({
+    /**
+     * The rule display name
+     */
+    displayName: z.string(),
+    /**
+     * The rule description
+     */
+    description: z.string().optional(),
+    /**
+     * The KQL query for the rule
+     */
+    query: z.string(),
+    /**
+     * The rule severity
+     */
+    severity: z.string().optional(),
+    /**
+     * MITRE ATT&CK tactic names
+     */
+    tactics: z.array(z.string()).optional(),
+    /**
+     * MITRE ATT&CK technique IDs
+     */
+    techniques: z.array(z.string()).optional(),
+    /**
+     * Whether the rule is enabled
+     */
+    enabled: z.boolean().optional(),
+  })
+);
 export type SentinelRuleProperties = z.infer<typeof SentinelRuleProperties>;
-export const SentinelRuleProperties = z.object({
-  /**
-   * The rule display name
-   */
-  displayName: z.string(),
-  /**
-   * The rule description
-   */
-  description: z.string().optional(),
-  /**
-   * The KQL query for the rule
-   */
-  query: z.string(),
-  /**
-   * The rule severity
-   */
-  severity: z.string().optional(),
-  /**
-   * MITRE ATT&CK tactic names
-   */
-  tactics: z.array(z.string()).optional(),
-  /**
-   * MITRE ATT&CK technique IDs
-   */
-  techniques: z.array(z.string()).optional(),
-  /**
-   * Whether the rule is enabled
-   */
-  enabled: z.boolean().optional(),
-});
 
 /**
  * A resource entry from a Microsoft Sentinel ARM template export
  */
+export const SentinelArmResource = lazySchema(() =>
+  z.object({
+    /**
+     * The ARM resource identifier
+     */
+    id: z.string().optional(),
+    /**
+     * The ARM resource name
+     */
+    name: z.string().optional(),
+    /**
+     * The rule kind (e.g. Scheduled)
+     */
+    kind: z.string().optional(),
+    /**
+     * The ARM resource type
+     */
+    type: z.string().optional(),
+    /**
+     * The rule properties
+     */
+    properties: SentinelRuleProperties.optional(),
+  })
+);
 export type SentinelArmResource = z.infer<typeof SentinelArmResource>;
-export const SentinelArmResource = z.object({
-  /**
-   * The ARM resource identifier
-   */
-  id: z.string().optional(),
-  /**
-   * The ARM resource name
-   */
-  name: z.string().optional(),
-  /**
-   * The rule kind (e.g. Scheduled)
-   */
-  kind: z.string().optional(),
-  /**
-   * The ARM resource type
-   */
-  type: z.string().optional(),
-  /**
-   * The rule properties
-   */
-  properties: SentinelRuleProperties.optional(),
-});
 
 /**
  * Request body for creating Sentinel rule migration rules from an ARM template export
  */
+export const CreateSentinelRulesBody = lazySchema(() =>
+  z.object({
+    /**
+     * The ARM template resources array containing Sentinel analytics rules
+     */
+    resources: z.array(SentinelArmResource).min(1),
+  })
+);
 export type CreateSentinelRulesBody = z.infer<typeof CreateSentinelRulesBody>;
-export const CreateSentinelRulesBody = z.object({
-  /**
-   * The ARM template resources array containing Sentinel analytics rules
-   */
-  resources: z.array(SentinelArmResource).min(1),
-});

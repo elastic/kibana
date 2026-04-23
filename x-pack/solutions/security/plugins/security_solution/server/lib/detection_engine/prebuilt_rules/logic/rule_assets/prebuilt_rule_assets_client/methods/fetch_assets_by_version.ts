@@ -59,24 +59,25 @@ export async function fetchAssetsByVersion(
     },
   });
 
-  const ruleAssets = searchResult.hits.hits.map((hit) => {
+  const ruleAssetsMap = new Map<string, PrebuiltRuleAsset>();
+
+  for (const hit of searchResult.hits.hits) {
     const hitSource = hit?._source;
     invariant(hitSource, 'Expected hit source to be defined');
 
-    const savedObject = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
-    return savedObject;
-  });
-
-  // Ensure the order of the returned assets matches the order of the "versions" argument.
-  const ruleAssetsMap = new Map<string, PrebuiltRuleAsset>();
-  for (const asset of ruleAssets) {
-    const key = getPrebuiltRuleAssetSoId(asset.rule_id, asset.version);
-    ruleAssetsMap.set(key, asset);
+    const asset = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
+    ruleAssetsMap.set(getPrebuiltRuleAssetSoId(asset.rule_id, asset.version), asset);
   }
 
-  const orderedRuleAssets = soIds
-    .map((soId) => ruleAssetsMap.get(soId))
-    .filter((asset) => asset !== undefined);
+  // Ensure the order of the returned assets matches the order of the "versions" argument.
+  const orderedRuleAssets: PrebuiltRuleAsset[] = [];
+
+  for (const soId of soIds) {
+    const asset = ruleAssetsMap.get(soId);
+    if (asset !== undefined) {
+      orderedRuleAssets.push(asset);
+    }
+  }
 
   return validatePrebuiltRuleAssets(orderedRuleAssets);
 }

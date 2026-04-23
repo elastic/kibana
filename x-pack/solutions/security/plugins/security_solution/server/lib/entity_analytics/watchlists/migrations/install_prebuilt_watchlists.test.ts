@@ -175,6 +175,22 @@ describe('installPrebuiltWatchlists', function () {
     expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
   });
 
+  it('should create integration entity sources with managed: true', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    // Both okta and ad entity sources should be created with managed: true
+    expect(mockEntitySourceCreate).toHaveBeenCalledTimes(2);
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'okta', managed: true })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'ad', managed: true })
+    );
+  });
+
   it('entity source index patterns use each space namespace', async () => {
     mockSoClient.find.mockResolvedValue(buildSpacesResponse(['space-2']));
     mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));

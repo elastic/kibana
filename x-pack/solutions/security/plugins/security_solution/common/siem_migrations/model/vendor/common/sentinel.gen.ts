@@ -14,10 +14,10 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The type of the resource
  */
+export const SentinelResourceType = lazySchema(() => z.literal('watchlist'));
 export type SentinelResourceType = z.infer<typeof SentinelResourceType>;
-export const SentinelResourceType = z.literal('watchlist');
