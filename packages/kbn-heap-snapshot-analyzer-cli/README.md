@@ -147,6 +147,9 @@ Output sections:
   snapshot was captured with allocation tracking. Walks each live
   node's allocation-time call stack to the first plugin frame, so
   schema libraries roll up to the plugin that triggered them.
+- **Allocated by Package (allocation site)** — same walk as the
+  plugin view, but lands on the first package frame (not just
+  plugins). Surfaces non-plugin packages that drive allocations.
 
 All tables include both percentage and absolute MB columns, so you
 can diff snapshots across interventions.
@@ -157,6 +160,11 @@ Flags:
 - `--counterfactual=N` — top-N packages/plugins included in the
   counterfactual analysis (default 30).
 - `--no-counterfactual` — skip counterfactual analysis (faster).
+- `--filter=<regex>` — restrict allocation-site tables to nodes whose
+  deepest allocation frame `script_name` matches `<regex>`, and skip
+  matching frames when walking the stack so attribution lands on the
+  *caller* of the filtered code. Example: `--filter=zod` to attribute
+  Zod-allocated state back to the package that defined the schema.
 
 ---
 
