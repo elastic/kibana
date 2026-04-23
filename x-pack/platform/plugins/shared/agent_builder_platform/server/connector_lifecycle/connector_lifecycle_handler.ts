@@ -79,14 +79,8 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
       );
 
       try {
-        const [coreStart, startDeps] = await getStartServices();
+        const [, startDeps] = await getStartServices();
         const request = params.request;
-        const soClient = coreStart.savedObjects.getScopedClient(request);
-        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-        const isExperimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-          SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        if (!isExperimentalFeaturesEnabled) return;
 
         try {
           await startDeps.semanticLayer.indexAttachment({

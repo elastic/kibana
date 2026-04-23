@@ -23,7 +23,6 @@
     "@kbn/security-plugin-types-server",
     "@kbn/management-settings-ids",
     "@kbn/agent-builder-common",
-    "@kbn/agent-builder-server",
     "@kbn/core-http-server-mocks",
     "@kbn/core-logging-server-mocks"
   ]
