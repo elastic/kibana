@@ -13,11 +13,13 @@ export const TS_PROJECTS = TsProject.loadAll({
   /** Array of repo-relative paths to projects which should be ignored and not treated as a TS project in the repo */
   ignore: [
     '**/__fixtures__/**/*',
-    // Every @kbn/ui-* package has a packaging build tsconfig used only for
-    // standalone build-time type validation; it intentionally imports from
-    // parent directories and conflicts with the package's main tsconfig.
+    // Every @kbn/ui-* package ships a `packaging/` subtree with its own
+    // tsconfig(s) — the packaging build tsconfig for type validation, and
+    // an `example/tsconfig.json` for the demo app that expects the built
+    // tarball as its import source. Both reach outside the repo-wide
+    // project graph and must be excluded from the full type check.
     // See e.g. `src/platform/kbn-ui/side-navigation/packaging/react/type_validation.ts`.
-    'src/platform/kbn-ui/*/packaging/tsconfig.json',
+    'src/platform/kbn-ui/*/packaging/**/tsconfig.json',
   ],
 
   /** Array of repo-relative paths to projects which should have their type-check disabled */

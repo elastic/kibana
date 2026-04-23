@@ -11,9 +11,7 @@ import React, { useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiProvider, EuiSpacer, EuiText, EuiCode, useEuiTheme } from '@elastic/eui';
 
-// @ts-expect-error — package must be built first.
 import { SideNavigation } from '../../..';
-// @ts-expect-error — package must be built first.
 import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '../../..';
 
 /** Returns a `className` that adds a divider after the Dashboard nav item. */
