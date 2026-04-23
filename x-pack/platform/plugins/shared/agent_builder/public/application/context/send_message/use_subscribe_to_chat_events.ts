@@ -19,6 +19,8 @@ import {
   isThinkingCompleteEvent,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
+  isBackgroundAgentCompleteEvent,
+  ConversationRoundStepType,
 } from '@kbn/agent-builder-common';
 import {
   createReasoningStep,
@@ -62,12 +64,19 @@ export const useSubscribeToChatEvents = ({
         assistantMessage: event.data.message_content,
       });
     } else if (isToolProgressEvent(event)) {
+      const isInternalProgress = event.data.metadata?.internal === 'true';
       conversationActions.setToolCallProgress({
-        progress: { message: event.data.message },
+        progress: {
+          message: event.data.message,
+          metadata: event.data.metadata ?? {},
+        },
         toolCallId: event.data.tool_call_id,
       });
       // Individual tool progression message should also be displayed as reasoning
-      setAgentReasoning(event.data.message);
+      // (but skip internal progress messages)
+      if (!isInternalProgress) {
+        setAgentReasoning(event.data.message);
+      }
     } else if (isReasoningEvent(event)) {
       conversationActions.addReasoningStep({
         step: createReasoningStep({
@@ -86,6 +95,7 @@ export const useSubscribeToChatEvents = ({
           tool_call_id: event.data.tool_call_id,
           tool_id: event.data.tool_id,
           tool_call_group_id: event.data.tool_call_group_id,
+          tool_origin: event.data.tool_origin,
         }),
       });
     } else if (isBrowserToolCallEvent(event)) {
@@ -145,6 +155,13 @@ export const useSubscribeToChatEvents = ({
       conversationActions.setCompactionStepComplete({
         tokenCountAfter: event.data.token_count_after,
         summarizedRoundCount: event.data.summarized_round_count,
+      });
+    } else if (isBackgroundAgentCompleteEvent(event)) {
+      conversationActions.addBackgroundExecutionCompleteStep({
+        step: {
+          type: ConversationRoundStepType.backgroundAgentComplete,
+          ...event.data.execution,
+        },
       });
     }
   };

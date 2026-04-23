@@ -113,6 +113,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Dashboard
   'dashboard-management',
 
+  // Platform – Discover
+  'discover-data-analysis',
+
   // Platform – Streams
   'streams-management',
   'significant-events-memory',
