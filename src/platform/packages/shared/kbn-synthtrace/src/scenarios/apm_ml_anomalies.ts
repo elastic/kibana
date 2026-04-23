@@ -8,10 +8,7 @@
  */
 
 /**
- * Generates APM data with recurring spikes in latency, throughput, and failure rate
- * for testing ML anomaly detection. Uses 1-second granularity so --live mode
- * produces a continuous data stream. Spikes occur for 2 minutes every 10 minutes
- * based on wall-clock time.
+ * Generates APM data with a defined spike in latency and failures for testing ML anomaly detection.
  */
 
 import type { ApmFields } from '@kbn/synthtrace-client';
@@ -20,17 +17,10 @@ import { range as _range } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
-const SPIKE_DURATION_MIN = 2;
-const SPIKE_CYCLE_MIN = 10;
-const SPIKE_LATENCY = 5000;
-const SPIKE_RATE = 10;
-const NORMAL_DURATION = 50;
+const spikeStart = new Date('2024-09-03T00:00:00.000Z').getTime();
+const spikeEnd = new Date('2024-09-03T02:00:00.000Z').getTime();
+const NORMAL_DURATION = 100;
 const NORMAL_RATE = 1;
-
-const isSpiking = (timestamp: number) => {
-  const minuteInCycle = Math.floor(timestamp / 60_000) % SPIKE_CYCLE_MIN;
-  return minuteInCycle < SPIKE_DURATION_MIN;
-};
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
@@ -41,13 +31,13 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       const serviceB = apm.service('b', 'production', 'go').instance('b');
 
       const apmData = range
-        .interval('1s')
+        .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          const spiking = isSpiking(timestamp);
-          const count = spiking ? SPIKE_RATE : NORMAL_RATE;
-          const duration = spiking ? SPIKE_LATENCY : NORMAL_DURATION;
-          const outcome = spiking ? 'failure' : 'success';
+          const isInSpike = timestamp >= spikeStart && timestamp < spikeEnd;
+          const count = isInSpike ? 4 : NORMAL_RATE;
+          const duration = isInSpike ? 1000 : NORMAL_DURATION;
+          const outcome = isInSpike ? 'failure' : 'success';
           return [
             ..._range(0, count).flatMap((_) =>
               serviceA
