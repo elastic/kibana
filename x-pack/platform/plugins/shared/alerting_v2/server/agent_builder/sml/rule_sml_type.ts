@@ -12,6 +12,7 @@ import {
   RULE_SML_TYPE,
   ruleAttachmentDataSchema,
 } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { GetScopedRulesClient } from '../scoped_rules_client_factory';
@@ -26,7 +27,7 @@ export const createRuleSmlType = ({
   getInternalRepository,
 }: CreateRuleSmlTypeOptions): SmlTypeDefinition => ({
   id: RULE_SML_TYPE,
-  fetchFrequency: () => '15m',
+  fetchFrequency: () => '1m',
 
   async *list() {
     const repository = getInternalRepository();
@@ -69,7 +70,7 @@ export const createRuleSmlType = ({
             type: RULE_SML_TYPE,
             title: name,
             content: contentParts.join('\n'),
-            permissions: [`saved_object:${RULE_SAVED_OBJECT_TYPE}/get`],
+            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.rules.read}`],
           },
         ],
       };
