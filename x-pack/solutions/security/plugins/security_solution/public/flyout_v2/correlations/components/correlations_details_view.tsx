@@ -68,7 +68,7 @@ export const CorrelationsDetailsView = memo(
     isRulePreview,
     onShowAlert,
     onShowAttack,
-    hidePreviewLink = true,
+    hidePreviewLink = false,
     openLinksAsSystemFlyout,
   }: CorrelationsDetailsViewProps) => {
     const eventId = hit.raw._id ?? '';

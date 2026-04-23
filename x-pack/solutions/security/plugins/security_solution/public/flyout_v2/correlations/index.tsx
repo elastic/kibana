@@ -58,7 +58,7 @@ export const CorrelationsDetails = memo(
     isRulePreview,
     onShowAlert,
     onShowAttack,
-    hidePreviewLink = true,
+    hidePreviewLink = false,
   }: CorrelationsDetailsProps) => {
     const { euiTheme } = useEuiTheme();
 

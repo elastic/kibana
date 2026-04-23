@@ -148,7 +148,6 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
             scopeId=""
             isRulePreview={false}
             onShowAlert={onShowAlert}
-            hidePreviewLink={false}
           />
         ),
       }),
