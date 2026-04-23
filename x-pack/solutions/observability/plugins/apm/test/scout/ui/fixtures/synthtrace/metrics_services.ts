@@ -7,7 +7,7 @@
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
 import {
-  PRODUCTION_ENVIRONMENT,
+  METRICS_ENVIRONMENT,
   SERVICE_METRICS_JAVA_APM,
   SERVICE_METRICS_NODEJS_APM,
   SERVICE_METRICS_RUBY_JRUBY,
@@ -299,7 +299,7 @@ export function metricsServices({
     const instance = apm
       .service({
         name: config.name,
-        environment: PRODUCTION_ENVIRONMENT,
+        environment: METRICS_ENVIRONMENT,
         agentName: config.agentName,
       })
       .instance(`${config.name}-instance`);

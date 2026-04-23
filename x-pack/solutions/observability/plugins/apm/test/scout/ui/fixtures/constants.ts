@@ -23,7 +23,9 @@ export const EDGE_OPBEANS_JAVA_TO_POSTGRESQL = `${SERVICE_OPBEANS_JAVA}~>${DEPEN
 export const SERVICE_GO = 'service-go';
 export const SERVICE_NODE = 'service-node';
 export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
+export const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';
 export const PRODUCTION_ENVIRONMENT = 'production';
+export const METRICS_ENVIRONMENT = 'metrics';
 
 export const SERVICE_OTEL_SENDOTLP = 'sendotlp-otel-native-synth';
 export const OTEL_INSTANCE_ID = '89117ac1-0dbf-4488-9e17-4c2c3b76943a';
