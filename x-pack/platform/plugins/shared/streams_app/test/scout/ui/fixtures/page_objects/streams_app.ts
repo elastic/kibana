@@ -1375,4 +1375,13 @@ export class StreamsApp {
     await this.openCreateChildQueryStreamForm();
     await this.fillAndSaveChildQueryStream(childName, esqlQuery);
   }
+
+  async deleteQueryStreamFromAdvancedTab(streamName: string) {
+    await this.clickStreamNameLink(streamName);
+    await this.clickQueryStreamDetailsTab('advanced');
+    await this.clickDeleteQueryStreamButton();
+    await this.fillDeleteQueryStreamModalInput(streamName);
+    await this.clickDeleteQueryStreamModalDeleteButton();
+    await expect(this.queryStreamDeletedSuccessToast).toBeVisible();
+  }
 }

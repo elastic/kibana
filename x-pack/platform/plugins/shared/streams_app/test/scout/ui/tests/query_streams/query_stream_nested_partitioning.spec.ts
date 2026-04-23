@@ -25,6 +25,10 @@ const INGEST_PARENT_STREAM_NAME = 'logs.ecs';
 const INGEST_CHILD_STREAM_NAME = 'qs-ingest-child';
 const INGEST_GRANDCHILD_STREAM_NAME = 'qs-ingest-grandchild';
 
+const DELETE_TEST_PARENT_STREAM_NAME = 'delete-test-parent-stream';
+const DELETE_TEST_CHILD_STREAM_NAME = 'delete-test-child-stream';
+const DELETE_TEST_GRANDCHILD_STREAM_NAME = 'delete-test-grandchild-stream';
+
 const STREAM_NAMES_CREATED_BY_SPEC = [
   ...ROOT_STREAM_NAMES,
   QUERY_ROOT_STREAM_NAME,
@@ -48,12 +52,12 @@ test.describe(
       await pageObjects.streams.gotoStreamMainPage();
     });
 
-    test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
+    test.afterAll(async ({ kbnClient, esClient, apiServices }) => {
       for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
         const esqlViewName = `$.${streamName}`;
-        await deleteRootStreamViews(esClient);
         await deleteQueryStream(apiServices, esClient, streamName, esqlViewName);
       }
+      await deleteRootStreamViews(esClient);
       await disableQueryStreams(kbnClient);
     });
 
@@ -168,10 +172,57 @@ test.describe(
       ]);
     });
 
-    test.fixme(
-      'Should properly remove deleted child query streams from streams list view',
-      async () => {}
-    );
+    test('Should properly remove deleted child query streams from streams list view, including any nested children', async ({
+      page,
+      pageObjects,
+    }) => {
+      const childFullName = `${DELETE_TEST_PARENT_STREAM_NAME}.${DELETE_TEST_CHILD_STREAM_NAME}`;
+      const grandchildFullName = `${childFullName}.${DELETE_TEST_GRANDCHILD_STREAM_NAME}`;
+
+      // create parent root query stream
+      await pageObjects.streams.createRootQueryStream(
+        DELETE_TEST_PARENT_STREAM_NAME,
+        `FROM $.logs.ecs | LIMIT 100`
+      );
+      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+
+      // navigate back to the streams list view and create a child query stream under the parent
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.clickStreamNameLink(DELETE_TEST_PARENT_STREAM_NAME);
+      await pageObjects.streams.gotoPartitioningTab(DELETE_TEST_PARENT_STREAM_NAME);
+      await pageObjects.streams.selectChildStreamType('Query');
+      await pageObjects.streams.openCreateChildQueryStreamForm();
+      await pageObjects.streams.fillAndSaveChildQueryStream(
+        DELETE_TEST_CHILD_STREAM_NAME,
+        `FROM $.${DELETE_TEST_PARENT_STREAM_NAME} | LIMIT 100`
+      );
+      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+
+      // navigate to the child's partitioning tab and create a grandchild query stream
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.clickStreamNameLink(childFullName);
+      await pageObjects.streams.gotoPartitioningTab(childFullName);
+      await pageObjects.streams.selectChildStreamType('Query');
+      await pageObjects.streams.openCreateChildQueryStreamForm();
+
+      await pageObjects.streams.fillAndSaveChildQueryStream(
+        DELETE_TEST_GRANDCHILD_STREAM_NAME,
+        `FROM $.${childFullName} | LIMIT 100`
+      );
+      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+
+      // delete the child query stream
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.deleteQueryStreamFromAdvancedTab(childFullName);
+      await expect(pageObjects.streams.queryStreamDeletedSuccessToast).toBeVisible();
+
+      // verify the child and grandchild query stream was deleted from the streams list view
+      await pageObjects.streams.gotoStreamMainPage();
+      await expect(page.getByTestId(`queryStream-${DELETE_TEST_PARENT_STREAM_NAME}`)).toBeVisible();
+      await expect(page.getByTestId(`queryStream-${childFullName}`)).toBeHidden();
+      await expect(page.getByTestId(`queryStream-${grandchildFullName}`)).toBeHidden();
+    });
+
     test.fixme(
       'Should error when child query stream references wrong parent in ES|QL query',
       async () => {}
