@@ -45,15 +45,15 @@ paths:
                   type: array
                   description: Subset of rule attributes to return.
                   items:
-                    $ref: '../granular_rules_contract.schema.yaml#/components/schemas/SearchRulesField'
+                    $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesField'
                 filter:
                   type: string
                   description: |
                     KQL filter string.
                 aggregations:
-                  $ref: '../granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'
+                  $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'
                 search:
-                  $ref: '../granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
+                  $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
                 sort_field:
                   $ref: '../find_rules/find_rules_route.schema.yaml#/components/schemas/FindRulesSortField'
                 sort_order:
@@ -145,7 +145,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                   counts:
-                    $ref: '../granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+                    $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
                 required:
                   - page
                   - perPage

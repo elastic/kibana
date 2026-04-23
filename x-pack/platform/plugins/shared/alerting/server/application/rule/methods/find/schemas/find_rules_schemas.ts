@@ -39,7 +39,7 @@ export const findRulesOptionsSchema = schema.object(
     ),
     ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
     consumers: schema.maybe(schema.arrayOf(schema.string())),
-    searchAfter: schema.maybe(schema.arrayOf(sortValueSchema, { maxSize: 2 })),
+    searchAfter: schema.maybe(schema.arrayOf(sortValueSchema, { maxSize: 100 })),
     aggs: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   },
   { unknowns: 'allow' }

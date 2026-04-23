@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GranularRulesFacetCategory } from '../../../../../../common/api/detection_engine/rule_management/granular_rules_contract.gen';
+import type { GranularRulesFacetCategory } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import { buildAggregations, expandRawAggregationResult } from './granular_facet_aggregations';
 
 describe('buildAggregations', () => {

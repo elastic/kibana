@@ -9,33 +9,26 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
-import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 import { MAX_RESULTS_WINDOW } from '../../../../../../usage/constants';
-import {
-  MAX_RULES_WITH_GAPS_TO_FETCH,
-  MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
-  EXCLUDED_GAP_REASONS_KEY,
-} from '../../../../../../../common/constants';
+import { EXCLUDED_GAP_REASONS_KEY } from '../../../../../../../common/constants';
 import type {
-  FindRulesSortField,
   SearchRulesField,
   SearchRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../../../common/api/detection_engine/rule_management/urls';
-import type { SortOrder, WarningSchema } from '../../../../../../../common/api/detection_engine';
 import { SearchRulesRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
 import { validateSearchRulesRequestBody } from './request_schema_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
-import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
 import { buildGranularRulesKql } from '../../../logic/search/build_granular_rules_kql';
 import {
   buildAggregations,
   expandRawAggregationResult,
 } from '../../../logic/search/granular_facet_aggregations';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { transformFindAlerts } from '../../../utils/utils';
+import { resolveGapPreFilter, transformFindAlerts } from '../../../utils/utils';
 
 const REQUIRED_TRANSFORM_FIELDS: readonly SearchRulesField[] = [
   'schedule',
@@ -44,86 +37,13 @@ const REQUIRED_TRANSFORM_FIELDS: readonly SearchRulesField[] = [
   'createdAt',
 ];
 
-interface GapPreFilterResult {
-  ruleIds?: string[];
-  warnings?: WarningSchema[];
-  emptyResult?: SearchRulesResponse;
-}
-
-const resolveGapPreFilter = async ({
-  rulesClient,
-  filter,
-  sortField,
-  sortOrder,
-  gapFillStatuses,
-  gapsRangeStart,
-  gapsRangeEnd,
-  excludedReasons,
-  schedulerId,
-  page,
-  perPage,
-}: {
-  rulesClient: Parameters<typeof getGapFilteredRuleIds>[0]['rulesClient'];
-  filter: string | undefined;
-  sortField?: FindRulesSortField;
-  sortOrder?: SortOrder;
-  gapFillStatuses?: GapFillStatus[];
-  gapsRangeStart?: string;
-  gapsRangeEnd?: string;
-  excludedReasons?: GapReasonType[];
-  schedulerId?: string;
-  page: number;
-  perPage: number;
-}): Promise<GapPreFilterResult> => {
-  if (!gapFillStatuses || !gapsRangeStart || !gapsRangeEnd) {
-    return {};
-  }
-
-  const { ruleIds: gapRuleIds, truncated } = await getGapFilteredRuleIds({
-    rulesClient,
-    gapRange: { start: gapsRangeStart, end: gapsRangeEnd },
-    gapFillStatuses,
-    maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
-    filter,
-    sortField,
-    sortOrder,
-    excludedReasons,
-    schedulerId,
-  });
-
-  const warnings: WarningSchema[] | undefined = truncated
-    ? [
-        {
-          type: MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
-          message: `Only the first ${MAX_RULES_WITH_GAPS_TO_FETCH} rules with gaps in the selected time range are returned. Additional rules with gaps are not included in this response.`,
-          actionPath: '',
-        },
-      ]
-    : undefined;
-
-  if (gapRuleIds.length === 0) {
-    return {
-      warnings,
-      emptyResult: {
-        page,
-        perPage,
-        total: 0,
-        data: [],
-        ...(warnings !== undefined ? { warnings } : {}),
-      },
-    };
-  }
-
-  return { ruleIds: gapRuleIds, warnings };
-};
-
 const resolveEffectiveFields = (fields: SearchRulesField[] | undefined): string[] | undefined =>
   fields?.length ? Array.from(new Set([...fields, ...REQUIRED_TRANSFORM_FIELDS])) : undefined;
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
  */
-export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: Logger) => {
   router.versioned
     .post({
       access: 'internal',
@@ -143,6 +63,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
           },
         },
       },
+      // eslint-disable-next-line complexity
       async (context, request, response): Promise<IKibanaResponse<SearchRulesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
@@ -175,8 +96,10 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
             filter,
             search,
           });
-          const hasGapFilters =
-            (gapFillStatuses && gapFillStatuses.length > 0) || gapsRangeStart || gapsRangeEnd;
+
+          const hasGapFilters = Boolean(
+            gapFillStatuses && gapFillStatuses.length > 0 && gapsRangeStart && gapsRangeEnd
+          );
 
           const shouldUseSearchAfter =
             sortField != null &&
@@ -184,30 +107,42 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
             !hasGapFilters &&
             (page * perPage >= MAX_RESULTS_WINDOW || searchAfterParam);
 
-          const uiSettingsClient = ctx.core.uiSettings.client;
-          const excludedReasons = hasGapFilters
-            ? await uiSettingsClient.get<GapReasonType[]>(EXCLUDED_GAP_REASONS_KEY)
-            : undefined;
+          const ruleIdsWithGaps: string[] = [];
+          const warnings: WarningSchema[] = [];
 
-          const gapPreFilter = await resolveGapPreFilter({
-            rulesClient,
-            filter: combinedKql,
-            sortField,
-            sortOrder,
-            gapFillStatuses,
-            gapsRangeStart,
-            gapsRangeEnd,
-            excludedReasons,
-            schedulerId,
-            page,
-            perPage,
-          });
+          if (hasGapFilters && gapFillStatuses && gapsRangeStart && gapsRangeEnd) {
+            const uiSettingsClient = ctx.core.uiSettings.client;
+            const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
+              EXCLUDED_GAP_REASONS_KEY
+            );
 
-          if (gapPreFilter.emptyResult) {
-            return response.ok({ body: gapPreFilter.emptyResult });
+            const gapPreFilter = await resolveGapPreFilter({
+              rulesClient,
+              filter: combinedKql,
+              sortField,
+              sortOrder,
+              gapFillStatuses,
+              gapsRangeStart,
+              gapsRangeEnd,
+              excludedReasons,
+              schedulerId,
+            });
+
+            if (gapPreFilter.ruleIds.length === 0) {
+              return response.ok({
+                body: {
+                  page,
+                  perPage,
+                  total: 0,
+                  data: [],
+                  ...(gapPreFilter.warnings.length > 0 ? { warnings: gapPreFilter.warnings } : {}),
+                },
+              });
+            }
+
+            ruleIdsWithGaps.push(...gapPreFilter.ruleIds);
+            warnings.push(...gapPreFilter.warnings);
           }
-
-          const { ruleIds, warnings } = gapPreFilter;
 
           const categoryCounts = aggregations?.counts ?? [];
 
@@ -228,14 +163,17 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
             fields: effectiveFields,
             searchAfter: shouldUseSearchAfter ? searchAfterParam : undefined,
             aggregations: aggs,
-            ruleIds,
+            ruleIds: hasGapFilters ? ruleIdsWithGaps : undefined,
           });
 
           const counts = rules.aggregations
             ? expandRawAggregationResult(rules.aggregations, categoryCounts)
             : undefined;
 
-          const transformedRules = transformFindAlerts(rules, warnings);
+          const transformedRules = transformFindAlerts(
+            rules,
+            hasGapFilters && warnings.length > 0 ? warnings : undefined
+          );
 
           const responseBody: SearchRulesResponse = {
             ...transformedRules,
