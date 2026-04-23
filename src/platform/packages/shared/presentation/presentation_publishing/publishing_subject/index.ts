@@ -8,7 +8,6 @@
  */
 
 export {
-  useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
 } from './publishing_batcher';
 export { useStateFromPublishingSubject, usePublishingSubject } from './publishing_subject';

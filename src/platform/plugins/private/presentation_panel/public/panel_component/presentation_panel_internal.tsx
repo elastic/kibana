@@ -17,7 +17,7 @@ import type { PublishesHideBorder, PublishesTitle } from '@kbn/presentation-publ
 import {
   apiHasParentApi,
   apiPublishesViewMode,
-  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
@@ -25,6 +25,7 @@ import type { PresentationPanelHoverActionsProps } from './panel_header/presenta
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import { BehaviorSubject } from 'rxjs';
 
 const PresentationPanelChrome = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -41,25 +42,22 @@ const PresentationPanelChrome = <
   getActions,
   actionPredicate,
   titleHighlight,
-
   setDragHandle,
-
-  api,
+  componentApi,
 }: React.PropsWithChildren<
   Omit<
     PresentationPanelInternalProps<ApiType, ComponentPropsType>,
     'hidePanelChrome' | 'setDragHandles' | 'Component' | 'componentProps'
   > & {
     setDragHandle: PresentationPanelHoverActionsProps['setDragHandle'];
-    api: ApiType | null;
   }
 >) => {
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
   const viewModeSubject = useMemo(() => {
-    if (apiPublishesViewMode(api)) return api.viewMode$;
-    if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode$;
-  }, [api]);
+    if (apiPublishesViewMode(componentApi)) return componentApi.viewMode$;
+    if (apiHasParentApi(componentApi) && apiPublishesViewMode(componentApi.parentApi)) return componentApi.parentApi.viewMode$;
+  }, [componentApi]);
 
   const [
     dataLoading,
@@ -71,16 +69,16 @@ const PresentationPanelChrome = <
     defaultPanelDescription,
     rawViewMode,
     parentHidePanelTitle,
-  ] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading$,
-    api?.blockingError$,
-    api?.title$,
-    api?.hideTitle$,
-    api?.description$,
-    api?.defaultTitle$,
-    api?.defaultDescription$,
-    viewModeSubject,
-    (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
+  ] = useBatchedPublishingSubjects(
+    componentApi.dataLoading$ ?? new BehaviorSubject(false),
+    componentApi.blockingError$ ?? new BehaviorSubject(undefined),
+    componentApi.title$ ?? new BehaviorSubject(undefined),
+    componentApi.hideTitle$ ?? new BehaviorSubject(false),
+    componentApi.description$ ?? new BehaviorSubject(undefined),
+    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
+    componentApi.defaultDescription$ ?? new BehaviorSubject(undefined),
+    viewModeSubject ?? new BehaviorSubject(undefined),
+    (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$  ?? new BehaviorSubject(false)
   );
   const viewMode = rawViewMode ?? 'view';
 
@@ -104,7 +102,7 @@ const PresentationPanelChrome = <
     <PresentationPanelHoverActionsWrapper
       {...{
         index,
-        api,
+        api: componentApi,
         getActions,
         actionPredicate,
         viewMode,
@@ -125,9 +123,9 @@ const PresentationPanelChrome = <
         {...contentAttrs}
         css={styles.embPanel}
       >
-        {!hideHeader && api && (
+        {!hideHeader && (
           <PresentationPanelHeader
-            api={api}
+            api={componentApi}
             setDragHandle={setDragHandle}
             headerId={headerId}
             viewMode={viewMode}
@@ -151,19 +149,19 @@ export const PresentationPanelInternal = <
   ComponentPropsType extends {} = {}
 >({
   Component,
+  componentApi,
   componentProps,
 
   setDragHandles,
   hidePanelChrome,
   ...rest
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
-  const [api, setApi] = useState<ApiType | null>(null);
   const [dataLoading, blockingError, panelHideBorder, parentHideBorder] =
-    useBatchedOptionalPublishingSubjects(
-      api?.dataLoading$,
-      api?.blockingError$,
-      api?.hideBorder$,
-      (api?.parentApi as Partial<PublishesHideBorder>)?.hideBorder$
+    useBatchedPublishingSubjects(
+      componentApi.dataLoading$ ?? new BehaviorSubject(false),
+      componentApi.blockingError$ ?? new BehaviorSubject<Error | undefined>(undefined),
+      componentApi.hideBorder$ ?? new BehaviorSubject(false),
+      (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ?? new BehaviorSubject(false)
     );
   const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
@@ -178,14 +176,14 @@ export const PresentationPanelInternal = <
   );
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading$))) {
+  if (!initialLoadComplete && (dataLoading === false || (!componentApi.dataLoading$))) {
     setInitialLoadComplete(true);
   }
 
   const InnerPanel = useMemo(() => {
     return (
       <>
-        {blockingError && api && <PresentationPanelErrorInternal api={api} error={blockingError} />}
+        {blockingError && <PresentationPanelErrorInternal api={componentApi} error={blockingError} />}
         {!initialLoadComplete && <PanelLoader />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
@@ -194,22 +192,19 @@ export const PresentationPanelInternal = <
           <EuiErrorBoundary>
             <Component
               {...(componentProps as React.ComponentProps<typeof Component>)}
-              ref={(newApi) => {
-                if (newApi && !api) setApi(newApi);
-              }}
             />
           </EuiErrorBoundary>
         </div>
       </>
     );
-  }, [blockingError, api, initialLoadComplete, Component, componentProps]);
+  }, [blockingError, componentApi, initialLoadComplete, Component, componentProps]);
 
   return hidePanelChrome ? (
     InnerPanel
   ) : (
     <PresentationPanelChrome
       {...rest}
-      api={api}
+      componentApi={componentApi}
       showBorder={hideBorder ? false : rest.showBorder}
       showShadow={hideBorder ? false : rest.showShadow}
       setDragHandle={setDragHandle}

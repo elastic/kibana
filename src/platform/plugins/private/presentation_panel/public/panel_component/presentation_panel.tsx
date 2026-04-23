@@ -14,7 +14,6 @@ import { EuiErrorBoundary, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { PanelLoader } from '@kbn/panel-loader';
-import { isPromise } from '@kbn/std';
 
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
@@ -30,14 +29,13 @@ export const PresentationPanel = <
   props: PresentationPanelProps<ApiType, PropsType>
 ) => {
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const { Component, ...passThroughProps } = props;
+  const { getComponent, ...passThroughProps } = props;
   const { euiTheme } = useEuiTheme();
   const { loading, value } = useAsync(async () => {
     const startServicesPromise = untilPluginStartServicesReady();
-    const componentPromise = isPromise(Component) ? Component : Promise.resolve(Component);
     const results = await Promise.allSettled([
       startServicesPromise,
-      componentPromise,
+      getComponent(),
       import('./panel_module'),
     ]);
 
@@ -57,7 +55,8 @@ export const PresentationPanel = <
         results[2].status === 'fulfilled'
           ? results[2].value?.PresentationPanelErrorInternal
           : undefined,
-      unwrappedComponent: results[1].status === 'fulfilled' ? results[1].value : undefined,
+      component: results[1].status === 'fulfilled' ? results[1].value.Component : undefined,
+      componentApi: results[1].status === 'fulfilled' ? results[1].value.componentApi : undefined,
     };
 
     // Ancestry chain is expected to use 'key' attribute to reset DOM and state
@@ -79,9 +78,10 @@ export const PresentationPanel = <
 
   const Panel = value?.Panel;
   const PanelError = value?.PanelError;
-  const UnwrappedComponent = value?.unwrappedComponent;
+  const Component = value?.component;
+  const componentApi = value?.componentApi;
 
-  if (value?.loadErrorReason || !Panel || !UnwrappedComponent) {
+  if (value?.loadErrorReason || !Panel || !Component || !componentApi) {
     return (
       <div ref={panelRef}>
         {PanelError ? (
@@ -94,12 +94,12 @@ export const PresentationPanel = <
   }
 
   return Panel ? (
-    <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
+    <Panel<ApiType, PropsType> Component={Component} componentApi={componentApi} {...passThroughProps} />
   ) : (
     <EuiErrorBoundary>
-      <UnwrappedComponent
+      <Component
         {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<
-          typeof UnwrappedComponent
+          typeof Component
         >)}
       />
     </EuiErrorBoundary>

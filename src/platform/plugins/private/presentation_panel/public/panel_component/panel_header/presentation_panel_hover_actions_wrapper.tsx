@@ -11,13 +11,14 @@ import React, { type PropsWithChildren } from 'react';
 
 import {
   canOverrideHoverActions,
-  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import classNames from 'classnames';
 import type { PresentationPanelHoverActionsProps } from './presentation_panel_hover_actions';
 import { PresentationPanelHoverActions } from './presentation_panel_hover_actions';
 import { useHoverActionStyles } from './use_hover_actions_styles';
+import { BehaviorSubject } from 'rxjs';
 
 const customActionsStyles = css({
   justifyContent: 'right !important',
@@ -35,11 +36,11 @@ export const PresentationPanelHoverActionsWrapper = (
   props: PropsWithChildren<PresentationPanelHoverActionsProps>
 ) => {
   const [defaultTitle, title, hasLockedHoverActions, overrideHoverActions] =
-    useBatchedOptionalPublishingSubjects(
-      props.api?.defaultTitle$,
-      props.api?.title$,
-      props.api?.hasLockedHoverActions$,
-      props.api?.overrideHoverActions$
+    useBatchedPublishingSubjects(
+      props.api.defaultTitle$ ?? new BehaviorSubject(undefined),
+      props.api.title$ ?? new BehaviorSubject(undefined),
+      props.api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
+      props.api.overrideHoverActions$  ?? new BehaviorSubject(false)
     );
   const containerStyles = useHoverActionStyles(props.viewMode === 'edit', props.showBorder);
 
