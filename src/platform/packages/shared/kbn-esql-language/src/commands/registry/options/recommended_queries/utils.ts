@@ -7,29 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Parser, WrappingPrettyPrinter } from '@elastic/esql';
+
+/**
+ * Prettifies an ES|QL query using the @elastic/esql parser and multiline pretty printer.
+ */
 export const prettifyQuery = (src: string): string => {
-  // Split by semicolons to separate header commands (e.g. SET) from the main query
-  const semicolonParts = src.split(';').map((part) => part.trim());
-
-  const headerParts = semicolonParts.slice(0, -1);
-  const mainQuery = semicolonParts[semicolonParts.length - 1] ?? '';
-
-  // Format the main query by splitting on pipes
-  const pipeParts = mainQuery.split('|').map((part) => part.trim());
-  const formattedMain = pipeParts
-    .map((part, index) => {
-      if (index === 0) {
-        // First part (FROM command) - no leading pipe or indentation
-        return part;
-      } else {
-        // All subsequent commands start with pipe and have 2-space indentation
-        return `  | ${part}`;
-      }
-    })
-    .join('\n');
-
-  const lines = [...headerParts.map((part) => `${part};`), formattedMain];
-  return lines.join('\n');
+  const { root } = Parser.parse(src, { withFormatting: true });
+  return WrappingPrettyPrinter.print(root, { multiline: true });
 };
 
 export const prettifyQueryTemplate = (query: string) => {
