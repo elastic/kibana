@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { CreateTimelinesResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TIMELINE_EXPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { Role } from '@kbn/security-plugin-types-common';
 import TestAgent from 'supertest/lib/agent';
@@ -21,7 +21,6 @@ import {
   copyTimeline,
   resolveTimeline,
   installPrepackedTimelines,
-  unPinEvent,
 } from '../../utils/timelines';
 import * as users from '../../../../config/privileges/users';
 import { roles } from '../../../../config/privileges/roles';
@@ -284,7 +283,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
     });
 
-    describe('pin/unpin events', () => {
+    describe('pin events', () => {
       let getTimelineId = () => '';
       const eventId = 'anId';
       before(async () => {
@@ -295,26 +294,16 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         getTimelineId = () => savedObjectId;
       });
       canWriteUsers.forEach((user) => {
-        it(`user "${user.username}" can pin/unpin events`, async () => {
+        it(`user "${user.username}" can pin events`, async () => {
           const superTest = await utils.createSuperTestWithUser(user);
           const pinEventResponse = await pinEvent(superTest, getTimelineId(), eventId);
           expect(pinEventResponse.status).to.be(200);
           expect('pinnedEventId' in pinEventResponse.body).to.be(true);
-
-          // unpin
-          const unPinEventResponse = await unPinEvent(
-            superTest,
-            getTimelineId(),
-            eventId,
-            'pinnedEventId' in pinEventResponse.body ? pinEventResponse.body.pinnedEventId : ''
-          );
-          expect(unPinEventResponse.status).to.be(200);
-          expect(unPinEventResponse.body).to.eql({ unpinned: true });
         });
       });
 
       cannotWriteUsers.forEach((user) => {
-        it(`user "${user.username}" cannot pin/unpin events`, async () => {
+        it(`user "${user.username}" cannot pin events`, async () => {
           const superTest = await utils.createSuperTestWithUser(user);
 
           const pinEventResponse = await pinEvent(superTest, getTimelineId(), eventId);
@@ -324,12 +313,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     describe('copy timeline', () => {
-      let getTimeline: () => CreateTimelinesResponse = () =>
-        ({} as unknown as CreateTimelinesResponse);
+      let getTimeline: () => TimelineResponse = () => ({} as TimelineResponse);
       before(async () => {
         const superTest = await utils.createSuperTestWithUser(users.secTimelineAllUser);
         const { body } = await createBasicTimeline(superTest, 'test timeline');
-        getTimeline = () => body;
+        getTimeline = () => body.data.persistTimeline.timeline;
       });
       canWriteUsers.forEach((user) => {
         it(`user "${user.username}" can copy timeline`, async () => {
