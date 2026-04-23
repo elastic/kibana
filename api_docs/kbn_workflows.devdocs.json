@@ -5750,7 +5750,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"transform\" | \"literal\" | \"date\" | \"map\" | \"readonly\" | \"success\" | \"default\" | \"set\" | \"optional\" | \"int\" | \"null\" | \"void\" | \"never\" | \"any\" | \"record\" | \"file\" | \"array\" | \"tuple\" | \"union\" | \"intersection\" | \"enum\" | \"nullable\" | \"nonoptional\" | \"prefault\" | \"catch\" | \"nan\" | \"pipe\" | \"template_literal\" | \"promise\" | \"lazy\" | \"custom\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"transform\" | \"literal\" | \"date\" | \"map\" | \"readonly\" | \"success\" | \"any\" | \"default\" | \"set\" | \"optional\" | \"int\" | \"null\" | \"void\" | \"never\" | \"record\" | \"file\" | \"array\" | \"tuple\" | \"union\" | \"intersection\" | \"enum\" | \"nullable\" | \"nonoptional\" | \"prefault\" | \"catch\" | \"nan\" | \"pipe\" | \"template_literal\" | \"promise\" | \"lazy\" | \"custom\""
             ],
             "path": "src/platform/packages/shared/kbn-workflows/common/utils/extract_schema_property_paths/extract_schema_property_paths.ts",
             "lineNumber": 16,

@@ -2320,7 +2320,7 @@
           "\nPage object that wraps common interactions with the Kibana Monaco-based code editor.\n\nInitially the API is intentionally aligned with the FTR `MonacoEditorService`\n(`src/platform/test/functional/services/monaco_editor.ts`)."
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-        "lineNumber": 14,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2336,7 +2336,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 21,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2358,7 +2358,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 21,
+                "lineNumber": 41,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2380,7 +2380,7 @@
               "(dataTestSubjId: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 23,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2396,7 +2396,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 27,
+                "lineNumber": 47,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2418,7 +2418,7 @@
               "(nthIndex?: number) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 32,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2436,7 +2436,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 42,
+                "lineNumber": 62,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2460,7 +2460,7 @@
               "(value: string, nthIndex?: number | undefined) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 73,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2478,7 +2478,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 81,
+                "lineNumber": 101,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2497,7 +2497,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 81,
+                "lineNumber": 101,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2520,7 +2520,7 @@
               "Locator"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 111,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2538,7 +2538,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 122,
+                "lineNumber": 141,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2561,11 +2561,131 @@
               "Locator"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 127,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaCodeEditorWrapper.getSuggestDetailsContainer",
+            "type": "Function",
+            "tags": [],
+            "label": "getSuggestDetailsContainer",
+            "description": [
+              "\nReturns a locator for the Monaco suggestion detail panel (the documentation pop-up\ndisplayed alongside the autocomplete suggestion list).\n\nThe detail panel has no `data-test-subj`. Monaco renders it as an *overlay widget*\n(via `addOverlayWidget`) which is placed inside the main `.monaco-editor` element,\nNOT inside the overflow-widgets container (which only holds content widgets)."
+            ],
+            "signature": [
+              "() => ",
+              "Locator"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaCodeEditorWrapper.triggerSuggest",
+            "type": "Function",
+            "tags": [],
+            "label": "triggerSuggest",
+            "description": [
+              "\nPositions the cursor after the given `text` in the editor model (if provided),\nthen programmatically triggers the Monaco autocomplete suggestion list.\n"
+            ],
+            "signature": [
+              "(text?: string | undefined, nthIndex?: number) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KibanaCodeEditorWrapper.triggerSuggest.$1",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [
+                  "- Optional substring to position the cursor after before triggering."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+                "lineNumber": 172,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KibanaCodeEditorWrapper.triggerSuggest.$2",
+                "type": "number",
+                "tags": [],
+                "label": "nthIndex",
+                "description": [
+                  "- Index of the Monaco text model to use. Defaults to `0`."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+                "lineNumber": 172,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaCodeEditorWrapper.toggleSuggestDetails",
+            "type": "Function",
+            "tags": [],
+            "label": "toggleSuggestDetails",
+            "description": [
+              "\nToggles the Monaco suggestion detail panel (the documentation pop-up displayed\nalongside the autocomplete suggestion list) for the given editor instance.\n\nThe precondition `HasFocusedSuggestion` must already be satisfied — call\n`triggerSuggest()` and navigate to an item with `ArrowDown` before calling this.\n"
+            ],
+            "signature": [
+              "(editorIndex?: number) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+            "lineNumber": 211,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KibanaCodeEditorWrapper.toggleSuggestDetails.$1",
+                "type": "number",
+                "tags": [],
+                "label": "editorIndex",
+                "description": [
+                  "- Index of the editor instance to target. Defaults to `0`."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+                "lineNumber": 220,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
