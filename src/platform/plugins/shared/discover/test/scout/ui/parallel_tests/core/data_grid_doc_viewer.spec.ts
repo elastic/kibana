@@ -28,11 +28,10 @@ const firstRowTimestampCell = (page: ScoutPage) =>
   page.locator('[data-grid-visible-row-index="0"] [data-gridcell-column-id="@timestamp"]');
 
 /**
- * Read the JSON currently rendered in the Monaco source editor (cell popover or
- * flyout source tab). Retries until the editor is mounted AND a non-empty model
- * value is present — `KibanaCodeEditorWrapper` returns `''` as soon as
- * `MonacoEnvironment` exists, even if the specific editor hasn't attached its
- * model yet, so a wrapping `expect.toPass` is needed.
+ * Read JSON from the Monaco source editor (cell popover or doc flyout). Uses
+ * `openAndWaitForDocViewerFlyout` before reading the flyout so the editor is mounted
+ * (serverless is slower). Retries until the model is non-empty — the wrapper can
+ * return `''` before the document attaches.
  */
 const readMonacoJson = async (
   page: ScoutPage
@@ -45,7 +44,7 @@ const readMonacoJson = async (
       throw new Error('Monaco editor has not rendered a value yet');
     }
     parsed = JSON.parse(raw);
-  }).toPass({ timeout: 15_000 });
+  }).toPass({ timeout: 30_000 });
   return parsed;
 };
 
@@ -88,7 +87,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
     expect(popoverDoc._id).toBe(EXPECTED_FIRST_ROW_ID);
 
     // Open the full flyout on the source tab and confirm it shows the same doc.
-    await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+    await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
     const flyoutDoc = await readMonacoJson(page);
     expect(flyoutDoc._id).toBe(popoverDoc._id);
 
@@ -110,7 +109,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
       const popoverDoc = await readMonacoJson(page);
       expect(popoverDoc._id).toBe(EXPECTED_FIRST_ROW_ID);
 
-      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
       await page.testSubj.click('docViewerTab-doc_view_source');
       const flyoutDoc = await readMonacoJson(page);
       expect(flyoutDoc._id).toBe(popoverDoc._id);
@@ -120,13 +119,13 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
   );
 
   spaceTest('expands a document row via the row toggle', async ({ page, pageObjects }) => {
-    await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+    await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
     await expect(page.testSubj.locator('docViewerRowDetailsTitle')).toBeVisible();
     await closeDocViewerFlyout(page);
   });
 
   spaceTest('shows the detail panel row actions', async ({ page, pageObjects }) => {
-    await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+    await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
 
     const rowActions = page.testSubj
       .locator('docViewerFlyout')
@@ -139,10 +138,10 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
   spaceTest(
     'paginates docs in the flyout when clicking a different row in the grid',
     async ({ page, pageObjects }) => {
-      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
       await expect(page.testSubj.locator('docViewerFlyoutNavigationPage-0')).toBeVisible();
 
-      await pageObjects.discover.openDocumentDetails({ rowIndex: 1 });
+      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 1 });
       await expect(page.testSubj.locator('docViewerFlyoutNavigationPage-1')).toBeVisible();
 
       await closeDocViewerFlyout(page);
@@ -152,7 +151,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
   spaceTest('adds and removes columns from the detail panel', async ({ page, pageObjects }) => {
     const fields = ['_id', '_index', 'agent'];
 
-    await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+    await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
     // The "toggle column" action is only exposed on the field-table tab.
     await page.testSubj.click('docViewerTab-doc_view_table');
     for (const field of fields) {
