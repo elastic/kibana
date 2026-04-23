@@ -145,7 +145,7 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
    Two-part answer: **definitions** live in a centralized package (`@kbn/workflows/managed`) owned by the workflows team via CODEOWNERS. **The imperative API** (`install` / `uninstall` / `enable` / `disable`) lives on the `workflows_extensions` start contract, following the same pattern as `emitEvent` for triggers — plugins interact by ID, without touching definitions. `workflows_extensions` delegates to `workflows_management` for storage and CRUD. This keeps the dependency graph unchanged (consuming plugins already depend on `workflows_extensions`), eliminates the approval-gate file (CODEOWNERS on the package replaces it), and provides a single source of truth for all managed workflow definitions. See [Registration > §3.1–§3.2](#3-registration) for the full design.
 
 2. **~~Post-start registration — what are the use cases and how should it work?~~** — **Resolved.**
-   Post-start registration is a first-class pattern via `management.lifecycle: 'dynamic'`. The workflow definition lives in `@kbn/workflows/managed` (known to the platform at startup), and the consuming plugin calls `managedWorkflows.install(id, { values })` at any point post-start — on user action, entity creation, feature activation, etc. The `yamlTemplate` mechanism handles install-time values (connector IDs, entity IDs, etc.) without partial editability. Cleanup is the plugin's responsibility via `managedWorkflows.uninstall(id)`. See [Registration > §3.2](#3-registration) and [Lifecycle > §5.2](#5-lifecycle-provisioning-updates-cleanup) for reconciliation behavior.
+   Post-start registration is a first-class pattern via `management.lifecycle: 'dynamic'`. The workflow definition lives in `@kbn/workflows/managed` (known to the platform at startup), and the consuming plugin calls `managedWorkflows.install(id)` at any point post-start — on user action, entity creation, feature activation, etc. Cleanup is the plugin's responsibility via `managedWorkflows.uninstall(id)`. See [Registration > §3.2](#3-registration) and [Lifecycle > §5.2](#5-lifecycle-provisioning-updates-cleanup) for reconciliation behavior. Install-time dynamic values (e.g., connector IDs, entity IDs) via `yamlTemplate` are a future extension contingent on [Mutability #4](#mutability).
 
 3. **~~How to prevent ID collisions between managed and user-defined workflows?~~** — **Resolved.**
    Reserved prefix (e.g., `system:`). `createWorkflow` rejects user-defined workflows with the reserved prefix — IDs are globally unique by construction. All read APIs (get, list, execute) work exactly the same for both managed and user-defined workflows, no changes needed. The `managed` flag on the document provides an additional layer of identification on the storage side. For mutations (enable/disable toggle), the update endpoint requires a `--force` flag to ensure user intentionality (see R2). The prefix is not used to determine whether a workflow is managed — it only guarantees collision-free coexistence.
@@ -354,7 +354,7 @@ The UI additionally disables edit/delete/disable controls for managed workflows 
 
 | Capability | Plugin | Rationale |
 |------------|--------|-----------|
-| **Definitions** (`@kbn/workflows/managed`) | Centralized package | All managed workflow definitions (YAML, templates, management policy) in one package, owned by workflows team via CODEOWNERS. Loaded into in-memory registry at startup. |
+| **Definitions** (`@kbn/workflows/managed`) | Centralized package | All managed workflow definitions (YAML + management policy) in one package, owned by workflows team via CODEOWNERS. Loaded into in-memory registry at startup. |
 | **Install / Uninstall API** (`managedWorkflows.*`) | `workflows_extensions` (start contract) | Thin imperative surface — plugins call `install(id)` / `uninstall(id)` by typed ID. Delegates to `workflows_management` for storage. Same pattern as `emitEvent` for triggers. |
 | **Read-only enforcement** | `workflows_management` (service layer) | All mutation routes live in management. The guards go in `WorkflowsManagementService.updateWorkflow` / `deleteWorkflows`. |
 | **Execution** (`executeWorkflow`, `scheduleWorkflow`) | `workflows_execution_engine` (start contract) | No changes needed. The engine executes workflow definitions by ID or inline — it doesn't care if the workflow is managed. |
@@ -401,7 +401,7 @@ Registration is split into two concerns: **where managed workflow definitions li
 A new package (or subpath of `@kbn/workflows`) owned by the workflows team via CODEOWNERS. Contains one file per managed workflow, exporting:
 
 - A typed ID constant.
-- A definition object with the YAML (or template), owning plugin, and `management` policy.
+- A definition object with the YAML, owning plugin, and `management` policy.
 
 An index file aggregates all exports for the platform's internal registry.
 
@@ -433,7 +433,18 @@ steps:
 };
 ```
 
-**Example with template (dynamic values at install time):**
+**Future extension — `yamlTemplate` (deferred, contingent on [Mutability #4](#mutability)):**
+
+> **Not part of v1.** All v1 managed workflows use static `yaml` only. The `yamlTemplate` mechanism below will be supported only if the [Mutability discussion (#4)](#mutability) concludes that install-time dynamic values are needed. It is documented here so the design is forward-compatible.
+
+If adopted, each managed workflow would declare **either** `yaml` **or** `yamlTemplate`, not both:
+
+| Field | Use case |
+|---|---|
+| `yaml: string` | Definition is fully static. No install-time variation. |
+| `yamlTemplate: (vars: T) => string` | Definition needs values only known at install time (e.g., a connector ID, a rule ID, an entity ID). Rendered at install time, not runtime. |
+
+Example template definition:
 
 ```typescript
 // packages/kbn-workflows/managed/entity_monitor.ts
@@ -463,14 +474,7 @@ steps:
 };
 ```
 
-Each managed workflow declares **either** `yaml` **or** `yamlTemplate`, not both:
-
-| Field | Use case |
-|---|---|
-| `yaml: string` | Definition is fully static. No install-time variation. |
-| `yamlTemplate: (vars: T) => string` | Definition needs values only known at install time (e.g., a connector ID, a rule ID, an entity ID). Rendered at install time, not runtime. |
-
-**Templating is rendered at install time, not at runtime.** The plugin calls `install(ID, { values })`, the platform invokes `yamlTemplate(values)` and stores the rendered YAML. The `definitionHash` is computed from the **rendered** YAML. No need to persist `values` on the document — the calling plugin is the source of truth and re-supplies them on every `install()` call.
+Templating would be rendered at install time, not at runtime. The plugin calls `install(ID, { values })`, the platform invokes `yamlTemplate(values)` and stores the rendered YAML. The `definitionHash` is computed from the **rendered** YAML. No need to persist `values` on the document — the calling plugin is the source of truth and re-supplies them on every `install()` call.
 
 **Definition type:**
 
@@ -480,10 +484,10 @@ interface ManagedWorkflowDefinition {
   id: string;
   /** Plugin ID that owns this workflow. Used for ownership tracking and cleanup. */
   pluginId: string;
-  /** The workflow YAML definition. Mutually exclusive with yamlTemplate. */
-  yaml?: string;
-  /** Template function for workflows with install-time values. Mutually exclusive with yaml. */
-  yamlTemplate?: (vars: any) => string;
+  /** The workflow YAML definition. Required in v1. */
+  yaml: string;
+  // Future (contingent on Mutability #4):
+  // yamlTemplate?: (vars: any) => string;  — mutually exclusive with yaml
   /**
    * Platform-level behavioral policy for this managed workflow.
    * Controls how the platform handles lifecycle, versioning, and enablement.
@@ -546,9 +550,9 @@ interface ManagedWorkflowManagement {
    * 'on_adopt':
    *   On hash mismatch, the platform stores the new version as available but
    *   does not apply it to the active document until the owning plugin explicitly
-   *   re-issues install(). This is useful for dynamic workflows where the plugin
+   *   re-issues install(). This is useful for workflows where the plugin
    *   wants to control when a new version takes effect (e.g., gradual rollout,
-   *   or when template values must be re-supplied with the new version).
+   *   coordinated upgrade across multiple workflows).
    *
    * @default 'auto'
    */
@@ -618,14 +622,14 @@ interface WorkflowsExtensionsServerPluginStart {
 interface ManagedWorkflowsApi {
   /**
    * Install (or re-assert) a managed workflow.
-   * - For yaml definitions: { values } is omitted.
-   * - For yamlTemplate definitions: { values } must satisfy the template's input type.
-   * - Idempotent: calling repeatedly with the same values is a no-op
-   *   after the first reconciliation.
-   * - Calling with different values updates the rendered YAML and bumps the hash.
+   * - Idempotent: calling repeatedly is a no-op after the first reconciliation.
+   * - The platform resolves the YAML from the in-memory registry by ID.
    *
    * Static workflows: call during setup() or start().
    * Dynamic workflows: call at any time post-start.
+   *
+   * Future (contingent on Mutability #4): for yamlTemplate definitions,
+   * options.values will supply template variables at install time.
    */
   install<TId extends ManagedWorkflowId>(
     id: TId,
@@ -655,9 +659,14 @@ For dynamic workflows installed in response to user actions or from route handle
 ```typescript
 // In a route handler — same pattern as emitting events
 const workflowsClient = await plugins.workflowsExtensions.getClient(request);
-await workflowsClient.managedWorkflows.install(ENTITY_MONITOR_WORKFLOW_ID, {
-  values: { entityId: 'entity-123' },
-});
+
+// v1: static yaml, install by ID only
+await workflowsClient.managedWorkflows.install(ENTITY_MONITOR_WORKFLOW_ID);
+
+// Future (contingent on Mutability #4): yamlTemplate with install-time values
+// await workflowsClient.managedWorkflows.install(ENTITY_MONITOR_WORKFLOW_ID, {
+//   values: { entityId: 'entity-123' },
+// });
 
 // Later, on entity deletion
 await workflowsClient.managedWorkflows.uninstall(ENTITY_MONITOR_WORKFLOW_ID);
@@ -678,7 +687,7 @@ await managedWorkflows.install(ATTACK_DISCOVERY_MAINTENANCE_WORKFLOW_ID);
 ```
                     @kbn/workflows/managed (package)
                               │
-                              │  exports: { id, pluginId, yaml/yamlTemplate, management }
+                              │  exports: { id, pluginId, yaml, management }
                               │  CODEOWNERS: workflows team
                               │
                               ▼
@@ -713,7 +722,7 @@ await managedWorkflows.install(ATTACK_DISCOVERY_MAINTENANCE_WORKFLOW_ID);
                               ├─ Static: managedWorkflows.install(ID)
                               │    (asserts the workflow; platform reconciles)
                               │
-                              ├─ Dynamic: managedWorkflows.install(ID, { values })
+                              ├─ Dynamic: managedWorkflows.install(ID)
                               │    (creates or updates the workflow on demand)
                               │
                               └─ Dynamic: managedWorkflows.uninstall(ID)
@@ -820,9 +829,9 @@ Dynamic workflows are **never** auto-orphaned. The platform makes no assumption 
 - If a dynamic workflow's `definitionHash` differs from the current package version and `management.versionStrategy` is `'auto'`, the platform updates the stored definition. If `'on_adopt'`, the new version is stored as pending.
 
 **At runtime:**
-- The owning plugin calls `install(id, { values })` to create or update dynamic workflows at any point post-start.
+- The owning plugin calls `install(id)` to create or update dynamic workflows at any point post-start.
 - The owning plugin calls `uninstall(id)` to explicitly remove a dynamic workflow.
-- Hash-based change detection still applies: if a plugin re-installs a dynamic workflow with new template values, the hash bumps and the document updates.
+- Hash-based change detection still applies: if the definition in the package changes (new Kibana version), re-installing the workflow detects the hash mismatch and updates the document.
 
 **Failure mode:** If a plugin forgets to call `uninstall()` for a workflow whose owning resource is gone, the workflow persists indefinitely. This is a bug to investigate, not silent data loss — and it is observably different from the alternative (platform guesses wrong and deletes a workflow the plugin needs).
 
@@ -839,7 +848,7 @@ Dynamic workflows are **never** auto-orphaned. The platform makes no assumption 
 | Dimension | `versionStrategy: 'auto'` | `versionStrategy: 'on_adopt'` |
 |---|---|---|
 | **On hash mismatch** | Overwrite stored YAML immediately | Store new version as pending; plugin re-issues `install()` to adopt |
-| **Use cases** | Always-current definitions (security maintenance) | Controlled rollout, dynamic workflows with template values |
+| **Use cases** | Always-current definitions (security maintenance) | Controlled rollout, coordinated upgrades |
 
 | Dimension | `enablement: 'enforced'` | `enablement: 'restorable'` |
 |---|---|---|
