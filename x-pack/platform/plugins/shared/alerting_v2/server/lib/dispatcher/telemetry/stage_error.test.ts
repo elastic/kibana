@@ -22,10 +22,8 @@ describe('telemetry/stage_error', () => {
   });
 
   it('preserves the message verbatim (no stack or cause leakage)', () => {
-    const err = new Error('hello');
+    const err = new Error('hello', { cause: { secret: 'do-not-leak' } });
     err.stack = 'very long stack\nwith many frames';
-    // @ts-expect-error — assigning a cause for the test
-    err.cause = { secret: 'do-not-leak' };
 
     const out = toStageError(err);
     expect(out).toEqual({ type: 'Error', message: 'hello' });
