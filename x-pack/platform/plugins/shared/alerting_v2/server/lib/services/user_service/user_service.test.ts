@@ -69,7 +69,7 @@ describe('UserService', () => {
       expect(userProfileService.getCurrent).not.toHaveBeenCalled();
     });
 
-    it('returns username from ES authenticate without calling userProfile service', async () => {
+    it('returns user profile with username from ES authenticate without calling userProfile service', async () => {
       const { userService, userProfileService } = createUserService({ isFakeRequest: true });
 
       await expect(userService.getCurrentUserProfile()).resolves.toEqual({
