@@ -521,6 +521,27 @@ paths:
     );
   });
 
+  it('should parse date-only values as YAML 1.1 timestamps (Date objects), not RFC3339 strings', () => {
+    // Integrations like microsoft_defender_cloud use date-only API versions (e.g. 2021-06-01).
+    // The compiled template is parsed with yaml-1.1 schema so that unquoted YYYY-MM-DD values
+    // are treated as YAML 1.1 timestamps (Date objects), matching the original js-yaml behavior.
+    // This allows downstream yaml-1.1 serialization to emit them as proper timestamps rather
+    // than as plain strings that the Elastic Agent's YAML 1.1 parser might misinterpret.
+    const streamTemplate = `
+state:
+  api_version: 2021-06-01
+  preview_version: 2019-01-01-preview
+`;
+
+    const output = compileTemplate({}, getMockedMetaVariable(), streamTemplate);
+
+    // YAML 1.1 parses unquoted YYYY-MM-DD as a timestamp → Date object
+    expect(output.state.api_version).toBeInstanceOf(Date);
+    expect((output.state.api_version as Date).toISOString().startsWith('2021-06-01')).toBe(true);
+    // A -preview suffix is not a valid YAML 1.1 timestamp, so it stays a string
+    expect(output.state.preview_version).toBe('2019-01-01-preview');
+  });
+
   it('should inject package meta varaible', () => {
     const streamTemplate = `
 input: {{_meta.input.id}}

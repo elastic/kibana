@@ -128,7 +128,7 @@ export function compileTemplate(
   );
 
   try {
-    const yamlFromCompiledTemplate = parse(compiledTemplate);
+    const yamlFromCompiledTemplate = parse(compiledTemplate, { schema: 'yaml-1.1' });
 
     // Hack to keep empty string ('') values around in the end yaml because
     // `load` replaces empty strings with null
