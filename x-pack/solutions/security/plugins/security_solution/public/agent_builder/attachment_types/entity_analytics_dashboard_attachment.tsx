@@ -145,14 +145,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
     chrome?: SecurityAgentBuilderChrome;
     searchSession?: ISessionService;
   }
-> = ({
-  attachment,
-  application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
-  searchSession,
-}) => {
+> = ({ attachment, application, agentBuilder, chrome, openSidebarConversation, searchSession }) => {
   const data = attachment.data;
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const [isRiskPanelNarrow, setIsRiskPanelNarrow] = useState(false);
@@ -191,7 +184,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
 
   return (
     <div css={rootCanvasStyles}>
-      <EuiPanel paddingSize="m" hasBorder css={{ overflow: 'auto' }}>
+      <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false} css={{ overflow: 'auto' }}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={true}>
             <EuiTitle size="m">
