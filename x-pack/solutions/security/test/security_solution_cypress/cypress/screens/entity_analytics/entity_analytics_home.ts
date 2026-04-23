@@ -6,6 +6,8 @@
  */
 
 export const PAGE_TITLE = '[data-test-subj="entityAnalyticsHomePage"]';
+/** Shown on entity_analytics_home_page while data view / page deps resolve (EuiLoadingSpinner) */
+export const ENTITY_ANALYTICS_HOME_PAGE_LOADER = '[data-test-subj="entityAnalyticsHomePageLoader"]';
 export const COMBINED_RISK_DONUT_CHART = '[data-test-subj="risk-score-donut-chart"]';
 export const ANOMALIES_PLACEHOLDER_PANEL = '[data-test-subj="recent-anomalies-panel"]';
 
