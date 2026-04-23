@@ -196,11 +196,18 @@ export function runHeapSnapshotAnalyzerCli(): void {
   const snapshotPath = positional[0];
 
   const filterStr = flagValue('filter');
-  const filterRegex =
-    filterStr !== undefined && filterStr.length > 0 ? new RegExp(filterStr) : undefined;
-  if (filterStr !== undefined && filterStr.length === 0) {
-    process.stderr.write(`--filter requires a value, e.g. --filter=zod\n`);
-    process.exit(1);
+  let filterRegex: RegExp | undefined;
+  if (filterStr !== undefined) {
+    if (filterStr.length === 0) {
+      process.stderr.write(`--filter requires a value, e.g. --filter=zod\n`);
+      process.exit(1);
+    }
+    try {
+      filterRegex = new RegExp(filterStr);
+    } catch (err) {
+      process.stderr.write(`Invalid --filter regex '${filterStr}': ${(err as Error).message}\n`);
+      process.exit(1);
+    }
   }
 
   function status(msg: string): void {
@@ -1175,6 +1182,11 @@ export function runHeapSnapshotAnalyzerCli(): void {
   // --filter is active, skip frames matching the filter regex so attribution lands
   // on the *caller* of the filtered code rather than the filtered code itself.
   const nodePkgAllocSitePkg = new Int32Array(nodeCount).fill(-1);
+  // When --filter is active, marks nodes whose leaf trace frame did NOT match
+  // the regex. Lets the aggregation loop distinguish "filtered out" from
+  // "passed filter but no plugin/package frame above" (the latter must flow
+  // into the unattributed buckets).
+  const nodeFilteredOut = filterRegex ? new Uint8Array(nodeCount) : undefined;
   let allocUntrackedNodes = 0;
   let allocFilteredOut = 0;
   let allocAttributable = false;
@@ -1305,6 +1317,7 @@ export function runHeapSnapshotAnalyzerCli(): void {
         const leafScriptId = leafScriptStrId(tIdx);
         if (!frameMatchesFilter(leafScriptId)) {
           allocFilteredOut++;
+          nodeFilteredOut![i] = 1;
           continue;
         }
       }
@@ -1364,20 +1377,12 @@ export function runHeapSnapshotAnalyzerCli(): void {
   let unattrAllocSitePkg = 0;
   if (allocAttributable) {
     for (let i = 0; i < nodeCount; i++) {
-      // When --filter is active, both attribution arrays are -1 for filtered-out
-      // nodes; selfSize for those should not flow into ANY bucket below.
-      // We detect filtering-out via the trace cache (nodePkgAllocSitePkg = -1
-      // AND nodePkgAllocSite = -1 AND traceId > 0 — but distinguishing "filtered"
-      // from "no plugin/no package" needs the filter flag).
+      // Filtered-out nodes (leaf frame didn't match --filter) are excluded from
+      // every bucket; they're already counted in allocFilteredOut.
+      if (nodeFilteredOut && nodeFilteredOut[i]) continue;
       const pid = nodePkgAllocSite[i];
       const pkgPid = nodePkgAllocSitePkg[i];
       const traceId = nodes[i * nf + traceNodeIdFieldIdx];
-
-      if (filterRegex) {
-        // For filtered runs, nodes that didn't match the filter have neither
-        // attribution. Skip them entirely; they're counted in allocFilteredOut.
-        if (pid === -1 && pkgPid === -1 && traceId > 0) continue;
-      }
 
       if (pid === -1) {
         if (traceId <= 0) allocSiteUntrackedBytes += selfSize[i];
