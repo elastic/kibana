@@ -35,7 +35,8 @@ export const createBulkEnableRulesTool = ({
 }): BuiltinToolDefinition<typeof schema> => ({
   id: ALERTING_V2_BULK_ENABLE_RULES_TOOL_ID,
   type: ToolType.builtin,
-  description: 'Enables multiple Alerting v2 rules in a single request. Accepts a list of IDs or a KQL filter.',
+  description:
+    'Enables multiple Alerting v2 rules in a single request. Accepts a list of IDs or a KQL filter.',
   tags: [...ALERTING_V2_TOOL_TAGS],
   schema,
   confirmation: { askUser: 'always' },

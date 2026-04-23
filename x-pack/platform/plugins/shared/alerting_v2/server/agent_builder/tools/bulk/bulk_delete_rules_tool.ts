@@ -36,7 +36,8 @@ export const createBulkDeleteRulesTool = ({
 }): BuiltinToolDefinition<typeof schema> => ({
   id: ALERTING_V2_BULK_DELETE_RULES_TOOL_ID,
   type: ToolType.builtin,
-  description: 'Permanently deletes multiple Alerting v2 rules. Accepts up to 100 IDs or a KQL filter. This action cannot be undone.',
+  description:
+    'Permanently deletes multiple Alerting v2 rules. Accepts up to 100 IDs or a KQL filter. This action cannot be undone.',
   tags: [...ALERTING_V2_TOOL_TAGS],
   schema,
   confirmation: { askUser: 'always' },
