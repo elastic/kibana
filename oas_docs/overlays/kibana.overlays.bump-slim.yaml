@@ -8,67 +8,36 @@ info:
 
 actions:
   # ──────────────────────────────────────────────
-  # DASHBOARDS
-  # Strategy: remove all real operations, keep only one synthetic GET so Bump
-  # still creates a nav entry for the Dashboards tag.
+  # DASHBOARDS — remove all operations entirely.
+  # The Dashboards tag section should still appear in Bump from the root tags
+  # array entry (set by dashboards.overlays.yaml) even with no operations.
   # ──────────────────────────────────────────────
   - target: "$.paths['/api/dashboards'].post"
     description: "Remove POST /api/dashboards for Bump slim output"
+    remove: true
+
+  - target: "$.paths['/api/dashboards'].get"
+    description: "Remove GET /api/dashboards for Bump slim output"
     remove: true
 
   - target: "$.paths['/api/dashboards/{id}']"
     description: "Remove /api/dashboards/{id} entirely for Bump slim output"
     remove: true
 
-  # Remove the real GET so we can replace it with a clean placeholder below.
-  - target: "$.paths['/api/dashboards'].get"
-    description: "Remove real GET /api/dashboards before injecting placeholder"
-    remove: true
-
-  # Inject a minimal placeholder GET that keeps the tag alive in the Bump nav.
-  # No description or responses — the notice is already shown via the tag-level description above.
-  - target: "$.paths['/api/dashboards']"
-    description: "Add placeholder GET /api/dashboards (x-internal hides it from Bump but keeps the tag in the nav)"
-    update:
-      get:
-        tags:
-          - Dashboards
-        summary: "Dashboards API — full reference available externally"
-        operationId: placeholder-dashboards-external
-        x-internal: true
-        responses:
-          '308':
-            description: "See external documentation."
-
   # ──────────────────────────────────────────────
-  # VISUALIZATIONS
-  # Same strategy as Dashboards.
+  # VISUALIZATIONS — same strategy.
   # ──────────────────────────────────────────────
   - target: "$.paths['/api/visualizations'].post"
     description: "Remove POST /api/visualizations for Bump slim output"
     remove: true
 
+  - target: "$.paths['/api/visualizations'].get"
+    description: "Remove GET /api/visualizations for Bump slim output"
+    remove: true
+
   - target: "$.paths['/api/visualizations/{id}']"
     description: "Remove /api/visualizations/{id} entirely for Bump slim output"
     remove: true
-
-  - target: "$.paths['/api/visualizations'].get"
-    description: "Remove real GET /api/visualizations before injecting placeholder"
-    remove: true
-
-  # No description — the notice is already shown via the tag-level description above.
-  - target: "$.paths['/api/visualizations']"
-    description: "Add placeholder GET /api/visualizations (x-internal hides it from Bump but keeps the tag in the nav)"
-    update:
-      get:
-        tags:
-          - Visualizations
-        summary: "Visualizations API — full reference available externally"
-        operationId: placeholder-visualizations-external
-        x-internal: true
-        responses:
-          '308':
-            description: "See external documentation."
 
   # ──────────────────────────────────────────────
   # Update the tag-level descriptions (shown as section intros in Bump).
