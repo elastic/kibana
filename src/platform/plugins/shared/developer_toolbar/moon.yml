@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-internal-types'
   - '@kbn/core-chrome-feature-flags'
   - '@kbn/design-tools'
+  - '@kbn/core-hotkeys-browser'
 tags:
   - plugin
   - prod

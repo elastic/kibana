@@ -53,7 +53,7 @@ export class DeveloperToolbarPlugin
     const LazyToolbar = React.lazy(() => import('./toolbar'));
     (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
-        <LazyToolbar items$={this.items$} envInfo={this.context.env} />
+        <LazyToolbar items$={this.items$} envInfo={this.context.env} hotkeys={core.hotkeys} />
       </Suspense>
     );
 
