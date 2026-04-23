@@ -32,11 +32,15 @@ export const registerWorkflowSteps = (
 
   workflowsExtensions.registerStepDefinition(async () => {
     if (!(await isEnabled)) return undefined;
-    return import('./render_alert_narrative_step').then((m) => m.renderAlertNarrativeStepDefinition);
+    return import('./render_alert_narrative_step').then(
+      (m) => m.renderAlertNarrativeStepDefinition
+    );
   });
 
   workflowsExtensions.registerStepDefinition(async () => {
     if (!(await isEnabled)) return undefined;
-    return import('./build_alert_entity_graph_step').then((m) => m.buildAlertEntityGraphStepDefinition);
+    return import('./build_alert_entity_graph_step').then(
+      (m) => m.buildAlertEntityGraphStepDefinition
+    );
   });
 };
