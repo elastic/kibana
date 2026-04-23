@@ -35,9 +35,6 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
-        responses:
-          '200':
-            description: See the full Dashboards API reference linked above.
       post:
         tags:
           - Dashboards
@@ -47,9 +44,6 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
-        responses:
-          '200':
-            description: See the full Dashboards API reference linked above.
 
   - target: "$.paths['/api/dashboards/{id}'].get"
     description: "Strip GET /api/dashboards/{id} down to redirect notice"
@@ -72,9 +66,6 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
-        responses:
-          '200':
-            description: See the full Dashboards API reference linked above.
       put:
         tags:
           - Dashboards
@@ -84,9 +75,6 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
-        responses:
-          '200':
-            description: See the full Dashboards API reference linked above.
       delete:
         tags:
           - Dashboards
@@ -96,9 +84,6 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Dashboards)**
-        responses:
-          '200':
-            description: See the full Dashboards API reference linked above.
 
   # ──────────────────────────────────────────────
   # VISUALIZATIONS — same strategy.
@@ -123,9 +108,6 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
-        responses:
-          '200':
-            description: See the full Visualizations API reference linked above.
       post:
         tags:
           - Visualizations
@@ -135,9 +117,6 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
-        responses:
-          '200':
-            description: See the full Visualizations API reference linked above.
 
   - target: "$.paths['/api/visualizations/{id}'].get"
     description: "Strip GET /api/visualizations/{id} down to redirect notice"
@@ -160,9 +139,6 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
-        responses:
-          '200':
-            description: See the full Visualizations API reference linked above.
       put:
         tags:
           - Visualizations
@@ -172,9 +148,6 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
-        responses:
-          '200':
-            description: See the full Visualizations API reference linked above.
       delete:
         tags:
           - Visualizations
@@ -184,9 +157,6 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://thomthomson.github.io/dashboard-tech-preview-docs/#tag/Visualizations)**
-        responses:
-          '200':
-            description: See the full Visualizations API reference linked above.
 
   # ──────────────────────────────────────────────
   # Tag-level descriptions (section intro above the operations list).
