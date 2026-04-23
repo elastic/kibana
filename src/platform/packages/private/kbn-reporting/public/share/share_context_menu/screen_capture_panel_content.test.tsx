@@ -22,7 +22,13 @@ jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   return {
     ...actual,
-    EuiCopy: ({ textToCopy, children }: { textToCopy: string; children: (copy: () => void) => React.ReactNode }) => {
+    EuiCopy: ({
+      textToCopy,
+      children,
+    }: {
+      textToCopy: string;
+      children: (copy: () => void) => React.ReactNode;
+    }) => {
       capturedTextToCopy = textToCopy;
       return children(() => {});
     },
