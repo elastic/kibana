@@ -14,6 +14,7 @@ import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
+import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -127,5 +128,68 @@ export const registerEntityAttachment = ({
         searchSession,
       })
     );
+  });
+};
+
+/**
+ * Registers the `security.rule` attachment renderer (rule preview card with
+ * "Apply to creation" / "Update rule" action buttons). Dynamically imports
+ * [./rule_attachment](./rule_attachment.tsx) so the rule-schema helpers and the
+ * EUI `EuiCodeBlock`/`EuiCallOut` surface stay off the main `securitySolution`
+ * page-load bundle.
+ *
+ * Race-window: until the chunk resolves, `security.rule` attachments are not
+ * registered yet and the Agent Builder attachments service falls back to its
+ * default handling. In practice the chunk resolves well before the user can
+ * post a message and get a rule attachment back from the LLM.
+ */
+export const registerRuleAttachment = ({
+  attachments,
+  application,
+  aiRuleCreation,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  aiRuleCreation: AiRuleCreationService;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_rule_attachment" */
+    './rule_attachment'
+  ).then(({ registerRuleAttachment: register }) => {
+    register({ attachments, application, aiRuleCreation });
+  });
+};
+
+/**
+ * Registers the `security.entity_analytics_dashboard` attachment renderer
+ * (inline summary pill + Canvas dashboard with risk breakdown, donut chart,
+ * and entity list). Dynamically imports
+ * [./entity_analytics_dashboard_attachment](./entity_analytics_dashboard_attachment.tsx)
+ * so the heavy transitive deps (`RiskLevelBreakdownTable`,
+ * `RiskScoreDonutChart`, `EntityListTable`, plus the Security
+ * entity-analytics translations/Redux wiring) stay off the main bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — the chunk
+ * resolves during plugin start well before the user can receive a dashboard
+ * attachment from the LLM.
+ */
+export const registerEntityAnalyticsDashboardAttachment = ({
+  attachments,
+  application,
+  agentBuilder,
+  chrome,
+  searchSession,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  searchSession?: ISessionService;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_entity_analytics_dashboard_attachment" */
+    './entity_analytics_dashboard_attachment'
+  ).then(({ registerEntityAnalyticsDashboardAttachment: register }) => {
+    register({ attachments, application, agentBuilder, chrome, searchSession });
   });
 };

@@ -76,10 +76,10 @@ import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
   registerAttachmentUiDefinitions,
+  registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
+  registerRuleAttachment,
 } from './agent_builder/attachment_types';
-import { registerEntityAnalyticsDashboardAttachment } from './agent_builder/attachment_types/entity_analytics_dashboard_attachment';
-import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
