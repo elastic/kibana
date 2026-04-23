@@ -1316,15 +1316,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(afterDelete.attachments.length).to.eql(0);
         } finally {
-          try {
-            await deleteStream(apiClient, SLO_TEST_STREAM);
-          } catch (err) {
-            // 404 expected — test already deleted the stream.
+          await deleteStream(apiClient, SLO_TEST_STREAM).catch((err) => {
             const message = String(err?.message ?? err);
             if (!/\b404\b/.test(message)) {
-              throw err;
+              log.warning(
+                `SLO cascade cleanup: deleteStream failed for ${SLO_TEST_STREAM}: ${message}`
+              );
             }
-          }
+          });
           if (sloId) {
             await supertest
               .delete(`/api/observability/slos/${encodeURIComponent(sloId)}`)
@@ -1381,14 +1380,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(afterDelete.attachments.length).to.eql(0);
         } finally {
-          try {
-            await deleteStream(apiClient, SLO_QUERY_TEST_STREAM);
-          } catch (err) {
+          // Throwing from finally would mask a real test failure above, so log-and-continue.
+          await deleteStream(apiClient, SLO_QUERY_TEST_STREAM).catch((err) => {
             const message = String(err?.message ?? err);
             if (!/\b404\b/.test(message)) {
-              throw err;
+              log.warning(
+                `SLO cascade cleanup: deleteStream failed for ${SLO_QUERY_TEST_STREAM}: ${message}`
+              );
             }
-          }
+          });
           if (sloId) {
             await supertest
               .delete(`/api/observability/slos/${encodeURIComponent(sloId)}`)
