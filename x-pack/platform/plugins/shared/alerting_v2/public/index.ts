@@ -27,6 +27,9 @@ import { WorkflowsApi } from './services/workflows_api';
 import { setKibanaServices } from './kibana_services';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { createRuleAttachmentDefinition } from './agent_builder/attachments/rule_attachment_definition';
 
 export type { AlertingV2PublicStart } from './types';
 export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
@@ -53,6 +56,15 @@ export const module = new ContainerModule(({ bind }) => {
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
       });
+
+      const agentBuilderToken = PluginStart('agentBuilder');
+      if (diContainer.isBound(agentBuilderToken)) {
+        const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
+        agentBuilder.attachments.addAttachmentType(
+          RULE_ATTACHMENT_TYPE,
+          createRuleAttachmentDefinition()
+        );
+      }
     });
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;

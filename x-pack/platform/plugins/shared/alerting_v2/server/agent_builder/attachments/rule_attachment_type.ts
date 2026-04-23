@@ -59,7 +59,6 @@ export const createRuleAttachmentType = ({
     try {
       const rulesClient = getRulesClient(context);
       const rule = await rulesClient.getRule({ id: origin });
-      if (!rule) return undefined;
       return ruleAttachmentDataSchema.parse(rule);
     } catch (error) {
       logger.warn(`Failed to resolve rule attachment for origin "${origin}": ${error}`);
@@ -77,8 +76,6 @@ export const createRuleAttachmentType = ({
     try {
       const rulesClient = getRulesClient(context);
       const rule = await rulesClient.getRule({ id: attachment.origin });
-      if (!rule?.updatedAt) return false;
-
       if (Date.parse(rule.updatedAt) > Date.parse(attachment.origin_snapshot_at)) {
         const latestVersion = getLatestVersion(attachment);
         if (!latestVersion) return false;
