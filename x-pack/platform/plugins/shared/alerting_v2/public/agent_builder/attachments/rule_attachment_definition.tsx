@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiBadge,
   EuiCode,
@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import {
   ActionButtonType,
-  type ActionButton,
   type AttachmentRenderProps,
   type AttachmentUIDefinition,
   type CanvasRenderCallbacks,
@@ -27,7 +26,7 @@ import {
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import type { ApplicationStart, IBasePath } from '@kbn/core/public';
+import type { ApplicationStart, IBasePath, NotificationsStart } from '@kbn/core/public';
 import { paths } from '../../constants';
 import type { RulesApi } from '../../services/rules_api';
 
@@ -37,100 +36,8 @@ interface RuleAttachmentDefinitionServices {
   rulesApi: RulesApi;
   application: ApplicationStart;
   basePath: IBasePath;
+  notifications: NotificationsStart;
 }
-
-const buildActionButtons = ({
-  attachment,
-  updateOrigin,
-  rulesApi,
-  application,
-  basePath,
-}: {
-  attachment: RuleAttachment;
-  updateOrigin: (origin: string) => Promise<unknown>;
-  rulesApi: RulesApi;
-  application: ApplicationStart;
-  basePath: IBasePath;
-}): ActionButton[] => {
-  const { data, origin } = attachment;
-  const isSaved = Boolean(origin);
-
-  if (!isSaved) {
-    return [
-      {
-        label: 'Save as Rule',
-        icon: 'save',
-        type: ActionButtonType.PRIMARY,
-        handler: async () => {
-          const created = await rulesApi.createRule({
-            kind: data.kind,
-            metadata: data.metadata,
-            time_field: data.time_field ?? '@timestamp',
-            schedule: data.schedule,
-            evaluation: data.evaluation,
-            state_transition: data.state_transition ?? null,
-            ...(data.recovery_policy ? { recovery_policy: data.recovery_policy } : {}),
-            ...(data.grouping ? { grouping: data.grouping } : {}),
-            ...(data.no_data ? { no_data: data.no_data } : {}),
-            ...(data.artifacts ? { artifacts: data.artifacts } : {}),
-          });
-          await updateOrigin(created.id);
-        },
-      },
-    ];
-  }
-
-  const ruleId = origin!;
-  const isEnabled = data.enabled ?? false;
-
-  return [
-    {
-      label: 'Update Rule',
-      icon: 'save',
-      type: ActionButtonType.PRIMARY,
-      handler: async () => {
-        await rulesApi.updateRule(ruleId, {
-          metadata: data.metadata,
-          schedule: data.schedule,
-          evaluation: { query: data.evaluation?.query },
-          state_transition: data.state_transition ?? null,
-          ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
-          ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
-          ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
-          ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
-        });
-      },
-    },
-    {
-      label: isEnabled ? 'Disable' : 'Enable',
-      icon: isEnabled ? 'pause' : 'play',
-      type: ActionButtonType.SECONDARY,
-      handler: async () => {
-        if (isEnabled) {
-          await rulesApi.bulkDisableRules({ ids: [ruleId] });
-        } else {
-          await rulesApi.bulkEnableRules({ ids: [ruleId] });
-        }
-      },
-    },
-    {
-      label: 'View in Rules',
-      icon: 'popout',
-      type: ActionButtonType.OVERFLOW,
-      handler: () => {
-        application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));
-      },
-    },
-    {
-      label: 'Delete Rule',
-      icon: 'trash',
-      type: ActionButtonType.OVERFLOW,
-      handler: async () => {
-        await rulesApi.deleteRule(ruleId);
-      },
-    },
-  ];
-};
 
 // ─── Canvas content ───────────────────────────────────────────────────────────
 
@@ -140,6 +47,7 @@ interface RuleCanvasContentProps
   rulesApi: RulesApi;
   application: ApplicationStart;
   basePath: IBasePath;
+  notifications: NotificationsStart;
 }
 
 const RuleCanvasContent = ({
@@ -149,17 +57,124 @@ const RuleCanvasContent = ({
   rulesApi,
   application,
   basePath,
+  notifications,
 }: RuleCanvasContentProps) => {
   const { data, origin } = attachment;
-  const isProposed = !origin;
+  const isSaved = Boolean(origin);
+  const isProposed = !isSaved;
   const status = isProposed ? 'proposed' : data.enabled ? 'enabled' : 'disabled';
   const statusColor = isProposed ? 'default' : data.enabled ? 'success' : 'warning';
 
+  // Mirrors the dashboard pattern: start false so the first effect registers [],
+  // matching the canvas_flyout clear effect. The second cycle (mounted=true)
+  // registers the real buttons after the parent clear has already fired.
+  const [mounted, setMounted] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(data.enabled ?? false);
+
   useEffect(() => {
-    registerActionButtons(
-      buildActionButtons({ attachment, updateOrigin, rulesApi, application, basePath })
-    );
-  }, [attachment, registerActionButtons, updateOrigin, rulesApi, application, basePath]);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) {
+      registerActionButtons([]);
+      return;
+    }
+
+    if (!isSaved) {
+      registerActionButtons([
+        {
+          label: 'Save as Rule',
+          icon: 'save',
+          type: ActionButtonType.PRIMARY,
+          handler: async () => {
+            const created = await rulesApi.createRule({
+              kind: data.kind,
+              metadata: data.metadata,
+              time_field: data.time_field ?? '@timestamp',
+              schedule: data.schedule,
+              evaluation: data.evaluation,
+              state_transition: data.state_transition ?? null,
+              ...(data.recovery_policy ? { recovery_policy: data.recovery_policy } : {}),
+              ...(data.grouping ? { grouping: data.grouping } : {}),
+              ...(data.no_data ? { no_data: data.no_data } : {}),
+              ...(data.artifacts ? { artifacts: data.artifacts } : {}),
+            });
+            await updateOrigin(created.id);
+            notifications.toasts.addSuccess(`Rule "${data.metadata.name}" saved`);
+          },
+        },
+      ]);
+      return;
+    }
+
+    const ruleId = origin!;
+
+    registerActionButtons([
+      {
+        label: 'Update Rule',
+        icon: 'save',
+        type: ActionButtonType.PRIMARY,
+        handler: async () => {
+          await rulesApi.updateRule(ruleId, {
+            metadata: data.metadata,
+            schedule: data.schedule,
+            evaluation: { query: data.evaluation?.query },
+            state_transition: data.state_transition ?? null,
+            ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
+            ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
+            ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
+            ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
+          });
+          notifications.toasts.addSuccess(`Rule "${data.metadata.name}" updated`);
+        },
+      },
+      {
+        label: isEnabled ? 'Disable' : 'Enable',
+        icon: isEnabled ? 'pause' : 'play',
+        type: ActionButtonType.SECONDARY,
+        handler: async () => {
+          if (isEnabled) {
+            await rulesApi.bulkDisableRules({ ids: [ruleId] });
+            setIsEnabled(false);
+            notifications.toasts.addSuccess(`Rule "${data.metadata.name}" disabled`);
+          } else {
+            await rulesApi.bulkEnableRules({ ids: [ruleId] });
+            setIsEnabled(true);
+            notifications.toasts.addSuccess(`Rule "${data.metadata.name}" enabled`);
+          }
+        },
+      },
+      {
+        label: 'View in Rules',
+        icon: 'popout',
+        type: ActionButtonType.OVERFLOW,
+        handler: () => {
+          application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));
+        },
+      },
+      {
+        label: 'Delete Rule',
+        icon: 'trash',
+        type: ActionButtonType.OVERFLOW,
+        handler: async () => {
+          await rulesApi.deleteRule(ruleId);
+        },
+      },
+    ]);
+  }, [
+    mounted,
+    isSaved,
+    origin,
+    isEnabled,
+    registerActionButtons,
+    updateOrigin,
+    rulesApi,
+    application,
+    basePath,
+    notifications,
+    data,
+  ]);
 
   return (
     <EuiPanel paddingSize="l" hasShadow={false}>
@@ -278,6 +293,7 @@ export const createRuleAttachmentDefinition = ({
   rulesApi,
   application,
   basePath,
+  notifications,
 }: RuleAttachmentDefinitionServices): AttachmentUIDefinition<RuleAttachment> => ({
   getLabel: (attachment) => attachment.data.metadata.name,
   getIcon: () => 'bell',
@@ -346,9 +362,21 @@ export const createRuleAttachmentDefinition = ({
       rulesApi={rulesApi}
       application={application}
       basePath={basePath}
+      notifications={notifications}
     />
   ),
 
-  getActionButtons: ({ attachment, updateOrigin }) =>
-    buildActionButtons({ attachment, updateOrigin, rulesApi, application, basePath }),
+  // Inline: only Preview opens the canvas. All action buttons live in the canvas header
+  // (registered via registerActionButtons in RuleCanvasContent, same as dashboard pattern).
+  getActionButtons: ({ openCanvas, isCanvas }) => {
+    if (isCanvas) return [];
+    return [
+      {
+        label: 'Preview',
+        icon: 'eye',
+        type: ActionButtonType.SECONDARY,
+        handler: () => openCanvas?.(),
+      },
+    ];
+  },
 });

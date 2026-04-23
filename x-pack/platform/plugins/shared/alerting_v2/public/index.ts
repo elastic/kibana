@@ -67,6 +67,7 @@ export const module = new ContainerModule(({ bind }) => {
             rulesApi,
             application: coreStart.application,
             basePath: coreStart.http.basePath,
+            notifications: coreStart.notifications,
           })
         );
       }
