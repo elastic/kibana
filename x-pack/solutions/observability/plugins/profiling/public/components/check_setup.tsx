@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
@@ -39,9 +39,11 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     [fetchHasSetup]
   );
 
-  if (status === AsyncStatus.Settled) {
-    setProfilingSetupStatus(data);
-  }
+  useEffect(() => {
+    if (status === AsyncStatus.Settled) {
+      setProfilingSetupStatus(data);
+    }
+  }, [data, status, setProfilingSetupStatus]);
 
   const http = useAutoAbortedHttpClient([]);
 
