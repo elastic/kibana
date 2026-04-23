@@ -805,7 +805,7 @@ describe('current status route', () => {
                   {
                     metrics: {
                       'monitor.status': 'up',
-                      'kibanaUrl': 'https://west.kibana.example.com',
+                      kibanaUrl: 'https://west.kibana.example.com',
                     },
                     sort: ['2022-09-15T16:19:16.724Z'],
                   },
@@ -923,10 +923,10 @@ describe('current status route', () => {
                   {
                     metrics: {
                       'monitor.status': 'down',
-                      'kibanaUrl': 'https://east.kibana.example.com',
+                      kibanaUrl: 'https://east.kibana.example.com',
                       'monitor.name': 'Remote API Check',
                       'monitor.type': 'http',
-                      'config_id': 'remote-config-1',
+                      config_id: 'remote-config-1',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
@@ -1019,9 +1019,7 @@ describe('current status route', () => {
       // Verify the ES query does NOT contain a meta.space_id filter
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
-      const spaceFilter = filters.find(
-        (f: any) => f.terms && f.terms['meta.space_id']
-      );
+      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
       expect(spaceFilter).toBeUndefined();
     });
 
@@ -1070,9 +1068,7 @@ describe('current status route', () => {
       // Verify the ES query DOES contain a meta.space_id filter
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
-      const spaceFilter = filters.find(
-        (f: any) => f.terms && f.terms['meta.space_id']
-      );
+      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
       expect(spaceFilter).toBeDefined();
       expect(spaceFilter.terms['meta.space_id']).toContain('default');
     });

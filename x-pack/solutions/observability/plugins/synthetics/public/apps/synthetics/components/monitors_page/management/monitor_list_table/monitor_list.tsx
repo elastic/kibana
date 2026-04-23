@@ -22,15 +22,55 @@ import type { MonitorListPageState } from '../../../../state';
 import type {
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
+  RemoteMonitorListItem,
+  RemoteMonitorInfo,
 } from '../../../../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 
+/**
+ * Unified item type for the monitor list table.
+ * Local monitors are EncryptedSyntheticsSavedMonitor; remote monitors are
+ * mapped to the same shape with placeholder values and a _isRemote flag.
+ */
+export type MonitorListItem = EncryptedSyntheticsSavedMonitor & {
+  _isRemote?: boolean;
+  _remote?: RemoteMonitorInfo;
+  _remoteLocations?: string[];
+};
+
+/**
+ * Maps a RemoteMonitorListItem into a MonitorListItem that the table can render.
+ * Fields that don't apply get placeholder values.
+ */
+function mapRemoteToListItem(remote: RemoteMonitorListItem): MonitorListItem {
+  return {
+    [ConfigKey.CONFIG_ID]: remote.configId,
+    [ConfigKey.NAME]: remote.name,
+    [ConfigKey.MONITOR_TYPE]: remote.type,
+    [ConfigKey.TAGS]: remote.tags ?? [],
+    [ConfigKey.LOCATIONS]: [],
+    [ConfigKey.ENABLED]: true,
+    [ConfigKey.SCHEDULE]: { number: '', unit: '' },
+    [ConfigKey.ALERT_CONFIG]: undefined,
+    [ConfigKey.PROJECT_ID]: '',
+    [ConfigKey.MONITOR_SOURCE_TYPE]: undefined,
+    id: remote.configId,
+    updated_at: '',
+    created_at: '',
+    spaces: [],
+    _isRemote: true,
+    _remote: remote.remote,
+    _remoteLocations: remote.locations,
+  } as MonitorListItem;
+}
+
 interface Props {
   pageState: MonitorListPageState;
   syntheticsMonitors: EncryptedSyntheticsSavedMonitor[];
+  remoteMonitors?: RemoteMonitorListItem[];
   total: number;
   error: IHttpSerializedFetchError | null;
   loading: boolean;
@@ -43,6 +83,7 @@ const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) =
 export const MonitorList = ({
   pageState: { pageIndex, pageSize, sortField, sortOrder },
   syntheticsMonitors,
+  remoteMonitors = [],
   total,
   error,
   loading,
@@ -59,11 +100,20 @@ export const MonitorList = ({
   } | null>(null);
   const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
+  // Merge local and remote monitors into a single list
+  const allItems: MonitorListItem[] = useMemo(() => {
+    const localItems: MonitorListItem[] = syntheticsMonitors as MonitorListItem[];
+    const remoteItems: MonitorListItem[] = remoteMonitors.map(mapRemoteToListItem);
+    return [...localItems, ...remoteItems];
+  }, [syntheticsMonitors, remoteMonitors]);
+
+  const totalItemCount = total + remoteMonitors.length;
+
   const handleOnChange = useCallback(
     ({
       page = { index: 0, size: 10 },
       sort = { field: ConfigKey.NAME, direction: 'asc' },
-    }: Criteria<EncryptedSyntheticsSavedMonitor>) => {
+    }: Criteria<MonitorListItem>) => {
       const { index, size } = page;
       const { field, direction } = sort;
 
@@ -80,21 +130,21 @@ export const MonitorList = ({
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount: total,
+    totalItemCount,
     pageSizeOptions: [5, 10, 25, 50, 100],
   };
 
-  const sorting: EuiTableSortingType<EncryptedSyntheticsSavedMonitor> = {
+  const sorting: EuiTableSortingType<MonitorListItem> = {
     sort: {
-      field: sortField?.replace('.keyword', '') as keyof EncryptedSyntheticsSavedMonitor,
+      field: sortField?.replace('.keyword', '') as keyof MonitorListItem,
       direction: sortOrder,
     },
   };
 
   const recordRangeLabel = labels.getRecordRangeLabel({
-    rangeStart: total === 0 ? 0 : pageSize * pageIndex + 1,
+    rangeStart: totalItemCount === 0 ? 0 : pageSize * pageIndex + 1,
     rangeEnd: pageSize * pageIndex + pageSize,
-    total,
+    total: totalItemCount,
   });
 
   const columns = useMonitorListColumns({
@@ -105,14 +155,22 @@ export const MonitorList = ({
     isFixableByReset,
   });
 
-  const [selectedItems, setSelectedItems] = useState<EncryptedSyntheticsSavedMonitor[]>([]);
-  const onSelectionChange = (selItems: EncryptedSyntheticsSavedMonitor[]) => {
-    setSelectedItems(selItems);
+  // Only allow selection of local monitors (remote monitors can't be bulk-actioned)
+  const [selectedItems, setSelectedItems] = useState<MonitorListItem[]>([]);
+  const onSelectionChange = (selItems: MonitorListItem[]) => {
+    setSelectedItems(selItems.filter((item) => !item._isRemote));
   };
 
-  const selection: EuiTableSelectionType<EncryptedSyntheticsSavedMonitor> = {
+  const selection: EuiTableSelectionType<MonitorListItem> = {
     onSelectionChange,
     initialSelected: selectedItems,
+    selectable: (item) => !item._isRemote,
+    selectableMessage: (selectable) =>
+      selectable
+        ? ''
+        : i18n.translate('xpack.synthetics.management.monitorList.remoteNotSelectable', {
+            defaultMessage: 'Remote monitors cannot be selected',
+          }),
   };
   const { spaces: spacesApi } = useKibana<ClientPluginsStart>().services;
 
@@ -132,12 +190,12 @@ export const MonitorList = ({
       >
         <MonitorListHeader
           recordRangeLabel={recordRangeLabel}
-          selectedItems={selectedItems}
+          selectedItems={selectedItems as EncryptedSyntheticsSavedMonitor[]}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
         />
         <EuiHorizontalRule margin="s" />
-        <EuiBasicTable
+        <EuiBasicTable<MonitorListItem>
           aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
             defaultMessage: 'Synthetics monitors list',
           })}
@@ -147,7 +205,7 @@ export const MonitorList = ({
           error={error?.body?.message}
           loading={loading}
           itemId="config_id"
-          items={syntheticsMonitors}
+          items={allItems}
           columns={columns}
           tableLayout={isXl ? 'auto' : 'fixed'}
           pagination={pagination}

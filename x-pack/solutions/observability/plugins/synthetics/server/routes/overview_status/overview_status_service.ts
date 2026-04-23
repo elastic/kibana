@@ -29,7 +29,7 @@ import {
 } from '../../../common/constants/client_defaults';
 import { isCCSEnabled, getRemoteMonitorInfo } from '../../lib/remote_result_utils';
 
-type LocationStatusEntry = {
+interface LocationStatusEntry {
   status: string;
   locationId: string;
   timestamp: string;
@@ -41,7 +41,7 @@ type LocationStatusEntry = {
   monitorType?: string;
   configId?: string;
   tags?: string[];
-};
+}
 
 type LocationStatus = LocationStatusEntry[];
 
@@ -272,11 +272,11 @@ export class OverviewStatusService {
           // _index comes from the terms sub-agg, not top_metrics
           const indexNameAgg = ccsEnabled ? (rest as any).index_name : undefined;
           const indexName = indexNameAgg?.buckets?.[0]?.key;
-          const kibanaUrl = ccsEnabled ? metrics?.['kibanaUrl'] : undefined;
+          const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
           const monitorName = ccsEnabled ? metrics?.['monitor.name'] : undefined;
           const monitorType = ccsEnabled ? metrics?.['monitor.type'] : undefined;
-          const configId = ccsEnabled ? metrics?.['config_id'] : undefined;
-          const tags = ccsEnabled ? metrics?.['tags'] : undefined;
+          const configId = ccsEnabled ? metrics?.config_id : undefined;
+          const tags = ccsEnabled ? metrics?.tags : undefined;
 
           monitorByIds.get(monitorId)?.push({
             status,

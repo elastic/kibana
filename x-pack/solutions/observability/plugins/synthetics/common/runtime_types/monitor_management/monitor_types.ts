@@ -25,6 +25,7 @@ import {
   RequestBodyCheckCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
+import { RemoteMonitorListItemCodec } from '../remote';
 import { PrivateLocationCodec } from './synthetics_private_locations';
 import {
   getNonEmptyStringCodec,
@@ -388,14 +389,19 @@ export const MonitorDefaultsCodec = t.interface({
   [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
 });
 
-export const MonitorManagementListResultCodec = t.type({
-  monitors: t.array(EncryptedSyntheticsSavedMonitorCodec),
-  page: t.number,
-  perPage: t.number,
-  total: t.union([t.number, t.null]),
-  absoluteTotal: t.union([t.number, t.null]),
-  syncErrors: t.union([ServiceLocationErrors, t.null]),
-});
+export const MonitorManagementListResultCodec = t.intersection([
+  t.type({
+    monitors: t.array(EncryptedSyntheticsSavedMonitorCodec),
+    page: t.number,
+    perPage: t.number,
+    total: t.union([t.number, t.null]),
+    absoluteTotal: t.union([t.number, t.null]),
+    syncErrors: t.union([ServiceLocationErrors, t.null]),
+  }),
+  t.partial({
+    remoteMonitors: t.array(RemoteMonitorListItemCodec),
+  }),
+]);
 
 export const SyntheticsMonitorWithSecretsCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,

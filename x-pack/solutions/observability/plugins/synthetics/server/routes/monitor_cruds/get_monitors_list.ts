@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import type {
+  EncryptedSyntheticsMonitorAttributes,
+  RemoteMonitorListItem,
+} from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -16,6 +20,8 @@ import {
   QuerySchema,
   MONITOR_SEARCH_FIELDS,
 } from '../common';
+import { isCCSEnabled } from '../../lib/remote_result_utils';
+import { getRemoteMonitorsList } from './get_remote_monitors_list';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -27,7 +33,13 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     },
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
+    const {
+      request,
+      server,
+      syntheticsEsClient,
+      syntheticsMonitorClient,
+      monitorConfigRepository,
+    } = routeContext;
     const totalCountQuery = async () => {
       if (isMonitorsQueryFiltered(request.query)) {
         return monitorConfigRepository.find({
@@ -59,22 +71,42 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 
     const { saved_objects: savedObjects, per_page: perPageT, ...rest } = queryResultSavedObjects;
 
+    const monitors = savedObjects.map((monitor) => {
+      const mon = mapSavedObjectToMonitor({
+        monitor,
+        internal: request.query?.internal,
+      });
+      return {
+        ...mon,
+        spaceId: monitor.namespaces?.[0],
+        spaces: monitor.namespaces ?? [],
+      };
+    });
+
+    // When CCS is enabled, also fetch remote-only monitors from ping data.
+    // Wrapped in try-catch so a CCS failure doesn't break the management page.
+    let remoteMonitors: RemoteMonitorListItem[] | undefined;
+    if (isCCSEnabled(server)) {
+      try {
+        const localConfigIds = new Set(
+          savedObjects.map((so) => so.attributes[ConfigKey.CONFIG_ID])
+        );
+        remoteMonitors = await getRemoteMonitorsList({
+          syntheticsEsClient,
+          localConfigIds,
+        });
+      } catch (e) {
+        server.logger.error(`Failed to fetch remote monitors list: ${e.message}`);
+      }
+    }
+
     return {
       ...rest,
-      monitors: savedObjects.map((monitor) => {
-        const mon = mapSavedObjectToMonitor({
-          monitor,
-          internal: request.query?.internal,
-        });
-        return {
-          ...mon,
-          spaceId: monitor.namespaces?.[0],
-          spaces: monitor.namespaces ?? [],
-        };
-      }),
+      monitors,
       absoluteTotal,
       perPage: perPageT,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
+      ...(remoteMonitors ? { remoteMonitors } : {}),
     };
   },
 });
