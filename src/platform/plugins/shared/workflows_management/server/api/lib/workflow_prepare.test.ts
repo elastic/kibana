@@ -118,10 +118,7 @@ describe('applyFieldUpdates', () => {
 
   it('allows enabling a workflow only if it has a definition', () => {
     const sourceWithDefinition = { ...baseSource, enabled: false, definition: {} as WorkflowYaml };
-    const { patch, validationErrors } = applyFieldUpdates(
-      { enabled: true },
-      sourceWithDefinition
-    );
+    const { patch, validationErrors } = applyFieldUpdates({ enabled: true }, sourceWithDefinition);
     expect(patch.enabled).toBe(true);
     expect(validationErrors).toEqual([]);
   });
