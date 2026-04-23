@@ -45,7 +45,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject updates and deletions of managed workflows. The only permitted user mutation is the enable/disable toggle, which requires a `--force` flag to ensure intentionality (see R3). For any other changes, the user must clone the workflow into a user-owned copy and edit the clone. Enforcement is server-side — UI-only restrictions are insufficient since API callers can still mutate. |
 | **R3** | **Enabled by default, with opt-out** | Registered managed workflows are active by default (`management.defaultEnabled: true`). The registration contract supports `management.defaultEnabled: false` for opt-in patterns where a product feature activates the workflow on the user's behalf. On reconciliation (new version), the platform's behavior depends on `management.enablement`: `'restorable'` (default) preserves the user's current enabled state; `'enforced'` resets to `management.defaultEnabled`. |
 | **R4** | **Ownership metadata** | Every managed workflow identifies its owning plugin, team, or feature. Visible when inspecting the workflow. |
-| **R5** | **Registration mechanism** | A way for solution teams to register managed workflows with the platform, including the workflow definition and ownership metadata. The workflow plugin handles installation and activation. How this is exposed (plugin contract, file-based convention, or other mechanism) is an implementation detail discussed in the [Registration](#3-registration) section of the technical design. |
+| **R5** | **Registration mechanism** | Managed workflow definitions live in a centralized package (`@kbn/workflows/managed`) owned by the workflows team via CODEOWNERS. Consuming plugins interact via an imperative `install` / `uninstall` / `enable` / `disable` API on `workflows_extensions`, referencing workflows by typed ID only. The platform resolves definitions from the package, handles provisioning and reconciliation. See [Registration](#3-registration) in the technical design. |
 | **R6** | **Caller-provided workflow ID with uniqueness guarantee** | Plugins can specify stable, deterministic IDs instead of auto-generated IDs. IDs must be globally unique so all existing APIs continue to serve both managed and user-defined workflows unambiguously. See [Open Questions > Registration #3](#id-uniqueness) for enforcement approaches. |
 | **R7** | **Custom triggers and custom steps** | Managed workflows support custom step types and custom triggers registered via `workflows_extensions`. Same engine, same capabilities. |
 | **R8** | **Existing guardrails apply** | All existing concurrency strategies, execution limits, and guardrails apply to managed workflows. |
@@ -85,11 +85,11 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 
 | # | Requirement | Details | Requested By |
 |---|-------------|---------|--------------|
-| **N1** | **Post-start / dynamic registration** | Support registration after plugin `start()`, not just `setup()`. Enables user-action-triggered managed workflows. Creation and deletion are straightforward (plugin calls an API; cleanup uses `managedBy` on uninstall). Updates are harder — see [Open Questions > Post-start lifecycle](#post-start-lifecycle) for approaches. | Security AB (KDKHD) |
+| **N1** | **~~Post-start / dynamic registration~~** | **Resolved.** First-class support via `management.lifecycle: 'dynamic'`. Definitions live in the package; plugins call `managedWorkflows.install(id, { values })` at any time post-start. Cleanup via explicit `uninstall()`. See [Registration > §3.2](#3-registration) and [Lifecycle > §5.2](#5-lifecycle-provisioning-updates-cleanup). | Security AB (KDKHD) |
 | **N3** | **Registration health / introspection** | Registry view: what's registered, what's installed per space, version/hash. | Security AB (KDKHD) |
 | **N4** | **Standardized gating + rollout controls** | Feature flags for progressive enablement of managed workflows. Achievable via S4 — the `shouldInstall` hook receives the full provisioning context (feature flags, space, deployment type, etc.), so the registering plugin can gate installation on any condition without a separate rollout mechanism. | Security AB (KDKHD) |
 | **N5** | **Out-of-band updates** | Update managed workflow definitions outside of Kibana release cycles. Related to integration-based distribution (N7). | Security AB (KDKHD) |
-| **N6** | **Type safety for code-defined workflows** | TypeScript types for workflow definitions in code. For the first delivery, workflow registration validates the YAML at startup, and the approval gate's Scout tests provide compile-time coverage. | Security AB (KDKHD) |
+| **N6** | **~~Type safety for code-defined workflows~~** | **Resolved.** The centralized `@kbn/workflows/managed` package exports typed ID constants and `ManagedWorkflowDefinition` objects. Consumers import typed IDs and pass them to `managedWorkflows.install(id)` — unknown IDs are compile-time errors. See [Registration > §3.1](#3-registration). | Security AB (KDKHD) |
 | **N7** | **Integration-based distribution** | Ship managed workflows as part of integrations. Registration happens through the integration lifecycle (install/uninstall). | O11y (ruflin), Search (pgayvallet) |
 | **N8** | **Partial user editability** | Allow the registering plugin to declare specific properties as user-editable while keeping the rest read-only. See [Open Questions > Mutability #4](#mutability) for the full design discussion, upgrade conflict analysis, and the recommended first-phase approach. | — |
 
@@ -141,31 +141,11 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 
 ### Registration
 
-1. **Where does the registration API live?**
-   The existing `workflows_extensions` registers step *types*. Managed workflow registration covers full workflow *lifecycle* (definition, provisioning, updates, removal). These are distinct concerns that coexist rather than being alternatives. The question is which plugin (or package) exposes the registration API:
-   - **`workflows_management`** — Natural home since it owns CRUD and storage. But this adds a setup dependency on `workflows_management` for every plugin that registers a managed workflow, which may be problematic for plugins that currently only depend on `workflows_extensions`.
-   - **`workflows_extensions`** — Already depended on by consuming plugins. Lighter dependency. But it has no access to Elasticsearch, no CRUD capabilities, and no space awareness — adding lifecycle management would bloat its responsibility.
-   - **Dedicated package** — A new lightweight package (e.g., `@kbn/workflows-registration`) that holds only the registration contract and in-memory registry. Plugins depend on the package (no plugin dependency at all). `workflows_management` consumes the registry at `start()` for provisioning. Cleanest dependency graph, but adds a new package.
+1. **~~Where does the registration API live?~~** — **Resolved.**
+   Two-part answer: **definitions** live in a centralized package (`@kbn/workflows/managed`) owned by the workflows team via CODEOWNERS. **The imperative API** (`install` / `uninstall` / `enable` / `disable`) lives on the `workflows_extensions` start contract, following the same pattern as `emitEvent` for triggers — plugins interact by ID, without touching definitions. `workflows_extensions` delegates to `workflows_management` for storage and CRUD. This keeps the dependency graph unchanged (consuming plugins already depend on `workflows_extensions`), eliminates the approval-gate file (CODEOWNERS on the package replaces it), and provides a single source of truth for all managed workflow definitions. See [Registration > §3.1–§3.2](#3-registration) for the full design.
 
-2. **Post-start registration — what are the use cases and how should it work?**
-   Post-start registration means installing a managed workflow on demand (e.g., user action, feature activation) rather than at plugin startup. Two distinct use cases exist:
-
-   - **On-demand registration of a constant, read-only workflow.** The workflow YAML is predefined and immutable — the only question is *when* to install it, not *what* to install. Example: a feature that activates a managed workflow when the user enables it from the product UI. The workflow itself doesn't change.
-   - **Registration with a customized YAML.** The workflow structure is predefined, but some configuration values (e.g., connector ID, rule ID, scheduling intercal) are only known at creation. This is a Mutability concern — see [question #4](#mutability) for the overrides mechanism that addresses this without requiring full partial editability.
-
-   For the first use case (constant workflows), the workflow can still be read-only, based on a predefined YAML, just installed on demand instead of at `setup()`.
-
-   **Two approaches for read-only post-start workflows:**
-
-   - **Option A: Register disabled at startup, enable on demand.** The workflow is registered at `setup()` like any other managed workflow (known to the platform, reconciled on startup), but with `management: { defaultEnabled: false }` (see R3). The solution team enables it post-start when needed. This keeps the workflow in the standard lifecycle — hash-based reconciliation works, the approval gate applies — and only the enablement is dynamic. Simplest approach, no new mechanisms needed.
-
-   - **Option B: Deferred provisioning via `provisionOnStart: false`.** A new field on `ManagedWorkflowRegistration` (default `true`). When `false`, the workflow is registered in the in-memory registry at `setup()` (known to the platform, approval gate applies) but not provisioned to storage on startup. The team triggers provisioning post-start by calling a `registerManagedWorkflow(id)` API. Once provisioned, all future reconciliation (updates, cleanup) works normally via the standard hash-based lifecycle. This avoids creating a disabled workflow document that sits unused, while keeping the workflow known and reconcilable.
-
-   **ID generation for post-start workflows:** Post-start provisioning introduces an ID uniqueness challenge — the same workflow could be created multiple times (e.g., per entity). For workflows registered at `setup()`, the deterministic ID from the registration handles this (create-if-absent). For post-start, two options:
-   - **Caller-provided ID** — The caller provides a unique ID that must start with the system workflow prefix (e.g., `system:attack-discovery-generation:space-x`). The platform validates uniqueness before creation.
-   - **Platform-generated ID** — If no ID is provided, the platform generates one using the registered workflow ID as a base (e.g., `system:<registered-id>:<spaceId>` or a UUID). This avoids duplicates but makes the ID less predictable for the caller.
-
-   The first delivery should at minimum be designed to not preclude these approaches.
+2. **~~Post-start registration — what are the use cases and how should it work?~~** — **Resolved.**
+   Post-start registration is a first-class pattern via `management.lifecycle: 'dynamic'`. The workflow definition lives in `@kbn/workflows/managed` (known to the platform at startup), and the consuming plugin calls `managedWorkflows.install(id, { values })` at any point post-start — on user action, entity creation, feature activation, etc. The `yamlTemplate` mechanism handles install-time values (connector IDs, entity IDs, etc.) without partial editability. Cleanup is the plugin's responsibility via `managedWorkflows.uninstall(id)`. See [Registration > §3.2](#3-registration) and [Lifecycle > §5.2](#5-lifecycle-provisioning-updates-cleanup) for reconciliation behavior.
 
 3. **~~How to prevent ID collisions between managed and user-defined workflows?~~** — **Resolved.**
    Reserved prefix (e.g., `system:`). `createWorkflow` rejects user-defined workflows with the reserved prefix — IDs are globally unique by construction. All read APIs (get, list, execute) work exactly the same for both managed and user-defined workflows, no changes needed. The `managed` flag on the document provides an additional layer of identification on the storage side. For mutations (enable/disable toggle), the update endpoint requires a `--force` flag to ensure user intentionality (see R2). The prefix is not used to determine whether a workflow is managed — it only guarantees collision-free coexistence.
@@ -251,7 +231,7 @@ The workflow platform consists of three plugins and a shared package:
 
 | Component | Responsibility |
 |-----------|---------------|
-| **`workflows_extensions`** | Registry for custom step types and trigger types. Plugins call `registerStepDefinition()` / `registerTriggerDefinition()` during `setup()`. Frozen at `start()`. |
+| **`workflows_extensions`** | Registry for custom step types, trigger types, and managed workflow operations. Plugins call `registerStepDefinition()` / `registerTriggerDefinition()` during `setup()`. At `start()`, exposes `managedWorkflows` API (`install` / `uninstall` / `enable` / `disable`) and `emitEvent` for event-driven triggers. |
 | **`workflows_management`** | All REST API routes (`/api/workflows/*`), workflow CRUD via `WorkflowsManagementApi`, Task Manager scheduling, connector integration. Exposes `management: WorkflowsManagementApi` on setup contract. |
 | **`workflows_execution_engine`** | Execution loop, Task Manager task types (`workflow:run`, `workflow:resume`, `workflow:scheduled`), metering, logs. Exposes `executeWorkflow`, `scheduleWorkflow`, etc. on start contract. Empty setup contract today. |
 | **`@kbn/workflows`** | Shared types (`EsWorkflow`, `EsWorkflowExecution`), Zod schemas, YAML/JSON helpers. |
@@ -318,7 +298,7 @@ Extend the existing `.workflows-workflows` index and document model with new fie
 | `originSystemWorkflowId` | `string \| null` | The registered system workflow ID this instance was created from. For workflows provisioned at startup with a deterministic ID, this equals the workflow's own ID. For post-start workflows that may be created multiple times with caller-provided or generated IDs (see [Open Questions > Post-start #2](#post-start)), this field links the instance back to the registered definition. Used together with `definitionHash` to detect version changes and apply reconciliation (updates, cleanup) across all instances of the same system workflow. `null` for user workflows. |
 | `lifecycle` | `'static' \| 'dynamic' \| null` | Persisted copy of the `management.lifecycle` value from the registration. Required for orphan cleanup — the platform needs to know whether to auto-orphan a workflow even when the owning plugin is no longer present (uninstall scenario). `null` for user workflows. See [Lifecycle](#5-lifecycle-provisioning-updates-cleanup) for behavior per lifecycle type. |
 
-The `management` policy fields (`lifecycle`, `versionStrategy`, `enablement`, `defaultEnabled`) are **not** stored on the workflow document — they live in the in-memory registration only, read from the `@kbn/workflows/managed` package at startup. During reconciliation, the platform reads these values from the registered workflow definition and acts accordingly. This keeps the storage model lean and avoids persisting registration-time metadata that may change between releases.
+The `management` policy fields (`lifecycle`, `versionStrategy`, `enablement`, `defaultEnabled`) are **not** stored on the workflow document — they live in the in-memory registration only. During reconciliation, the platform reads these values from the registered workflow definition and acts accordingly. This keeps the storage model lean and avoids persisting registration-time metadata that may change between releases.
 
 The one exception is `lifecycle`: it is stored on the document as well (see mapping below) so that the platform can distinguish static from dynamic workflows during orphan cleanup, even for workflows whose owning plugin is no longer present (uninstall scenario).
 
@@ -374,7 +354,8 @@ The UI additionally disables edit/delete/disable controls for managed workflows 
 
 | Capability | Plugin | Rationale |
 |------------|--------|-----------|
-| **Registration API** (`registerManagedWorkflow`) | TBD — see [Open Questions > Registration #1](#registration) | Three candidates: `workflows_management`, `workflows_extensions`, or a dedicated package. Each has different dependency and responsibility tradeoffs. |
+| **Definitions** (`@kbn/workflows/managed`) | Centralized package | All managed workflow definitions (YAML, templates, management policy) in one package, owned by workflows team via CODEOWNERS. Loaded into in-memory registry at startup. |
+| **Install / Uninstall API** (`managedWorkflows.*`) | `workflows_extensions` (start contract) | Thin imperative surface — plugins call `install(id)` / `uninstall(id)` by typed ID. Delegates to `workflows_management` for storage. Same pattern as `emitEvent` for triggers. |
 | **Read-only enforcement** | `workflows_management` (service layer) | All mutation routes live in management. The guards go in `WorkflowsManagementService.updateWorkflow` / `deleteWorkflows`. |
 | **Execution** (`executeWorkflow`, `scheduleWorkflow`) | `workflows_execution_engine` (start contract) | No changes needed. The engine executes workflow definitions by ID or inline — it doesn't care if the workflow is managed. |
 | **Provisioning** (startup reconciliation, new space hook) | `workflows_management` (internal) | Management owns the workflow index and CRUD. Provisioning is a write path. |
@@ -413,38 +394,96 @@ The `--force` flag is scoped to the **enable/disable toggle only**. Updates and 
 
 ### 3. Registration
 
-**New `registerManagedWorkflow` API.** The hosting plugin/package is an open question — see [Open Questions > Registration #1](#registration). The contract and lifecycle are the same regardless of where the API lives.
+Registration is split into two concerns: **where managed workflow definitions live** (a centralized package) and **how consuming plugins interact with them** (an imperative API on `workflows_extensions`). This mirrors the existing pattern for event-driven triggers: trigger definitions are declared in a package, and plugins emit events by ID via the `workflows_extensions` contract without touching the definition directly.
 
-This is distinct from `workflows_extensions.registerStepDefinition()`:
+#### 3.1 The centralized package: `@kbn/workflows/managed`
 
-| | `workflows_extensions` | `workflows_management` |
-|---|---|---|
-| **What it registers** | Step types, trigger types (code handlers) | Full workflow definitions (YAML + metadata) |
-| **When** | `setup()` | `setup()` |
-| **Storage** | In-memory registry, no persistence | Persisted to `.workflows-workflows` on start |
-| **Scope** | Global (step types are not space-scoped) | Per-space (each workflow is provisioned per space) |
+A new package (or subpath of `@kbn/workflows`) owned by the workflows team via CODEOWNERS. Contains one file per managed workflow, exporting:
 
-**Contract on `WorkflowsServerPluginSetup.management`:**
+- A typed ID constant.
+- A definition object with the YAML (or template), owning plugin, and `management` policy.
+
+An index file aggregates all exports for the platform's internal registry.
+
+**Example file:**
 
 ```typescript
-interface WorkflowsManagementApi {
-  // ... existing methods ...
+// packages/kbn-workflows/managed/attack_discovery_maintenance.ts
+export const ATTACK_DISCOVERY_MAINTENANCE_WORKFLOW_ID =
+  'system-attack_discovery_maintenance_workflow';
 
-  /**
-   * Register a managed workflow definition. The platform handles per-space
-   * provisioning (create-if-absent, update-if-changed) and sets managed=true.
-   * Call during plugin setup().
-   */
-  registerManagedWorkflow(registration: ManagedWorkflowRegistration): void;
-}
+export const ATTACK_DISCOVERY_MAINTENANCE_WORKFLOW: ManagedWorkflowDefinition = {
+  id: ATTACK_DISCOVERY_MAINTENANCE_WORKFLOW_ID,
+  pluginId: 'securityInsights',
+  yaml: `
+name: Attack Discovery Maintenance
+triggers:
+  - type: schedule
+    with:
+      every: 10m
+steps:
+  ...
+`,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+    defaultEnabled: true,
+  },
+};
+```
 
-interface ManagedWorkflowRegistration {
-  /** Stable, deterministic workflow ID (e.g., 'attack-discovery-generation'). */
+**Example with template (dynamic values at install time):**
+
+```typescript
+// packages/kbn-workflows/managed/entity_monitor.ts
+export const ENTITY_MONITOR_WORKFLOW_ID = 'system-entity_monitor';
+
+export const ENTITY_MONITOR_WORKFLOW: ManagedWorkflowDefinition = {
+  id: ENTITY_MONITOR_WORKFLOW_ID,
+  pluginId: 'entityAnalytics',
+  yamlTemplate: (vars: { entityId: string }) => `
+name: Entity Monitor - ${vars.entityId}
+triggers:
+  - type: schedule
+    with:
+      every: 5m
+steps:
+  - name: check_entity
+    type: entity-analytics.checkEntity
+    with:
+      entityId: ${vars.entityId}
+`,
+  management: {
+    lifecycle: 'dynamic',
+    versionStrategy: 'on_adopt',
+    enablement: 'restorable',
+    defaultEnabled: true,
+  },
+};
+```
+
+Each managed workflow declares **either** `yaml` **or** `yamlTemplate`, not both:
+
+| Field | Use case |
+|---|---|
+| `yaml: string` | Definition is fully static. No install-time variation. |
+| `yamlTemplate: (vars: T) => string` | Definition needs values only known at install time (e.g., a connector ID, a rule ID, an entity ID). Rendered at install time, not runtime. |
+
+**Templating is rendered at install time, not at runtime.** The plugin calls `install(ID, { values })`, the platform invokes `yamlTemplate(values)` and stores the rendered YAML. The `definitionHash` is computed from the **rendered** YAML. No need to persist `values` on the document — the calling plugin is the source of truth and re-supplies them on every `install()` call.
+
+**Definition type:**
+
+```typescript
+interface ManagedWorkflowDefinition {
+  /** Stable, deterministic workflow ID (e.g., 'system-attack_discovery_maintenance'). */
   id: string;
   /** Plugin ID that owns this workflow. Used for ownership tracking and cleanup. */
   pluginId: string;
-  /** The workflow YAML definition. */
-  yaml: string;
+  /** The workflow YAML definition. Mutually exclusive with yamlTemplate. */
+  yaml?: string;
+  /** Template function for workflows with install-time values. Mutually exclusive with yaml. */
+  yamlTemplate?: (vars: any) => string;
   /**
    * Platform-level behavioral policy for this managed workflow.
    * Controls how the platform handles lifecycle, versioning, and enablement.
@@ -452,18 +491,12 @@ interface ManagedWorkflowRegistration {
    * breaking existing registrations (all fields have sensible defaults).
    */
   management: ManagedWorkflowManagement;
-  /**
-   * Optional pre-install hook called per space during provisioning.
-   * Receives the full provisioning context (space, license, deployment info, etc.).
-   * Return true to install, false to skip. When omitted, the workflow is
-   * installed in all spaces unconditionally.
-   *
-   * Examples: gate on license tier, deployment type, feature flag, or
-   * space-specific conditions.
-   */
-  shouldInstall?: (ctx: ManagedWorkflowInstallContext) => boolean | Promise<boolean>;
 }
+```
 
+**`ManagedWorkflowManagement` interface:**
+
+```typescript
 /**
  * Platform-level behavioral policy for a managed workflow.
  * Groups all knobs that control how the platform treats the workflow
@@ -551,79 +584,164 @@ interface ManagedWorkflowManagement {
    */
   defaultEnabled?: boolean;
 }
+```
 
-interface ManagedWorkflowInstallContext {
-  spaceId: string;
-  license: { type: string; isActive: boolean };
-  deploymentType: 'ech' | 'serverless';
-  // Extensible — add fields as consumer needs emerge.
+**Ownership model — CODEOWNERS replaces the approval gate:**
+
+The `approved_managed_workflows.ts` approval gate (hash file + Scout test) is eliminated. Instead:
+
+- The **package** is owned by the workflows team via CODEOWNERS. Any PR that adds or modifies a managed workflow definition requires workflows team review by construction.
+- Each managed workflow file can list the consuming team as a co-owner via CODEOWNERS sub-paths, so both teams are auto-requested on changes.
+- This replaces a fragile two-file-in-lockstep mechanism (YAML hash in one place, definition in another, CI test to catch drift) with normal code review on a single artifact.
+
+The package owns **the artifact and the ID**. The plugin owns **the policy and the lifecycle decision** (when to install, whether to install, when to uninstall).
+
+#### 3.2 Plugin contract: `install` / `uninstall` / `enable` / `disable`
+
+Consuming plugins interact with managed workflows through an imperative API on the `workflows_extensions` start contract. This follows the same pattern as event-driven triggers: plugins call `emitEvent(triggerId, payload)` by ID without touching the trigger definition — and similarly, plugins call `install(workflowId)` by ID without touching the YAML definition.
+
+**Why `workflows_extensions`:**
+
+- `workflows_extensions` is already the plugin that consuming plugins depend on for contributing steps, triggers, and emitting events. Adding `managedWorkflows` keeps the dependency graph unchanged.
+- The `managedWorkflows` API is a thin imperative surface (install/uninstall by ID). The heavy lifting (CRUD, storage, reconciliation) remains in `workflows_management`, which consumes the package registry internally.
+- `workflows_extensions` already has a request-scoped client pattern (`getClient(request)`) for `emitEvent`. The same pattern works for `install`/`uninstall` when a request context is available, and a setup/start-time API works for static lifecycle workflows.
+
+**Contract on `WorkflowsExtensionsServerPluginStart`:**
+
+```typescript
+interface WorkflowsExtensionsServerPluginStart {
+  // ... existing methods (getClient, emitEvent, etc.) ...
+
+  /**
+   * Managed workflow operations. All methods reference workflows by ID —
+   * the YAML is resolved from the in-memory registry built from
+   * @kbn/workflows/managed at platform startup.
+   *
+   * Calling any method with an unknown ID throws — typed ID constants
+   * from the package make this a compile-time error in well-typed consumers.
+   */
+  managedWorkflows: ManagedWorkflowsApi;
+}
+
+interface ManagedWorkflowsApi {
+  /**
+   * Install (or re-assert) a managed workflow.
+   * - For yaml definitions: { values } is omitted.
+   * - For yamlTemplate definitions: { values } must satisfy the template's input type.
+   * - Idempotent: calling repeatedly with the same values is a no-op
+   *   after the first reconciliation.
+   * - Calling with different values updates the rendered YAML and bumps the hash.
+   *
+   * Static workflows: call during setup() or start().
+   * Dynamic workflows: call at any time post-start.
+   */
+  install<TId extends ManagedWorkflowId>(
+    id: TId,
+    options?: { values?: ValuesFor<TId>; spaceId?: string }
+  ): Promise<void>;
+
+  /** Disable a managed workflow without removing it. */
+  disable(id: string, options?: { spaceId?: string }): Promise<void>;
+
+  /** Re-enable a previously disabled managed workflow. */
+  enable(id: string, options?: { spaceId?: string }): Promise<void>;
+
+  /** Remove a managed workflow document. Primarily for dynamic lifecycle workflows. */
+  uninstall(id: string, options?: { spaceId?: string }): Promise<void>;
 }
 ```
 
-**Approval gate (follows the custom steps pattern):**
+Notes:
+- `spaceId` is accepted but its semantics depend on the space-provisioning model adopted from §4.
+- `install` for an unknown ID throws. Typed ID constants from `@kbn/workflows/managed` make this a compile-time error in well-typed consumers.
+- The API does not expose the YAML or management policy — consumers only work with IDs. The platform resolves definitions from the in-memory registry.
 
-Custom steps already use an approval mechanism: an `approved_step_definitions.ts` file listing each step's ID and handler hash, owned by the workflow team via CODEOWNERS. A Scout API test fails CI if a step is registered but not in the approved list, or if the handler hash has drifted. The workflow team must review and approve every new step or handler change via PR.
+**Request-scoped client (post-start, with request context):**
 
-Managed workflows follow the same pattern. Solution teams store the YAML definition in their own plugin directory. An approved list file in the workflows plugin (e.g., `approved_managed_workflows.ts`) records each workflow's ID, owning plugin, and YAML definition hash:
+For dynamic workflows installed in response to user actions or from route handlers, the same `getClient(request)` pattern used for `emitEvent` provides a request-scoped managed workflows client:
 
 ```typescript
-// src/platform/plugins/shared/workflows_management/test/scout/api/fixtures/approved_managed_workflows.ts
-export const APPROVED_MANAGED_WORKFLOWS: Array<{ id: string; pluginId: string; definitionHash: string }> = [
-  {
-    id: 'attack-discovery-generation',
-    pluginId: 'securityInsights',
-    definitionHash: 'a1b2c3d4...', // SHA-256 of the YAML
-  },
-  {
-    id: 'streams-description-generation',
-    pluginId: 'streams',
-    definitionHash: 'e5f6g7h8...',
-  },
-];
+// In a route handler — same pattern as emitting events
+const workflowsClient = await plugins.workflowsExtensions.getClient(request);
+await workflowsClient.managedWorkflows.install(ENTITY_MONITOR_WORKFLOW_ID, {
+  values: { entityId: 'entity-123' },
+});
+
+// Later, on entity deletion
+await workflowsClient.managedWorkflows.uninstall(ENTITY_MONITOR_WORKFLOW_ID);
 ```
 
-A corresponding Scout test validates at CI time that:
-1. Every registered managed workflow has a matching entry in the approved list.
-2. The hash of the provided YAML matches the approved hash.
-3. No approved entries exist without a corresponding registration (stale entries).
+**Setup/start-time usage (static workflows):**
 
-When a solution team adds or modifies a managed workflow, their PR touches:
-- Their own plugin (YAML definition + `registerManagedWorkflow()` call) — they own this.
-- The approved list file in the workflows plugin — CODEOWNERS requires workflow team review.
+For static workflows asserted during plugin lifecycle, the plugin uses the start contract directly:
 
-This ensures the workflow team reviews every managed workflow before it ships, without owning the YAML definitions themselves.
+```typescript
+// In plugin start()
+const { managedWorkflows } = plugins.workflowsExtensions;
+await managedWorkflows.install(ATTACK_DISCOVERY_MAINTENANCE_WORKFLOW_ID);
+```
 
-**Why `workflows_management` and not `workflows_extensions`:**
-
-- `workflows_extensions` is a lightweight registry for code-level definitions (step handlers, trigger handlers). It has no access to Elasticsearch, no CRUD capabilities, and no space awareness. Adding full workflow lifecycle management would bloat its responsibility.
-- `workflows_management` already owns the workflow index, CRUD operations, and scheduling. It has the `WorkflowsManagementService` which handles create/update/delete. Registration is a natural extension.
-- Plugins that register managed workflows already depend on `workflows_management` for execution (via `runWorkflow`). Adding a setup dependency is not a new coupling.
-
-**Registration flow:**
+#### 3.3 Registration flow
 
 ```
-Plugin setup()                    workflows_management setup()
-     │                                      │
-     ├─ registerStepDefinition()  ──►  workflows_extensions (step registry)
-     │                                      │
-     ├─ registerManagedWorkflow() ──►  workflows_management (managed registry)
-     │                                      │    - stores in-memory: { id, pluginId, yaml, hash }
-     │                                      │
-     ▼                                      ▼
-                              workflows_management start()
-                                      │
-                                      ├─ For each registered managed workflow:
-                                      │    ├─ Load existing workflow by ID (spaceId = '_global')
-                                      │    ├─ If not found → create with spaceId = '_global'
-                                      │    ├─ If found, hash differs → update
-                                      │    └─ If found, hash matches → skip
-                                      │
-                                      └─ Orphan cleanup (see Lifecycle section)
+                    @kbn/workflows/managed (package)
+                              │
+                              │  exports: { id, pluginId, yaml/yamlTemplate, management }
+                              │  CODEOWNERS: workflows team
+                              │
+                              ▼
+                    workflows_extensions setup()
+                              │
+                              ├─ Loads all managed workflow definitions from package
+                              │  into in-memory registry: { id → definition }
+                              │
+                              ├─ registerStepDefinition()  ◄── Plugin setup()
+                              ├─ registerTriggerDefinition() ◄── Plugin setup()
+                              │
+                              ▼
+                    workflows_extensions start()
+                              │
+                              ├─ Exposes managedWorkflows API (install/uninstall/enable/disable)
+                              │  Delegates to workflows_management for storage/CRUD
+                              │
+                              ▼
+                    workflows_management start()
+                              │
+                              ├─ For each static workflow in registry:
+                              │    ├─ Load existing document by ID
+                              │    ├─ If not found → create (managed: true, definitionHash, lifecycle)
+                              │    ├─ If found, hash differs → apply per versionStrategy
+                              │    └─ If found, hash matches → skip (or reset enabled per enablement)
+                              │
+                              ├─ Orphan cleanup for static workflows (disable-then-delete)
+                              │
+                              ▼
+                    Plugin setup() / start()
+                              │
+                              ├─ Static: managedWorkflows.install(ID)
+                              │    (asserts the workflow; platform reconciles)
+                              │
+                              ├─ Dynamic: managedWorkflows.install(ID, { values })
+                              │    (creates or updates the workflow on demand)
+                              │
+                              └─ Dynamic: managedWorkflows.uninstall(ID)
+                                   (removes the workflow when no longer needed)
 ```
+
+#### 3.4 Comparison: managed workflows vs. steps vs. triggers
+
+| | Custom steps | Event-driven triggers | Managed workflows |
+|---|---|---|---|
+| **Definition lives in** | Consumer plugin code | Consumer plugin + common package | `@kbn/workflows/managed` (centralized) |
+| **Registered via** | `registerStepDefinition()` at setup | `registerTriggerDefinition()` at setup | Package loaded at startup (automatic) |
+| **Consumed via** | Engine resolves by step type ID | `emitEvent(triggerId, payload)` by ID | `install(workflowId)` / `uninstall(workflowId)` by ID |
+| **Approval gate** | `approved_step_definitions.ts` + hash | `approved_trigger_definitions.ts` + hash | CODEOWNERS on package (no hash file) |
+| **Storage** | In-memory registry | In-memory registry + event dispatch | Persisted to `.workflows-workflows` |
+| **Scope** | Global (types) | Global (types) + space-scoped (events) | Space-scoped (documents) |
 
 **What about integrations?**
 
-Integrations (Fleet packages) are a future distribution channel. The integration would call the same `registerManagedWorkflow` API during its install lifecycle. The API contract is the same — the only difference is *who* calls it (plugin `setup()` vs. integration install handler). This is deferred (N7) but the API design does not preclude it.
+Integrations (Fleet packages) are a future distribution channel (N7). The integration would call the same `managedWorkflows.install(id)` API during its install lifecycle. The API contract is the same — the only difference is *who* calls it. This is deferred but the design does not preclude it.
 
 ---
 
