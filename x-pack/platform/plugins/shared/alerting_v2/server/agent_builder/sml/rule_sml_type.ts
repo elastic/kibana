@@ -5,80 +5,61 @@
  * 2.0.
  */
 
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { SmlTypeDefinition, SmlListItem } from '@kbn/agent-builder-plugin/server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
 import {
   RULE_ATTACHMENT_TYPE,
   RULE_SML_TYPE,
   ruleAttachmentDataSchema,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { GetScopedRulesClient } from '../scoped_rules_client_factory';
 
 interface CreateRuleSmlTypeOptions {
   getScopedRulesClient: GetScopedRulesClient;
+  getInternalRepository: () => ISavedObjectsRepository;
 }
 
 export const createRuleSmlType = ({
   getScopedRulesClient,
+  getInternalRepository,
 }: CreateRuleSmlTypeOptions): SmlTypeDefinition => ({
   id: RULE_SML_TYPE,
   fetchFrequency: () => '15m',
 
-  // alerting_rule is a hidden SO type — the generic savedObjectsClient cannot
-  // access it. Query the underlying ES index directly instead.
-  // alerting_rule is a hidden SO type — the generic savedObjectsClient cannot
-  // access it. Query the underlying ES index directly instead.
-  async *list(context) {
-    const pageSize = 1000;
-    let searchAfter: SortResults | undefined;
+  async *list() {
+    const repository = getInternalRepository();
+    const finder = repository.createPointInTimeFinder<RuleSavedObjectAttributes>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: 1000,
+      namespaces: ['*'],
+      fields: [],
+    });
 
-    while (true) {
-      const response = await context.esClient.search({
-        index: `${ALERTING_CASES_SAVED_OBJECT_INDEX}*`,
-        size: pageSize,
-        _source: ['updated_at', 'namespaces'],
-        query: { term: { type: RULE_SAVED_OBJECT_TYPE } },
-        sort: [{ _id: 'asc' }],
-        ...(searchAfter ? { search_after: searchAfter } : {}),
-      });
-
-      const hits = response.hits.hits;
-      if (hits.length === 0) break;
-
-      const items: SmlListItem[] = [];
-      for (const hit of hits) {
-        if (!hit._id) continue;
-        const src = hit._source as { updated_at?: string; namespaces?: string[] };
-        const prefix = `${RULE_SAVED_OBJECT_TYPE}:`;
-        const id = hit._id.startsWith(prefix) ? hit._id.slice(prefix.length) : hit._id;
-        items.push({
-          id,
-          updatedAt: src.updated_at ?? new Date().toISOString(),
-          spaces: src.namespaces ?? ['default'],
-        });
+    try {
+      for await (const response of finder.find()) {
+        yield response.saved_objects.map((so) => ({
+          id: so.id,
+          updatedAt: so.updated_at ?? new Date().toISOString(),
+          spaces: so.namespaces ?? ['default'],
+        }));
       }
-      yield items;
-
-      if (hits.length < pageSize) break;
-      searchAfter = hits[hits.length - 1].sort as SortResults;
+    } finally {
+      await finder.close();
     }
   },
 
   getSmlData: async (originId, context) => {
     try {
-      const response = await context.esClient.get<{ [key: string]: RuleSavedObjectAttributes }>({
-        index: `${ALERTING_CASES_SAVED_OBJECT_INDEX}*`,
-        id: `${RULE_SAVED_OBJECT_TYPE}:${originId}`,
-      });
-      const attrs = response._source?.[RULE_SAVED_OBJECT_TYPE];
+      const repository = getInternalRepository();
+      const so = await repository.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, originId);
+      const attrs = so.attributes;
       const name = attrs?.metadata?.name ?? originId;
-      const description = attrs.metadata?.description ?? '';
-      const tags = attrs.metadata?.tags?.join(', ') ?? '';
-      const kind = attrs.kind ?? '';
-      const query = attrs.evaluation?.query?.base ?? '';
+      const description = attrs?.metadata?.description ?? '';
+      const tags = attrs?.metadata?.tags?.join(', ') ?? '';
+      const kind = attrs?.kind ?? '';
+      const query = attrs?.evaluation?.query?.base ?? '';
 
       const contentParts = [name, description, kind, tags, query].filter(Boolean);
 

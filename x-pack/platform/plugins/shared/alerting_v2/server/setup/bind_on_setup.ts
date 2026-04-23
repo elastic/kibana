@@ -19,6 +19,7 @@ import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { buildScopedRulesClientFactory } from '../agent_builder/scoped_rules_client_factory';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -56,8 +57,8 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
     if (container.isBound(agentBuilderToken)) {
       const agentBuilder = container.get(agentBuilderToken);
-      const getScopedRulesClient = buildScopedRulesClientFactory(
-        () => container.get(CoreStart('injection'))
+      const getScopedRulesClient = buildScopedRulesClientFactory(() =>
+        container.get(CoreStart('injection'))
       );
       agentBuilder.attachments.registerType(
         createRuleAttachmentType({
@@ -65,7 +66,11 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
           getRulesClient: (context) => getScopedRulesClient(context.request),
         }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
       );
-      agentBuilder.sml.registerType(createRuleSmlType({ getScopedRulesClient }));
+      const getInternalRepository = () =>
+        container.get(CoreStart('savedObjects')).createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
+      agentBuilder.sml.registerType(
+        createRuleSmlType({ getScopedRulesClient, getInternalRepository })
+      );
     }
 
     if (container.isBound(usageCollectionToken)) {
