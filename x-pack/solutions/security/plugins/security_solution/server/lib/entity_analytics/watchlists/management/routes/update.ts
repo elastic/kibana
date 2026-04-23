@@ -24,7 +24,7 @@ import { getRequestSavedObjectClient } from '../../shared/utils';
 import {
   buildWatchlistApiCallSuccessFields,
   reportWatchlistApiCallError,
-} from './watchlist_api_telemetry';
+} from './watchlist_ebt_helpers';
 
 export const updateWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
