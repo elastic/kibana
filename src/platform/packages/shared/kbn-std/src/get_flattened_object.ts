@@ -47,7 +47,7 @@ export function getFlattenedObject(rootValue: Record<string, any>) {
     throw new TypeError(`Root value is not flatten-able, received ${rootValue}`);
   }
 
-  const result: Record<string, unknown> = {};
+  const result: { [key: string]: any } = {};
   flatten('', rootValue, result);
   return result;
 }
