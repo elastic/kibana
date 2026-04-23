@@ -16,6 +16,7 @@ import {
   ToolChoiceType,
   ChatCompletionEventType,
   isChatCompletionChunkEvent,
+  InferenceConnectorType,
   MessageRole,
 } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
@@ -87,7 +88,7 @@ describe('openAIAdapter', () => {
   beforeEach(() => {
     executorMock.invoke.mockReset();
     executorMock.getConnector.mockReset().mockReturnValue({
-      type: '.gen-ai',
+      type: InferenceConnectorType.OpenAI,
       name: 'test-connector',
       connectorId: 'test-id',
       config: {},
