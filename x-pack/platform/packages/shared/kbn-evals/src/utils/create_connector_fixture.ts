@@ -127,12 +127,34 @@ export async function createConnectorFixture({
   // connector id.
   const connectorIdAsUuid = getConnectorIdAsUuid(predefinedConnector.id);
 
+  // EIS-managed connectors use dot-prefixed inference IDs (e.g. `.openai-gpt-5.4-chat_completion`)
+  // which ES rejects during connector creation. Strip the leading dot so the connector can be
+  // created locally while still routing to the same EIS inference endpoint.
+  const inferenceId = predefinedConnector.config?.inferenceId;
+  const needsInferenceIdFix =
+    predefinedConnector.actionTypeId === '.inference' &&
+    typeof inferenceId === 'string' &&
+    inferenceId.startsWith('.');
+
+  const connectorConfig = needsInferenceIdFix
+    ? { ...predefinedConnector.config, inferenceId: inferenceId!.slice(1) }
+    : predefinedConnector.config;
+
   const connectorWithUuid = {
     ...predefinedConnector,
     id: connectorIdAsUuid,
+    config: connectorConfig,
   };
 
-  log.info(`Creating connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
+  if (needsInferenceIdFix) {
+    const stripped = inferenceId!.slice(1);
+    log.info(
+      `Creating connector: ${predefinedConnector.id} as ${connectorIdAsUuid}` +
+        ` (stripped dot from inference ID "${inferenceId}" → "${stripped}")`
+    );
+  } else {
+    log.info(`Creating connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
+  }
 
   try {
     await fetch({

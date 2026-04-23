@@ -30,7 +30,7 @@ export const registerRuleManagementRoutes = (
   logger: Logger
 ) => {
   // Rules CRUD
-  createRuleRoute(router);
+  createRuleRoute(router, logger);
   readRuleRoute(router, logger);
   updateRuleRoute(router);
   patchRuleRoute(router);

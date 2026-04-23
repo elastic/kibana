@@ -134,6 +134,15 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     tags: ['alert', 'agent-builder', 'ai', 'console'],
     filename: 'invoke_agent.yml',
   },
+  {
+    id: 'alerts_search_and_count',
+    name: 'Search and Count Security Alerts',
+    description:
+      'Counts open alerts and iterates over critical ones using the security.alertsSearch step',
+    category: 'security',
+    tags: ['manual', 'security', 'alerts', 'foreach', 'console'],
+    filename: 'alerts_search_and_count.yml',
+  },
 ];
 
 /** Allowlisted example IDs — prevents path traversal attacks when reading files */

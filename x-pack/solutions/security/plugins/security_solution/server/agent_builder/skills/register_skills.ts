@@ -14,11 +14,14 @@ import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { createFixFalsePositiveAlertsSkill } from './fix_false_positive_alerts';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { getSecurityMlJobsSkill } from './security_ml_jobs';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
+  core: SecuritySolutionPluginCoreSetupDependencies;
   experimentalFeatures: ExperimentalFeatures;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
@@ -34,6 +37,7 @@ interface RegisterSkillsOpts {
  */
 export const registerSkills = async ({
   agentBuilder,
+  core,
   experimentalFeatures,
   getStartServices,
   kibanaVersion,
@@ -59,4 +63,5 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
+  await agentBuilder.skills.register(createFixFalsePositiveAlertsSkill(core, logger));
 };

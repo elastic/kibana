@@ -58,6 +58,7 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { ThresholdResult } from './threshold/types';
 import type { ScheduleNotificationResponseActionsService } from '../rule_response_actions/schedule_notification_response_actions';
+import type { EmitAlertsCreatedEvent } from '../../../workflows/triggers';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
@@ -164,6 +165,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   endpointAppContextService: EndpointAppContextService;
+  emitAlertsCreatedEvent?: EmitAlertsCreatedEvent;
   getEntityStore: () => Promise<EntityStoreStartContract>;
 }
 

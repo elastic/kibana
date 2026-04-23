@@ -20,6 +20,10 @@ import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/co
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
+import { registerWorkflowTriggers, createEmitAlertsCreatedEvent } from './workflows/triggers';
+import { registerWorkflowSteps } from './workflows/steps';
+import { installPrebuiltWorkflows } from './workflows/prebuilt';
+import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
@@ -167,7 +171,7 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
-import { registerWorkflowSteps } from './workflows/step_types';
+import { registerWorkflowSteps as registerWorkflowStepTypes } from './workflows/step_types';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import {
@@ -278,6 +282,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerSkills({
       agentBuilder,
+      core,
       experimentalFeatures,
       getStartServices: core.getStartServices,
       kibanaVersion: this.pluginContext.env.packageInfo.version,
@@ -575,6 +580,17 @@ export class Plugin implements ISecuritySolutionPlugin {
       secondaryAlias: undefined,
     });
 
+    const emitAlertsCreatedEvent = plugins.workflowsExtensions
+      ? createEmitAlertsCreatedEvent({
+          getWorkflowsExtensionsStart: async () => {
+            const [, startPlugins] = await core.getStartServices();
+            return startPlugins.workflowsExtensions;
+          },
+          http: core.http,
+          logger: this.logger,
+        })
+      : undefined;
+
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       docLinks: core.docLinks,
@@ -597,6 +613,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
       endpointAppContextService: this.endpointAppContextService,
+      emitAlertsCreatedEvent,
       getEntityStore: async () => {
         const [, startPlugins] = await core.getStartServices();
         return startPlugins.entityStore;
@@ -820,21 +837,38 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
 
     if (plugins.workflowsExtensions) {
-      const workflowsExtensions = plugins.workflowsExtensions;
-      core
-        .getStartServices()
-        .then(async ([coreStart]) => {
-          await registerWorkflowSteps(workflowsExtensions, coreStart);
-        })
-        .catch((error) => {
-          this.logger.error(
-            `[RegisterAlertValidationSteps] Error registering alert validation steps: ${error.message}`,
-            {
-              error: error.stack,
-            }
-          );
-        });
+      registerWorkflowTriggers(plugins.workflowsExtensions);
+      registerWorkflowSteps(plugins.workflowsExtensions);
     }
+
+    if (plugins.workflowsManagement) {
+      this.logger.info('Workflows Management plugin available, scheduling prebuilt workflow installation');
+      installPrebuiltWorkflows({
+        logger: this.logger,
+        getStartServices: core.getStartServices,
+        managementApi: plugins.workflowsManagement.management,
+      }).catch((err) => {
+        this.logger.warn(`Failed to install prebuilt workflows: ${err}`);
+      });
+    } else {
+      this.logger.debug('Workflows Management plugin not available, skipping prebuilt workflow installation');
+    }
+
+    const workflowsExtensions = plugins.workflowsExtensions;
+    core
+      .getStartServices()
+      .then(async ([coreStart]) => {
+        await registerWorkflowStepTypes(workflowsExtensions, coreStart);
+      })
+      .catch((error) => {
+        this.logger.error(
+          `[RegisterAlertValidationSteps] Error registering alert validation steps: ${error.message}`,
+          {
+            error: error.stack,
+          }
+        );
+      });
+    
 
     setupAlertsCapabilitiesSwitcher({
       core,

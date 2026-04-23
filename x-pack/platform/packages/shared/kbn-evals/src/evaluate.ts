@@ -384,6 +384,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         throw error;
       }
 
+      // Incremental writes use refresh:false for performance; the batch export
+      // may only hit 409 conflicts without triggering a new refresh. Force one
+      // so the reporter query always finds the just-exported documents.
+      await evaluationsEsClient.indices.refresh({ index: 'kibana-evaluations' });
+
       await reportModelScore(scoreRepository, currentRunId, log, {
         taskModelId: model.id,
         suiteId: process.env.EVAL_SUITE_ID,

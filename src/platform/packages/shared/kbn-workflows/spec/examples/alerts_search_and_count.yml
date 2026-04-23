@@ -1,0 +1,56 @@
+version: '1'
+name: Search and Count Security Alerts
+description: >
+  Searches open security alerts, logs the total count, and iterates over
+  critical alerts to log their details.
+enabled: true
+
+triggers:
+  - type: manual
+
+steps:
+  - name: count_open_alerts
+    type: security.alertsSearch
+    with:
+      query:
+        bool:
+          filter:
+            - term:
+                kibana.alert.workflow_status: open
+
+  - name: log_total
+    type: console
+    with:
+      message: 'Total open alerts: {{ steps.count_open_alerts.output.total }}'
+
+  - name: search_critical_alerts
+    type: security.alertsSearch
+    with:
+      size: 50
+      query:
+        bool:
+          filter:
+            - term:
+                kibana.alert.workflow_status: open
+            - term:
+                kibana.alert.severity: critical
+      sort:
+        - '@timestamp':
+            order: desc
+
+  - name: log_critical_count
+    type: console
+    with:
+      message: 'Critical open alerts: {{ steps.search_critical_alerts.output.total }}'
+
+  - name: process_critical_alerts
+    type: foreach
+    foreach: '{{ steps.search_critical_alerts.output.hits }}'
+    steps:
+      - name: log_alert
+        type: console
+        with:
+          message: >-
+            Alert: {{ foreach.item.kibana.alert.rule.name }}
+            — severity: {{ foreach.item.kibana.alert.severity }}
+            — host: {{ foreach.item.host.name }}

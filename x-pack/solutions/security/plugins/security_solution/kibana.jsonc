@@ -88,7 +88,9 @@
       "llmTasks",
       "workflowsExtensions",
       "cps",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "workflowsExtensions",
+      "workflowsManagement"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -100,7 +102,8 @@
       "ml",
       "unifiedSearch",
       "esql",
-      "agentBuilder"
+      "agentBuilder",
+      "workflowsExtensions"
     ],
     "extraPublicDirs": [
       "common"

@@ -120,6 +120,7 @@ export const servers: ScoutServerConfig = {
   },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
+    sourceArgs: [...(defaultConfig.kbnTestServer.sourceArgs ?? []), '--no-watch'],
     env: {
       ...defaultConfig.kbnTestServer.env,
       ...(shouldEnableTracing

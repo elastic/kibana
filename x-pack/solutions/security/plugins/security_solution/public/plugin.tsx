@@ -76,6 +76,8 @@ import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
 import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
+import { registerWorkflowTriggerDefinitions } from './workflows/triggers';
+import { registerWorkflowStepDefinitions } from './workflows/steps';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -120,7 +122,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, usageCollection, management, cases, share, workflowsExtensions } = plugins;
+    if (plugins.workflowsExtensions) {
+      registerWorkflowTriggerDefinitions(plugins.workflowsExtensions);
+      registerWorkflowStepDefinitions(plugins.workflowsExtensions);
+    }
+
+    const { home, usageCollection, management, cases, share } = plugins;
     const { productFeatureKeys$ } = this.contract;
 
     if (share) {
@@ -128,11 +135,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     // Register workflow steps
-    if (workflowsExtensions) {
+    if (plugins.workflowsExtensions) {
       import('./workflows/step_types')
         .then(async ({ registerWorkflowSteps }) => {
           const [coreStart] = await core.getStartServices();
-          return registerWorkflowSteps(workflowsExtensions, coreStart);
+          return registerWorkflowSteps(plugins.workflowsExtensions!, coreStart);
         })
         .catch((error) => {
           this.logger.error(

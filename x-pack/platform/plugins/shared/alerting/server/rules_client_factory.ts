@@ -348,7 +348,15 @@ export class RulesClientFactory {
           return false;
         }
         const user = securityService.authc.getCurrentUser(request);
-        return user && user.authentication_type ? user.authentication_type === 'api_key' : false;
+        if (user?.authentication_type) {
+          return user.authentication_type === 'api_key';
+        }
+        // getCurrentUser may return null for Task Manager fake requests that
+        // are authenticated via API key but haven't gone through Kibana's HTTP
+        // authentication pipeline. Fall back to inspecting the Authorization
+        // header scheme directly.
+        const authHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+        return authHeader?.scheme.toLowerCase() === 'apikey';
       },
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);

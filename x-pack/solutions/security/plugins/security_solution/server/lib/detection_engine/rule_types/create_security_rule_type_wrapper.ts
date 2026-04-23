@@ -110,6 +110,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     licensing,
     scheduleNotificationResponseActionsService,
     endpointAppContextService,
+    emitAlertsCreatedEvent,
     getEntityStore,
   }) =>
   (type) => {
@@ -531,11 +532,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 ruleParams: params,
               });
             } catch (error) {
-              // Catching here to prevent telemetry errors from propagating to the Alerting Framework.
-              // The framework would catch the error and mark the rule run as failed.
-              // We don't want the rule to be marked as failed, if only telemetry failed.
               logger.info(`Failed to send alert suppression telemetry event: ${error}`);
             }
+          }
+
+          if (!isPreview && emitAlertsCreatedEvent && result.createdSignalsCount > 0) {
+            await emitAlertsCreatedEvent({
+              spaceId,
+              scopedClusterClient: services.scopedClusterClient,
+              event: {
+                rule_id: rule.id,
+                rule_name: rule.name,
+                rule_type: rule.ruleTypeId,
+                alerts_count: result.createdSignalsCount,
+                suppressed_alerts_count: result.suppressedAlertsCount ?? 0,
+              },
+            });
           }
 
           return {

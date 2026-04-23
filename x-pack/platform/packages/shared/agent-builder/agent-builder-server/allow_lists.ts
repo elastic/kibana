@@ -131,6 +131,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'detection-rule-edit',
   'threat-hunting',
+  'fix-false-positive-alerts',
 
   // O11Y
   'observability.rca',

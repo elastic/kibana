@@ -28,6 +28,14 @@
  */
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
+    id: 'security_alerts.created',
+    schemaHash: 'PLACEHOLDER_RUN_SERVER_AND_GET_HASH',
+  },
+  {
+    id: 'security_rules.created',
+    schemaHash: 'PLACEHOLDER_RUN_SERVER_AND_GET_HASH',
+  },
+  {
     id: 'workflows.failed',
     schemaHash: '2ac7a279823d7ca59c4d47de93ea7bd7103b1953ea484cef7f489d12d0c81980',
   },

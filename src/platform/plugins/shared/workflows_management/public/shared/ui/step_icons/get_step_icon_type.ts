@@ -115,7 +115,9 @@ export const getStepIconType = (nodeType: string): IconType => {
     // will be handled by in getStackConnectorIcon
 
     default:
-      if (nodeType.startsWith('elasticsearch')) {
+      if (nodeType.startsWith('security.')) {
+        iconType = 'securityApp';
+      } else if (nodeType.startsWith('elasticsearch')) {
         iconType = 'logoElasticsearch';
       } else if (nodeType.startsWith('kibana')) {
         iconType = 'logoKibana';
