@@ -967,7 +967,10 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
     // option list can rebuild mid-type when the index fetch resolves, which
     // resets the active highlight and turns {enter} into a no-op.
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(field);
-    cy.get(COMBO_BOX_OPTION).contains(field).click();
+    // Use the contains(selector, text) overload so the yielded element is the
+    // option button, not the inner <mark> highlight — the mark is
+    // pointer-events: none and breaks cy.click().
+    cy.contains(COMBO_BOX_OPTION, field).click();
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX)
       .find('[data-test-subj="euiComboBoxPill"]')
       .should('contain.text', field);
