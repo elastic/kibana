@@ -1101,7 +1101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Query streams rely on ES|QL Views, which are not yet available on serverless/MKI/Cloud.
       this.tags(['skipCloud', 'skipMKI', 'skipServerless']);
 
-      const QUERY_ATTACH_TEST_STREAM = '$.logs.otel.query_attach_test';
+      const QUERY_ATTACH_TEST_STREAM = 'query-attach-test-stream';
 
       before(async () => {
         await kibanaServer.uiSettings.update({
@@ -1235,7 +1235,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('SLO cascade-unlink on stream deletion', () => {
       const SLO_TEST_STREAM = 'logs.otel.slo_test';
-      const SLO_QUERY_TEST_STREAM = '$.logs.otel.slo_query_test';
+      const SLO_QUERY_TEST_STREAM = 'query-attach-slo-test-stream';
+
+      const resolveSloSavedObjectId = async (logicalSloId: string): Promise<string> => {
+        const { saved_objects: sloSavedObjects } = await kibanaServer.savedObjects.find<{
+          id: string;
+        }>({ type: 'slo' });
+        const match = sloSavedObjects.find((so) => so.attributes.id === logicalSloId);
+        if (!match) {
+          throw new Error(`Could not find SLO saved object for logical id ${logicalSloId}`);
+        }
+        return match.id;
+      };
 
       const wiredChildStreamBody = {
         dashboards: [],
@@ -1301,11 +1312,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           sloId = createSloResponse.body.id as string;
           expect(sloId).to.not.be.empty();
 
+          const sloSavedObjectId = await resolveSloSavedObjectId(sloId);
+
           await linkAttachment({
             apiClient,
             stream: SLO_TEST_STREAM,
             type: 'slo',
-            id: sloId,
+            id: sloSavedObjectId,
           });
 
           const linked = await getAttachments({
@@ -1314,7 +1327,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             filters: { types: ['slo'] },
           });
           expect(linked.attachments.length).to.eql(1);
-          expect(linked.attachments[0].id).to.eql(sloId);
+          expect(linked.attachments[0].id).to.eql(sloSavedObjectId);
 
           await deleteStream(apiClient, SLO_TEST_STREAM);
           await putStream(apiClient, SLO_TEST_STREAM, wiredChildStreamBody);
@@ -1380,11 +1393,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             sloId = createSloResponse.body.id as string;
             expect(sloId).to.not.be.empty();
 
+            const sloSavedObjectId = await resolveSloSavedObjectId(sloId);
+
             await linkAttachment({
               apiClient,
               stream: SLO_QUERY_TEST_STREAM,
               type: 'slo',
-              id: sloId,
+              id: sloSavedObjectId,
             });
 
             const linked = await getAttachments({
@@ -1393,7 +1408,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               filters: { types: ['slo'] },
             });
             expect(linked.attachments.length).to.eql(1);
-            expect(linked.attachments[0].id).to.eql(sloId);
+            expect(linked.attachments[0].id).to.eql(sloSavedObjectId);
 
             await deleteStream(apiClient, SLO_QUERY_TEST_STREAM);
 
