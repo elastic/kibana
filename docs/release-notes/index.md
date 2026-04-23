@@ -186,7 +186,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds a **Save Discover table to dashboard** option [#259626]({{kib-pull}}259626).
 
 % general
-* Highlights multiple word occurrences in search results [#258764]({{kib-pull}}258764).
 * Adds default table columns for indexes and views with a small number of fields [#255292]({{kib-pull}}255292).
 
 % doc viewer
@@ -217,6 +216,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Improves query pretty printing [#257440]({{kib-pull}}257440).
 * Adds an {{esql}} indentation shortcut to the editor [#247234]({{kib-pull}}247234).
 * Simplifies the **Run** and **Cancel** button states in the {{esql}} editor [#254121]({{kib-pull}}254121).
+* Highlights multiple word occurrences in search results [#258764]({{kib-pull}}258764).
 
 
 **Elastic Observability solution**:
@@ -392,8 +392,6 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Resets the time field when the updated index pattern does not have it [#262001]({{kib-pull}}262001).
 * Resets the default profile state when transitioning between tab modes [#255226]({{kib-pull}}255226).
 * Makes matches cells expandable for long field filter matches [#255093]({{kib-pull}}255093).
-* Aborts in-flight long-running queries [#254487]({{kib-pull}}254487).
-* Fixes incorrect KQL bar results for some indices [#254119]({{kib-pull}}254119).
 * Fixes URL, Badge, Color, and other field formatters incorrectly rendering fields with missing or null values [#251892]({{kib-pull}}251892).
 * Fixes filtering out null values from the Discover histogram legend in {{esql}} mode [#249302]({{kib-pull}}249302).
 * Fixes **Search entire time range** for date nanos [#248495]({{kib-pull}}248495).
@@ -413,6 +411,8 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes autocomplete fetches piling up without cancellation when typing rapidly in the {{esql}} editor [#255664]({{kib-pull}}255664).
 * Fixes incorrect validation of the `TS` (time series) command [#253635]({{kib-pull}}253635).
 * Fixes some `GROK` patterns not being recognized, which caused columns to appear as unknown [#246871]({{kib-pull}}246871).
+* Aborts in-flight long-running queries for {{esql}} controls [#254487]({{kib-pull}}254487).
+* Fixes incorrect KQL bar results for some indices [#254119]({{kib-pull}}254119).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.4.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
