@@ -53,6 +53,7 @@ export const runResolutionScoringStep = async ({
   );
   let pagesProcessed = 0;
   let scoresWrittenResolution = 0;
+  let abortedBetweenPages = false;
 
   for await (const pageScores of calculateResolutionEntityScores({
     esClient,
@@ -69,6 +70,7 @@ export const runResolutionScoringStep = async ({
   })) {
     if (abortSignal?.aborted) {
       runLogger.info('Resolution scoring aborted between pages');
+      abortedBetweenPages = true;
       break;
     }
     pagesProcessed += 1;
@@ -90,14 +92,18 @@ export const runResolutionScoringStep = async ({
   }
 
   if (scoresWrittenResolution === 0) {
-    const skipReason = pagesProcessed === 0 ? 'lookup_empty' : 'no_matching_alerts';
+    const skipReason = abortedBetweenPages
+      ? 'aborted'
+      : pagesProcessed === 0
+        ? 'lookup_empty'
+        : 'no_matching_alerts';
     runLogger.debug(
       `phase 2 resolution scoring produced no writes: reason=${skipReason}, pages=${pagesProcessed}`
     );
     return {
       scoresWritten: 0,
       pagesProcessed,
-      skippedReason: pagesProcessed === 0 ? 'lookup_empty' : undefined,
+      skippedReason: !abortedBetweenPages && pagesProcessed === 0 ? 'lookup_empty' : undefined,
     };
   }
 
