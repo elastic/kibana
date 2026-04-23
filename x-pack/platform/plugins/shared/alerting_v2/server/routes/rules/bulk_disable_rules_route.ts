@@ -57,8 +57,8 @@ export class BulkDisableRulesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { ids, filter } = this.request.body;
-    const params = ids ? { ids } : { filter: filter ?? '' };
+    const { ids, filter, search } = this.request.body;
+    const params = ids ? { ids } : { filter, search };
     const result = await this.rulesClient.bulkDisableRules(params);
     return this.ctx.response.ok({ body: result });
   }

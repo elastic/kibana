@@ -12,9 +12,8 @@ import { BULK_FILTER_MAX_RULES } from './constants';
 /**
  * Schema for bulk operation request bodies.
  *
- * Enforces that exactly one of `ids` or `filter` must be provided:
- * - `ids`: An explicit list of rule IDs to operate on (1–100).
- * - `filter`: A KQL filter string to match rules.
+ * Either `ids` or at least one of `filter`/`search` must be provided.
+ * `ids` cannot be combined with `filter` or `search`.
  */
 export const bulkOperationParamsSchema = z
   .object({
@@ -30,12 +29,16 @@ export const bulkOperationParamsSchema = z
       .describe(
         `KQL filter string to match rules. At most ${BULK_FILTER_MAX_RULES} matching rules are processed per request.`
       ),
+    search: z
+      .string()
+      .optional()
+      .describe('Free-text search string to match rules by name and description.'),
   })
-  .refine((data) => data.ids != null || data.filter != null, {
-    message: 'Either ids or filter must be provided.',
+  .refine((data) => data.ids != null || data.filter != null || data.search != null, {
+    message: 'Either ids, filter, or search must be provided.',
   })
-  .refine((data) => data.ids == null || data.filter == null, {
-    message: 'Only one of ids or filter can be provided.',
+  .refine((data) => data.ids == null || (data.filter == null && data.search == null), {
+    message: 'ids cannot be combined with filter or search.',
   });
 
 export type BulkOperationParams = z.infer<typeof bulkOperationParamsSchema>;

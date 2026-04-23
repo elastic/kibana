@@ -8,7 +8,6 @@
 import { useReducer, useMemo, useCallback } from 'react';
 import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { escapeQuotes } from '@kbn/es-query';
-import { buildApiRulesListCombinedFilter } from '../../common/utils/build_rules_list_kql';
 import type { BulkOperationParams } from '../services/rules_api';
 
 interface BulkSelectState {
@@ -176,7 +175,7 @@ export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulk
   /**
    * Returns the appropriate `BulkOperationParams` for the current selection state.
    *
-   * When `isAllSelected` is true, sends a filter (or empty filter for "match all")
+   * When `isAllSelected` is true, sends `filter` and/or `search` params
    * with an exclusion clause for deselected IDs. When false, sends explicit IDs.
    *
    * Filters use clean API field names (e.g. `id`), which the server
@@ -184,16 +183,20 @@ export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulk
    */
   const getBulkParams = useCallback((): BulkOperationParams => {
     if (state.isAllSelected) {
-      const listScope = buildApiRulesListCombinedFilter({ filter, search }) ?? '';
       const excludedIds = [...state.selectedIds];
-      if (excludedIds.length === 0) {
-        return { filter: listScope };
-      }
-      const exclusionClauses = excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ');
-      if (listScope) {
-        return { filter: `(${listScope}) AND NOT (${exclusionClauses})` };
-      }
-      return { filter: `NOT (${exclusionClauses})` };
+      const exclusionClauses =
+        excludedIds.length > 0
+          ? excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ')
+          : undefined;
+
+      const combinedFilter = [filter, exclusionClauses ? `NOT (${exclusionClauses})` : undefined]
+        .filter(Boolean)
+        .join(' AND ');
+
+      return {
+        ...(combinedFilter ? { filter: combinedFilter } : {}),
+        ...(search ? { search } : {}),
+      };
     }
 
     return { ids: [...state.selectedIds] };
