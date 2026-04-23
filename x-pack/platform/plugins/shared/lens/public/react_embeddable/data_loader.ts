@@ -36,7 +36,7 @@ import {
   tap,
   type Subscription,
 } from 'rxjs';
-import { apm, type Span } from '@elastic/apm-rum';
+import { apm } from '@elastic/apm-rum';
 import { getEditPath } from '../../common/constants';
 import { prepareCallbacks } from './expressions/callbacks';
 import { getExpressionRendererParams } from './expressions/expression_params';
@@ -149,52 +149,9 @@ export function loadEmbeddableData(
     updateMessages(getUserMessages('embeddableBadge'));
     // No issues so far, blocking errors are handled directly by Lens from this point on
     if (!dispatchBlockingErrorIfAny()) {
-      endChartSpan('success');
       internalApi.dispatchRenderComplete();
-    } else {
-      endChartSpan('failure', internalApi.blockingError$.getValue() ?? undefined);
     }
   };
-
-  // Track the current APM span for the lens chart render lifecycle
-  let currentChartSpan: Span | undefined;
-
-  function startChartSpan() {
-    // End any previous span that wasn't completed (e.g., a reload triggered before completion)
-    if (currentChartSpan) {
-      // @ts-expect-error RUM types don't include outcome
-      currentChartSpan.outcome = 'unknown';
-      currentChartSpan.end();
-      currentChartSpan = undefined;
-    }
-    const currentState = getState();
-    const parentContext = getParentContext(parentApi);
-    const meta = parentContext?.meta as Record<string, string | undefined> | undefined;
-
-    currentChartSpan = apm.startSpan('lens-chart-render', 'lens-embeddable', {
-      blocking: true,
-      sync: false,
-    });
-
-    if (currentChartSpan) {
-      currentChartSpan.addLabels({
-        kibana_meta_lens_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
-        kibana_meta_lens_profile_id: meta?.profile_id ?? 'unknown',
-        kibana_meta_lens_metric_id: meta?.metric_id ?? 'unknown',
-      });
-    }
-  }
-
-  function endChartSpan(outcome: 'success' | 'failure', error?: Error) {
-    if (!currentChartSpan) return;
-    if (error) {
-      apm.captureError(error);
-    }
-    // @ts-expect-error RUM types don't include outcome
-    currentChartSpan.outcome = outcome;
-    currentChartSpan.end();
-    currentChartSpan = undefined;
-  }
 
   async function reload(
     // make reload easier to debug
@@ -204,9 +161,6 @@ export function loadEmbeddableData(
     addLog(`Embeddable reload reason: ${sourceId}`);
 
     resetMessages();
-
-    // Start APM span for this render cycle
-    startChartSpan();
 
     // reset the render on reload
     internalApi.dispatchRenderStart();
@@ -280,47 +234,37 @@ export function loadEmbeddableData(
       services
     );
 
-    let resolvedParams: Awaited<ReturnType<typeof getExpressionRendererParams>>;
-    let dataViewIds: Awaited<ReturnType<typeof getUsedDataViews>>;
-
-    try {
-      // Go concurrently: build the expression and fetch the dataViews
-      [resolvedParams, dataViewIds] = await Promise.all([
-        getExpressionRendererParams(currentState, {
-          searchContext,
-          api,
-          settings: {
-            syncColors: currentState.syncColors,
-            syncCursor: currentState.syncCursor,
-            syncTooltips: currentState.syncTooltips,
-          },
-          renderMode: getRenderMode(parentApi),
-          services,
-          searchSessionId: api.searchSessionId$.getValue(),
-          abortController: internalApi.expressionAbortController$.getValue(),
-          getExecutionContext,
-          logError: getLogError(getExecutionContext),
-          addUserMessages,
-          onRender,
-          onData,
-          handleEvent,
-          disableTriggers,
-          updateBlockingErrors,
-          forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
-          getDisplayOptions: internalApi.getDisplayOptions,
-        }),
-        getUsedDataViews(
-          currentState.attributes.references,
-          currentState.attributes.state?.adHocDataViews,
-          services.dataViews
-        ),
-      ]);
-    } catch (error) {
-      endChartSpan('failure', error instanceof Error ? error : new Error(String(error)));
-      throw error;
-    }
-
-    const { params, abortController, ...rest } = resolvedParams;
+    // Go concurrently: build the expression and fetch the dataViews
+    const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
+      getExpressionRendererParams(currentState, {
+        searchContext,
+        api,
+        settings: {
+          syncColors: currentState.syncColors,
+          syncCursor: currentState.syncCursor,
+          syncTooltips: currentState.syncTooltips,
+        },
+        renderMode: getRenderMode(parentApi),
+        services,
+        searchSessionId: api.searchSessionId$.getValue(),
+        abortController: internalApi.expressionAbortController$.getValue(),
+        getExecutionContext,
+        logError: getLogError(getExecutionContext),
+        addUserMessages,
+        onRender,
+        onData,
+        handleEvent,
+        disableTriggers,
+        updateBlockingErrors,
+        forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
+        getDisplayOptions: internalApi.getDisplayOptions,
+      }),
+      getUsedDataViews(
+        currentState.attributes.references,
+        currentState.attributes.state?.adHocDataViews,
+        services.dataViews
+      ),
+    ]);
 
     // update the visualization context before anything else
     // as it will be used to compute blocking errors also in case of issues
@@ -335,10 +279,6 @@ export function loadEmbeddableData(
 
     // This will catch also failed loaded dataViews
     const hasBlockingErrors = dispatchBlockingErrorIfAny();
-
-    if (hasBlockingErrors) {
-      endChartSpan('failure', internalApi.blockingError$.getValue() ?? undefined);
-    }
 
     if (params?.expression != null && !hasBlockingErrors) {
       internalApi.updateExpressionParams(params);
@@ -387,11 +327,28 @@ export function loadEmbeddableData(
       .pipe(debounceTime(0))
       .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
-    // End the APM span as failure when a blocking error occurs
+    // Capture blocking errors in APM for observability
     internalApi.blockingError$
       .pipe(filter((error): error is Error => error != null))
       .subscribe((error) => {
-        endChartSpan('failure', error);
+        const currentState = getState();
+        const parentContext = getParentContext(parentApi);
+        const meta = parentContext?.meta as Record<string, string | undefined> | undefined;
+        const transaction = apm.getCurrentTransaction();
+        if (transaction) {
+          const span = transaction.startSpan('lens-chart-error', 'lens-embeddable');
+          if (span) {
+            span.addLabels({
+              kibana_meta_lens_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
+              kibana_meta_lens_profile_id: meta?.profile_id ?? 'unknown',
+              kibana_meta_lens_metric_id: meta?.metric_id ?? 'unknown',
+            });
+            apm.captureError(error);
+            // @ts-expect-error RUM types don't include outcome
+            span.outcome = 'failure';
+            span.end();
+          }
+        }
       }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
@@ -428,7 +385,6 @@ export function loadEmbeddableData(
 
   return {
     cleanup: () => {
-      endChartSpan('success');
       for (const subscription of subscriptions) {
         subscription.unsubscribe();
       }
