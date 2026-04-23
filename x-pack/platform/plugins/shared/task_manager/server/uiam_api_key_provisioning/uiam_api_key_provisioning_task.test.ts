@@ -224,7 +224,7 @@ describe('UiamApiKeyProvisioningTask', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
-  it('invalidates built updates and rethrows when bulkUpdate fails', async () => {
+  it('rethrows when bulkUpdate fails without invalidating minted UIAM keys', async () => {
     const uiamConvert = jest.fn().mockResolvedValue({
       results: [uiamSuccess('uiam-x', 'sec')],
     } as ConvertUiamAPIKeysResponse);
@@ -243,13 +243,7 @@ describe('UiamApiKeyProvisioningTask', () => {
     await expect(
       (createTask() as unknown as UiamTaskPrivate).runTask(makeConcreteTask(), coreSetup)
     ).rejects.toThrow('es unavailable');
-    expect(markApiKeysForInvalidationMock).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({ apiKeyId: 'uiam-x', uiamApiKey: expect.any(String) }),
-      ]),
-      logger,
-      expect.anything()
-    );
+    expect(markApiKeysForInvalidationMock).not.toHaveBeenCalled();
   });
 
   it('invalidates orphan keys when bulk update reports per-item error', async () => {

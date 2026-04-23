@@ -41,10 +41,7 @@ import { classifyTasksForUiamProvisioning } from './lib/classify_task';
 import { fetchFirstBatchOfTasksToConvert } from './lib/fetch_first_batch_of_tasks_to_convert';
 import { getExcludeTasksFilter } from './lib/get_exclude_tasks_filter';
 import { mapUiamConvertResponseToKeyResults } from './lib/map_uiam_convert_response_to_key_results';
-import {
-  buildSavedObjectBulkUpdatesForUiamKeys,
-  invalidationTargetsFromUiamTaskBulkUpdates,
-} from './lib/build_saved_object_bulk_updates_for_uiam';
+import { buildSavedObjectBulkUpdatesForUiamKeys } from './lib/build_saved_object_bulk_updates_for_uiam';
 import { markApiKeysForInvalidation } from '../api_key_strategy';
 import { statusDocsAndOrphanedUiamKeysFromTaskBulkUpdate } from './lib/task_status_and_orphaned_keys_from_bulk_update';
 import { UiamProvisioningFeatureFlagScheduler } from './lib/uiam_provisioning_feature_flag_scheduler';
@@ -270,11 +267,6 @@ export class UiamApiKeyProvisioningTask {
       this.logger.error(`Error bulk updating tasks with UIAM API keys: ${getErrorMessage(error)}`, {
         error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
       });
-      await markApiKeysForInvalidation(
-        invalidationTargetsFromUiamTaskBulkUpdates(updates),
-        this.logger,
-        savedObjectsClient
-      );
       throw error;
     }
   };

@@ -13,7 +13,7 @@ export const TASK_ID = 'uiam_api_key_provisioning';
 export const TASK_TYPE = `task_manager:${TASK_ID}`;
 
 export const UIAM_PROVISIONING_TASK_TITLE = 'UIAM API key provisioning for task manager tasks';
-export const SCHEDULE_INTERVAL: IntervalSchedule = { interval: '1h' };
+export const SCHEDULE_INTERVAL: IntervalSchedule = { interval: '1d' };
 export const TASK_TIMEOUT = '5m';
 
 /**
@@ -21,8 +21,8 @@ export const TASK_TIMEOUT = '5m';
  * Keeps eligible tasks from being claimed for execution imminently; evaluated as `now` on the cluster.
  */
 export const UIAM_PROVISIONING_FETCH_RUN_AT_GT = 'now+30s';
-/** When there are more tasks to convert, run again after this many ms (1m) to process the next batch. */
-export const RUN_AT_INTERVAL_MS = 60_000;
+/** When there are more tasks to convert, run again after this many ms (10m) to process the next batch. */
+export const RUN_AT_INTERVAL_MS = 600_000;
 
 /** Max number of task docs to fetch per run (same as referenced alerting provisioning task). */
 export const FETCH_BATCH_SIZE = 500;

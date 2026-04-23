@@ -137,14 +137,25 @@ export const writeTaskUiamProvisioningObservabilityStatus = async (
     return;
   }
   try {
-    await savedObjectsClient.bulkCreate(docs, { overwrite: true });
+    const result = await savedObjectsClient.bulkCreate(docs, { overwrite: true });
+    result.saved_objects.forEach((so) => {
+      if (so.error) {
+        logger.warn(
+          `Error writing task provisioning status for ${so.id}: ${so.error.message ?? so.error}`,
+          { tags: TAGS }
+        );
+      }
+    });
     logger.info(
       `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
       { tags: TAGS }
     );
   } catch (e) {
     logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
-      error: { stack_trace: e instanceof Error ? e.stack : undefined, tags: TAGS },
+      error: {
+        stack_trace: e instanceof Error ? e.stack : undefined,
+        tags: [...TAGS, 'status-write-failed'],
+      },
     });
   }
 };
