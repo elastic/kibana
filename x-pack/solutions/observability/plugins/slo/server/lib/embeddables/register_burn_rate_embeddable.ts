@@ -13,8 +13,8 @@ import { getTransforms } from '../../../common/embeddables/burn_rate/transforms/
 /**
  * Registers the schema and transforms for the SLO Burn Rate embeddable
  */
-export const registerBurnRateEmbeddableTransforms = (embeddable: EmbeddableSetup): void => {
-  embeddable.registerTransforms(SLO_BURN_RATE_EMBEDDABLE_ID, {
+export const registerBurnRateEmbeddable = (embeddable: EmbeddableSetup): void => {
+  embeddable.registerEmbeddableServerDefinition(SLO_BURN_RATE_EMBEDDABLE_ID, {
     title: 'SLO burn rate',
     getSchema: getBurnRateEmbeddableSchema,
     getTransforms,
