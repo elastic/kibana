@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, CoreSetup } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import type { TaskManagerPluginsStart, TaskManagerStartContract } from '../plugin';
@@ -70,8 +70,9 @@ const makeConcreteTask = (overrides: Partial<ConcreteTaskInstance> = {}): Concre
     attempts: 0,
     status: TaskStatus.Running,
     retryAt: null,
+    ownerId: null,
     ...overrides,
-  };
+  } as ConcreteTaskInstance;
 };
 
 interface UiamTaskPrivate {
@@ -84,7 +85,7 @@ interface UiamTaskPrivate {
 describe('UiamApiKeyProvisioningTask', () => {
   const coreSetup = {} as CoreSetup<TaskManagerPluginsStart, TaskManagerStartContract>;
   const logger = loggingSystemMock.createLogger();
-  const analytics = { reportEvent: jest.fn() };
+  const analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
 
   const convertibleTask: ConcreteTaskInstance = {
     id: 't1',
