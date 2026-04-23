@@ -18,6 +18,7 @@ import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { buildScopedRulesClientFactory } from '../agent_builder/scoped_rules_client_factory';
+import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -64,6 +65,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
           getRulesClient: (context) => getScopedRulesClient(context.request),
         }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
       );
+      agentBuilder.sml.registerType(createRuleSmlType({ getScopedRulesClient }));
     }
 
     if (container.isBound(usageCollectionToken)) {
