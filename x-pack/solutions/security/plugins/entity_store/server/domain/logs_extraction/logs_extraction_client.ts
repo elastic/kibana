@@ -704,7 +704,7 @@ export class LogsExtractionClient {
   private getFromDateISOFromPersistedLogPageCursorStart(
     engineState: EngineLogExtractionState
   ): string | undefined {
-    return engineState.logsPageCursorStartTimestamp || undefined;
+    return engineState.logsPageCursorStartTimestamp;
   }
 
   private getDelayedLastExecutionTimestamp(

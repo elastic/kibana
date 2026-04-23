@@ -57,10 +57,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
           await crudClient.deleteEntity(req.body.entityId);
         } catch (error) {
           if (error instanceof EntityNotFoundError) {
-            return res.customError({
-              statusCode: 404,
-              body: error,
-            });
+            return res.notFound({ body: error });
           }
 
           logger.error(error);

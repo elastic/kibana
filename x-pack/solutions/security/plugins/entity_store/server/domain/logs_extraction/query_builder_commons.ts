@@ -475,9 +475,9 @@ function buildPaginationWhereClause(
   { timestampCursor, idCursor }: PaginationParams,
   { timestampField, idFieldInQuery: idFieldExprForWhere }: PaginationFields
 ): string {
-  return `| WHERE ${timestampField} > TO_DATETIME("${timestampCursor}") 
-            OR (${timestampField} == TO_DATETIME("${timestampCursor}") 
-                AND ${idFieldExprForWhere} > "${idCursor}")`;
+  return `| WHERE ${timestampField} > TO_DATETIME("${timestampCursor}")
+            OR (${timestampField} == TO_DATETIME("${timestampCursor}")
+                AND ${idFieldExprForWhere} > "${escapeEsqlStringLiteral(idCursor)}")`;
 }
 
 export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {
