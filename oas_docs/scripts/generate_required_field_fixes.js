@@ -10,7 +10,7 @@
 /**
  * generate_required_field_fixes.js
  *
- * Auto-generates overlays/required-field-fixes.overlays.yaml from the merged
+ * Auto-generates overlays/required_field_fixes.overlays.yaml from the merged
  * OAS bundles (output/kibana.yaml and output/kibana.serverless.yaml).
  *
  * Root cause: schema.maybe() in @kbn/config-schema emits x-oas-optional: true
@@ -34,7 +34,7 @@ const yaml = require('js-yaml');
 const OAS_DOCS_DIR = path.resolve(__dirname, '..');
 const STATEFUL_INPUT = path.join(OAS_DOCS_DIR, 'output', 'kibana.yaml');
 const SERVERLESS_INPUT = path.join(OAS_DOCS_DIR, 'output', 'kibana.serverless.yaml');
-const OUTPUT_FILE = path.join(OAS_DOCS_DIR, 'overlays', 'required-field-fixes.overlays.yaml');
+const OUTPUT_FILE = path.join(OAS_DOCS_DIR, 'overlays', 'required_field_fixes.overlays.yaml');
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
