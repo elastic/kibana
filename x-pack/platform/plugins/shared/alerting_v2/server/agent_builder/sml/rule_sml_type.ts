@@ -69,13 +69,11 @@ export const createRuleSmlType = ({
 
   getSmlData: async (originId, context) => {
     try {
-      const response = await context.esClient.get({
+      const response = await context.esClient.get<{ [key: string]: RuleSavedObjectAttributes }>({
         index: `${ALERTING_CASES_SAVED_OBJECT_INDEX}*`,
         id: `${RULE_SAVED_OBJECT_TYPE}:${originId}`,
       });
-      const attrs = (
-        response._source as { [key: string]: RuleSavedObjectAttributes }
-      )[RULE_SAVED_OBJECT_TYPE];
+      const attrs = response._source?.[RULE_SAVED_OBJECT_TYPE];
       const name = attrs?.metadata?.name ?? originId;
       const description = attrs.metadata?.description ?? '';
       const tags = attrs.metadata?.tags?.join(', ') ?? '';
