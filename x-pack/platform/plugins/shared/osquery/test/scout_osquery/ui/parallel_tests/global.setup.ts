@@ -16,6 +16,13 @@ import {
   FLEET_SERVER_KEY_PATH,
   fleetServerDevServiceAccount,
 } from '@kbn/dev-utils';
+import { getOsqueryApiService } from '../../common/services/osquery_api_service';
+import {
+  ALL_SCOUT_PACK_PREFIXES,
+  ALL_SCOUT_SAVED_QUERY_PREFIXES,
+  cleanOsqueryPacksByPrefix,
+  cleanOsquerySavedQueriesByPrefix,
+} from '../helpers/defensive_cleanup';
 
 const FLEET_SERVER_CONTAINER = 'scout-fleet-server';
 const AGENT_CONTAINER_PREFIX = 'scout-osquery-agent';
@@ -750,5 +757,26 @@ globalSetupHook(
     await waitForOsqueryReady(kbnClient, log);
 
     log.info('[osquery-setup] Osquery warm-up complete. Agents are responsive.');
+  }
+);
+
+// ── Defensive cleanup for orphaned scout-* resources ──────────────────────────
+//
+// A previously-crashed run can leave osquery packs or saved queries behind
+// with `scout-*` prefixes. Running this sweep once per environment here
+// removes them before any spec starts, so spec-local `beforeAll` hooks can
+// assume a clean slate. Per-spec `afterAll` deletion still handles the
+// normal-exit case (global-setup has no corresponding teardown).
+globalSetupHook(
+  'Sweep orphaned scout-* osquery packs and saved queries',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  async ({ kbnClient, log }) => {
+    log.info('[osquery-setup] Defensive sweep of orphaned scout-* packs / saved queries...');
+    const osqueryApi = getOsqueryApiService({ kbnClient, log });
+    await cleanOsqueryPacksByPrefix(osqueryApi, [...ALL_SCOUT_PACK_PREFIXES]);
+    await cleanOsquerySavedQueriesByPrefix(osqueryApi, [...ALL_SCOUT_SAVED_QUERY_PREFIXES]);
+    log.info('[osquery-setup] Defensive sweep complete.');
   }
 );

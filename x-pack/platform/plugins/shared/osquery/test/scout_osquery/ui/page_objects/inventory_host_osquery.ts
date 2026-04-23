@@ -7,7 +7,6 @@
 
 import rison from '@kbn/rison';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 import { submitLiveQuery } from '../../common/submit_live_query';
 
 /**
@@ -40,7 +39,6 @@ export class InventoryHostOsqueryPage {
     const spacePrefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
     const path = `${spacePrefix}/app/metrics/detail/host/${encodeURIComponent(hostname)}`;
     await this.page.goto(this.kbnUrl.get(path, { params: { assetDetails: assetDetails ?? '' } }));
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     await this.overviewTab.waitFor({ state: 'visible', timeout: 120_000 });
     await this.osqueryTab.click();
     await this.liveQueryForm.waitFor({ state: 'visible', timeout: 60_000 });

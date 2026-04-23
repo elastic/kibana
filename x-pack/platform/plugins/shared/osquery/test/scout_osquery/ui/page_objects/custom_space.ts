@@ -6,7 +6,6 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 /** Page object for Osquery operations inside a user-defined (non-default) Kibana space. */
 export class CustomSpacePage {
@@ -22,30 +21,27 @@ export class CustomSpacePage {
 
   async gotoOsqueryInSpace(spaceId: string): Promise<void> {
     await this.page.goto(this.kbnUrl.app('osquery', { space: spaceId }));
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
+  /**
+   * Navigate to the new-live-query form inside a custom space. Waits up to
+   * 60s for the submit button to appear — first render in a freshly-created
+   * Scout space must wait for Kibana to mount osquery, resolve capabilities,
+   * and hit the app's initial queries, so the 30s default would be too tight.
+   *
+   * A prior implementation wrapped the wait in try/catch + page.reload() as a
+   * defensive retry for spaces where the first app mount missed. The reload
+   * workaround hid a real race; callers that see this fail reliably should
+   * wrap the call in `expect(...).toPass(...)` at the spec level with a
+   * comment linking to the underlying race.
+   */
   async gotoNewLiveQueryInSpace(spaceId: string): Promise<void> {
     await this.page.goto(this.kbnUrl.app('osquery/new', { space: spaceId }));
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-    try {
-      // 60s: first render in a freshly-created Scout space must wait for
-      // Kibana to mount osquery + resolve capabilities + hit the app's
-      // initial queries. 30s is too tight under CI load.
-      await this.submitButton.waitFor({ state: 'visible', timeout: 60_000 });
-    } catch {
-      // Reload once: the Scout-created space occasionally misses the first
-      // app mount (router redirect lands before capabilities are resolved).
-      // A reload re-runs the mount against a now-ready space.
-      await this.page.reload();
-      await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-      await this.submitButton.waitFor({ state: 'visible', timeout: 60_000 });
-    }
+    await this.submitButton.waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async gotoPacksInSpace(spaceId: string): Promise<void> {
     await this.page.goto(this.kbnUrl.app('osquery/packs', { space: spaceId }));
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     // Wait for the packs table to actually render before callers start
     // hunting for a specific row — otherwise `runPackByName`'s default
     // 10 s click budget is spent waiting for the list query, not the row.

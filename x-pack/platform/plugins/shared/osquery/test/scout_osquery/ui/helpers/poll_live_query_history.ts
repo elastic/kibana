@@ -15,7 +15,8 @@ import type { KbnClient } from '@kbn/scout';
  *
  * `waitForLiveQueryComplete` polls the action's details endpoint until the first query
  * reports `status: 'completed'` or `docs > 0`, whichever arrives first. Tests invoke it
- * BEFORE calling `pageObjects.osqueryLiveQueryForm.waitForResults()`.
+ * BEFORE calling `pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults()` (or the
+ * pack-variant `waitForPackResults()`).
  *
  * Uses `kbnClient` (superuser) rather than the role-scoped session; readiness checks
  * should not be gated on the role under test.

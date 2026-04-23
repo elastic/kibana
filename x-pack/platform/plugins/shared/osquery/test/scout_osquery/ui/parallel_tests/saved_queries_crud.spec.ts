@@ -9,10 +9,8 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalSavedQuery } from '../../api/fixtures/constants';
-import { cleanOsquerySavedQueriesByPrefix } from '../helpers/defensive_cleanup';
 
 const mkiTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-const SAVED_QUERY_PREFIXES = ['scout-sq-create-', 'scout-sq-edit-', 'scout-sq-delete-'];
 
 test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
   // Track user-visible saved-query IDs created during each test so `afterEach`
@@ -21,12 +19,8 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
   // only cleanup path that works for every creation flow in this suite.
   const createdSavedQueryLabels: string[] = [];
 
-  test.beforeAll(async ({ apiServices }) => {
-    // Defensive: a prior crashed run can leave `scout-sq-*` custom queries
-    // behind. The list endpoint includes prebuilts (~80) so prefix-matching
-    // only touches the handful of test-specific labels.
-    await cleanOsquerySavedQueriesByPrefix(apiServices, SAVED_QUERY_PREFIXES);
-  });
+  // Orphan `scout-sq-*` cleanup is handled once per environment by the
+  // defensive-cleanup globalSetupHook; no spec-local beforeAll needed.
 
   test.afterEach(async ({ apiServices }) => {
     const labels = createdSavedQueryLabels.splice(0);
@@ -49,6 +43,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     page,
     pageObjects,
   }) => {
+    // 3 min: UI-driven create with Monaco + ECS mapping combobox interactions.
     test.setTimeout(180_000);
 
     await browserAuth.loginAsOsqueryPowerUser();
@@ -89,6 +84,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     pageObjects,
     apiServices,
   }) => {
+    // 3 min: seed + list + row-actions + edit form + update round-trip.
     test.setTimeout(180_000);
 
     const created = await apiServices.osquery.savedQueries.create(
@@ -116,6 +112,8 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     pageObjects,
     apiServices,
   }) => {
+    // 3 min: list pagination to page 2 of prebuilt queries + edit page nav +
+    // custom-query delete flow + list re-check.
     test.setTimeout(180_000);
 
     const created = await apiServices.osquery.savedQueries.create(
@@ -159,7 +157,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     await expect(page.getByText(inner.id)).toBeHidden({ timeout: 30_000 });
   });
 
-  test('paginates the saved queries list when size changes', async ({
+  test('paginates the saved queries list and renders 50 rows at the selected size', async ({
     browserAuth,
     page,
     pageObjects,
@@ -171,6 +169,14 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
 
     await page.testSubj.locator('tablePaginationPopoverButton').click();
     await page.testSubj.locator('tablePagination-50-rows').click();
+
+    // Assert both (a) the page-size control reflects the selection AND (b) the
+    // underlying table rendered at the chosen size. osquery_manager ships ~80
+    // prebuilt saved queries, so page 1 at size 50 MUST show exactly 50 rows.
     await expect(page.testSubj.locator('tablePaginationPopoverButton')).toContainText('50');
+    await expect(pageObjects.osquerySavedQuery.savedQueriesTable.locator('tbody tr')).toHaveCount(
+      50,
+      { timeout: 30_000 }
+    );
   });
 });

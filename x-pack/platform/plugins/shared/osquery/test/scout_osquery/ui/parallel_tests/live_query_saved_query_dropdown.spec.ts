@@ -51,6 +51,7 @@ test.describe('Live query saved-query dropdown', { tag: localTags }, () => {
     kbnClient,
     pageObjects,
   }) => {
+    // 5 min: dropdown populate + agent-dependent submit + results grid render.
     test.setTimeout(300_000);
 
     await browserAuth.loginAsOsqueryPowerUser();
@@ -71,7 +72,7 @@ test.describe('Live query saved-query dropdown', { tag: localTags }, () => {
     });
 
     await test.step('renders results', async () => {
-      await pageObjects.osqueryLiveQueryForm.waitForResults();
+      await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
       await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({
         timeout: 180_000,
       });

@@ -120,9 +120,10 @@ export async function submitLiveQuery(
       return { response, actionId };
     } catch (error) {
       lastError = error;
-      // Before retrying, give the Monaco 500 ms debounce a chance to flush and
-      // any in-flight validation / re-render to settle.
-      await page.waitForTimeout(750);
+      // No hard sleep between attempts — the next `Promise.all([
+      //   waitForResponse, click({ force: true })])` re-evaluates
+      // actionability and the Monaco debounce (500 ms) will have flushed
+      // before the subsequent click lands under the per-attempt wait budget.
     }
   }
 

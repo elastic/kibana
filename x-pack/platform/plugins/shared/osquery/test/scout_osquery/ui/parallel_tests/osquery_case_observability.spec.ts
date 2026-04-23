@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
-import { getMinimalLiveQuery } from '../../api/fixtures/constants';
-import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
-import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
+import { runAddLiveQueryResultToCase } from '../helpers/case_flows';
 
 // Observability-owner Cases are not available in serverless security projects —
 // `feature_observabilityCases` is not wired into the security project type, so a
@@ -27,41 +24,18 @@ test.describe('Osquery results attached to Observability cases', { tag: stateful
     apiServices,
     kbnClient,
   }) => {
+    // 4 min: agent-dependent live query + case create via API + UI attach flow.
     test.setTimeout(240_000);
 
-    await waitForAtLeastOneAgentOnline(kbnClient);
-    const live = await apiServices.osquery.liveQueries.create(
-      getMinimalLiveQuery({
-        query: 'SELECT * FROM os_version;',
-        agent_all: true,
-      })
-    );
-    const liveBody = live.data as { data: { action_id: string } };
-    const actionId = liveBody.data.action_id;
-    await waitForLiveQueryComplete(kbnClient, actionId);
-
-    const caseTitle = `scout-oblt-case-${Date.now()}`;
-    const createdCase = await apiServices.cases.create({
-      title: caseTitle,
-      tags: [],
-      severity: 'low',
-      description: 'scout',
-      assignees: [],
-      connector: { id: 'none', name: 'none', type: '.none', fields: null },
-      settings: { syncAlerts: true, extractObservables: true },
-      owner: 'observability',
+    const caseId = await runAddLiveQueryResultToCase({
+      apiServices,
+      browserAuth,
+      kbnClient,
+      page,
+      pageObjects,
+      caseOwner: 'observability',
+      caseTitlePrefix: 'scout-oblt-case',
     });
-    const caseId = createdCase.data.id;
-
-    await browserAuth.loginAsOsqueryPowerUser();
-    await pageObjects.osqueryCasesPage.navigateToHistory();
-    await pageObjects.osqueryCasesPage.openLiveQueryRowDetails(actionId);
-    await pageObjects.osqueryCasesPage.addToCaseFromRowKebab(caseId);
-
-    await expect(page.getByText(new RegExp(`Case ${caseTitle} updated`))).toBeVisible();
-    await pageObjects.osqueryCasesPage.clickViewCaseFromToast();
-    await pageObjects.osqueryCasesPage.expectOsqueryAttachmentVisible();
-    await pageObjects.osqueryCasesPage.expectTextInCaseBody('SELECT * FROM os_version;');
 
     await apiServices.cases.delete([caseId]);
   });

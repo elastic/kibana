@@ -6,7 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 export class OsqueryCasesPage {
   public readonly packQueriesKebabs: Locator;
@@ -38,21 +37,25 @@ export class OsqueryCasesPage {
     await row.getByLabel('Details').click();
   }
 
+  /**
+   * Pack-results layout: click the per-query row kebab and pick "Add to Case"
+   * from its context menu. Callers MUST be in a pack-results view — this
+   * method does not fall back to the header variant if the kebab is missing.
+   * Use `addToCaseFromHeader` for single-query results.
+   */
   async addToCaseFromRowKebab(caseId: string): Promise<void> {
-    // eslint-disable-next-line playwright/no-nth-methods -- pack results render one kebab per query row; using the first exercises the generic add-to-case flow without coupling to a specific query row
-    const kebab = this.packQueriesKebabs.first();
-    if (await kebab.isVisible().catch(() => false)) {
-      await kebab.click();
-      await this.page.locator('.euiContextMenuPanel').getByText('Add to Case').click();
-    } else {
-      // eslint-disable-next-line playwright/no-nth-methods -- fallback for layouts without the row kebab (single-query pack header renders the Add-to-Case button directly)
-      await this.addToCaseLabel.first().click();
-    }
+    // eslint-disable-next-line playwright/no-nth-methods -- pack results render one kebab per query row; the first exercises the generic add-to-case flow without coupling to a specific query row
+    await this.packQueriesKebabs.first().click();
+    await this.page.locator('.euiContextMenuPanel').getByText('Add to Case').click();
 
     await this.selectCaseText.waitFor({ state: 'visible', timeout: 30_000 });
     await this.page.testSubj.locator(`cases-table-row-select-${caseId}`).click();
   }
 
+  /**
+   * Single-query results layout: click the aggregate "Add to Case" button in
+   * the results header. Use `addToCaseFromRowKebab` for pack-results rows.
+   */
   async addToCaseFromHeader(caseId: string): Promise<void> {
     // eslint-disable-next-line playwright/no-nth-methods -- the results header renders a single Add-to-Case button but Playwright treats `getByLabel` as strict-multi; first() matches the header variant specifically
     await this.addToCaseLabel.first().click();
@@ -94,12 +97,10 @@ export class OsqueryCasesPage {
 
   async navigateToOsqueryApp(): Promise<void> {
     await this.page.gotoApp('osquery');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async navigateToHistory(): Promise<void> {
     await this.page.gotoApp('osquery/history');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   getAddToCaseLocator(): Locator {

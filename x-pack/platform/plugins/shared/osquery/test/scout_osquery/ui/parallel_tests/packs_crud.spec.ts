@@ -9,14 +9,8 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalSavedQuery } from '../../api/fixtures/constants';
-import {
-  cleanOsqueryPacksByPrefix,
-  cleanOsquerySavedQueriesByPrefix,
-} from '../helpers/defensive_cleanup';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-const PACK_PREFIXES = ['scout-pack-', 'scout-pack-edit-', 'scout-pack-delete-'];
-const SAVED_QUERY_PREFIXES = ['scout-pack-sq-', 'scout-pack-sq-extra-'];
 
 test.describe('Pack CRUD from UI', { tag: localTags }, () => {
   let savedQueryId: string;
@@ -27,13 +21,21 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
   // check inside the flyout (`idSet`).
   let extraSavedQueryId: string;
   let extraSavedQueryLabel: string;
+  // Tracks per-test pack seeds so `afterEach` can clean them — avoids
+  // try/finally inside test bodies.
+  const transientPackIds: string[] = [];
+
+  test.afterEach(async ({ apiServices }) => {
+    while (transientPackIds.length > 0) {
+      const id = transientPackIds.pop();
+      if (id) await apiServices.osquery.packs.delete(id);
+    }
+  });
 
   test.beforeAll(async ({ apiServices }) => {
-    // Defensive: a previously-crashed run may have left `scout-pack-*` SOs
-    // behind. Clean them before seeding this run's fixtures so Fleet policy
-    // sync doesn't surface a stale pack on our agents.
-    await cleanOsqueryPacksByPrefix(apiServices, PACK_PREFIXES);
-    await cleanOsquerySavedQueriesByPrefix(apiServices, SAVED_QUERY_PREFIXES);
+    // Orphan `scout-pack-*` cleanup is handled once per environment by the
+    // defensive-cleanup globalSetupHook in `parallel_tests/global.setup.ts`;
+    // this beforeAll only seeds fixtures.
 
     const body = getMinimalSavedQuery({
       id: `scout-pack-sq-${Date.now()}`,
@@ -68,6 +70,8 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
+    // 5 min: pack create via UI + attach saved query flyout + Fleet policy
+    // sync read-after-write + Lens-popup step + UI delete.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -143,6 +147,8 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
+    // 5 min: pack seed via API + UI edit flow (open, attach saved query,
+    // save flyout, update pack) + Fleet policy sync.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -167,6 +173,7 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
       },
     });
     const packId = (created.data as { data: { saved_object_id: string } }).data.saved_object_id;
+    transientPackIds.push(packId);
 
     await pageObjects.osqueryPackForm.navigateToPacksList();
     await pageObjects.osqueryPackForm.setPagination50Rows();
@@ -181,16 +188,17 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     // path whose Monaco + ECS-mapping validation interactions were flaking
     // on save. Mirrors the Cypress `saved_queries.cy.ts` edit-pack flow.
     await pageObjects.osqueryPackForm.attachSavedQuery(extraSavedQueryLabel);
-    // The flyout's save click fires RHF `handleSubmit` — the ECS editor runs a
-    // 500ms debounce on its internal form state, and clicking Save before the
-    // debounce flushes causes validation to silently fail. Cypress uses
-    // `cy.wait(1000)` here; the same defensive wait applies to Playwright.
-    await page.waitForTimeout(1000);
+    // Wait for RHF to reflect the attached saved query by gating on the
+    // flyout's ID input carrying the saved-query's label. This replaces an
+    // earlier `waitForTimeout(1000)` defensive sleep that existed to cover
+    // the ECS editor's 500 ms debounce — the ID-populated signal is
+    // deterministic (fires on the same RHF update the debounce drives).
+    await expect(pageObjects.osqueryPackForm.queryIdInput).toHaveValue(extraSavedQueryLabel, {
+      timeout: 15_000,
+    });
     await pageObjects.osqueryPackForm.saveQueryFlyout();
     await pageObjects.osqueryPackForm.updatePack();
     await expect(page.getByText(`Successfully updated "${packName}" pack`)).toBeVisible();
-
-    await apiServices.osquery.packs.delete(packId);
   });
 
   test('deletes a pack from the edit page', async ({
@@ -199,6 +207,8 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
+    // 5 min: pack seed via API + UI delete flow + list re-render assertion
+    // (list view has multiple render states depending on prior test state).
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -225,30 +235,27 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
       },
     });
     const packId = (created.data as { data: { saved_object_id: string } }).data.saved_object_id;
+    // Track even though the UI delete should remove it — afterEach's delete
+    // is idempotent (`ignoreErrors: [404]`) and catches partial-UI-flow cases.
+    transientPackIds.push(packId);
 
-    try {
-      // Navigate directly to the pack's edit URL instead of routing through
-      // the list + pagination. After the preceding tests' deletes run the
-      // packs list can briefly render the "Load Elastic prebuilt packs"
-      // empty-state (the pagination popover doesn't mount at all in that
-      // state, which makes the previous `setPagination50Rows` flow time out).
-      // The edit URL is stable and doesn't depend on list-render state.
-      await page.gotoApp(`osquery/packs/${packId}/edit`);
-      await page.getByRole('button', { name: /^Delete pack$/ }).click();
-      await page.getByRole('button', { name: 'Confirm' }).click();
+    // Navigate directly to the pack's edit URL instead of routing through
+    // the list + pagination. After the preceding tests' deletes run the
+    // packs list can briefly render the "Load Elastic prebuilt packs"
+    // empty-state (the pagination popover doesn't mount at all in that
+    // state, which makes the previous `setPagination50Rows` flow time out).
+    // The edit URL is stable and doesn't depend on list-render state.
+    await page.gotoApp(`osquery/packs/${packId}/edit`);
+    await page.getByRole('button', { name: /^Delete pack$/ }).click();
+    await page.getByRole('button', { name: 'Confirm' }).click();
 
-      await expect(page.getByText(/Successfully deleted/)).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/Successfully deleted/)).toBeVisible({ timeout: 30_000 });
 
-      // After deletion the edit URL 404s; navigate to the list to confirm the
-      // pack no longer appears. Scope to the page (list may be empty-state
-      // again, in which case the pack-name link simply doesn't exist — that's
-      // exactly the contract we want to assert).
-      await pageObjects.osqueryPackForm.navigateToPacksList();
-      await expect(page.getByRole('link', { name: packName })).toBeHidden();
-    } finally {
-      // Idempotent — the delete endpoint ignores 404 so this is a safety net
-      // for cases where the UI flow partially completed before asserting.
-      await apiServices.osquery.packs.delete(packId);
-    }
+    // After deletion the edit URL 404s; navigate to the list to confirm the
+    // pack no longer appears. Scope to the page (list may be empty-state
+    // again, in which case the pack-name link simply doesn't exist — that's
+    // exactly the contract we want to assert).
+    await pageObjects.osqueryPackForm.navigateToPacksList();
+    await expect(page.getByRole('link', { name: packName })).toBeHidden();
   });
 });

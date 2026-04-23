@@ -6,21 +6,11 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import { submitLiveQuery } from '../../common/submit_live_query';
+import { waitForMonacoContains } from '../../common/monaco_helpers';
+import { selectSingleAsPlainTextOption } from '../../common/combo_box_helpers';
 
 const FLYOUT_OSQUERY_EDITOR = 'flyout-body-osquery';
-
-/** Narrow shape for Monaco editor access in `page.evaluate`. */
-type WindowWithMonaco = Omit<Window, 'MonacoEnvironment'> & {
-  MonacoEnvironment?: {
-    monaco?: {
-      editor: {
-        getModels: () => Array<{ getValue: () => string }>;
-      };
-    };
-  };
-};
 
 export class AlertFlyoutPage {
   public readonly expandEventButton: Locator;
@@ -132,16 +122,7 @@ export class AlertFlyoutPage {
     // Wait for Monaco's model to actually carry the typed query before letting
     // the caller click Submit. The hidden textarea only buffers IME input, so we
     // have to read the editor model directly.
-    await this.page.waitForFunction(
-      (expected: string) => {
-        const w = window as unknown as WindowWithMonaco;
-        const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
-
-        return models.some((m) => m.getValue().includes(expected));
-      },
-      query,
-      { timeout: 10_000 }
-    );
+    await waitForMonacoContains(this.page, query, { timeoutMs: 10_000 });
   }
 
   // The osquery flyout mounts asynchronously after the take-action menu picks "Run Osquery":
@@ -178,68 +159,25 @@ export class AlertFlyoutPage {
     // EuiComboBox wrapper re-renders a few times as React settles after the
     // mode toggle; the inner `comboBoxSearchInput` is a stable leaf so its
     // readiness is the cleanest signal that the selector is actually interactable.
-    await this.packSearchInput.waitFor({ state: 'visible', timeout: 15_000 });
+    await this.flyoutBody
+      .locator('[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]')
+      .waitFor({ state: 'visible', timeout: 15_000 });
   }
 
+  /**
+   * Select a pack from the flyout's `select-live-pack` combobox. Scoped to
+   * `flyoutBody` so we don't cross-match a combobox elsewhere on the page.
+   * The combobox is `asPlainText`, so the helper asserts on the rendered
+   * label rather than the (replaced) input value. NOTE: the helper
+   * deliberately does NOT press Escape — Escape bubbles up to the alert
+   * flyout and closes it.
+   */
   async selectFlyoutPack(packName: string): Promise<void> {
-    // Target the input directly rather than the outer combobox wrapper. The
-    // wrapper (`select-live-pack`) detaches/remounts when the surrounding form
-    // re-renders after the mode switch, causing strict-click retries to fail
-    // even though Playwright eventually resolves to an element. The inner
-    // `comboBoxSearchInput` is a stable leaf node that Playwright's auto-retry
-    // resolves freshly on every action. Scope to the flyout body + the pack-
-    // selector so we don't cross-match a different combobox elsewhere on the page.
-    const searchInput = this.packSearchInput;
-    // Re-anchor after switchFlyoutToPackMode's React re-renders settle. The
-    // combobox wrapper can still be mid-remount at the exact moment the caller
-    // reaches this line, which makes Playwright's default 10 s click
-    // actionability budget insufficient on serverless CI.
-    await searchInput.waitFor({ state: 'visible', timeout: 15_000 });
-
-    // On serverless CI the EuiComboBox wrapper renders in >=3 passes as the
-    // surrounding form hydrates, and the input node detaches between each
-    // pass. Playwright's `click()` enforces element stability (same-position
-    // for two animation frames), so a click lands inside a remount window
-    // and keeps retrying until the 10–15 s budget is exhausted. Two
-    // adjustments make this reliable:
-    //   1. Drive focus via `dispatchEvent('click')` — this bypasses the
-    //      stability check entirely and opens EuiComboBox's popover the same
-    //      way a user click would (the component listens to bubbled click /
-    //      focus events, not the raw pointer-move sequence Playwright
-    //      simulates). If the first attempt lands in a remount, `toPass`
-    //      re-resolves the locator and retries against the fresh node.
-    //   2. Wait for `aria-expanded=true` — EuiComboBox sets this only after
-    //      the popover mounts, which is the first moment the input has
-    //      stopped remounting and `pressSequentially` is safe.
-    await expect(async () => {
-      await this.packSearchInput.dispatchEvent('click');
-      await expect(this.packSearchInput).toHaveAttribute('aria-expanded', 'true', {
-        timeout: 2_000,
-      });
-    }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
-
-    // `fill()` is an atomic "locate-focus-set-value" and still races the
-    // remount, so stick with `pressSequentially` for the same reason as
-    // before. Each keystroke follows focus, and the per-key delay gives
-    // React time to reconcile between options-list filter updates.
-    await this.packSearchInput.pressSequentially(packName, { delay: 20 });
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
-    // Confirm the pack is actually chosen before returning. `packs_combobox_field.tsx`
-    // uses `singleSelection={{ asPlainText: true }}`, so after the Enter press
-    // EuiComboBox REPLACES the `comboBoxSearchInput` `<input>` with a plain
-    // text node holding the option's label. Asserting on `toHaveValue` of the
-    // input therefore times out with "element(s) not found" even though the
-    // selection committed. Instead, assert on the label text rendered inside
-    // the `select-live-pack` wrapper — this is stable across EUI's
-    // input-vs-plain-text modes.
-    // NOTE: do NOT press Escape here — the key bubbles up and the surrounding
-    // alert flyout also listens for Escape, which silently closes it.
-    await expect(
-      this.flyoutBody
-        .locator('[data-test-subj="select-live-pack"]')
-        .getByText(packName, { exact: true })
-    ).toBeVisible({ timeout: 10_000 });
+    const flyoutPackWrapper = this.flyoutBody.locator('[data-test-subj="select-live-pack"]');
+    await selectSingleAsPlainTextOption(this.page, {
+      wrapper: { locator: flyoutPackWrapper },
+      optionName: packName,
+    });
   }
 
   async clickAddToCaseFromResults(): Promise<void> {
@@ -250,7 +188,7 @@ export class AlertFlyoutPage {
     // stages (loading cell → populated cell → header actions), so wait for the
     // button explicitly with a generous budget instead of relying on the
     // 10 s default click-actionability budget, which was racing against the
-    // header-render after `waitForResults` returned.
+    // header-render after `waitForPackResults` returned.
     await addToCase.waitFor({ state: 'visible', timeout: 60_000 });
     await addToCase.click();
   }
@@ -289,11 +227,5 @@ export class AlertFlyoutPage {
 
   async clickCancelInFlyout(): Promise<void> {
     await this.cancelButton.click();
-  }
-
-  private get packSearchInput(): Locator {
-    return this.flyoutBody.locator(
-      '[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]'
-    );
   }
 }

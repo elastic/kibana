@@ -24,6 +24,8 @@ test.describe('Inventory host Osquery tab', { tag: statefulLocalOnly }, () => {
     pageObjects,
     kbnClient,
   }) => {
+    // 5 min: Infra host detail page's Osquery tab mount is heavy (Infra plugin
+    // data fetches + osquery embedded form), plus agent-dependent submit.
     test.setTimeout(300_000);
     await waitForAtLeastOneAgentOnline(kbnClient);
     await browserAuth.loginAsOsqueryPowerUser();

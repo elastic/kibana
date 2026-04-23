@@ -27,6 +27,8 @@ test.describe('Live query submission with enrolled agents', { tag: localTags }, 
     page,
     pageObjects,
   }) => {
+    // 6 min: agent-dependent submit at custom 120s query timeout + results
+    // grid per-agent row rendering + Discover popup open.
     test.setTimeout(360_000);
 
     await waitForAtLeastOneAgentOnline(kbnClient);
@@ -43,7 +45,7 @@ test.describe('Live query submission with enrolled agents', { tag: localTags }, 
         await waitForLiveQueryComplete(kbnClient, actionId);
       }
 
-      await pageObjects.osqueryLiveQueryForm.waitForResults();
+      await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
       await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({
         timeout: 180_000,
       });

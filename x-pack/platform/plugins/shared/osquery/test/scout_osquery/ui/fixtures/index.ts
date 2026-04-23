@@ -211,5 +211,3 @@ export const customSpaceUiTest = spaceBaseTest.extend<
     await use(extendedPageObjects);
   },
 });
-
-export * as testData from '../../api/fixtures/constants';

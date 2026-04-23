@@ -15,6 +15,15 @@ import {
 } from '../helpers/detection_rule_lifecycle';
 import { getMinimalPack } from '../../api/fixtures/constants';
 
+/**
+ * UI-only coverage of the rule-editor pack-response-action flow. The exact
+ * payload-shape assertions (outgoing PUT body + persisted GET readback) have
+ * moved to `api/tests/response_actions_pack_queries.spec.ts` per the
+ * `osquery-scout-ui-post-review-hardening` change (Workstream A). This spec
+ * now only asserts observable UI outcomes: the "Rule saved" toast and the
+ * combobox value persisting across edit-mode re-entry.
+ */
+
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Pack-based Osquery response actions in the rule editor', { tag: localTags }, () => {
@@ -81,12 +90,13 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     await apiServices.osquery.packs.delete(multiQueryPackId);
   });
 
-  test('persists pack response actions and expands queries on save', async ({
+  test('UI: saves a pack response action and the selection persists across edit-mode re-entry', async ({
     browserAuth,
-    kbnClient,
     page,
     pageObjects,
   }) => {
+    // 5 min: rule-edit flow involves two save round trips plus re-enter
+    // edit mode + pack selection. Slower than the API-layer equivalent.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -95,11 +105,6 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     await pageObjects.osqueryRuleEditor.enterRuleEditMode();
     await pageObjects.osqueryRuleEditor.goToActionsTab();
 
-    const savePromise = page.waitForResponse(
-      (resp) => resp.url().includes('detection_engine/rules') && resp.request().method() === 'PUT',
-      { timeout: 60_000 }
-    );
-
     await pageObjects.osqueryRuleEditor.clickAddOsqueryResponseAction();
     await pageObjects.osqueryRuleEditor.chooseRunPackInResponseAction(0);
     await pageObjects.osqueryRuleEditor.selectPackInComboBox(0, singleQueryPackName, [
@@ -107,20 +112,13 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     ]);
     await pageObjects.osqueryRuleEditor.clickSaveRule();
 
-    const firstSave = await savePromise;
-    expect(firstSave.status()).toBe(200);
-    const firstPostData = firstSave.request().postData();
-    const firstBody = JSON.parse(firstPostData ?? '{}') as {
-      response_actions?: Array<{ params?: { queries?: unknown[] } }>;
-    };
-    expect(firstBody.response_actions?.[0]?.params?.queries).toStrictEqual([
-      {
-        interval: 3600,
-        query: 'select * from uptime;',
-        id: singleQueryKey,
-      },
-    ]);
+    // Observable outcome: "rule was saved" toast.
+    await expect(page.getByText(`${ruleName} was saved`)).toBeVisible({ timeout: 60_000 });
+    await pageObjects.osqueryRuleEditor.dismissAllToasts();
 
+    // Re-enter edit mode and confirm the pack selection persisted. This is
+    // the user-visible proof that the first save took effect — payload-shape
+    // assertions on the outgoing PUT body live in the API spec instead.
     await pageObjects.osqueryRuleEditor.enterRuleEditMode();
     await pageObjects.osqueryRuleEditor.goToActionsTab();
     await pageObjects.osqueryRuleEditor
@@ -131,68 +129,22 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
       pageObjects.osqueryRuleEditor.responseActionItem(0).getByTestId('comboBoxSearchInput')
     ).toHaveValue(singleQueryPackName);
 
-    const secondSavePromise = page.waitForResponse(
-      (resp) => resp.url().includes('detection_engine/rules') && resp.request().method() === 'PUT',
-      { timeout: 60_000 }
-    );
-
+    // Switch to the multi-query pack and save again; same observable
+    // outcome assertion.
     await pageObjects.osqueryRuleEditor.selectPackInComboBox(0, multiQueryPackName, multiKeys);
     await pageObjects.osqueryRuleEditor.clickSaveChanges();
-    const secondSave = await secondSavePromise;
-    expect(secondSave.status()).toBe(200);
-    const secondPostData = secondSave.request().postData();
-    const secondBody = JSON.parse(secondPostData ?? '{}') as {
-      response_actions?: Array<{ params?: { queries?: unknown[] } }>;
-    };
-    const expectedSentMultiQueries = [
-      {
-        interval: 3600,
-        query: 'SELECT * FROM memory_info;',
-        platform: 'linux',
-        id: multiKeys[0],
-      },
-      {
-        interval: 3600,
-        query: 'SELECT * FROM system_info;',
-        id: multiKeys[1],
-      },
-      {
-        interval: 10,
-        query: 'select opera_extensions.* from users join opera_extensions using (uid);',
-        id: multiKeys[2],
-      },
-    ];
-    expect(secondBody.response_actions?.[0]?.params?.queries).toStrictEqual(
-      expectedSentMultiQueries
-    );
+    await expect(page.getByText(`${ruleName} was saved`)).toBeVisible({ timeout: 60_000 });
+    await pageObjects.osqueryRuleEditor.dismissAllToasts();
 
-    // Post-save API verification (§3.4.1 of `osquery-scout-ui-hardening` tasks.md).
-    // The combobox-commit guard in `rule_editor.ts:selectPackInComboBox`
-    // (toHaveValue(packName) before save) prevents the in-flight POST body
-    // from carrying the wrong pack's queries, but we re-read the persisted
-    // rule to ensure server-side state matches what the UI claims — this
-    // catches any future regression where the POST body is correct but
-    // server-side merging drops fields.
-    //
-    // Detection-engine's `OsqueryQuery` zod schema
-    // (x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/
-    //  model/rule_response_actions/response_actions.gen.ts) does not declare
-    // `interval`, so zod strips it on persist/read. The UI still ships
-    // `interval` in the POST body (verified above), but the round-tripped
-    // value omits it.
-    const expectedPersistedMultiQueries = expectedSentMultiQueries.map(
-      ({ interval: _interval, ...rest }) => rest
-    );
-    const persisted = await kbnClient.request<{
-      response_actions?: Array<{
-        params?: { queries?: Array<{ id: string; query: string }> };
-      }>;
-    }>({
-      method: 'GET',
-      path: `/api/detection_engine/rules?id=${ruleId}`,
-    });
-    expect(persisted.data.response_actions?.[0]?.params?.queries).toStrictEqual(
-      expectedPersistedMultiQueries
-    );
+    // Re-enter to confirm the second save persisted the new pack.
+    await pageObjects.osqueryRuleEditor.enterRuleEditMode();
+    await pageObjects.osqueryRuleEditor.goToActionsTab();
+    await pageObjects.osqueryRuleEditor
+      .responseActionItem(0)
+      .getByTestId('comboBoxSearchInput')
+      .waitFor({ state: 'visible' });
+    await expect(
+      pageObjects.osqueryRuleEditor.responseActionItem(0).getByTestId('comboBoxSearchInput')
+    ).toHaveValue(multiQueryPackName);
   });
 });

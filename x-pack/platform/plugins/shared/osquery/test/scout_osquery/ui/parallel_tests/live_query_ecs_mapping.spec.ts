@@ -31,6 +31,8 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
     page,
     pageObjects,
   }) => {
+    // 6 min: combobox-heavy ECS mapping setup + agent-dependent submit +
+    // results-grid header rendering.
     test.setTimeout(360_000);
 
     // `select * from uptime;` is the canonical osquery sample because every
@@ -63,7 +65,7 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
         await waitForLiveQueryComplete(kbnClient, actionId);
       }
 
-      await pageObjects.osqueryLiveQueryForm.waitForResults();
+      await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
       // `message` appears only when the server persisted the dynamic pairing
       // AND the agent's `days` column resolved to a value. `tags` appears only
       // when the static mapping is honored in the result pipeline.
@@ -91,7 +93,7 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
     await pageObjects.osqueryEcsMappingEditor.typeEcsField('message{downArrow}{enter}');
     await pageObjects.osqueryEcsMappingEditor.typeColumnValue('days{downArrow}{enter}');
 
-    const rows = pageObjects.osqueryEcsMappingEditor.ecsMappingForm();
+    const rows = pageObjects.osqueryEcsMappingEditor.mappingForm;
     await expect(rows).toHaveCount(2, { timeout: 10_000 });
 
     // eslint-disable-next-line playwright/no-nth-methods -- the form always renders a trailing empty row; removing the first (populated) row validates the delete action returns the form to a single-row state

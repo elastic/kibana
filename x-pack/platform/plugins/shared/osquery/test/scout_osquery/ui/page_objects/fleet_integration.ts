@@ -6,7 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 export class FleetIntegrationPage {
   public readonly gotItButton: Locator;
@@ -35,51 +34,56 @@ export class FleetIntegrationPage {
     this.integrationPolicyUpgradeBtn = this.page.testSubj.locator('integrationPolicyUpgradeBtn');
   }
 
-  /** Fleet tour shows a "Got it" button on first visit. Dismiss it if present. */
-  async closeFleetTourIfVisible(): Promise<void> {
-    if (await this.gotItButton.isVisible().catch(() => false)) {
-      await this.gotItButton.click();
-    }
+  /**
+   * Click the Fleet tour's "Got it" button. Callers MUST know the tour is
+   * visible — this method does not no-op when the button is absent. Playwright
+   * creates a fresh browser context per test, so the tour is present on the
+   * first Fleet navigation within a test (or not at all, on subsequent
+   * navigations within the same test).
+   */
+  async dismissFleetTour(): Promise<void> {
+    await this.gotItButton.click();
   }
 
   async gotoFleetAgentPolicies(): Promise<void> {
     await this.page.gotoApp('fleet/policies');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async gotoFleetIntegrations(): Promise<void> {
     await this.page.gotoApp('integrations');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async gotoOsqueryManagerIntegrationDetail(): Promise<void> {
     await this.page.gotoApp('integrations/detail/osquery_manager/overview');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async gotoOsqueryManagerIntegrationDetailForVersion(version: string): Promise<void> {
     await this.page.gotoApp(`integrations/detail/osquery_manager-${version}/overview`);
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
+  /**
+   * Create a new agent policy via the Fleet UI. Callers SHOULD dismiss the
+   * Fleet first-visit tour (`dismissFleetTour`) in a spec-level `beforeEach`
+   * before invoking this method, or its first click will be intercepted by
+   * the tour overlay.
+   */
   async createAgentPolicy(policyName: string): Promise<void> {
-    await this.closeFleetTourIfVisible();
     await this.createAgentPolicyButton.click();
     await this.createAgentPolicyNameField.fill(policyName);
     await this.createAgentPolicyFlyoutBtn.click();
-    await this.closeFleetTourIfVisible();
   }
 
+  /**
+   * Open an existing agent policy by name. Callers are responsible for any
+   * tour dismissal (see `dismissFleetTour`).
+   */
   async openAgentPolicy(policyName: string): Promise<void> {
-    await this.closeFleetTourIfVisible();
     await this.agentPolicyNameLink.filter({ hasText: policyName }).click();
-    await this.closeFleetTourIfVisible();
   }
 
   async addOsqueryManagerIntegrationToPolicy(integrationName: string): Promise<void> {
     await this.addPackagePolicyButton.click();
     await this.addIntegrationFlyout.waitFor({ state: 'visible' });
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
 
     await this.comboBoxInput.fill('osquery manager');
     await this.page.keyboard.press('ArrowDown');

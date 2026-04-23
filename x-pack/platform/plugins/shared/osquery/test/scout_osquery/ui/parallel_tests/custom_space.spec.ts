@@ -91,20 +91,25 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     await waitForPolicySpaceShareVisible(kbnClient, scoutSpace.id);
   });
 
-  test.afterAll(async ({ apiServices, scoutSpace }) => {
+  test.afterAll(async ({ apiServices, scoutSpace, log }) => {
     if (packId) {
-      await apiServices.osquery.packs.delete(packId).catch(() => {});
+      // osquery packs.delete already handles 404 via `ignoreErrors: [404]`.
+      await apiServices.osquery.packs.delete(packId);
     }
 
     if (restoreOsqueryPolicies) {
-      await restoreOsqueryPolicies().catch(() => {});
+      await restoreOsqueryPolicies().catch((err: Error) =>
+        log.debug(`restoreOsqueryPolicies failed: ${err.message}`)
+      );
     }
 
     // Skill-mandated catch-all for spaceTest-based specs: removes any
     // standard-list SOs the test harness tracked inside the Scout space.
     // Runs AFTER the domain-specific cleanup so a failure there still lets the
     // generic sweep fire.
-    await scoutSpace.savedObjects.cleanStandardList().catch(() => {});
+    await scoutSpace.savedObjects
+      .cleanStandardList()
+      .catch((err: Error) => log.debug(`cleanStandardList failed: ${err.message}`));
   });
 
   test('runs a live query in the custom space and asserts the Discover link routes to that space', async ({
@@ -115,6 +120,8 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     scoutSpace,
     pageObjects,
   }) => {
+    // 6 min: space-create + policy-share + space-scoped UI navigation (which
+    // can re-mount on first render) + agent-dependent submit + Discover popup.
     test.setTimeout(360_000);
 
     await waitForAtLeastOneAgentOnline(kbnClient);
@@ -132,7 +139,7 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
         await waitForLiveQueryComplete(kbnClient, actionId, { spaceId: scoutSpace.id });
       }
 
-      await pageObjects.osqueryLiveQueryForm.waitForResults();
+      await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
       await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({ timeout: 180_000 });
     });
 
@@ -158,6 +165,7 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     apiServices,
     pageObjects,
   }) => {
+    // 6 min: pack seed + space-scoped UI pack-run + agent-dependent results.
     test.setTimeout(360_000);
 
     await waitForAtLeastOneAgentOnline(kbnClient);
@@ -182,7 +190,6 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
       await waitForLiveQueryComplete(kbnClient, actionId, { spaceId: scoutSpace.id });
     }
 
-    await pageObjects.osqueryLiveQueryForm.waitForResults();
-    await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({ timeout: 180_000 });
+    await pageObjects.osqueryLiveQueryForm.waitForPackResults();
   });
 });

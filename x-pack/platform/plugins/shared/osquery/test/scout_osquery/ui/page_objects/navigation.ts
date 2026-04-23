@@ -6,7 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 /**
  * Osquery left-nav and deep links. With `queryHistoryRework` enabled (default in tests),
@@ -24,40 +23,23 @@ export class OsqueryNavigation {
 
   async gotoRoot(): Promise<void> {
     await this.page.gotoApp('osquery');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async gotoHistory(): Promise<void> {
     await this.page.gotoApp('osquery/history');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-  }
-
-  async gotoLiveQueriesLegacy(): Promise<void> {
-    await this.page.gotoApp('osquery/live_queries');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async gotoPacks(): Promise<void> {
     await this.page.gotoApp('osquery/packs');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async gotoSavedQueries(): Promise<void> {
     await this.page.gotoApp('osquery/saved_queries');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   /** New live query form (`/new` when queryHistoryRework is on, else `/live_queries/new`). */
   async gotoNewLiveQuery(): Promise<void> {
     await this.page.gotoApp('osquery/new');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-    await this.liveQuerySubmitButton.waitFor({ state: 'visible', timeout: 30_000 });
-  }
-
-  /** Legacy deep link; with queryHistoryRework, router redirects to `/new`. */
-  async gotoNewLiveQueryLegacyPath(): Promise<void> {
-    await this.page.gotoApp('osquery/live_queries/new');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     await this.liveQuerySubmitButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 }

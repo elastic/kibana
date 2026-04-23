@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
+import { selectSingleAsPlainTextOption } from '../../common/combo_box_helpers';
 
 export class EcsMappingEditorPage {
   public readonly mappingForm: Locator;
@@ -17,85 +17,40 @@ export class EcsMappingEditorPage {
     this.advancedAccordion = this.page.testSubj.locator('advanced-accordion-content');
   }
 
-  ecsMappingForm(): Locator {
-    return this.mappingForm;
-  }
-
   async toggleAdvancedSection(): Promise<void> {
     await this.advancedAccordion.click();
   }
 
+  /**
+   * Select a single osquery column value on the ECS-mapping editor's column
+   * combobox at the given row index. Uses `selectSingleAsPlainTextOption`,
+   * which clicks the option by `title` attribute — stable across EUI's
+   * description-vs-value accessible-name rendering (the osquery column
+   * combobox renders columns with description text but keeps `title` as the
+   * raw column name).
+   */
   async typeColumnValue(text: string, index = 0): Promise<void> {
-    // eslint-disable-next-line playwright/no-nth-methods -- ECS row index is parameterized for multi-row mappings
-    const fieldSelect = this.page.testSubj.locator('osqueryColumnValueSelect').nth(index);
-    const searchInput = fieldSelect.getByTestId('comboBoxSearchInput');
-    const options = this.page.getByRole('option');
-    // eslint-disable-next-line playwright/no-nth-methods -- pick first schema option in dropdown
-    const option = options.first();
     const cleanText = text.replace('{downArrow}{enter}', '');
-
-    for (let attempt = 0; attempt < 5; attempt++) {
-      await searchInput.click();
-      await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-      await searchInput.fill('');
-      await searchInput.pressSequentially(cleanText);
-
-      try {
-        await option.waitFor({ state: 'visible', timeout: 10_000 });
-        await option.click();
-
-        return;
-      } catch {
-        await searchInput.press('Escape');
-        await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-      }
-    }
-
-    await searchInput.click();
-    await searchInput.fill('');
-    await searchInput.pressSequentially(cleanText);
-    await option.waitFor({ state: 'visible', timeout: 15_000 });
-    await option.click();
+    // eslint-disable-next-line playwright/no-nth-methods -- ECS row index is parameterized for multi-row mappings
+    const rowLocator = this.page.testSubj.locator('osqueryColumnValueSelect').nth(index);
+    await selectSingleAsPlainTextOption(this.page, {
+      wrapper: { locator: rowLocator },
+      optionName: cleanText,
+    });
   }
 
+  /**
+   * Select a single ECS field on the ECS-mapping editor's field combobox at
+   * the given row index. Same rationale as `typeColumnValue` — ECS field
+   * options render the description as visible text, so we match by `title`.
+   */
   async typeEcsField(text: string, index = 0): Promise<void> {
-    // eslint-disable-next-line playwright/no-nth-methods -- ECS row index is parameterized for multi-row mappings
-    const ecsWrapper = this.page.testSubj.locator('ECS-field-input').nth(index);
-    const searchInput = ecsWrapper.getByTestId('comboBoxSearchInput');
     const cleanText = text.replace('{downArrow}{enter}', '');
-
-    for (let attempt = 0; attempt < 5; attempt++) {
-      await searchInput.click();
-      await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-      await searchInput.fill('');
-      await searchInput.pressSequentially(cleanText);
-
-      const filteredOptions = this.page
-        .locator('[role="option"]')
-        .filter({ hasText: new RegExp(`^.*${cleanText}.*$`, 'i') });
-      // eslint-disable-next-line playwright/no-nth-methods -- first option matching typed ECS field prefix
-      const matchingOption = filteredOptions.first();
-
-      try {
-        await matchingOption.waitFor({ state: 'visible', timeout: 10_000 });
-        await matchingOption.click();
-
-        return;
-      } catch {
-        await searchInput.press('Escape');
-        await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-      }
-    }
-
-    await searchInput.click();
-    await searchInput.fill('');
-    await searchInput.pressSequentially(cleanText);
-    const filteredOptions = this.page
-      .locator('[role="option"]')
-      .filter({ hasText: new RegExp(`^.*${cleanText}.*$`, 'i') });
-    // eslint-disable-next-line playwright/no-nth-methods -- first option matching typed ECS field prefix
-    const matchingOption = filteredOptions.first();
-    await matchingOption.waitFor({ state: 'visible', timeout: 15_000 });
-    await matchingOption.click();
+    // eslint-disable-next-line playwright/no-nth-methods -- ECS row index is parameterized for multi-row mappings
+    const rowLocator = this.page.testSubj.locator('ECS-field-input').nth(index);
+    await selectSingleAsPlainTextOption(this.page, {
+      wrapper: { locator: rowLocator },
+      optionName: cleanText,
+    });
   }
 }

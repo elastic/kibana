@@ -34,8 +34,10 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     await bootstrapSecurityAlertsIndex(kbnClient);
   });
 
-  test.afterAll(async ({ esClient, kbnClient }) => {
-    await deleteSeededAlerts(esClient, ruleId).catch(() => {});
+  test.afterAll(async ({ esClient, kbnClient, log }) => {
+    await deleteSeededAlerts(esClient, ruleId).catch((err: Error) =>
+      log.debug(`deleteSeededAlerts failed: ${err.message}`)
+    );
     await deleteDetectionRule(kbnClient, ruleId);
   });
 
@@ -55,6 +57,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     page,
     pageObjects,
   }) => {
+    // 5 min: alert seed + flyout open + 2-agent wait + substituted-query submit.
     test.setTimeout(300_000);
 
     const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
@@ -92,6 +95,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     page,
     pageObjects,
   }) => {
+    // 5 min: alert seed + timeline-open flow + flyout + substituted-query submit.
     test.setTimeout(300_000);
 
     const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);

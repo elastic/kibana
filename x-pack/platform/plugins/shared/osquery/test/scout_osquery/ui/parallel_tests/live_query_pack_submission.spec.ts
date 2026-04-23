@@ -69,6 +69,8 @@ test.describe('Live query pack submission', { tag: localTags }, () => {
     page,
     pageObjects,
   }) => {
+    // 6 min: pack-mode submit + agent execution + per-query grid render can
+    // take 3-5 min on a cold stack; 6 leaves slack for CI variance.
     test.setTimeout(360_000);
 
     await browserAuth.loginAsOsqueryPowerUser();

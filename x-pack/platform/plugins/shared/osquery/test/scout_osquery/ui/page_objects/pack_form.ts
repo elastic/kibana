@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
+import { waitForMonacoContains } from '../../common/monaco_helpers';
 
 export class PackFormPage {
   public readonly addPackButton: Locator;
@@ -57,24 +57,16 @@ export class PackFormPage {
 
   async navigateToPacksList(): Promise<void> {
     await this.page.gotoApp('osquery/packs');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     await this.addPackButton.waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async openCreatePackFlyout(): Promise<void> {
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     await this.addPackButton.click();
   }
 
   async fillPackName(name: string): Promise<void> {
     await this.packNameInput.waitFor({ state: 'visible', timeout: 15_000 });
     await this.packNameInput.fill(name);
-  }
-
-  async fillPackDescription(text: string): Promise<void> {
-    if (await this.packDescriptionInput.isVisible().catch(() => false)) {
-      await this.packDescriptionInput.fill(text);
-    }
   }
 
   async selectPolicy(policyLabel: string): Promise<void> {
@@ -110,20 +102,7 @@ export class PackFormPage {
     await this.osqueryEditor.evaluate((el: HTMLElement) => {
       el.querySelector<HTMLTextAreaElement>('textarea')?.blur();
     });
-    await this.page.waitForFunction(
-      (expected: string) => {
-        const w = window as unknown as {
-          MonacoEnvironment?: {
-            monaco?: { editor: { getModels: () => Array<{ getValue: () => string }> } };
-          };
-        };
-        const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
-
-        return models.some((m) => m.getValue().includes(expected));
-      },
-      query,
-      { timeout: 10_000 }
-    );
+    await waitForMonacoContains(this.page, query, { timeoutMs: 10_000 });
   }
 
   async setQueryIntervalSeconds(seconds: string): Promise<void> {
@@ -156,25 +135,31 @@ export class PackFormPage {
     await this.page.keyboard.press('Enter');
   }
 
+  /**
+   * Save a newly-created pack. If the pack is bound to at least one agent
+   * policy (the common case in tests), Fleet surfaces a confirmation modal
+   * — the method waits for it and confirms. Callers that save a policy-less
+   * pack SHOULD use `saveNewPackWithoutPolicyModal` instead.
+   */
   async saveNewPack(): Promise<void> {
     await this.savePackButton.click();
-    await this.confirmPolicyChangeModalIfVisible();
+    await this.confirmPolicyChangeModal();
   }
 
   async updatePack(): Promise<void> {
     await this.updatePackButton.click();
-    await this.confirmPolicyChangeModalIfVisible();
+    await this.confirmPolicyChangeModal();
   }
 
-  // Pack create/update attaches queries to agent policies. Fleet shows a confirmation
-  // modal ("Update X policies?") when the pack is bound to live policies; the Cypress
-  // suite relied on `closeModalIfVisible()` after every save. Without dismissing it,
-  // the subsequent assertions (success toast, navigation) never land because the
-  // overlay intercepts pointer events on the next action.
-  async confirmPolicyChangeModalIfVisible(): Promise<void> {
-    if (await this.confirmModalButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      await this.confirmModalButton.click();
-    }
+  /**
+   * Click the "Save and update X policies" confirmation modal that Fleet
+   * surfaces when a pack is bound to live policies. Asserts the modal is
+   * present — callers that don't expect it SHOULD use
+   * `saveNewPackWithoutPolicyModal` on the parent method instead.
+   */
+  async confirmPolicyChangeModal(): Promise<void> {
+    await this.confirmModalButton.waitFor({ state: 'visible', timeout: 15_000 });
+    await this.confirmModalButton.click();
   }
 
   async openPackFromList(packName: string): Promise<void> {

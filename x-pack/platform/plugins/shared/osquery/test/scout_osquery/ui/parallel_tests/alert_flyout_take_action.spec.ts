@@ -25,6 +25,9 @@ const localTags = [...tags.stateful.classic, ...tags.serverless.security.complet
 test.describe('Alert flyout take action and investigation guide', { tag: localTags }, () => {
   let ruleId: string;
   let ruleName: string;
+  // Track test-local rules seeded by individual tests (e.g. the "persists IG
+  // suggestions" test seeds its own rule to stay ordering-independent).
+  const transientRuleIds: string[] = [];
 
   test.beforeAll(async ({ kbnClient }) => {
     const rule = buildOsqueryAlertTestRule({ includeResponseActions: false });
@@ -34,8 +37,18 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     await bootstrapSecurityAlertsIndex(kbnClient);
   });
 
-  test.afterAll(async ({ esClient, kbnClient }) => {
-    await deleteSeededAlerts(esClient, ruleId).catch(() => {});
+  test.afterEach(async ({ kbnClient }) => {
+    // Drain any test-local rule seeds from this test's run.
+    while (transientRuleIds.length > 0) {
+      const id = transientRuleIds.pop();
+      if (id) await deleteDetectionRule(kbnClient, id);
+    }
+  });
+
+  test.afterAll(async ({ esClient, kbnClient, log }) => {
+    await deleteSeededAlerts(esClient, ruleId).catch((err: Error) =>
+      log.debug(`deleteSeededAlerts failed: ${err.message}`)
+    );
     await deleteDetectionRule(kbnClient, ruleId);
   });
 
@@ -44,6 +57,8 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     page,
     pageObjects,
   }) => {
+    // 5 min: rule-edit flow + IG queries add + save flow on the detection-
+    // engine rule endpoint (PUT is slow on serverless task-manager).
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -60,7 +75,7 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     );
     await pageObjects.osqueryRuleEditor.clickSaveChanges();
     await expect(page.getByText(`${ruleName} was saved`)).toBeVisible();
-    await pageObjects.osqueryRuleEditor.dismissToastIfVisible();
+    await pageObjects.osqueryRuleEditor.dismissAllToasts();
   });
 
   test('runs a live query from the alert flyout and adds the action to Timeline', async ({
@@ -70,6 +85,8 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     page,
     pageObjects,
   }) => {
+    // 5 min: alert seed + flyout open + agent-dependent submit + results +
+    // Add-to-Timeline flow + timeline bottom-bar assertion.
     test.setTimeout(300_000);
 
     const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
@@ -99,7 +116,7 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
 
     await pageObjects.osqueryAlertFlyout.clickAddToTimeline();
     await page.testSubj.locator('globalToastList').getByText('Added').waitFor({ state: 'visible' });
-    await pageObjects.osqueryRuleEditor.dismissToastIfVisible();
+    await pageObjects.osqueryRuleEditor.dismissAllToasts();
     await pageObjects.osqueryAlertFlyout.clickCancelInFlyout();
     await page.testSubj.locator('timeline-bottom-bar').getByText('Untitled timeline').click();
     await expect(page.testSubj.locator('draggableWrapperKeyboardHandler')).toContainText(
@@ -113,44 +130,53 @@ test.describe('Alert flyout take action and investigation guide', { tag: localTa
     page,
     pageObjects,
   }) => {
+    // 5 min: rule-edit navigation + re-edit (two saves) + IG-block render +
+    // toast handling. Slow because rule-edit route fetches connectors + rule.
     test.setTimeout(300_000);
+
+    // Seed a dedicated rule with IG response actions baked in — decouples this
+    // test from test 1's UI-driven add-IG-queries flow. Ordering-free by
+    // design: this test is independently runnable via --grep.
+    //
+    // The response-action shape mirrors `buildOsqueryAlertTestRule({
+    // includeResponseActions: true })` in `helpers/detection_rule_lifecycle.ts`,
+    // which in turn mirrors what `clickOsqueryAddInvestigationGuideQueries`
+    // writes when the IG button is clicked in the UI — so future changes to
+    // the IG button's output should be reflected in that helper's source.
+    const seededRule = buildOsqueryAlertTestRule({
+      includeResponseActions: true,
+      nameSuffix: `ig-persist-${Date.now()}`,
+    });
+    const created = await createDetectionRule(kbnClient, seededRule);
+    const seededRuleId = created.id;
+    const seededRuleName = created.name;
+    transientRuleIds.push(seededRuleId); // cleaned in afterEach
+
     await browserAuth.loginAsOsqueryPowerUser();
 
-    // First, verify via the API that test 1 actually persisted the IG response
-    // actions to the rule. The `Save changes` UI flow can pop up a confirmation
-    // modal in some build types — this assertion catches that regression
-    // without it cascading into a generic UI-not-rendered timeout.
-    const apiRule = await kbnClient.request<{ response_actions?: unknown[] }>({
-      method: 'GET',
-      path: `/api/detection_engine/rules?id=${ruleId}`,
-    });
-    const responseActions =
-      (apiRule.data as { response_actions?: Array<{ params?: { query?: string } }> })
-        .response_actions ?? [];
-    test.skip(
-      responseActions.length === 0,
-      'IG response actions were not persisted by test 1 (likely a confirmation-modal regression in `clickSaveChanges`); skip until the UI flow is fixed so this test gives a clean signal rather than masking the upstream issue.'
+    await pageObjects.osqueryRuleEditor.navigateToRuleEdit(seededRuleId);
+    await pageObjects.osqueryRuleEditor.goToActionsTab();
+    await pageObjects.osqueryRuleEditor
+      .responseActionItem(0)
+      .waitFor({ state: 'visible', timeout: 60_000 });
+    await expect(pageObjects.osqueryRuleEditor.responseActionItem(0)).toContainText(
+      'os_version',
+      { timeout: 30_000 }
     );
-
-    await pageObjects.osqueryRuleEditor.navigateToRuleEdit(ruleId);
-    await pageObjects.osqueryRuleEditor.goToActionsTab();
-    await pageObjects.osqueryRuleEditor
-      .responseActionItem(0)
-      .waitFor({ state: 'visible', timeout: 60_000 });
-    await expect(pageObjects.osqueryRuleEditor.responseActionItem(0)).toContainText('os_version', {
-      timeout: 30_000,
-    });
     await pageObjects.osqueryRuleEditor.clickSaveChanges();
-    await expect(page.getByText(`${ruleName} was saved`)).toBeVisible({ timeout: 60_000 });
-    await pageObjects.osqueryRuleEditor.dismissToastIfVisible();
+    await expect(page.getByText(`${seededRuleName} was saved`)).toBeVisible({
+      timeout: 60_000,
+    });
+    await pageObjects.osqueryRuleEditor.dismissAllToasts();
 
-    await pageObjects.osqueryRuleEditor.navigateToRuleEdit(ruleId);
+    await pageObjects.osqueryRuleEditor.navigateToRuleEdit(seededRuleId);
     await pageObjects.osqueryRuleEditor.goToActionsTab();
     await pageObjects.osqueryRuleEditor
       .responseActionItem(0)
       .waitFor({ state: 'visible', timeout: 60_000 });
-    await expect(pageObjects.osqueryRuleEditor.responseActionItem(0)).toContainText('os_version', {
-      timeout: 30_000,
-    });
+    await expect(pageObjects.osqueryRuleEditor.responseActionItem(0)).toContainText(
+      'os_version',
+      { timeout: 30_000 }
+    );
   });
 });

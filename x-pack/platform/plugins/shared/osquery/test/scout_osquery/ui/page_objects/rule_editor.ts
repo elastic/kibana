@@ -6,8 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 
 const OSQUERY_RESPONSE_ACTION_ADD_BUTTON = 'Osquery-response-action-type-selection-option';
 
@@ -48,12 +46,10 @@ export class RuleEditorPage {
 
   async navigateToRuleEdit(ruleId: string): Promise<void> {
     await this.page.gotoApp(`security/rules/id/${ruleId}/edit`);
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async navigateToRulesList(): Promise<void> {
     await this.page.gotoApp('security/rules');
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async openRuleByName(ruleName: string): Promise<void> {
@@ -88,17 +84,13 @@ export class RuleEditorPage {
   async enterRuleEditMode(): Promise<void> {
     await this.editRuleSettingsLink.waitFor({ state: 'visible', timeout: 60_000 });
     await this.editRuleSettingsLink.click();
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-  }
-
-  async closeDatePickerTabIfVisible(): Promise<void> {
-    if (await this.absoluteDatePickerTab.isVisible().catch(() => false)) {
-      await this.page.keyboard.press('Escape').catch(() => {});
-    }
   }
 
   async goToActionsTab(): Promise<void> {
-    await this.closeDatePickerTabIfVisible();
+    // Escape is idempotent — if the rule-edit page's absolute-date-picker
+    // popover is open from a prior click it will close; otherwise nothing
+    // happens. No conditional state check needed.
+    await this.page.keyboard.press('Escape');
     await this.actionsTab.click();
     await this.loadingConnectorsText.waitFor({ state: 'hidden' }).catch(() => {});
   }
@@ -132,11 +124,26 @@ export class RuleEditorPage {
     // EuiComboBox commits the selection asynchronously. Without waiting for the
     // input value to actually carry the new pack name, callers can race a
     // subsequent save click before the form's `pack` field updates — the
-    // request body then carries the previous pack's queries (observed in
-    // `alert_response_action_form` second-save assertion).
-    // Combobox single-select with `singleSelection={asPlainText}` writes the
-    // chosen option label into the input's `value` attribute.
-    await expect(search).toHaveValue(packName, { timeout: 30_000 });
+    // request body then carries the previous pack's queries.
+    //
+    // CSS `[value="..."]` attribute selectors do NOT match React-controlled
+    // input values (the attribute reflects defaultValue only; the live value
+    // lives in the DOM property), so read the property via
+    // `page.waitForFunction`. That's a Playwright synchronization primitive,
+    // which preserves the page-object "no `expect()`" rule.
+    await search.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.page.waitForFunction(
+      ({ itemSubj, expectedValue }) => {
+        const row = document.querySelector(`[data-test-subj="${itemSubj}"]`);
+        const input = row?.querySelector('[data-test-subj="comboBoxSearchInput"]') as
+          | HTMLInputElement
+          | null;
+
+        return input?.value === expectedValue;
+      },
+      { itemSubj: `response-actions-list-item-${itemIndex}`, expectedValue: packName },
+      { timeout: 30_000 }
+    );
 
     // The combobox commit only marks `packId` in the form; the form's
     // `queries` field is populated by a subsequent `useEffect` that waits on
@@ -160,12 +167,15 @@ export class RuleEditorPage {
     await packQueriesTable.waitFor({ state: 'visible', timeout: 30_000 });
 
     const expectedRowCount = expectedQueryIds?.length ?? 1;
-    await expect
-      .poll(() => packQueriesTable.locator('tbody tr.euiTableRow').count(), {
-        timeout: 30_000,
-        intervals: [250, 500, 1_000],
-      })
-      .toBeGreaterThanOrEqual(expectedRowCount);
+    // Wait for the Nth row to mount — equivalent to "row count >= N" but
+    // expressed as a single `waitFor` so we stay out of the `expect.poll`
+    // page-object anti-pattern. Targeting the (N-1)-th row is safe because
+    // EuiBasicTable mounts rows in order.
+    // eslint-disable-next-line playwright/no-nth-methods -- target the Nth row to confirm at least N rows have rendered
+    await packQueriesTable
+      .locator('tbody tr.euiTableRow')
+      .nth(expectedRowCount - 1)
+      .waitFor({ state: 'attached', timeout: 30_000 });
 
     // Optional per-id belt-and-braces: if the caller knows the exact ids we
     // expect, confirm each one's ID-column text is rendered. Missing IDs
@@ -214,7 +224,14 @@ export class RuleEditorPage {
     await this.saveChangesButton.click();
   }
 
-  async dismissToastIfVisible(): Promise<void> {
+  /**
+   * Dismiss every currently-visible toast in the global toast list. `.all()`
+   * returns an empty array when the list is empty, so this method is a no-op
+   * in that case (not a conditional branch). Individual clicks are wrapped in
+   * `.catch()` because toasts can auto-dismiss between the `all()` snapshot
+   * and the `click()` — that race is unavoidable in the DOM.
+   */
+  async dismissAllToasts(): Promise<void> {
     const closeButtons = await this.toastList.locator('[data-test-subj="toastCloseButton"]').all();
     for (const btn of closeButtons) {
       await btn.click().catch(() => {});

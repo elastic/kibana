@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { OsqueryUiApiServicesFixture } from '../fixtures';
+import type { OsqueryApiService } from '../../common/services/osquery_api_service';
 
 /**
  * Defensive pre-cleanup helpers. A previous test run that crashed between
  * creating a named resource and running `afterAll` can leave packs / saved
- * queries behind. Running these in `beforeAll` means the re-run starts from a
- * clean domain slate without requiring the previous run's `afterAll` to have
- * completed.
+ * queries behind. These helpers are invoked once per environment by the
+ * `globalSetupHook` in `parallel_tests/global.setup.ts` — spec-local
+ * `beforeAll` SHOULD NOT re-invoke them.
  *
- * Everything here is idempotent and swallows 404s — safe to call even when
- * there is nothing to clean.
+ * Everything here is idempotent — the osquery API service already ignores 404
+ * on delete via `ignoreErrors: [404]`, so no extra catch is needed.
  */
 
 interface PackListItem {
@@ -35,16 +35,16 @@ interface SavedQueryListItem {
  * Pass just the unambiguous test-specific prefix to avoid over-matching.
  */
 export async function cleanOsqueryPacksByPrefix(
-  apiServices: OsqueryUiApiServicesFixture,
+  osqueryApi: OsqueryApiService,
   prefixes: string[]
 ): Promise<void> {
   if (prefixes.length === 0) return;
   try {
-    const response = await apiServices.osquery.packs.list();
+    const response = await osqueryApi.packs.list();
     const items = (response.data as { data?: PackListItem[] }).data ?? [];
     const targets = items.filter((p) => prefixes.some((prefix) => p.name?.startsWith(prefix)));
     for (const p of targets) {
-      await apiServices.osquery.packs.delete(p.saved_object_id).catch(() => {});
+      await osqueryApi.packs.delete(p.saved_object_id);
     }
   } catch {
     // List call failed (role not yet set up, network error); the ensuing test
@@ -58,18 +58,48 @@ export async function cleanOsqueryPacksByPrefix(
  * any `scout-` prefix so they are left in place.
  */
 export async function cleanOsquerySavedQueriesByPrefix(
-  apiServices: OsqueryUiApiServicesFixture,
+  osqueryApi: OsqueryApiService,
   prefixes: string[]
 ): Promise<void> {
   if (prefixes.length === 0) return;
   try {
-    const response = await apiServices.osquery.savedQueries.list();
+    const response = await osqueryApi.savedQueries.list();
     const items = (response.data as { data?: SavedQueryListItem[] }).data ?? [];
     const targets = items.filter((q) => prefixes.some((prefix) => q.id?.startsWith(prefix)));
     for (const q of targets) {
-      await apiServices.osquery.savedQueries.delete(q.saved_object_id).catch(() => {});
+      await osqueryApi.savedQueries.delete(q.saved_object_id);
     }
   } catch {
     // Same rationale as `cleanOsqueryPacksByPrefix`.
   }
 }
+
+/** All `scout-*` pack-name prefixes used across the Scout UI suite. Used by the
+ *  defensive-cleanup globalSetupHook; if you add a new prefix in a spec, add it
+ *  here so the global sweep catches orphans from crashed runs. */
+export const ALL_SCOUT_PACK_PREFIXES = [
+  'scout-pack-',
+  'scout-pack-edit-',
+  'scout-pack-delete-',
+  'scout-policy-pack-',
+  'scout-dup-',
+  'scout-ra-',
+  'scout-fast-pack-',
+  'scout-live-pack-',
+  'scout-alert-case-pack-',
+  'scout-custom-space-pack-',
+  'scout-fleet-int-',
+  'scout-osquery-int-',
+  'scout-upgrade-',
+] as const;
+
+/** All `scout-*` saved-query-id prefixes used across the Scout UI suite. */
+export const ALL_SCOUT_SAVED_QUERY_PREFIXES = [
+  'scout-pack-sq-',
+  'scout-pack-sq-extra-',
+  'scout-policy-sq-',
+  'scout-sq-create-',
+  'scout-sq-edit-',
+  'scout-sq-delete-',
+  'scout-dropdown-',
+] as const;

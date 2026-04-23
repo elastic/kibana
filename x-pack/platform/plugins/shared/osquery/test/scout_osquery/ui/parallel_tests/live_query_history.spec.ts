@@ -47,6 +47,7 @@ test.describe('Live query history', { tag: localTags }, () => {
     page,
     pageObjects,
   }) => {
+    // 5 min: agent-dependent submit + results + history page + re-run flow.
     test.setTimeout(300_000);
 
     await browserAuth.loginAsOsqueryPowerUser();
@@ -70,7 +71,7 @@ test.describe('Live query history', { tag: localTags }, () => {
       await waitForLiveQueryComplete(kbnClient, actionId);
     }
 
-    await pageObjects.osqueryLiveQueryForm.waitForResults();
+    await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
 
     await pageObjects.osqueryNavigation.gotoHistory();
     // eslint-disable-next-line playwright/no-nth-methods -- re-run the most recent history entry, which is the one we just submitted
@@ -88,6 +89,7 @@ test.describe('Live query history', { tag: localTags }, () => {
     page,
     pageObjects,
   }) => {
+    // 3 min: API-seeded history row + UI details-panel open assertions.
     test.setTimeout(180_000);
 
     // Seed a dedicated history row with a unique marker in THIS test so we
@@ -115,7 +117,12 @@ test.describe('Live query history', { tag: localTags }, () => {
     await expect(page.getByText(detailsMarker)).toBeVisible({ timeout: 30_000 });
   });
 
-  test('paginates the query history list', async ({ browserAuth, page, pageObjects }) => {
+  test('paginates the query history list and renders seeded rows at the selected size', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
+    // 3 min: history page load on a list that may include a large seed set.
     test.setTimeout(180_000);
 
     await browserAuth.loginAsOsqueryPowerUser();
@@ -124,9 +131,12 @@ test.describe('Live query history', { tag: localTags }, () => {
     await page.testSubj.locator('tablePaginationPopoverButton').click();
     await page.testSubj.locator('tablePagination-10-rows').click();
 
-    // The history table always renders at least the rows seeded above; pagination
-    // controls must be present (even if there's only one page when only 2 rows
-    // exist — the pagination popover is always rendered).
+    // Assert both (a) the page-size control reflects the selection AND (b) the
+    // underlying table rendered at the chosen size. Row count is bounded above
+    // by 10 (the selected page size) and below by 2 (the seeds in beforeAll).
     await expect(page.testSubj.locator('tablePaginationPopoverButton')).toContainText('10');
+    const historyRowCount = await page.locator('[aria-label="Details"]').count();
+    expect(historyRowCount).toBeGreaterThanOrEqual(2);
+    expect(historyRowCount).toBeLessThanOrEqual(10);
   });
 });

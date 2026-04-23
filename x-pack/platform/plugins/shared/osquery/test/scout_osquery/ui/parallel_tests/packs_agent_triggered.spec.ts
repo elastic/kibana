@@ -9,10 +9,8 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
-import { cleanOsqueryPacksByPrefix } from '../helpers/defensive_cleanup';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-const PACK_PREFIXES = ['scout-fast-pack-'];
 
 interface UnifiedHistoryRow {
   id: string;
@@ -30,11 +28,17 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
   // actual `logs-osquery_manager.result-*` ingest. The rewrite asserts on
   // user-visible behaviour instead: the scheduled pack results land on the
   // unified history page, and the row's details page renders.
-  test.beforeAll(async ({ apiServices }) => {
-    // A crashed run can leave a `scout-fast-pack-*` assigned to an agent
-    // policy, causing Fleet to ship stale scheduled results that cross-match
-    // our new pack's unified-history lookup. Clean before the test seeds.
-    await cleanOsqueryPacksByPrefix(apiServices, PACK_PREFIXES);
+  // Orphan `scout-fast-pack-*` cleanup is handled once per environment by the
+  // defensive-cleanup globalSetupHook (Fleet policy sync reconciles agents
+  // before the first test starts).
+
+  const transientPackIds: string[] = [];
+
+  test.afterEach(async ({ apiServices }) => {
+    while (transientPackIds.length > 0) {
+      const id = transientPackIds.pop();
+      if (id) await apiServices.osquery.packs.delete(id);
+    }
   });
 
   test('shows pack query results in history after scheduled agent execution', async ({
@@ -58,7 +62,6 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
     const packName = `scout-fast-pack-${Date.now()}`;
     const queryId = 'fastQuery';
 
-    let packId: string | undefined;
     // Populated from the history API once the agent ships its first scheduled
     // result for our pack. The modern osquery pack schema assigns a UUID
     // `schedule_id` to each query at create-time (see
@@ -71,22 +74,22 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
     let capturedScheduleId: string | undefined;
     let capturedExecutionCount: number | undefined;
 
-    try {
-      const created = await apiServices.osquery.packs.create({
-        name: packName,
-        enabled: true,
-        description: 'scout scheduled pack',
-        shards: {},
-        policy_ids: [firstPolicyId!],
-        queries: {
-          // 10 s interval is the minimum the UI allows, and is short enough
-          // that a successful execution happens inside our wall-clock budget.
-          [queryId]: { ecs_mapping: {}, interval: 10, query: 'select * from uptime;' },
-        },
-      });
-      packId = (created.data as { data: { saved_object_id: string } }).data.saved_object_id;
+    const created = await apiServices.osquery.packs.create({
+      name: packName,
+      enabled: true,
+      description: 'scout scheduled pack',
+      shards: {},
+      policy_ids: [firstPolicyId!],
+      queries: {
+        // 10 s interval is the minimum the UI allows, and is short enough
+        // that a successful execution happens inside our wall-clock budget.
+        [queryId]: { ecs_mapping: {}, interval: 10, query: 'select * from uptime;' },
+      },
+    });
+    const packId = (created.data as { data: { saved_object_id: string } }).data.saved_object_id;
+    transientPackIds.push(packId);
 
-      await test.step('scheduled results surface in the history API', async () => {
+    await test.step('scheduled results surface in the history API', async () => {
         // The unified-history aggregation groups by `schedule_id` over
         // `logs-osquery_manager.result-*`. Poll until a row matching our pack
         // name appears — this is the definitive "agent ran it, ES ingested
@@ -177,11 +180,6 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
             timeout: 5_000,
           });
         }).toPass({ timeout: 90_000, intervals: [2_000, 5_000, 10_000] });
-      });
-    } finally {
-      if (packId) {
-        await apiServices.osquery.packs.delete(packId).catch(() => {});
-      }
-    }
+    });
   });
 });

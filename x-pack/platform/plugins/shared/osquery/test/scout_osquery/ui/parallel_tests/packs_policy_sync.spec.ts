@@ -9,22 +9,26 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalSavedQuery } from '../../api/fixtures/constants';
-import {
-  cleanOsqueryPacksByPrefix,
-  cleanOsquerySavedQueriesByPrefix,
-} from '../helpers/defensive_cleanup';
 
 const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-const PACK_PREFIXES = ['scout-policy-pack-', 'scout-dup-'];
-const SAVED_QUERY_PREFIXES = ['scout-policy-sq-'];
 
 test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
   let savedQueryId: string;
   let savedQueryLabel: string;
+  // Per-test packs get tracked here so `afterEach` can clean them without
+  // requiring try/finally inside test bodies.
+  const transientPackIds: string[] = [];
+
+  test.afterEach(async ({ apiServices }) => {
+    while (transientPackIds.length > 0) {
+      const id = transientPackIds.pop();
+      if (id) await apiServices.osquery.packs.delete(id);
+    }
+  });
 
   test.beforeAll(async ({ apiServices }) => {
-    await cleanOsqueryPacksByPrefix(apiServices, PACK_PREFIXES);
-    await cleanOsquerySavedQueriesByPrefix(apiServices, SAVED_QUERY_PREFIXES);
+    // Orphan `scout-policy-*` / `scout-dup-*` cleanup is handled once per
+    // environment by the defensive-cleanup globalSetupHook.
 
     const body = getMinimalSavedQuery({
       id: `scout-policy-sq-${Date.now()}`,
@@ -46,6 +50,8 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
+    // 5 min: pack seed + UI toggle + confirmation modal + Fleet policy PUT
+    // read-after-write + toggle back.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -66,26 +72,24 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
       },
     });
     const packId = (created.data as { data: { saved_object_id: string } }).data.saved_object_id;
+    transientPackIds.push(packId);
 
-    try {
-      await pageObjects.osqueryPackForm.navigateToPacksList();
-      await pageObjects.osqueryPackForm.setPagination50Rows();
-      await pageObjects.osqueryPackForm.togglePackActiveFromList(packName);
-      // Toggling pack state re-writes the Fleet package policy; a confirmation
-      // modal can sit on top of the list until dismissed, blocking the next click.
-      await pageObjects.osqueryPackForm.confirmPolicyChangeModalIfVisible();
+    await pageObjects.osqueryPackForm.navigateToPacksList();
+    await pageObjects.osqueryPackForm.setPagination50Rows();
+    await pageObjects.osqueryPackForm.togglePackActiveFromList(packName);
+    // Toggling pack state re-writes the Fleet package policy; Fleet
+    // surfaces a confirmation modal that must be confirmed before the next
+    // action can proceed.
+    await pageObjects.osqueryPackForm.confirmPolicyChangeModal();
 
-      const afterToggle = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
-      const items = (afterToggle.data as { items: Array<{ name: string; enabled?: boolean }> })
-        .items;
-      const match = items.find((p) => p.name === `Policy for Default policy`);
-      expect(match).toBeDefined();
+    const afterToggle = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
+    const items = (afterToggle.data as { items: Array<{ name: string; enabled?: boolean }> })
+      .items;
+    const match = items.find((p) => p.name === `Policy for Default policy`);
+    expect(match).toBeDefined();
 
-      await pageObjects.osqueryPackForm.togglePackActiveFromList(packName);
-      await pageObjects.osqueryPackForm.confirmPolicyChangeModalIfVisible();
-    } finally {
-      await apiServices.osquery.packs.delete(packId);
-    }
+    await pageObjects.osqueryPackForm.togglePackActiveFromList(packName);
+    await pageObjects.osqueryPackForm.confirmPolicyChangeModal();
   });
 
   test('duplicates a pack from the kebab menu with a _copy suffix', async ({
@@ -94,6 +98,8 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
+    // 5 min: pack seed + UI kebab menu + duplicate server flow + edit-page
+    // load + list lookup for cleanup tracking.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -114,33 +120,27 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
       },
     });
     const packId = (created.data as { data: { saved_object_id: string } }).data.saved_object_id;
+    transientPackIds.push(packId);
 
-    let duplicatePackId: string | undefined;
-    try {
-      await pageObjects.osqueryPackForm.navigateToPacksList();
-      await pageObjects.osqueryPackForm.setPagination50Rows();
-      await pageObjects.osqueryPackForm.clickPackRowKebab(packName);
-      await pageObjects.osqueryPackForm.chooseContextMenuItem(/Duplicate/);
+    await pageObjects.osqueryPackForm.navigateToPacksList();
+    await pageObjects.osqueryPackForm.setPagination50Rows();
+    await pageObjects.osqueryPackForm.clickPackRowKebab(packName);
+    await pageObjects.osqueryPackForm.chooseContextMenuItem(/Duplicate/);
 
-      // Duplicate opens the pack-edit page pre-filled with `${packName}_copy`; assert
-      // via the pack-name input so we're not depending on text anywhere on the page
-      // (the list no longer shows the copy until after save). The suffix is an
-      // underscore, not a dash — see `server/routes/utils/generate_copy_name.ts` and
-      // the OpenAPI contract docs.
-      const nameInput = page.locator('input[name="name"]');
-      await expect(nameInput).toHaveValue(`${packName}_copy`, { timeout: 30_000 });
+    // Duplicate opens the pack-edit page pre-filled with `${packName}_copy`; assert
+    // via the pack-name input so we're not depending on text anywhere on the page
+    // (the list no longer shows the copy until after save). The suffix is an
+    // underscore, not a dash — see `server/routes/utils/generate_copy_name.ts` and
+    // the OpenAPI contract docs.
+    const nameInput = page.locator('input[name="name"]');
+    await expect(nameInput).toHaveValue(`${packName}_copy`, { timeout: 30_000 });
 
-      // Find the persisted duplicate saved object so cleanup can remove it —
-      // relying on the UI toast alone would leak the copy across CI runs.
-      const packs = await apiServices.osquery.packs.list();
-      const items = (packs.data as { data: Array<{ name?: string; saved_object_id: string }> })
-        .data;
-      duplicatePackId = items.find((p) => p.name === `${packName}_copy`)?.saved_object_id;
-    } finally {
-      await apiServices.osquery.packs.delete(packId);
-      if (duplicatePackId) {
-        await apiServices.osquery.packs.delete(duplicatePackId);
-      }
-    }
+    // Find the persisted duplicate saved object so cleanup can remove it —
+    // relying on the UI toast alone would leak the copy across CI runs.
+    const packs = await apiServices.osquery.packs.list();
+    const items = (packs.data as { data: Array<{ name?: string; saved_object_id: string }> })
+      .data;
+    const duplicatePackId = items.find((p) => p.name === `${packName}_copy`)?.saved_object_id;
+    if (duplicatePackId) transientPackIds.push(duplicatePackId);
   });
 });

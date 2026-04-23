@@ -12,9 +12,17 @@ import { uiTest as test } from '../fixtures';
 const noAgentTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Live query submission without enrolled agents', { tag: noAgentTags }, () => {
-  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
+  });
+
+  // Dedicated a11y test. Axe is expensive (~5-10s) — running it once here
+  // instead of in `beforeEach` for every behaviour test in the file keeps
+  // the wall-clock predictable and matches the ui-best-practices guidance
+  // ("Add checks at high-value points in your UI tests, not on every
+  // interaction").
+  test('live query form has no accessibility violations', async ({ page }) => {
     // EuiCard's `selectable` prop renders a footer `<button>` whose class is an
     // emotion-compiled string ending in `-euiCardSelect` (e.g.
     // `css-1ti8sfo-euiButtonDisplay-...-euiCardSelect`). The button has no

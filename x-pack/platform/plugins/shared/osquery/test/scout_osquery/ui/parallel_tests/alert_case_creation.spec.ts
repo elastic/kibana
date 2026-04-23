@@ -27,6 +27,9 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
   let ruleName: string;
   let packId: string;
   let packName: string;
+  // Tracks case ids this test's test body created so `afterEach` can clean up
+  // without a try/finally inside the test body.
+  const transientCaseIds: string[] = [];
 
   test.beforeAll(async ({ esClient, kbnClient, apiServices }) => {
     const pack = await apiServices.osquery.packs.create({
@@ -52,8 +55,17 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     await bootstrapSecurityAlertsIndex(kbnClient);
   });
 
-  test.afterAll(async ({ esClient, kbnClient, apiServices }) => {
-    await deleteSeededAlerts(esClient, ruleId).catch(() => {});
+  test.afterEach(async ({ apiServices }) => {
+    while (transientCaseIds.length > 0) {
+      const caseId = transientCaseIds.pop();
+      if (caseId) await apiServices.cases.delete([caseId]);
+    }
+  });
+
+  test.afterAll(async ({ esClient, kbnClient, apiServices, log }) => {
+    await deleteSeededAlerts(esClient, ruleId).catch((err: Error) =>
+      log.debug(`deleteSeededAlerts failed: ${err.message}`)
+    );
     await deleteDetectionRule(kbnClient, ruleId);
     await apiServices.osquery.packs.delete(packId);
   });
@@ -91,68 +103,61 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
       owner: 'securitySolution',
     });
     const existingCaseId = existingCase.data.id;
+    transientCaseIds.push(existingCaseId);
 
-    try {
-      // Seed an alert directly into `.alerts-security.alerts-default` for this
-      // rule + a known Osquery-enrolled agent. Bypasses task-manager latency;
-      // `openRuleAlertsView` sees the row immediately. See `helpers/seed_alert.ts`
-      // for the schema contract and the `agent.id` gating on the Run Osquery menu.
-      const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
-      await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
+    // Seed an alert directly into `.alerts-security.alerts-default` for this
+    // rule + a known Osquery-enrolled agent. Bypasses task-manager latency;
+    // `openRuleAlertsView` sees the row immediately. See `helpers/seed_alert.ts`
+    // for the schema contract and the `agent.id` gating on the Run Osquery menu.
+    const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
+    await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
 
-      await browserAuth.loginAsOsqueryPowerUser();
+    await browserAuth.loginAsOsqueryPowerUser();
 
-      await test.step('submit osquery in pack mode from the alert flyout', async () => {
-        await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
-        await pageObjects.osqueryAlertFlyout.expandFirstAlert();
-        await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
-        await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
-        await pageObjects.osqueryAlertFlyout.waitForFlyoutEditorReady();
-        await pageObjects.osqueryAlertFlyout.switchFlyoutToPackMode();
-        await pageObjects.osqueryAlertFlyout.selectFlyoutPack(packName);
-        await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-        // Pack mode renders results inside a tab — `waitForResults` clicks the
-        // results tab (if visible) and polls until `osqueryResultsTable` or any
-        // data cell appears, handling the pack-vs-single-query UI difference.
-        // In pack mode only the data cell may appear (no `osqueryResultsTable`
-        // test-subj), so the race inside `waitForResults` is the correct stop
-        // condition — do NOT re-wait on `osqueryResultsTable` afterwards.
-        await pageObjects.osqueryLiveQueryForm.waitForResults();
+    await test.step('submit osquery in pack mode from the alert flyout', async () => {
+      await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
+      await pageObjects.osqueryAlertFlyout.expandFirstAlert();
+      await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
+      await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
+      await pageObjects.osqueryAlertFlyout.waitForFlyoutEditorReady();
+      await pageObjects.osqueryAlertFlyout.switchFlyoutToPackMode();
+      await pageObjects.osqueryAlertFlyout.selectFlyoutPack(packName);
+      await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+      // Pack mode renders results inside `osqueryResultsPanel` (no aggregate
+      // `osqueryResultsTable`), so use the pack-specific waiter.
+      await pageObjects.osqueryLiveQueryForm.waitForPackResults();
+    });
+
+    await test.step('attach results to the pre-seeded existing case', async () => {
+      await pageObjects.osqueryAlertFlyout.clickAddToCaseFromResults();
+      await page.getByText('Select case').waitFor({ state: 'visible', timeout: 30_000 });
+      await page.testSubj.locator(`cases-table-row-select-${existingCaseId}`).click();
+      await expect(
+        page.getByText(new RegExp(`An alert was added to "${existingCaseTitle}"`))
+      ).toBeVisible();
+    });
+
+    await test.step('attach results to a brand new case via the create-case flyout', async () => {
+      await pageObjects.osqueryAlertFlyout.clickAddToCaseFromResults();
+      await pageObjects.osqueryCasesPage.openCreateCaseFlyoutFromFilterBar();
+
+      const newCaseTitle = `scout-new-case-${Date.now()}`;
+      await pageObjects.osqueryCasesPage.fillNewCaseTitle(newCaseTitle);
+      await pageObjects.osqueryCasesPage.fillNewCaseDescription('scout');
+
+      // Scope to the create-case flyout only. The osquery flyout's own
+      // `[class*="euiCardSelect"]` gaps are covered by `alert_flyout_take_action.spec.ts`.
+      const { violations } = await page.checkA11y({
+        include: ['[data-test-subj="create-case-flyout"]'],
+        exclude: ['[class*="euiCardSelect"]'],
+        timeoutMs: 25_000,
       });
+      expect(violations).toStrictEqual([]);
 
-      await test.step('attach results to the pre-seeded existing case', async () => {
-        await pageObjects.osqueryAlertFlyout.clickAddToCaseFromResults();
-        await page.getByText('Select case').waitFor({ state: 'visible', timeout: 30_000 });
-        await page.testSubj.locator(`cases-table-row-select-${existingCaseId}`).click();
-        await expect(
-          page.getByText(new RegExp(`An alert was added to "${existingCaseTitle}"`))
-        ).toBeVisible();
-      });
-
-      await test.step('attach results to a brand new case via the create-case flyout', async () => {
-        await pageObjects.osqueryAlertFlyout.clickAddToCaseFromResults();
-        await pageObjects.osqueryCasesPage.openCreateCaseFlyoutFromFilterBar();
-
-        const newCaseTitle = `scout-new-case-${Date.now()}`;
-        await pageObjects.osqueryCasesPage.fillNewCaseTitle(newCaseTitle);
-        await pageObjects.osqueryCasesPage.fillNewCaseDescription('scout');
-
-        // Scope to the create-case flyout only. The osquery flyout's own
-        // `[class*="euiCardSelect"]` gaps are covered by `alert_flyout_take_action.spec.ts`.
-        const { violations } = await page.checkA11y({
-          include: ['[data-test-subj="create-case-flyout"]'],
-          exclude: ['[class*="euiCardSelect"]'],
-          timeoutMs: 25_000,
-        });
-        expect(violations).toStrictEqual([]);
-
-        await pageObjects.osqueryCasesPage.submitCreateCase();
-        await expect(
-          page.getByText(new RegExp(`An alert was added to "${newCaseTitle}"`))
-        ).toBeVisible();
-      });
-    } finally {
-      await apiServices.cases.delete([existingCaseId]);
-    }
+      await pageObjects.osqueryCasesPage.submitCreateCase();
+      await expect(
+        page.getByText(new RegExp(`An alert was added to "${newCaseTitle}"`))
+      ).toBeVisible();
+    });
   });
 });

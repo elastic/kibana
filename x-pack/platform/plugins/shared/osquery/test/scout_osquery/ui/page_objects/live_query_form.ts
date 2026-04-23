@@ -6,21 +6,15 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import { OSQUERY_UI_RESULTS_TIMEOUT_MS } from '../../common/constants';
-import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 import { submitLiveQuery } from '../../common/submit_live_query';
-
-/** Narrow shape for Monaco editor access in `page.evaluate`; omit conflicts with `Window.MonacoEnvironment` from monaco-editor typings. */
-type WindowWithMonaco = Omit<Window, 'MonacoEnvironment'> & {
-  MonacoEnvironment?: {
-    monaco?: {
-      editor: {
-        getModels: () => Array<{ setValue: (value: string) => void; getValue: () => string }>;
-      };
-    };
-  };
-};
+import {
+  getMonacoEditorText,
+  setMonacoValue,
+  waitForMonacoContains,
+  waitForMonacoNonEmpty,
+} from '../../common/monaco_helpers';
+import { selectSingleAsPlainTextOption } from '../../common/combo_box_helpers';
 
 async function dismissVisibleToasts(page: ScoutPage): Promise<void> {
   const closeButtons = await page.testSubj
@@ -83,7 +77,6 @@ export class LiveQueryFormPage {
   }
 
   async selectAllAgents(): Promise<void> {
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
 
     const agentInput = this.agentSelection.getByTestId('comboBoxSearchInput');
     await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
@@ -113,33 +106,8 @@ export class LiveQueryFormPage {
   async clearAndInputQuery(query: string): Promise<void> {
     await this.queryEditor.waitFor({ state: 'visible' });
     await this.queryEditor.click();
-
-    await this.page.evaluate((newQuery: string) => {
-      const w = window as WindowWithMonaco;
-      const monacoEnv = w.MonacoEnvironment;
-      if (monacoEnv?.monaco?.editor) {
-        const models = monacoEnv.monaco.editor.getModels();
-        for (const model of models) {
-          model.setValue(newQuery);
-        }
-      }
-    }, query);
-
-    await this.page.waitForFunction(
-      (expected: string) => {
-        const w = window as unknown as WindowWithMonaco;
-        const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
-        const text = models.map((m) => m.getValue()).join('\n');
-
-        if (expected === '') {
-          return text.trim() === '';
-        }
-
-        return text.includes(expected);
-      },
-      query,
-      { timeout: 15_000 }
-    );
+    await setMonacoValue(this.page, query);
+    await waitForMonacoContains(this.page, query);
   }
 
   async clickSubmit(): Promise<void> {
@@ -156,7 +124,6 @@ export class LiveQueryFormPage {
    * parsed — existing callers that don't need the id remain unaffected.
    */
   async submitQuery(): Promise<string | undefined> {
-    await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     // Clear any open toasts that may intercept the Submit click.
     for (let dismissRound = 0; dismissRound < 2; dismissRound++) {
       await dismissVisibleToasts(this.page);
@@ -174,48 +141,37 @@ export class LiveQueryFormPage {
     return actionId;
   }
 
-  async waitForResults(): Promise<void> {
-    const start = Date.now();
-    const maxWaitMs = OSQUERY_UI_RESULTS_TIMEOUT_MS;
+  /**
+   * Wait for a single-query submission's results to render. Single-query mode
+   * surfaces the aggregate `osqueryResultsTable` — this method waits on that
+   * directly. Use `waitForPackResults()` for pack-mode submissions, which
+   * render results inside the `osqueryResultsPanel` instead.
+   */
+  async waitForSingleQueryResults(): Promise<void> {
+    await this.resultsTable.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS });
+  }
 
+  /**
+   * Wait for a pack-mode submission's results to render. Pack mode surfaces
+   * results inside the `osqueryResultsPanel` (one `dataGridRowCell` per
+   * result doc) and, when submitted from the live-query page, adds a
+   * `resultsTab` that must be clicked first. Use `waitForSingleQueryResults`
+   * for single-query submissions.
+   */
+  async waitForPackResults(): Promise<void> {
     if (await this.resultsTab.isVisible().catch(() => false)) {
       await this.resultsTab.click();
     }
 
-    while (Date.now() - start < maxWaitMs) {
-      // Scope the cell probe to the osquery results panel. Page-wide `dataGridRowCell`
-      // also matches cells in the alerts EuiDataGrid rendered behind the osquery flyout,
-      // which would cause this race to resolve immediately — before any osquery result
-      // has actually landed — and leave downstream actions (e.g. clicking "Add to Case")
-      // clicking against a still-loading flyout.
-      // eslint-disable-next-line playwright/no-nth-methods -- any populated cell in the osquery panel indicates results loaded
-      const dataCell = this.resultsPanel.getByTestId('dataGridRowCell').first();
-
-      try {
-        await Promise.race([
-          this.resultsTable.waitFor({ state: 'visible', timeout: 20_000 }),
-          dataCell.waitFor({ state: 'visible', timeout: 20_000 }),
-        ]);
-
-        return;
-      } catch {
-        try {
-          if (await this.statusTab.isVisible().catch(() => false)) {
-            await this.statusTab.click();
-            await this.resultsTab.waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
-            if (await this.resultsTab.isVisible().catch(() => false)) {
-              await this.resultsTab.click();
-            }
-          } else {
-            await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-          }
-        } catch {
-          await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
-        }
-      }
-    }
-
-    await this.resultsTable.waitFor({ state: 'visible', timeout: 60_000 });
+    // Scope the cell probe to the osquery results panel. Page-wide
+    // `dataGridRowCell` also matches cells in the alerts EuiDataGrid rendered
+    // behind the osquery flyout, which would cause this race to resolve
+    // immediately — before any osquery result has actually landed — and
+    // leave downstream actions (e.g. clicking "Add to Case") clicking
+    // against a still-loading flyout.
+    // eslint-disable-next-line playwright/no-nth-methods -- any populated cell in the osquery panel indicates results loaded
+    const dataCell = this.resultsPanel.getByTestId('dataGridRowCell').first();
+    await dataCell.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS });
   }
 
   async clickAdvanced(): Promise<void> {
@@ -234,12 +190,7 @@ export class LiveQueryFormPage {
   }
 
   async getMonacoEditorText(): Promise<string> {
-    return this.page.evaluate(() => {
-      const w = window as WindowWithMonaco;
-      const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
-
-      return models.map((m) => m.getValue()).join('\n');
-    });
+    return getMonacoEditorText(this.page);
   }
 
   async pressShiftEnterInEditor(): Promise<void> {
@@ -262,34 +213,18 @@ export class LiveQueryFormPage {
     await this.queryEditor.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
-  // Select a pack from the live-query page's `select-live-pack` combobox.
-  // Mirrors `alert_flyout.ts:184-236` selector strategy (scope to the inner
-  // `comboBoxSearchInput` leaf node; `dispatchEvent('click')` to bypass
-  // Playwright's element-stability check while the EuiComboBox wrapper
-  // remounts after the mode switch; type + ArrowDown + Enter + verify the
-  // selection landed via `toHaveValue`).
+  /**
+   * Select a pack from the live-query page's `select-live-pack` combobox.
+   * The combobox is `asPlainText`, so the helper asserts on the rendered
+   * label (the search input is replaced on commit). Callers SHOULD still
+   * assert the pack name visible in the downstream pack-preview block if
+   * they need confirmation the pack loaded.
+   */
   async selectLivePack(packName: string): Promise<void> {
-    const searchInput = this.livePackSearchInput;
-    await searchInput.waitFor({ state: 'visible', timeout: 15_000 });
-
-    await expect(async () => {
-      await searchInput.dispatchEvent('click');
-      await expect(searchInput).toHaveAttribute('aria-expanded', 'true', {
-        timeout: 2_000,
-      });
-    }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
-
-    await searchInput.pressSequentially(packName, { delay: 20 });
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
-    // `packs_combobox_field.tsx` uses `singleSelection={{ asPlainText: true }}`
-    // — after Enter, EuiComboBox replaces the `comboBoxSearchInput` `<input>`
-    // with a plain text label, so `toHaveValue` on the input times out with
-    // "element(s) not found". Assert on the label rendered inside the
-    // `select-live-pack` wrapper instead.
-    await expect(
-      this.page.locator('[data-test-subj="select-live-pack"]').getByText(packName, { exact: true })
-    ).toBeVisible({ timeout: 10_000 });
+    await selectSingleAsPlainTextOption(this.page, {
+      wrapper: { dataTestSubj: 'select-live-pack' },
+      optionName: packName,
+    });
   }
 
   // Click the per-query accordion toggle in pack results. Callers assert on
@@ -299,48 +234,17 @@ export class LiveQueryFormPage {
     await this.page.testSubj.locator(`toggleIcon-${queryName}`).click();
   }
 
-  // Select a saved query from the `savedQuerySelect` combobox on the
-  // live-query form. Same scoping + race-avoidance strategy as `selectLivePack`
-  // (inner `comboBoxSearchInput` leaf, ArrowDown + Enter). Gates on Monaco's
-  // model actually carrying non-empty content before returning — same pattern
-  // as `clearAndInputQuery` above. Callers can follow with `getMonacoEditorText`
-  // to assert the populated value matches the expected saved-query body.
+  /**
+   * Select a saved query from the `savedQuerySelect` combobox on the
+   * live-query form. Gates on Monaco's model carrying non-empty content
+   * before returning — the useful "selection committed" signal for this
+   * specific combobox is the editor populating.
+   */
   async selectSavedQueryFromDropdown(savedQueryName: string): Promise<void> {
-    const searchInput = this.savedQuerySearchInput;
-    await searchInput.waitFor({ state: 'visible', timeout: 15_000 });
-
-    await expect(async () => {
-      await searchInput.dispatchEvent('click');
-      await expect(searchInput).toHaveAttribute('aria-expanded', 'true', {
-        timeout: 2_000,
-      });
-    }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
-
-    await searchInput.pressSequentially(savedQueryName, { delay: 20 });
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
-
-    await this.page.waitForFunction(
-      () => {
-        const w = window as unknown as WindowWithMonaco;
-        const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
-
-        return models.some((m) => m.getValue().trim().length > 0);
-      },
-      undefined,
-      { timeout: 15_000 }
-    );
-  }
-
-  private get livePackSearchInput(): Locator {
-    return this.page.locator(
-      '[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]'
-    );
-  }
-
-  private get savedQuerySearchInput(): Locator {
-    return this.page.locator(
-      '[data-test-subj="savedQuerySelect"] [data-test-subj="comboBoxSearchInput"]'
-    );
+    await selectSingleAsPlainTextOption(this.page, {
+      wrapper: { dataTestSubj: 'savedQuerySelect' },
+      optionName: savedQueryName,
+    });
+    await waitForMonacoNonEmpty(this.page);
   }
 }
