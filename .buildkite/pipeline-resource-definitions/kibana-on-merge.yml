@@ -20,10 +20,10 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_COMMIT_STATUS_CONTEXT: buildkite/on-merge
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main 9.4 9.3 9.2 8.19
