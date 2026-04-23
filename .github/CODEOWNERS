@@ -3255,6 +3255,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 # OpenAPI spec files
 oas_docs/linters                              @elastic/experience-docs
 oas_docs/overlays                             @elastic/experience-docs
+oas_docs/scripts                              @elastic/experience-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
 oas_docs/kibana.info.yaml                     @elastic/experience-docs
 oas_docs/output                               @elastic/ski-docs
