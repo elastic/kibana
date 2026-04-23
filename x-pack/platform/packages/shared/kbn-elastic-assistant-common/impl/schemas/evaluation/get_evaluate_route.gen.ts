@@ -14,16 +14,18 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const GetEvaluateResponse = lazySchema(() =>
+  z.object({
+    datasets: z.array(z.string()),
+    graphs: z.array(z.string()),
+    results: z.array(
+      z.object({
+        id: z.string(),
+        status: z.string(),
+      })
+    ),
+  })
+);
 export type GetEvaluateResponse = z.infer<typeof GetEvaluateResponse>;
-export const GetEvaluateResponse = z.object({
-  datasets: z.array(z.string()),
-  graphs: z.array(z.string()),
-  results: z.array(
-    z.object({
-      id: z.string(),
-      status: z.string(),
-    })
-  ),
-});
