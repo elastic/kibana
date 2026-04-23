@@ -13,7 +13,7 @@ import {
   createDetectionRule,
   deleteDetectionRule,
 } from '../helpers/detection_rule_lifecycle';
-import { getFirstOnlineAgent } from '../helpers/fleet_agents';
+import { getFirstOnlineAgent, waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 import {
   bootstrapSecurityAlertsIndex,
   deleteSeededAlerts,
@@ -59,6 +59,14 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
 
     const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
     await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
+
+    // The assertion below requires two response rows (one per enrolled Docker
+    // agent). `global.setup.ts` provisions two agents but on serverless CI the
+    // second one can still be mid-enrollment when `getFirstOnlineAgent`
+    // returns. Without this gate the "All agents" selection below runs against
+    // a single-agent target and we get only one row. 180 s matches the Docker
+    // agent cold-start budget observed in `global.setup.ts:waitForAgents`.
+    await waitForAtLeastOneAgentOnline(kbnClient, { expectedCount: 2, timeoutMs: 180_000 });
 
     await browserAuth.loginAsOsqueryPowerUser();
 

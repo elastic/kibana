@@ -160,7 +160,22 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
         //   - `<PackQueriesStatusTable>` mounted and the data grid rendered
         // `scout-osquery-agent-0` / `scout-osquery-agent-1` are provisioned
         // by `global.setup.ts`; either one is sufficient.
-        await expect(page.getByText(/scout-osquery-agent-[01]/)).toBeVisible({ timeout: 30_000 });
+        //
+        // The Results tab mounts `<ResultsTable>` which kicks off its own
+        // indexPattern + search request before any cells render. On
+        // cold serverless stacks that can take longer than a raw 30 s
+        // `toBeVisible` budget, so we wait for the panel wrapper first
+        // (signals the tab's content has mounted) and then poll the agent
+        // cell inside the panel with `toPass` — retries survive the
+        // data-grid virtualization remount that happens once the first
+        // response arrives.
+        const resultsPanel = page.testSubj.locator('osqueryResultsPanel');
+        await resultsPanel.waitFor({ state: 'visible', timeout: 60_000 });
+        await expect(async () => {
+          await expect(resultsPanel.getByText(/scout-osquery-agent-[01]/).first()).toBeVisible({
+            timeout: 5_000,
+          });
+        }).toPass({ timeout: 90_000, intervals: [2_000, 5_000, 10_000] });
       });
     } finally {
       if (packId) {

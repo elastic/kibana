@@ -102,7 +102,9 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
 
     await pageObjects.osqueryRuleEditor.clickAddOsqueryResponseAction();
     await pageObjects.osqueryRuleEditor.chooseRunPackInResponseAction(0);
-    await pageObjects.osqueryRuleEditor.selectPackInComboBox(0, singleQueryPackName);
+    await pageObjects.osqueryRuleEditor.selectPackInComboBox(0, singleQueryPackName, [
+      singleQueryKey,
+    ]);
     await pageObjects.osqueryRuleEditor.clickSaveRule();
 
     const firstSave = await savePromise;
@@ -134,7 +136,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
       { timeout: 60_000 }
     );
 
-    await pageObjects.osqueryRuleEditor.selectPackInComboBox(0, multiQueryPackName);
+    await pageObjects.osqueryRuleEditor.selectPackInComboBox(0, multiQueryPackName, multiKeys);
     await pageObjects.osqueryRuleEditor.clickSaveChanges();
     const secondSave = await secondSavePromise;
     expect(secondSave.status()).toBe(200);

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CA_TRUSTED_FINGERPRINT } from '@kbn/dev-utils';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as securityServerlessConfig } from '../../default/serverless/security_complete.serverless.config';
 
@@ -19,6 +20,11 @@ import { servers as securityServerlessConfig } from '../../default/serverless/se
  *   shared `elastic` Docker network — serverless ES containers bind their HTTP port
  *   to 127.0.0.1 on the host, so host.docker.internal is unreachable from other
  *   containers; containers on the `elastic` network reach es01 directly by hostname.
+ *   The output carries `ca_trusted_fingerprint` and `ssl.verification_mode: 'none'`
+ *   so Elastic Agents can validate / skip-validate the self-signed serverless ES
+ *   certificate when writing monitoring and osquery result data. Mirrors the known-
+ *   good pattern used by security_solution Cypress in
+ *   `x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/get_ftr_config.ts`.
  * - Pre-installation of the osquery_manager integration at Kibana startup.
  *
  * We override xpack.fleet.fleetServerHosts / xpack.fleet.outputs rather than
@@ -53,6 +59,12 @@ export const servers: ScoutServerConfig = {
           is_default: true,
           is_default_monitoring: true,
           hosts: [`https://es01:${securityServerlessConfig.servers.elasticsearch.port}`],
+          ca_trusted_fingerprint: CA_TRUSTED_FINGERPRINT,
+          config: {
+            ssl: {
+              verification_mode: 'none',
+            },
+          },
         },
       ])}`,
       '--xpack.fleet.packages.0.name=osquery_manager',

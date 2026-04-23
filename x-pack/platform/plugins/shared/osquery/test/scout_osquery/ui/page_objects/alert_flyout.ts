@@ -164,21 +164,34 @@ export class AlertFlyoutPage {
     // reaches this line, which makes Playwright's default 10 s click
     // actionability budget insufficient on serverless CI.
     await searchInput.waitFor({ state: 'visible', timeout: 15_000 });
-    await searchInput.click({ timeout: 15_000 });
 
-    // EuiComboBox re-renders the input node once the listbox mounts after the
-    // click (new `aria-controls` id is assigned to the freshly-mounted input).
-    // `fill()` is an atomic "locate-focus-set-value" and races that detach;
-    // seen in serverless CI as "element was detached from the DOM, retrying"
-    // followed by a 10 s timeout. Two mitigations:
-    //   1. Wait for the input's `aria-expanded` to flip to "true" — that's
-    //      EuiComboBox's signal that the popover mounted and the re-render
-    //      triggered by the click has settled.
-    //   2. Use `pressSequentially` (per-key keystrokes through `page.keyboard`)
-    //      with a small delay — each keystroke follows focus, and the delay
-    //      gives React time to reconcile between options-list filter updates.
-    await expect(searchInput).toHaveAttribute('aria-expanded', 'true', { timeout: 5_000 });
-    await searchInput.pressSequentially(packName, { delay: 20 });
+    // On serverless CI the EuiComboBox wrapper renders in >=3 passes as the
+    // surrounding form hydrates, and the input node detaches between each
+    // pass. Playwright's `click()` enforces element stability (same-position
+    // for two animation frames), so a click lands inside a remount window
+    // and keeps retrying until the 10–15 s budget is exhausted. Two
+    // adjustments make this reliable:
+    //   1. Drive focus via `dispatchEvent('click')` — this bypasses the
+    //      stability check entirely and opens EuiComboBox's popover the same
+    //      way a user click would (the component listens to bubbled click /
+    //      focus events, not the raw pointer-move sequence Playwright
+    //      simulates). If the first attempt lands in a remount, `toPass`
+    //      re-resolves the locator and retries against the fresh node.
+    //   2. Wait for `aria-expanded=true` — EuiComboBox sets this only after
+    //      the popover mounts, which is the first moment the input has
+    //      stopped remounting and `pressSequentially` is safe.
+    await expect(async () => {
+      await this.packSearchInput.dispatchEvent('click');
+      await expect(this.packSearchInput).toHaveAttribute('aria-expanded', 'true', {
+        timeout: 2_000,
+      });
+    }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
+
+    // `fill()` is an atomic "locate-focus-set-value" and still races the
+    // remount, so stick with `pressSequentially` for the same reason as
+    // before. Each keystroke follows focus, and the per-key delay gives
+    // React time to reconcile between options-list filter updates.
+    await this.packSearchInput.pressSequentially(packName, { delay: 20 });
     await this.page.keyboard.press('ArrowDown');
     await this.page.keyboard.press('Enter');
     // Confirm the pack is actually chosen before returning. EuiComboBox with
@@ -186,7 +199,7 @@ export class AlertFlyoutPage {
     // the input's `value` attribute.
     // NOTE: do NOT press Escape here — the key bubbles up and the surrounding
     // alert flyout also listens for Escape, which silently closes it.
-    await expect(searchInput).toHaveValue(
+    await expect(this.packSearchInput).toHaveValue(
       new RegExp(packName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     );
   }

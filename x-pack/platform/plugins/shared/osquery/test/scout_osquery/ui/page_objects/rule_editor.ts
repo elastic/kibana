@@ -115,7 +115,11 @@ export class RuleEditorPage {
     await this.responseActionItem(itemIndex).getByText('Run a set of queries in a pack').click();
   }
 
-  async selectPackInComboBox(itemIndex: number, packName: string): Promise<void> {
+  async selectPackInComboBox(
+    itemIndex: number,
+    packName: string,
+    expectedQueryIds?: readonly string[]
+  ): Promise<void> {
     const row = this.responseActionItem(itemIndex);
     const search = row.getByTestId('comboBoxSearchInput');
     await row.getByTestId('comboBoxInput').click();
@@ -133,6 +137,51 @@ export class RuleEditorPage {
     // Combobox single-select with `singleSelection={asPlainText}` writes the
     // chosen option label into the input's `value` attribute.
     await expect(search).toHaveValue(packName, { timeout: 30_000 });
+
+    // The combobox commit only marks `packId` in the form; the form's
+    // `queries` field is populated by a subsequent `useEffect` that waits on
+    // the `usePack` React Query fetch. Callers that click Save immediately
+    // after this method can capture a PUT body with `queries: []` because
+    // that fetch is still in flight. Wait for the pack's queries table to
+    // mount inside the response-action row — `PackFieldWrapper` only renders
+    // `PackQueriesStatusTable` after `selectedPackData.queries?.length > 0`,
+    // which is the same precondition the `replace(queriesArray)` effect
+    // runs under, so the table mounting is a reliable "queries have been
+    // hydrated" signal.
+    //
+    // NOTE on test-subj choice: `PackQueriesStatusTable` renders
+    // `toggleIcon-<id>` only when `item.action_id` is set (i.e. the query
+    // has been executed). In the *form* view we have no `action_id` — the
+    // row only has the ID column text, the query text, and EuiBasicTable
+    // `<tr>` nodes. We anchor on the EuiBasicTable itself plus a row count
+    // check, which works regardless of whether `action_id` is populated.
+    const packQueriesTable = row.locator('table.euiTable').first();
+    await packQueriesTable.waitFor({ state: 'visible', timeout: 30_000 });
+
+    const expectedRowCount = expectedQueryIds?.length ?? 1;
+    await expect
+      .poll(() => packQueriesTable.locator('tbody tr.euiTableRow').count(), {
+        timeout: 30_000,
+        intervals: [250, 500, 1_000],
+      })
+      .toBeGreaterThanOrEqual(expectedRowCount);
+
+    // Optional per-id belt-and-braces: if the caller knows the exact ids we
+    // expect, confirm each one's ID-column text is rendered. Missing IDs
+    // indicate the form rendered stale data (e.g. previous pack's queries),
+    // not just an underpopulated fetch. `renderIDColumn` wraps the id in
+    // `<span tabindex="0">` inside an EuiToolTip, so match by exact text
+    // within that scope.
+    if (expectedQueryIds && expectedQueryIds.length > 0) {
+      await Promise.all(
+        expectedQueryIds.map((queryId) =>
+          packQueriesTable
+            .getByText(queryId, { exact: true })
+            .first()
+            .waitFor({ state: 'visible', timeout: 15_000 })
+        )
+      );
+    }
   }
 
   async typePackNameInComboBox(itemIndex: number, packName: string): Promise<void> {
