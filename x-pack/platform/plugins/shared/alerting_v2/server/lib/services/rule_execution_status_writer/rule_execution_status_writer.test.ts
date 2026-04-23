@@ -10,10 +10,9 @@ import type { RulesSavedObjectServiceContract } from '../rules_saved_object_serv
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 
 const createDependencies = () => {
-  const rulesSavedObjectService: jest.Mocked<Pick<
-    RulesSavedObjectServiceContract,
-    'partialUpdateLastExecution'
-  >> = {
+  const rulesSavedObjectService: jest.Mocked<
+    Pick<RulesSavedObjectServiceContract, 'partialUpdateLastExecution'>
+  > = {
     partialUpdateLastExecution: jest.fn().mockResolvedValue(undefined),
   };
   const logger: jest.Mocked<LoggerServiceContract> = {

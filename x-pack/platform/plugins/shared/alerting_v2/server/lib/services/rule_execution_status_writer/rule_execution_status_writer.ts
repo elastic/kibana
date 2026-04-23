@@ -6,16 +6,10 @@
  */
 
 import { inject, injectable } from 'inversify';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../logger_service/logger_service';
+import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
 import type { RulesSavedObjectServiceContract } from '../rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceInternalToken } from '../rules_saved_object_service/tokens';
-import type {
-  RuleExecutionStatusWriterContract,
-  WriteExecutionStatusParams,
-} from './types';
+import type { RuleExecutionStatusWriterContract, WriteExecutionStatusParams } from './types';
 
 /**
  * Persists the outcome of the latest rule execution onto the rule SO.
