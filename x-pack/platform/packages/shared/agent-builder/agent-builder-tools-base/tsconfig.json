@@ -8,32 +8,20 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/agent-builder-tools-base",
-    "@kbn/core-http-server",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/core-elasticsearch-server",
-    "@kbn/inference-plugin",
-    "@kbn/zod",
-    "@kbn/logging",
-    "@kbn/logging-mocks",
-    "@kbn/core",
-    "@kbn/inference-tracing",
-    "@kbn/es-errors",
-    "@kbn/i18n",
-    "@kbn/std",
-    "@kbn/esql",
-    "@kbn/esql-server-utils",
     "@kbn/lens-embeddable-utils",
+    "@kbn/logging",
     "@kbn/utility-types",
-    "@kbn/esql-language",
-    "@kbn/datemath",
-    "@kbn/es-query",
+    "@kbn/workflows",
+    "@kbn/workflows-management-plugin",
+    "@kbn/zod"
   ]
 }

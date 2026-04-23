@@ -4603,6 +4603,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-tools-base@link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -6824,6 +6828,10 @@
   uid ""
 
 "@kbn/esql-resource-browser@link:src/platform/packages/shared/kbn-esql-resource-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-server-utils@link:src/platform/packages/shared/kbn-esql-server-utils":
   version "0.0.0"
   uid ""
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { WorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
-
-export type WorkflowExecutionResult =
-  | { success: true; execution: WorkflowExecutionState }
-  | { success: false; error: string };
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base'],
+};

@@ -44,8 +44,9 @@ export {
   runSearchTool,
   type TopSnippetsConfig,
 } from './tools';
+export { buildVisualizationConfig } from './build_visualization_config_with_genai';
+export type { BuildVisualizationConfigParamsWithoutInjectedGenerateEsql } from './build_visualization_config_with_genai';
 export {
-  buildVisualizationConfig,
   getChartTypeSelectionPromptContent,
   type VisualizationConfig,
-} from './tools/visualization';
+} from '@kbn/agent-builder-tools-base';
