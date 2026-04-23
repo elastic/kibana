@@ -20,7 +20,7 @@ import type {
   EnrichmentUrlState,
 } from '../url_schema/enrichment_url_schema';
 
-type StreamsAppLocatorDefinitionParams = StreamsAppLocationParams & {
+export type StreamsAppLocatorDefinitionParams = StreamsAppLocationParams & {
   pageState?: EnrichmentUrlState;
 };
 

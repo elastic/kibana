@@ -13,7 +13,7 @@ import type {
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { DEFAULT_DATEPICKER_REFRESH } from '@kbn/dataset-quality-plugin/common';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
+import type { StreamsAppLocatorDefinitionParams } from '../../common/locators/streams_locator';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
@@ -47,7 +47,7 @@ export const useDatasetQualityController = (
   const { updateTimeRange } = useTimeRangeUpdate();
 
   const streamsUrls = useMemo(() => {
-    const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
+    const streamsLocator = locators.get<StreamsAppLocatorDefinitionParams>(STREAMS_APP_LOCATOR_ID);
     if (!streamsLocator) {
       return undefined;
     }
@@ -57,11 +57,11 @@ export const useDatasetQualityController = (
       processingUrl: streamsLocator.getRedirectUrl({
         name: streamName,
         managementTab: 'processing',
-      } as StreamsAppLocationParams),
+      } as StreamsAppLocatorDefinitionParams),
       schemaUrl: streamsLocator.getRedirectUrl({
         name: streamName,
         managementTab: 'schema',
-      } as StreamsAppLocationParams),
+      } as StreamsAppLocatorDefinitionParams),
     };
   }, [locators, definition.stream.name]);
 
