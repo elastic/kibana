@@ -217,13 +217,13 @@ describe('SecurityNavControl', () => {
           >
             <h2
               class="euiContextMenuPanelTitle__text css-8u7lys-text"
-              id="euiContextMenuPanelTitle_generated-id"
+              id="generated-id_euiContextMenuPanelTitle"
             >
               full name
             </h2>
           </div>
           <div
-            aria-labelledby="euiContextMenuPanelTitle_generated-id"
+            aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
           >
             <div
@@ -231,7 +231,7 @@ describe('SecurityNavControl', () => {
               tabindex="-1"
             >
               <div
-                aria-labelledby="euiContextMenuPanelTitle_generated-id"
+                aria-labelledby="generated-id_euiContextMenuPanelTitle"
                 class="euiContextMenuPanel__list"
               >
                 <a
@@ -402,13 +402,13 @@ describe('SecurityNavControl', () => {
           >
             <h2
               class="euiContextMenuPanelTitle__text css-8u7lys-text"
-              id="euiContextMenuPanelTitle_generated-id"
+              id="generated-id_euiContextMenuPanelTitle"
             >
               full name
             </h2>
           </div>
           <div
-            aria-labelledby="euiContextMenuPanelTitle_generated-id"
+            aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
           >
             <div
@@ -416,7 +416,7 @@ describe('SecurityNavControl', () => {
               tabindex="-1"
             >
               <div
-                aria-labelledby="euiContextMenuPanelTitle_generated-id"
+                aria-labelledby="generated-id_euiContextMenuPanelTitle"
                 class="euiContextMenuPanel__list"
               >
                 <a
@@ -557,13 +557,13 @@ describe('SecurityNavControl', () => {
           >
             <h2
               class="euiContextMenuPanelTitle__text css-8u7lys-text"
-              id="euiContextMenuPanelTitle_generated-id"
+              id="generated-id_euiContextMenuPanelTitle"
             >
               full name
             </h2>
           </div>
           <div
-            aria-labelledby="euiContextMenuPanelTitle_generated-id"
+            aria-labelledby="generated-id_euiContextMenuPanelTitle"
             class="euiContextMenuPanel__list"
           >
             <div
@@ -571,7 +571,7 @@ describe('SecurityNavControl', () => {
               tabindex="-1"
             >
               <div
-                aria-labelledby="euiContextMenuPanelTitle_generated-id"
+                aria-labelledby="generated-id_euiContextMenuPanelTitle"
                 class="euiContextMenuPanel__list"
               >
                 <div
