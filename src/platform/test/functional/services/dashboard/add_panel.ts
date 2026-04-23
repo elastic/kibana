@@ -285,7 +285,7 @@ export class DashboardAddPanelService extends FtrService {
     embeddableType?: string,
     closePanelWhenComplete: boolean = true
   ) {
-    if (embeddableType === 'search') debugger;
+    if (embeddableType === 'search') {}
     this.log.debug(
       `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
     );
