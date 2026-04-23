@@ -24,7 +24,7 @@ import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { syncLookupIndexForCategorizedPage } from '../lookup/sync_lookup_index';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
-import { MAX_RESOLUTION_MEMBER_FETCH_COUNT } from '../../constants';
+import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
@@ -355,43 +355,21 @@ const findResolutionTargetIdsForPage = async ({
   const confirmedTargetIds = new Set<string>();
 
   try {
-    const fetchPageSize = candidateTargetIds.length * 10;
-    const maxIterations = Math.max(
-      1,
-      Math.ceil(MAX_RESOLUTION_MEMBER_FETCH_COUNT / Math.max(fetchPageSize, 1))
-    );
     let searchAfter: Array<string | number> | undefined;
-    let iterations = 0;
-    let fetchedCount = 0;
     do {
-      iterations += 1;
-      if (iterations > maxIterations) {
-        logger.warn(
-          `findResolutionTargetIdsForPage exceeded ${maxIterations} pages (aligned cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
-        );
-        break;
-      }
-
       const { entities, nextSearchAfter } = await crudClient.listEntities({
         filter: {
           terms: { 'entity.relationships.resolution.resolved_to': candidateTargetIds },
         },
-        size: fetchPageSize,
+        size: MAX_ENTITY_SEARCH_PAGE_SIZE,
         searchAfter,
         source: ['entity.relationships.resolution.resolved_to'],
       });
-      fetchedCount += entities.length;
       for (const entity of entities) {
         const resolvedTo = entity.entity?.relationships?.resolution?.resolved_to;
         if (typeof resolvedTo === 'string' && candidateSet.has(resolvedTo)) {
           confirmedTargetIds.add(resolvedTo);
         }
-      }
-      if (fetchedCount >= MAX_RESOLUTION_MEMBER_FETCH_COUNT) {
-        logger.warn(
-          `findResolutionTargetIdsForPage fetched ${fetchedCount} entities (cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
-        );
-        break;
       }
       searchAfter = nextSearchAfter;
     } while (searchAfter !== undefined);
