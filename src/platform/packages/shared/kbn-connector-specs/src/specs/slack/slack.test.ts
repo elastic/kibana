@@ -9,7 +9,8 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
-import { Slack, SlackListChannelsInputSchema, SlackResolveChannelIdInputSchema } from './slack';
+import { Slack } from './slack';
+import { SlackListChannelsInputSchema, SlackResolveChannelIdInputSchema } from './types';
 
 describe('Slack', () => {
   const mockClient = {

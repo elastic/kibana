@@ -753,6 +753,3 @@ export const Slack: ConnectorSpec = {
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
   ].join('\n'),
 };
-
-export type { SlackListChannelsInput, SlackResolveChannelIdInput } from './types';
-export { SlackListChannelsInputSchema, SlackResolveChannelIdInputSchema } from './types';
