@@ -276,37 +276,47 @@ export function loadEmbeddableData(
       services
     );
 
-    // Go concurrently: build the expression and fetch the dataViews
-    const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
-      getExpressionRendererParams(currentState, {
-        searchContext,
-        api,
-        settings: {
-          syncColors: currentState.syncColors,
-          syncCursor: currentState.syncCursor,
-          syncTooltips: currentState.syncTooltips,
-        },
-        renderMode: getRenderMode(parentApi),
-        services,
-        searchSessionId: api.searchSessionId$.getValue(),
-        abortController: internalApi.expressionAbortController$.getValue(),
-        getExecutionContext,
-        logError: getLogError(getExecutionContext),
-        addUserMessages,
-        onRender,
-        onData,
-        handleEvent,
-        disableTriggers,
-        updateBlockingErrors,
-        forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
-        getDisplayOptions: internalApi.getDisplayOptions,
-      }),
-      getUsedDataViews(
-        currentState.attributes.references,
-        currentState.attributes.state?.adHocDataViews,
-        services.dataViews
-      ),
-    ]);
+    let resolvedParams: Awaited<ReturnType<typeof getExpressionRendererParams>>;
+    let dataViewIds: Awaited<ReturnType<typeof getUsedDataViews>>;
+
+    try {
+      // Go concurrently: build the expression and fetch the dataViews
+      [resolvedParams, dataViewIds] = await Promise.all([
+        getExpressionRendererParams(currentState, {
+          searchContext,
+          api,
+          settings: {
+            syncColors: currentState.syncColors,
+            syncCursor: currentState.syncCursor,
+            syncTooltips: currentState.syncTooltips,
+          },
+          renderMode: getRenderMode(parentApi),
+          services,
+          searchSessionId: api.searchSessionId$.getValue(),
+          abortController: internalApi.expressionAbortController$.getValue(),
+          getExecutionContext,
+          logError: getLogError(getExecutionContext),
+          addUserMessages,
+          onRender,
+          onData,
+          handleEvent,
+          disableTriggers,
+          updateBlockingErrors,
+          forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
+          getDisplayOptions: internalApi.getDisplayOptions,
+        }),
+        getUsedDataViews(
+          currentState.attributes.references,
+          currentState.attributes.state?.adHocDataViews,
+          services.dataViews
+        ),
+      ]);
+    } catch (error) {
+      endChartSpan('failure', error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    }
+
+    const { params, abortController, ...rest } = resolvedParams;
 
     // update the visualization context before anything else
     // as it will be used to compute blocking errors also in case of issues
