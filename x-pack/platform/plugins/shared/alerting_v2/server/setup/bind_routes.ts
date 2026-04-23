@@ -41,6 +41,13 @@ import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_valu
 import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
 import { NotificationPolicyTagsRoute } from '../routes/suggestions/notification_policy_tags_route';
 
+/**
+ * TODO: https://github.com/elastic/rna-program/issues/426
+ * Remove this route and its binding before GA.
+ */
+
+import { ResetResourcesRoute } from '../routes/reset_resources_route';
+
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
   bind(Route).toConstantValue(UpdateRuleRoute);
@@ -75,4 +82,6 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherDataFieldsRoute);
   bind(Route).toConstantValue(NotificationPolicyTagsRoute);
+  // TODO(rna-program#426): remove this binding before GA.
+  bind(Route).toConstantValue(ResetResourcesRoute);
 }
