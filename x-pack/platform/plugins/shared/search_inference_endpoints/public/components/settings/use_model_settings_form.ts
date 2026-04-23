@@ -24,6 +24,8 @@ export interface ModelSettingsForm {
   assignments: Assignments;
   sections: FeatureSection[];
   invalidEndpointIds: Set<string>;
+  hasSavedObject: Record<string, boolean>;
+  dirtyFeatureIds: ReadonlySet<string>;
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
   save: () => void;
   resetSection: (sectionId: string) => void;
@@ -113,13 +115,27 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [registeredFeatures]
   );
 
-  const defaultAssignments = useMemo((): Assignments => {
-    const savedMap = new Map<string, string[]>(
-      (settingsData?.data?.features ?? [])
-        .map((f): [string, string[]] => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)])
-        .filter(([, ids]) => ids.length > 0)
-    );
+  const savedMap = useMemo(
+    () =>
+      new Map<string, string[]>(
+        (settingsData?.data?.features ?? [])
+          .map((f): [string, string[]] => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)])
+          .filter(([, ids]) => ids.length > 0)
+      ),
+    [settingsData]
+  );
 
+  const hasSavedObject = useMemo(
+    () =>
+      Object.fromEntries(
+        sections.flatMap(({ children }) =>
+          children.map((f): [string, boolean] => [f.featureId, savedMap.has(f.featureId)])
+        )
+      ),
+    [sections, savedMap]
+  );
+
+  const defaultAssignments = useMemo((): Assignments => {
     return Object.fromEntries(
       sections.flatMap(({ children }) =>
         children.map((f): [string, string[]] => [
@@ -128,7 +144,7 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
         ])
       )
     );
-  }, [settingsData, sections, recommendedEndpointsById]);
+  }, [savedMap, sections, recommendedEndpointsById]);
 
   const [assignments, setAssignments] = useState<Assignments>(defaultAssignments);
 
@@ -141,10 +157,18 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [settingsData]
   );
 
-  const isDirty = useMemo(
-    () => JSON.stringify(assignments) !== JSON.stringify(defaultAssignments),
-    [assignments, defaultAssignments]
-  );
+  const dirtyFeatureIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const [featureId, ids$] of Object.entries(assignments)) {
+      const defaults = defaultAssignments[featureId];
+      if (!defaults || !arraysEqual(ids$, defaults)) {
+        ids.add(featureId);
+      }
+    }
+    return ids;
+  }, [assignments, defaultAssignments]);
+
+  const isDirty = dirtyFeatureIds.size > 0;
 
   const updateEndpoints = useCallback((featureId: string, endpointIds: string[]) => {
     setAssignments((prev) => ({ ...prev, [featureId]: endpointIds }));
@@ -185,6 +209,8 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     assignments,
     sections,
     invalidEndpointIds,
+    hasSavedObject,
+    dirtyFeatureIds,
     updateEndpoints,
     save,
     resetSection,
