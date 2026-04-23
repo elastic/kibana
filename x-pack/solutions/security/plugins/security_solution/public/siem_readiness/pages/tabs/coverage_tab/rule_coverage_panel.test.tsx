@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
+import { IntlProvider } from '@kbn/i18n-react';
 import { RuleCoveragePanel } from './rule_coverage_panel';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../../../common/lib/telemetry/events/siem_readiness/types';
@@ -49,7 +50,11 @@ describe('RuleCoveragePanel telemetry', () => {
   });
 
   it('reports RuleViewToggled with view: mitre_attack when MITRE toggle is clicked', () => {
-    const { getByText } = render(<RuleCoveragePanel />);
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <RuleCoveragePanel />
+      </IntlProvider>
+    );
     fireEvent.click(getByText('MITRE ATT&CK enabled rules'));
     expect(mockReportEvent).toHaveBeenCalledWith(SiemReadinessEventTypes.RuleViewToggled, {
       view: 'mitre_attack',
@@ -57,7 +62,11 @@ describe('RuleCoveragePanel telemetry', () => {
   });
 
   it('reports RuleViewToggled with view: all_rules when All rules toggle is clicked', () => {
-    const { getByText } = render(<RuleCoveragePanel />);
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <RuleCoveragePanel />
+      </IntlProvider>
+    );
     fireEvent.click(getByText('MITRE ATT&CK enabled rules'));
     mockReportEvent.mockClear();
     fireEvent.click(getByText('All enabled rules'));
