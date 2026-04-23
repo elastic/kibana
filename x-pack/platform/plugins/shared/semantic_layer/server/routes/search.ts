@@ -49,14 +49,15 @@ export const registerSearchRoute = ({
     async (ctx, request, response) => {
       try {
         const coreContext = await ctx.core;
-        const soClient = coreContext.savedObjects.client;
         const uiSettingsClient = coreContext.uiSettings.client;
 
         const isEnabled = await uiSettingsClient.get<boolean>(
           SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (!isEnabled) {
-          return response.notFound({ body: { message: 'Semantic Layer experimental features are not enabled' } });
+          return response.notFound({
+            body: { message: 'Semantic Layer experimental features are not enabled' },
+          });
         }
 
         const sml = getSmlService();
