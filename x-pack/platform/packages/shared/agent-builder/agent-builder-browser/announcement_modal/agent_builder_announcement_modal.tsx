@@ -5,159 +5,111 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ComponentType } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiText,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
+import type { AnnouncementModalVariantProps } from './variants/types';
+import { NoPriorAssistantUsage } from './variants/no_prior_assistant_usage';
+import { PriorAssistantAdminRevert } from './variants/prior_assistant_admin_revert';
+import { PriorAssistantSpaceAdminRevert } from './variants/prior_assistant_space_admin_revert';
 
-const AGENT_BUILDER_DOCUMENTATION_URL =
-  'https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder';
+export type { AgentBuilderAnnouncementVariant } from './translations';
 
 export interface AgentBuilderAnnouncementModalProps {
+  variant: i18n.AgentBuilderAnnouncementVariant;
   onRevert: () => void;
   onContinue: () => void;
-  /**
-   * When false, the revert action is hidden and the body shows a short FYI plus a link to
-   * documentation (no bullets or history callout), since the user cannot change Gen AI settings.
-   */
-  canRevertToAssistant?: boolean;
 }
 
-export const AgentBuilderAnnouncementModal: React.FC<AgentBuilderAnnouncementModalProps> = ({
-  onRevert,
-  onContinue,
-  canRevertToAssistant = true,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const modalTitleId = useGeneratedHtmlId({ prefix: 'agentBuilderAnnouncementModalTitle' });
+const VARIANT_CONTENT: Record<
+  i18n.AgentBuilderAnnouncementVariant,
+  ComponentType<AnnouncementModalVariantProps>
+> = {
+  '1a': NoPriorAssistantUsage,
+  '1b': PriorAssistantSpaceAdminRevert,
+  '2a': PriorAssistantAdminRevert,
+};
 
-  const listCss = css`
-    li + li {
-      margin-top: ${euiTheme.size.base};
+const MODAL_MAX_WIDTH = 576;
+
+/** Header product icon gradient (design: blue → purple). */
+const AGENT_PRODUCT_ICON_GRADIENT_START = '#1750BA';
+const AGENT_PRODUCT_ICON_GRADIENT_END = '#6B3C9F';
+
+function AnnouncementModalHeader({ titleId }: { titleId: string }) {
+  const gradientId = useGeneratedHtmlId({ prefix: 'agentBuilderAnnouncementAgentIconGradient' });
+  const iconWrapperCss = css`
+    display: inline-flex;
+    line-height: 0;
+
+    & .euiIcon,
+    & .euiIcon [fill]:not([fill='none']) {
+      fill: url(#${gradientId}) !important;
     }
   `;
 
-  const calloutAfterBodyWrapperCss = css`
-    margin-top: 2em;
-  `;
-
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={onContinue} css={{ maxWidth: '576px' }}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.agentBuilder.announcementModal.modalDescription"
-              defaultMessage="We've set <strong>AI Agent</strong> as the default experience for this space to provide more powerful automation across your environment."
-              values={{ strong: (chunks: React.ReactNode) => <strong>{chunks}</strong> }}
-            />
-          </p>
-
-          {canRevertToAssistant ? (
-            <>
-              <p>
-                <em>{i18n.WHAT_TO_EXPECT}</em>
-              </p>
-
-              <ul css={listCss}>
-                <li>
-                  <strong>{i18n.DUAL_EXPERIENCES_TITLE}</strong> {i18n.DUAL_EXPERIENCES_BODY}
-                </li>
-                <li>
-                  <strong>{i18n.DATA_ISOLATION_TITLE}</strong> {i18n.DATA_ISOLATION_BODY}
-                </li>
-                <li>
-                  <strong>{i18n.FEATURE_PARITY_TITLE}</strong> {i18n.FEATURE_PARITY_BODY}
-                </li>
-              </ul>
-            </>
-          ) : null}
-        </EuiText>
-
-        {canRevertToAssistant ? null : (
-          <div css={calloutAfterBodyWrapperCss}>
-            <EuiCallOut
-              announceOnMount={false}
-              title={i18n.LEARN_MORE_CALLOUT_TITLE}
-              iconType="bulb"
-              color="primary"
-              size="s"
-              data-test-subj="agentBuilderAnnouncementLearnMoreCallout"
+    <EuiModalHeader>
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <span css={iconWrapperCss}>
+            <svg
+              width="0"
+              height="0"
+              aria-hidden="true"
+              focusable="false"
+              style={{ position: 'absolute' }}
             >
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.agentBuilder.announcementModal.learnMoreDescriptionDetail"
-                    defaultMessage="Learn more in our {documentationLink}."
-                    values={{
-                      documentationLink: (
-                        <EuiLink
-                          href={AGENT_BUILDER_DOCUMENTATION_URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          external
-                          data-test-subj="agentBuilderAnnouncementDocumentationLink"
-                        >
-                          {i18n.DOCUMENTATION_LINK_TEXT}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            </EuiCallOut>
-          </div>
-        )}
+              <defs>
+                <linearGradient
+                  id={gradientId}
+                  x1="-0.5"
+                  y1="-2.5"
+                  x2="15.5"
+                  y2="9.5"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop offset="16%" stopColor={AGENT_PRODUCT_ICON_GRADIENT_START} />
+                  <stop offset="83%" stopColor={AGENT_PRODUCT_ICON_GRADIENT_END} />
+                </linearGradient>
+              </defs>
+            </svg>
+            <EuiIcon type="productAgent" size="xl" aria-hidden={true} />
+          </span>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiModalHeaderTitle id={titleId}>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiModalHeader>
+  );
+}
 
-        {canRevertToAssistant ? (
-          <div css={calloutAfterBodyWrapperCss}>
-            <EuiCallOut
-              announceOnMount={false}
-              title={i18n.NEED_HISTORY_TITLE}
-              iconType="hourglass"
-              color="primary"
-              size="s"
-            >
-              <EuiText size="s">
-                <p>{i18n.NEED_HISTORY_BODY}</p>
-              </EuiText>
-            </EuiCallOut>
-          </div>
-        ) : null}
-      </EuiModalBody>
-
-      <EuiModalFooter>
-        {canRevertToAssistant ? (
-          <EuiButtonEmpty onClick={onRevert} data-test-subj="agentBuilderAnnouncementRevertButton">
-            {i18n.REVERT_BUTTON}
-          </EuiButtonEmpty>
-        ) : null}
-        <EuiButton
-          fill
-          onClick={onContinue}
-          data-test-subj="agentBuilderAnnouncementContinueButton"
-        >
-          {canRevertToAssistant ? i18n.CONTINUE_BUTTON : i18n.CONTINUE_BUTTON_READONLY}
-        </EuiButton>
-      </EuiModalFooter>
+export const AgentBuilderAnnouncementModal: React.FC<AgentBuilderAnnouncementModalProps> = ({
+  variant,
+  onRevert,
+  onContinue,
+}) => {
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'agentBuilderAnnouncementModalTitle' });
+  const VariantContent = VARIANT_CONTENT[variant];
+  return (
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={onContinue}
+      css={{ maxWidth: MODAL_MAX_WIDTH }}
+      data-test-subj={`agentBuilderAnnouncementModal-${variant}`}
+    >
+      <AnnouncementModalHeader titleId={modalTitleId} />
+      <VariantContent onContinue={onContinue} onRevert={onRevert} />
     </EuiModal>
   );
 };
