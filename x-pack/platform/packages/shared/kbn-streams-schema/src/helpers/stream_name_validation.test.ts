@@ -67,7 +67,7 @@ describe('validateStreamName', () => {
       valid: false,
       error: 'invalidCharacter',
       message: 'Stream name cannot contain spaces.',
-      meta: { character: ' ' },
+      meta: { characters: [' '] },
     });
   });
 
@@ -120,9 +120,27 @@ describe('validateStreamName', () => {
         if (!result.valid) {
           expect(result.message).toContain('Stream name cannot contain');
           expect(result.error).toBe('invalidCharacter');
-          expect(result.meta).toEqual({ character: char });
+          expect(result.meta).toEqual({ characters: [char] });
         }
       });
+    });
+  });
+
+  it('reports all invalid characters at once', () => {
+    expect(validateStreamName('my*stream#test:data')).toEqual({
+      valid: false,
+      error: 'invalidCharacter',
+      message: 'Stream name cannot contain "*", "#", ":".',
+      meta: { characters: ['*', '#', ':'] },
+    });
+  });
+
+  it('reports spaces alongside other invalid characters', () => {
+    expect(validateStreamName('my stream|data')).toEqual({
+      valid: false,
+      error: 'invalidCharacter',
+      message: 'Stream name cannot contain spaces, "|".',
+      meta: { characters: [' ', '|'] },
     });
   });
 

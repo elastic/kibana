@@ -7,8 +7,13 @@
 
 import * as t from 'io-ts';
 
-export const remoteMonitorInfoSchema = t.type({
-  remoteName: t.string,
-});
+export const remoteMonitorInfoSchema = t.intersection([
+  t.type({
+    remoteName: t.string,
+  }),
+  t.partial({
+    kibanaUrl: t.string,
+  }),
+]);
 
 export type RemoteMonitorInfo = t.TypeOf<typeof remoteMonitorInfoSchema>;
