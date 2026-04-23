@@ -16,7 +16,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiButtonEmpty,
   EuiFormRow,
   EuiFieldText,
@@ -28,6 +27,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
@@ -751,27 +751,29 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
             {isAnalyzeDisabled && analyzeLogsDisabledTooltipContent != null ? (
               <EuiToolTip content={analyzeLogsDisabledTooltipContent} position="top">
                 <span tabIndex={0}>
-                  <EuiButton
-                    fill
+                  <AiButton
+                    iconType="sparkles"
+                    variant="accent"
                     onClick={handleAnalyzeLogs}
                     disabled={isAnalyzeDisabled}
                     isLoading={isParsing || isLoading || isUploadingSamples}
                     data-test-subj="analyzeLogsButton"
                   >
                     {i18n.ANALYZE_LOGS_BUTTON}
-                  </EuiButton>
+                  </AiButton>
                 </span>
               </EuiToolTip>
             ) : (
-              <EuiButton
-                fill
+              <AiButton
+                iconType="sparkles"
+                variant="accent"
                 onClick={handleAnalyzeLogs}
                 disabled={isAnalyzeDisabled}
                 isLoading={isParsing || isLoading || isUploadingSamples}
                 data-test-subj="analyzeLogsButton"
               >
                 {i18n.ANALYZE_LOGS_BUTTON}
-              </EuiButton>
+              </AiButton>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
