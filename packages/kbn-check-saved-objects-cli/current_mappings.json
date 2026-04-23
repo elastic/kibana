@@ -449,6 +449,19 @@
       "kind": {
         "type": "keyword"
       },
+      "last_execution": {
+        "properties": {
+          "duration_ms": {
+            "type": "long"
+          },
+          "outcome": {
+            "type": "keyword"
+          },
+          "timestamp": {
+            "type": "date"
+          }
+        }
+      },
       "metadata": {
         "properties": {
           "description": {
