@@ -187,6 +187,12 @@ export function runHeapSnapshotAnalyzerCli(): void {
         '  --filter=<regex>         Restrict allocation-site tables to nodes whose deepest\n' +
         '                           allocation frame script_name matches <regex>. Example:\n' +
         '                           --filter=zod for Zod-only allocation attribution.\n' +
+        '  --stack-contains=<regex> Print total bytes/nodes whose alloc stack contains a\n' +
+        '                           frame matching <regex> ANYWHERE (not just the leaf).\n' +
+        "                           The 'blast radius' of a piece of code: bytes downstream\n" +
+        '                           of that frame even when strict attribution credits\n' +
+        '                           them elsewhere. Overlaps across queries — do not sum.\n' +
+        '                           Example: --stack-contains=instrumentation-undici.\n' +
         '\n' +
         'Computes two attribution views by default:\n' +
         '  - package: explicit-evidence seeds + dominator propagation (per-package; edge-order invariant)\n' +
@@ -208,6 +214,25 @@ export function runHeapSnapshotAnalyzerCli(): void {
       filterRegex = new RegExp(filterStr);
     } catch (err) {
       process.stderr.write(`Invalid --filter regex '${filterStr}': ${(err as Error).message}\n`);
+      process.exit(1);
+    }
+  }
+
+  const stackContainsStr = flagValue('stack-contains');
+  let stackContainsRegex: RegExp | undefined;
+  if (stackContainsStr !== undefined) {
+    if (stackContainsStr.length === 0) {
+      process.stderr.write(
+        `--stack-contains requires a value, e.g. --stack-contains=instrumentation-undici\n`
+      );
+      process.exit(1);
+    }
+    try {
+      stackContainsRegex = new RegExp(stackContainsStr);
+    } catch (err) {
+      process.stderr.write(
+        `Invalid --stack-contains regex '${stackContainsStr}': ${(err as Error).message}\n`
+      );
       process.exit(1);
     }
   }
@@ -1206,6 +1231,9 @@ export function runHeapSnapshotAnalyzerCli(): void {
   let allocUntrackedNodes = 0;
   let allocFilteredOut = 0;
   let allocAttributable = false;
+  // Filled in below when --stack-contains is active.
+  let stackContainsBytes = 0;
+  let stackContainsNodes = 0;
   const traceNodeIdFieldIdx = nodeFields.indexOf('trace_node_id');
   if (
     traceNodeIdFieldIdx !== -1 &&
@@ -1378,8 +1406,69 @@ export function runHeapSnapshotAnalyzerCli(): void {
         tAlloc
       )} (${allocUntrackedNodes} nodes without trace ctx${filterMsg})`
     );
+
+    // --- Stack-contains pass (independent of attribution) ---
+    // For each heap node, check whether ANY frame in its alloc stack matches
+    // the regex. Different from --filter (leaf only) and from the attribution
+    // walks (first matching frame). Captures the "blast radius" of a piece of
+    // code: every byte downstream of a stack frame matching the pattern, even
+    // when strict attribution credits the bytes to some other package.
+    if (stackContainsRegex) {
+      const tSC = Date.now();
+      status(`Stack-contains pass: /${stackContainsStr}/...`);
+      const scCache = new Uint8Array(strings.length);
+      function scriptMatchesStackContains(scriptStrId: number): boolean {
+        if (scriptStrId < 0 || scriptStrId >= strings.length) return false;
+        const c = scCache[scriptStrId];
+        if (c === 1) return true;
+        if (c === 2) return false;
+        const matches = stackContainsRegex!.test(strings[scriptStrId]);
+        scCache[scriptStrId] = matches ? 1 : 2;
+        return matches;
+      }
+      // 0 = unset, 1 = stack contains a match, 2 = does not.
+      const traceContains = new Uint8Array(td.parents.length);
+      function stackContains(traceIdx: number): boolean {
+        if (traceIdx < 0) return false;
+        let cur = traceIdx;
+        const path: number[] = [];
+        while (cur >= 0 && traceContains[cur] === 0) {
+          path.push(cur);
+          const fnIdx = td.fnInfo[cur];
+          if (fnIdx >= 0 && fnIdx * tfiStride + tfiScriptIdx < tfi.length) {
+            const scriptStrId = tfi[fnIdx * tfiStride + tfiScriptIdx];
+            if (scriptMatchesStackContains(scriptStrId)) {
+              for (const p of path) traceContains[p] = 1;
+              return true;
+            }
+          }
+          cur = td.parents[cur];
+        }
+        const result = cur >= 0 ? traceContains[cur] === 1 : false;
+        const mark = result ? 1 : 2;
+        for (const p of path) traceContains[p] = mark;
+        return result;
+      }
+      for (let i = 0; i < nodeCount; i++) {
+        const traceId = nodes[i * nf + traceNodeIdFieldIdx];
+        if (traceId <= 0) continue;
+        const tIdx = td.idToIdx.get(traceId);
+        if (tIdx === undefined) continue;
+        if (stackContains(tIdx)) {
+          stackContainsBytes += selfSize[i];
+          stackContainsNodes++;
+        }
+      }
+      status(
+        `  stack-contains pass in ${elapsed(tSC)} ` +
+          `(${stackContainsNodes} nodes, ${fmtBytes(stackContainsBytes)})`
+      );
+    }
   } else {
     status('Skipping alloc-site mode (snapshot has no allocation tracking data).');
+    if (stackContainsRegex) {
+      status('  --stack-contains requires allocation tracking data; skipping.');
+    }
   }
 
   // --- Aggregate per-package retained bytes (boundary-aware to avoid
@@ -1943,6 +2032,23 @@ export function runHeapSnapshotAnalyzerCli(): void {
       report.unattributed.allocSitePackage?.retainedBytes ?? 0,
       report.unattributed.allocSitePackage?.pct ?? 0
     );
+
+    if (stackContainsRegex) {
+      const pct = rootRetained > 0 ? (stackContainsBytes / rootRetained) * 100 : 0;
+      out.write('\n');
+      out.write(`=== Stack-Contains Summary (/${stackContainsStr}/) ===\n`);
+      out.write(
+        'Bytes/nodes whose alloc stack passes through a frame matching the\n' +
+          'pattern ANYWHERE — not just at the leaf, not just at the first match.\n' +
+          'Captures the blast radius of a piece of code (every byte downstream\n' +
+          'of a matching frame, even when strict attribution credits it elsewhere).\n' +
+          'Overlaps with other stack-contains queries; do not sum across patterns.\n\n'
+      );
+      out.write(
+        `  Nodes:       ${stackContainsNodes}\n` +
+          `  Self bytes:  ${fmtBytes(stackContainsBytes)} (${pct.toFixed(2)}% of root-retained)\n`
+      );
+    }
   } else {
     out.write(
       '\n(Allocation-site table omitted — snapshot has no allocation tracking. ' +
