@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/kibana-utils-plugin'
+  - '@kbn/uiam-api-keys-provisioning-status'
   - '@kbn/utility-types'
   - '@kbn/config-schema'
   - '@kbn/data-plugin'
