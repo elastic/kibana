@@ -1882,7 +1882,7 @@
     "@testing-library/react": "16.3.2",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.6.1",
-    "@types/adm-zip": "0.5.7",
+    "@types/adm-zip": "0.5.8",
     "@types/archiver": "7.0.0",
     "@types/async": "3.2.25",
     "@types/aws4": "1.11.3",
