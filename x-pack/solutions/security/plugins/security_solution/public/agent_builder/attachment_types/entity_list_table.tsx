@@ -120,6 +120,21 @@ const NAME_COLUMN_WIDTH = '260px';
  * rows whose other-column content has different widths). Forcing
  * width/min-width/max-width on the cells themselves makes the Name column
  * stable across pages.
+ *
+ * Pagination overrides: when this attachment is rendered inside a chat round,
+ * the message content sits inside an `EuiText` + `EuiMarkdownFormat` scope
+ * that forces `ul { list-style: disc; margin-inline-start: 1.7143rem; }` onto
+ * every nested list. EuiPagination renders its buttons inside a
+ * `<ul class="euiPagination__list">`, so the inherited rules turn each
+ * `<li>` into a visible bullet — the stray dark dot that shows up between
+ * the "previous" chevron and the first page button — and push the whole
+ * list to the right with a markdown-list indent. We also zero out any
+ * background/outline on the active-page `EuiPaginationButton` so that
+ * chat-scope styles (e.g. disabled-button tints inherited from ancestor
+ * themes) do not render as a circular "disc" behind the active page
+ * number. Scoped to this wrapper so the overrides only affect the entity
+ * list attachment table's pagination. Mirrors the sibling override in
+ * `entity_attachment/entity_table/entity_table.tsx`.
  */
 const tableScrollStyles = css`
   overflow-x: auto;
@@ -133,6 +148,28 @@ const tableScrollStyles = css`
     width: ${NAME_COLUMN_WIDTH};
     min-width: ${NAME_COLUMN_WIDTH};
     max-width: ${NAME_COLUMN_WIDTH};
+  }
+
+  .euiPagination__list,
+  .euiPagination__list .euiPagination__item {
+    list-style: none;
+    margin: 0;
+    margin-inline-start: 0;
+    padding-inline-start: 0;
+  }
+
+  .euiPagination__list .euiPagination__item::marker,
+  .euiPagination__list .euiPagination__item::before {
+    content: none;
+  }
+
+  .euiPaginationButton[aria-current='page'],
+  .euiPaginationButton[aria-current='page']::before,
+  .euiPaginationButton[aria-current='page']::after {
+    background: transparent;
+    background-color: transparent;
+    box-shadow: none;
+    outline: none;
   }
 `;
 

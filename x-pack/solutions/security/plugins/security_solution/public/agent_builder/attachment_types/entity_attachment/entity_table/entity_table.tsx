@@ -75,16 +75,18 @@ const MAX_VISIBLE_SOURCES = 3;
  * squeezing the Name column into character-by-character wrapping.
  *
  * Pagination overrides: when the attachment is rendered inside a chat round,
- * the message content sits inside an `EuiText` scope that forces
- * `ul { list-style: disc; }` onto every nested list. EuiPagination renders
- * its buttons inside a `<ul class="euiPagination__list">`, so the inherited
- * rule turns each `<li>` into a visible bullet — the stray dark dot that
- * shows up between the "previous" chevron and the first page button. We also
- * zero out any background/outline on the active-page `EuiPaginationButton`
- * so that chat-scope styles (e.g. disabled-button tints inherited from
- * ancestor themes) do not render as a circular "disc" behind the active
- * page number. Scoped to this wrapper so the overrides only affect the
- * entity attachment table's pagination.
+ * the message content sits inside an `EuiText` + `EuiMarkdownFormat` scope
+ * that forces `ul { list-style: disc; margin-inline-start: 1.7143rem; }` onto
+ * every nested list. EuiPagination renders its buttons inside a
+ * `<ul class="euiPagination__list">`, so the inherited rules turn each
+ * `<li>` into a visible bullet — the stray dark dot that shows up between
+ * the "previous" chevron and the first page button — and push the whole
+ * list to the right with a markdown-list indent. We also zero out any
+ * background/outline on the active-page `EuiPaginationButton` so that
+ * chat-scope styles (e.g. disabled-button tints inherited from ancestor
+ * themes) do not render as a circular "disc" behind the active page
+ * number. Scoped to this wrapper so the overrides only affect the entity
+ * attachment table's pagination.
  */
 const tableScrollStyles = css`
   overflow-x: auto;
@@ -96,6 +98,8 @@ const tableScrollStyles = css`
   .euiPagination__list,
   .euiPagination__list .euiPagination__item {
     list-style: none;
+    margin: 0;
+    margin-inline-start: 0;
     padding-inline-start: 0;
   }
 
