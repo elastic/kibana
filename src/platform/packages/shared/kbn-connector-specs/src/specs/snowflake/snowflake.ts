@@ -93,9 +93,7 @@ export const Snowflake: ConnectorSpec = {
     types: [
       {
         type: 'bearer',
-        defaults: {
-          token: '',
-        },
+        defaults: {},
         overrides: {
           meta: {
             token: {
@@ -113,12 +111,7 @@ export const Snowflake: ConnectorSpec = {
       },
       {
         type: 'oauth_authorization_code',
-        defaults: {
-          authorizationUrl: '',
-          tokenUrl: '',
-          scope: '',
-          useBasicAuth: true,
-        },
+        defaults: {},
         overrides: {
           meta: {
             authorizationUrl: {
@@ -541,7 +534,7 @@ export const Snowflake: ConnectorSpec = {
     'For unstructured text retrieval (product catalogs, support docs, chat logs), use Cortex Search instead of `LIKE`/`CONTAINS` in SQL:',
     '',
     '1. `listCortexSearchServices` for the target schema → pick a service.',
-    '2. `cortexSearch` with a natural-language `query`. ,
+    '2. `cortexSearch` with a natural-language `query`.',
     '',
     'Prefer `limit <= 20` and request only the columns you actually need to keep LLM context small.',
     '',

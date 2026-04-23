@@ -2470,6 +2470,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** 
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/snowflake/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
@@ -2479,7 +2480,6 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/** 
 
 # Connector Agent Skills
 src/platform/packages/shared/kbn-connector-specs/.claude/skills @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/snowflake/** @elastic/workflows-eng
 
 # Connector Workflow Tests
 src/platform/plugins/shared/workflows_management/test/connector_workflows @elastic/workchat-eng

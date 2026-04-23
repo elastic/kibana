@@ -1,7 +1,7 @@
 ---
 navigation_title: "Snowflake"
 type: reference
-description: "Use the Snowflake connector to execute SQL, discover databases, schemas, tables and views, and run semantic searches via Cortex Search."
+description: "Use the Snowflake connector to run SQL, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search."
 applies_to:
   stack: preview 9.5
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Snowflake connector [snowflake-action-type]
 
-The Snowflake connector wraps the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/reference), the [Snowflake REST API v2](https://docs.snowflake.com/en/developer-guide/snowflake-rest-api/reference), and [Cortex Search](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/query-cortex-search-service). Use it to execute arbitrary SQL asynchronously, discover databases, schemas, tables and views, describe their structure, and run semantic searches via Cortex Search.
+The Snowflake connector wraps the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/reference), the [Snowflake REST API v2](https://docs.snowflake.com/en/developer-guide/snowflake-rest-api/reference), and [Cortex Search](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/query-cortex-search-service). Use it to run arbitrary SQL asynchronously, discover databases, schemas, tables, and views, describe their structure, and run semantic searches through Cortex Search.
 
 ## Create connectors in {{kib}} [define-snowflake-ui]
 
@@ -36,13 +36,13 @@ Default Role
 
 ## Test connectors [snowflake-action-configuration]
 
-You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by executing `SELECT CURRENT_VERSION()` and returning the Snowflake version.
+You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by running `SELECT CURRENT_VERSION()` and returning the Snowflake version.
 
 The Snowflake connector has the following actions:
 
 Execute statement
-:   Execute a SQL statement asynchronously in Snowflake. Returns a statement handle for polling results or cancellation. Supports bind variables, multi-statement execution, and per-request context overrides.
-    - `statement` (required): SQL statement to execute. Supports any Snowflake SQL. Use `?` placeholders for bind variables.
+:   Run an SQL statement asynchronously in Snowflake. Returns a statement handle for polling results or cancellation. Supports bind variables, multi-statement execution, and per-request context overrides.
+    - `statement` (required): SQL statement to run. Supports any Snowflake SQL. Use `?` placeholders for bind variables.
     - `timeout` (optional): Timeout in seconds (0–604800). Set to 0 for the maximum timeout of 7 days.
     - `warehouse` (optional): Warehouse override for this request.
     - `database` (optional): Database override for this request.
@@ -58,7 +58,7 @@ Get statement status
     - `partition` (optional): Partition number (0-based) for large result sets split across multiple partitions.
 
 Cancel statement
-:   Cancel a running SQL statement. Only works on statements that are still executing.
+:   Cancel a running SQL statement. Only works on statements that are still running.
     - `statementHandle` (required): The statement handle of the running statement to cancel.
 
 List databases
@@ -118,7 +118,7 @@ Cortex Search
 ::::{tip}
 Use *Execute statement* to submit a query, then poll with *Get statement status* using the returned `statementHandle`. If the response status is 202, the query is still running — wait and poll again. A 200 response contains the result data and column metadata. Use *Cancel statement* to stop long-running queries.
 
-For AI agents without prior knowledge of the target data, discover before querying: *List databases* → *List schemas* → *List tables* → *Describe table* → *Execute statement*. Discovery actions return clean JSON and do not require a warehouse, so they are faster and cheaper than equivalent `SHOW` / `DESCRIBE` calls via *Execute statement*.
+For AI agents without prior knowledge of the target data, discover before querying: *List databases* → *List schemas* → *List tables* → *Describe table* → *Execute statement*. Discovery actions return clean JSON and do not require a warehouse, so they are faster and cheaper than equivalent `SHOW` / `DESCRIBE` calls through *Execute statement*.
 ::::
 
 ## Connector networking configuration [snowflake-connector-networking-configuration]
@@ -131,7 +131,7 @@ The Snowflake connector supports two authentication methods: **OAuth Authorizati
 
 ### OAuth Authorization Code (recommended)
 
-Use this method to let users authorize the connector with their own Snowflake account. The connector handles token exchange and refresh automatically using PKCE.
+Use this method to let users authorize the connector with their own Snowflake account. The connector handles token exchange and refresh automatically using Proof Key for Code Exchange (PKCE).
 
 1. In your Snowflake account, create a security integration for a custom OAuth client:
 
@@ -163,9 +163,9 @@ Use this method to let users authorize the connector with their own Snowflake ac
 Use this method for quick setup or automated access. Snowflake PATs are tied to a specific user and role.
 
 1. In your Snowflake account, ensure programmatic access tokens are enabled for your user.
-2. Generate a PAT through the Snowflake web UI (**User Menu > Preferences > Programmatic Access Tokens**) or via SQL.
+2. Generate a PAT through the Snowflake web UI (**User Menu → Preferences → Programmatic Access Tokens**) or through SQL.
 3. In {{kib}}, create a Snowflake connector and select **Bearer** as the authentication method. Paste the PAT into the **Snowflake access token** field.
 
 ::::{note}
-PATs may have an expiration date depending on your Snowflake account configuration. Regenerate the token before it expires.
+PATs might expire depending on your Snowflake account configuration. Regenerate the token before it expires.
 ::::
