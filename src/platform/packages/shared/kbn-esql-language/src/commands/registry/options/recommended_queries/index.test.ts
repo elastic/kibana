@@ -14,9 +14,9 @@ describe('getRecommendedQueriesTemplates', () => {
     const withFrom = getRecommendedQueriesTemplates({ fromCommand: 'FROM x' });
     const emptyFrom = getRecommendedQueriesTemplates({ fromCommand: '' });
 
-    const unmmappedFieldsTemplate = withFrom.find((q) => q.label === 'Load unmapped fields');
-    expect(unmmappedFieldsTemplate).toBeDefined();
-    expect(unmmappedFieldsTemplate?.queryString).toBe(`SET unmapped_fields = "LOAD";\nFROM x`);
+    const unmappedFieldsTemplate = withFrom.find((q) => q.label === 'Load unmapped fields');
+    expect(unmappedFieldsTemplate).toBeDefined();
+    expect(unmappedFieldsTemplate?.queryString).toBe(`SET unmapped_fields = "LOAD";\nFROM x`);
 
     expect(emptyFrom.find((q) => q.label === 'Load unmapped fields')).toBeUndefined();
   });
