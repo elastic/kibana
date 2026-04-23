@@ -115,11 +115,11 @@ export const AccessSection: React.FC<AccessSectionProps> = ({ canChangeVisibilit
       <EuiTitle size="xs">
         <h3>{flyoutLabels.accessTitle}</h3>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued" component="p">
         {flyoutLabels.accessDescription}
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiFormRow
         label={flyoutLabels.visibilityLabel}
         helpText={!canChangeVisibility ? flyoutLabels.visibilityDisabledReason : undefined}

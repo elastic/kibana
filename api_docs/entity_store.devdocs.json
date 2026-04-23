@@ -944,7 +944,7 @@
         "label": "ENTITY_STORE_ROUTES",
         "description": [],
         "signature": [
-          "{ readonly public: { readonly INSTALL: \"/api/security/entity_store/install\"; readonly UPDATE: \"/api/security/entity_store\"; readonly UNINSTALL: \"/api/security/entity_store/uninstall\"; readonly STATUS: \"/api/security/entity_store/status\"; readonly START: \"/api/security/entity_store/start\"; readonly STOP: \"/api/security/entity_store/stop\"; readonly CHECK_PRIVILEGES: \"/api/security/entity_store/check_privileges\"; readonly CRUD_CREATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/api/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/api/security/entity_store/entities\"; readonly CRUD_DELETE: \"/api/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/api/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/api/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/api/security/entity_store/resolution/group\"; }; readonly internal: { readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_CCS_EXTRACT_TO_UPDATES: \"/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }; }"
+          "{ readonly public: { readonly INSTALL: \"/api/security/entity_store/install\"; readonly UPDATE: \"/api/security/entity_store\"; readonly UNINSTALL: \"/api/security/entity_store/uninstall\"; readonly STATUS: \"/api/security/entity_store/status\"; readonly START: \"/api/security/entity_store/start\"; readonly STOP: \"/api/security/entity_store/stop\"; readonly CRUD_CREATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/api/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/api/security/entity_store/entities\"; readonly CRUD_DELETE: \"/api/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/api/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/api/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/api/security/entity_store/resolution/group\"; }; readonly internal: { readonly CHECK_PRIVILEGES: \"/internal/security/entity_store/check_privileges\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_CCS_EXTRACT_TO_UPDATES: \"/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
         "lineNumber": 47,
@@ -1159,7 +1159,7 @@
           "(dataset: Dataset, namespace: string) => `entities-history-${string}` | `entities-latest-${string}` | `entities-updates-${string}`"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-        "lineNumber": 36,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1175,7 +1175,7 @@
               "Dataset"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
@@ -1192,7 +1192,7 @@
               "string"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
@@ -1306,7 +1306,7 @@
           "(namespace: string) => string"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-        "lineNumber": 50,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1322,7 +1322,7 @@
               "string"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 50,
+            "lineNumber": 52,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -1342,7 +1342,7 @@
         "label": "BulkObject",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-        "lineNumber": 62,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1358,7 +1358,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 63,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1374,7 +1374,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 64,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1390,7 +1390,7 @@
         "label": "BulkObjectResponse",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-        "lineNumber": 67,
+        "lineNumber": 76,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1403,7 +1403,7 @@
             "label": "_id",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 68,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1416,7 +1416,7 @@
             "label": "status",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 69,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1429,7 +1429,7 @@
             "label": "type",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 70,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1442,7 +1442,7 @@
             "label": "reason",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 71,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1458,7 +1458,7 @@
         "label": "RegisterEntityMaintainerConfig",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-        "lineNumber": 78,
+        "lineNumber": 93,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1471,7 +1471,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1487,7 +1487,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 80,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1500,7 +1500,23 @@
             "label": "interval",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 81,
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.RegisterEntityMaintainerConfig.timeout",
+            "type": "string",
+            "tags": [],
+            "label": "timeout",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1516,7 +1532,7 @@
               "EntityMaintainerState"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1529,12 +1545,14 @@
             "label": "run",
             "description": [],
             "signature": [
-              "(context: EntityMaintainerTaskMethodContext) => Promise<",
+              "(context: ",
+              "EntityMaintainerTaskMethodContext",
+              ") => Promise<",
               "EntityMaintainerState",
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1551,7 +1569,7 @@
                   "EntityMaintainerTaskMethodContext"
                 ],
                 "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-                "lineNumber": 75,
+                "lineNumber": 90,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1570,7 +1588,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1586,7 +1604,7 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 85,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1691,7 +1709,7 @@
           ">; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-        "lineNumber": 81,
+        "lineNumber": 90,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1921,7 +1939,7 @@
           "(dataset: Dataset, namespace: string) => `entities-history-${string}` | `entities-latest-${string}` | `entities-updates-${string}`"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-        "lineNumber": 36,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1937,7 +1955,7 @@
               "Dataset"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
@@ -1954,7 +1972,7 @@
               "string"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
@@ -2049,7 +2067,7 @@
           "(namespace: string) => string"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-        "lineNumber": 50,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2065,7 +2083,7 @@
               "string"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 50,
+            "lineNumber": 52,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -2209,7 +2227,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 178,
+        "lineNumber": 271,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2226,7 +2244,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 182,
+        "lineNumber": 275,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2243,7 +2261,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 437,
+        "lineNumber": 710,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2605,7 +2623,7 @@
           "$ZodTypeInternals<any, unknown>>"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 438,
+        "lineNumber": 711,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2619,7 +2637,7 @@
         "label": "ENTITY_STORE_ROUTES",
         "description": [],
         "signature": [
-          "{ readonly public: { readonly INSTALL: \"/api/security/entity_store/install\"; readonly UPDATE: \"/api/security/entity_store\"; readonly UNINSTALL: \"/api/security/entity_store/uninstall\"; readonly STATUS: \"/api/security/entity_store/status\"; readonly START: \"/api/security/entity_store/start\"; readonly STOP: \"/api/security/entity_store/stop\"; readonly CHECK_PRIVILEGES: \"/api/security/entity_store/check_privileges\"; readonly CRUD_CREATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/api/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/api/security/entity_store/entities\"; readonly CRUD_DELETE: \"/api/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/api/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/api/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/api/security/entity_store/resolution/group\"; }; readonly internal: { readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_CCS_EXTRACT_TO_UPDATES: \"/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }; }"
+          "{ readonly public: { readonly INSTALL: \"/api/security/entity_store/install\"; readonly UPDATE: \"/api/security/entity_store\"; readonly UNINSTALL: \"/api/security/entity_store/uninstall\"; readonly STATUS: \"/api/security/entity_store/status\"; readonly START: \"/api/security/entity_store/start\"; readonly STOP: \"/api/security/entity_store/stop\"; readonly CRUD_CREATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/api/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/api/security/entity_store/entities\"; readonly CRUD_DELETE: \"/api/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/api/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/api/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/api/security/entity_store/resolution/group\"; }; readonly internal: { readonly CHECK_PRIVILEGES: \"/internal/security/entity_store/check_privileges\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_CCS_EXTRACT_TO_UPDATES: \"/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
         "lineNumber": 47,

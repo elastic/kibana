@@ -10,6 +10,7 @@ import { ObserverCodec } from './observer';
 import { ErrorStateCodec } from './error_state';
 import { DateRangeType } from '../common';
 import { SyntheticsDataType } from './synthetics';
+import { remoteMonitorInfoSchema } from '../remote';
 
 // IO type for validation
 export const PingErrorType = t.intersection([
@@ -239,6 +240,8 @@ export const PingType = t.intersection([
       dataset: t.string,
     }),
     labels: t.record(t.string, t.string),
+    remote: remoteMonitorInfoSchema,
+    kibanaUrl: t.string,
   }),
 ]);
 

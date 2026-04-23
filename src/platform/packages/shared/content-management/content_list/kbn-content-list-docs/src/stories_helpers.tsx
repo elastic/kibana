@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
-import type { ReactElement } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import reactElementToJSXString from 'react-element-to-jsx-string';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiCodeBlock,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -27,18 +31,94 @@ import {
   useContentListSort,
   useContentListPagination,
   useContentListConfig,
+  MANAGED_USER_FILTER,
+  MANAGED_USER_LABEL,
+  NO_CREATOR_USER_FILTER,
+  NO_CREATOR_USER_LABEL,
 } from '@kbn/content-list-provider';
-import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
+import type {
+  ContentListItem,
+  FindItemsParams,
+  FindItemsResult,
+  FilterFacetConfig,
+  UserProfileEntry,
+} from '@kbn/content-list-provider';
+import type { Tag } from '@kbn/content-management-tags';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import {
   MOCK_DASHBOARDS,
   createMockFindItems,
   createMockFavoritesClient,
   extractTagIds,
   mockTagsService,
+  mockContentListUserProfilesServices,
+  MOCK_USER_PROFILES_MAP,
 } from '@kbn/content-list-mock-data';
 
-export { mockTagsService, createMockFavoritesClient };
+export { mockTagsService, createMockFavoritesClient, mockContentListUserProfilesServices };
+
+// =============================================================================
+// Inspect Flyout (mock content editor)
+// =============================================================================
+
+/**
+ * Mock "View details" flyout for Storybook stories.
+ *
+ * Renders a lightweight EuiFlyout showing item metadata. Stands in for the
+ * real Kibana content editor flyout (`@kbn/content-management-content-editor`)
+ * which requires Kibana core services not available in Storybook.
+ */
+const InspectFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () => void }) => (
+  <EuiFlyout onClose={onClose} size="s" ownFocus>
+    <EuiFlyoutHeader hasBorder>
+      <EuiTitle size="m">
+        <h2>{item.title}</h2>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <EuiDescriptionList
+        type="column"
+        compressed
+        listItems={[
+          { title: 'ID', description: item.id },
+          { title: 'Description', description: item.description || '—' },
+          { title: 'Type', description: item.type || '—' },
+          {
+            title: 'Updated',
+            description: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '—',
+          },
+          { title: 'Tags', description: item.tags?.join(', ') || '—' },
+        ]}
+      />
+    </EuiFlyoutBody>
+  </EuiFlyout>
+);
+
+/**
+ * Hook that manages the open/close state for a mock inspect flyout.
+ *
+ * Returns an `onInspect` callback suitable for `ContentListItemConfig.onInspect`
+ * and a `flyout` element to render in the component tree.
+ *
+ * @example
+ * ```tsx
+ * const { onInspect, flyout } = useInspectFlyout();
+ * // pass onInspect to item config, render {flyout} in JSX
+ * ```
+ */
+export const useInspectFlyout = (): {
+  onInspect: (item: ContentListItem) => void;
+  flyout: ReactNode;
+} => {
+  const [inspectedItem, setInspectedItem] = useState<ContentListItem | null>(null);
+  const onInspect = useCallback((item: ContentListItem) => setInspectedItem(item), []);
+  const flyout = inspectedItem ? (
+    <InspectFlyout item={inspectedItem} onClose={() => setInspectedItem(null)} />
+  ) : null;
+
+  return { onInspect, flyout };
+};
 
 // =============================================================================
 // Mock Data
@@ -48,7 +128,7 @@ export { mockTagsService, createMockFavoritesClient };
  * Build a mock items array of the requested length by cycling through
  * `MOCK_DASHBOARDS` and appending an index suffix when wrapping.
  */
-const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
+export const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
   const base = MOCK_DASHBOARDS;
   if (count <= base.length) {
     return base.slice(0, count);
@@ -75,7 +155,7 @@ const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
  *
  * Pass the same `favoritesClient` instance used for `services.favorites`
  * on the provider so that starred items are immediately visible when the
- * `starredOnly` filter is toggled (both sides share the same in-memory set).
+ * `starred` filter is toggled (both sides share the same in-memory set).
  */
 export const createStoryFindItems = (options?: {
   totalItems?: number;
@@ -117,12 +197,104 @@ export const createStoryFindItems = (options?: {
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
         tags: extractTagIds(item.references),
+        createdBy: item.createdBy,
+        managed: item.managed,
       })),
       total: result.total,
-      counts: result.counts,
     };
   };
 };
+
+// =============================================================================
+// Mock FilterFacetConfigs
+// =============================================================================
+
+/**
+ * Compute per-key counts from a set of items.
+ */
+const computeCounts = (
+  items: UserContentCommonSchema[],
+  keyFn: (item: UserContentCommonSchema) => string[]
+): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  for (const item of items) {
+    for (const key of keyFn(item)) {
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+};
+
+/**
+ * Creates a mock {@link FilterFacetConfig} for tags.
+ *
+ * Counts are computed from the provided `items` array. Tag metadata
+ * (name, color, description) comes from `mockTagsService.getTagList()`.
+ */
+export const createMockTagFacetProvider = (
+  items: UserContentCommonSchema[]
+): FilterFacetConfig<Tag> => ({
+  getFacets: async () => {
+    const tagCounts = computeCounts(items, (item) =>
+      (item.references ?? []).filter((ref) => ref.type === 'tag').map((ref) => ref.id)
+    );
+    return mockTagsService.getTagList().map((tag) => ({
+      key: tag.id ?? tag.name,
+      label: tag.name,
+      count: tagCounts[tag.id ?? tag.name] ?? 0,
+      data: tag,
+    }));
+  },
+});
+
+/**
+ * Creates a mock {@link FilterFacetConfig} for user profiles.
+ *
+ * Counts are computed from the provided `items` array using `getCreatorKey`
+ * logic so that managed and no-creator items produce sentinel facet entries.
+ * Profile metadata comes from `MOCK_USER_PROFILES_MAP`.
+ */
+export const createMockUserProfileFacetProvider = (
+  items: UserContentCommonSchema[]
+): FilterFacetConfig<UserProfileEntry> => ({
+  getFacets: async () => {
+    const getCreatorKey = (item: UserContentCommonSchema): string => {
+      if ((item as { managed?: boolean }).managed) {
+        return MANAGED_USER_FILTER;
+      }
+      if (!item.createdBy) {
+        return NO_CREATOR_USER_FILTER;
+      }
+      return item.createdBy;
+    };
+
+    const userCounts = computeCounts(items, (item) => [getCreatorKey(item)]);
+
+    return Object.entries(userCounts).map(([key, count]) => {
+      if (key === MANAGED_USER_FILTER) {
+        return { key, label: MANAGED_USER_LABEL, count, data: undefined };
+      }
+      if (key === NO_CREATOR_USER_FILTER) {
+        return { key, label: NO_CREATOR_USER_LABEL, count, data: undefined };
+      }
+
+      const profile = MOCK_USER_PROFILES_MAP[key];
+      return {
+        key,
+        label: profile?.user.full_name ?? profile?.user.username ?? key,
+        count,
+        data: profile
+          ? {
+              uid: key,
+              user: profile.user,
+              email: profile.user.email ?? '',
+              fullName: profile.user.full_name ?? profile.user.username,
+            }
+          : undefined,
+      };
+    });
+  },
+});
 
 // =============================================================================
 // JSX Serialization

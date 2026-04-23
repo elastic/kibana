@@ -20,13 +20,13 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { ViewInAPMButton } from './view_in_apm_button';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 
 const INITIAL_STATE = {
   currentPeriod: [],
   previousPeriod: [],
 };
-function ThroughputChart({
+export function ThroughputChart({
   transactionType,
   transactionTypes,
   setTransactionType,
@@ -41,6 +41,7 @@ function ThroughputChart({
   timeZone,
   kuery = '',
   filters,
+  ruleTypeId,
 }: {
   transactionType: string;
   transactionTypes?: string[];
@@ -56,6 +57,7 @@ function ThroughputChart({
   timeZone: string;
   kuery?: string;
   filters?: BoolQuery;
+  ruleTypeId?: string;
 }) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -161,14 +163,16 @@ function ThroughputChart({
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <ViewInAPMButton
-                  serviceName={serviceName}
-                  environment={environment}
-                  from={start}
-                  to={end}
-                  kuery={kuery}
-                  transactionName={transactionName}
-                  transactionType={transactionType}
+                <RedMetricsChartActions
+                  queryParams={{
+                    serviceName,
+                    environment,
+                    transactionName,
+                    transactionType,
+                    kuery,
+                  }}
+                  timeRange={{ from: start, to: end }}
+                  ruleTypeId={ruleTypeId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -191,6 +195,3 @@ function ThroughputChart({
     </EuiFlexItem>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default ThroughputChart;
