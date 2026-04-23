@@ -44,20 +44,14 @@ test.describe(
       });
     });
 
-    test('should display KPI metrics for semconv data', async ({
-      pageObjects: { assetDetailsPage },
-      page,
-    }) => {
+    test('should display KPI metrics for semconv data', async ({ pageObjects: { hostsPage } }) => {
       const kpiTiles = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
 
       for (const metric of kpiTiles) {
         await test.step(`verify ${metric} KPI tile has a value`, async () => {
-          const tile = page.getByTestId(`infraAssetDetailsKPI${metric}`);
-          await expect(tile).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-          await expect(assetDetailsPage.hostOverviewTab.getKPIValue(metric)).toHaveAttribute(
-            'title',
-            /.+/
-          );
+          const value = hostsPage.getHostKPIChartValueLocator(metric);
+          await expect(value).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+          await expect(value).toHaveAttribute('title', /.+/);
         });
       }
     });

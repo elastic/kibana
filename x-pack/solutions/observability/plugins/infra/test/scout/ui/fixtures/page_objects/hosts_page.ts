@@ -192,6 +192,18 @@ export class HostsPage {
     return this.getKPITileValueLocator(type).getAttribute('title');
   }
 
+  /**
+   * Value locator for the shared host KPI tiles (`cpuUsage`, `normalizedLoad1m`,
+   * `memoryUsage`, `diskUsage`) rendered via `HostKpiCharts`. They use the
+   * `infraAssetDetailsKPI*` prefix in both the hosts page grid and the flyout;
+   * scoping to the hosts page `kpiGrid` disambiguates when both are on screen.
+   */
+  public getHostKPIChartValueLocator(metric: string) {
+    return this.kpiGrid
+      .getByTestId(`infraAssetDetailsKPI${metric}`)
+      .locator('.echMetricText__value');
+  }
+
   // Metrics tab
 
   public async visitMetricsTab() {

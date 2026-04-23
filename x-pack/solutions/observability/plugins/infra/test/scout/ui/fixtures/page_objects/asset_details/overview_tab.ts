@@ -15,6 +15,7 @@ export class OverviewTab extends AssetDetailsTab {
   public readonly tabName: AssetDetailsPageTabName = 'Overview';
   public readonly tab: Locator;
 
+  public readonly kpiGrid: Locator;
   public readonly kpiCpuUsageChart: Locator;
   public readonly kpiNormalizedLoadChart: Locator;
   public readonly kpiMemoryUsageChart: Locator;
@@ -69,11 +70,11 @@ export class OverviewTab extends AssetDetailsTab {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
 
-    const kpiGrid = this.page.getByTestId('infraAssetDetailsKPIGrid');
-    this.kpiCpuUsageChart = kpiGrid.getByTestId('infraAssetDetailsKPIcpuUsage');
-    this.kpiNormalizedLoadChart = kpiGrid.getByTestId('infraAssetDetailsKPInormalizedLoad1m');
-    this.kpiMemoryUsageChart = kpiGrid.getByTestId('infraAssetDetailsKPImemoryUsage');
-    this.kpiDiskUsageChart = kpiGrid.getByTestId('infraAssetDetailsKPIdiskUsage');
+    this.kpiGrid = this.page.getByTestId('infraAssetDetailsKPIGrid');
+    this.kpiCpuUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPIcpuUsage');
+    this.kpiNormalizedLoadChart = this.kpiGrid.getByTestId('infraAssetDetailsKPInormalizedLoad1m');
+    this.kpiMemoryUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPImemoryUsage');
+    this.kpiDiskUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPIdiskUsage');
 
     this.metadataSection = this.page
       .getByTestId('infraAssetDetailsCollapseExpandSection')
@@ -182,7 +183,9 @@ export class OverviewTab extends AssetDetailsTab {
   }
 
   public getKPIValue(metric: string): Locator {
-    return this.page.getByTestId(`infraAssetDetailsKPI${metric}`).locator('.echMetricText__value');
+    return this.kpiGrid
+      .getByTestId(`infraAssetDetailsKPI${metric}`)
+      .locator('.echMetricText__value');
   }
 
   /**
@@ -193,10 +196,10 @@ export class OverviewTab extends AssetDetailsTab {
    */
   public async waitForKPIChartsToLoad(timeout?: number) {
     for (const metric of KPI_METRICS) {
-      await this.page
+      await this.kpiGrid
         .getByTestId(`infraAssetDetailsKPI${metric}-loading`)
         .waitFor({ state: 'hidden', timeout });
-      await this.page
+      await this.kpiGrid
         .getByTestId(`infraAssetDetailsKPI${metric}-error`)
         .waitFor({ state: 'hidden' });
       await this.getKPIValue(metric).waitFor({ state: 'visible', timeout });

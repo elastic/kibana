@@ -91,9 +91,7 @@ test.describe(
       });
     });
 
-    test('should display correct KPI tile values', async ({
-      pageObjects: { hostsPage, assetDetailsPage },
-    }) => {
+    test('should display correct KPI tile values', async ({ pageObjects: { hostsPage } }) => {
       await test.step('verify hosts count KPI', async () => {
         await expect(hostsPage.getKPITileValueLocator('hostsCount')).toHaveAttribute(
           'title',
@@ -104,7 +102,7 @@ test.describe(
       const kpiTiles = ['cpuUsage', 'memoryUsage', 'normalizedLoad1m', 'diskUsage'];
       for (const metric of kpiTiles) {
         await test.step(`verify ${metric} KPI is present`, async () => {
-          await expect(assetDetailsPage.hostOverviewTab.getKPIValue(metric)).toHaveAttribute(
+          await expect(hostsPage.getHostKPIChartValueLocator(metric)).toHaveAttribute(
             'title',
             /.+/
           );
