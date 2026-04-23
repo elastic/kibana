@@ -41,11 +41,12 @@ export interface OtelTranspileOptions {
  *
  * Supported actions: `set`, `rename`, `remove`, `grok`, `uppercase`, `lowercase`,
  * `trim`, `replace`, `split`, `convert`, `redact`, `concat`, `drop_document`,
- * and the full condition operator surface.
+ * `append`, `date`, `json_extract`, and the full condition operator surface.
  *
  * Actions with no OTTL equivalent (`enrich`, `math`, `network_direction`, `sort`,
- * `remove_by_prefix`, `manual_ingest_pipeline`) throw a descriptive error — the
- * transpiler does not produce a partial config that silently drops processors.
+ * `remove_by_prefix`, `dissect`, `join`, `manual_ingest_pipeline`) throw a
+ * descriptive error — the transpiler does not produce a partial config that
+ * silently drops processors.
  *
  * Cross-target semantic gap — `ignore_missing: false`:
  * OTTL has no "error if nil" primitive. The OTel transpiler approximates this

@@ -661,6 +661,222 @@ describe('transpileOtelCollector', () => {
     });
   });
 
+  describe('append processor', () => {
+    it('emits one append statement per value', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'append', to: 'tags', value: ['a', 'b'] }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'append(log.attributes["tags"], "a")',
+        'append(log.attributes["tags"], "b")',
+      ]);
+    });
+
+    it('creates an array when the target does not exist', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'append', to: 'new_tags', value: [42] }],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'append(log.attributes["new_tags"], 42)',
+      ]);
+    });
+
+    it('adds IsMatch dedup guards when allow_duplicates is false', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'append', to: 'tags', value: ['x'], allow_duplicates: false }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('IsMatch');
+      expect(stmts[0]).toContain('"x"');
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toContain('allow_duplicates');
+    });
+  });
+
+  describe('json_extract processor', () => {
+    it('emits ParseJSON + field extractions + cleanup', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'payload',
+            extractions: [{ selector: 'user_id', target_field: 'uid' }],
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toBe(
+        'set(log.attributes["__sl_p"], ParseJSON(log.attributes["payload"])) where (log.attributes["payload"] != nil)'
+      );
+      expect(stmts[1]).toBe(
+        'set(log.attributes["uid"], log.attributes["__sl_p"]["user_id"]) where (log.attributes["__sl_p"] != nil)'
+      );
+      expect(stmts[2]).toContain('delete_key');
+      expect(stmts[2]).toContain('__sl_p');
+    });
+
+    it('handles dotted selectors as nested access', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'payload',
+            extractions: [{ selector: 'user.name', target_field: 'username' }],
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[1]).toContain('["user"]["name"]');
+    });
+
+    it('handles array index selectors', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'payload',
+            extractions: [{ selector: 'items[0]', target_field: 'first' }],
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[1]).toContain('["items"][0]');
+    });
+
+    it('wraps extraction with type converter when type is specified', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'payload',
+            extractions: [{ selector: 'count', target_field: 'count_int', type: 'integer' }],
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[1]).toContain('Int(');
+    });
+
+    it('strips $. JSONPath prefix from selector', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'payload',
+            extractions: [{ selector: '$.user.id', target_field: 'uid' }],
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[1]).toContain('["user"]["id"]');
+    });
+  });
+
+  describe('date processor', () => {
+    it('emits UnixNano(Time(...)) for a custom date format', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'date', from: 'timestamp_str', formats: ['yyyy-MM-dd'] }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('UnixNano(Time(');
+      expect(stmts[0]).toContain('"2006-01-02"');
+      expect(stmts[0]).toContain('log.attributes["timestamp_str"]');
+    });
+
+    it('translates a named Elasticsearch format', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'date', from: 'ts', formats: ['strict_date_optional_time'] }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('2006-01-02T15:04:05');
+    });
+
+    it('handles epoch_millis as multiplication rather than Time()', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'date', from: 'ts_ms', formats: ['epoch_millis'] }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('Int(log.attributes["ts_ms"]) * 1000000');
+      expect(stmts[0]).not.toContain('Time(');
+    });
+
+    it('handles epoch_second as multiplication', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'date', from: 'ts_s', formats: ['epoch_second'] }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('Int(log.attributes["ts_s"]) * 1000000000');
+    });
+
+    it('writes to a target field when to is specified', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'date', from: 'raw_ts', to: 'parsed_ts', formats: ['yyyy-MM-dd'] }],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('log.attributes["parsed_ts"]');
+    });
+
+    it('appends timezone to the Time() call', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'date',
+            from: 'ts',
+            formats: ['yyyy-MM-dd HH:mm:ss'],
+            timezone: 'America/New_York',
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts[0]).toContain('"America/New_York"');
+    });
+
+    it('tries formats in order via target == nil guard', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'date', from: 'ts', formats: ['yyyy-MM-dd HH:mm:ss', 'yyyy-MM-dd'] },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmts = asTransform(result.processors['transform/streamlang']).log_statements;
+      expect(stmts).toHaveLength(2);
+      expect(stmts[0]).toContain('log.attributes["ts"] == nil');
+      expect(stmts[1]).toContain('log.attributes["ts"] == nil');
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toContain('2 formats');
+    });
+
+    it('emits a warning when output_format is specified', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'date',
+            from: 'ts',
+            formats: ['yyyy-MM-dd'],
+            output_format: 'dd/MM/yyyy',
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toContain('output_format');
+    });
+  });
+
   describe('error_mode option', () => {
     it('passes propagate to all emitted processors', async () => {
       const dsl: StreamlangDSL = {

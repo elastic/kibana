@@ -6,10 +6,13 @@
  */
 
 import type {
+  AppendProcessor,
   ConcatProcessor,
   ConvertProcessor,
+  DateProcessor,
   DropDocumentProcessor,
   GrokProcessor,
+  JsonExtractProcessor,
   LowercaseProcessor,
   RedactProcessor,
   RemoveProcessor,
@@ -22,10 +25,13 @@ import type {
   UppercaseProcessor,
 } from '../../../types/processors';
 import type { Emission } from './emission';
+import { convertAppendProcessorToOtel } from './processors/append';
 import { convertConcatProcessorToOtel } from './processors/concat';
 import { convertConvertProcessorToOtel } from './processors/convert';
+import { convertDateProcessorToOtel } from './processors/date';
 import { convertDropDocumentProcessorToOtel } from './processors/drop_document';
 import { convertGrokProcessorToOtel } from './processors/grok';
+import { convertJsonExtractProcessorToOtel } from './processors/json_extract';
 import { convertLowercaseProcessorToOtel } from './processors/lowercase';
 import { convertRedactProcessorToOtel } from './processors/redact';
 import { convertRemoveProcessorToOtel } from './processors/remove';
@@ -49,10 +55,8 @@ const UNSUPPORTED_REASONS: Partial<Record<string, string>> = {
   sort: 'OTTL has no array-sort function',
   remove_by_prefix: 'OTTL does not support iterating over attribute keys by prefix',
   manual_ingest_pipeline: 'this processor is specific to the Elasticsearch ingest pipeline',
-  append: 'array append is not yet implemented for the OTel Collector transpiler',
-  json_extract: 'json_extract is not yet implemented for the OTel Collector transpiler',
-  dissect: 'dissect is not yet implemented for the OTel Collector transpiler',
-  date: 'date parsing is not yet implemented for the OTel Collector transpiler',
+  dissect: 'ExtractDissectPatterns is not available in the OTTL log context',
+  join: 'join is not yet implemented for the OTel Collector transpiler',
 };
 
 /**
@@ -132,6 +136,21 @@ export const convertProcessorToOtel = (
     case 'concat': {
       const p = processor as ConcatProcessor;
       return convertConcatProcessorToOtel(p);
+    }
+    case 'append': {
+      const p = processor as AppendProcessor;
+      return convertAppendProcessorToOtel(p);
+    }
+    case 'date': {
+      const p = processor as DateProcessor;
+      return convertDateProcessorToOtel(p);
+    }
+    case 'json_extract': {
+      const p = processor as JsonExtractProcessor;
+      const { emission, warnings: procWarnings } = convertJsonExtractProcessorToOtel(p);
+      const ignoreMissingWarnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('json_extract', p.field)] : [];
+      return { emission, warnings: [...procWarnings, ...ignoreMissingWarnings] };
     }
     case 'grok':
       return convertGrokProcessorToOtel(processor as GrokProcessor);
