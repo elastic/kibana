@@ -56,7 +56,66 @@ describe('telemetry/tick_summary', () => {
         completed: true,
         halt_reason: null,
         stages: [],
+        totals: STAGE_ZERO_COUNTS,
       });
+    });
+
+    it('totals roll up the last stages counts so metric aggs do not flatten the array', () => {
+      hrtimeSpy = jest.spyOn(process.hrtime, 'bigint').mockReturnValueOnce(1_000_000n);
+      const stages: DispatcherStageTiming[] = [
+        {
+          name: 'fetch_episodes',
+          duration_ms: 1,
+          halted: false,
+          counts: { ...STAGE_ZERO_COUNTS, episodes: 42 },
+        },
+        {
+          name: 'apply_suppression',
+          duration_ms: 1,
+          halted: false,
+          counts: { ...STAGE_ZERO_COUNTS, episodes: 42, dispatchable: 40, suppressed: 2 },
+        },
+      ];
+
+      const tick = buildTickSummary({
+        startedAt: new Date('2026-01-01T00:00:00Z'),
+        startedAtNs: 0n,
+        previousStartedAt: new Date('2026-01-01T00:00:00Z'),
+        completed: true,
+        haltReason: null,
+        stages,
+      });
+
+      expect(tick.totals).toEqual({
+        ...STAGE_ZERO_COUNTS,
+        episodes: 42,
+        dispatchable: 40,
+        suppressed: 2,
+      });
+    });
+
+    it('totals reflect the halting stage when the tick halts early', () => {
+      hrtimeSpy = jest.spyOn(process.hrtime, 'bigint').mockReturnValueOnce(500_000n);
+      const stages: DispatcherStageTiming[] = [
+        {
+          name: 'fetch_episodes',
+          duration_ms: 0.5,
+          halted: true,
+          counts: { ...STAGE_ZERO_COUNTS, episodes: 7 },
+          error: { type: 'Error', message: 'boom' },
+        },
+      ];
+
+      const tick = buildTickSummary({
+        startedAt: new Date('2026-01-01T00:00:00Z'),
+        startedAtNs: 0n,
+        previousStartedAt: new Date('2026-01-01T00:00:00Z'),
+        completed: false,
+        haltReason: 'step_error',
+        stages,
+      });
+
+      expect(tick.totals).toEqual({ ...STAGE_ZERO_COUNTS, episodes: 7 });
     });
 
     it('rounds duration_ms to 3 decimals', () => {
@@ -130,6 +189,7 @@ describe('telemetry/tick_summary', () => {
       completed: true,
       halt_reason: null,
       stages: [],
+      totals: STAGE_ZERO_COUNTS,
     };
 
     it('logs at info with the fixed "dispatcher tick complete" message', () => {

@@ -59,6 +59,14 @@ export interface DispatcherTickSummary {
   readonly completed: boolean;
   readonly halt_reason: DispatcherHaltReason | null;
   readonly stages: readonly DispatcherStageTiming[];
+  /**
+   * Final per-tick counts, rolled up from the last stage that ran.
+   * Emitted as a flat object so metric aggregations (sum/avg/percentile)
+   * can target `kibana.alerting_v2.dispatcher.tick.totals.*` directly
+   * without flattening the `stages[]` array (which would double-count
+   * monotonic counters across stages). All keys are always present.
+   */
+  readonly totals: DispatcherStageCounts;
 }
 
 /**

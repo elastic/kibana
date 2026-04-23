@@ -7,9 +7,26 @@
 
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { elapsedMs, roundMs } from './clock';
-import type { DispatcherTickLogMeta, DispatcherTickSummary } from './types';
+import type {
+  DispatcherStageCounts,
+  DispatcherTickLogMeta,
+  DispatcherTickSummary,
+} from './types';
 
 const TICK_COMPLETE_MESSAGE = 'dispatcher tick complete';
+
+const ZERO_COUNTS: DispatcherStageCounts = Object.freeze({
+  episodes: 0,
+  suppressions: 0,
+  dispatchable: 0,
+  suppressed: 0,
+  rules: 0,
+  policies: 0,
+  matched: 0,
+  groups: 0,
+  dispatch: 0,
+  throttled: 0,
+});
 
 export interface BuildTickSummaryParams {
   readonly startedAt: Date;
@@ -43,6 +60,7 @@ export function buildTickSummary({
     completed,
     halt_reason: haltReason,
     stages,
+    totals: stages.length === 0 ? ZERO_COUNTS : stages[stages.length - 1].counts,
   };
 }
 
