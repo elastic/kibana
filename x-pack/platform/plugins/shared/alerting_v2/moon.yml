@@ -101,6 +101,9 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
 tags:
   - plugin
   - prod

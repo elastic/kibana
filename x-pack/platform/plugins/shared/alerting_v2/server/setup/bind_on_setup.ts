@@ -16,6 +16,7 @@ import { TaskDefinition } from '../lib/services/task_run_scope_service/create_ta
 import { registerSavedObjects } from '../saved_objects';
 import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
+import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -48,6 +49,20 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
+
+    const agentBuilderToken =
+      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
+    if (container.isBound(agentBuilderToken)) {
+      const agentBuilder = container.get(agentBuilderToken);
+      agentBuilder.attachments.registerType(
+        createRuleAttachmentType({
+          logger,
+          getRulesClient: (_context) => {
+            throw new Error('getRulesClient not yet wired for attachments');
+          },
+        }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
+      );
+    }
 
     if (container.isBound(usageCollectionToken)) {
       // Both getters are called task run (after start), so the
