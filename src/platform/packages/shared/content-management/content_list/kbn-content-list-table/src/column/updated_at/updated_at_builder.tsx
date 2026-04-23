@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
+import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
 import { UpdatedAtCell } from './updated_at_cell';
 
 /** Default i18n-translated column title for the updated at column. */
@@ -27,9 +28,7 @@ const DEFAULT_UPDATED_AT_COLUMN_TITLE = i18n.translate(
  * These are the declarative attributes consumers pass in JSX. The builder
  * reads them directly from the parsed attributes.
  */
-export interface UpdatedAtColumnProps {
-  /** Column width (CSS value like `'150px'` or `'20%'`). */
-  width?: string;
+export interface UpdatedAtColumnProps extends ColumnLayoutProps {
   /** Custom column title. Defaults to `'Last updated'`. */
   columnTitle?: string;
   /**
@@ -51,7 +50,14 @@ export const buildUpdatedAtColumn = (
   attributes: UpdatedAtColumnProps,
   context: ColumnBuilderContext
 ): EuiBasicTableColumn<ContentListItem> => {
-  const { columnTitle, width, sortable: sortableProp } = attributes;
+  const {
+    columnTitle,
+    width,
+    minWidth,
+    maxWidth,
+    truncateText,
+    sortable: sortableProp,
+  } = attributes;
 
   const supportsSorting = context.supports?.sorting ?? true;
 
@@ -62,7 +68,7 @@ export const buildUpdatedAtColumn = (
     field: 'updatedAt',
     name: columnTitle ?? DEFAULT_UPDATED_AT_COLUMN_TITLE,
     sortable,
-    ...(width && { width }),
+    ...getColumnLayoutProps({ width, minWidth, maxWidth, truncateText }),
     'data-test-subj': 'content-list-table-column-updatedAt',
     render: (_value: Date | undefined, item: ContentListItem) => {
       return <UpdatedAtCell updatedAt={item.updatedAt} />;

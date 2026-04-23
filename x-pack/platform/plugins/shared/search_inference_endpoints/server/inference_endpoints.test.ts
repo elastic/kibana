@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
+import type {
+  ISavedObjectsRepository,
+  IUiSettingsClient,
+  Logger,
+  SavedObject,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   type InferenceConnector,
@@ -13,10 +18,14 @@ import {
   defaultInferenceEndpoints,
 } from '@kbn/inference-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import type { InferenceFeatureConfig } from './types';
 import type { InferenceSettingsAttributes } from '../common/types';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
-import { getForFeature } from './inference_endpoints';
+import { getForFeature, getForFeatureWithDefault } from './inference_endpoints';
 
 const createValidFeature = (
   overrides: Partial<InferenceFeatureConfig> = {}
@@ -451,6 +460,203 @@ describe('getForFeature', () => {
       endpoints: [createConnector('gp_so')],
       warnings: [],
       soEntryFound: true,
+    });
+  });
+});
+
+interface UiSettings {
+  defaultConnectorId?: string;
+  defaultConnectorOnly?: boolean;
+}
+
+const createUiSettingsClient = ({
+  defaultConnectorId,
+  defaultConnectorOnly,
+}: UiSettings = {}): IUiSettingsClient =>
+  ({
+    get: jest.fn(async (key: string) => {
+      if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return defaultConnectorId;
+      if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY)
+        return defaultConnectorOnly ?? false;
+      return undefined;
+    }),
+  } as unknown as IUiSettingsClient);
+
+describe('getForFeatureWithDefault', () => {
+  let registry: InferenceFeatureRegistry;
+  let logger: Logger;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    registry = new InferenceFeatureRegistry(logger);
+  });
+
+  it('returns only the default connector when defaultConnectorOnly is set', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient(),
+      uiSettingsClient: createUiSettingsClient({
+        defaultConnectorId: 'default-id',
+        defaultConnectorOnly: true,
+      }),
+      getConnectorById: createGetConnectorById(['default-id', 'rec1']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({
+      endpoints: [createConnector('default-id')],
+      warnings: [],
+      soEntryFound: false,
+    });
+  });
+
+  it('returns an empty list when defaultConnectorOnly is set but no default is configured', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient(),
+      uiSettingsClient: createUiSettingsClient({ defaultConnectorOnly: true }),
+      getConnectorById: createGetConnectorById(['rec1']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+  });
+
+  it('returns an empty list when defaultConnectorOnly is set with the NO_DEFAULT_CONNECTOR sentinel', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient(),
+      uiSettingsClient: createUiSettingsClient({
+        defaultConnectorId: 'NO_DEFAULT_CONNECTOR',
+        defaultConnectorOnly: true,
+      }),
+      getConnectorById: createGetConnectorById(['rec1']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+  });
+
+  it('returns an empty list when defaultConnectorOnly is set but the default connector lookup fails', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient(),
+      uiSettingsClient: createUiSettingsClient({
+        defaultConnectorId: 'missing',
+        defaultConnectorOnly: true,
+      }),
+      getConnectorById: createGetConnectorById(['rec1']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+  });
+
+  it('prepends the default connector when no SO entry is found', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient(),
+      uiSettingsClient: createUiSettingsClient({ defaultConnectorId: 'default-id' }),
+      getConnectorById: createGetConnectorById(['default-id', 'rec1']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({
+      endpoints: [createConnector('default-id'), createConnector('rec1')],
+      warnings: [],
+      soEntryFound: false,
+    });
+  });
+
+  it('deduplicates the default connector when already present in the resolved endpoints', async () => {
+    registry.register(
+      createValidFeature({ featureId: 'f1', recommendedEndpoints: ['default-id'] })
+    );
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient(),
+      uiSettingsClient: createUiSettingsClient({ defaultConnectorId: 'default-id' }),
+      getConnectorById: createGetConnectorById(['default-id']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({
+      endpoints: [createConnector('default-id')],
+      warnings: [],
+      soEntryFound: false,
+    });
+  });
+
+  it('ignores the default connector when an SO entry was found', async () => {
+    registry.register(createValidFeature({ featureId: 'f1' }));
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'so_ep' }] }]),
+      uiSettingsClient: createUiSettingsClient({ defaultConnectorId: 'default-id' }),
+      getConnectorById: createGetConnectorById(['default-id', 'so_ep']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({
+      endpoints: [createConnector('so_ep')],
+      warnings: [],
+      soEntryFound: true,
+    });
+  });
+
+  it('ignores the NO_DEFAULT_CONNECTOR sentinel when resolving feature endpoints', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient(),
+      uiSettingsClient: createUiSettingsClient({ defaultConnectorId: 'NO_DEFAULT_CONNECTOR' }),
+      getConnectorById: createGetConnectorById(['rec1']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({
+      endpoints: [createConnector('rec1')],
+      warnings: [],
+      soEntryFound: false,
+    });
+  });
+
+  it('returns the feature endpoints unchanged when the default connector lookup fails', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient(),
+      uiSettingsClient: createUiSettingsClient({ defaultConnectorId: 'missing' }),
+      getConnectorById: createGetConnectorById(['rec1']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({
+      endpoints: [createConnector('rec1')],
+      warnings: [],
+      soEntryFound: false,
+    });
+  });
+
+  it('returns the feature endpoints when no default is configured', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    const result = await getForFeatureWithDefault({
+      registry,
+      soClient: createSoClient(),
+      uiSettingsClient: createUiSettingsClient(),
+      getConnectorById: createGetConnectorById(['rec1']),
+      featureId: 'f1',
+      logger,
+    });
+    expect(result).toEqual({
+      endpoints: [createConnector('rec1')],
+      warnings: [],
+      soEntryFound: false,
     });
   });
 });

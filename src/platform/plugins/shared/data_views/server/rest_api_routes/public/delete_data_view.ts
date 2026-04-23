@@ -20,6 +20,7 @@ import {
   SPECIFIC_DATA_VIEW_PATH,
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
   INITIAL_REST_VERSION,
+  DELETE_DATA_VIEW_SUMMARY,
   DELETE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
@@ -41,7 +42,7 @@ export const deleteDataView = async ({
 };
 
 const deleteIndexPatternRouteFactory =
-  (path: string, description?: string) =>
+  (path: string, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -54,6 +55,7 @@ const deleteIndexPatternRouteFactory =
       .delete({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -71,6 +73,7 @@ const deleteIndexPatternRouteFactory =
                   id: schema.string({
                     minLength: 1,
                     maxLength: 1_000,
+                    meta: { description: 'The unique identifier of the data view to delete.' },
                   }),
                 },
                 { unknowns: 'allow' }
@@ -106,9 +109,12 @@ const deleteIndexPatternRouteFactory =
 
 export const registerDeleteDataViewRoute = deleteIndexPatternRouteFactory(
   SPECIFIC_DATA_VIEW_PATH,
+  DELETE_DATA_VIEW_SUMMARY,
   DELETE_DATA_VIEW_DESCRIPTION
 );
 
 export const registerDeleteDataViewRouteLegacy = deleteIndexPatternRouteFactory(
-  SPECIFIC_DATA_VIEW_PATH_LEGACY
+  SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  DELETE_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id} endpoint instead.'
 );
