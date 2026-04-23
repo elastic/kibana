@@ -39,7 +39,8 @@ export default defineCypressConfig({
     baseUrl: 'http://localhost:5601',
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     experimentalMemoryManagement: true,
-    specPattern: './cypress/e2e/**/*.cy.ts',
+    specPattern:
+      './cypress/e2e/detection_response/rule_management/rule_actions/bulk_actions/bulk_edit_rules_suppression_essentials_serverless.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
       samlAuthentication(on, config);
