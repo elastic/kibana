@@ -39,10 +39,9 @@ const RULE_TYPE_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleTypeFieldLabel',
   { defaultMessage: 'Rule type' }
 );
-const QUERY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.queryLabel',
-  { defaultMessage: 'Custom query' }
-);
+const QUERY_LABEL = i18n.translate('xpack.securitySolution.detectionEngine.createRule.queryLabel', {
+  defaultMessage: 'Custom query',
+});
 const EQL_QUERY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.eqlQueryLabel',
   { defaultMessage: 'EQL query' }
