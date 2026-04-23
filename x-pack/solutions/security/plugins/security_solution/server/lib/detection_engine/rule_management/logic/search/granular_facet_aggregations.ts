@@ -10,7 +10,7 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 import type {
   FacetCounts,
   GranularRulesFacetCategory,
-} from '../../../../../../common/api/detection_engine/rule_management/granular_rules_contract.gen';
+} from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import { RULES_FACET_CATEGORY_TO_ATTRIBUTE } from '../../../../../../common/api/detection_engine/rule_management';
 
 const DEFAULT_AGGREGATION_MAX_SIZE = 200;

@@ -21,7 +21,7 @@ import {
   SearchRulesAggregations,
   GranularRulesSearch,
   FacetCounts,
-} from '../granular_rules_contract.gen';
+} from '../granular_rules/granular_rules_contract.gen';
 import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
 import { SortOrder } from '../../model/sorting.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
