@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -21,7 +22,7 @@ import { DeprecatedRulesCallout } from './deprecated_rules_callout';
 import { DeprecatedRulesModal } from './deprecated_rules_modal';
 import * as i18n from './translations';
 
-const DISMISSAL_STORAGE_KEY = 'securitySolution.deprecatedRulesCallout.dismissedAt';
+export const DISMISSAL_STORAGE_KEY = 'securitySolution.deprecatedRulesCallout.dismissedAt';
 
 export const useDeprecatedRulesTableCallout = () => {
   const isFeatureEnabled = useIsExperimentalFeatureEnabled('prebuiltRulesDeprecationUIEnabled');
@@ -29,7 +30,14 @@ export const useDeprecatedRulesTableCallout = () => {
   const [isConfirmVisible, showConfirm, hideConfirm] = useBoolState();
   const [isDismissed, dismiss] = useTimedDismissal(DISMISSAL_STORAGE_KEY);
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-  const { telemetry } = useKibana().services;
+  const {
+    telemetry,
+    docLinks: {
+      links: {
+        securitySolution: { manageDetectionRules },
+      },
+    },
+  } = useKibana().services;
   const { data, isLoading } = usePrebuiltRulesDeprecationReview(null, {
     enabled: isFeatureEnabled,
   });
@@ -76,7 +84,7 @@ export const useDeprecatedRulesTableCallout = () => {
     });
   }, [data?.rules, executeBulkAction, hideConfirm, telemetry]);
 
-  if (!isFeatureEnabled || isDismissed || isLoading || !data || data.rules.length === 0) {
+  if (!isCalloutVisible || !data) {
     return null;
   }
 
@@ -84,7 +92,22 @@ export const useDeprecatedRulesTableCallout = () => {
     <>
       <DeprecatedRulesCallout
         title={i18n.DEPRECATION_CALLOUT_TITLE(data.rules.length)}
-        description={i18n.DEPRECATION_TABLE_CALLOUT_DESCRIPTION}
+        description={
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.deprecation.tableCalloutDescription"
+            defaultMessage="These rules have been deprecated and won't receive new updates or fixes. Duplicate them as custom rules, delete them now, or dismiss this to be reminded in 7 days. {docsLink}"
+            values={{
+              docsLink: (
+                <EuiLink href={`${manageDetectionRules}#deprecated-prebuilt-rules`} target="_blank">
+                  <FormattedMessage
+                    id="xpack.securitySolution.detectionEngine.deprecation.tableCalloutDocsLink"
+                    defaultMessage="Read the docs to learn more."
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
         buttons={[
           <EuiButton
             color="warning"

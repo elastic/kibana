@@ -121,16 +121,19 @@ export class TutorialsRegistry {
     );
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
-        const emptyContext = this.baseTutorialContext;
-        let tutorial: TutorialSchema;
-        try {
-          tutorial = tutorialSchema.validate(specProvider(emptyContext));
-        } catch (error) {
-          throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
-        }
-
-        if (customIntegrations && tutorial) {
-          registerTutorialWithCustomIntegrations(customIntegrations, tutorial);
+        // Defer the provider call (and the i18n evaluation it triggers) to the first
+        // incoming HTTP request.  TypeScript typing guarantees shape at compile time;
+        // any runtime schema errors will surface on first read rather than at startup.
+        if (customIntegrations) {
+          customIntegrations.registerDeferredIntegrations(() => {
+            let tutorial: TutorialSchema;
+            try {
+              tutorial = tutorialSchema.validate(specProvider(this.baseTutorialContext));
+            } catch (error) {
+              throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
+            }
+            registerTutorialWithCustomIntegrations(customIntegrations, tutorial);
+          });
         }
         this.tutorialProviders.push(specProvider);
       },
@@ -160,10 +163,16 @@ export class TutorialsRegistry {
     this.tutorialProviders.push(...builtInTutorials);
 
     if (customIntegrations) {
-      builtInTutorials.forEach((provider) => {
-        const tutorial = provider(this.baseTutorialContext);
-        if (tutorial.omitServerless && this.isServerless) return;
-        registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
+      // Defer provider evaluation so that i18n strings (and the ICU message-format parsing
+      // they trigger) are only compiled on the first incoming HTTP request rather than
+      // at plugin-start time.  The deferred initializer runs exactly once, before the
+      // integrations list is first read, so Fleet always sees the complete list.
+      customIntegrations.registerDeferredIntegrations(() => {
+        builtInTutorials.forEach((provider) => {
+          const tutorial = provider(this.baseTutorialContext);
+          if (tutorial.omitServerless && this.isServerless) return;
+          registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
+        });
       });
     }
     return {};
