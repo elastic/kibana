@@ -248,6 +248,9 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           checked={isHistoryEnabled}
           label={isHistoryEnabled ? ON_LABEL : OFF_LABEL}
+          aria-label={i18n.translate('console.settingsPage.saveRequestsToHistoryAriaLabel', {
+            defaultMessage: 'Save requests to history',
+          })}
           onChange={(e) => toggleSavingToHistory(e.target.checked)}
         />
       </SettingsFormRow>
@@ -259,6 +262,9 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           data-test-subj="enableKeyboardShortcuts"
           label={isKeyboardShortcutsEnabled ? ON_LABEL : OFF_LABEL}
+          aria-label={i18n.translate('console.settingsPage.enableKeyboardShortcutsAriaLabel', {
+            defaultMessage: 'Keyboard shortcuts',
+          })}
           checked={isKeyboardShortcutsEnabled}
           onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
         />
@@ -271,6 +277,9 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           data-test-subj="enableA11yOverlay"
           label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          aria-label={i18n.translate('console.settingsPage.enableAccessibilityOverlayAriaLabel', {
+            defaultMessage: 'Accessibility overlay',
+          })}
           checked={isAccessibilityOverlayEnabled}
           onChange={(e) => toggleAccessibilityOverlay(e.target.checked)}
         />
@@ -311,6 +320,9 @@ export const SettingsEditor = (props: Props) => {
           css={styles.minWidthControl}
           compressed
           data-test-subj="setting-font-size-input"
+          aria-label={i18n.translate('console.settingsPage.fontSizeAriaLabel', {
+            defaultMessage: 'Font size',
+          })}
           value={fontSize}
           min={6}
           max={50}
@@ -329,6 +341,9 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           data-test-subj="settingsWrapLines"
           label={wrapMode ? ON_LABEL : OFF_LABEL}
+          aria-label={i18n.translate('console.settingsPage.wrapLongLinesAriaLabel', {
+            defaultMessage: 'Wrap long lines',
+          })}
           checked={wrapMode}
           onChange={(e) => setWrapMode(e.target.checked)}
           id="wrapLines"
@@ -342,6 +357,9 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           data-test-subj="tripleQuotes"
           label={tripleQuotes ? ON_LABEL : OFF_LABEL}
+          aria-label={i18n.translate('console.settingsPage.tripleQuotesAriaLabel', {
+            defaultMessage: 'Triple quotes in output',
+          })}
           checked={tripleQuotes}
           onChange={(e) => setTripleQuotes(e.target.checked)}
           id="tripleQuotes"
@@ -359,6 +377,7 @@ export const SettingsEditor = (props: Props) => {
           <EuiSwitch
             data-test-subj={`autocomplete-settings-${opts.id}`}
             label={opts.checked ? ON_LABEL : OFF_LABEL}
+            aria-label={opts.label}
             checked={opts.checked}
             onChange={(e) => opts.stateSetter(e.target.checked)}
           />
