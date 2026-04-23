@@ -64,7 +64,7 @@ interface MaybeCollectReferencesOpt {
   log: ToolingLog;
   apiDec: ApiDeclaration;
   captureReferences: boolean;
-  skipDeprecatedRefs: boolean;
+  skipDeprecatedRefs?: boolean;
   node: Node;
 }
 

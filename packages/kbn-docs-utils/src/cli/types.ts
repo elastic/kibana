@@ -51,7 +51,7 @@ export interface CliOptions {
   /** Whether to collect references for API items. */
   collectReferences: boolean;
   /** Skip reference collection for deprecated and adoption-tracked APIs. */
-  skipDeprecatedRefs: boolean;
+  skipDeprecatedRefs?: boolean;
   /** Stats flags to display. */
   stats?: string[];
   /** Plugin filter IDs (plugin.id from kibana.jsonc). */

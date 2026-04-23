@@ -32,7 +32,7 @@ export function getPluginApiMap(
     collectReferences,
     skipDeprecatedRefs,
     pluginFilter,
-  }: { collectReferences: boolean; skipDeprecatedRefs: boolean; pluginFilter?: string[] }
+  }: { collectReferences: boolean; skipDeprecatedRefs?: boolean; pluginFilter?: string[] }
 ): {
   pluginApiMap: { [key: string]: PluginApi };
   missingApiItems: MissingApiItemMap;

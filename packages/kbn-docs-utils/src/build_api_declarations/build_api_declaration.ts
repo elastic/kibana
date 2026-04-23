@@ -32,7 +32,7 @@ export function buildApiDeclarationTopNode(
     log: ToolingLog;
     currentPluginId: string;
     captureReferences: boolean;
-    skipDeprecatedRefs: boolean;
+    skipDeprecatedRefs?: boolean;
     parentApiId?: string;
     scope: ApiScope;
   }

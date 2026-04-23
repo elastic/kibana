@@ -23,7 +23,7 @@ export interface BuildApiDecOpts {
    * and adoption-tracked APIs. Used on PR builds where deprecation cross-reference
    * reports are not needed.
    */
-  skipDeprecatedRefs: boolean;
+  skipDeprecatedRefs?: boolean;
   /**
    * User facing name of the API item.
    */
