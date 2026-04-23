@@ -26,6 +26,7 @@ interface RunResolutionScoringParams {
   sampleSize: number;
   now: string;
   calculationRunId: string;
+  abortSignal?: AbortSignal;
   watchlistConfigs: Map<string, WatchlistObject>;
   idBasedRiskScoringEnabled: boolean;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
@@ -42,6 +43,7 @@ export const runResolutionScoringStep = async ({
   sampleSize,
   now,
   calculationRunId,
+  abortSignal,
   watchlistConfigs,
   idBasedRiskScoringEnabled,
   writer,
@@ -65,6 +67,10 @@ export const runResolutionScoringStep = async ({
     calculationRunId,
     watchlistConfigs,
   })) {
+    if (abortSignal?.aborted) {
+      runLogger.info('Resolution scoring aborted between pages');
+      break;
+    }
     pagesProcessed += 1;
     if (pageScores.length > 0) {
       scoresWrittenResolution += await persistScoresToRiskIndex({
