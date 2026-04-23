@@ -273,10 +273,6 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 
 /**
  * Outcome of the latest rule execution persisted on the rule SO.
- *
- * Two-state today (`success` / `failure`) matching the server-side
- * `ExecutionOutcome`. Clients must treat unknown future values as opaque
- * strings so we can extend without a breaking change.
  */
 export const ruleLastExecutionOutcomeSchema = z.enum(['success', 'failure']);
 export type RuleLastExecutionOutcome = z.infer<typeof ruleLastExecutionOutcomeSchema>;

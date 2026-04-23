@@ -37,19 +37,32 @@ import { buildRulesListFilter } from './utils';
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
 
-// Partial: `lastExecutionOutcome` / `lastExecutionAt` exist on the API sort
-// enum but the column + table-field value that renders them live on the
-// rules-list UI branch; on this backend-only branch they resolve to
-// `undefined` which `RulesListTable.sortField?` accepts.
-const SORT_FIELD_TO_TABLE_FIELD: Partial<Record<FindRulesSortField, RulesListTableSortField>> = {
+/**
+ * Both `lastExecutionOutcome` and `lastExecutionAt` collapse onto the single
+ * `last_execution` table column; the column itself is added on the rules-list
+ * UI branch, so clicking it is a no-op here but the map stays exhaustive so
+ * the server-side sort values remain type-checked.
+ */
+const SORT_FIELD_TO_TABLE_FIELD: Record<FindRulesSortField, RulesListTableSortField> = {
   kind: 'kind',
   enabled: 'enabled',
   name: 'metadata',
+  lastExecutionOutcome: 'last_execution',
+  lastExecutionAt: 'last_execution',
 };
 
-const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
-  Object.entries(SORT_FIELD_TO_TABLE_FIELD).map(([api, table]) => [table, api])
-) as Partial<Record<string, FindRulesSortField>>;
+/**
+ * Reverse lookup: when the user clicks a column header we need to map the
+ * table field back to an API sort field. `last_execution` resolves to
+ * `lastExecutionAt` (timestamp) — outcome-sort is exposed via the filter
+ * popover instead.
+ */
+const TABLE_FIELD_TO_API_SORT_FIELD: Partial<Record<string, FindRulesSortField>> = {
+  kind: 'kind',
+  enabled: 'enabled',
+  metadata: 'name',
+  last_execution: 'lastExecutionAt',
+};
 
 export const RulesListPage = () => {
   const { basePath } = useService(CoreStart('http'));

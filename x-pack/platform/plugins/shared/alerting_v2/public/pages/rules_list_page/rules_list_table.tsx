@@ -62,7 +62,7 @@ const descriptionTextStyle = css`
   word-break: break-word;
 `;
 
-export type RulesListTableSortField = 'kind' | 'enabled' | 'metadata';
+export type RulesListTableSortField = 'kind' | 'enabled' | 'metadata' | 'last_execution';
 
 export interface RulesListTableProps {
   items: RuleApiResponse[];
