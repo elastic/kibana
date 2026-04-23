@@ -162,28 +162,13 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 
    **How it could work:** The registering plugin declares which properties are user-editable (an allowlist). The platform enforces the allowlist at the service layer — user mutations that touch non-allowlisted fields are rejected, allowlisted field changes are persisted.
 
-   **The upgrade conflict problem:** If a user edits an allowlisted field (e.g., changes the scheduling interval from 10m to 1h), and a new Kibana release ships an updated version of the same managed workflow, should the platform:
-   - **Overwrite user edits?** Simple, but the user loses their customization silently.
-   - **Preserve user edits and merge?** Apply the new definition but keep the user's values for allowlisted fields. Complex — requires field-level merge logic, and the new definition may not be compatible with the old user values.
-   - **Skip the update?** Leave the user's version in place. The workflow drifts from what the plugin intended. Risky.
-
-   None of these options are clean. This is the core reason partial editability is deferred — it requires solving the managed/template hybrid problem, which is out of scope for the first delivery.
-
    **Overrides mechanism (alternative to full editability):** Two layers handle dynamic configuration without breaking the lifecycle:
 
    1. **Runtime values via `constants` or `inputs`.** For **scheduled runs**, `constants` can be stored as a separate field on the workflow document (merged with YAML-defined constants, document field takes precedence). For **manual runs**, the caller supplies values via workflow `inputs` at execution time. Neither affects `definitionHash` — reconciliation works normally, and existing constants are preserved across version upgrades.
 
-   2. **`overrides` field (creation-time values).** Some values are needed at creation time, not just runtime — triggers (scheduling interval, trigger filters), tags, name, and description are all stored on the workflow document when it's provisioned. These can't be deferred to runtime. An `overrides` field on the document stores these creation-time customizations. When the workflow is provisioned, overrides are applied to the document fields before writing. The `definitionHash` is computed from the template YAML (not the overridden values), so it remains unaffected. When a new version is delivered, the platform reads the existing overrides and re-applies them to the new version before storing — the hash tracks the latest template version.
+   2. **`overrides` field (creation-time values).** Some values are needed at creation time, not just runtime — triggers (scheduling interval, trigger filters), tags, name, and description are all stored on the workflow document when it's provisioned. These can't be deferred to runtime. An `overrides` field on the document stores these creation-time customizations. When the workflow is provisioned, overrides are applied to the document fields before writing. When a new version is delivered, the platform reads the existing overrides and re-applies them to the new version before storing.
 
    Both are orthogonal to versioning — the lifecycle process is preserved since the workflow version is identified based on the hash.
-
-   **Recommended first-phase approach:** For any other customization, the user should:
-   1. Clone the managed workflow into a user-owned copy.
-   2. Edit whatever is needed on the clone.
-   3. Disable the original managed workflow.
-   4. When a new version ships, the platform updates the definition but preserves the user's enabled state (the original stays disabled). The user can re-enable the updated original, clone and edit again if needed.
-
-   This keeps the managed workflow definition clean (no merge conflicts), gives users full editing power on the clone, and the user stays in control of the enabled state across upgrades.
 
 5. **~~Should managed workflows support being registered as disabled by default?~~** — **Resolved.**
    Yes. The `ManagedWorkflowRegistration` contract includes `management.defaultEnabled` (default `true`, settable to `false`). This covers both always-on patterns and opt-in patterns where a product feature activates the workflow on the user's behalf. The enable/disable toggle is a user-permitted mutation — not gated behind `--force`. On reconciliation, the platform's behavior depends on `management.enablement`: `'restorable'` (default) preserves the user's current enabled state; `'enforced'` resets to `management.defaultEnabled` (e.g., a critical fix that must be active). See R3.
@@ -435,9 +420,9 @@ steps:
 
 **Future extension — `yamlTemplate` (deferred, contingent on [Mutability #4](#mutability)):**
 
-> **Not part of v1.** All v1 managed workflows use static `yaml` only. The `yamlTemplate` mechanism below will be supported only if the [Mutability discussion (#4)](#mutability) concludes that install-time dynamic values are needed. It is documented here so the design is forward-compatible.
+> The `yamlTemplate` mechanism below will be supported only if the [Mutability discussion (#4)](#mutability) concludes that install-time dynamic values are needed. It is documented here so the design is forward-compatible.
 
-If adopted, each managed workflow would declare **either** `yaml` **or** `yamlTemplate`, not both:
+Each managed workflow would declare **either** `yaml` **or** `yamlTemplate`, not both:
 
 | Field | Use case |
 |---|---|
@@ -891,8 +876,6 @@ Today, the execution engine resolves identity via `getAuthenticatedUser(request,
 | **C: Defer scheduled managed workflows** | For the first delivery, managed workflows only support on-demand and event-driven execution (where a user context exists). Scheduled execution waits for the Execution Identity epic (#15718). | Limits use cases (Entity Analytics needs scheduling). But gets the core platform shipped. |
 | **D: Ship scheduled workflows disabled, use enabler's identity** | Scheduled managed workflows are provisioned as disabled by default. When a user enables the workflow (via the product UI or API with `--force`), the platform captures the enabling user's API key and stores it with the Task Manager task. The workflow runs with that user's privileges. | Simple, no new identity system needed. But the workflow's permissions are tied to a specific user — if the user is deactivated or loses permissions, the workflow breaks. Also requires the enabling user to have all necessary privileges. |
 | **E: Privileged background user** | Create a dedicated "power background" user with broad permissions that all managed workflow scheduled executions run as. The platform provisions and manages this user. | Simplest approach — no per-workflow identity management, no dependency on user enablement. But unclear whether this aligns with Kibana security best practices (principle of least privilege), and a single over-privileged user is a wider blast radius if compromised. Needs validation with the platform security team. |
-
-**Recommendation:** Option D is a pragmatic interim approach — it reuses existing mechanisms (API key capture on enablement, Task Manager storage) and gives the user explicit control over which identity the workflow runs with. Option E is the simplest operationally but needs validation against Kibana security best practices before adoption. Option C remains the safest fallback if the identity-tied-to-user limitation is unacceptable. All are superseded by #15718 (service accounts) once available.
 
 **Known issue:** When a workflow step patches a detection rule, the rule's execution identity changes to whoever ran the step (the alerting framework regenerates the API key from the updater). In autonomous mode with no human approver, the identity used by the apply step becomes the rule's permanent identity. This cascading side effect needs resolution as part of #15718.
 
