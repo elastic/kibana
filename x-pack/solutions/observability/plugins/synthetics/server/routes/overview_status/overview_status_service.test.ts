@@ -786,6 +786,342 @@ describe('current status route', () => {
       expect(result.pending).toEqual(pending);
     });
   });
+
+  describe('CCS remote decoration', () => {
+    it('populates remote field when CCS is enabled and _index is from a remote cluster', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'id1',
+                locationId: japanLoc.id,
+              },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      'kibanaUrl': 'https://west.kibana.example.com',
+                    },
+                    sort: ['2022-09-15T16:19:16.724Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'cluster-west:synthetics-browser-default', doc_count: 1 }],
+              },
+            },
+            {
+              key: {
+                monitorId: 'id2',
+                locationId: japanLoc.id,
+              },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                    },
+                    sort: ['2022-09-15T16:19:16.724Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
+              },
+            },
+            {
+              key: {
+                monitorId: 'id2',
+                locationId: germanyLoc.id,
+              },
+              status: {
+                key: germanyLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                    },
+                    sort: ['2022-09-15T16:19:16.724Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      // Remote monitor should have remote field populated
+      expect(result.upConfigs['id1-asia_japan'].remote).toEqual({
+        remoteName: 'cluster-west',
+        kibanaUrl: 'https://west.kibana.example.com',
+      });
+
+      // Local monitors should NOT have remote field
+      expect(result.upConfigs['id2-asia_japan'].remote).toBeUndefined();
+      expect(result.downConfigs['id2-europe_germany'].remote).toBeUndefined();
+    });
+
+    it('discovers remote-only monitors that have no local saved object', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            // Local monitor (has saved object)
+            {
+              key: {
+                monitorId: 'id1',
+                locationId: japanLoc.id,
+              },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                    },
+                    sort: ['2022-09-15T16:19:16.724Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
+              },
+            },
+            // Remote-only monitor (NO local saved object)
+            {
+              key: {
+                monitorId: 'remote-monitor-1',
+                locationId: 'us-east-1',
+              },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      'kibanaUrl': 'https://east.kibana.example.com',
+                      'monitor.name': 'Remote API Check',
+                      'monitor.type': 'http',
+                      'config_id': 'remote-config-1',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'cluster-east:synthetics-browser-default', doc_count: 1 }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      // Remote-only monitor should appear in downConfigs with metadata from ping fields
+      const remoteDown = result.downConfigs['remote-config-1-us-east-1'];
+      expect(remoteDown).toBeDefined();
+      expect(remoteDown.name).toBe('Remote API Check');
+      expect(remoteDown.type).toBe('http');
+      expect(remoteDown.configId).toBe('remote-config-1');
+      expect(remoteDown.locationLabel).toBe('us-east-1');
+      expect(remoteDown.remote).toEqual({
+        remoteName: 'cluster-east',
+        kibanaUrl: 'https://east.kibana.example.com',
+      });
+
+      // Counts should include the remote monitor
+      expect(result.down).toBe(1);
+      expect(result.up).toBe(1);
+    });
+
+    it('skips meta.space_id filter when CCS is enabled', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'id1',
+                locationId: japanLoc.id,
+              },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                    },
+                    sort: ['2022-09-15T16:19:16.724Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      await overviewStatusService.getOverviewStatus();
+
+      // Verify the ES query does NOT contain a meta.space_id filter
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+      const spaceFilter = filters.find(
+        (f: any) => f.terms && f.terms['meta.space_id']
+      );
+      expect(spaceFilter).toBeUndefined();
+    });
+
+    it('includes meta.space_id filter when CCS is disabled', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'id1',
+                locationId: japanLoc.id,
+              },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                    },
+                    sort: ['2022-09-15T16:19:16.724Z'],
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      await overviewStatusService.getOverviewStatus();
+
+      // Verify the ES query DOES contain a meta.space_id filter
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+      const spaceFilter = filters.find(
+        (f: any) => f.terms && f.terms['meta.space_id']
+      );
+      expect(spaceFilter).toBeDefined();
+      expect(spaceFilter.terms['meta.space_id']).toContain('default');
+    });
+
+    it('does not populate remote field when CCS is disabled', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'id1',
+                locationId: japanLoc.id,
+              },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                    },
+                    sort: ['2022-09-15T16:19:16.724Z'],
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      // Remote field should not be populated when CCS is disabled
+      expect(result.upConfigs['id1-asia_japan'].remote).toBeUndefined();
+    });
+  });
 });
 
 function getEsResponse({ buckets, after }: { buckets: any[]; after?: any }) {
