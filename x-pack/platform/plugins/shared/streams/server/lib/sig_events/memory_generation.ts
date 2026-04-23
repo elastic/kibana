@@ -139,7 +139,7 @@ export async function generateMemory(
       },
     });
 
-    totalTokens = sumTokens({ total: totalTokens, added: response.tokens });
+    totalTokens = sumTokens({ accumulated: totalTokens, added: response.tokens });
 
     logger.info(
       `Reasoning agent completed for stream "${streamName}": ${pagesWritten} page(s) written, response length: ${response.content.length}`
