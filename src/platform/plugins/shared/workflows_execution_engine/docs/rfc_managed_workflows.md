@@ -43,7 +43,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 |---|-------------|---------|
 | **R1** | **Distinguish managed from user-defined** | The platform must be able to distinguish managed workflows from user-defined ones. The designation is not user-settable. How this is achieved (a flag on the same index, a separate index, or other mechanism) is discussed in the [Storage](#1-storage) section of the technical design. |
 | **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject updates and deletions of managed workflows. The only permitted user mutation is the enable/disable toggle, which requires a `--force` flag to ensure intentionality (see R3). For any other changes, the user must clone the workflow into a user-owned copy and edit the clone. Enforcement is server-side — UI-only restrictions are insufficient since API callers can still mutate. |
-| **R3** | **Enabled by default, with opt-out** | Registered managed workflows are active by default (`enabled: true`). The registration contract supports `enabled: false` for opt-in patterns where a product feature activates the workflow on the user's behalf. On reconciliation (new version), the platform preserves the user's current enabled state unless the registering team explicitly forces a reset. |
+| **R3** | **Enabled by default, with opt-out** | Registered managed workflows are active by default (`management.defaultEnabled: true`). The registration contract supports `management.defaultEnabled: false` for opt-in patterns where a product feature activates the workflow on the user's behalf. On reconciliation (new version), the platform's behavior depends on `management.enablement`: `'restorable'` (default) preserves the user's current enabled state; `'enforced'` resets to `management.defaultEnabled`. |
 | **R4** | **Ownership metadata** | Every managed workflow identifies its owning plugin, team, or feature. Visible when inspecting the workflow. |
 | **R5** | **Registration mechanism** | A way for solution teams to register managed workflows with the platform, including the workflow definition and ownership metadata. The workflow plugin handles installation and activation. How this is exposed (plugin contract, file-based convention, or other mechanism) is an implementation detail discussed in the [Registration](#3-registration) section of the technical design. |
 | **R6** | **Caller-provided workflow ID with uniqueness guarantee** | Plugins can specify stable, deterministic IDs instead of auto-generated IDs. IDs must be globally unique so all existing APIs continue to serve both managed and user-defined workflows unambiguously. See [Open Questions > Registration #3](#id-uniqueness) for enforcement approaches. |
@@ -157,7 +157,7 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
 
    **Two approaches for read-only post-start workflows:**
 
-   - **Option A: Register disabled at startup, enable on demand.** The workflow is registered at `setup()` like any other managed workflow (known to the platform, reconciled on startup), but with `enabled: false` (see R3). The solution team enables it post-start when needed. This keeps the workflow in the standard lifecycle — hash-based reconciliation works, the approval gate applies — and only the enablement is dynamic. Simplest approach, no new mechanisms needed.
+   - **Option A: Register disabled at startup, enable on demand.** The workflow is registered at `setup()` like any other managed workflow (known to the platform, reconciled on startup), but with `management: { defaultEnabled: false }` (see R3). The solution team enables it post-start when needed. This keeps the workflow in the standard lifecycle — hash-based reconciliation works, the approval gate applies — and only the enablement is dynamic. Simplest approach, no new mechanisms needed.
 
    - **Option B: Deferred provisioning via `provisionOnStart: false`.** A new field on `ManagedWorkflowRegistration` (default `true`). When `false`, the workflow is registered in the in-memory registry at `setup()` (known to the platform, approval gate applies) but not provisioned to storage on startup. The team triggers provisioning post-start by calling a `registerManagedWorkflow(id)` API. Once provisioned, all future reconciliation (updates, cleanup) works normally via the standard hash-based lifecycle. This avoids creating a disabled workflow document that sits unused, while keeping the workflow known and reconcilable.
 
@@ -206,7 +206,7 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
    This keeps the managed workflow definition clean (no merge conflicts), gives users full editing power on the clone, and the user stays in control of the enabled state across upgrades.
 
 5. **~~Should managed workflows support being registered as disabled by default?~~** — **Resolved.**
-   Yes. The `ManagedWorkflowRegistration` contract includes an `enabled` option (default `true`, settable to `false`). This covers both always-on patterns and opt-in patterns where a product feature activates the workflow on the user's behalf. The enable/disable toggle is a user-permitted mutation — not gated behind `--force`. On reconciliation, the platform preserves the user's current enabled state unless the registering team forces a reset (e.g., a critical fix that must be active). See R3.
+   Yes. The `ManagedWorkflowRegistration` contract includes `management.defaultEnabled` (default `true`, settable to `false`). This covers both always-on patterns and opt-in patterns where a product feature activates the workflow on the user's behalf. The enable/disable toggle is a user-permitted mutation — not gated behind `--force`. On reconciliation, the platform's behavior depends on `management.enablement`: `'restorable'` (default) preserves the user's current enabled state; `'enforced'` resets to `management.defaultEnabled` (e.g., a critical fix that must be active). See R3.
 
 6. **~~Should a `--force` flag allow overriding read-only?~~** — **Resolved.**
    The primary user path is: disable the managed workflow, clone it into a user-owned copy, and edit the clone freely. The platform preserves the user's enabled state across upgrades unless the registering team forces a reset (e.g., a critical fix that must be active). A `--force` flag on mutation APIs remains available as an operational escape hatch (API-only, not UI, logged) for testing, recovery, and urgent fixes — see the [Force Override](#21-force-override) technical design section.
@@ -316,8 +316,11 @@ Extend the existing `.workflows-workflows` index and document model with new fie
 | `managedBy` | `string \| null` | Plugin ID that owns this workflow (e.g., `securityInsights`, `streams`). `null` for user workflows. Used for ownership tracking, reconciliation, and cleanup. |
 | `definitionHash` | `string \| null` | SHA-256 of the YAML definition. Used for reconciliation (create-if-absent, update-if-changed). `null` for user workflows. |
 | `originSystemWorkflowId` | `string \| null` | The registered system workflow ID this instance was created from. For workflows provisioned at startup with a deterministic ID, this equals the workflow's own ID. For post-start workflows that may be created multiple times with caller-provided or generated IDs (see [Open Questions > Post-start #2](#post-start)), this field links the instance back to the registered definition. Used together with `definitionHash` to detect version changes and apply reconciliation (updates, cleanup) across all instances of the same system workflow. `null` for user workflows. |
+| `lifecycle` | `'static' \| 'dynamic' \| null` | Persisted copy of the `management.lifecycle` value from the registration. Required for orphan cleanup — the platform needs to know whether to auto-orphan a workflow even when the owning plugin is no longer present (uninstall scenario). `null` for user workflows. See [Lifecycle](#5-lifecycle-provisioning-updates-cleanup) for behavior per lifecycle type. |
 
-`defaultEnabled` and `preserveEnabledState` are **not** stored on the document — they live in the in-memory registration only. During reconciliation, the platform reads these values from the registered workflow definition and acts accordingly. This keeps the storage model lean and avoids persisting registration-time metadata that may change between releases.
+The `management` policy fields (`lifecycle`, `versionStrategy`, `enablement`, `defaultEnabled`) are **not** stored on the workflow document — they live in the in-memory registration only, read from the `@kbn/workflows/managed` package at startup. During reconciliation, the platform reads these values from the registered workflow definition and acts accordingly. This keeps the storage model lean and avoids persisting registration-time metadata that may change between releases.
+
+The one exception is `lifecycle`: it is stored on the document as well (see mapping below) so that the platform can distinguish static from dynamic workflows during orphan cleanup, even for workflows whose owning plugin is no longer present (uninstall scenario).
 
 New mapping additions (in `workflow_storage.ts`):
 
@@ -326,6 +329,7 @@ managed: types.boolean({}),
 managedBy: types.keyword({}),
 definitionHash: types.keyword({ index: false }),
 originSystemWorkflowId: types.keyword({}),
+lifecycle: types.keyword({}), // 'static' | 'dynamic' — persisted for orphan cleanup when owning plugin is absent
 ```
 
 - **Reads:** One index; list/detail APIs filter or label using `managed` (e.g., hide managed by default).
@@ -402,7 +406,7 @@ The `--force` flag is scoped to the **enable/disable toggle only**. Updates and 
 **Behavior:**
 - The operation is logged (audit trail) with the requesting user.
 - The `force` flag ensures the user is acting with full intention — without it, the API rejects changes to managed workflows.
-- The platform preserves the user's enabled state across version upgrades (see `preserveEnabledState` in the [Registration](#3-registration) contract). When the registering team sets `preserveEnabledState: false`, a new version resets `enabled` to the registered default.
+- The platform preserves the user's enabled state across version upgrades when `management.enablement` is `'restorable'` (default). When the registering team sets `management.enablement: 'enforced'`, a new version resets `enabled` to `management.defaultEnabled`.
 - The force flag is **API-only** — the UI may expose the toggle through a product-specific surface (e.g., Detection Engine UI) that calls the API with `force=true` on behalf of the user.
 
 ---
@@ -441,15 +445,13 @@ interface ManagedWorkflowRegistration {
   pluginId: string;
   /** The workflow YAML definition. */
   yaml: string;
-  /** Initial enabled state. Defaults to true (active immediately). Set to false for opt-in patterns. */
-  enabled?: boolean;
   /**
-   * Whether to preserve the user's current enabled state when a new version is reconciled.
-   * Defaults to true — the user's choice survives upgrades.
-   * Set to false to force-reset enabled to the registered default on every update
-   * (e.g., a critical fix that must be active).
+   * Platform-level behavioral policy for this managed workflow.
+   * Controls how the platform handles lifecycle, versioning, and enablement.
+   * Extensible — new fields can be added in future releases without
+   * breaking existing registrations (all fields have sensible defaults).
    */
-  preserveEnabledState?: boolean;
+  management: ManagedWorkflowManagement;
   /**
    * Optional pre-install hook called per space during provisioning.
    * Receives the full provisioning context (space, license, deployment info, etc.).
@@ -460,6 +462,94 @@ interface ManagedWorkflowRegistration {
    * space-specific conditions.
    */
   shouldInstall?: (ctx: ManagedWorkflowInstallContext) => boolean | Promise<boolean>;
+}
+
+/**
+ * Platform-level behavioral policy for a managed workflow.
+ * Groups all knobs that control how the platform treats the workflow
+ * during reconciliation, provisioning, and enforcement — separate from
+ * the workflow's content (YAML) and identity (ID, pluginId).
+ *
+ * Every field has a sensible default so existing registrations remain
+ * valid when new fields are added.
+ */
+interface ManagedWorkflowManagement {
+  /**
+   * Lifecycle determines when the workflow is installed and how the platform
+   * handles cleanup.
+   *
+   * 'static' (default):
+   *   The owning plugin calls install() during setup() or start().
+   *   The full set of static workflows is known once all plugins finish start().
+   *   The platform auto-orphans static workflows that are no longer asserted:
+   *   - First sweep (startup where install() was not called): workflow is disabled.
+   *   - Second sweep (next startup, still unasserted): workflow is deleted.
+   *   This protects against transient regressions — a one-time bug in a plugin's
+   *   start() disables the workflow but doesn't destroy it. The next healthy
+   *   startup re-asserts and re-enables it.
+   *
+   * 'dynamic':
+   *   The owning plugin calls install() and uninstall() explicitly, at any
+   *   point in the plugin's lifetime (post-start, on user action, on entity
+   *   creation, etc.). The platform makes no assumption about which dynamic
+   *   workflows should exist and never auto-orphans them.
+   *   Cleanup is the plugin's responsibility via explicit uninstall() calls.
+   *   If the plugin forgets to uninstall a workflow whose owning resource is
+   *   gone, the workflow persists — an observable bug, not silent data loss.
+   *
+   * @default 'static'
+   */
+  lifecycle?: 'static' | 'dynamic';
+
+  /**
+   * How the platform applies a new definition version to an existing document.
+   *
+   * 'auto' (default):
+   *   On hash mismatch, the platform overwrites the stored YAML with the new
+   *   version immediately during reconciliation. This is the standard behavior
+   *   for always-on system workflows where the owning team wants every Kibana
+   *   upgrade to push the latest definition.
+   *
+   * 'on_adopt':
+   *   On hash mismatch, the platform stores the new version as available but
+   *   does not apply it to the active document until the owning plugin explicitly
+   *   re-issues install(). This is useful for dynamic workflows where the plugin
+   *   wants to control when a new version takes effect (e.g., gradual rollout,
+   *   or when template values must be re-supplied with the new version).
+   *
+   * @default 'auto'
+   */
+  versionStrategy?: 'auto' | 'on_adopt';
+
+  /**
+   * How the platform handles the workflow's enabled/disabled state across
+   * reconciliation and user interactions.
+   *
+   * 'restorable' (default):
+   *   The platform preserves the user's current enabled state across version
+   *   upgrades and reconciliation. The owning plugin can still call enable()
+   *   or disable() to change the state programmatically, but user toggles
+   *   are respected. Use for "recommended but optional" workflows where the
+   *   user should have control over enablement.
+   *
+   * 'enforced':
+   *   The platform resets the enabled state to the declared default on every
+   *   reconciliation. User toggles are overridden. Use for critical system
+   *   workflows that must always be active (or always inactive until the
+   *   plugin explicitly enables them).
+   *
+   * @default 'restorable'
+   */
+  enablement?: 'enforced' | 'restorable';
+
+  /**
+   * Initial enabled state when the workflow is first provisioned.
+   * Defaults to true (active immediately). Set to false for opt-in patterns
+   * where a product feature activates the workflow on the user's behalf.
+   *
+   * @default true
+   */
+  defaultEnabled?: boolean;
 }
 
 interface ManagedWorkflowInstallContext {
@@ -572,6 +662,14 @@ The remaining product-level questions are captured in [Open Questions > Space Be
 
 On startup, the platform reconciles the in-memory registry (what plugins declared) against storage (what's persisted per space). This covers R11 (auto-provisioning), R12 (privileged updates), R13 (plugin uninstall cleanup), and R14 (unregistration cleanup).
 
+Reconciliation behavior is driven by the `management` property declared on each managed workflow registration. The three relevant fields are:
+
+- **`management.lifecycle`** (`'static'` | `'dynamic'`) — determines when the platform expects `install()` calls and how it handles cleanup.
+- **`management.versionStrategy`** (`'auto'` | `'on_adopt'`) — determines how new definition versions are applied to existing documents.
+- **`management.enablement`** (`'enforced'` | `'restorable'`) — determines how the enabled/disabled state is handled across reconciliation.
+
+See the [Registration > `ManagedWorkflowManagement`](#3-registration) interface for the full field documentation.
+
 **Change detection** uses a SHA-256 hash of the YAML definition, stored in `definitionHash`. Today, `WorkflowProperties` has no version or hash field — updates are full document overwrites with no change detection. Once workflow versioning lands (#15776), managed workflows should adopt it. Until then:
 
 **Hash computation:**
@@ -584,29 +682,75 @@ function computeDefinitionHash(yaml: string): string {
 }
 ```
 
+#### 5.1 Reconciliation for `lifecycle: 'static'` workflows
+
+Static workflows are expected to be asserted via `install()` during the owning plugin's `setup()` or `start()` phase. The platform waits for all plugins to finish `start()` before running the reconciliation pass — this is a natural completion barrier, not a heuristic timer.
+
 **Reconciliation on startup (in `workflows_management` `start()`):**
 
-For each registered managed workflow, for each space:
+For each registered **static** managed workflow, for each space:
 
 1. Query `.workflows-workflows` by `id` + `spaceId`.
-2. If not found → **create** with `managed: true`, `managedBy: pluginId`, `definitionHash: hash`, `enabled: registration.enabled ?? true`.
-3. If found and `definitionHash` matches → **skip** (no I/O).
-4. If found and `definitionHash` differs → **update** the `yaml`, `definition`, `definitionHash`, `lastUpdatedBy: 'system'`. For the `enabled` field: read `preserveEnabledState` from the in-memory registration (default `true`). If `true`, keep the existing document's `enabled` value (user's choice survives). If `false`, reset `enabled` to `registration.enabled` (registering team forces a state).
-5. If found but `managed: false` → This shouldn't happen (ID collision between user workflow and managed workflow). Log a warning and skip. The caller-provided deterministic ID (R17) makes this unlikely but not impossible.
+2. If not found → **create** with `managed: true`, `managedBy: pluginId`, `definitionHash: hash`, `enabled: management.defaultEnabled ?? true`.
+3. If found and `definitionHash` matches → **skip** (no I/O). Exception: if `management.enablement` is `'enforced'`, reset `enabled` to `management.defaultEnabled` even when the hash matches.
+4. If found and `definitionHash` differs → apply based on `management.versionStrategy`:
+   - **`'auto'`** (default): **update** the `yaml`, `definition`, `definitionHash`, `lastUpdatedBy: 'system'` immediately.
+   - **`'on_adopt'`**: store the new hash and YAML as `pendingVersion` on the document but do **not** replace the active definition. The owning plugin must re-issue `install()` to adopt.
+   For the `enabled` field on update: read `management.enablement` from the registration.
+   - **`'enforced'`**: reset `enabled` to `management.defaultEnabled`.
+   - **`'restorable'`** (default): preserve the existing document's `enabled` value (user's choice survives).
+5. If found but `managed: false` → ID collision between user workflow and managed workflow. Log a warning and skip.
 
-**Cleanup on unregistration (R14):**
+**Cleanup — disable-then-delete for static workflows (R14):**
 
-After provisioning, a second pass handles orphans — managed workflows that exist in storage but are no longer in the in-memory registry (the plugin removed the registration in a new release):
+After provisioning, a second pass handles orphans — static workflows that exist in storage but were **not** asserted via `install()` during this startup:
 
-1. For each space, query `.workflows-workflows` for documents where `managed: true` (or `managedBy` is set).
-2. For each result, check if the `id` + `managedBy` pair exists in the in-memory registry.
-3. If not found in the registry → **delete** the orphaned workflow from that space.
+1. For each space, query `.workflows-workflows` for documents where `managed: true` and the workflow's registered lifecycle is `'static'`.
+2. For each result, check if the `id` was asserted via `install()` in this startup cycle.
+3. If **not asserted** and currently enabled → **disable** the workflow (set `enabled: false`). Do not delete. This protects against transient regressions — a one-time bug in a plugin's `start()` that skips `install()` for a workflow that should exist. The workflow is silenced (no triggers fire) but the document survives.
+4. If **not asserted** and already disabled from a previous sweep → **delete** the orphaned workflow. Permanent removal happens only when the plugin has stopped asserting the workflow across multiple healthy startups — the correct signal that the workflow is genuinely gone.
 
-This can be combined with the provisioning pass (step 1 already loads existing managed workflows per space) to avoid extra queries.
+This two-phase approach (disable → delete) replaces immediate deletion of unregistered workflows. It handles R14 (unregistration cleanup) with stronger safety against transient bugs.
+
+#### 5.2 Reconciliation for `lifecycle: 'dynamic'` workflows
+
+Dynamic workflows are **never** auto-orphaned. The platform makes no assumption about which dynamic workflows should exist — only the owning plugin can enumerate them.
+
+**On startup:**
+- Dynamic workflow documents are loaded from storage and remain in their stored state (enabled or disabled). No reconciliation sweep runs against them.
+- If a dynamic workflow's `definitionHash` differs from the current package version and `management.versionStrategy` is `'auto'`, the platform updates the stored definition. If `'on_adopt'`, the new version is stored as pending.
+
+**At runtime:**
+- The owning plugin calls `install(id, { values })` to create or update dynamic workflows at any point post-start.
+- The owning plugin calls `uninstall(id)` to explicitly remove a dynamic workflow.
+- Hash-based change detection still applies: if a plugin re-installs a dynamic workflow with new template values, the hash bumps and the document updates.
+
+**Failure mode:** If a plugin forgets to call `uninstall()` for a workflow whose owning resource is gone, the workflow persists indefinitely. This is a bug to investigate, not silent data loss — and it is observably different from the alternative (platform guesses wrong and deletes a workflow the plugin needs).
+
+#### 5.3 Summary: lifecycle × versionStrategy × enablement
+
+| Dimension | `lifecycle: 'static'` | `lifecycle: 'dynamic'` |
+|---|---|---|
+| **When `install()` is called** | During `setup()` / `start()` | Any time, post-start |
+| **Platform auto-orphans** | Yes (disable on first sweep, delete on second) | Never |
+| **Cleanup mechanism** | Plugin stops calling `install()` → eventually deleted | Plugin calls `uninstall()` explicitly |
+| **Failure if plugin misbehaves** | Workflow temporarily disabled, self-heals on next healthy start | Workflow lingers indefinitely (observable bug) |
+| **Use cases** | Always-on system workflows (Attack Discovery, Streams Significant Events) | Per-entity workflows (Entity Analytics monitoring), feature-activated workflows |
+
+| Dimension | `versionStrategy: 'auto'` | `versionStrategy: 'on_adopt'` |
+|---|---|---|
+| **On hash mismatch** | Overwrite stored YAML immediately | Store new version as pending; plugin re-issues `install()` to adopt |
+| **Use cases** | Always-current definitions (security maintenance) | Controlled rollout, dynamic workflows with template values |
+
+| Dimension | `enablement: 'enforced'` | `enablement: 'restorable'` |
+|---|---|---|
+| **On reconciliation** | Reset to `defaultEnabled` | Preserve user's current enabled state |
+| **User toggle** | Overridden on next reconciliation | Respected indefinitely |
+| **Use cases** | Critical workflows that must always be active | Recommended-but-optional workflows |
 
 **Cleanup on plugin uninstall (R13):**
 
-When a plugin is uninstalled (removed from the Kibana deployment), it no longer calls `registerManagedWorkflow()` at `setup()`. Its workflows are absent from the in-memory registry, so the unregistration cleanup above handles removal automatically — no separate mechanism needed. The `managedBy` field identifies which workflows belonged to the removed plugin.
+When a plugin is uninstalled (removed from the Kibana deployment), it no longer calls `install()` at `setup()`. For static workflows, this triggers the disable-then-delete orphan cleanup described above. For dynamic workflows, the `managedBy` field identifies which workflows belonged to the removed plugin — the platform can run a one-time cleanup pass on plugin uninstall to remove all dynamic workflows owned by the uninstalled plugin.
 
 ---
 
