@@ -63,3 +63,30 @@ export const PostEnrollmentAPIKeyRequestSchema = {
     expiration: schema.maybe(schema.string()),
   }),
 };
+
+export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
+  body: schema.object({
+    tokenIds: schema.maybe(schema.arrayOf(schema.string())),
+    kuery: schema.maybe(
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(
+            value,
+            [FLEET_ENROLLMENT_API_PREFIX],
+            ENROLLMENT_API_KEY_MAPPINGS,
+            true
+          );
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      })
+    ),
+    forceDelete: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const BulkDeleteEnrollmentAPIKeysResponseSchema = schema.object({
+  action: schema.string(),
+  count: schema.number(),
+});

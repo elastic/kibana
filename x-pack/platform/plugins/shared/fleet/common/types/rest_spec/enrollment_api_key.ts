@@ -50,3 +50,16 @@ export interface PostEnrollmentAPIKeyResponse {
   action: string;
   item: EnrollmentAPIKey;
 }
+
+export interface BulkDeleteEnrollmentAPIKeysRequest {
+  body: {
+    tokenIds?: string[];
+    kuery?: string;
+    forceDelete?: boolean;
+  };
+}
+
+export interface BulkDeleteEnrollmentAPIKeysResponse {
+  action: string;
+  count: number;
+}

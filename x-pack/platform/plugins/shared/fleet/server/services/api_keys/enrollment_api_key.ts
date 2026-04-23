@@ -207,6 +207,47 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
   }
 }
 
+export async function bulkDeleteEnrollmentApiKeys(
+  esClient: ElasticsearchClient,
+  options: {
+    tokenIds?: string[];
+    kuery?: string;
+    forceDelete?: boolean;
+    spaceId?: string;
+  }
+): Promise<{ count: number }> {
+  const { tokenIds, kuery, forceDelete = false, spaceId } = options;
+  let count = 0;
+
+  if (tokenIds && tokenIds.length > 0) {
+    for (const id of tokenIds) {
+      await deleteEnrollmentApiKey(esClient, id, forceDelete, spaceId);
+      count++;
+    }
+  } else if (kuery) {
+    let hasMore = true;
+    let page = 1;
+    while (hasMore) {
+      const { items } = await listEnrollmentApiKeys(esClient, {
+        page: page++,
+        perPage: 1000,
+        kuery,
+        spaceId,
+      });
+      if (items.length === 0) {
+        hasMore = false;
+        break;
+      }
+      for (const key of items) {
+        await deleteEnrollmentApiKey(esClient, key.id, forceDelete, spaceId);
+        count++;
+      }
+    }
+  }
+
+  return { count };
+}
+
 export async function generateEnrollmentAPIKey(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,

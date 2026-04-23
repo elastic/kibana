@@ -13,6 +13,8 @@ import type {
   GetEnrollmentAPIKeysRequest,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  BulkDeleteEnrollmentAPIKeysRequest,
+  BulkDeleteEnrollmentAPIKeysResponse,
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -81,6 +83,15 @@ export function sendCreateEnrollmentAPIKey(body: PostEnrollmentAPIKeyRequest['bo
   return sendRequest<PostEnrollmentAPIKeyResponse>({
     method: 'post',
     path: enrollmentAPIKeyRouteService.getCreatePath(),
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendBulkDeleteEnrollmentAPIKeys(body: BulkDeleteEnrollmentAPIKeysRequest['body']) {
+  return sendRequest<BulkDeleteEnrollmentAPIKeysResponse>({
+    method: 'post',
+    path: enrollmentAPIKeyRouteService.getBulkDeletePath(),
     version: API_VERSIONS.public.v1,
     body,
   });

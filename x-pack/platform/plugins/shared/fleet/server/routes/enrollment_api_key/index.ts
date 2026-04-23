@@ -18,9 +18,11 @@ import {
   GetOneEnrollmentAPIKeyRequestSchema,
   DeleteEnrollmentAPIKeyRequestSchema,
   PostEnrollmentAPIKeyRequestSchema,
+  BulkDeleteEnrollmentAPIKeysRequestSchema,
   EnrollmentAPIKeySchema,
   EnrollmentAPIKeyResponseSchema,
   DeleteEnrollmentAPIKeyResponseSchema,
+  BulkDeleteEnrollmentAPIKeysResponseSchema,
 } from '../../types';
 
 import { genericErrorResponse } from '../schema/errors';
@@ -32,6 +34,7 @@ import {
   getOneEnrollmentApiKeyHandler,
   deleteEnrollmentApiKeyHandler,
   postEnrollmentApiKeyHandler,
+  bulkDeleteEnrollmentApiKeysHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -158,6 +161,40 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getEnrollmentApiKeysHandler
+    );
+
+  router.versioned
+    .post({
+      path: ENROLLMENT_API_KEY_ROUTES.BULK_DELETE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Bulk delete enrollment API keys`,
+      description: `Delete or deactivate multiple enrollment API keys.`,
+      options: {
+        tags: ['oas-tag:Fleet enrollment API keys'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: BulkDeleteEnrollmentAPIKeysRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => BulkDeleteEnrollmentAPIKeysResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      bulkDeleteEnrollmentApiKeysHandler
     );
 
   router.versioned
