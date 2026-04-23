@@ -20,7 +20,6 @@ import {
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
   getSourceFieldNames,
-  mergeDocumentsFilterAndPostAgg,
 } from './commons';
 import {
   applyFieldEvaluations,
@@ -30,8 +29,6 @@ import {
 
 /**
  * Returns a DSL filter that matches documents considered for the given entity type.
- * Combines documentsFilter and postAggFilter (when present) so the filter is
- * equivalent to the ESQL extraction logic: only IDP or non-IDP documents pass.
  *
  * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
  * Use it to pre-filter searches/aggregations to only documents that could
@@ -54,9 +51,7 @@ export function getEuidDslDocumentsContainsIdFilter(
       isNotEmptyCondition(identityField.singleField)
     ) as QueryDslQueryContainer;
   }
-  return conditionToQueryDsl(
-    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, entityDefinition.postAggFilter)
-  ) as QueryDslQueryContainer;
+  return conditionToQueryDsl(identityField.documentsFilter) as QueryDslQueryContainer;
 }
 
 /**
@@ -153,28 +148,34 @@ export function getEuidDslFilterBasedOnDocument(
   };
   const boolQuery = dsl.bool!;
 
-  const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
-    (field) => !evaluatedDestinations.has(field)
-  );
-  if (toBeFilteredOut.length > 0) {
-    const priorMust = Array.isArray(boolQuery.must) ? boolQuery.must : [];
-    dsl.bool = {
-      ...boolQuery,
-      must: [...priorMust, ...toBeFilteredOut.map(fieldMissingOrEmptyDsl)],
-    };
-  }
+  // Compute source match specs once, excluding evaluations whose sources are themselves evaluated.
+  const evaluationSpecs = fieldEvaluations
+    .filter((evaluation) => {
+      const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+      return ![...exactMatchFields, ...prefixMatchFields].some((f) => evaluatedDestinations.has(f));
+    })
+    .map((evaluation) => ({ evaluation, spec: getSourceMatchSpec(doc, evaluation) }));
 
-  if (fieldEvaluations.length > 0) {
+  // For condition-based namespaces (e.g. local users identified by user.name + host.id from
+  // authentication events), the identity fields alone are sufficient — no higher-ranked field
+  // guards or source clause needed.
+  const isConditionBased = evaluationSpecs.some(({ spec }) => spec.type === 'condition');
+
+  if (!isConditionBased) {
+    const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
+      (field) => !evaluatedDestinations.has(field)
+    );
+    if (toBeFilteredOut.length > 0) {
+      const priorMust = Array.isArray(boolQuery.must) ? boolQuery.must : [];
+      dsl.bool = {
+        ...boolQuery,
+        must: [...priorMust, ...toBeFilteredOut.map(fieldMissingOrEmptyDsl)],
+      };
+    }
+
     const currentBoolQuery = dsl.bool!;
     const filterList = Array.isArray(currentBoolQuery.filter) ? currentBoolQuery.filter : [];
-    for (const evaluation of fieldEvaluations) {
-      const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
-      const sourceFields = [...exactMatchFields, ...prefixMatchFields];
-      const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
-      if (hasEvaluatedSource) {
-        continue;
-      }
-      const spec = getSourceMatchSpec(doc, evaluation);
+    for (const { evaluation, spec } of evaluationSpecs) {
       filterList.push(buildSourceClauseDsl(evaluation, spec) as QueryDslQueryContainer);
     }
     dsl.bool = { ...dsl.bool, filter: filterList };

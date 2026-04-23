@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getAssignedColorConfig, getColorAssignments } from './color_assignment';
+import {
+  getAssignedColorConfig,
+  getColorAssignments,
+  getLayerPaletteName,
+} from './color_assignment';
 import type { FormatFactory } from '../../../common/types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { XYDataLayerConfig } from './types';
@@ -230,6 +234,69 @@ describe('color_assignment', () => {
     });
   });
 
+  describe('getLayerPaletteName', () => {
+    it('should fall back to line-optimized palette for line series with no explicit palette', () => {
+      const layer: XYDataLayerConfig = {
+        ...layers[0],
+        seriesType: 'line',
+        palette: undefined,
+        colorMapping: undefined,
+      };
+      expect(getLayerPaletteName(layer)).toEqual(KbnPalette.ElasticLineOptimized);
+    });
+
+    it('should fall back to default palette for bar series with no explicit palette', () => {
+      const layer: XYDataLayerConfig = {
+        ...layers[0],
+        seriesType: 'bar',
+        palette: undefined,
+        colorMapping: undefined,
+      };
+      expect(getLayerPaletteName(layer)).toEqual(KbnPalette.Default);
+    });
+
+    it('should ignore colorMapping.paletteId when layer is collapsed and fall back to series type default', () => {
+      const layer: XYDataLayerConfig = {
+        ...layers[0],
+        seriesType: 'line',
+        palette: undefined,
+        collapseFn: 'sum',
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.Default,
+        },
+      };
+      expect(getLayerPaletteName(layer)).toEqual(KbnPalette.ElasticLineOptimized);
+    });
+
+    it('should ignore legacy palette when layer is collapsed and fall back to series type default', () => {
+      const layer: XYDataLayerConfig = {
+        ...layers[0],
+        seriesType: 'line',
+        palette: { type: 'palette', name: 'custom_palette' },
+        collapseFn: 'sum',
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.Default,
+        },
+      };
+      expect(getLayerPaletteName(layer)).toEqual(KbnPalette.ElasticLineOptimized);
+    });
+
+    it('should use colorMapping.paletteId when layer is not collapsed', () => {
+      const layer: XYDataLayerConfig = {
+        ...layers[0],
+        seriesType: 'line',
+        palette: undefined,
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.ElasticLineOptimized,
+        },
+      };
+      expect(getLayerPaletteName(layer)).toEqual(KbnPalette.ElasticLineOptimized);
+    });
+  });
+
   describe('colorMapping palette support', () => {
     it('should group layers by colorMapping.paletteId when present', () => {
       const lineLayer: XYDataLayerConfig = {
@@ -317,6 +384,105 @@ describe('color_assignment', () => {
       expect(paletteService.get).toHaveBeenCalledWith('eui_amsterdam_color_blind');
       expect(paletteService.get).toHaveBeenCalledWith('default');
       expect(defaultGetCategoricalColor).toHaveBeenCalled();
+    });
+
+    it('should group bar layers under the default palette', () => {
+      const barLayer1: XYDataLayerConfig = {
+        ...layers[0],
+        layerId: '1',
+        seriesType: 'bar',
+        palette: undefined,
+        colorMapping: undefined,
+      };
+      const barLayer2: XYDataLayerConfig = {
+        ...layers[1],
+        layerId: '2',
+        seriesType: 'bar',
+        palette: undefined,
+        colorMapping: undefined,
+      };
+      const assignments = getColorAssignments([barLayer1, barLayer2], data, formatFactory);
+      expect(assignments[KbnPalette.ElasticLineOptimized]).toBeUndefined();
+      expect(assignments[KbnPalette.Default]).toBeDefined();
+    });
+
+    it('should group multiple line layers under the line-optimized palette', () => {
+      const lineLayer1: XYDataLayerConfig = {
+        ...layers[0],
+        layerId: '1',
+        seriesType: 'line',
+        palette: undefined,
+        colorMapping: undefined,
+      };
+      const lineLayer2: XYDataLayerConfig = {
+        ...layers[1],
+        layerId: '2',
+        seriesType: 'line',
+        palette: undefined,
+        colorMapping: undefined,
+      };
+      const assignments = getColorAssignments([lineLayer1, lineLayer2], data, formatFactory);
+      expect(assignments[KbnPalette.ElasticLineOptimized]).toBeDefined();
+      expect(assignments[KbnPalette.Default]).toBeUndefined();
+    });
+  });
+
+  describe('annotation layer defaults', () => {
+    it('should resolve the point annotation fallback color for the dark theme', () => {
+      const assigned = getAssignedColorConfig(
+        {
+          layerId: 'annotation_layer',
+          layerType: LayerTypes.ANNOTATIONS,
+          indexPatternId: '1',
+          annotations: [
+            {
+              id: 'point_annotation',
+              type: 'manual',
+              label: 'Event',
+              key: {
+                type: 'point_in_time',
+                timestamp: '2022-03-18T08:25:17.140Z',
+              },
+            },
+          ],
+        } as never,
+        'point_annotation',
+        {} as never,
+        { datasourceLayers: {} } as never,
+        {} as never,
+        true
+      );
+
+      expect(assigned.color).toEqual('#FFFFFF');
+    });
+
+    it('should resolve the range annotation fallback color for the light theme', () => {
+      const assigned = getAssignedColorConfig(
+        {
+          layerId: 'annotation_layer',
+          layerType: LayerTypes.ANNOTATIONS,
+          indexPatternId: '1',
+          annotations: [
+            {
+              id: 'range_annotation',
+              type: 'manual',
+              label: 'Event range',
+              key: {
+                type: 'range',
+                timestamp: '2022-03-18T08:25:17.140Z',
+                endTimestamp: '2022-03-31T08:25:17.140Z',
+              },
+            },
+          ],
+        } as never,
+        'range_annotation',
+        {} as never,
+        { datasourceLayers: {} } as never,
+        {} as never,
+        false
+      );
+
+      expect(assigned.color).toEqual('#2B394F1A');
     });
   });
 });

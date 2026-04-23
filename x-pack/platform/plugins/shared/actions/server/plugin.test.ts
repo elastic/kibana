@@ -918,6 +918,64 @@ describe('Actions Plugin', () => {
           expect(pluginStart.inMemoryConnectors.length).toEqual(1);
           expect(pluginStart.inMemoryConnectors[0]).toEqual(existingConnector);
         });
+
+        it('should allow removing a previously registered dynamic connector', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          pluginStart.registerDynamicConnector(newDynamicConnector);
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+
+          expect(pluginStart.unregisterDynamicConnector(newDynamicConnector.id)).toEqual(true);
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(
+            pluginStart.inMemoryConnectors.find((c) => c.id === newDynamicConnector.id)
+          ).toBeUndefined();
+        });
+
+        it('should mutate the inMemoryConnectors array in place when removing a dynamic connector', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          pluginStart.registerDynamicConnector(newDynamicConnector);
+          const liveReference = pluginStart.inMemoryConnectors;
+
+          pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
+
+          expect(pluginStart.inMemoryConnectors).toBe(liveReference);
+          expect(liveReference.length).toEqual(1);
+        });
+
+        it('should return false when removing a dynamic connector that does not exist', () => {
+          expect(pluginStart.unregisterDynamicConnector('non-existent-id')).toEqual(false);
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+        });
+
+        it('should not allow removing a non-dynamic preconfigured connector', () => {
+          const existingConnector = pluginStart.inMemoryConnectors[0];
+          expect(existingConnector.isDynamic).not.toEqual(true);
+
+          expect(pluginStart.unregisterDynamicConnector(existingConnector.id)).toEqual(false);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(pluginStart.inMemoryConnectors[0]).toEqual(existingConnector);
+        });
       });
     });
 

@@ -5,26 +5,56 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import React from 'react';
+import { render, fireEvent, renderHook } from '@testing-library/react';
 import { useLeadingControlColumns } from './use_leading_control_columns';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
-const mockOpenChat = jest.fn();
-const mockUseAgentBuilderAvailability = jest.fn().mockReturnValue({ isAgentBuilderEnabled: false });
-const mockUseKibana = jest.fn().mockReturnValue({
-  services: { agentBuilder: undefined },
-});
+const mockGetEuidFilterBasedOnDocument = jest.fn();
+const mockUseEntityStoreEuidApi = jest.fn();
 
-jest.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: (...args: unknown[]) => mockUseAgentBuilderAvailability(...args),
+jest.mock('@kbn/entity-store/public', () => ({
+  useEntityStoreEuidApi: (...args: unknown[]) => mockUseEntityStoreEuidApi(...args),
+  ENTITY_STORE_ROUTES: { public: { RESOLUTION_GROUP: '/mock/resolution/group' } },
 }));
 
-jest.mock('../../../../../common/lib/kibana/use_kibana', () => ({
-  useKibana: (...args: unknown[]) => mockUseKibana(...args),
-}));
+const mockRecord: DataTableRecord = {
+  id: '1',
+  raw: {
+    _index: 'test',
+    _id: '1',
+    _source: {
+      entity: {
+        id: 'test-entity-id',
+        name: 'john.doe',
+        EngineMetadata: { Type: 'user' },
+      },
+    },
+  },
+  flattened: {
+    'entity.name': 'john.doe',
+    'entity.EngineMetadata.Type': 'user',
+  },
+};
 
-jest.mock('../../../../../agent_builder/hooks/use_security_agent_id', () => ({
-  useSecurityAgentId: jest.fn().mockReturnValue('security.agent'),
-}));
+const MockControl: React.FC<{
+  onClick?: () => void;
+  disabled?: boolean;
+  iconType?: string;
+  label?: string;
+  color?: string;
+  'data-test-subj'?: string;
+}> = ({ onClick, disabled }) => (
+  <button type="button" onClick={onClick} disabled={disabled} data-test-subj="control-button">
+    {'Control'}
+  </button>
+);
+
+const renderTimelineControl = (column: RowControlColumn, record: DataTableRecord = mockRecord) => {
+  const rendered = (column.render as Function)(MockControl, { record });
+  return render(rendered);
+};
 
 describe('useLeadingControlColumns', () => {
   const defaultArgs = {
@@ -34,8 +64,10 @@ describe('useLeadingControlColumns', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentBuilderEnabled: false });
-    mockUseKibana.mockReturnValue({ services: { agentBuilder: undefined } });
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { kql: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
+    });
+    mockGetEuidFilterBasedOnDocument.mockReturnValue(undefined);
   });
 
   it('returns no timeline action when canUseTimeline is false', () => {
@@ -50,28 +82,73 @@ describe('useLeadingControlColumns', () => {
     expect(result.current.find((c) => c.id === 'entity-analytics-timeline-action')).toBeDefined();
   });
 
-  it('returns no AI action when isAgentBuilderEnabled is false', () => {
-    const { result } = renderHook(() => useLeadingControlColumns(defaultArgs));
-    expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeUndefined();
-  });
+  describe('timeline action onClick', () => {
+    const investigateInTimeline = jest.fn();
 
-  it('returns AI action when isAgentBuilderEnabled is true and agentBuilder has openChat', () => {
-    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentBuilderEnabled: true });
-    mockUseKibana.mockReturnValue({
-      services: { agentBuilder: { openChat: mockOpenChat } },
+    it('calls investigateInTimeline with KQL query when euidApi returns a filter', () => {
+      mockGetEuidFilterBasedOnDocument.mockReturnValue('user.name: "john.doe"');
+
+      const { result } = renderHook(() =>
+        useLeadingControlColumns({ canUseTimeline: true, investigateInTimeline })
+      );
+
+      const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
+      const { getByTestId } = renderTimelineControl(column);
+      fireEvent.click(getByTestId('control-button'));
+
+      expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith('user', mockRecord.raw);
+      expect(investigateInTimeline).toHaveBeenCalledWith({
+        query: { query: 'user.name: "john.doe"', language: 'kuery' },
+      });
     });
 
-    const { result } = renderHook(() => useLeadingControlColumns(defaultArgs));
-    expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeDefined();
-  });
+    it('falls back to dataProviders when euidApi returns undefined', () => {
+      mockGetEuidFilterBasedOnDocument.mockReturnValue(undefined);
 
-  it('returns no AI action when agentBuilder is undefined even if enabled', () => {
-    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentBuilderEnabled: true });
-    mockUseKibana.mockReturnValue({
-      services: { agentBuilder: undefined },
+      const { result } = renderHook(() =>
+        useLeadingControlColumns({ canUseTimeline: true, investigateInTimeline })
+      );
+
+      const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
+      const { getByTestId } = renderTimelineControl(column);
+      fireEvent.click(getByTestId('control-button'));
+
+      expect(investigateInTimeline).toHaveBeenCalledWith({
+        dataProviders: expect.any(Array),
+      });
     });
 
-    const { result } = renderHook(() => useLeadingControlColumns(defaultArgs));
-    expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeUndefined();
+    it('falls back to dataProviders when euidApi is null', () => {
+      mockUseEntityStoreEuidApi.mockReturnValue(null);
+
+      const { result } = renderHook(() =>
+        useLeadingControlColumns({ canUseTimeline: true, investigateInTimeline })
+      );
+
+      const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
+      const { getByTestId } = renderTimelineControl(column);
+      fireEvent.click(getByTestId('control-button'));
+
+      expect(investigateInTimeline).toHaveBeenCalledWith({
+        dataProviders: expect.any(Array),
+      });
+    });
+
+    it('renders disabled control when entity fields are missing', () => {
+      const emptyRecord: DataTableRecord = {
+        id: '2',
+        raw: { _index: 'test', _id: '2', _source: {} },
+        flattened: {},
+      };
+
+      const { result } = renderHook(() =>
+        useLeadingControlColumns({ canUseTimeline: true, investigateInTimeline })
+      );
+
+      const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
+      const { getByTestId } = renderTimelineControl(column, emptyRecord);
+
+      expect(getByTestId('control-button')).toBeDisabled();
+    });
   });
 });

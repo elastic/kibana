@@ -14,21 +14,25 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
+export const DeleteMonitoringEngineRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Whether to delete all the privileged user data
+     */
+    data: BooleanFromString.optional().default(false),
+  })
+);
 export type DeleteMonitoringEngineRequestQuery = z.infer<typeof DeleteMonitoringEngineRequestQuery>;
-export const DeleteMonitoringEngineRequestQuery = z.object({
-  /**
-   * Whether to delete all the privileged user data
-   */
-  data: BooleanFromString.optional().default(false),
-});
 export type DeleteMonitoringEngineRequestQueryInput = z.input<
   typeof DeleteMonitoringEngineRequestQuery
 >;
 
+export const DeleteMonitoringEngineResponse = lazySchema(() =>
+  z.object({
+    deleted: z.boolean(),
+  })
+);
 export type DeleteMonitoringEngineResponse = z.infer<typeof DeleteMonitoringEngineResponse>;
-export const DeleteMonitoringEngineResponse = z.object({
-  deleted: z.boolean(),
-});

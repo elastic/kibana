@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
   - '@kbn/scout'
+  - '@kbn/search-api-panels'
 tags:
   - plugin
   - prod
