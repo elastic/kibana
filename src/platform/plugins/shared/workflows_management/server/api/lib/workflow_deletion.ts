@@ -265,7 +265,7 @@ const softDeleteWorkflows = async (
 
   return {
     total: ids.length,
-    deleted: ids.length - failures.length,
+    deleted: successfulIds.length,
     failures,
     successfulIds,
   };

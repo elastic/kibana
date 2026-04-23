@@ -132,8 +132,34 @@ describe('deleteWorkflows', () => {
         getWorkflowExecutions: noopExecutions,
       });
 
-      expect(result.deleted).toBe(1);
-      expect(result.failures).toEqual([]);
+      expect(result).toEqual({
+        total: 1,
+        deleted: 0,
+        successfulIds: [],
+        failures: [],
+      });
+    });
+
+    it('only counts existing ids as deleted when the request mixes found and missing', async () => {
+      const { storage } = makeStorageClient([{ _id: 'wf-1', _source: makeWorkflowSource() }]);
+
+      const result = await deleteWorkflows({
+        ids: ['wf-1', 'wf-missing'],
+        spaceId: 'default',
+        force: false,
+        storage,
+        esClient: makeEsClient(),
+        taskScheduler: null,
+        logger,
+        getWorkflowExecutions: noopExecutions,
+      });
+
+      expect(result).toEqual({
+        total: 2,
+        deleted: 1,
+        successfulIds: ['wf-1'],
+        failures: [],
+      });
     });
   });
 
