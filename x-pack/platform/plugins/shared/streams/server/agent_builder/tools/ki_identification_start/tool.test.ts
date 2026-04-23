@@ -7,6 +7,7 @@
 
 import { createKiIdentificationStartTool } from './tool';
 import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
+import { OnboardingStep } from '@kbn/streams-schema';
 
 describe('createKiIdentificationStartTool', () => {
   const telemetry = {
@@ -27,7 +28,13 @@ describe('createKiIdentificationStartTool', () => {
   it('schedules onboarding and returns immediately by default', async () => {
     const { tool, context, taskClient } = setup();
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler(
+      {
+        stream_name: 'logs.nginx',
+        steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
+      },
+      context
+    );
 
     expect(taskClient.schedule).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -58,7 +65,13 @@ describe('createKiIdentificationStartTool', () => {
     const { tool, context, taskClient } = setup();
     taskClient.schedule.mockRejectedValueOnce(new Error('version conflict'));
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler(
+      {
+        stream_name: 'logs.nginx',
+        steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
+      },
+      context
+    );
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('error');
