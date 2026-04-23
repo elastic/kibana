@@ -34,6 +34,8 @@ Stop if the PR isn't a backport and do NOT leave any comments on the PR to not c
 
 The goal is to identify the original PR that was merged into the `main` branch. It is often linked from within the PR description, and will very likely have a similar title to the backport PR (without any version prefix).
 
+Fetch the original PR's diff and file list via `GET /repos/elastic/kibana/pulls/{originalPR}`.
+
 ## 3. Review the backport PR
 
 Review the backport PR diff against the original PR. When a parity issue is found, link to the equivalent line in the original PR.
@@ -77,7 +79,7 @@ Post exactly one top-level comment using this template. Do not include headings,
 
 Do not leave any review or comment if no issues are found.
 
-## 4. Re-run Behavior & Constraints
+## 5. Re-run Behavior & Constraints
 
 - On re-runs, update/resolve existing inline comments and update the main review body status. Do not post a new top-level comment.
 - Do not duplicate inline comments on unchanged lines.
