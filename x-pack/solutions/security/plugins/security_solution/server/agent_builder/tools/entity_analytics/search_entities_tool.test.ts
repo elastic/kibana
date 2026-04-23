@@ -325,7 +325,13 @@ describe('searchEntitiesTool', () => {
       expect(query).toContain(EXPECTED_KEEP_CLAUSE);
       expect(query).toContain(EXPECTED_SORT_CLAUSE);
       expect(query).toContain('LIMIT 10');
-      expect(query).not.toContain('WHERE');
+      // The default risk-score sort always pairs with an IS NOT NULL guard so
+      // that ES|QL's NULLS-FIRST DESC ordering doesn't fill LIMIT N with
+      // unscored entities. The test still asserts that no caller-driven filter
+      // clauses (identity / risk floor) were emitted for empty params.
+      expect(query).toContain('WHERE entity.risk.calculated_score_norm IS NOT NULL');
+      expect(query).not.toContain('WHERE entity.EngineMetadata.Type');
+      expect(query).not.toContain('WHERE entity.risk.calculated_score_norm >=');
 
       expect(result.results).toHaveLength(2);
       expect(result.results[0].type).toBe(ToolResultType.esqlResults);
@@ -772,6 +778,70 @@ describe('searchEntitiesTool', () => {
         expect(query).not.toContain('entity.lifecycle.last_activity <=');
         expect(query).toContain('WHERE entity.EngineMetadata.Type IN ("user")');
         expect(query).toContain('LIMIT 5');
+      });
+
+      it('adds entity.risk.calculated_score_norm IS NOT NULL when sortBy is omitted (default risk-score sort)', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { entityTypes: ['user'] },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        // ES|QL sorts NULL FIRST in DESC, so the default risk-score sort is
+        // paired with an IS NOT NULL guard so that LIMIT N doesn't get filled
+        // with unscored rows at the top of a "top N riskiest" ranking.
+        expect(query).toContain('WHERE entity.risk.calculated_score_norm IS NOT NULL');
+        expect(query).toContain(EXPECTED_SORT_CLAUSE);
+      });
+
+      it('adds entity.risk.calculated_score_norm IS NOT NULL when sortBy is explicit "riskScore"', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { sortBy: 'riskScore' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        expect(query).toContain('WHERE entity.risk.calculated_score_norm IS NOT NULL');
+        expect(query).toContain(EXPECTED_SORT_CLAUSE);
+      });
+
+      it('does NOT add the IS NOT NULL guard when sortBy is "criticality" (criticality_rank handles nulls)', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { sortBy: 'criticality' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        // The criticality branch deliberately keeps unscored entities in the
+        // result set; they land at the bottom because criticality_rank defaults
+        // to 0 for rows without an asset.criticality match.
+        expect(query).not.toContain('entity.risk.calculated_score_norm IS NOT NULL');
+        expect(query).toContain(EXPECTED_CRITICALITY_RANK_EVAL);
+        expect(query).toContain(EXPECTED_CRITICALITY_SORT_CLAUSE);
+      });
+
+      it('keeps exactly one IS NOT NULL guard when riskScoreChangeInterval is set (no duplication with the default branch)', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler(
+          { riskScoreChangeInterval: '30d' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
+        // The two branches are mutually exclusive via `else if`, so the
+        // riskScoreChangeInterval path should emit exactly one IS NOT NULL
+        // clause — not one from its own branch plus another from the default
+        // risk-score fallback.
+        const matches = query.match(/WHERE entity\.risk\.calculated_score_norm IS NOT NULL/g);
+        expect(matches).not.toBeNull();
+        expect(matches).toHaveLength(1);
       });
     });
 

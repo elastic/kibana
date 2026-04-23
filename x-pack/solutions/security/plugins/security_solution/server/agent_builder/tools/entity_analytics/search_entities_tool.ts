@@ -106,8 +106,9 @@ const schema = z.object({
     .optional()
     .describe(
       'Minimum normalized risk score (1-100). When >0, only returns entities with entity.risk.calculated_score_norm >= this value. ' +
-        'Pass 0 or omit this parameter to apply no minimum — this preserves entities that do not have a computed risk score yet ' +
-        '(calculated_score_norm IS NULL), which otherwise would be dropped because NULL >= 0 is false in ES|QL. ' +
+        'Pass 0 or omit this parameter to apply no lower bound. ' +
+        'Note: the default sort is "riskScore", which by itself already excludes entities whose score is NULL — ' +
+        'if the user wants unscored entities alongside scored ones, use sortBy: "criticality" instead of lowering riskScoreMin. ' +
         'Only set a positive floor when the user explicitly asked for a score threshold (e.g. "above 70").'
     ),
   riskScoreMax: z
@@ -226,6 +227,9 @@ const schema = z.object({
     .optional()
     .describe(
       'Field to order results by (always DESC). Defaults to "riskScore" (entity.risk.calculated_score_norm). ' +
+        'Sorting by "riskScore" (default or explicit) implicitly excludes entities whose ' +
+        'entity.risk.calculated_score_norm IS NULL — ranking is not meaningful for unscored entities. ' +
+        'Use sortBy: "criticality" if you need unscored entities to appear (their criticality_rank defaults to 0 so they land last). ' +
         'Use "criticality" when the user explicitly asks to order, rank, sort, or list top-N entities BY criticality ' +
         '(extreme_impact > high_impact > medium_impact > low_impact; entities with no asset.criticality land last; ' +
         'risk score is the tiebreaker within a tier). ' +
@@ -398,6 +402,7 @@ const buildRiskAndAssetCriticalityFilterClauses = ({
   riskLevels,
   riskScoreChangeInterval,
   criticalityLevels,
+  sortBy,
 }: ToolParams) => {
   const clauses: string[] = [];
   if (riskScoreChangeInterval) {
@@ -405,6 +410,15 @@ const buildRiskAndAssetCriticalityFilterClauses = ({
     clauses.push(
       `WHERE @timestamp >= DATE_TRUNC(1 day, ${intervalToEsql(riskScoreChangeInterval)})`
     );
+  } else if (sortBy === undefined || sortBy === 'riskScore') {
+    // ES|QL sorts NULL FIRST in DESC, so without this guard a plain
+    // `SORT calculated_score_norm DESC | LIMIT N` query surfaces N unscored
+    // entities at the top of the list. Mirror the IS NOT NULL filter already
+    // used by the riskScoreChangeInterval branch so the default / explicit
+    // `sortBy: 'riskScore'` ranking is meaningful. The `sortBy: 'criticality'`
+    // branch does not need this because `criticality_rank` defaults to 0 for
+    // null-risk entities, which deterministically lands them last.
+    clauses.push(`WHERE entity.risk.calculated_score_norm IS NOT NULL`);
   }
   // Treat `riskScoreMin: 0` as "no floor" rather than `>= 0`. In ES|QL any comparison
   // against NULL is false, so emitting `calculated_score_norm >= 0` would silently drop
