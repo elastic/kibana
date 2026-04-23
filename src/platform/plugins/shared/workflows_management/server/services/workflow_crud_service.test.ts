@@ -41,6 +41,13 @@ const makeStorageClient = () => ({
   bulk: jest.fn(),
 });
 
+const makeSecurityMock = (username: string = 'alice') =>
+  ({
+    authc: {
+      getCurrentUser: jest.fn().mockReturnValue({ username }),
+    },
+  } as any);
+
 const makeDeps = (
   clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>
 ): { deps: WorkflowCrudDeps; client: ReturnType<typeof makeStorageClient> } => {
@@ -58,7 +65,7 @@ const makeDeps = (
     logger: loggerMock.create(),
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
     workflowStorage: { getClient: () => client } as any,
-    getSecurity: () => undefined,
+    getSecurity: () => makeSecurityMock('alice'),
     workflowsExtensions: undefined,
     getTaskScheduler: () => null,
     executionQueryService,
@@ -224,6 +231,270 @@ describe('WorkflowCrudService', () => {
 
       const searchCall = client.search.mock.calls[0][0];
       expect(searchCall._source).toBe(true);
+    });
+  });
+
+  describe('createWorkflow', () => {
+    const validYaml = [
+      'name: My Workflow',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step-one',
+      '    type: console',
+      '    with:',
+      '      message: "hi"',
+    ].join('\n');
+
+    const request = { auth: { credentials: { username: 'alice' } } } as any;
+
+    it('validates the workflow id format before touching storage', async () => {
+      const { deps, client } = makeDeps();
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.createWorkflow({ id: 'Invalid ID!', yaml: validYaml }, 'default', request)
+      ).rejects.toThrow();
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('indexes a new workflow and returns the resulting DTO', async () => {
+      const { deps, client } = makeDeps();
+      // No existing workflow for the generated id.
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.createWorkflow({ yaml: validYaml }, 'default', request);
+
+      expect(result.name).toBe('My Workflow');
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: expect.any(String),
+          refresh: true,
+          document: expect.objectContaining({
+            name: 'My Workflow',
+            spaceId: 'default',
+          }),
+        })
+      );
+    });
+
+    it('throws WorkflowConflictError when a user-supplied id matches an existing workflow (including tombstones)', async () => {
+      const { deps, client } = makeDeps();
+      // First search (dup-check via getWorkflow with includeDeleted:true) returns a hit.
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [{ _id: 'dup-id', _source: makeSource({ name: 'existing' }) }],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await expect(
+        service.createWorkflow({ id: 'dup-id', yaml: validYaml }, 'default', request)
+      ).rejects.toThrow(/already exists/);
+      expect(client.index).not.toHaveBeenCalled();
+
+      // Dup-check must include tombstones — otherwise the facade would silently allow id reuse
+      // against soft-deleted workflows.
+      const searchArgs = client.search.mock.calls[0][0];
+      expect(searchArgs.query.bool.must_not ?? []).not.toContainEqual({
+        exists: { field: 'deleted_at' },
+      });
+    });
+  });
+
+  describe('bulkCreateWorkflows', () => {
+    const validYaml = (name: string) =>
+      [
+        `name: ${name}`,
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: step',
+        '    type: console',
+        '    with:',
+        '      message: "m"',
+      ].join('\n');
+
+    const request = { auth: { credentials: { username: 'alice' } } } as any;
+
+    it('returns empty result for an empty workflow list and does not call bulk', async () => {
+      const { deps, client } = makeDeps();
+      const service = new WorkflowCrudService(deps);
+
+      const result = await service.bulkCreateWorkflows([], 'default', request);
+
+      expect(result).toEqual({ created: [], failed: [] });
+      expect(client.bulk).not.toHaveBeenCalled();
+    });
+
+    it('maps per-item bulk failures to the failed list while still returning successes', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      client.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: 'id-a', status: 201 } },
+          {
+            create: {
+              _id: 'id-b',
+              status: 409,
+              error: { type: 'version_conflict_engine_exception', reason: 'exists' },
+            },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.bulkCreateWorkflows(
+        [{ yaml: validYaml('A') }, { yaml: validYaml('B') }],
+        'default',
+        request
+      );
+
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].error).toMatch(/exists/);
+    });
+
+    it('uses index (overwrite) vs create (no overwrite) based on the option flag', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      client.bulk.mockResolvedValue({
+        items: [{ index: { _id: 'id-a', status: 200 } }],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.bulkCreateWorkflows([{ yaml: validYaml('A') }], 'default', request, {
+        overwrite: true,
+      });
+
+      const ops = client.bulk.mock.calls[0][0].operations;
+      expect(ops[0]).toHaveProperty('index');
+      expect(ops[0]).not.toHaveProperty('create');
+
+      client.bulk.mockClear();
+      client.bulk.mockResolvedValue({
+        items: [{ create: { _id: 'id-b', status: 201 } }],
+      });
+      await service.bulkCreateWorkflows([{ yaml: validYaml('B') }], 'default', request);
+      const opsNoOverwrite = client.bulk.mock.calls[0][0].operations;
+      expect(opsNoOverwrite[0]).toHaveProperty('create');
+      expect(opsNoOverwrite[0]).not.toHaveProperty('index');
+    });
+
+    it('rejects a user-supplied id that collides with an existing workflow when overwrite=false', async () => {
+      const { deps, client } = makeDeps();
+      // Initial dup-check search during resolveAndDeduplicateBulkIds.
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [{ _id: 'taken-id', _source: makeSource() }],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.bulkCreateWorkflows(
+        [{ id: 'taken-id', yaml: validYaml('taken') }],
+        'default',
+        request
+      );
+
+      expect(result.created).toEqual([]);
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].id).toBe('taken-id');
+      // bulk must not be issued when every valid entry has been filtered out.
+      expect(client.bulk).not.toHaveBeenCalled();
+    });
+
+    it('dedupes duplicate user-supplied ids within the same batch (first one wins)', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      client.bulk.mockResolvedValue({
+        items: [{ create: { _id: 'same', status: 201 } }],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.bulkCreateWorkflows(
+        [
+          { id: 'same', yaml: validYaml('one') },
+          { id: 'same', yaml: validYaml('two') },
+        ],
+        'default',
+        request
+      );
+
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].id).toBe('same');
+    });
+  });
+
+  describe('updateWorkflow', () => {
+    const request = { auth: { credentials: { username: 'alice' } } } as any;
+
+    it('throws when the workflow does not exist', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      await expect(
+        service.updateWorkflow('missing', { enabled: false }, 'default', request)
+      ).rejects.toThrow(/not found/);
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('patches fields and indexes the merged document', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ name: 'Before', enabled: true, tags: ['t1'] }),
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.updateWorkflow(
+        'wf-1',
+        { tags: ['t1', 't2'] } as any,
+        'default',
+        request
+      );
+
+      expect(result.id).toBe('wf-1');
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'wf-1',
+          refresh: true,
+          document: expect.objectContaining({
+            tags: ['t1', 't2'],
+            lastUpdatedBy: 'alice',
+          }),
+        })
+      );
+    });
+
+    it('records the caller in lastUpdatedBy on every update', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ lastUpdatedBy: 'someone-else' }),
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+
+      expect(client.index.mock.calls[0][0].document.lastUpdatedBy).toBe('alice');
     });
   });
 });
