@@ -176,7 +176,7 @@ This RFC covers managed workflows only. Templates are a separate initiative (see
    The current position is "fully read-only" with clone-to-customize. Before investing in partial editability, we need concrete use cases that cannot be solved by cloning or by the overrides/constants mechanism. Two dimensions:
 
    - **User-driven:** Does any team need users to change the scheduling interval, connector ID, or trigger filters of a managed workflow without cloning? If so, which fields and why can't clone-to-customize work?
-   - **Team-driven:** Does any team need the same managed workflow definition with parts modified in different scenarios (e.g., different connector IDs per deployment, different scheduling intervals per space or customer tier)? This is the overrides/constants use case — if the variation is known at registration or provisioning time, constants and overrides already handle it without partial editability.
+   - **Product-driven:** Does any team need the same managed workflow definition with parts modified in different scenarios, abstracted for the user (e.g., different rule ID, different scheduling intervals based on user action)?
 
    Note: partial editability with ongoing updates is effectively a hybrid between managed workflows and workflow templates (see [Clarifications > Managed workflow vs. workflow template](#managed-workflow-vs-workflow-template)) — the platform keeps the definition in sync, but the user or team also owns parts of it. This blurs the boundary and introduces the upgrade conflict problem below.
 
@@ -545,9 +545,15 @@ The product requirement is that managed workflows are space-aware and behave con
 
 Store the workflow once with a special `spaceId` (e.g., `_global`) instead of provisioning per space. All query paths change from `spaceId = currentSpace` to `spaceId = currentSpace OR spaceId = '_global'`. No per-space provisioning needed — the workflow exists once and is visible everywhere.
 
-This avoids the new-space problem entirely (no provisioning needed), but raises a hard question: **execution context**. When a `_global` workflow runs, which space's resources does it use? Two sub-options:
-- **Caller provides space at execution time** — The trigger or schedule specifies a space. The workflow definition is global, but each execution is space-scoped. This works for scheduled workflows (the schedule includes a target space) and API-triggered runs (the request carries a space).
-- **Truly spaceless execution** — The workflow only uses space-agnostic resources (cluster-level APIs, external HTTP calls). This limits which steps can be used and is only viable for a narrow set of use cases.
+This avoids the new-space problem entirely (no provisioning needed). The execution context works as follows:
+
+- **User-driven runs (manual invocations, event-driven):** Always space-aware — the request carries a space context, so the workflow runs in that space even though the document's `spaceId` is `_global`.
+- **Scheduled runs:** No inherent space context. Two patterns:
+  - **Global-run:** The workflow is designed to run in a global context (e.g., cluster-level operations, external HTTP calls). Runs once globally.
+  - **Per-space iteration:** The workflow's first step fetches all spaces, then iterates them with a `foreach` step. Each iteration runs in the target space's context. This gives granularity — one scheduled run covers all spaces.
+- **Post-start registered workflows:** The caller can provide a `spaceId` at provisioning time. If provided, the workflow runs in that space context only. If not, it behaves as a `_global` workflow.
+
+**Limitation:** The enablement toggle is global — disabling affects all spaces. Per-space enablement is not supported with this approach. This is acceptable if system workflows are treated as globally managed entities.
 
 **Approach 2: Provision into every space (current model)**
 
@@ -556,10 +562,9 @@ Each space gets its own copy of the workflow document. Execution context is unam
 Today, the Spaces plugin has no public `onSpaceCreated` hook or event system. Space creation goes through `SpacesClient.create()` → saved object write → return. The only post-create logic is hard-coded in the route handler (not an extension point). Options for provisioning into new spaces:
 
 - **Option A: `onSpaceCreated` hook on the Spaces plugin** — Propose a callback registry on `SpacesPluginSetup` (e.g., `spaces.onSpaceCreated(callback)`). The workflows plugin registers a listener at setup; when a space is created, it provisions all managed workflows. This is the only approach that fully satisfies R11 and requires cross-team collaboration with the Spaces team.
-- **Option B: Lazy provisioning on first access** — When any workflow API is called in a space, check if managed workflows are provisioned. Cache the result per space. No dependency on the Spaces plugin, but workflows are missing until first use (does not fully meet R11).
-- **Option C: Periodic reconciliation** — A Task Manager task that periodically scans all spaces and provisions missing workflows. Robust, no Spaces plugin dependency, but adds delay (up to one reconciliation interval) and background load.
+- **Option B: Periodic reconciliation** — A Task Manager task that periodically scans all spaces and provisions missing workflows. Robust, no Spaces plugin dependency, but adds delay (up to one reconciliation interval) and background load.
 
-**Leaning toward Approach 2.** It is more robust: each space has its own document with its own enabled state, schedule, and execution context. This naturally supports per-space enablement/disabling, eliminates the scheduled execution context problem (each space's document carries its own space context), and avoids the query path changes required by Approach 1. The tradeoff is solving the new-space provisioning problem — see the options above (hook, lazy, periodic). The remaining product-level questions are captured in [Open Questions > Space Behavior #9](#space-behavior).
+The remaining product-level questions are captured in [Open Questions > Space Behavior #9](#space-behavior).
 
 ---
 
@@ -602,10 +607,6 @@ This can be combined with the provisioning pass (step 1 already loads existing m
 **Cleanup on plugin uninstall (R13):**
 
 When a plugin is uninstalled (removed from the Kibana deployment), it no longer calls `registerManagedWorkflow()` at `setup()`. Its workflows are absent from the in-memory registry, so the unregistration cleanup above handles removal automatically — no separate mechanism needed. The `managedBy` field identifies which workflows belonged to the removed plugin.
-
-**Performance consideration:**
-
-With N managed workflows and M spaces, reconciliation performs up to N*M queries on startup. For the expected scale (single-digit workflows, tens of spaces), this is acceptable. If scale grows, a bulk `mget` per space reduces to M queries total. The orphan cleanup adds one query per space (fetch all managed workflows), which can be merged with the provisioning query.
 
 ---
 
