@@ -6,7 +6,7 @@ paths:
   /api/attack_discovery/_generate:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |

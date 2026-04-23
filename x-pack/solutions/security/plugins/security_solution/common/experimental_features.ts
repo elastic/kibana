@@ -32,11 +32,6 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables the SOC trends timerange and stats on D&R page
-   */
-  socTrendsEnabled: false,
-
-  /**
    * `runscript` response actions for SentinelOne hosts.
    *
    * Release: 9.2.0 (earlier for serverless)
@@ -238,7 +233,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
-  prebuiltRulesDeprecationUIEnabled: false,
+  prebuiltRulesDeprecationUIEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
