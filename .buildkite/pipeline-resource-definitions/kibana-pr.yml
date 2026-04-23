@@ -34,6 +34,9 @@ spec:
             paths:
               - .buildkite
               - package.json
+              - tsconfig.base.json
+              - versions.json
+              - x-pack/platform/packages/shared/kbn-evals/evals.suites.json
       provider_settings:
         build_branches: false
         build_pull_requests: true

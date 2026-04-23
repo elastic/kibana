@@ -28,14 +28,7 @@ function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
     const raw = Fs.readFileSync(filePath, 'utf-8');
     const parsed = JSON.parse(raw) as { suites?: EvalsSuiteMetadataEntry[] };
     const suites = Array.isArray(parsed.suites) ? parsed.suites : [];
-    return suites.filter((suite) => {
-      if (!suite?.configPath) return true;
-      try {
-        return Fs.existsSync(Path.resolve(process.cwd(), suite.configPath));
-      } catch {
-        return false;
-      }
-    });
+    return suites;
   } catch {
     return [];
   }
