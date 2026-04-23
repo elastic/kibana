@@ -71,8 +71,7 @@ export const PresentationPanel = <
         css={css`
           border-radius: ${euiTheme.border.radius.medium};
         `}
-        dataTestSubj="embed
-        dablePanelLoadingIndicator"
+        dataTestSubj="embeddablePanelLoadingIndicator"
       />
     );
 

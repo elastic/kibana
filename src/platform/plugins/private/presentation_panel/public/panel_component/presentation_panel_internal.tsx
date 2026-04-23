@@ -190,7 +190,11 @@ export const PresentationPanelInternal = <
         )}
         {!initialLoadComplete && <PanelLoader />}
         <div
-          className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
+          className={
+            blockingError || !initialLoadComplete
+              ? 'embPanel__content--hidden'
+              : 'embPanel__content'
+          }
           css={styles.embPanelContent}
         >
           <EuiErrorBoundary>
