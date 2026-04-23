@@ -12,10 +12,21 @@ import { getKibanaDir } from '#pipeline-utils';
 
 const TEST_FILE_PATTERNS = ['**/*.test.{ts,tsx,js,jsx,mjs}', '**/*.spec.{ts,tsx,js,jsx,mjs}'];
 
-// Integration tests live under integration_tests/ dirs and are handled by
-// separate jest.integration.config.js configs, so exclude them when checking
-// unit configs to avoid false positives that skew CI stats grouping.
-const IGNORE_PATTERNS = ['**/node_modules/**', '**/integration_tests/**'];
+// Loaded lazily because getKibanaDir() isn't available at module-init time.
+let ignorePatterns: string[];
+function getIgnorePatterns(): string[] {
+  if (!ignorePatterns) {
+    // Integration test patterns loaded from the Jest integration preset so this
+    // stays in sync automatically if that preset ever changes.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const integrationPreset = require(resolve(
+      getKibanaDir(),
+      'src/platform/packages/shared/kbn-test/jest_integration_node/jest-preset.js'
+    ));
+    ignorePatterns = ['**/node_modules/**', ...integrationPreset.testMatch];
+  }
+  return ignorePatterns;
+}
 
 /**
  * Fast check for whether a jest config's directory contains any test files.
@@ -26,7 +37,7 @@ function hasTestFiles(configAbsPath: string): boolean {
   const dir = dirname(configAbsPath);
   const matches = globby.sync(TEST_FILE_PATTERNS, {
     cwd: dir,
-    ignore: IGNORE_PATTERNS,
+    ignore: getIgnorePatterns(),
     onlyFiles: true,
   });
   return matches.length > 0;
