@@ -17,10 +17,8 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { SigeventsOverviewPage } from './sigevents_overview';
 
-jest.mock('./significant_events_discovery_illustration', () => ({
-  SignificantEventsDiscoveryIllustration: () => (
-    <div data-test-subj="mock-illustration">Illustration</div>
-  ),
+jest.mock('../../components/sigevents_overview', () => ({
+  SigeventsOverview: () => <div data-test-subj="sigeventsOverview">SigeventsOverview</div>,
 }));
 
 const mockCore = coreMock.createStart();
@@ -53,18 +51,11 @@ function renderWithProviders(agentBuilder?: ReturnType<typeof agentBuilderMocks.
 }
 
 describe('SigeventsOverviewPage', () => {
-  it('renders page structure with header, placeholder, illustration, and conversation container', () => {
+  it('renders page structure with header, SigeventsOverview, and conversation container', () => {
     renderWithProviders();
 
     expect(screen.getByTestSubject('obltSigeventsOverviewPageHeader')).toBeInTheDocument();
-    expect(screen.getByTestSubject('obltSigeventsOverviewPlaceholder')).toBeInTheDocument();
-    expect(screen.getByText('Observability Status page')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'This page will show status, active significant events, impacted entities and other related information. It will also allow for a conversation with context.'
-      )
-    ).toBeInTheDocument();
-    expect(screen.getByTestSubject('mock-illustration')).toBeInTheDocument();
+    expect(screen.getByTestSubject('sigeventsOverview')).toBeInTheDocument();
     expect(screen.getByTestSubject('obltSigeventsConversation')).toBeInTheDocument();
   });
 

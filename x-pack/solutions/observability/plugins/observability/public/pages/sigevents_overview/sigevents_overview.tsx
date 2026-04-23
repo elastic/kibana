@@ -6,15 +6,27 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
-import { SignificantEventsDiscoveryIllustration } from './significant_events_discovery_illustration';
+import { SigeventsOverview } from '../../components/sigevents_overview';
 
-const emptyPromptContainerStyles = css`
-  min-height: 340px;
+const MAX_CONTENT_WIDTH = 900;
+
+const containerStyles = css`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-height: 0;
+`;
+
+const contentColumnStyles = css`
+  width: 100%;
+  max-width: ${MAX_CONTENT_WIDTH}px;
+  height: 100%;
+  min-height: 0;
 `;
 
 export function SigeventsOverviewPage() {
@@ -42,57 +54,31 @@ export function SigeventsOverviewPage() {
         },
       }}
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="m"
-        style={{ height: '100%', minHeight: 0 }}
-        data-test-subj="obltSigeventsConversation"
-      >
-        <EuiFlexItem grow={false}>
+      <div css={containerStyles}>
+        <div css={contentColumnStyles}>
           <EuiFlexGroup
-            alignItems="center"
-            justifyContent="center"
             direction="column"
             gutterSize="m"
-            css={emptyPromptContainerStyles}
+            style={{ height: '100%', minHeight: 0 }}
+            data-test-subj="obltSigeventsConversation"
           >
             <EuiFlexItem grow={false}>
-              <EuiEmptyPrompt
-                hasShadow
-                color="plain"
-                icon={<SignificantEventsDiscoveryIllustration />}
-                data-test-subj="obltSigeventsOverviewPlaceholder"
-                title={
-                  <h2>
-                    {i18n.translate('xpack.observability.sigeventsOverview.emptyState.title', {
-                      defaultMessage: 'Observability Status page',
-                    })}
-                  </h2>
-                }
-                body={
-                  <p>
-                    {i18n.translate('xpack.observability.sigeventsOverview.emptyState.body', {
-                      defaultMessage:
-                        'This page will show status, active significant events, impacted entities and other related information. It will also allow for a conversation with context.',
-                    })}
-                  </p>
-                }
-              />
+              <SigeventsOverview />
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
 
-        {EmbeddableConversation && (
-          <EuiFlexItem grow={true} style={{ minHeight: 0 }}>
-            <EmbeddableConversation
-              sessionTag="sigevents"
-              hideWelcomeTitle
-              hideCloseButton
-              initialTitle="Systems overview"
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+            {EmbeddableConversation && (
+              <EuiFlexItem grow={true} style={{ minHeight: 0 }}>
+                <EmbeddableConversation
+                  sessionTag="sigevents"
+                  hideWelcomeTitle
+                  hideCloseButton
+                  initialTitle="Systems overview"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </div>
+      </div>
     </ObservabilityPageTemplate>
   );
 }
