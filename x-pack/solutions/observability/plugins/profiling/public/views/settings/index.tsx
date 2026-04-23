@@ -90,7 +90,12 @@ export function Settings() {
   const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
 
   return (
-    <ProfilingAppPageTemplate hideSearchBar>
+    <ProfilingAppPageTemplate
+      hideSearchBar
+      pageTitle={i18n.translate('xpack.profiling.settingsView.pageTitle', {
+        defaultMessage: 'Settings',
+      })}
+    >
       <>
         <EuiTitle>
           <EuiText>
@@ -235,7 +240,7 @@ export function Settings() {
                   <>
                     <EuiFlexGroup gutterSize="xs">
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="info" />
+                        <EuiIcon type="info" aria-hidden={true} />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiFlexGroup direction="column" gutterSize="xs">

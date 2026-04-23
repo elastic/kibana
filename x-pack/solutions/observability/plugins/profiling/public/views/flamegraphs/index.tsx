@@ -50,7 +50,13 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   ];
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
+    <ProfilingAppPageTemplate
+      tabs={tabs}
+      hideSearchBar={isDifferentialView}
+      pageTitle={i18n.translate('xpack.profiling.flameGraphsView.pageTitle', {
+        defaultMessage: 'Flamegraph',
+      })}
+    >
       {children}
     </ProfilingAppPageTemplate>
   );

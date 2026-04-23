@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { EuiPageHeaderContentProps } from '@elastic/eui';
+import type { EuiPageHeaderContentProps, EuiPageHeaderProps } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
@@ -81,7 +82,27 @@ export function ProfilingAppPageTemplate({
             )}
           </EuiFlexGroup>
         ),
-        tabs,
+        color: 'subdued' as unknown as EuiPageHeaderProps['color'], // This value is valid but not properly typed
+        children: (tabs.length > 0 || !hideSearchBar) && (
+          <EuiFlexGroup direction="column">
+            {tabs.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiTabs size="m">
+                  {tabs.map(({ label, ...tabRest }, index) => (
+                    <EuiTab key={index} {...tabRest}>
+                      {label}
+                    </EuiTab>
+                  ))}
+                </EuiTabs>
+              </EuiFlexItem>
+            )}
+            {!hideSearchBar && (
+              <EuiFlexItem grow={false}>
+                <PrimaryProfilingSearchBar />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ),
       }}
       restrictWidth={restrictWidth}
       pageSectionProps={{
@@ -94,13 +115,6 @@ export function ProfilingAppPageTemplate({
       }}
     >
       <EuiFlexGroup direction="column" style={{ maxWidth: '100%' }}>
-        {!hideSearchBar && (
-          <EuiFlexItem grow={false}>
-            <EuiPanel hasShadow={false} color="subdued">
-              <PrimaryProfilingSearchBar />
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
         {profilingSetupStatus?.unauthorized === true && privilegesWarningDismissed !== true ? (
           <EuiFlexItem grow={false}>
             <EuiCallOut

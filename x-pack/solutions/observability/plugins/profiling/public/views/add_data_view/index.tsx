@@ -511,13 +511,12 @@ EOF`}
 
   return (
     <ProfilingAppPageTemplate
-      tabs={[]}
       restrictWidth
       hideSearchBar
       pageTitle={
         <EuiFlexGroup direction="row" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoObservability" size="m" />
+            <EuiIcon type="logoObservability" size="m" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.profiling.noDataPage.pageTitle', {

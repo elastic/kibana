@@ -64,7 +64,13 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
   ];
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
+    <ProfilingAppPageTemplate
+      tabs={tabs}
+      hideSearchBar={isDifferentialView}
+      pageTitle={i18n.translate('xpack.profiling.functionsView.pageTitle', {
+        defaultMessage: 'Functions',
+      })}
+    >
       {children}
     </ProfilingAppPageTemplate>
   );

@@ -47,7 +47,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   if (!license?.hasAtLeast('enterprise')) {
     return (
-      <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
+      <ProfilingAppPageTemplate hideSearchBar>
         <LicensePrompt />
       </ProfilingAppPageTemplate>
     );
@@ -57,7 +57,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   if (displayLoadingScreen) {
     return (
-      <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
+      <ProfilingAppPageTemplate hideSearchBar>
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xxl" />
@@ -84,7 +84,6 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   if (displaySetupScreen) {
     return (
       <ProfilingAppPageTemplate
-        tabs={[]}
         noDataConfig={{
           action: {
             elasticAgent: {
