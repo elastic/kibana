@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   PackName,
@@ -25,15 +25,17 @@ import {
   ObjectQueries,
 } from '../model/schema/common_attributes.gen';
 
+export const CreatePacksRequestBody = lazySchema(() =>
+  z.object({
+    name: PackName.optional(),
+    description: PackDescriptionOrUndefined.optional(),
+    enabled: EnabledOrUndefined.optional(),
+    policy_ids: PolicyIdsOrUndefined.optional(),
+    shards: Shards.optional(),
+    queries: ObjectQueries.optional(),
+  })
+);
 export type CreatePacksRequestBody = z.infer<typeof CreatePacksRequestBody>;
-export const CreatePacksRequestBody = z.object({
-  name: PackName.optional(),
-  description: PackDescriptionOrUndefined.optional(),
-  enabled: EnabledOrUndefined.optional(),
-  policy_ids: PolicyIdsOrUndefined.optional(),
-  shards: Shards.optional(),
-  queries: ObjectQueries.optional(),
-});
 
+export const CreatePacksResponse = lazySchema(() => z.object({}));
 export type CreatePacksResponse = z.infer<typeof CreatePacksResponse>;
-export const CreatePacksResponse = z.object({});

@@ -524,8 +524,11 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
               showDescriptionColumn={!isSingleInputAndStreams}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
+              sections={packageInput.sections}
             />
-            {hasInputStreams && !shouldConsolidateAdvancedSections ? (
+            {hasInputStreams &&
+            !shouldConsolidateAdvancedSections &&
+            packageInput.show_divider !== false ? (
               <ShortenedHorizontalRule margin="m" />
             ) : (
               <EuiSpacer size="l" />
