@@ -34,7 +34,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: [],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -58,7 +58,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['gh-1'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -92,7 +92,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['gh-2'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -118,7 +118,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['gh-3'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );
@@ -152,7 +152,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['dup'],
-          services: { expressions: mockExpressions },
+          expressions: mockExpressions,
         }),
       { wrapper }
     );

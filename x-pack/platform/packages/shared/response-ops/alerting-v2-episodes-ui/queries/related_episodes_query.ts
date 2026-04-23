@@ -6,22 +6,22 @@
  */
 
 import { esql } from '@elastic/esql';
+import type { ComposerQuery } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
 import { addEpisodeAggregation, ALERT_EPISODE_FIELDS } from './episodes_query';
 
-/**
- * ES|QL query listing alert episodes for a rule, excluding one episode id.
- * Temporarily limited to 5 episodes.
- */
-export const buildRelatedAlertEpisodesEsqlQuery = (ruleId: string, excludeEpisodeId: string) => {
-  const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
-    .where`rule.id == ${ruleId} AND episode.id != ${excludeEpisodeId}`;
+const RELATED_EPISODE_LIMIT = 5;
 
+export const finishRelatedEpisodesQuery = (query: ComposerQuery) => {
   addEpisodeAggregation(query);
 
-  // prettier-ignore
   return query
     .sort([TIME_FIELD, 'DESC'])
-    .limit(5)
+    .limit(RELATED_EPISODE_LIMIT)
     .keep(...ALERT_EPISODE_FIELDS);
+};
+
+export const buildRelatedBaseQuery = (ruleId: string, excludeEpisodeId: string) => {
+  return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
+    .where`rule.id == ${ruleId} AND episode.id != ${excludeEpisodeId}`;
 };

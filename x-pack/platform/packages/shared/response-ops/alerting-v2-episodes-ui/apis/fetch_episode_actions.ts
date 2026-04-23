@@ -15,7 +15,7 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 export interface FetchEpisodeActionsOptions {
   episodeIds: string[];
   abortSignal?: AbortSignal;
-  services: { expressions: ExpressionsStart };
+  expressions: ExpressionsStart;
 }
 
 /**
@@ -24,7 +24,7 @@ export interface FetchEpisodeActionsOptions {
 export const fetchEpisodeActions = ({
   episodeIds,
   abortSignal,
-  services: { expressions },
+  expressions,
 }: FetchEpisodeActionsOptions): Promise<AlertEpisodeAction[]> => {
   return executeEsqlQuery<AlertEpisodeAction>({
     expressions,
