@@ -128,7 +128,7 @@ export const EmbeddableRenderer = <
           errorApi.parentApi = parentApi;
         }
         onApiAvailable?.(errorApi);
-        return { componentApi: errorApi, Component: null };
+        return { componentApi: errorApi, Component: () => <span /> };
       }
     },
     /**
