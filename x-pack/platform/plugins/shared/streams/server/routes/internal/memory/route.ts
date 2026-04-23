@@ -10,6 +10,7 @@ import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskResult } from '@kbn/streams-schema';
 import { featureSchema, generatedSignificantEventQuerySchema } from '@kbn/streams-schema';
+import { EMPTY_TOKENS } from '@kbn/streams-ai';
 import { notFound } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -557,7 +558,12 @@ const generateMemoryRoute = createServerRoute({
     const { inferenceClient, uiSettingsClient } = await getScopedClients({ request });
 
     if (!(await isMemoryEnabled(uiSettingsClient))) {
-      return { streamsProcessed: 0, skipped: true, reason: 'memory_disabled' };
+      return {
+        streamsProcessed: 0,
+        tokensUsed: EMPTY_TOKENS,
+        skipped: true,
+        reason: 'memory_disabled',
+      };
     }
 
     const { streamName } = params.path;

@@ -6,9 +6,10 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
 import type { BaseFeature, GeneratedSignificantEventQuery, Insight } from '@kbn/streams-schema';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import { EMPTY_TOKENS, sumTokens } from '@kbn/streams-ai';
 import {
   MemoryServiceImpl,
   formatExistingPages,
@@ -25,6 +26,7 @@ export interface MemoryGenerationParams {
 
 export interface MemoryGenerationResult {
   streamsProcessed: number;
+  tokensUsed: ChatCompletionTokenCount;
 }
 
 interface MemoryGenerationDependencies {
@@ -53,7 +55,7 @@ export async function generateMemory(
 
   if (streamGroups.length === 0) {
     logger.info('No inputs provided, skipping memory generation');
-    return { streamsProcessed: 0 };
+    return { streamsProcessed: 0, tokensUsed: EMPTY_TOKENS };
   }
 
   logger.info(
@@ -74,6 +76,8 @@ export async function generateMemory(
   const existingPages = formatExistingPages(allEntries);
 
   logger.info(`Found ${allEntries.length} existing memory entries total`);
+
+  let totalTokens = EMPTY_TOKENS;
 
   for (const { streamName, indicators } of streamGroups) {
     if (signal.aborted) {
@@ -135,6 +139,8 @@ export async function generateMemory(
       },
     });
 
+    totalTokens = sumTokens({ total: totalTokens, added: response.tokens });
+
     logger.info(
       `Reasoning agent completed for stream "${streamName}": ${pagesWritten} page(s) written, response length: ${response.content.length}`
     );
@@ -142,7 +148,10 @@ export async function generateMemory(
 
   logger.info(`Memory generation completed: processed ${streamGroups.length} stream(s)`);
 
-  return { streamsProcessed: streamGroups.length };
+  return {
+    streamsProcessed: streamGroups.length,
+    tokensUsed: totalTokens,
+  };
 }
 
 const groupInputsByStream = ({
