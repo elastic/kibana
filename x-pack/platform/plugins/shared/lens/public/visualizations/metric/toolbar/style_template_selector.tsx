@@ -7,29 +7,44 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
-  EuiFormRow,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
-  euiFocusRing,
-  EuiFieldText,
-  EuiToolTip,
   EuiPanel,
-  EuiButtonGroup,
+  EuiText,
+  euiFocusRing,
+  useEuiTheme,
 } from '@elastic/eui';
-import type {
-  PrimaryMetricFontSize,
-  IconPosition,
-  Alignment,
-  PrimaryMetricPosition,
-} from '@kbn/lens-common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { MetricStyleTemplate } from './type';
+
+const styleTemplates: Array<{
+  id: MetricStyleTemplate;
+  label: string;
+  preview: ReactNode;
+}> = [
+  {
+    id: 'top',
+    label: i18n.translate('xpack.lens.metric.styleTemplate.top', { defaultMessage: 'Top' }),
+    preview: <MetricPreview position="top" />,
+  },
+  {
+    id: 'middle',
+    label: i18n.translate('xpack.lens.metric.styleTemplate.middle', { defaultMessage: 'Middle' }),
+    preview: <MetricPreview position="middle" />,
+  },
+  {
+    id: 'bottom',
+    label: i18n.translate('xpack.lens.metric.styleTemplate.bottom', { defaultMessage: 'Bottom' }),
+    preview: <MetricPreview position="bottom" />,
+  },
+  {
+    id: 'custom',
+    label: i18n.translate('xpack.lens.metric.styleTemplate.custom', { defaultMessage: 'Custom' }),
+    preview: <MetricPreview position="custom" />,
+  },
+];
 
 export function StyleTemplateSelector({
   selectedTemplate,
@@ -154,7 +169,7 @@ function StyleTemplateCard({
   );
 }
 
-function MetricPreview({ position }: { position: 'top' | 'middle' | 'bottom' | 'custom' }) {
+function MetricPreview({ position }: { position: MetricStyleTemplate }) {
   const { euiTheme } = useEuiTheme();
 
   const value = (fontSize: string) => (
@@ -219,198 +234,3 @@ function MetricPreview({ position }: { position: 'top' | 'middle' | 'bottom' | '
 
   return <div data-test-subj={`lens-metric-style-preview-${position}`}>{content[position]}</div>;
 }
-
-const styleTemplates: Array<{
-  id: MetricStyleTemplate;
-  label: string;
-  preview: ReactNode;
-}> = [
-  {
-    id: 'top',
-    label: i18n.translate('xpack.lens.metric.styleTemplate.top', { defaultMessage: 'Top' }),
-    preview: <MetricPreview position="top" />,
-  },
-  {
-    id: 'middle',
-    label: i18n.translate('xpack.lens.metric.styleTemplate.middle', { defaultMessage: 'Middle' }),
-    preview: <MetricPreview position="middle" />,
-  },
-  {
-    id: 'bottom',
-    label: i18n.translate('xpack.lens.metric.styleTemplate.bottom', { defaultMessage: 'Bottom' }),
-    preview: <MetricPreview position="bottom" />,
-  },
-  {
-    id: 'custom',
-    label: i18n.translate('xpack.lens.metric.styleTemplate.custom', { defaultMessage: 'Custom' }),
-    preview: <MetricPreview position="custom" />,
-  },
-];
-
-export function AppearanceOptionGroup({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <EuiText size="s">
-      <h4>{title}</h4>
-      {children}
-    </EuiText>
-  );
-}
-
-export function SubtitleOption({
-  value = '',
-  onChange,
-  isDisabled,
-}: {
-  value?: string;
-  onChange: (subtitle: string) => void;
-  isDisabled: boolean | string;
-}) {
-  const { inputValue, handleInputChange } = useDebouncedValue<string>(
-    { onChange, value },
-    { allowFalsyValue: true }
-  );
-
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.lens.metric.appearancePopover.subtitle', {
-        defaultMessage: 'Subtitle',
-      })}
-      fullWidth
-      display="columnCompressed"
-      isDisabled={!!isDisabled}
-    >
-      <EuiToolTip display="block" content={isDisabled}>
-        <EuiFieldText
-          compressed
-          disabled={!!isDisabled}
-          data-test-subj="lens-metric-appearance-subtitle-field"
-          value={inputValue}
-          onChange={({ target: { value: newValue } }) => handleInputChange(newValue)}
-        />
-      </EuiToolTip>
-    </EuiFormRow>
-  );
-}
-
-interface AppearanceOptionProps<OptionType extends string> {
-  label: string;
-  value: OptionType;
-  options: Array<EuiButtonGroupOptionProps & { id: OptionType }>;
-  onChange: (id: OptionType) => void;
-  isDisabled?: boolean;
-  isIconOnly?: boolean;
-  dataTestSubj?: string;
-}
-
-export function AppearanceOption<OptionType extends string>({
-  label,
-  value,
-  options,
-  onChange,
-  isDisabled = false,
-  isIconOnly = false,
-  dataTestSubj,
-}: AppearanceOptionProps<OptionType>) {
-  const onChangeOption = (clickedOptionId: string) => {
-    // Prevent onChange method call if the option clicked is selected
-    if (value !== clickedOptionId) {
-      onChange(clickedOptionId as OptionType);
-    }
-  };
-
-  return (
-    <EuiFormRow display="columnCompressed" fullWidth label={label}>
-      <EuiButtonGroup
-        isFullWidth
-        legend={label}
-        data-test-subj={dataTestSubj}
-        buttonSize="compressed"
-        options={options}
-        // Don't show selected option if the button group is disabled
-        idSelected={isDisabled ? '' : value}
-        isDisabled={isDisabled}
-        onChange={onChangeOption}
-        isIconOnly={isIconOnly}
-      />
-    </EuiFormRow>
-  );
-}
-
-export const alignmentOptions: Array<EuiButtonGroupOptionProps & { id: Alignment }> = [
-  {
-    id: 'left',
-    label: i18n.translate('xpack.lens.shared.left', {
-      defaultMessage: 'Left',
-    }),
-    iconType: 'textAlignLeft',
-  },
-  {
-    id: 'center',
-    label: i18n.translate('xpack.lens.shared.center', {
-      defaultMessage: 'Center',
-    }),
-    iconType: 'textAlignCenter',
-  },
-  {
-    id: 'right',
-    label: i18n.translate('xpack.lens.shared.right', {
-      defaultMessage: 'Right',
-    }),
-    iconType: 'textAlignRight',
-  },
-];
-
-export const iconPositionOptions: Array<EuiButtonGroupOptionProps & { id: IconPosition }> = [
-  {
-    id: 'left',
-    label: i18n.translate('xpack.lens.shared.left', {
-      defaultMessage: 'Left',
-    }),
-  },
-  {
-    id: 'right',
-    label: i18n.translate('xpack.lens.shared.right', {
-      defaultMessage: 'Right',
-    }),
-  },
-];
-
-export const fontSizeOptions: Array<EuiButtonGroupOptionProps & { id: PrimaryMetricFontSize }> = [
-  {
-    id: 'default',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.default', {
-      defaultMessage: 'Default',
-    }),
-  },
-  {
-    id: 'fit',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.fit', {
-      defaultMessage: 'Fit',
-    }),
-  },
-];
-
-export const primaryMetricPositionOptions: Array<
-  EuiButtonGroupOptionProps & {
-    id: PrimaryMetricPosition;
-  }
-> = [
-  {
-    id: 'top',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.top', {
-      defaultMessage: 'Top',
-    }),
-  },
-  {
-    id: 'middle',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.middle', {
-      defaultMessage: 'Middle',
-    }),
-  },
-  {
-    id: 'bottom',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.bottom', {
-      defaultMessage: 'Bottom',
-    }),
-  },
-];
