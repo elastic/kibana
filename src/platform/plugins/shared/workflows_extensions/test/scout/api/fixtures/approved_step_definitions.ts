@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: 'eb7dc95f4ed0ed0151051c77827c71d45ec4f17d22efff73d43f4e9f5741a2ee',
+    handlerHash: 'ee8c280a01262305768e617ba97723d50c1c13fd01f620825bece394aaf48ee6',
   },
   {
     id: 'ai.classify',

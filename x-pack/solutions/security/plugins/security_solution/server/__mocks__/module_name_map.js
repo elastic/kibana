@@ -16,4 +16,8 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/__mocks__/alert.mock.ts',
   '^@kbn/actions-plugin/server$':
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/__mocks__/action.mock.ts',
+  // Resolve like production so `jest.mock('@kbn/agent-builder-esql-utils', ...)` applies to the
+  // same module the tool imports (virtual mocks can split instances and break call counts in CI).
+  '^@kbn/agent-builder-esql-utils$':
+    '<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-esql-utils/index.ts',
 };

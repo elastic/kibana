@@ -18,13 +18,9 @@ jest.mock('../common', () => ({
   entityAnalyticsInlineToolSchema: {},
 }));
 
-jest.mock(
-  '@kbn/agent-builder-esql-utils',
-  () => ({
-    generateEsql: jest.fn(),
-  }),
-  { virtual: true }
-);
+jest.mock('@kbn/agent-builder-esql-utils', () => ({
+  generateEsql: jest.fn(),
+}));
 
 const mockBootstrapCommonServices = jest.requireMock('../common')
   .bootstrapCommonServices as jest.Mock;
