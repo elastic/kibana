@@ -86,6 +86,9 @@ export function registerKibanaFunction({
 
       function getLocalServerUrl() {
         const serverInfo = core.http.getServerInfo();
+        if (serverInfo.protocol === 'socket') {
+          return undefined;
+        }
         const hostname =
           serverInfo.hostname === '0.0.0.0' || serverInfo.hostname === '::'
             ? 'localhost'

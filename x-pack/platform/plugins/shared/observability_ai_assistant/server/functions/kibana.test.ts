@@ -192,6 +192,6 @@ describe('kibana tool', () => {
     expect(retryCall.url).toBe('http://localhost:5601/api/status');
 
     expect(result).toEqual({ content: { status: 'ok' } });
-    expect(resources.logger.debug).toHaveBeenCalledWith(expect.stringContaining('(ENOTFOUND)'));
+    expect(resources.logger.warn).toHaveBeenCalledWith(expect.stringContaining('(ENOTFOUND)'));
   });
 });
