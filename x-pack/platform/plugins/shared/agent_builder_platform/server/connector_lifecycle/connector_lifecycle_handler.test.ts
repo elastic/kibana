@@ -7,42 +7,35 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
 const createMockUiSettingsClient = (experimentalFeaturesEnabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalFeaturesEnabled;
+    if (key === SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalFeaturesEnabled;
     return undefined;
   }),
 });
 
-const createMockSmlService = () => ({
+const createMockSemanticLayer = () => ({
   indexAttachment: jest.fn().mockResolvedValue(undefined),
+  getSmlService: jest.fn(),
 });
 
-const createMockServiceManager = (
+const createMockGetStartServices = (
   uiSettingsClient = createMockUiSettingsClient(),
-  sml = createMockSmlService()
-) => ({
-  internalStart: {
-    savedObjects: {
-      getScopedClient: jest.fn().mockReturnValue({}),
-    },
-    uiSettings: {
-      asScopedToClient: jest.fn().mockReturnValue(uiSettingsClient),
-    },
-    sml,
-  },
-});
-
-const createMockGetStartServices = () =>
+  semanticLayer = createMockSemanticLayer()
+) =>
   jest.fn().mockResolvedValue([
     {
       elasticsearch: { client: { asInternalUser: {} } },
       savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) },
+      uiSettings: { asScopedToClient: jest.fn().mockReturnValue(uiSettingsClient) },
     },
-    { spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('default') } } },
+    {
+      spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('default') } },
+      semanticLayer,
+    },
     {},
   ]);
 
@@ -68,43 +61,40 @@ describe('createConnectorLifecycleHandler', () => {
 
   describe('onPostCreate', () => {
     it('skips unsuccessful saves', async () => {
-      const sml = createMockSmlService();
+      const semanticLayer = createMockSemanticLayer();
       const handler = createConnectorLifecycleHandler({
-        serviceManager: createMockServiceManager(createMockUiSettingsClient(), sml) as any,
         logger,
-        getStartServices: createMockGetStartServices(),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
       });
 
       await handler.onPostCreate(createBaseParams({ wasSuccessful: false }) as any);
 
-      expect(sml.indexAttachment).not.toHaveBeenCalled();
+      expect(semanticLayer.indexAttachment).not.toHaveBeenCalled();
     });
 
-    it('skips when connectors feature is disabled', async () => {
+    it('skips when experimental features are disabled', async () => {
       const uiSettingsClient = createMockUiSettingsClient(false);
-      const sml = createMockSmlService();
+      const semanticLayer = createMockSemanticLayer();
       const handler = createConnectorLifecycleHandler({
-        serviceManager: createMockServiceManager(uiSettingsClient, sml) as any,
         logger,
-        getStartServices: createMockGetStartServices(),
+        getStartServices: createMockGetStartServices(uiSettingsClient, semanticLayer),
       });
 
       await handler.onPostCreate(createBaseParams() as any);
 
-      expect(sml.indexAttachment).not.toHaveBeenCalled();
+      expect(semanticLayer.indexAttachment).not.toHaveBeenCalled();
     });
 
     it('indexes connector into SML', async () => {
-      const sml = createMockSmlService();
+      const semanticLayer = createMockSemanticLayer();
       const handler = createConnectorLifecycleHandler({
-        serviceManager: createMockServiceManager(createMockUiSettingsClient(), sml) as any,
         logger,
-        getStartServices: createMockGetStartServices(),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
       });
 
       await handler.onPostCreate(createBaseParams() as any);
 
-      expect(sml.indexAttachment).toHaveBeenCalledWith(
+      expect(semanticLayer.indexAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
           originId: 'connector-abc',
           attachmentType: AttachmentType.connector,
@@ -113,13 +103,12 @@ describe('createConnectorLifecycleHandler', () => {
       );
     });
 
-    it('logs warning but does not throw when sml.indexAttachment fails', async () => {
-      const sml = createMockSmlService();
-      sml.indexAttachment.mockRejectedValue(new Error('SML error'));
+    it('logs warning but does not throw when indexAttachment fails', async () => {
+      const semanticLayer = createMockSemanticLayer();
+      semanticLayer.indexAttachment.mockRejectedValue(new Error('SML error'));
       const handler = createConnectorLifecycleHandler({
-        serviceManager: createMockServiceManager(createMockUiSettingsClient(), sml) as any,
         logger,
-        getStartServices: createMockGetStartServices(),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
       });
 
       await expect(handler.onPostCreate(createBaseParams() as any)).resolves.toBeUndefined();
@@ -128,34 +117,19 @@ describe('createConnectorLifecycleHandler', () => {
         expect.stringContaining('failed to index connector')
       );
     });
-
-    it('returns early when services are not started', async () => {
-      const handler = createConnectorLifecycleHandler({
-        serviceManager: { internalStart: undefined } as any,
-        logger,
-        getStartServices: createMockGetStartServices(),
-      });
-
-      await handler.onPostCreate(createBaseParams() as any);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('services not started yet')
-      );
-    });
   });
 
   describe('onPostDelete', () => {
     it('removes connector from SML', async () => {
-      const sml = createMockSmlService();
+      const semanticLayer = createMockSemanticLayer();
       const handler = createConnectorLifecycleHandler({
-        serviceManager: createMockServiceManager(createMockUiSettingsClient(), sml) as any,
         logger,
-        getStartServices: createMockGetStartServices(),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
       });
 
       await handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any);
 
-      expect(sml.indexAttachment).toHaveBeenCalledWith(
+      expect(semanticLayer.indexAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
           originId: 'connector-abc',
           attachmentType: AttachmentType.connector,
@@ -165,12 +139,11 @@ describe('createConnectorLifecycleHandler', () => {
     });
 
     it('logs warning but does not throw when SML delete fails', async () => {
-      const sml = createMockSmlService();
-      sml.indexAttachment.mockRejectedValue(new Error('SML delete error'));
+      const semanticLayer = createMockSemanticLayer();
+      semanticLayer.indexAttachment.mockRejectedValue(new Error('SML delete error'));
       const handler = createConnectorLifecycleHandler({
-        serviceManager: createMockServiceManager(createMockUiSettingsClient(), sml) as any,
         logger,
-        getStartServices: createMockGetStartServices(),
+        getStartServices: createMockGetStartServices(createMockUiSettingsClient(), semanticLayer),
       });
 
       await expect(
@@ -182,24 +155,9 @@ describe('createConnectorLifecycleHandler', () => {
       );
     });
 
-    it('returns early when services are not started', async () => {
-      const handler = createConnectorLifecycleHandler({
-        serviceManager: { internalStart: undefined } as any,
-        logger,
-        getStartServices: createMockGetStartServices(),
-      });
-
-      await handler.onPostDelete(createBaseParams() as any);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('services not started yet')
-      );
-    });
-
-    it('logs warning but does not throw when getStartServices fails during SML delete', async () => {
+    it('logs error when getStartServices fails', async () => {
       const getStartServices = jest.fn().mockRejectedValue(new Error('start services failed'));
       const handler = createConnectorLifecycleHandler({
-        serviceManager: createMockServiceManager() as any,
         logger,
         getStartServices,
       });
@@ -208,8 +166,8 @@ describe('createConnectorLifecycleHandler', () => {
         handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any)
       ).resolves.toBeUndefined();
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('failed to remove connector')
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('failed to clean up for connector')
       );
     });
   });

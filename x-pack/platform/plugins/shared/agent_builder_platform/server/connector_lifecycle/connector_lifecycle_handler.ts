@@ -7,23 +7,24 @@
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   ConnectorLifecyclePostCreateParams,
   ConnectorLifecyclePostDeleteParams,
 } from '@kbn/actions-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { ServiceManager } from '..';
+import type { SemanticLayerPluginStart } from '@kbn/semantic-layer-plugin/server';
 
 interface ConnectorLifecycleHandlerDeps {
-  serviceManager: ServiceManager;
   logger: Logger;
-  getStartServices: () => Promise<[CoreStart, { spaces?: SpacesPluginStart }, unknown]>;
+  getStartServices: () => Promise<
+    [CoreStart, { spaces?: SpacesPluginStart; semanticLayer?: SemanticLayerPluginStart }, unknown]
+  >;
 }
 
 export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerDeps) {
-  const { serviceManager, logger, getStartServices } = deps;
+  const { logger, getStartServices } = deps;
 
   return {
     async onPostCreate(params: ConnectorLifecyclePostCreateParams): Promise<void> {
@@ -37,39 +38,23 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
       const { connectorId, connectorType } = params;
 
       try {
-        const internalServices = serviceManager.internalStart;
-        if (!internalServices) {
-          logger.error('Connector lifecycle: services not started yet');
-          return;
-        }
-
-        // Check the feature flag at runtime rather than at registration time,
-        // because UI settings aren't available during plugin setup and the flag
-        // can be toggled without a restart.
+        const [coreStart, startDeps] = await getStartServices();
         const request = params.request;
-        const soClient = internalServices.savedObjects.getScopedClient(request);
-        const uiSettingsClient = internalServices.uiSettings.asScopedToClient(soClient);
+        const soClient = coreStart.savedObjects.getScopedClient(request);
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
         const isExperimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+          SEMANTIC_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (!isExperimentalFeaturesEnabled) return;
 
-        // Index the connector into SML for immediate discoverability
-        const sml = serviceManager.internalStart?.sml;
-        if (sml) {
+        const semanticLayer = startDeps.semanticLayer;
+        if (semanticLayer) {
           try {
-            const [coreStart, startDeps] = await getStartServices();
-            const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
-            await sml.indexAttachment({
+            await semanticLayer.indexAttachment({
+              request,
               originId: connectorId,
               attachmentType: AttachmentType.connector,
               action: 'create',
-              spaces: [spaceId],
-              esClient: coreStart.elasticsearch.client.asInternalUser,
-              savedObjectsClient: coreStart.savedObjects.getScopedClient(request, {
-                includedHiddenTypes: ['action'],
-              }),
-              logger,
             });
             logger.info(`Connector lifecycle: indexed connector ${connectorId} into SML`);
           } catch (smlError) {
@@ -82,7 +67,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         }
       } catch (error) {
         logger.error(
-          `Connector lifecycle: failed to handle post-create for connector ${connectorId} (type: ${connectorType}): ${error.message}`
+          `Connector lifecycle: failed to handle post-create for connector ${connectorId} (type: ${connectorType}): ${(error as Error).message}`
         );
       }
     },
@@ -95,30 +80,17 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
       );
 
       try {
-        const internalServices = serviceManager.internalStart;
-        if (!internalServices) {
-          logger.error('Connector lifecycle: services not started yet, cannot clean up');
-          return;
-        }
-
+        const [, startDeps] = await getStartServices();
         const request = params.request;
 
-        // Remove the connector from SML
-        const sml = serviceManager.internalStart?.sml;
-        if (sml) {
+        const semanticLayer = startDeps.semanticLayer;
+        if (semanticLayer) {
           try {
-            const [coreStart, startDeps] = await getStartServices();
-            const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
-            await sml.indexAttachment({
+            await semanticLayer.indexAttachment({
+              request,
               originId: connectorId,
               attachmentType: AttachmentType.connector,
               action: 'delete',
-              spaces: [spaceId],
-              esClient: coreStart.elasticsearch.client.asInternalUser,
-              savedObjectsClient: coreStart.savedObjects.getScopedClient(request, {
-                includedHiddenTypes: ['action'],
-              }),
-              logger,
             });
             logger.info(`Connector lifecycle: removed connector ${connectorId} from SML`);
           } catch (smlError) {
@@ -131,7 +103,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         }
       } catch (error) {
         logger.error(
-          `Connector lifecycle: failed to clean up for connector ${connectorId}: ${error.message}`
+          `Connector lifecycle: failed to clean up for connector ${connectorId}: ${(error as Error).message}`
         );
       }
     },
