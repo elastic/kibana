@@ -113,6 +113,17 @@ export const ElasticInferenceServiceModelsPage = () => {
 
   return (
     <>
+      {!isCloudConnectStatusLoading && !isCloudConnected && (
+        <EisCloudConnectPromoCallout
+          promoId="elasticInferencePage"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="row"
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+          addSpacer="top"
+        />
+      )}
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
@@ -166,29 +177,16 @@ export const ElasticInferenceServiceModelsPage = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           {filtered.length === 0 ? (
-            <>
-              <EuiEmptyPrompt
-                data-test-subj="eisNoModelsFound"
-                title={
-                  <h3>
-                    {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.noResults', {
-                      defaultMessage: 'No models found',
-                    })}
-                  </h3>
-                }
-              />
-              {!isCloudConnectStatusLoading && !isCloudConnected && (
-                <EisCloudConnectPromoCallout
-                  promoId="elasticInferencePage"
-                  isSelfManaged={!cloud?.isCloudEnabled}
-                  direction="row"
-                  navigateToApp={() =>
-                    application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-                  }
-                  addSpacer="top"
-                />
-              )}
-            </>
+            <EuiEmptyPrompt
+              data-test-subj="eisNoModelsFound"
+              title={
+                <h3>
+                  {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.noResults', {
+                    defaultMessage: 'No models found',
+                  })}
+                </h3>
+              }
+            />
           ) : (
             <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3} data-test-subj="eisModelCards">
               {filtered.map((m) => (

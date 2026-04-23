@@ -13,7 +13,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { MAX_TAG_LENGTH, MAX_TAGS_PER_EPISODE } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import { AlertEpisodeTagsFlyout } from './alert_episode_tags_flyout';
+import { AlertEpisodeTagsFlyout } from './edit_episode_tags_flyout';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
 import { useFetchAlertEpisodeTagSuggestions } from '../../hooks/use_fetch_alert_episode_tag_suggestions';
 import { createTestQueryClient, createQueryClientWrapper } from '../../hooks/test_utils';
