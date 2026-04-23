@@ -100,10 +100,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     await browserAuth.loginAsOsqueryPowerUser();
 
     await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
-    // eslint-disable-next-line playwright/no-nth-methods -- one "send alert to timeline" button per alert row; first-match drives the first alert into Timeline which is the only required fixture for this test
-    await pageObjects.osqueryAlertFlyout.sendAlertToTimelineButton.first().click();
-    // eslint-disable-next-line playwright/no-nth-methods -- the timeline grid renders one expand toggle per event row; first-match expands the topmost event which is the alert we just linked
-    await page.testSubj.locator('docTableExpandToggleColumn').first().click();
+    await pageObjects.osqueryAlertFlyout.openFirstAlertInTimelineAndExpand();
     await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
     await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
     await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectAllAgents();

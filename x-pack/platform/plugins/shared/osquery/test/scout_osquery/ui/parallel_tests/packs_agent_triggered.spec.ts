@@ -172,6 +172,7 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
         const resultsPanel = page.testSubj.locator('osqueryResultsPanel');
         await resultsPanel.waitFor({ state: 'visible', timeout: 60_000 });
         await expect(async () => {
+          // eslint-disable-next-line playwright/no-nth-methods -- either agent-0 or agent-1 appearing in the panel proves results landed; the regex may match both within the virtualized grid
           await expect(resultsPanel.getByText(/scout-osquery-agent-[01]/).first()).toBeVisible({
             timeout: 5_000,
           });

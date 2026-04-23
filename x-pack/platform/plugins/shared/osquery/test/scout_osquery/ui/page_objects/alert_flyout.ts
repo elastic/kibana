@@ -32,6 +32,8 @@ export class AlertFlyoutPage {
   public readonly flyoutBody: Locator;
   public readonly addToTimelineButton: Locator;
   public readonly cancelButton: Locator;
+  public readonly timelineModalHeader: Locator;
+  public readonly timelineExpandEventToggle: Locator;
   private readonly flyoutOsqueryEditor: Locator;
   private readonly agentSelection: Locator;
 
@@ -51,6 +53,35 @@ export class AlertFlyoutPage {
     this.addToTimelineButton = this.page.testSubj.locator('add-to-timeline');
     this.cancelButton = this.page.getByRole('button', { name: 'Cancel' });
     this.agentSelection = this.page.testSubj.locator('agentSelection');
+    this.timelineModalHeader = this.page.testSubj.locator('timeline-modal-header-panel');
+    this.timelineExpandEventToggle = this.page.testSubj.locator('docTableExpandToggleColumn');
+  }
+
+  // Drives the "Investigate in timeline" icon on an alert row and expands the
+  // first event in the timeline that opens. Exists as a single helper because
+  // the Playwright-strict version of this sequence has two well-known pitfalls:
+  //   1. `send-alert-to-timeline-button` is an EuiButtonIcon whose EuiToolTip
+  //      ("Investigate in timeline") is rendered in a `data-euiportal` subtree.
+  //      Playwright clicks without moving the cursor afterwards, so the
+  //      tooltip stays mounted and overlays the timeline's first-row expand
+  //      toggle, intercepting the next click. We dismiss the tooltip by
+  //      moving the pointer to (0, 0) before targeting the toggle.
+  //   2. The timeline overlay mounts incrementally — the grid rows attach,
+  //      detach, and reattach while redux hydrates the linked alert. Clicking
+  //      `docTableExpandToggleColumn` during that window triggers Playwright's
+  //      "element was detached from the DOM" retry loop and can exhaust the
+  //      default 10 s budget on CI. Anchoring on `timeline-modal-header-panel`
+  //      first guarantees the overlay's redux store has produced its first
+  //      stable render before we touch the row.
+  async openFirstAlertInTimelineAndExpand(): Promise<void> {
+    // eslint-disable-next-line playwright/no-nth-methods -- one "send alert to timeline" button per alert row; first-match drives the top alert into Timeline
+    await this.sendAlertToTimelineButton.first().click();
+    await this.timelineModalHeader.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.page.mouse.move(0, 0);
+    // eslint-disable-next-line playwright/no-nth-methods -- the timeline grid renders one expand toggle per event row; first-match expands the topmost event which is the alert we just linked
+    const firstExpandToggle = this.timelineExpandEventToggle.first();
+    await firstExpandToggle.waitFor({ state: 'visible', timeout: 30_000 });
+    await firstExpandToggle.click();
   }
 
   async expandFirstAlert(): Promise<void> {

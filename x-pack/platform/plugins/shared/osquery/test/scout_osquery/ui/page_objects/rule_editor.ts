@@ -155,6 +155,7 @@ export class RuleEditorPage {
     // row only has the ID column text, the query text, and EuiBasicTable
     // `<tr>` nodes. We anchor on the EuiBasicTable itself plus a row count
     // check, which works regardless of whether `action_id` is populated.
+    // eslint-disable-next-line playwright/no-nth-methods -- the row scope may contain nested euiTable instances (tooltip content, combobox popover lists); the outermost euiTable in DOM order is the pack-queries table
     const packQueriesTable = row.locator('table.euiTable').first();
     await packQueriesTable.waitFor({ state: 'visible', timeout: 30_000 });
 
@@ -177,6 +178,7 @@ export class RuleEditorPage {
         expectedQueryIds.map((queryId) =>
           packQueriesTable
             .getByText(queryId, { exact: true })
+            // eslint-disable-next-line playwright/no-nth-methods -- `renderIDColumn` wraps the id in `<span tabindex="0">` inside an EuiToolTip, yielding two text matches per id; either match proves the id rendered
             .first()
             .waitFor({ state: 'visible', timeout: 15_000 })
         )

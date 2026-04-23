@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { OSQUERY_UI_RESULTS_TIMEOUT_MS } from '../../common/constants';
 import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana_loading_finished';
 import { submitLiveQuery } from '../../common/submit_live_query';
@@ -244,5 +245,97 @@ export class LiveQueryFormPage {
   async pressShiftEnterInEditor(): Promise<void> {
     await this.queryEditor.click();
     await this.page.keyboard.press('Shift+Enter');
+  }
+
+  // Switches the live-query form from single-query mode into pack mode. The
+  // mode selector is an `EuiCard` with `selectable`; the card's onClick lives
+  // on the selectable footer button, so we target the card's role+name. Unlike
+  // the alert flyout (`alert_flyout.ts:171-182`) the live-query page renders
+  // the selectable card directly on the page body, so the pack mode completion
+  // signal is that the single-query Monaco editor has unmounted.
+  async selectPackMode(): Promise<void> {
+    const packCard = this.page.locator('.euiCard', {
+      has: this.page.getByText('Run a set of queries in a pack.'),
+    });
+    await packCard.waitFor({ state: 'visible', timeout: 15_000 });
+    await packCard.click();
+    await this.queryEditor.waitFor({ state: 'hidden', timeout: 15_000 });
+  }
+
+  // Select a pack from the live-query page's `select-live-pack` combobox.
+  // Mirrors `alert_flyout.ts:184-236` selector strategy (scope to the inner
+  // `comboBoxSearchInput` leaf node; `dispatchEvent('click')` to bypass
+  // Playwright's element-stability check while the EuiComboBox wrapper
+  // remounts after the mode switch; type + ArrowDown + Enter + verify the
+  // selection landed via `toHaveValue`).
+  async selectLivePack(packName: string): Promise<void> {
+    const searchInput = this.livePackSearchInput;
+    await searchInput.waitFor({ state: 'visible', timeout: 15_000 });
+
+    await expect(async () => {
+      await searchInput.dispatchEvent('click');
+      await expect(searchInput).toHaveAttribute('aria-expanded', 'true', {
+        timeout: 2_000,
+      });
+    }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
+
+    await searchInput.pressSequentially(packName, { delay: 20 });
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+    await expect(searchInput).toHaveValue(
+      new RegExp(packName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    );
+  }
+
+  // Click the per-query accordion toggle in pack results. Callers assert on
+  // downstream visibility (rows / cells / tabs) — this method intentionally
+  // does not assert on anything so callers can choose the appropriate signal.
+  async togglePackQuery(queryName: string): Promise<void> {
+    await this.page.testSubj.locator(`toggleIcon-${queryName}`).click();
+  }
+
+  // Select a saved query from the `savedQuerySelect` combobox on the
+  // live-query form. Same scoping + race-avoidance strategy as `selectLivePack`
+  // (inner `comboBoxSearchInput` leaf, ArrowDown + Enter). Gates on Monaco's
+  // model actually carrying non-empty content before returning — same pattern
+  // as `clearAndInputQuery` above. Callers can follow with `getMonacoEditorText`
+  // to assert the populated value matches the expected saved-query body.
+  async selectSavedQueryFromDropdown(savedQueryName: string): Promise<void> {
+    const searchInput = this.savedQuerySearchInput;
+    await searchInput.waitFor({ state: 'visible', timeout: 15_000 });
+
+    await expect(async () => {
+      await searchInput.dispatchEvent('click');
+      await expect(searchInput).toHaveAttribute('aria-expanded', 'true', {
+        timeout: 2_000,
+      });
+    }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] });
+
+    await searchInput.pressSequentially(savedQueryName, { delay: 20 });
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
+
+    await this.page.waitForFunction(
+      () => {
+        const w = window as unknown as WindowWithMonaco;
+        const models = w.MonacoEnvironment?.monaco?.editor.getModels() ?? [];
+
+        return models.some((m) => m.getValue().trim().length > 0);
+      },
+      undefined,
+      { timeout: 15_000 }
+    );
+  }
+
+  private get livePackSearchInput(): Locator {
+    return this.page.locator(
+      '[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]'
+    );
+  }
+
+  private get savedQuerySearchInput(): Locator {
+    return this.page.locator(
+      '[data-test-subj="savedQuerySelect"] [data-test-subj="comboBoxSearchInput"]'
+    );
   }
 }
