@@ -158,7 +158,7 @@ describe('runWorkflow', () => {
           workflowId: 'wf',
           spaceId,
           status: ExecutionStatus.RUNNING,
-          triggeredBy: 'workflow-step',
+          triggeredBy: 'cases.caseCreated',
         });
 
         await runWorkflowWithDefaults({
@@ -263,7 +263,7 @@ describe('runWorkflow', () => {
       it('when event-driven trigger and kill switch disabled, skips and does not start or loop', async () => {
         workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue({
           ...baseExecution,
-          triggeredBy: 'workflow-step',
+          triggeredBy: 'cases.caseCreated',
         });
 
         await runWorkflowWithDefaults({
@@ -289,7 +289,7 @@ describe('runWorkflow', () => {
       it('when event-driven trigger and kill switch enabled, full run proceeds', async () => {
         workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue({
           ...baseExecution,
-          triggeredBy: 'workflow-step',
+          triggeredBy: 'cases.caseCreated',
         });
 
         await runWorkflowWithDefaults({

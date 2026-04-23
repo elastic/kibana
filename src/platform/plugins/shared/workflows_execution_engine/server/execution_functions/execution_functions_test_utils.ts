@@ -54,9 +54,18 @@ export const createMockWorkflowExecutionRepository = (): MockWorkflowExecutionRe
   updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
 });
 
+export interface MockTelemetryClient {
+  reportEventDrivenExecutionSuppressed: jest.Mock;
+}
+
+export const createMockTelemetryClient = (): MockTelemetryClient => ({
+  reportEventDrivenExecutionSuppressed: jest.fn(),
+});
+
 export const buildMockSetupDependenciesReturn = (options: {
   workflowRuntime: MockWorkflowRuntime;
   workflowExecutionRepository: MockWorkflowExecutionRepository;
+  telemetryClient?: MockTelemetryClient;
 }): Awaited<ReturnType<typeof setupDependencies>> =>
   ({
     workflowRuntime: options.workflowRuntime,
@@ -68,6 +77,7 @@ export const buildMockSetupDependenciesReturn = (options: {
     workflowTaskManager: {},
     workflowExecutionRepository: options.workflowExecutionRepository,
     esClient: {},
+    telemetryClient: options.telemetryClient ?? createMockTelemetryClient(),
   } as unknown as Awaited<ReturnType<typeof setupDependencies>>);
 
 /** Payload passed to `workflowExecutionLoop` from `runWorkflow` / `resumeWorkflow` (mocked deps). */
