@@ -1175,7 +1175,8 @@ describe('getEntityTool', () => {
 
       const nameExactQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
       expect(nameExactQuery).toContain('entity.name == "LAPTOP-SALES04"');
-      expect(nameExactQuery).toContain('user.full_name == "LAPTOP-SALES04"');
+      expect(nameExactQuery).toContain('MV_CONTAINS(user.full_name, "LAPTOP-SALES04")');
+      expect(nameExactQuery).toContain('MV_CONTAINS(host.name, "LAPTOP-SALES04")');
       expect(nameExactQuery).toContain('LIMIT 2');
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
@@ -1239,7 +1240,7 @@ describe('getEntityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const nameExactQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
-      expect(nameExactQuery).toContain('user.full_name == "John Doe"');
+      expect(nameExactQuery).toContain('MV_CONTAINS(user.full_name, "John Doe")');
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
       expect(context.attachments.add).toHaveBeenCalledWith({
@@ -1252,6 +1253,66 @@ describe('getEntityTool', () => {
           entityStoreId: 'user:jdoe',
         },
         description: 'user: jdoe',
+      });
+
+      expect(result.results).toHaveLength(2);
+      expect(result.results[1].type).toBe(ToolResultType.other);
+    });
+
+    it('creates an attachment when resolved via exact host.name match (historical hostname)', async () => {
+      // Simulates a renamed host: the queried id only survives in the
+      // multi-valued `host.name` array, while `entity.name` holds the newer
+      // canonical name. MV_CONTAINS(host.name, ...) must still resolve the
+      // row so the rich attachment is created under the current entity.name.
+      const expectedHostAttachmentId = buildSingleEntityAttachmentId('host', 'LAPTOP-SALES05');
+
+      (executeEsql as jest.Mock)
+        // 1. Exact id match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. Exact name match — single hit via host.name (historical value)
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+            { name: 'host.name', type: 'keyword' },
+          ],
+          values: [
+            [
+              'host:LAPTOP-SALES05',
+              'LAPTOP-SALES05',
+              'host',
+              ['LAPTOP-SALES04', 'LAPTOP-SALES05'],
+            ],
+          ],
+        });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: expectedHostAttachmentId,
+        current_version: 1,
+      });
+
+      const result = (await richTool.handler(
+        { entityId: 'LAPTOP-SALES04' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      const nameExactQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      expect(nameExactQuery).toContain('MV_CONTAINS(host.name, "LAPTOP-SALES04")');
+
+      expect(context.attachments.add).toHaveBeenCalledTimes(1);
+      expect(context.attachments.add).toHaveBeenCalledWith({
+        id: expectedHostAttachmentId,
+        type: SecurityAgentBuilderAttachments.entity,
+        data: {
+          identifierType: 'host',
+          identifier: 'LAPTOP-SALES05',
+          attachmentLabel: 'host: LAPTOP-SALES05',
+          entityStoreId: 'host:LAPTOP-SALES05',
+        },
+        description: 'host: LAPTOP-SALES05',
       });
 
       expect(result.results).toHaveLength(2);

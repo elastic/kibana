@@ -436,11 +436,19 @@ const findEntityById = async ({
     return { source: 'exact_id', query: idQuery, columns: idHit.columns, values: idHit.values };
   }
 
-  // 2. Exact name match against entity.name or user.full_name. LIMIT 2 detects
-  // collisions (two entities sharing the same display name) so we can suppress
-  // the rich entity card and let the LLM disambiguate.
+  // 2. Exact name match against entity.name, user.full_name, or host.name.
+  // `user.full_name` and `host.name` are multi-valued `collect` fields in the
+  // entity store, so we use MV_CONTAINS instead of `==` (which returns null
+  // with a warning on MV inputs). LIMIT 2 still detects display-name
+  // collisions so we can suppress the rich entity card and let the LLM
+  // disambiguate.
   const escapedRaw = escapeEsqlString(entityId);
-  const nameExactQuery = `FROM ${entityIndex} | WHERE entity.name == "${escapedRaw}" OR user.full_name == "${escapedRaw}" | LIMIT 2`;
+  const nameExactQuery =
+    `FROM ${entityIndex} ` +
+    `| WHERE entity.name == "${escapedRaw}" ` +
+    `OR MV_CONTAINS(user.full_name, "${escapedRaw}") ` +
+    `OR MV_CONTAINS(host.name, "${escapedRaw}") ` +
+    `| LIMIT 2`;
   const nameExactHit = await executeEsql({ query: nameExactQuery, esClient });
   if (nameExactHit.values.length > 0) {
     return {
