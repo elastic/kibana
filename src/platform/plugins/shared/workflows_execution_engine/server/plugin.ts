@@ -50,7 +50,6 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
-  BulkScheduleWorkflow,
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
@@ -634,13 +633,14 @@ export class WorkflowsExecutionEnginePlugin
 
     // Builds an execution document without persisting it. Shared by the
     // single-item persist helper and the bulk scheduling path.
-    const buildWorkflowExecutionDocument = (
-      workflow: WorkflowExecutionEngineModel,
-      context: Record<string, unknown>,
-      defaultTriggeredBy: string,
-      authenticatedUser: string,
-      now: Date
-    ): Partial<EsWorkflowExecution> => {
+    const buildWorkflowExecutionDocument = (args: {
+      workflow: WorkflowExecutionEngineModel;
+      context: Record<string, unknown>;
+      defaultTriggeredBy: string;
+      authenticatedUser: string;
+      now: Date;
+    }): Partial<EsWorkflowExecution> => {
+      const { workflow, context, defaultTriggeredBy, authenticatedUser, now } = args;
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
@@ -695,13 +695,13 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
 
-      const workflowExecution = buildWorkflowExecutionDocument(
+      const workflowExecution = buildWorkflowExecutionDocument({
         workflow,
         context,
         defaultTriggeredBy,
         authenticatedUser,
-        new Date()
-      );
+        now: new Date(),
+      });
 
       // Only pay the refresh cost when the concurrency check will actually run.
       // Without a concurrencyGroupKey there is no check, so refresh:false is fine.
@@ -713,21 +713,6 @@ export class WorkflowsExecutionEnginePlugin
       });
 
       return { workflowExecution, repository: workflowExecutionRepository };
-    };
-
-    const toItemError = (err: unknown): BulkScheduleWorkflowResult[number] => {
-      const message = err instanceof Error ? err.message : String(err);
-      const rawCode =
-        err && typeof err === 'object' && 'code' in err
-          ? (err as { code?: unknown }).code
-          : undefined;
-      return {
-        status: 'error',
-        error: {
-          message,
-          ...(typeof rawCode === 'string' ? { code: rawCode } : {}),
-        },
-      };
     };
 
     // Helper function to create a task instance
@@ -890,7 +875,10 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const bulkScheduleWorkflow: BulkScheduleWorkflow = async (items, request) => {
+    const bulkScheduleWorkflow = async (
+      items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
+      request: KibanaRequest
+    ): Promise<BulkScheduleWorkflowResult> => {
       if (items.length === 0) {
         return [];
       }
@@ -907,16 +895,18 @@ export class WorkflowsExecutionEnginePlugin
 
       const results: BulkScheduleWorkflowResult = new Array(items.length);
 
-      const enabledCache = new Map<string, Promise<void>>();
-      const checkEnabled = (workflow: WorkflowExecutionEngineModel, spaceId: string) => {
-        const key = `${spaceId}:${workflow.id}`;
-        let promise = enabledCache.get(key);
-        if (!promise) {
-          promise = ensureWorkflowEnabled(workflow, spaceId);
-          enabledCache.set(key, promise);
-        }
-        return promise;
-      };
+      const spaceIdFor = (item: (typeof items)[number]) =>
+        (item.context.spaceId as string | undefined) || 'default';
+
+      // Single ES search for the enabled flags of every (workflowId, spaceId)
+      // referenced by the batch. Skips `isTestRun` items (they are not indexed).
+      const enabledRefs = items
+        .filter((item) => !item.workflow.isTestRun)
+        .map((item) => ({ workflowId: item.workflow.id, spaceId: spaceIdFor(item) }));
+      const enabledMap =
+        enabledRefs.length === 0
+          ? new Map<string, boolean>()
+          : await workflowRepository.areWorkflowsEnabled(enabledRefs);
 
       interface PreparedItem {
         idx: number;
@@ -924,24 +914,31 @@ export class WorkflowsExecutionEnginePlugin
       }
       const prepared: PreparedItem[] = [];
 
-      await Promise.all(
-        items.map(async (item, idx) => {
-          try {
-            const spaceId = (item.context.spaceId as string | undefined) || 'default';
-            await checkEnabled(item.workflow, spaceId);
-            const workflowExecution = buildWorkflowExecutionDocument(
-              item.workflow,
-              item.context,
-              'alert',
-              authenticatedUser,
-              now
-            );
-            prepared.push({ idx, workflowExecution });
-          } catch (err) {
-            results[idx] = toItemError(err);
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        try {
+          if (!item.workflow.isTestRun) {
+            const spaceId = spaceIdFor(item);
+            const enabled = enabledMap.get(`${spaceId}:${item.workflow.id}`) ?? false;
+            if (!enabled) {
+              throw new Error(
+                `Workflow is disabled: ${item.workflow.id}. Enable the workflow to run it.`
+              );
+            }
           }
-        })
-      );
+          const workflowExecution = buildWorkflowExecutionDocument({
+            workflow: item.workflow,
+            context: item.context,
+            defaultTriggeredBy: 'alert',
+            authenticatedUser,
+            now,
+          });
+          prepared.push({ idx, workflowExecution });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          results[idx] = { status: 'error', error: { message } };
+        }
+      }
 
       if (prepared.length === 0) {
         return results;
@@ -955,7 +952,8 @@ export class WorkflowsExecutionEnginePlugin
         { refresh: 'wait_for' }
       );
 
-      // Phase 4: Map per-doc bulk errors back to results; keep succeeded.
+      // Map per-doc bulk errors back to results; keep succeeded items for the
+      // concurrency + task-scheduling passes.
       const succeeded: PreparedItem[] = [];
       for (let i = 0; i < prepared.length; i++) {
         const p = prepared[i];
@@ -974,45 +972,31 @@ export class WorkflowsExecutionEnginePlugin
         return results;
       }
 
-      // Phase 5: Concurrency check. Dropped executions still return success
-      // with their id (matching the single-item scheduleWorkflow contract).
-      const concurrencyResults = await Promise.all(
-        succeeded.map((p) => this.checkConcurrencyIfNeeded(p.workflowExecution))
-      );
-
-      const toSchedule: PreparedItem[] = [];
-      for (let i = 0; i < succeeded.length; i++) {
-        const p = succeeded[i];
-        if (!concurrencyResults[i]) {
-          results[p.idx] = {
-            status: 'scheduled',
-            workflowExecutionId: p.workflowExecution.id as string,
-          };
-        } else {
-          toSchedule.push(p);
-        }
-      }
-
-      if (toSchedule.length === 0) {
-        return results;
-      }
-
-      // Phase 6: Bulk-schedule tasks in a single call.
-      const taskInstances = toSchedule.map((p) =>
-        createTaskInstance(
-          p.workflowExecution,
-          generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
-        )
-      );
-
-      await plugins.taskManager.bulkSchedule(taskInstances, { request });
-      for (const p of toSchedule) {
+      // Every item with a persisted doc returns 'scheduled' with its id, regardless
+      // of whether the concurrency check drops it (matches single-item scheduleWorkflow).
+      for (const p of succeeded) {
         results[p.idx] = {
           status: 'scheduled',
           workflowExecutionId: p.workflowExecution.id as string,
         };
       }
-      this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
+
+      // The concurrency check only decides which executions also get a TM task.
+      const shouldSchedule = await Promise.all(
+        succeeded.map((p) => this.checkConcurrencyIfNeeded(p.workflowExecution))
+      );
+
+      const toSchedule = succeeded.filter((_, i) => shouldSchedule[i]);
+      if (toSchedule.length > 0) {
+        const tasks = toSchedule.map((p) =>
+          createTaskInstance(
+            p.workflowExecution,
+            generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
+          )
+        );
+        await plugins.taskManager.bulkSchedule(tasks, { request });
+        this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
+      }
 
       return results;
     };

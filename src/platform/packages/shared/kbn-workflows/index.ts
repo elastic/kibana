@@ -41,7 +41,6 @@ export * from './types/utils';
 export * from './common/constants';
 export * from './common/well_known_trigger_sources';
 export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_execution_schedule_metadata';
-export type { BulkScheduleWorkflowResult } from './common/bulk_schedule_workflow_result';
 export * from './common/privileges';
 export * from './common/utils';
 export * from './common/step_types';

@@ -141,7 +141,7 @@ export interface TestWorkflowParams {
 export interface BulkScheduleWorkflowItem {
   workflow: WorkflowExecutionEngineModel;
   spaceId: string;
-  inputs: Record<string, any>;
+  inputs: Record<string, unknown>;
   triggeredBy: string;
   metadata?: WorkflowExecutionEventDispatchMetadata;
 }

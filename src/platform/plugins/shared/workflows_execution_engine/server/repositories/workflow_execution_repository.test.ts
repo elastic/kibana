@@ -63,10 +63,10 @@ describe('WorkflowExecutionRepository', () => {
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
 
-    it('issues a single _bulk index call with provided docs and refresh option', async () => {
+    it('issues a single _bulk create call with provided docs and refresh option', async () => {
       esClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'e1', status: 201 } }, { index: { _id: 'e2', status: 201 } }],
+        items: [{ create: { _id: 'e1', status: 201 } }, { create: { _id: 'e2', status: 201 } }],
       });
 
       const executions = [
@@ -83,9 +83,9 @@ describe('WorkflowExecutionRepository', () => {
         refresh: 'wait_for',
         index: WORKFLOWS_EXECUTIONS_INDEX,
         operations: [
-          { index: { _id: 'e1' } },
+          { create: { _id: 'e1' } },
           executions[0],
-          { index: { _id: 'e2' } },
+          { create: { _id: 'e2' } },
           executions[1],
         ],
       });
@@ -96,7 +96,7 @@ describe('WorkflowExecutionRepository', () => {
     it('defaults refresh to false when not provided', async () => {
       esClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'e1', status: 201 } }],
+        items: [{ create: { _id: 'e1', status: 201 } }],
       });
 
       await repository.bulkCreateWorkflowExecutions([{ id: 'e1' }]);
@@ -108,15 +108,15 @@ describe('WorkflowExecutionRepository', () => {
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [
-          { index: { _id: 'e1', status: 201 } },
+          { create: { _id: 'e1', status: 201 } },
           {
-            index: {
+            create: {
               _id: 'e2',
               status: 409,
-              error: { type: 'version_conflict', reason: 'doc already exists' },
+              error: { type: 'version_conflict_engine_exception', reason: 'doc already exists' },
             },
           },
-          { index: { _id: 'e3', status: 201 } },
+          { create: { _id: 'e3', status: 201 } },
         ],
       });
 

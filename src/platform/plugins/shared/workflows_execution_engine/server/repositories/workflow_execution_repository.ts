@@ -109,18 +109,14 @@ export class WorkflowExecutionRepository {
     const bulkResponse = await this.esClient.bulk({
       refresh: options.refresh ?? false,
       index: this.indexName,
-      operations: executions.flatMap((execution) => [{ index: { _id: execution.id } }, execution]),
+      operations: executions.flatMap((execution) => [{ create: { _id: execution.id } }, execution]),
     });
 
     return bulkResponse.items.map((item, idx) => {
-      const op = item.index ?? item.create;
+      const op = item.create ?? item.index;
       const id = executions[idx].id as string;
       if (op?.error) {
-        const reason =
-          typeof op.error === 'object' && 'reason' in op.error
-            ? op.error.reason ?? JSON.stringify(op.error)
-            : JSON.stringify(op.error);
-        return { id, error: reason };
+        return { id, error: op.error.reason ?? JSON.stringify(op.error) };
       }
       return { id };
     });
