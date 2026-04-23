@@ -81,7 +81,7 @@ export async function generateInsights({
   );
 
   const tokensUsed = streamInsightsResults.reduce<ChatCompletionTokenCount>(
-    (acc, result) => sumTokens({ total: acc, added: result.tokens_used }),
+    (acc, result) => sumTokens({ accumulated: acc, added: result.tokens_used }),
     EMPTY_TOKENS
   );
 
@@ -123,7 +123,7 @@ export async function generateInsights({
 
     return {
       insights,
-      tokens_used: sumTokens({ total: tokensUsed, added: response.tokens }),
+      tokens_used: sumTokens({ accumulated: tokensUsed, added: response.tokens }),
     };
   } catch (error) {
     if (
