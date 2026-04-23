@@ -12,6 +12,7 @@ import type {
   DateProcessor,
   DropDocumentProcessor,
   GrokProcessor,
+  JoinProcessor,
   JsonExtractProcessor,
   LowercaseProcessor,
   RedactProcessor,
@@ -31,6 +32,7 @@ import { convertConvertProcessorToOtel } from './processors/convert';
 import { convertDateProcessorToOtel } from './processors/date';
 import { convertDropDocumentProcessorToOtel } from './processors/drop_document';
 import { convertGrokProcessorToOtel } from './processors/grok';
+import { convertJoinProcessorToOtel } from './processors/join';
 import { convertJsonExtractProcessorToOtel } from './processors/json_extract';
 import { convertLowercaseProcessorToOtel } from './processors/lowercase';
 import { convertRedactProcessorToOtel } from './processors/redact';
@@ -56,7 +58,6 @@ const UNSUPPORTED_REASONS: Partial<Record<string, string>> = {
   remove_by_prefix: 'OTTL does not support iterating over attribute keys by prefix',
   manual_ingest_pipeline: 'this processor is specific to the Elasticsearch ingest pipeline',
   dissect: 'ExtractDissectPatterns is not available in the OTTL log context',
-  join: 'join is not yet implemented for the OTel Collector transpiler',
 };
 
 /**
@@ -136,6 +137,12 @@ export const convertProcessorToOtel = (
     case 'concat': {
       const p = processor as ConcatProcessor;
       return convertConcatProcessorToOtel(p);
+    }
+    case 'join': {
+      const p = processor as JoinProcessor;
+      const warnings =
+        p.ignore_missing === false ? [ignoreMissingWarning('join', p.from.join(', '))] : [];
+      return { emission: convertJoinProcessorToOtel(p), warnings };
     }
     case 'append': {
       const p = processor as AppendProcessor;

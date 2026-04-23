@@ -877,6 +877,61 @@ describe('transpileOtelCollector', () => {
     });
   });
 
+  describe('join processor', () => {
+    it('joins fields with a delimiter using Concat', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'join',
+            from: ['first_name', 'last_name'],
+            delimiter: ' ',
+            to: 'full_name',
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["full_name"], Concat([log.attributes["first_name"], log.attributes["last_name"]], " ")) where (log.attributes["first_name"] != nil) and (log.attributes["last_name"] != nil)',
+      ]);
+    });
+
+    it('drops nil guards when ignore_missing is true', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'join',
+            from: ['a', 'b', 'c'],
+            delimiter: '-',
+            to: 'result',
+            ignore_missing: true,
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      expect(asTransform(result.processors['transform/streamlang']).log_statements).toEqual([
+        'set(log.attributes["result"], Concat([log.attributes["a"], log.attributes["b"], log.attributes["c"]], "-"))',
+      ]);
+    });
+
+    it('passes a where condition through to the statement', async () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'join',
+            from: ['host', 'path'],
+            delimiter: '/',
+            to: 'url',
+            where: { field: 'enabled', eq: true },
+          },
+        ],
+      };
+      const result = await transpile(dsl);
+      const stmt = asTransform(result.processors['transform/streamlang']).log_statements[0];
+      expect(stmt).toContain('log.attributes["enabled"] == true');
+      expect(stmt).toContain('Concat(');
+    });
+  });
+
   describe('error_mode option', () => {
     it('passes propagate to all emitted processors', async () => {
       const dsl: StreamlangDSL = {
