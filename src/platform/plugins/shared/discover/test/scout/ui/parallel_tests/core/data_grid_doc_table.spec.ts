@@ -41,6 +41,9 @@ spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CO
     await browserAuth.loginAsViewer();
     await pageObjects.discover.goto();
     await pageObjects.discover.waitUntilSearchingHasFinished();
+    // Search can finish before the grid leaves "Loading documents" (histogram may
+    // render first). Wait until the table reports a stable render before row counts.
+    await pageObjects.discover.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -65,6 +68,7 @@ spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CO
 
     await pageObjects.datePicker.setAbsoluteRange(NARROWED_TIME_RANGE);
     await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.discover.waitForDocTableRendered();
 
     const finalCount = await rows.count();
     expect(finalCount).toBeLessThan(initialCount);

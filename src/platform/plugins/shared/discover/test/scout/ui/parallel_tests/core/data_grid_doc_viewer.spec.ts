@@ -28,10 +28,9 @@ const firstRowTimestampCell = (page: ScoutPage) =>
   page.locator('[data-grid-visible-row-index="0"] [data-gridcell-column-id="@timestamp"]');
 
 /**
- * Read JSON from the Monaco source editor (cell popover or doc flyout). Uses
- * `openAndWaitForDocViewerFlyout` before reading the flyout so the editor is mounted
- * (serverless is slower). Retries until the model is non-empty — the wrapper can
- * return `''` before the document attaches.
+ * Read JSON from a Monaco source editor (cell popover, or doc flyout after the JSON
+ * tab is selected). Retries until the model is non-empty — the wrapper can return
+ * `''` before the document attaches.
  */
 const readMonacoJson = async (
   page: ScoutPage
@@ -66,6 +65,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.goto();
     await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.discover.waitForDocTableRendered();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -86,8 +86,10 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
     const popoverDoc = await readMonacoJson(page);
     expect(popoverDoc._id).toBe(EXPECTED_FIRST_ROW_ID);
 
-    // Open the full flyout on the source tab and confirm it shows the same doc.
+    // Open the full flyout and read JSON from the source tab. Serverless O11y can
+    // default to "Log overview" so Monaco is not mounted until the JSON tab is open.
     await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+    await page.testSubj.click('docViewerTab-doc_view_source');
     const flyoutDoc = await readMonacoJson(page);
     expect(flyoutDoc._id).toBe(popoverDoc._id);
 
@@ -102,6 +104,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addSavedSearch('expand-cell-search');
       await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForDocTableRendered();
 
       await expect(firstRowTimestampCell(page)).toContainText(EXPECTED_FIRST_ROW_TIMESTAMP);
 
