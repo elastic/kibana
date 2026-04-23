@@ -16,7 +16,7 @@ import { COMPONENT_TYPE_VIS_COLORS, COMPONENT_TYPE_LABELS } from './constants';
 type ComponentNodeType = Node<OTelGraphNodeData, 'component'>;
 
 export const ComponentNode = memo(
-  ({ data, sourcePosition, targetPosition }: NodeProps<ComponentNodeType>) => {
+  ({ data, selected, sourcePosition, targetPosition }: NodeProps<ComponentNodeType>) => {
     const { euiTheme } = useEuiTheme();
 
     const accentColor =
@@ -32,6 +32,9 @@ export const ComponentNode = memo(
       min-width: 140px;
       max-width: 220px;
       box-shadow: 0 1px 3px ${euiTheme.colors.lightShade};
+      cursor: pointer;
+      outline: ${selected ? `2px solid ${accentColor}` : 'none'};
+      outline-offset: -1px;
     `;
 
     const handleStyles = css`
