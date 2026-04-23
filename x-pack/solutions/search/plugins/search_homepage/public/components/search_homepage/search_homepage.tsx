@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { KibanaVersionBadge } from '@kbn/search-shared-ui';
+import {
+  KibanaVersionBadge,
+  TrialUsageBadge,
+  TRIAL_USAGE_BADGE_ENABLED_ID,
+} from '@kbn/search-shared-ui';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
@@ -18,13 +22,35 @@ import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
 import { docLinks } from '../../../common/doc_links';
+import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 
 export const SearchHomepagePage = () => {
   const {
-    services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
+    services: {
+      console: consolePlugin,
+      history,
+      searchNavigation,
+      cloud,
+      kibanaVersion,
+      uiSettings,
+    },
   } = useKibana();
 
   const { user } = useAuthenticatedUser();
+  const { isTrial } = useGetLicenseInfo();
+  const isTrialBadgeEnabled = uiSettings.get<boolean>(TRIAL_USAGE_BADGE_ENABLED_ID, false);
+
+  const [billingUrl, setBillingUrl] = useState<string>('');
+  useEffect(() => {
+    cloud
+      ?.getPrivilegedUrls()
+      .then((urls) => {
+        if (urls.billingUrl) {
+          setBillingUrl(urls.billingUrl);
+        }
+      })
+      .catch(() => {});
+  }, [cloud]);
 
   useEffect(() => {
     if (searchNavigation) {
@@ -72,10 +98,16 @@ export const SearchHomepagePage = () => {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {(!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
+              {isTrial && isTrialBadgeEnabled ? (
                 <EuiFlexItem grow={false}>
-                  <LicenseBadge />
+                  <TrialUsageBadge billingUrl={billingUrl} />
                 </EuiFlexItem>
+              ) : (
+                !cloud?.isCloudEnabled && (
+                  <EuiFlexItem grow={false}>
+                    <LicenseBadge />
+                  </EuiFlexItem>
+                )
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
