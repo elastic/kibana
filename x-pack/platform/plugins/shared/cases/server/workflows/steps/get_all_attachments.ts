@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getAllAttachmentsStepCommonDefinition } from '../../../common/workflows/steps/get_all_attachments';
 import type { CasesClient } from '../../client';
-import { getCasesClientFromStepsContext } from './utils';
+import { getCasesClientFromStepsContext, safeParseCaseForWorkflowOutput } from './utils';
 
 export const getAllAttachmentsStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -17,15 +17,20 @@ export const getAllAttachmentsStepDefinition = (
   createServerStepDefinition({
     ...getAllAttachmentsStepCommonDefinition,
     handler: async (context) => {
-      const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-      const attachments = await casesClient.attachments.getAll({
-        caseID: context.input.case_id,
-      });
+      try {
+        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
+        const attachments = await casesClient.attachments.getAll({
+          caseID: context.input.case_id,
+        });
 
-      const output = getAllAttachmentsStepCommonDefinition.outputSchema.parse({
-        attachments,
-      });
+        const output = safeParseCaseForWorkflowOutput(
+          getAllAttachmentsStepCommonDefinition.outputSchema,
+          { attachments }
+        );
 
-      return { output };
+        return { output };
+      } catch (error) {
+        return { error };
+      }
     },
   });
