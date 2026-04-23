@@ -17,6 +17,7 @@ export interface WorkplaceAIAppPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIAppPluginStart {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIAppPluginSetupDependencies {}
 
 export interface WorkplaceAIAppPluginStartDependencies {
