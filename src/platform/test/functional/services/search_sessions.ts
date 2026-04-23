@@ -92,6 +92,11 @@ export class SearchSessionsService extends FtrService {
     if (!successToast) return;
     const closeBtn = await successToast.findByTestSubject('toastCloseButton');
     await closeBtn.click();
+
+    await this.retry.waitFor('success toast to be dismissed', async () => {
+      const _successToast = await this.getSuccessToast();
+      return !_successToast;
+    });
   }
 
   private async getSuccessToast() {
