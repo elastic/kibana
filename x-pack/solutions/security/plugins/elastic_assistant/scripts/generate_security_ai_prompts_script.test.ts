@@ -52,7 +52,12 @@ describe('generateStableId', () => {
   });
 
   it('is fully lowercase', () => {
-    const id = generateStableId({ ...basePrompt, promptGroupId: 'AttackDiscovery', promptId: 'SystemPrompt', provider: 'OpenAI' });
+    const id = generateStableId({
+      ...basePrompt,
+      promptGroupId: 'AttackDiscovery',
+      promptId: 'SystemPrompt',
+      provider: 'OpenAI',
+    });
     expect(id).toBe(id.toLowerCase());
   });
 
