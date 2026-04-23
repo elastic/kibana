@@ -212,7 +212,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   ]);
 
   const skipAlertsQuery =
-    skip || (shouldResolveEntityIdFromStore && (entityFromStoreLoading || entityFilters == null));
+    skip || (shouldResolveEntityIdFromStore && (entityFromStoreLoading || !entityFilters.length));
 
   const isResolvingEntityId = shouldResolveEntityIdFromStore && entityFromStoreLoading;
 
