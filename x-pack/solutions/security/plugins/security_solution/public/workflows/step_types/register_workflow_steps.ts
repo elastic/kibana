@@ -7,8 +7,6 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { CoreSetup } from '@kbn/core/public';
-import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
-import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
@@ -34,11 +32,11 @@ export const registerWorkflowSteps = (
 
   workflowsExtensions.registerStepDefinition(async () => {
     if (!(await isEnabled)) return undefined;
-    return renderAlertNarrativeStepDefinition;
+    return import('./render_alert_narrative_step').then((m) => m.renderAlertNarrativeStepDefinition);
   });
 
   workflowsExtensions.registerStepDefinition(async () => {
     if (!(await isEnabled)) return undefined;
-    return buildAlertEntityGraphStepDefinition;
+    return import('./build_alert_entity_graph_step').then((m) => m.buildAlertEntityGraphStepDefinition);
   });
 };
