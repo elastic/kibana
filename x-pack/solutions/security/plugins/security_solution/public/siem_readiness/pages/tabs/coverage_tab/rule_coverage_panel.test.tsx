@@ -11,7 +11,10 @@ import { RuleCoveragePanel } from './rule_coverage_panel';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../../../common/lib/telemetry/events/siem_readiness/types';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
+  useBasePath: jest.fn(() => '/test/base/path'),
+}));
 jest.mock('../../../hooks/use_siem_readiness_cases', () => ({
   useSiemReadinessCases: () => ({ openNewCaseFlyout: jest.fn() }),
 }));

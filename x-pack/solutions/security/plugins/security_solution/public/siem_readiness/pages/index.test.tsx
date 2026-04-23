@@ -12,7 +12,9 @@ import SiemReadinessDashboard from './index';
 import { useKibana } from '../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../common/lib/telemetry/events/siem_readiness/types';
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
+}));
 jest.mock('react-router-dom', () => ({
   useHistory: jest.fn(),
   useParams: jest.fn(),
