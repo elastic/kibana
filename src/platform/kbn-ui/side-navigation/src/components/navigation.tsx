@@ -257,10 +257,9 @@ export const Navigation = ({
                     <SideNav.NestedSecondaryMenu>
                       <SideNav.NestedSecondaryMenu.Panel
                         id={MAIN_PANEL_ID}
-                        title={i18n.translate(
-                          'kbnUI.sideNavigation.nestedSecondaryMenuMoreTitle',
-                          { defaultMessage: 'More' }
-                        )}
+                        title={i18n.translate('kbnUI.sideNavigation.nestedSecondaryMenuMoreTitle', {
+                          defaultMessage: 'More',
+                        })}
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
                           <SideNav.NestedSecondaryMenu.Section>
