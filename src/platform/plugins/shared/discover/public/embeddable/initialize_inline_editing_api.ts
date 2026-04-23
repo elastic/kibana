@@ -9,9 +9,19 @@
 
 import { BehaviorSubject, skip, filter, map } from 'rxjs';
 import type { Observable } from 'rxjs';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { DiscoverSessionTab, SavedSearch } from '@kbn/saved-search-plugin/common/types';
-import { apiCanFocusPanel, type PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiCanFocusPanel,
+  apiPublishesSavedObjectId,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 import type { SearchEmbeddableSerializedAttributes, SearchEmbeddableStateManager } from './types';
+import {
+  DISCOVER_IN_DASHBOARD_EVENT_TYPE,
+  DiscoverInDashboardEventDataKeys,
+  DiscoverInDashboardEventName,
+} from '../ebt_manager/discover_in_dashboard_event_definition';
 
 // This type forces our snapshot to include all keys so we don't overlook new ones
 type InlineEditSnapshot = {
@@ -42,7 +52,9 @@ export const initializeInlineEditingApi = ({
   uuid,
   parentApi,
   tabs,
+  analytics,
   selectedTabId$,
+  savedObjectId$,
   searchEmbeddable,
   blockingError$,
   dataLoading$,
@@ -50,7 +62,9 @@ export const initializeInlineEditingApi = ({
   uuid: string;
   parentApi: unknown;
   tabs: DiscoverSessionTab[];
+  analytics: AnalyticsServiceStart;
   selectedTabId$: BehaviorSubject<string | undefined>;
+  savedObjectId$: BehaviorSubject<string | undefined>;
   searchEmbeddable: SearchEmbeddableDeps;
   blockingError$: BehaviorSubject<Error | undefined>;
   dataLoading$: BehaviorSubject<boolean | undefined>;
@@ -154,6 +168,17 @@ export const initializeInlineEditingApi = ({
 
     selectedTabId$.next(draftTabId);
     stopInlineEditing();
+
+    analytics.reportEvent(DISCOVER_IN_DASHBOARD_EVENT_TYPE, {
+      [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.tabSwitched,
+      [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]: apiPublishesSavedObjectId(parentApi)
+        ? parentApi.savedObjectId$.getValue() ?? 'new'
+        : undefined,
+      [DiscoverInDashboardEventDataKeys.EMBEDDABLE_PANEL_ID]: uuid,
+      [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: savedObjectId$.getValue(),
+      [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_FROM_ID]: committedTabId,
+      [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_TO_ID]: draftTabId,
+    });
   };
 
   const cancelInlineTabSelection = async () => {
