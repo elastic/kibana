@@ -29,7 +29,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { EuiCallOut } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { capitalize } from 'lodash';
 import {
   ANOMALY_DETECTOR_TYPE,
   SERVICE_ENVIRONMENT,
@@ -37,28 +36,23 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
-import {
-  ANOMALY_ALERT_SEVERITY_TYPES,
-  getApmMlDetectorLabel,
-} from '../../../../../common/rules/apm_rule_types';
-import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { FailedTransactionChart } from './failed_transaction_chart';
-import { getAggsTypeFromRule, isAnomalyRuleType } from './helpers';
+import {
+  formatAnomalySeverityThreshold,
+  formatAnomalySeverityValue,
+  getAggsTypeFromRule,
+  isAnomalyRuleType,
+} from './helpers';
 import { LatencyChart } from './latency_chart';
 import { ThroughputChart } from './throughput_chart';
 import type { AlertDetailsAppSectionProps, ChartId } from './types';
 import { DEFAULT_LAYOUT, getAnomalyChartLayout, RULE_TYPE_CHART_LAYOUTS } from './types';
 
-export function AlertDetailsAppSection({
-  rule,
-  alert,
-  timeZone,
-  setSources,
-}: AlertDetailsAppSectionProps) {
+export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAppSectionProps) {
   const { services } = useKibana();
   createCallApmApi(services as CoreStart);
 
@@ -89,31 +83,14 @@ export function AlertDetailsAppSection({
 
   const thresholdComponent = useMemo(() => {
     if (isAnomaly) {
-      const detectorLabel = getApmMlDetectorLabel(detectorType as AnomalyDetectorType);
-      const severityMatch = ANOMALY_ALERT_SEVERITY_TYPES.find(
-        (s) => s.threshold === alertEvaluationThreshold
-      );
+      if (!alertSeverity || !alertEvaluationThreshold) return undefined;
 
       return (
         <AnomalyThreshold
           chartProps={chartThemes}
           id={`${chartLayout.primary}-anomaly-threshold`}
-          title={i18n.translate('xpack.apm.alertDetails.anomalyThresholdTitle', {
-            defaultMessage: 'APM Anomaly detected',
-          })}
-          value={i18n.translate('xpack.apm.alertDetails.anomalyValueLabel', {
-            defaultMessage: '{severity} {detector} anomaly',
-            values: {
-              severity: capitalize(alertSeverity),
-              detector: capitalize(detectorLabel),
-            },
-          })}
-          extra={i18n.translate('xpack.apm.alertDetails.anomalySeveritySubtitle', {
-            defaultMessage: 'Alert when {severity} or above',
-            values: {
-              severity: severityMatch?.label ?? alertEvaluationThreshold,
-            },
-          })}
+          severity={formatAnomalySeverityValue(alertSeverity, detectorType)}
+          severityThreshold={formatAnomalySeverityThreshold(alertEvaluationThreshold)}
         />
       );
     }

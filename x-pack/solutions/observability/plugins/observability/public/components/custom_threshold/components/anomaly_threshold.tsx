@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import React from 'react';
 import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
@@ -18,17 +17,15 @@ export interface AnomalyThresholdProps {
     baseTheme: Theme;
   };
   id: string;
-  title: string;
-  value: string;
-  extra?: ReactNode;
+  severity: string;
+  severityThreshold: string;
 }
 
 export function AnomalyThreshold({
   chartProps: { theme, baseTheme },
   id,
-  title,
-  value,
-  extra,
+  severity,
+  severityThreshold,
 }: AnomalyThresholdProps) {
   const color = useEuiBackgroundColor('danger');
 
@@ -52,10 +49,12 @@ export function AnomalyThreshold({
           data={[
             [
               {
-                title,
-                ...(extra != null ? { extra: <span>{extra}</span> } : {}),
+                title: i18n.translate('xpack.observability.alertDetails.anomalyThresholdTitle', {
+                  defaultMessage: 'APM Anomaly detected',
+                }),
+                ...(severityThreshold != null ? { extra: <span>{severityThreshold}</span> } : {}),
                 color,
-                value,
+                value: severity,
                 icon: ({ width, height, color: iconColor }) => (
                   <EuiIcon
                     width={width}
