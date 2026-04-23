@@ -42,7 +42,13 @@ describe('generateStableId', () => {
 
   it('omits model segment when provider is absent', () => {
     const id = generateStableId({ ...basePrompt, model: 'gpt-4o' });
-    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}ai-assistant-system-prompt-gpt-4o`);
+    expect(id).toBe(`${SAVED_OBJECT_ID_PREFIX}ai-assistant-system-prompt`);
+  });
+
+  it('does not collide when provider-only vs model-only have the same value', () => {
+    const providerOnly = generateStableId({ ...basePrompt, provider: 'openai' });
+    const modelOnly = generateStableId({ ...basePrompt, model: 'openai' });
+    expect(providerOnly).not.toBe(modelOnly);
   });
 
   it('is fully lowercase', () => {

@@ -83,8 +83,10 @@ const toKebabCase = (str: string): string =>
 
 export const generateStableId = ({ promptGroupId, promptId, provider, model }: Prompt): string => {
   const parts = [SAVED_OBJECT_ID_PREFIX + toKebabCase(promptGroupId), toKebabCase(promptId)];
-  if (provider) parts.push(toKebabCase(provider));
-  if (model) parts.push(toKebabCase(model));
+  if (provider) {
+    parts.push(toKebabCase(provider));
+    if (model) parts.push(toKebabCase(model));
+  }
   return parts.join('-');
 };
 
