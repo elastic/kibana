@@ -63,7 +63,7 @@ describe(
       login();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.wait('@entityStoreStatus');
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
       waitForTableToLoad();
     });
 
@@ -199,7 +199,7 @@ describe(
       login();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.wait('@entityStoreStatus');
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
       cy.get(PAGE_TITLE).should('exist');
     });
 

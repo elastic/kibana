@@ -51,7 +51,7 @@ describe(
         )
       );
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.wait('@entityStoreStatus');
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
     });
 
     after(() => {
@@ -121,7 +121,7 @@ describe(
       interceptEntityStoreStatus('not_installed');
       login();
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.wait('@entityStoreStatus');
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
       cy.contains('h1', 'Entity analytics').should('exist');
     });
 

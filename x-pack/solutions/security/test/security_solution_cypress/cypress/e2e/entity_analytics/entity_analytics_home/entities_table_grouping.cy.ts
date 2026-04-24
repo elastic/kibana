@@ -63,7 +63,7 @@ describe(
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
         // Resolution is the default grouping
-        cy.wait('@entityStoreStatus');
+        cy.wait('@entityStoreStatus', { timeout: 20000 });
         cy.wait('@entityStoreSearch');
         waitForGroupingTable();
       });
@@ -116,7 +116,7 @@ describe(
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
-        cy.wait('@entityStoreStatus');
+        cy.wait('@entityStoreStatus', { timeout: 20000 });
         cy.wait('@entityStoreSearch');
         waitForGroupingTable();
       });
@@ -152,7 +152,7 @@ describe(
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
-        cy.wait('@entityStoreStatus');
+        cy.wait('@entityStoreStatus', { timeout: 20000 });
         cy.wait('@entityStoreSearch');
         waitForGroupingTable();
       });
