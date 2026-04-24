@@ -230,7 +230,13 @@ export const DataCoveragePanel: React.FC = () => {
         const options = getIntegrationOptionsForCategory(row.category);
         const statusMap = getStatusMapForCategory(row.category);
 
-        return <IntegrationSelectablePopover options={options} statusMap={statusMap} />;
+        return (
+          <IntegrationSelectablePopover
+            options={options}
+            statusMap={statusMap}
+            telemetrySource="data_coverage"
+          />
+        );
       },
     },
   ];
