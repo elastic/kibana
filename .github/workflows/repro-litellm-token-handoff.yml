@@ -25,8 +25,8 @@ jobs:
           base-url: ${{ secrets.LITELLM_BASE_URL }}
           master-key: ${{ secrets.LITELLM_MASTER_API_KEY }}
           models: ${{ env.CLAUDE_MODEL }}
-          key-ttl: 15m
-          max-budget: '5'
+          key-ttl: 30m
+          max-budget: '20'
 
   claude-review:
     needs: mint-token
@@ -53,8 +53,8 @@ jobs:
 
             Use the repository root `REVIEW.md` as the canonical review instructions for this run. Defer to that file for review scope, posting rules, and final summary format.
           claude_args: |
-            --max-turns 5
-            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Bash(gh api:*),Write,mcp__github_inline_comment__create_inline_comment"
+            --max-turns 30
+            --allowedTools "Read,Grep,Glob,LS,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Write,mcp__github_inline_comment__create_inline_comment"
         env:
           ANTHROPIC_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
           ANTHROPIC_MODEL: ${{ env.CLAUDE_MODEL }}

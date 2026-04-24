@@ -30,7 +30,7 @@ Prioritize findings such as:
 - missing docs when a PR changes a public API, operator workflow, or
   user-visible behavior in a way that would leave users or operators behind
 
-Ground architectural and maintainability findings in local prior art and clear
+Ground architectural and maintainability findings in local code and clear
 behavioral risk, not personal preference.
 
 ## Kibana-specific review checks
@@ -38,7 +38,7 @@ behavioral risk, not personal preference.
 - For server, API, or security changes, check validation, privilege handling,
   current-user scoping, and data-leak risks across spaces, users, or tenants.
 - For new or changed routes, services, or persistence logic, expect tests at
-  the right layer for the change: unit, integration, API, functional, or Scout.
+  the right layer for the change: unit, integration or Scout E2E tests.
 - For UI changes, look for obvious accessibility issues and coverage of the
   changed user behavior, not just implementation details.
 - For public contracts, config changes, deprecations, and migrations, check
@@ -55,17 +55,27 @@ behavioral risk, not personal preference.
 
 ## Review output
 
-- Use `mcp__github_inline_comment__create_inline_comment` for findings tied to
-  a changed line. Inline comments are the primary output.
-- After all inline comments are posted, create `/tmp/review.md` with the
-  `Write` tool and submit exactly one final PR review summary using the `REPO`
-  and `PR_NUMBER` values from the prompt:
+- Per-line findings: post via
+  `mcp__github_inline_comment__create_inline_comment` (the only allowed path
+  for inline comments; body is sanitized for leaked tokens, `path` and `line`
+  are validated against the diff).
+- Final summary: create `/tmp/review.md` with the `Write` tool, then submit
+  exactly one PR review summary with:
   `gh pr review <PR_NUMBER> --repo <REPO> --comment --body-file /tmp/review.md`
-- If there are no issues, the review body must be exactly: `No issues found.`
-- Do not post any separate top-level PR comments beyond that single final review
-  summary.
+  `REPO` and `PR_NUMBER` come from the `/review` prompt line.
+- If there are no findings, the review body must be exactly: `No issues found.`
+- Do not post any other top-level PR comments.
+- For research before posting, use `Read`, `Grep`, `Glob`, and `LS` to ground
+  findings in surrounding code and related tests; use
+  `gh pr view <PR_NUMBER> --repo <REPO>` (including `--json` for `reviews` and
+  `comments`) and `gh pr diff <PR_NUMBER> --repo <REPO>` for PR context.
 
 ## Re-runs
 
-On subsequent runs, review only the new changes, stay high-signal, and avoid
-repeating comments on unchanged lines.
+On subsequent runs, before posting an inline comment, fetch prior review
+comments with `gh pr view <PR_NUMBER> --repo <REPO> --json reviews,comments`
+and skip lines already covered by an unchanged earlier comment from this
+reviewer.
+
+Review only the new changes, stay high-signal, and do not re-state findings on
+unchanged lines.
