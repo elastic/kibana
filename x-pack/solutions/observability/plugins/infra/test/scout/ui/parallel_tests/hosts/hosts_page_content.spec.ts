@@ -19,7 +19,7 @@ test.describe(
   'Hosts Page - Content',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage }, page }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
@@ -29,11 +29,7 @@ test.describe(
 
       await test.step('wait for table and KPIs to load', async () => {
         await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-        await expect(
-          page
-            .getByTestId('infraAssetDetailsKPIcpuUsage')
-            .getByRole('progressbar', { name: 'Loading' })
-        ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+        await hostsPage.waitForKPILoadingToFinish(EXTENDED_TIMEOUT);
       });
     });
 

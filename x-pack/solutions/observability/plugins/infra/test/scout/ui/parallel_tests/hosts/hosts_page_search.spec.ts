@@ -31,11 +31,7 @@ test.describe(
 
       await test.step('verify all hosts are visible before filtering', async () => {
         await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-        await expect(
-          page
-            .getByTestId('infraAssetDetailsKPIcpuUsage')
-            .getByRole('progressbar', { name: 'Loading' })
-        ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+        await hostsPage.waitForKPILoadingToFinish(EXTENDED_TIMEOUT);
         await expect(
           page.getByRole('listitem').getByRole('heading', { name: 'CPU Usage' })
         ).toBeVisible({ timeout: EXTENDED_TIMEOUT });

@@ -18,6 +18,8 @@ import {
   KPI_RENDER_TIMEOUT,
 } from '../../fixtures/constants';
 
+const CUSTOM_DASHBOARDS_SETTING = 'observability:enableInfrastructureAssetCustomDashboards';
+
 test.describe(
   'Hosts Page - Flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -36,6 +38,12 @@ test.describe(
         preferredSchema: 'ecs',
       });
       await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+    });
+
+    test.afterEach(async ({ kbnClient }) => {
+      // Reset the custom-dashboards setting after every test so cleanup runs
+      // even if the test times out. No-op for tests that didn't toggle it.
+      await kbnClient.uiSettings.update({ [CUSTOM_DASHBOARDS_SETTING]: false });
     });
 
     test('Overview Tab - KPI charts and collapsible sections', async ({
@@ -183,32 +191,27 @@ test.describe(
     });
 
     test('Dashboards Tab', async ({ pageObjects: { hostsPage, assetDetailsPage }, kbnClient }) => {
-      const CUSTOM_DASHBOARDS_SETTING = 'observability:enableInfrastructureAssetCustomDashboards';
-
       await kbnClient.uiSettings.update({ [CUSTOM_DASHBOARDS_SETTING]: true });
+      // Re-navigate so the page picks up the enabled setting (the beforeEach
+      // navigation happened with the setting still off).
+      await hostsPage.goToPage({
+        from: DATE_WITH_HOSTS_DATA_FROM,
+        to: DATE_WITH_HOSTS_DATA_TO,
+        preferredSchema: 'ecs',
+      });
+      await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+      await hostsPage.openHostFlyout(HOST1_NAME);
 
-      try {
-        await hostsPage.goToPage({
-          from: DATE_WITH_HOSTS_DATA_FROM,
-          to: DATE_WITH_HOSTS_DATA_TO,
-          preferredSchema: 'ecs',
-        });
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-        await hostsPage.openHostFlyout(HOST1_NAME);
+      await test.step('navigate to dashboards tab', async () => {
+        await assetDetailsPage.dashboardsTab.clickTab();
+        await expect(assetDetailsPage.dashboardsTab.tab).toHaveAttribute('aria-selected', 'true');
+      });
 
-        await test.step('navigate to dashboards tab', async () => {
-          await assetDetailsPage.dashboardsTab.clickTab();
-          await expect(assetDetailsPage.dashboardsTab.tab).toHaveAttribute('aria-selected', 'true');
+      await test.step('verify dashboards splash screen is visible', async () => {
+        await expect(assetDetailsPage.dashboardsTab.addDashboardButton).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
         });
-
-        await test.step('verify dashboards splash screen is visible', async () => {
-          await expect(assetDetailsPage.dashboardsTab.addDashboardButton).toBeVisible({
-            timeout: EXTENDED_TIMEOUT,
-          });
-        });
-      } finally {
-        await kbnClient.uiSettings.update({ [CUSTOM_DASHBOARDS_SETTING]: false });
-      }
+      });
     });
   }
 );

@@ -11,6 +11,7 @@ import { test } from '../../fixtures';
 import {
   HOST1_NAME,
   HOST2_NAME,
+  HOST3_NAME,
   HOST5_NAME,
   HOST6_NAME,
   HOSTS,
@@ -25,7 +26,7 @@ test.describe(
   'Hosts Page - Table',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage }, page }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
       // The hosts table suite waits on Lens + elastic-charts KPI rendering in
       // beforeEach; under CI contention first-load timing exceeds Scout's 60s
       // default. Extend the budget to 180s.
@@ -39,11 +40,7 @@ test.describe(
 
       await test.step('wait for table and KPIs to load', async () => {
         await expect(hostsPage.tableRows).toHaveCount(EXPECTED_HOST_COUNT);
-        await expect(
-          page
-            .getByTestId('infraAssetDetailsKPIcpuUsage')
-            .getByRole('progressbar', { name: 'Loading' })
-        ).toBeHidden({ timeout: KPI_RENDER_TIMEOUT });
+        await hostsPage.waitForKPILoadingToFinish(KPI_RENDER_TIMEOUT);
       });
     });
 
@@ -156,7 +153,7 @@ test.describe(
 
       await test.step('navigate to last page and verify highest CPU host', async () => {
         await hostsPage.paginateTo(2);
-        const highestCpuRow = hostsPage.getHostRow('host-3');
+        const highestCpuRow = hostsPage.getHostRow(HOST3_NAME);
         await expect(highestCpuRow).toBeVisible();
       });
     });
@@ -167,7 +164,7 @@ test.describe(
       await test.step('sort descending and verify highest CPU host is on first page', async () => {
         await hostsPage.sortByCpuUsage();
         await hostsPage.sortByCpuUsage();
-        const highestCpuRow = hostsPage.getHostRow('host-3');
+        const highestCpuRow = hostsPage.getHostRow(HOST3_NAME);
         await expect(highestCpuRow).toBeVisible();
       });
 

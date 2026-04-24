@@ -217,6 +217,19 @@ export class HostsPage {
     );
   }
 
+  /**
+   * Waits for the KPI loading spinner to disappear. Complements
+   * `waitForHostKPIChartsToLoad` (which waits for the value element to appear)
+   * and is useful in `beforeEach` blocks that just need the page-ready signal
+   * before assertions begin, without waiting on every individual chart value.
+   */
+  public async waitForKPILoadingToFinish(timeout?: number) {
+    await this.kpiGrid
+      .getByTestId('infraAssetDetailsKPIcpuUsage')
+      .getByRole('progressbar', { name: 'Loading' })
+      .waitFor({ state: 'hidden', timeout });
+  }
+
   // Metrics tab
 
   public async visitMetricsTab() {
