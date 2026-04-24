@@ -175,6 +175,29 @@ export function ensureMetadata(esql: string): string {
 }
 
 /**
+ * Removes any `METADATA …` option from the FROM clause.
+ * Inverse of {@link ensureMetadata}. Returns the query unchanged when
+ * no METADATA option is present or when the query has no FROM clause.
+ */
+export function stripMetadata(esql: string): string {
+  const { root, fromCmd } = parseFromCommand(esql);
+  if (!fromCmd) return esql;
+
+  const filtered = fromCmd.args.filter(
+    (arg) =>
+      Array.isArray(arg) ||
+      !('type' in arg) ||
+      arg.type !== 'option' ||
+      !('name' in arg) ||
+      arg.name !== 'metadata'
+  );
+
+  if (filtered.length === fromCmd.args.length) return esql;
+
+  return printWithUpdatedFrom(root, fromCmd, filtered);
+}
+
+/**
  * Normalizes an ES|QL query string by parsing it into an AST and
  * pretty-printing it back. This strips comments, collapses whitespace,
  * and uppercases command/keyword names so that two syntactically

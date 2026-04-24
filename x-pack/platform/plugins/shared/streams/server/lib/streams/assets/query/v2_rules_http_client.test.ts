@@ -50,7 +50,10 @@ const createBody: CreateRuleBody = {
   consumer: STREAMS_RULE_CONSUMER,
   alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
   actions: [] as never[],
-  params: { timestampField: '@timestamp', query: 'FROM logs-* | WHERE level == "error"' },
+  params: {
+    timestampField: '@timestamp',
+    query: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
+  },
   enabled: true,
   tags: ['streams', 'my-stream'],
   schedule: { interval: '1m' },
@@ -59,7 +62,10 @@ const createBody: CreateRuleBody = {
 const updateBody: UpdateRuleBody = {
   name: 'Updated title',
   actions: [] as never[],
-  params: { timestampField: '@timestamp', query: 'FROM logs-* | WHERE level == "error"' },
+  params: {
+    timestampField: '@timestamp',
+    query: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
+  },
   tags: ['streams', 'my-stream'],
   schedule: { interval: '1m' },
 };
@@ -82,17 +88,17 @@ describe('V2RulesHttpClient', () => {
           tags: ['sigevents:stream:my-stream'],
         },
         time_field: '@timestamp',
-        schedule: { every: '1m' },
+        schedule: { every: '1m', lookback: '2m' },
         evaluation: { query: { base: 'FROM logs-* | WHERE level == "error"' } },
       });
     });
 
-    it('does not include schedule.lookback (Option B — no overlap)', async () => {
+    it('includes a 2-minute lookback to match v1 MATCH_LOOKBACK_MINUTES', async () => {
       const client = makeClient();
       await client.createRule('rule-1', createBody);
 
       const body = lastFetchBody() as Record<string, unknown>;
-      expect((body.schedule as Record<string, unknown>).lookback).toBeUndefined();
+      expect((body.schedule as Record<string, unknown>).lookback).toBe('2m');
     });
 
     it('maps updateRule body to v2 partial shape (no kind or time_field)', async () => {
@@ -104,7 +110,7 @@ describe('V2RulesHttpClient', () => {
           name: 'Updated title',
           tags: ['sigevents:stream:my-stream'],
         },
-        schedule: { every: '1m' },
+        schedule: { every: '1m', lookback: '2m' },
         evaluation: { query: { base: 'FROM logs-* | WHERE level == "error"' } },
       });
     });
@@ -126,6 +132,50 @@ describe('V2RulesHttpClient', () => {
 
       const body = lastFetchBody() as { metadata: { tags: string[] } };
       expect(body.metadata.tags).toEqual(['streams']);
+    });
+
+    it('strips METADATA _id, _source from queries to avoid oversized Arrow responses', async () => {
+      const client = makeClient();
+      await client.createRule('rule-1', {
+        ...createBody,
+        params: {
+          timestampField: '@timestamp',
+          query: 'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("message: error")',
+        },
+      });
+
+      const body = lastFetchBody() as { evaluation: { query: { base: string } } };
+      expect(body.evaluation.query.base).toBe(
+        'FROM logs.child, logs.child.* | WHERE KQL("message: error")'
+      );
+    });
+
+    it('strips METADATA from updateRule bodies as well', async () => {
+      const client = makeClient();
+      await client.updateRule('rule-1', {
+        ...updateBody,
+        params: {
+          timestampField: '@timestamp',
+          query: 'FROM logs-* METADATA _id, _source | WHERE level == "error"',
+        },
+      });
+
+      const body = lastFetchBody() as { evaluation: { query: { base: string } } };
+      expect(body.evaluation.query.base).toBe('FROM logs-* | WHERE level == "error"');
+    });
+
+    it('leaves queries without METADATA unchanged', async () => {
+      const client = makeClient();
+      await client.createRule('rule-1', {
+        ...createBody,
+        params: {
+          timestampField: '@timestamp',
+          query: 'FROM logs-* | WHERE level == "error"',
+        },
+      });
+
+      const body = lastFetchBody() as { evaluation: { query: { base: string } } };
+      expect(body.evaluation.query.base).toBe('FROM logs-* | WHERE level == "error"');
     });
   });
 

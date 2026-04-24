@@ -9,6 +9,7 @@ import fetch from 'node-fetch';
 import https from 'https';
 import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { stripMetadata } from '@kbn/streams-schema';
 import {
   STREAMS_RULE_CONSUMER,
   STREAMS_ESQL_RULE_TYPE_ID,
@@ -194,8 +195,8 @@ function toV2CreateBody(body: CreateRuleBody) {
       tags: toV2Tags(body.tags),
     },
     time_field: body.params.timestampField,
-    schedule: { every: body.schedule.interval },
-    evaluation: { query: { base: body.params.query } },
+    schedule: { every: body.schedule.interval, lookback: '2m' },
+    evaluation: { query: { base: stripMetadata(body.params.query) } },
   };
 }
 
@@ -205,8 +206,8 @@ function toV2UpdateBody(body: UpdateRuleBody) {
       name: body.name,
       tags: toV2Tags(body.tags),
     },
-    schedule: { every: body.schedule.interval },
-    evaluation: { query: { base: body.params.query } },
+    schedule: { every: body.schedule.interval, lookback: '2m' },
+    evaluation: { query: { base: stripMetadata(body.params.query) } },
   };
 }
 
