@@ -247,7 +247,6 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           checked={isHistoryEnabled}
           showLabel={false}
-          label=""
           aria-labelledby="saveRequestsToHistory-label"
           onChange={(e) => toggleSavingToHistory(e.target.checked)}
         />
@@ -261,7 +260,6 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           data-test-subj="enableKeyboardShortcuts"
           showLabel={false}
-          label=""
           aria-labelledby="keyboardShortcuts-label"
           checked={isKeyboardShortcutsEnabled}
           onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
@@ -276,7 +274,6 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           data-test-subj="enableA11yOverlay"
           showLabel={false}
-          label=""
           aria-labelledby="accessibilityOverlay-label"
           checked={isAccessibilityOverlayEnabled}
           onChange={(e) => toggleAccessibilityOverlay(e.target.checked)}
@@ -339,7 +336,6 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           data-test-subj="settingsWrapLines"
           showLabel={false}
-          label=""
           aria-labelledby="wrapLongLines-label"
           checked={wrapMode}
           onChange={(e) => setWrapMode(e.target.checked)}
@@ -355,7 +351,6 @@ export const SettingsEditor = (props: Props) => {
         <EuiSwitch
           data-test-subj="tripleQuotes"
           showLabel={false}
-          label=""
           aria-labelledby="tripleQuotes-label"
           checked={tripleQuotes}
           onChange={(e) => setTripleQuotes(e.target.checked)}
@@ -374,7 +369,6 @@ export const SettingsEditor = (props: Props) => {
           <EuiSwitch
             data-test-subj={`autocomplete-settings-${opts.id}`}
             showLabel={false}
-            label=""
             aria-labelledby={`autocomplete-${opts.id}-label`}
             checked={opts.checked}
             onChange={(e) => opts.stateSetter(e.target.checked)}
