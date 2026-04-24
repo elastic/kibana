@@ -1,5 +1,5 @@
 {
-  "sha1": "03e069fcc73bffc266d059c218288270fe463d38",
+  "sha1": "19f32b45009bbe1d11f63992f024eb044f0aa300",
   "tests": [
     {
       "id": "30ebe9a34bf659d-a632a3af2fa3cab",
@@ -86,23 +86,6 @@
       }
     },
     {
-      "id": "4efc85dbb40716c-9961aec1448fe75",
-      "title": "GenAI Settings - Confirmation Modal should cancel Agent selection without saving changes",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/confirmation_modal.spec.ts",
-        "line": 35,
-        "column": 14
-      }
-    },
-    {
       "id": "09dd6e1d637aebe-0af9efa5c0eb18a",
       "title": "GenAI Settings - Documentation Section should show Documentation section in Agent mode and hide it in Classic mode",
       "expectedStatus": "passed",
@@ -160,7 +143,7 @@
     {
       "id": "4c939ca2b72e878-ee032ba495e2030",
       "title": "GenAI Settings - Page Display should display correct UI elements",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@local-serverless-security_complete",
@@ -172,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/page_display.spec.ts",
-        "line": 29,
+        "line": 28,
         "column": 14
       }
     },
