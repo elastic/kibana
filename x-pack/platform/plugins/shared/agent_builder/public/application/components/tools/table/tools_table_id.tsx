@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiLink, EuiText, EuiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
 import React from 'react';
-import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { useToolsActions } from '../../../context/tools_provider';
+import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 
 export interface ToolIdWithDescriptionProps {
   tool: ToolDefinition;
@@ -25,14 +25,14 @@ export const ToolIdWithDescription = ({ tool }: ToolIdWithDescriptionProps) => {
   `;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup direction="column" gutterSize="xs" css={css({ minWidth: 0 })}>
       <EuiLink href={!tool.readonly ? getEditToolUrl(tool.id) : getViewToolUrl(tool.id)}>
         <EuiText size="s" css={toolIdStyle}>
           {tool.id}
         </EuiText>
       </EuiLink>
-      <EuiText size="s" color="subdued">
-        {truncateAtNewline(tool.description)}
+      <EuiText size="s" color="subdued" css={css({ minWidth: 0 })}>
+        <EuiTextTruncate text={truncateAtNewline(tool.description)} truncation="end" />
       </EuiText>
     </EuiFlexGroup>
   );
