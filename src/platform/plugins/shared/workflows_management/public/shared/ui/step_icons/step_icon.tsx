@@ -23,16 +23,9 @@ import { HardcodedIcons } from './hardcoded_icons';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
 
-/**
- * Aggregate icons for bare base types returned by `getBaseConnectorType` when the
- * workflow list collapses family members (e.g. `ai.prompt` + `ai.agent` → `ai`).
- *
- * Takes precedence over extension-family inheritance so the category icon stays
- * stable regardless of which members happen to be registered or what icons they
- * chose individually. Concretely: `ai` uses the EUI `productAgent` robot icon (the
- * AI family is thematic, not branded), and `workflow` uses the workflow.execute
- * glyph (no `workflow.*` step defs live in the extensions registry at all).
- */
+// Category icons for bare base types (e.g. `ai.prompt` + `ai.agent` → `ai`) applied
+// before extension-family inheritance, so the aggregated row icon stays stable
+// regardless of which family members are registered or what icon they picked.
 const BASE_TYPE_AGGREGATE_ICONS: Record<string, IconType> = {
   ai: 'productAgent',
   workflow: HardcodedIcons['workflow.execute'],
@@ -44,12 +37,9 @@ interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   onClick?: React.MouseEventHandler;
 }
 
-/**
- * `EuiIcon` drops the `title` prop when its `type` is a React component (e.g. the
- * lazy-loaded connector icons), so a consumer that sets `title` on StepIcon
- * otherwise gets no tooltip. Wrapping the resolved icon in a span[title] covers
- * every rendering branch uniformly with the browser's native tooltip.
- */
+// EuiIcon drops `title` when `type` is a React component (lazy-loaded connector
+// icons), so wrap every resolved icon in a span[title] to get a consistent native
+// tooltip across branches.
 const tooltipWrapperStyle = css({
   display: 'inline-flex',
   alignItems: 'center',

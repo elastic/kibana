@@ -42,10 +42,6 @@ export default {
   decorators: [kibanaReactDecorator],
 };
 
-// -----------------------------------------------------------------------------
-// Shared infrastructure
-// -----------------------------------------------------------------------------
-
 const nullLogger: Logger = {
   debug: () => {},
   info: () => {},
@@ -63,12 +59,9 @@ interface LoadedExtensions {
   triggerDefs: PublicTriggerDefinition[];
 }
 
-/**
- * Populate registries with the real internal extension defs shipped by
- * `@kbn/workflows-extensions`. Step defs registered at runtime by other plugins
- * (cases, agent_builder, …) aren't reachable without cross-plugin imports and
- * are intentionally omitted — their absence is noted on the Catalog story.
- */
+// Only the internal defs shipped by `@kbn/workflows-extensions`. Runtime-registered
+// defs from other plugins (cases, agent_builder, …) are intentionally absent — the
+// Catalog story calls that out.
 const loadExtensions = async (): Promise<LoadedExtensions> => {
   const stepRegistry = new PublicStepRegistry(nullLogger);
   const triggerRegistry = new PublicTriggerRegistry();
@@ -91,21 +84,15 @@ const buildWorkflowsExtensionsFromRegistry = ({
   isReady: async () => {},
 });
 
-/**
- * Every connector spec bundled in `@kbn/connector-specs`, with its icon resolved
- * the same way `stack_connectors` does at runtime: inline `metadata.icon` first,
- * then `ConnectorIconsMap`, then fall back to `plugs`.
- */
 const allConnectorSpecs: ConnectorSpec[] = Object.values(connectorsSpecs);
 
+// Mirrors stack_connectors' runtime resolution: inline icon → ConnectorIconsMap → plugs.
 const resolveConnectorIcon = (spec: ConnectorSpec) =>
   spec.metadata.icon ?? ConnectorIconsMap.get(spec.metadata.id) ?? 'plugs';
 
 const buildSpecActionTypeRegistry = () => {
   const registry = new TypeRegistry<ActionTypeModel>();
   for (const spec of allConnectorSpecs) {
-    // Cast — story only needs `id` + `iconClass`; the rest of ActionTypeModel
-    // is unused on the icon path.
     registry.register({
       id: spec.metadata.id,
       iconClass: resolveConnectorIcon(spec),
@@ -114,12 +101,8 @@ const buildSpecActionTypeRegistry = () => {
   return registry;
 };
 
-/**
- * Wraps children in a `KibanaContextProvider` whose services override the outer
- * decorator's empty mocks with the real workflows_extensions registry and a
- * stack-connectors-style action type registry. Nested providers shadow their
- * ancestors, so `useKibana()` inside `StepIcon` reads the seeded services.
- */
+// Nested KibanaContextProvider shadows the outer decorator's empty mocks, so
+// `useKibana()` inside StepIcon reads the seeded extensions + action type registry.
 const SeededKibanaProvider: React.FC<{
   extensions: LoadedExtensions;
   children: React.ReactNode;
@@ -164,17 +147,12 @@ const LoadingIndicator = () => (
   </EuiFlexGroup>
 );
 
-/** Base type returned by the list's `getBaseConnectorType` for an extension id. */
 const baseTypeFor = (id: string): string => {
   if (id.startsWith('elasticsearch.')) return 'elasticsearch';
   if (id.startsWith('kibana.')) return 'kibana';
   if (id.startsWith('slack_api')) return 'slack';
   return id.includes('.') ? id.split('.')[0] : id;
 };
-
-// -----------------------------------------------------------------------------
-// Small presentational helpers
-// -----------------------------------------------------------------------------
 
 const SectionHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <EuiFlexItem>
@@ -221,11 +199,7 @@ const stepIconOf = (type: string) => (
   <StepIcon stepType={type} executionStatus={undefined} title={type} />
 );
 
-/**
- * Trigger icon renderer that mirrors `TriggerIcon` in `worflows_triggers_list.tsx`:
- * hardcoded icons for built-in types (`manual`, `alert`, `scheduled`) and
- * `PublicTriggerDefinition.icon` for custom types registered via workflows_extensions.
- */
+// Mirrors `TriggerIcon` in worflows_triggers_list.tsx.
 const BUILT_IN_TRIGGER_ICONS: Record<string, string> = {
   manual: 'play',
   alert: 'warning',
@@ -252,13 +226,8 @@ const TriggerIconFromRegistry = ({
   return <EuiIcon type="bolt" size="m" title={type} />;
 };
 
-// -----------------------------------------------------------------------------
-// Catalog — every step-icon input the UI commonly passes, grouped by source.
-// -----------------------------------------------------------------------------
-
 const BUILT_IN_TRIGGER_TYPES = ['manual', 'alert', 'scheduled'];
 
-/** Types handled by `getStepIconType` / `HardcodedIcons` — no extension lookup needed. */
 const builtInStepTypes = [
   'http',
   'console',
@@ -361,10 +330,6 @@ export const Catalog = () => {
     </SeededKibanaProvider>
   );
 };
-
-// -----------------------------------------------------------------------------
-// BaseTypeAggregation — regression check for the list's bare-base-type path.
-// -----------------------------------------------------------------------------
 
 const baseTypeCases: Array<{ baseType: string; expected: string }> = [
   { baseType: 'ai', expected: 'productAgent (robot — BASE_TYPE_AGGREGATE_ICONS)' },
