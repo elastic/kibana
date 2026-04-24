@@ -86,6 +86,7 @@ enabled:
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/embeddable/config.ts
+  - src/platform/test/functional/apps/discover/embeddable_2/config.ts
   - src/platform/test/functional/apps/discover/esql_1/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/esql_3/config.ts
