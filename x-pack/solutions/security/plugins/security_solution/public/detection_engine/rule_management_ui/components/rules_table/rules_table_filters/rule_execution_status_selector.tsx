@@ -109,7 +109,7 @@ const RuleExecutionStatusSelectorComponent = ({
           return (
             <div
               css={css`
-                margin-top: 4px; // aligns the badge within the option
+                display: inline-flex; // ensures styles to align the badge within the option are properly applied
               `}
               data-test-subj="executionStatusFilterOption"
             >
