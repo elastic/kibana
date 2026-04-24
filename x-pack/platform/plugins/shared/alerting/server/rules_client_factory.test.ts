@@ -807,4 +807,107 @@ describe('RulesClientFactory', () => {
       `"Failed to parse API key credentials from authorization header for alerting rule : test"`
     );
   });
+
+  test('cloneAPIKey is undefined when cloneApiKeys option is not set', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    const request = mockRouter.createKibanaRequest();
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.cloneAPIKey).toBeUndefined();
+  });
+
+  test('cloneAPIKey is defined when cloneApiKeys option is true', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    const request = mockRouter.createKibanaRequest();
+    await factory.create(request, savedObjectsService, { cloneApiKeys: true });
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.cloneAPIKey).toEqual(expect.any(Function));
+  });
+
+  test('cloneAPIKey calls cloneAsInternalUser and returns the result', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    securityService.authc.apiKeys.cloneAsInternalUser.mockResolvedValueOnce({
+      id: 'cloned-id',
+      name: 'test-rule-key',
+      api_key: 'cloned-secret',
+      encoded: 'encoded-value',
+    });
+
+    const request = mockRouter.createKibanaRequest();
+    await factory.create(request, savedObjectsService, { cloneApiKeys: true });
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const result = await constructorCall.cloneAPIKey('test-rule-key');
+
+    expect(securityService.authc.apiKeys.cloneAsInternalUser).toHaveBeenCalledWith(request, {
+      name: 'test-rule-key',
+      metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+    });
+
+    expect(result).toEqual({
+      apiKeysEnabled: true,
+      result: {
+        id: 'cloned-id',
+        name: 'test-rule-key',
+        api_key: 'cloned-secret',
+        encoded: 'encoded-value',
+      },
+    });
+  });
+
+  test('cloneAPIKey falls back to key reuse when clone fails', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    securityService.authc.apiKeys.cloneAsInternalUser.mockRejectedValueOnce(
+      new Error('Clone endpoint not available')
+    );
+
+    const apiKeyCredentials = Buffer.from('key-id:key-secret').toString('base64');
+    const request = mockRouter.createKibanaRequest({
+      headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+    });
+
+    await factory.create(request, savedObjectsService, { cloneApiKeys: true });
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const result = await constructorCall.cloneAPIKey('test-rule-key');
+
+    expect(result).toEqual({
+      apiKeysEnabled: true,
+      result: {
+        name: 'test-rule-key-user-created',
+        id: 'key-id',
+        api_key: 'key-secret',
+      },
+    });
+  });
 });

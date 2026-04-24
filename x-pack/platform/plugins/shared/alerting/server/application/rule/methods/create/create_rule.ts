@@ -143,7 +143,9 @@ export async function createRule<Params extends RuleParams = never>(
     isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
     const name = generateAPIKeyName(ruleType.id, data.name);
     createdAPIKey = data.enabled
-      ? isAuthTypeApiKey
+      ? context.cloneAPIKey
+        ? await context.cloneAPIKey(name)
+        : isAuthTypeApiKey
         ? context.getAuthenticationAPIKey(`${name}-user-created`)
         : await withSpan(
             {

@@ -32,7 +32,9 @@ export async function createNewAPIKeySet(
     isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
     const name = generateAPIKeyName(id, ruleName);
     createdAPIKey = shouldUpdateApiKey
-      ? isAuthTypeApiKey
+      ? context.cloneAPIKey
+        ? await context.cloneAPIKey(name)
+        : isAuthTypeApiKey
         ? context.getAuthenticationAPIKey(`${name}-user-created`)
         : await context.createAPIKey(name)
       : null;

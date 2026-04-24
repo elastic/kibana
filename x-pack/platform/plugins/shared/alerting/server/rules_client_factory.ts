@@ -44,6 +44,15 @@ import {
   UIAM_LOGS_GRANT_TAGS,
   UIAM_LOGS_INVALIDATE_TAGS,
 } from './constants';
+export interface RulesClientFactoryOptions {
+  /**
+   * When true and the request uses API key authentication, clone the API key
+   * per rule instead of reusing the request's key. The cloned key is independent,
+   * non-expiring, and managed by alerting (invalidated on rule delete/update).
+   */
+  cloneApiKeys?: boolean;
+}
+
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -137,13 +146,15 @@ export class RulesClientFactory {
    */
   public async create(
     request: KibanaRequest,
-    savedObjects: SavedObjectsServiceStart
+    savedObjects: SavedObjectsServiceStart,
+    options?: RulesClientFactoryOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
       request,
       savedObjects,
       spaceId: this.getSpaceId(request),
       isExplicitSpaceOverride: false,
+      options,
     });
   }
 
@@ -154,13 +165,15 @@ export class RulesClientFactory {
   public async createWithSpaceId(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
-    spaceId: string
+    spaceId: string,
+    options?: RulesClientFactoryOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
       request,
       savedObjects,
       spaceId,
       isExplicitSpaceOverride: true,
+      options,
     });
   }
 
@@ -235,11 +248,13 @@ export class RulesClientFactory {
     savedObjects,
     spaceId,
     isExplicitSpaceOverride,
+    options,
   }: {
     request: KibanaRequest;
     savedObjects: SavedObjectsServiceStart;
     spaceId: string;
     isExplicitSpaceOverride: boolean;
+    options?: RulesClientFactoryOptions;
   }): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
     const factory = this;
@@ -389,6 +404,40 @@ export class RulesClientFactory {
         }
         return { apiKeysEnabled: false };
       },
+      cloneAPIKey: options?.cloneApiKeys
+        ? async (name: string) => {
+            try {
+              const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
+                name,
+                metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+              });
+              if (!cloneResult) {
+                return { apiKeysEnabled: false };
+              }
+              return {
+                apiKeysEnabled: true,
+                result: cloneResult,
+              };
+            } catch (error) {
+              factory.logger.warn(
+                `Failed to clone API key, falling back to key reuse: ${error.message}`
+              );
+              const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+              if (authorizationHeader?.credentials) {
+                const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
+                  .toString()
+                  .split(':');
+                if (apiKeyId && apiKey) {
+                  return {
+                    apiKeysEnabled: true,
+                    result: { name: `${name}-user-created`, id: apiKeyId, api_key: apiKey },
+                  };
+                }
+              }
+              return { apiKeysEnabled: false };
+            }
+          }
+        : undefined,
       isSystemAction(actionId: string) {
         return actions.isSystemActionConnector(actionId);
       },
