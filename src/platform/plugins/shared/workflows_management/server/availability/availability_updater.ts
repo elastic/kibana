@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subscription } from 'rxjs';
+import { filter, type Subscription, take } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { isLicenseValid, REQUIRED_LICENSE_TYPE } from './is_license_valid';
@@ -42,13 +42,15 @@ export class AvailabilityUpdater {
       await this.runConfigUnavailableDisable();
       return;
     }
-
-    this.licenseSubscription = this.deps.licensing.license$.subscribe(async (license) => {
-      if (license.isAvailable && !isLicenseValid(license)) {
+    this.licenseSubscription = this.deps.licensing.license$
+      .pipe(
+        filter((license) => license.isAvailable && !isLicenseValid(license)),
+        take(1)
+      )
+      .subscribe(async () => {
         await this.runLicenseDowngradeDisable();
         this.stop();
-      }
-    });
+      });
   }
 
   public stop(): void {

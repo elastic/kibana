@@ -17,10 +17,17 @@ const checkLicense: CheckLicense = (license) => {
   if (!license.isAvailable) {
     return {
       valid: false,
-      message: i18n.translate(
-        'plugins.workflowsManagement.checkLicense.unavailableOrInactiveLicense',
-        { defaultMessage: 'License information is not available.' }
-      ),
+      message: i18n.translate('plugins.workflowsManagement.checkLicense.unavailable', {
+        defaultMessage: 'License information is not available.',
+      }),
+    };
+  }
+  if (!license.isActive) {
+    return {
+      valid: false,
+      message: i18n.translate('plugins.workflowsManagement.checkLicense.inactive', {
+        defaultMessage: 'License is expired. Please renew your license.',
+      }),
     };
   }
 
