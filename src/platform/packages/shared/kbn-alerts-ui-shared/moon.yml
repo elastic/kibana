@@ -36,7 +36,6 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/search-types'
   - '@kbn/utility-types'
-  - '@kbn/safer-lodash-set'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/core-notifications-browser-mocks'
@@ -51,6 +50,7 @@ dependsOn:
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
+  - '@kbn/test-jest-helpers'
 tags:
   - shared-browser
   - package

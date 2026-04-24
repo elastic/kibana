@@ -714,6 +714,14 @@
                 "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/provisioning/uiam_api_key_provisioning_task.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
               },
@@ -742,14 +750,6 @@
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/provisioning/uiam_api_key_provisioning_task.ts"
-              },
-              {
                 "plugin": "unifiedDocViewer",
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer/doc_viewer.tsx"
               },
@@ -774,44 +774,64 @@
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/full_screen_waterfall/index.tsx"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attach_events_ebt.ts"
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.ts"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attachments_tab_ebt.ts"
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/telemetry/workflows_ai_telemetry_client.ts"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attachments_tab_ebt.ts"
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/telemetry/workflows_management_telemetry_client.ts"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/case_view/use_case_page_view_ebt.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/settings_context_menu/try_ai_agent_context_menu_item.tsx"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/tour/agent_builder/index.tsx"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/settings_context_menu/settings_context_menu.tsx"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/settings_context_menu/settings_context_menu.tsx"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/settings_context_menu/settings_context_menu.tsx"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
               {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/settings_context_menu/settings_context_menu.tsx"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -842,12 +862,32 @@
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/analytics/index.ts"
               },
               {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attach_events_ebt.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attachments_tab_ebt.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/analytics/use_attachments_tab_ebt.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/case_view/use_case_page_view_ebt.ts"
+              },
+              {
                 "plugin": "@kbn/unified-chart-section-viewer",
                 "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/analytics/report_unified_chart_section_viewer_data_summary.ts"
               },
               {
                 "plugin": "discover",
                 "path": "src/platform/plugins/shared/discover/public/ebt_manager/discover_ebt_manager.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/embeddable/initialize_inline_editing_api.ts"
               },
               {
                 "plugin": "reporting",
@@ -902,56 +942,8 @@
                 "path": "x-pack/platform/plugins/shared/ml/public/application/services/telemetry/telemetry_client.ts"
               },
               {
-                "plugin": "workflowsExecutionEngine",
-                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/telemetry/workflows_ai_telemetry_client.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/telemetry/workflows_management_telemetry_client.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+                "plugin": "streams",
+                "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/ebt/client.ts"
               },
               {
                 "plugin": "streams",
@@ -1664,6 +1656,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_details/routes/entity_details_highlight.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/lead_generation/run_pipeline.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2466,6 +2462,34 @@
                 "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.test.ts"
               },
               {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/embeddable/initialize_inline_editing_api.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/embeddable/initialize_inline_editing_api.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/embeddable/initialize_inline_editing_api.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/embeddable/initialize_inline_editing_api.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/embeddable/initialize_inline_editing_api.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/embeddable/initialize_inline_editing_api.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/embeddable/initialize_inline_editing_api.test.ts"
+              },
+              {
                 "plugin": "data",
                 "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.test.ts"
               },
@@ -2636,6 +2660,50 @@
               {
                 "plugin": "@kbn/esql-editor",
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -2738,6 +2806,14 @@
                 "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
               },
               {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/services/trial_companion_milestone_service.test.ts"
               },
@@ -2800,6 +2876,22 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/ebt_manager/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/ebt_manager/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/ebt_manager/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/ebt_manager/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",

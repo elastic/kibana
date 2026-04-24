@@ -550,6 +550,8 @@
               },
               ") => void; registerApiKeyInvalidateFn: (fn?: ",
               "ApiKeyInvalidationFn",
+              " | undefined) => void; registerUiamApiKeyInvalidateFn: (fn?: ",
+              "UiamApiKeyInvalidationFn",
               " | undefined) => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
@@ -830,7 +832,7 @@
         "label": "AnalyzeLogsTriggeredPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 55,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -846,7 +848,39 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 56,
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.AnalyzeLogsTriggeredPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.AnalyzeLogsTriggeredPayload.dataStreamId",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -862,7 +896,164 @@
               "\"index\" | \"file\""
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.AnalyzeLogsTriggeredPayload.inputTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "inputTypes",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ApproveModalApproveClickedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApproveModalApproveClickedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.ApproveModalApproveClickedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.ApproveModalApproveClickedPayload.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.ApproveModalApproveClickedPayload.dataStreamCount",
+            "type": "number",
+            "tags": [],
+            "label": "dataStreamCount",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ApproveModalCancelClickedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApproveModalCancelClickedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.ApproveModalCancelClickedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.CancelButtonClickedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "CancelButtonClickedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.CancelButtonClickedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.CancelButtonClickedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -878,7 +1069,7 @@
         "label": "CodeEditorCopyClickedPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 64,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -894,7 +1085,39 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.CodeEditorCopyClickedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.CodeEditorCopyClickedPayload.dataStreamId",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -910,7 +1133,7 @@
         "label": "CreateIntegrationPageLoadedPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 41,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -926,7 +1149,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -942,7 +1165,7 @@
         "label": "DataStreamCreationCompletePayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 68,
+        "lineNumber": 83,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -958,7 +1181,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -971,7 +1194,7 @@
             "label": "integrationId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -984,7 +1207,7 @@
             "label": "integrationName",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -997,7 +1220,7 @@
             "label": "dataStreamId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 72,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1010,7 +1233,68 @@
             "label": "dataStreamName",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.connectorId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.modelName",
+            "type": "string",
+            "tags": [],
+            "label": "modelName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.connectorType",
+            "type": "string",
+            "tags": [],
+            "label": "connectorType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamCreationCompletePayload.connectorName",
+            "type": "string",
+            "tags": [],
+            "label": "connectorName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1023,7 +1307,7 @@
             "label": "durationMs",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1036,7 +1320,7 @@
             "label": "success",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1052,7 +1336,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1068,7 +1352,7 @@
         "label": "DataStreamDeleteConfirmedPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 103,
+        "lineNumber": 141,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1084,7 +1368,39 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 142,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamDeleteConfirmedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamDeleteConfirmedPayload.dataStreamId",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1100,7 +1416,7 @@
         "label": "DataStreamFlyoutOpenedPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 45,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1116,22 +1432,23 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "automaticImport",
-            "id": "def-common.DataStreamFlyoutOpenedPayload.isFirstDataStream",
-            "type": "boolean",
+            "id": "def-common.DataStreamFlyoutOpenedPayload.integrationId",
+            "type": "string",
             "tags": [],
-            "label": "isFirstDataStream",
-            "description": [
-              "Boolean flag if this is the first data stream being created for a new integration"
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1147,7 +1464,7 @@
         "label": "DataStreamRefreshConfirmedPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 107,
+        "lineNumber": 147,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1163,7 +1480,87 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 108,
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamRefreshConfirmedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DataStreamRefreshConfirmedPayload.dataStreamId",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.DoneButtonClickedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "DoneButtonClickedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 114,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DoneButtonClickedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.DoneButtonClickedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1179,7 +1576,7 @@
         "label": "EditDataStreamFlyoutOpenedPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 51,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1195,7 +1592,87 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.EditDataStreamFlyoutOpenedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.EditDataStreamFlyoutOpenedPayload.dataStreamId",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.EditIntegrationPageLoadedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "EditIntegrationPageLoadedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.EditIntegrationPageLoadedPayload.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.EditIntegrationPageLoadedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1211,7 +1688,7 @@
         "label": "EditPipelineTabOpenedPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 60,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1227,7 +1704,71 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.EditPipelineTabOpenedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.EditPipelineTabOpenedPayload.dataStreamId",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.IntegrationDownloadZipClickedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationDownloadZipClickedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 124,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.IntegrationDownloadZipClickedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1243,7 +1784,7 @@
         "label": "IntegrationInstalledPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 79,
+        "lineNumber": 98,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1259,7 +1800,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 80,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1272,7 +1813,7 @@
             "label": "integrationName",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 81,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1285,7 +1826,7 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1298,7 +1839,7 @@
             "label": "dataStreamCount",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1311,7 +1852,7 @@
             "label": "dataStreamName",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1372,7 +1913,7 @@
         "label": "PipelineEditedPayload",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 111,
+        "lineNumber": 153,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1388,7 +1929,39 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 154,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.PipelineEditedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.PipelineEditedPayload.dataStreamId",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1401,7 +1974,7 @@
             "label": "linesAdded",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1414,7 +1987,7 @@
             "label": "linesRemoved",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1427,7 +2000,55 @@
             "label": "netLineChange",
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 159,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImport",
+        "id": "def-common.ReviewApproveMenuClickedPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReviewApproveMenuClickedPayload",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.ReviewApproveMenuClickedPayload.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImport",
+            "id": "def-common.ReviewApproveMenuClickedPayload.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1527,33 +2148,24 @@
       },
       {
         "parentPluginId": "automaticImport",
-        "id": "def-common.ApproveModalApproveClickedPayload",
+        "id": "def-common.ApproveModalApproveWithAutoInstallClickedPayload",
         "type": "Type",
         "tags": [],
-        "label": "ApproveModalApproveClickedPayload",
-        "description": [],
+        "label": "ApproveModalApproveWithAutoInstallClickedPayload",
+        "description": [
+          "User approved with \"Automatically install integration after approval\" checked; fires after approve API succeeds, before install."
+        ],
         "signature": [
-          "{ [x: string]: never; }"
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.ApproveModalApproveClickedPayload",
+            "text": "ApproveModalApproveClickedPayload"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 101,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.ApproveModalCancelClickedPayload",
-        "type": "Type",
-        "tags": [],
-        "label": "ApproveModalCancelClickedPayload",
-        "description": [],
-        "signature": [
-          "{ [x: string]: never; }"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 100,
+        "lineNumber": 138,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1582,6 +2194,22 @@
             "docId": "kibAutomaticImportPluginApi",
             "section": "def-common.CreateIntegrationPageLoadedPayload",
             "text": "CreateIntegrationPageLoadedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".EditIntegrationPageLoaded ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.EditIntegrationPageLoadedPayload",
+            "text": "EditIntegrationPageLoadedPayload"
           },
           " : T extends ",
           {
@@ -1672,7 +2300,13 @@
             "text": "AutomaticImportTelemetryEventType"
           },
           ".CancelButtonClicked ? ",
-          "CancelButtonClickedPayload",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.CancelButtonClickedPayload",
+            "text": "CancelButtonClickedPayload"
+          },
           " : T extends ",
           {
             "pluginId": "automaticImport",
@@ -1682,7 +2316,13 @@
             "text": "AutomaticImportTelemetryEventType"
           },
           ".DoneButtonClicked ? ",
-          "DoneButtonClickedPayload",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.DoneButtonClickedPayload",
+            "text": "DoneButtonClickedPayload"
+          },
           " : T extends ",
           {
             "pluginId": "automaticImport",
@@ -1772,7 +2412,13 @@
             "text": "AutomaticImportTelemetryEventType"
           },
           ".IntegrationDownloadZipClicked ? ",
-          "IntegrationDownloadZipClickedPayload",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.IntegrationDownloadZipClickedPayload",
+            "text": "IntegrationDownloadZipClickedPayload"
+          },
           " : T extends ",
           {
             "pluginId": "automaticImport",
@@ -1798,6 +2444,22 @@
             "text": "AutomaticImportTelemetryEventType"
           },
           ".ApproveModalApproveClicked ? ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.ApproveModalApproveClickedPayload",
+            "text": "ApproveModalApproveClickedPayload"
+          },
+          " : T extends ",
+          {
+            "pluginId": "automaticImport",
+            "scope": "common",
+            "docId": "kibAutomaticImportPluginApi",
+            "section": "def-common.AutomaticImportTelemetryEventType",
+            "text": "AutomaticImportTelemetryEventType"
+          },
+          ".ApproveModalApproveWithAutoInstallClicked ? ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1856,7 +2518,7 @@
           " : never"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 118,
+        "lineNumber": 162,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2174,7 +2836,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 87,
+        "lineNumber": 106,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2264,23 +2926,6 @@
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/model/api/data_streams/data_stream.gen.ts",
         "lineNumber": 64,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "automaticImport",
-        "id": "def-common.ReviewApproveMenuClickedPayload",
-        "type": "Type",
-        "tags": [],
-        "label": "ReviewApproveMenuClickedPayload",
-        "description": [],
-        "signature": [
-          "{ [x: string]: never; }"
-        ],
-        "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 98,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2437,7 +3082,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/telemetry/types.ts",
-        "lineNumber": 88,
+        "lineNumber": 107,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

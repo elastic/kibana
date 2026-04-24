@@ -14,8 +14,11 @@ import {
   EuiPanel,
   EuiTitle,
   useIsWithinBreakpoints,
+  EuiButtonIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
@@ -25,9 +28,13 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSourcererDataView } from '../../sourcerer/containers';
+import { useKibana } from '../../common/lib/kibana';
+import { EntityEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useLicense } from '../../common/hooks/use_license';
 import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
 import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_panel';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
@@ -43,10 +50,15 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { TabId } from './entity_analytics_management_page';
 import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
 import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
+import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
@@ -57,27 +69,45 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
 });
 
 export const EntityAnalyticsHomePage = () => {
+  const { telemetry, agentBuilder, http } = useKibana().services;
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const { data: availableConnectors } = useLoadConnectors({ http, featureId: 'lead_generation' });
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const leadGenerationEnabled = useIsExperimentalFeatureEnabled('leadGenerationEnabled');
+  const isEnterprise = useLicense().isEnterprise();
+  const leadGenerationEnabled =
+    useIsExperimentalFeatureEnabled('leadGenerationEnabled') && isEnterprise;
   const spaceId = useSpaceId();
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
 
+  const resolvedSpaceId = spaceId ?? 'default';
+  const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
+  const connectorId = spaceId ? storedConnectorId ?? '' : '';
+  const hasValidConnector = !!availableConnectors?.find((c) => c.id === connectorId);
+  const safeSetConnectorId = useCallback(
+    (id: string | undefined) => {
+      if (spaceId) {
+        setStoredConnectorId(id);
+      }
+    },
+    [spaceId, setStoredConnectorId]
+  );
   const {
     leads,
     totalCount,
     isLoading: isLeadsLoading,
     isGenerating,
     hasGenerated,
+    lastRunTimestamp,
     generate,
     isScheduled,
     toggleSchedule,
-  } = useHuntingLeads(leadGenerationEnabled);
+  } = useHuntingLeads(connectorId, leadGenerationEnabled);
   const openAgentBuilderWithLead = useLeadAttachment();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -89,6 +119,7 @@ export const EntityAnalyticsHomePage = () => {
 
   const location = useLocation();
   const history = useHistory();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
   const selectedWatchlistId = useMemo(() => {
     const params = new URLSearchParams(location.search);
@@ -126,20 +157,25 @@ export const EntityAnalyticsHomePage = () => {
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
 
+  const { data: entityStoreStatusData } = useEntityStoreStatus();
+  const entityStoreDisabled =
+    entityStoreStatusData?.status === 'not_installed' ||
+    entityStoreStatusData?.status === 'stopped';
+
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
   const handleOpenLeadInChat = useCallback(
-    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
-    [openAgentBuilderWithLead]
+    (lead: HuntingLead) => {
+      telemetry.reportEvent(EntityEventTypes.LeadGenerationLeadClicked, {});
+      openAgentBuilderWithLead(lead);
+    },
+    [openAgentBuilderWithLead, telemetry]
   );
 
   const handleHuntInChat = useCallback(() => {
-    const firstLead = leads[0];
-    if (firstLead) {
-      openAgentBuilderWithLead(firstLead);
-    }
-  }, [leads, openAgentBuilderWithLead]);
+    agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
+  }, [agentBuilder]);
 
   if (newDataViewPickerEnabled && entityDataViewLoading) {
     return <PageLoader />;
@@ -147,6 +183,10 @@ export const EntityAnalyticsHomePage = () => {
 
   if (showEmptyPrompt) {
     return <EmptyPrompt />;
+  }
+
+  if (entityStoreDisabled) {
+    return <EntityStoreDisabledEmptyPrompt />;
   }
 
   return (
@@ -164,14 +204,33 @@ export const EntityAnalyticsHomePage = () => {
           title={
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.homePage.pageTitle"
-              defaultMessage="Entity Analytics"
+              defaultMessage="Entity analytics"
             />
           }
           rightSideItems={[
-            <WatchlistFilter
-              selectedId={selectedWatchlistId ?? ''}
-              onChangeSelectedId={setSelectedWatchlist}
-            />,
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <WatchlistFilter
+                  selectedId={selectedWatchlistId ?? ''}
+                  onChangeSelectedId={setSelectedWatchlist}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  display="base"
+                  iconType="gear"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
+                    { defaultMessage: 'Watchlists settings' }
+                  )}
+                  href={getSecuritySolutionUrl({
+                    deepLinkId: SecurityPageName.entityAnalyticsManagement,
+                    path: `/${TabId.Watchlists}`,
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>,
           ]}
         />
 
@@ -187,12 +246,17 @@ export const EntityAnalyticsHomePage = () => {
                   isLoading={isLeadsLoading}
                   isGenerating={isGenerating}
                   hasGenerated={hasGenerated}
+                  lastRunTimestamp={lastRunTimestamp}
+                  isScheduled={isScheduled}
+                  onToggleSchedule={toggleSchedule}
                   onSeeAll={handleOpenFlyout}
                   onLeadClick={handleOpenLeadInChat}
                   onHuntInChat={handleHuntInChat}
                   onGenerate={generate}
-                  isScheduled={isScheduled}
-                  onToggleSchedule={toggleSchedule}
+                  connectorId={connectorId}
+                  hasValidConnector={hasValidConnector}
+                  onConnectorIdSelected={safeSetConnectorId}
+                  isAgentChatExperienceEnabled={isAgentChatExperienceEnabled}
                 />
               </EuiFlexItem>
             )}

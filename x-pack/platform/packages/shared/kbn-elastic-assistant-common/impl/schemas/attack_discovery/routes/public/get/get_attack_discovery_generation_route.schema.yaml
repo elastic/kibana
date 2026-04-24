@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
-  title: Get Attack discovery generation API endpoint
+  title: Get Attack Discovery generation API endpoint
   version: '2023-10-31'
 paths:
   /api/attack_discovery/generations/{execution_uuid}:
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -16,18 +16,18 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: GetAttackDiscoveryGeneration
-      summary: Get a single Attack discovery generation, including its discoveries and (optional) generation metadata
-      description: Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics.
+      summary: Get a single Attack Discovery generation, including its discoveries and (optional) generation metadata
+      description: Returns a specific Attack Discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics.
       parameters:
         - name: execution_uuid
           in: path
           required: true
-          description: The unique identifier for the Attack discovery generation execution. This UUID is returned at the start of an Attack discovery generation.
+          description: The unique identifier for the Attack Discovery generation execution. This UUID is returned at the start of an Attack Discovery generation.
           schema:
             $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
           example: "2e13f386-46cf-4d65-9e2b-68609e132ba5"
         - name: 'enable_field_rendering'
-          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
           in: query
           required: false
           schema:
@@ -44,7 +44,7 @@ paths:
           example: true
       responses:
         200:
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -60,8 +60,19 @@ paths:
                     $ref: '../../../generation.schema.yaml#/components/schemas/AttackDiscoveryGeneration'
                 required:
                   - data
+              example:
+                data:
+                  - id: "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f"
+                    title: "Suspicious process execution on host-01"
+                generation:
+                  execution_uuid: "2e13f386-46cf-4d65-9e2b-68609e132ba5"
+                  status: "succeeded"
+                  start: "2025-09-29T06:42:08.962Z"
+                  end: "2025-09-29T06:42:44.810Z"
+                  discoveries: 1
+                  alerts_context_count: 50
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -78,9 +89,13 @@ paths:
                   message:
                     type: string
                     description: Human-readable error message describing what went wrong with the request
-                    example: "Invalid request parameters"
+                    example: "Invalid request parameters."
                 required:
                   - status_code
                   - error
                   - message
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters."
 

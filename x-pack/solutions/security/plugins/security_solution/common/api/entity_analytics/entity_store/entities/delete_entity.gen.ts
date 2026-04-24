@@ -14,26 +14,35 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EntityType } from '../common.gen';
 
+export const DeleteSingleEntityRequestParams = lazySchema(() =>
+  z.object({
+    entityType: EntityType,
+  })
+);
 export type DeleteSingleEntityRequestParams = z.infer<typeof DeleteSingleEntityRequestParams>;
-export const DeleteSingleEntityRequestParams = z.object({
-  entityType: EntityType,
-});
 export type DeleteSingleEntityRequestParamsInput = z.input<typeof DeleteSingleEntityRequestParams>;
 
+export const DeleteSingleEntityRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Identifier of the entity to be deleted, commonly entity.id value.
+     */
+    id: z.string(),
+  })
+);
 export type DeleteSingleEntityRequestBody = z.infer<typeof DeleteSingleEntityRequestBody>;
-export const DeleteSingleEntityRequestBody = z.object({
-  /**
-   * Identifier of the entity to be deleted, commonly entity.id value.
-   */
-  id: z.string(),
-});
 export type DeleteSingleEntityRequestBodyInput = z.input<typeof DeleteSingleEntityRequestBody>;
 
+export const DeleteSingleEntityResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Whether the entity was successfully deleted.
+     */
+    deleted: z.boolean().optional(),
+  })
+);
 export type DeleteSingleEntityResponse = z.infer<typeof DeleteSingleEntityResponse>;
-export const DeleteSingleEntityResponse = z.object({
-  deleted: z.boolean().optional(),
-});
