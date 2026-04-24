@@ -31,6 +31,7 @@ Skip the todo list when:
 ### Rules
 
 - Mark a task \`completed\` **immediately** after you finish it. Do not batch completions.
+- Mark a task \`in_progress\` when you start working on it. You can mark the previous task as \`completed\` and start a new one as \`in_progress\` in the same call.
 - Only **one** task should be \`in_progress\` at a time.
 - Finish the current \`in_progress\` task before starting a new one.
 - Cancel tasks that become irrelevant as the work evolves.
