@@ -165,7 +165,7 @@ describe('<TakeActionButton />', () => {
 
   it('should include investigateInTimelineActionItems when in Security app', () => {
     mockUseIsInSecurityApp.mockReturnValue(true);
-    const timelineItem = { name: 'Investigate in timeline', onClick: jest.fn() };
+    const timelineItem = { name: 'Investigate in Timeline', onClick: jest.fn() };
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimelineActionItems: [timelineItem],
     });
@@ -179,7 +179,7 @@ describe('<TakeActionButton />', () => {
 
   it('should not include investigateInTimelineActionItems when not in Security app (e.g. Discover)', () => {
     mockUseIsInSecurityApp.mockReturnValue(false);
-    const timelineItem = { name: 'Investigate in timeline', onClick: jest.fn() };
+    const timelineItem = { name: 'Investigate in Timeline', onClick: jest.fn() };
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimelineActionItems: [timelineItem],
     });
@@ -188,7 +188,7 @@ describe('<TakeActionButton />', () => {
 
     fireEvent.click(queryByText('Take action')!.closest('button')!);
 
-    expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
+    expect(queryByText('Investigate in Timeline')).not.toBeInTheDocument();
   });
 
   it('should pass onAlertUpdated as refetch to useAlertsActions', () => {
