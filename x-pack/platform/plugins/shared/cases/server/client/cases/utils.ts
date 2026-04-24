@@ -11,6 +11,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { v4 } from 'uuid';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   ActionConnector,
   AttachmentV2,
@@ -26,7 +27,7 @@ import type {
   Observable,
   User,
 } from '../../../common/types/domain';
-import type { TemplatesService } from '../../services';
+import type { Template } from '../../../common/types/domain/template/latest';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
   CasePostRequest,
@@ -690,13 +691,13 @@ export const processObservables = (
  * or extended fields, or whose templates cannot be retrieved, are returned unchanged.
  *
  * @param cases - Array of cases to enrich
- * @param templatesService - Service for fetching template definitions
- * @returns Promise resolving to the enriched cases array, preserving original order
+ * @param templateSOs - Pre-fetched template saved objects
+ * @returns The enriched cases array, preserving original order
  */
-export const enrichCasesWithFieldLabels = async (
+export const enrichCasesWithFieldLabels = (
   cases: Case[],
-  templatesService: TemplatesService
-): Promise<Case[]> => {
+  templateSOs: Array<SavedObject<Template>>
+): Case[] => {
   type EligibleCase = Case & {
     template: NonNullable<Case['template']>;
     extended_fields: NonNullable<Case['extended_fields']>;
@@ -710,33 +711,19 @@ export const enrichCasesWithFieldLabels = async (
     return cases;
   }
 
-  const uniqueTemplateKeys = [
-    ...new Map(
-      eligibleCases.map((c) => [`${c.template.id}:${c.template.version}`, c.template])
-    ).values(),
-  ];
-
-  const templateResults = await Promise.all(
-    uniqueTemplateKeys.map(({ id, version }) => templatesService.getTemplate(id, String(version)))
-  );
-
-  const labelsByTemplateKey = templateResults.reduce<Map<string, Record<string, string>>>(
-    (byKey, templateSO) => {
-      if (templateSO == null) return byKey;
-      const fieldKeyToLabel = Object.fromEntries(
-        (templateSO.attributes.fieldNames ?? []).map((field) => [
-          `${field.name}_as_${field.type}`,
-          field.label,
-        ])
-      );
-      byKey.set(
-        `${templateSO.attributes.templateId}:${templateSO.attributes.templateVersion}`,
-        fieldKeyToLabel
-      );
-      return byKey;
-    },
-    new Map()
-  );
+  const labelsByTemplateKey = new Map<string, Record<string, string>>();
+  for (const so of templateSOs) {
+    const fieldKeyToLabel = Object.fromEntries(
+      (so.attributes.fieldNames ?? []).map((field) => [
+        `${field.name}_as_${field.type}`,
+        field.label,
+      ])
+    );
+    labelsByTemplateKey.set(
+      `${so.attributes.templateId}:${so.attributes.templateVersion}`,
+      fieldKeyToLabel
+    );
+  }
 
   const enrichedCasesById = new Map(
     eligibleCases.flatMap((c) => {

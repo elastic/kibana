@@ -122,45 +122,32 @@ export const search = async (
 
     const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
 
+    const ownerArray = asArray(paramArgs.owner).filter(Boolean);
+
     /**
-     * Extended field filter resolution with support for all template versions.
-     *
-     * Unlike getAllTemplates (which only returns isLatest:true), we need to resolve
-     * filters against ALL template versions to correctly match cases created with
-     * older template versions where field definitions may have changed.
-     *
-     * This handles edge cases where:
-     * - A field is removed in a newer template version
-     * - A field is renamed across versions
-     * - A field type changes across versions
-     *
-     * Example: Case created with template v1 (has "effort estimate" field) → template
-     * updated to v2 (renames field to "some estimate") → search for "effort estimate"
-     * should only find cases created with v1, not v2.
+     * Fetch ALL template versions upfront. This single fetch serves two purposes:
+     * 1. Extended field filter resolution — we need all versions (not just isLatest) to
+     *    correctly match cases created with older template versions where fields may differ.
+     * 2. Label enrichment — enrichCasesWithFieldLabels uses the same SOs to populate
+     *    extended_fields_labels on returned cases, avoiding redundant fetches.
      */
-    const resolvedExtendedFieldFilters = await (async () => {
-      const rawFilters = paramArgs.extendedFieldFilters;
-      if (!rawFilters || rawFilters.length === 0) {
-        return undefined;
-      }
+    const templateSOs = await templatesService.getTemplateVersionsForExtendedFieldSearch({
+      owner: ownerArray.length > 0 ? ownerArray : undefined,
+      isDeleted: false,
+    });
 
-      const ownerArray = asArray(paramArgs.owner).filter(Boolean);
-
-      // Fetch ALL template versions (not filtered by isLatest) for the given owner(s)
-      const templateSOs = await templatesService.getTemplateVersionsForExtendedFieldSearch({
-        owner: ownerArray.length > 0 ? ownerArray : undefined,
-        isDeleted: false,
-      });
-
-      // Convert SavedObject<Template> to the format expected by resolveExtendedFieldFilters
-      const templates = templateSOs.map((so) => ({
-        templateId: so.attributes.templateId,
-        templateVersion: so.attributes.templateVersion,
-        fieldNames: so.attributes.fieldNames,
-      }));
-
-      return resolveExtendedFieldFilters(rawFilters, templates);
-    })();
+    const rawFilters = paramArgs.extendedFieldFilters;
+    const resolvedExtendedFieldFilters =
+      rawFilters && rawFilters.length > 0
+        ? resolveExtendedFieldFilters(
+            rawFilters,
+            templateSOs.map((so) => ({
+              templateId: so.attributes.templateId,
+              templateVersion: so.attributes.templateVersion,
+              fieldNames: so.attributes.fieldNames,
+            }))
+          )
+        : undefined;
 
     const [cases, statusStats] = await Promise.all([
       caseService.searchCasesGroupedByID({
@@ -189,7 +176,7 @@ export const search = async (
       countClosedCases: statusStats.closed,
     });
 
-    res.cases = await enrichCasesWithFieldLabels(res.cases, templatesService);
+    res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs);
 
     return decodeOrThrow(CasesFindResponseRt)(res);
   } catch (error) {
