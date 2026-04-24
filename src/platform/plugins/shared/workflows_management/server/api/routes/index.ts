@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import { registerExecutionRoutes } from './executions';
 import { registerInternalRoutes } from './internal';
 import type { RouteDependencies } from './types';
@@ -22,7 +22,7 @@ export function defineRoutes(
   router: WorkflowsRouter,
   api: WorkflowsManagementApi,
   logger: Logger,
-  spaces: SpacesServiceStart,
+  spaces: SpacesServiceSetup,
   service: WorkflowsService
 ) {
   const audit = new WorkflowManagementAuditLog({ service });

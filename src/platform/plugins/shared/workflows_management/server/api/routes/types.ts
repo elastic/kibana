@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { WorkflowManagementAuditLog } from './utils/workflow_audit_logging';
 import type { WorkflowsRouter } from '../../types';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
@@ -19,7 +19,7 @@ export interface RouteDependencies {
   api: WorkflowsManagementApi;
   service: WorkflowsService;
   logger: Logger;
-  spaces: SpacesServiceStart;
+  spaces: SpacesServiceSetup;
   audit: WorkflowManagementAuditLog;
 }
 

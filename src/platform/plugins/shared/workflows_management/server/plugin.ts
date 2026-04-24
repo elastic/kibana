@@ -73,10 +73,7 @@ export class WorkflowsPlugin
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available);
 
-    const spaces = plugins.spaces?.spacesService;
-    if (!spaces) {
-      throw new Error('Spaces service not initialized');
-    }
+    const spaces = plugins.spaces.spacesService;
 
     // Register workflows connector if actions plugin is available
     if (plugins.actions) {
