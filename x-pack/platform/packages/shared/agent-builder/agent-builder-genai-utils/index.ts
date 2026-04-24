@@ -44,8 +44,3 @@ export {
   runSearchTool,
   type TopSnippetsConfig,
 } from './tools';
-export {
-  buildVisualizationConfig,
-  getChartTypeSelectionPromptContent,
-  type VisualizationConfig,
-} from './tools/visualization';
