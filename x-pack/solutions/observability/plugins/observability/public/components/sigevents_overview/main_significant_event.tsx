@@ -123,7 +123,7 @@ export const MainSignificantEvent = ({
 
   const topSectionCss = css`
     background: ${euiTheme.colors.backgroundBaseSubdued};
-    padding: ${euiTheme.size.l};
+    padding: ${euiTheme.size.m} ${euiTheme.size.l};
   `;
 
   const bottomSectionCss = css`
@@ -192,7 +192,7 @@ export const MainSignificantEvent = ({
               <h3>{title}</h3>
             </EuiTitle>
 
-            <EuiSpacer size="s" />
+            <EuiSpacer size="xs" />
 
             <EuiFlexGroup
               responsive={false}
@@ -231,7 +231,7 @@ export const MainSignificantEvent = ({
         <EuiText size="s">
           <p>{description}</p>
         </EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="xs" />
         <EuiFlexGroup responsive={false} wrap gutterSize="s">
           <EuiFlexItem grow={false}>
             <AiButton
