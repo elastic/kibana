@@ -78,13 +78,14 @@ describe('Assets for rule monitoring', () => {
     });
 
     describe('Rule gap histogram', () => {
-      it('should contain the correct title', () => {
+      it('should contain the correct title and a description', () => {
         const panelsConfig = JSON.parse(sourceRuleMonitoringDashboard.attributes.panelsJSON);
         expect(panelsConfig).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
               embeddableConfig: expect.objectContaining({
                 title: 'Rule gap histogram',
+                description: 'Number of rule gaps detected within the selected timeframe.',
               }),
             }),
           ])
