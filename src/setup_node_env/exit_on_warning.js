@@ -116,7 +116,6 @@ var IGNORE_WARNINGS = [
   {
     name: 'DeprecationWarning',
     code: 'DEP0190',
-    file: '/node_modules/@storybook/core/dist/telemetry/index.cjs',
   },
 ];
 
