@@ -34,7 +34,7 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
     },
   } = useKibana();
   const { getOnboardingTaskStatus, scheduleOnboardingTask, cancelOnboardingTask } =
-    useOnboardingApi({ saveQueries: true });
+    useOnboardingApi();
 
   const scheduleTaskMutation = useMutation({
     mutationFn: scheduleOnboardingTask,

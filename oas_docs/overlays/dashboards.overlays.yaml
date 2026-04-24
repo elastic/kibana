@@ -35,7 +35,7 @@ actions:
           -H "kbn-xsrf: true" \
           -H "Content-Type: application/json" \
           -d '{
-            "title": "My first dashboard",
+            "title": "My first API dashboard",
             "panels": [
               {
                 "grid": {
@@ -53,10 +53,10 @@ actions:
                       "type": "line",
                       "data_source": {
                         "type": "esql",
-                        "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                        "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                       },
                       "x": {
-                        "column": "@timestamp"
+                        "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                       },
                       "y": [
                         {
@@ -64,7 +64,14 @@ actions:
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "axis": {
+                    "x": {
+                      "title": {
+                        "visible": false
+                      }
+                    }
+                  }
                 }
               }
             ]
@@ -313,18 +320,18 @@ actions:
                               - type: line
                                 data_source:
                                   type: esql
-                                  query: "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                                  query: "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                                 sampling: 1
                                 ignore_global_filters: false
                                 x:
-                                  column: "@timestamp"
+                                  column: "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                                 y:
                                   - column: count
                                     axis_id: "y"
                             axis:
                               x:
                                 title:
-                                  visible: true
+                                  visible: false
                                 ticks:
                                   visible: true
                                 grid:
@@ -461,10 +468,10 @@ actions:
                         "type": "line",
                         "data_source": {
                           "type": "esql",
-                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                         },
                         "x": {
-                          "column": "@timestamp"
+                          "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                         },
                         "y": [
                           {
@@ -472,7 +479,14 @@ actions:
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "axis": {
+                      "x": {
+                        "title": {
+                          "visible": false
+                        }
+                      }
+                    }
                   }
                 }
               ]
@@ -559,10 +573,10 @@ actions:
                         "type": "line",
                         "data_source": {
                           "type": "esql",
-                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                         },
                         "x": {
-                          "column": "@timestamp"
+                          "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                         },
                         "y": [
                           {
@@ -570,7 +584,14 @@ actions:
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "axis": {
+                      "x": {
+                        "title": {
+                          "visible": false
+                        }
+                      }
+                    }
                   }
                 }
               ]
@@ -618,7 +639,6 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "metric",
-                        "title": "Total requests",
                         "data_source": {
                           "type": "data_view_spec",
                           "index_pattern": "kibana_sample_data_logs",
@@ -642,7 +662,6 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "metric",
-                        "title": "Average response size",
                         "data_source": {
                           "type": "data_view_spec",
                           "index_pattern": "kibana_sample_data_logs",
@@ -695,7 +714,14 @@ actions:
                               }
                             ]
                           }
-                        ]
+                        ],
+                        "axis": {
+                          "x": {
+                            "title": {
+                              "visible": false
+                            }
+                          }
+                        }
                       }
                     },
                     {
@@ -714,10 +740,10 @@ actions:
                             "type": "line",
                             "data_source": {
                               "type": "esql",
-                              "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                              "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                             },
                             "x": {
-                              "column": "@timestamp"
+                              "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                             },
                             "y": [
                               {
@@ -725,7 +751,14 @@ actions:
                               }
                             ]
                           }
-                        ]
+                        ],
+                        "axis": {
+                          "x": {
+                            "title": {
+                              "visible": false
+                            }
+                          }
+                        }
                       }
                     }
                   ]
@@ -772,7 +805,6 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "metric",
-                        "title": "Total requests",
                         "data_source": {
                           "type": "data_view_spec",
                           "index_pattern": "kibana_sample_data_logs",
@@ -796,7 +828,6 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "metric",
-                        "title": "Average response size",
                         "data_source": {
                           "type": "data_view_spec",
                           "index_pattern": "kibana_sample_data_logs",
@@ -849,7 +880,14 @@ actions:
                               }
                             ]
                           }
-                        ]
+                        ],
+                        "axis": {
+                          "x": {
+                            "title": {
+                              "visible": false
+                            }
+                          }
+                        }
                       }
                     },
                     {
@@ -868,10 +906,10 @@ actions:
                             "type": "line",
                             "data_source": {
                               "type": "esql",
-                              "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                              "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                             },
                             "x": {
-                              "column": "@timestamp"
+                              "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                             },
                             "y": [
                               {
@@ -879,7 +917,14 @@ actions:
                               }
                             ]
                           }
-                        ]
+                        ],
+                        "axis": {
+                          "x": {
+                            "title": {
+                              "visible": false
+                            }
+                          }
+                        }
                       }
                     }
                   ]
@@ -1034,18 +1079,18 @@ actions:
                               - type: line
                                 data_source:
                                   type: esql
-                                  query: "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                                  query: "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                                 sampling: 1
                                 ignore_global_filters: false
                                 x:
-                                  column: "@timestamp"
+                                  column: "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                                 y:
                                   - column: count
                                     axis_id: "y"
                             axis:
                               x:
                                 title:
-                                  visible: true
+                                  visible: false
                                 ticks:
                                   visible: true
                                 grid:
@@ -1220,18 +1265,18 @@ actions:
                               - type: line
                                 data_source:
                                   type: esql
-                                  query: "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                                  query: "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                                 sampling: 1
                                 ignore_global_filters: false
                                 x:
-                                  column: "@timestamp"
+                                  column: "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                                 y:
                                   - column: count
                                     axis_id: "y"
                             axis:
                               x:
                                 title:
-                                  visible: true
+                                  visible: false
                                 ticks:
                                   visible: true
                                 grid:
@@ -1384,10 +1429,10 @@ actions:
                         "type": "line",
                         "data_source": {
                           "type": "esql",
-                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                         },
                         "x": {
-                          "column": "@timestamp"
+                          "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                         },
                         "y": [
                           {
@@ -1395,7 +1440,14 @@ actions:
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "axis": {
+                      "x": {
+                        "title": {
+                          "visible": false
+                        }
+                      }
+                    }
                   }
                 },
                 {
@@ -1494,10 +1546,10 @@ actions:
                         "type": "line",
                         "data_source": {
                           "type": "esql",
-                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                         },
                         "x": {
-                          "column": "@timestamp"
+                          "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
                         },
                         "y": [
                           {
@@ -1505,7 +1557,14 @@ actions:
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "axis": {
+                      "x": {
+                        "title": {
+                          "visible": false
+                        }
+                      }
+                    }
                   }
                 },
                 {

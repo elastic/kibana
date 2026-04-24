@@ -18,6 +18,10 @@ import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import * as queryAnalysisUtils from './query_analysis_utils';
 import { NON_ECS_FIELD } from './scoped_discover_ebt_manager';
+import {
+  DiscoverInDashboardEventDataKeys,
+  DiscoverInDashboardEventName,
+} from './discover_in_dashboard_event_definition';
 
 jest.mock('@kbn/ebt-tools', () => ({
   ...jest.requireActual('@kbn/ebt-tools'),
@@ -123,6 +127,53 @@ describe('DiscoverEBTManager', () => {
                 description:
                   "List of field names if they are part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
               },
+            },
+          },
+        },
+      });
+
+      expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
+        eventType: 'discover_in_dashboard',
+        schema: {
+          eventName: {
+            type: 'keyword',
+            _meta: {
+              description: 'The event name. Expected values: savedSession, tabSwitched',
+            },
+          },
+          dashboardId: {
+            type: 'keyword',
+            _meta: {
+              description: 'The unique dashboard identifier',
+              optional: true,
+            },
+          },
+          embeddablePanelId: {
+            type: 'keyword',
+            _meta: {
+              description: 'The embeddable panel instance identifier within the dashboard',
+              optional: true,
+            },
+          },
+          savedSessionId: {
+            type: 'keyword',
+            _meta: {
+              description: 'The discover session identifier (present for savedSession)',
+              optional: true,
+            },
+          },
+          tabSwitchedFromId: {
+            type: 'keyword',
+            _meta: {
+              description: 'Tab identifier switched from (present for tabSwitched)',
+              optional: true,
+            },
+          },
+          tabSwitchedToId: {
+            type: 'keyword',
+            _meta: {
+              description: 'Tab identifier switched to (present for tabSwitched)',
+              optional: true,
             },
           },
         },
@@ -1044,6 +1095,60 @@ describe('DiscoverEBTManager', () => {
       expect(analyzeSpy).toHaveBeenCalledTimes(1);
 
       analyzeSpy.mockRestore();
+    });
+  });
+
+  describe('trackDiscoverToDashboardEvent', () => {
+    it('should track a savedSession event with the provided payload', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      scopedManager.trackDiscoverToDashboardEvent({
+        [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.savedSession,
+        [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: 'session-1',
+        [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]: 'dashboard-1',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_in_dashboard', {
+        eventName: 'savedSession',
+        savedSessionId: 'session-1',
+        dashboardId: 'dashboard-1',
+      });
+    });
+
+    it('should track a tabSwitched event with the provided payload', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      scopedManager.trackDiscoverToDashboardEvent({
+        [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.tabSwitched,
+        [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]: 'dashboard-1',
+        [DiscoverInDashboardEventDataKeys.EMBEDDABLE_PANEL_ID]: 'panel-1',
+        [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: 'session-1',
+        [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_FROM_ID]: 'tab-1',
+        [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_TO_ID]: 'tab-2',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_in_dashboard', {
+        eventName: 'tabSwitched',
+        dashboardId: 'dashboard-1',
+        embeddablePanelId: 'panel-1',
+        savedSessionId: 'session-1',
+        tabSwitchedFromId: 'tab-1',
+        tabSwitchedToId: 'tab-2',
+      });
     });
   });
 });
