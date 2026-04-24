@@ -7,8 +7,6 @@ on:
         description: Pull request number to review
         required: true
         type: string
-resources:
-  - ../agents/code-reviewer.md
 imports:
   - .github/agents/code-reviewer.md
 secrets:
