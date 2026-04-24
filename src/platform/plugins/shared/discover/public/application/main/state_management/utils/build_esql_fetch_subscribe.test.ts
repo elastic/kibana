@@ -758,15 +758,10 @@ describe('buildEsqlFetchSubscribe', () => {
     expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns']);
   });
 
-  const makeEsqlCols = (names: string[]) =>
-    names.map((name) => ({ id: name, name, meta: { type: 'string' as const } }));
-
-  test('#189909: DROP on a user-selected column should remove the ghost column from appState', async () => {
+  test('should remove dropped columns from the DROP command', async () => {
     const { toolkit, replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
 
-    // First fetch: 7 columns, non-transformational → nextDefaultColumns = [] (> 5 threshold)
-    const sevenCols = makeEsqlCols(['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7']);
     const sevenRaw = { f1: 1, f2: 2, f3: 3, f4: 4, f5: 5, f6: 6, f7: 7 };
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -775,15 +770,12 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     replaceUrlState.mockClear();
 
-    // User manually selects f1 and f2
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.updateAppState)({
         appState: { columns: ['f1', 'f2'] },
       })
     );
 
-    // Second fetch: DROP f2 → schema has 6 columns [f1, f3, f4, f5, f6, f7], still > 5 threshold
-    // ghostColumnFilter path kicks in: f2 is a ghost → filter appState.columns to ['f1']
     const afterDropRaw = { f1: 1, f3: 3, f4: 4, f5: 5, f6: 6, f7: 7 };
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -797,11 +789,10 @@ describe('buildEsqlFetchSubscribe', () => {
     expect(replaceUrlState).toHaveBeenCalledWith({ tabId, appState: { columns: ['f1'] } });
   });
 
-  test('#189909: running the same DROP query a second time should not spuriously clear columns', async () => {
+  test('should not spuriously clear columns running the same DROP query a second time', async () => {
     const { toolkit, replaceUrlState, dataState } = await setupTest({});
     const documents$ = dataState.data$.documents$;
 
-    // Setup: 7 columns, non-transformational → defaultColumns = []
     const sevenRaw = { f1: 1, f2: 2, f3: 3, f4: 4, f5: 5, f6: 6, f7: 7 };
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -814,14 +805,12 @@ describe('buildEsqlFetchSubscribe', () => {
       })
     );
 
-    // First DROP run: removes ghost f2, leaves ['f1'] in appState
     const dropRaw = { f1: 1, f3: 3, f4: 4, f5: 5, f6: 6, f7: 7 };
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [{ id: '1', raw: dropRaw, flattened: dropRaw } as unknown as DataTableRecord],
       query: { esql: 'from the-data-view-title | drop f2' },
     });
-    // Simulate appState reflecting the dispatched columns update
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.updateAppState)({
         appState: { columns: ['f1'] },
@@ -829,14 +818,12 @@ describe('buildEsqlFetchSubscribe', () => {
     );
     replaceUrlState.mockClear();
 
-    // Second run of the exact same DROP query — schema unchanged, no ghost columns
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [{ id: '1', raw: dropRaw, flattened: dropRaw } as unknown as DataTableRecord],
       query: { esql: 'from the-data-view-title | drop f2' },
     });
 
-    // allColumnsChanged = false (schema unchanged) → no dispatch
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
 });
