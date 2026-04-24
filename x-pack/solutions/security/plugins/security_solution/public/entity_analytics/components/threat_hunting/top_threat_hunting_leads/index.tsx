@@ -118,9 +118,9 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
               <EuiTitle size="m">
-                <h2>{i18n.TOP_THREAT_HUNTING_LEADS_TITLE}</h2>
+                <h2 className="eui-textTruncate">{i18n.TOP_THREAT_HUNTING_LEADS_TITLE}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -396,7 +396,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
               )}
             </EuiPanel>
           ) : (
-            <div ref={setCardsContainer} style={{ overflow: 'hidden' }}>
+            <div ref={setCardsContainer} style={{ overflow: 'hidden', padding: 16, margin: -8 }}>
               <EuiFlexGroup
                 gutterSize="m"
                 responsive={false}

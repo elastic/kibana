@@ -61,6 +61,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
       data-test-subj={`leadCard-${lead.id}`}
       css={{
         minWidth: 0,
+        maxWidth: 480,
         '.euiCard__titleButton': { maxWidth: '100%' },
       }}
     />
