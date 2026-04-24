@@ -11,7 +11,7 @@ import Path from 'path';
 import Fsp from 'fs/promises';
 import zlib from 'zlib';
 import { promisify } from 'util';
-import { cpus } from 'os';
+import { availableParallelism } from 'os';
 
 import globby from 'globby';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -52,7 +52,7 @@ export const BuildRspackBundles: Task = {
     const brotliQuality = buildConfig.isRelease ? zlib.constants.BROTLI_MAX_QUALITY : 9;
     const jsFiles = await globby(['**/*.js'], { cwd: bundlesDir, absolute: true });
     log.info(`Brotli-compressing ${jsFiles.length} bundle files...`);
-    await asyncForEachWithLimit(jsFiles, cpus().length, async (file) => {
+    await asyncForEachWithLimit(jsFiles, availableParallelism(), async (file) => {
       const content = await Fsp.readFile(file);
       const compressed = await brotliCompressAsync(content, {
         params: { [zlib.constants.BROTLI_PARAM_QUALITY]: brotliQuality },
