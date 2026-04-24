@@ -19,7 +19,6 @@ test.describe(
     });
 
     test('renders JVM metrics overview for JRuby agent', async ({
-      page,
       pageObjects: { serviceDetailsPage },
     }) => {
       await serviceDetailsPage.metricsTab.goToTab({
@@ -29,7 +28,9 @@ test.describe(
       });
 
       await test.step('JVM table is visible', async () => {
-        await expect(page.locator('.euiTable')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+        await expect(serviceDetailsPage.metricsTab.jvmMetricsTable).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
 
       await test.step('Dashboard panels are not shown', async () => {

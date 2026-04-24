@@ -27,11 +27,13 @@ export class MetricsTab extends ServiceDetailsTab {
   public readonly tab: Locator;
 
   public readonly noDashboardCallout: Locator;
+  public readonly jvmMetricsTable: Locator;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
     this.noDashboardCallout = this.page.getByTestId('apmMetricsNoDashboardFound');
+    this.jvmMetricsTable = this.page.getByTestId('apmJvmMetricsTable');
   }
 
   protected async waitForTabLoad(): Promise<void> {

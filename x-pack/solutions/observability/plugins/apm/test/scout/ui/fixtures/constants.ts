@@ -63,6 +63,7 @@ export const SERVICE_METRICS_OTEL_NATIVE_OTEL_JAVA = 'metrics-on-otel-java';
 export const SERVICE_METRICS_OTEL_NATIVE_OTEL_NODEJS = 'metrics-on-otel-nodejs';
 export const SERVICE_METRICS_OTEL_NATIVE_OTEL_PYTHON = 'metrics-on-otel-python';
 export const SERVICE_METRICS_OTEL_NATIVE_OTEL_GO = 'metrics-on-otel-go';
+export const SERVICE_METRICS_RUST = 'metrics-rust';
 
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 export const APPLE_TRANSACTION_NAME = 'GET /apple 🍎';
