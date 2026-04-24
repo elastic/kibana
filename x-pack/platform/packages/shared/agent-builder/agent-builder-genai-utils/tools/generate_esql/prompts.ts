@@ -131,7 +131,7 @@ Format any ES|QL query as follows:
 ${nlQuery}
 </user_query>
 
-${additionalContext ? `<additional_context>\n${additionalContext}\n</additional_context>` : ''}
+${additionalContext ? `<additional_context>\n${additionalContext}\n</<additional_context>` : ''}
 
 ${formatResourceWithSampledValues({ resource })}
 
