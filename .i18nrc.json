@@ -81,6 +81,7 @@
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnConfig": "src/platform/packages/shared/kbn-config/src",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
+    "kbnUI": "src/platform/kbn-ui",
     "kibana_utils": "src/platform/plugins/shared/kibana_utils",
     "kibana-react": "src/platform/plugins/shared/kibana_react",
     "kibanaOverview": "src/platform/plugins/private/kibana_overview",
