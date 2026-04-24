@@ -382,6 +382,13 @@ paths:
         '500':
           content:
             application/json:
+              examples:
+                InitMonitoringEngineError:
+                  summary: Internal server error during engine initialization
+                  value:
+                    error:
+                      message: Failed to initialize monitoring engine
+                    status: error
               schema:
                 $ref: '#/components/schemas/MonitoringEngineDescriptor'
           description: Internal Server Error
@@ -413,6 +420,11 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                ScheduleMonitoringEngineConflict:
+                  summary: Engine is already running
+                  value:
+                    message: Monitoring engine is already running
               schema:
                 type: object
                 properties:
@@ -484,13 +496,16 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                has_all_required: true
-                privileges:
-                  elasticsearch:
-                    index:
-                      .entity_analytics.monitoring.user-default:
-                        read: true
+              examples:
+                PrivMonPrivilegesResponse:
+                  summary: Privileges check response
+                  value:
+                    has_all_required: true
+                    privileges:
+                      elasticsearch:
+                        index:
+                          .entity_analytics.monitoring.user-default:
+                            read: true
               schema:
                 $ref: '#/components/schemas/EntityAnalyticsPrivileges'
           description: Successful response
@@ -555,6 +570,14 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              PrivmonBulkUploadUsersCSVRequest:
+                summary: CSV file with privileged users
+                value:
+                  file: |
+                    username,is_privileged
+                    john.doe,true
+                    jane.smith,true
             schema:
               type: object
               properties:
@@ -568,17 +591,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                PrivmonBulkUploadUsersCSVResponse:
+                  summary: Bulk upload response with mixed results
+                  value:
+                    errors:
+                      - index: 1
+                        message: Invalid monitored field
+                        username: john.doe
+                    stats:
+                      failedOperations: 1
+                      successfulOperations: 1
+                      totalOperations: 2
+                      uploaded: 2
               schema:
-                example:
-                  errors:
-                    - index: 1
-                      message: Invalid monitored field
-                      username: john.doe
-                  stats:
-                    failedOperations: 1
-                    successfulOperations: 1
-                    totalOperations: 2
-                    uploaded: 1
                 type: object
                 properties:
                   errors:
@@ -601,7 +627,8 @@ paths:
       description: Removes a privileged user from monitoring by their document ID.
       operationId: DeletePrivMonUser
       parameters:
-        - in: path
+        - description: The document ID of the monitored user to delete
+          in: path
           name: id
           required: true
           schema:
@@ -639,7 +666,8 @@ paths:
         document ID.
       operationId: UpdatePrivMonUser
       parameters:
-        - in: path
+        - description: The document ID of the monitored user to update
+          in: path
           name: id
           required: true
           schema:

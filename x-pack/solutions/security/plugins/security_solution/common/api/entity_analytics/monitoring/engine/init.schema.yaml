@@ -30,3 +30,10 @@ paths:
             application/json:
               schema:
                 $ref: "../common.schema.yaml#/components/schemas/MonitoringEngineDescriptor"
+              examples:
+                InitMonitoringEngineError:
+                  summary: Internal server error during engine initialization
+                  value:
+                    status: error
+                    error:
+                      message: "Failed to initialize monitoring engine"
