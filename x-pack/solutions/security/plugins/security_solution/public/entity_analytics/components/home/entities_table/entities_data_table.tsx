@@ -42,6 +42,7 @@ import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { inputsModel } from '../../../../common/store';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';
@@ -465,7 +466,14 @@ export const EntitiesDataTable = ({
         if (!doc) return null;
         const { entityType, entityName } = getEntityFields(doc);
         if (!entityName || !entityType) return null;
-        return <EntityAlertsCell entityName={entityName} entityType={entityType} />;
+        const entityRecord = doc?.raw?._source ? (doc.raw._source as EntityStoreRecord) : null;
+        return (
+          <EntityAlertsCell
+            entityRecord={entityRecord}
+            entityName={entityName}
+            entityType={entityType}
+          />
+        );
       },
     };
 
