@@ -60,10 +60,10 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
    * options lits.
    */
   useEffect(() => {
-    if (isDisabled) {
+    if (isDisabled || isLoading) {
       comboBoxRef.current?.closeList();
     }
-  }, [isDisabled]);
+  }, [isDisabled, isLoading]);
 
   return (
     <ComboBoxField
