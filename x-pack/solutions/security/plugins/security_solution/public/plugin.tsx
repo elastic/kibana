@@ -75,6 +75,9 @@ import { generateIndicatorAttachmentType } from './cases/attachments/indicator/u
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
+import { registerEntityCardAttachment } from './agent_builder/attachment_types/entity_card_attachment';
+import { registerEntityListAttachment } from './agent_builder/attachment_types/entity_list_attachment';
+import { registerEntityAnalyticsDashboardAttachment } from './agent_builder/attachment_types/entity_analytics_dashboard_attachment';
 import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
 import { registerWorkflowSteps } from './workflows/step_types';
 
@@ -302,6 +305,32 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
         aiRuleCreation: this.services.aiRuleCreation,
+      });
+      registerEntityCardAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        resolveSecurityCanvasContext: async () => {
+          const startedSubPlugins = await this.ensureStartedSubPlugins(core, plugins);
+          const [store, kibanaServices] = await Promise.all([
+            this.store(core, plugins, startedSubPlugins),
+            this.services.generateServices(core, plugins as StartPluginsDependencies),
+          ]);
+          return { store, kibanaServices };
+        },
+      });
+      registerEntityListAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+      });
+      registerEntityAnalyticsDashboardAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
       });
     }
 

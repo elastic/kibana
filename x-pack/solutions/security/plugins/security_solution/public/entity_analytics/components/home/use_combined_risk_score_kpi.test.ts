@@ -9,10 +9,28 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useCombinedRiskScoreKpi } from './use_combined_risk_score_kpi';
 import { TestProviders } from '../../../common/mock';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
+import { useEntityStoreRiskScoreKpi } from '../../api/hooks/use_entity_store_risk_score_kpi';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 
 jest.mock('../../api/hooks/use_risk_score_kpi');
+jest.mock('../../api/hooks/use_entity_store_risk_score_kpi', () => ({
+  useEntityStoreRiskScoreKpi: jest.fn(() => ({
+    severityCount: undefined,
+    loading: false,
+    error: undefined,
+    isModuleDisabled: false,
+    refetch: jest.fn(),
+    inspect: { dsl: [], response: [] },
+  })),
+}));
+jest.mock('../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...actual,
+    useUiSetting: jest.fn(() => false),
+  };
+});
 jest.mock('../../../common/hooks/use_global_filter_query', () => ({
   useGlobalFilterQuery: jest.fn(() => ({ filterQuery: '' })),
 }));
@@ -24,6 +42,7 @@ jest.mock('../../../common/containers/use_global_time', () => ({
 }));
 
 const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
+const mockUseEntityStoreRiskScoreKpi = useEntityStoreRiskScoreKpi as jest.Mock;
 
 describe('useCombinedRiskScoreKpi', () => {
   beforeEach(() => {
@@ -95,6 +114,20 @@ describe('useCombinedRiskScoreKpi', () => {
     expect(mockUseRiskScoreKpi).toHaveBeenCalledWith(
       expect.objectContaining({
         riskEntity: [EntityType.user, EntityType.host, EntityType.service],
+        skip: false,
+      })
+    );
+    expect(mockUseEntityStoreRiskScoreKpi).toHaveBeenCalledTimes(2);
+    expect(mockUseEntityStoreRiskScoreKpi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        riskEntity: EntityType.host,
+        skip: true,
+      })
+    );
+    expect(mockUseEntityStoreRiskScoreKpi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        riskEntity: EntityType.user,
+        skip: true,
       })
     );
   });
