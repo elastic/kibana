@@ -142,16 +142,14 @@ export async function runWorkflow({
   } finally {
     loopSpan?.end();
 
-    if (workflowsExecutionEngine) {
-      await emitWorkflowExecutionFailedEventIfFailed({
-        workflowRuntime,
-        workflowExecutionState,
-        emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
-        request: fakeRequest,
-        logger,
-        workflowRunId,
-      });
-    }
+    await emitWorkflowExecutionFailedEventIfFailed({
+      workflowRuntime,
+      workflowExecutionState,
+      emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
+      request: fakeRequest,
+      logger,
+      workflowRunId,
+    });
   }
 
   // Report metering after execution completes and state is flushed.
