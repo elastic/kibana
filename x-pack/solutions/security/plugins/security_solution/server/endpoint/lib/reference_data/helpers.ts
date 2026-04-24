@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import pRetry from 'p-retry';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import { ReferenceDataClient } from './reference_data_client';
-import { REF_DATA_KEYS } from './constants';
+import { REF_DATA_KEYS, REFERENCE_DATA_SAVED_OBJECT_TYPE } from './constants';
 import type { OptInStatusMetadata } from './types';
 
 /**
@@ -40,12 +41,12 @@ export const getIsEndpointExceptionsPerPolicyEnabled = async (
  * It has to be called during plugin.start() to ensure that the data used to decide
  * whether opt-in should be enabled or not is not initialized yet on new deployments.
  *
- * @param soClient soClient with write access to REFERENCE_DATA_SAVED_OBJECT_TYPE
+ * @param savedObjectsServiceStart SavedObjectsServiceStart
  * @param experimentalFeatures
  * @param logger
  */
 export const initializeEndpointExceptionsPerPolicyOptInStatus = async (
-  soClient: SavedObjectsClientContract,
+  savedObjectsServiceStart: SavedObjectsServiceStart,
   experimentalFeatures: ExperimentalFeatures,
   _logger: Logger
 ): Promise<void> => {
@@ -53,6 +54,10 @@ export const initializeEndpointExceptionsPerPolicyOptInStatus = async (
 
   await pRetry(
     async () => {
+      const soClient = new SavedObjectsClient(
+        savedObjectsServiceStart.createInternalRepository([REFERENCE_DATA_SAVED_OBJECT_TYPE])
+      );
+
       const referenceDataClient = new ReferenceDataClient(soClient, experimentalFeatures, logger);
 
       const result = await referenceDataClient.get<OptInStatusMetadata>(
