@@ -8,7 +8,7 @@ on:
         required: true
         type: string
 resources:
-  - utils/prefetch-pr-context.yml
+  - prefetch-pr-context.yml
 imports:
   - .github/agents/code-reviewer.md
 secrets:
@@ -34,7 +34,7 @@ network:
     - elastic.litellm-prod.ai
 jobs:
   prefetch_pr_context:
-    uses: ./.github/workflows/utils/prefetch-pr-context.yml
+    uses: ./.github/workflows/prefetch-pr-context.yml
     with:
       pr_number: ${{ github.event.inputs.pr_number }}
       repo: ${{ github.repository }}

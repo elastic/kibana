@@ -27,6 +27,17 @@ jobs:
       issues: read
       pull-requests: read
     steps:
+      - name: Reject fork pull requests
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          REPO: ${{ inputs.repo }}
+        run: |
+          IS_FORK="$(gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '.head.repo.full_name != .base.repo.full_name')"
+          if [ "$IS_FORK" = "true" ]; then
+            echo "Fork pull requests are not supported by reviewer-claude." >&2
+            exit 1
+          fi
       - name: Fetch PR context
         env:
           GH_TOKEN: ${{ secrets.github_token }}
