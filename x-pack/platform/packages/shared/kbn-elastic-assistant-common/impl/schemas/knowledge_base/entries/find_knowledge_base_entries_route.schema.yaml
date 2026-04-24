@@ -6,6 +6,13 @@ paths:
   /api/security_ai_assistant/knowledge_base/entries/_find:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/_find?page=1&per_page=20' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: FindKnowledgeBaseEntries
       description: Finds Knowledge Base Entries that match the given query.
@@ -21,7 +28,7 @@ paths:
             type: array
             items:
               type: string
-            example: ['title', 'created_at']
+            example: ['name', 'created_at']
         - name: 'filter'
           in: query
           description: Search query to filter Knowledge Base Entries by specific criteria.
@@ -92,8 +99,27 @@ paths:
                   - perPage
                   - total
                   - data
+              examples:
+                FindKnowledgeBaseEntriesResponse200Example:
+                  value:
+                    page: 1
+                    perPage: 20
+                    total: 100
+                    data:
+                      - id: "12345"
+                        name: "How to reset a password"
+                        type: "document"
+                        kbResource: "user"
+                        source: "manual"
+                        text: "To reset your password, go to the settings page and click 'Reset Password'."
+                        createdAt: "2024-01-15T10:00:00.000Z"
+                        createdBy: "user@example.com"
+                        updatedAt: "2024-01-15T10:00:00.000Z"
+                        updatedBy: "user@example.com"
+                        namespace: "default"
+                        global: false
         400:
-          description: Generic Error indicating an issue with the request.
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -111,6 +137,12 @@ paths:
                     type: string
                     description: A detailed message explaining the error.
                     example: 'Invalid query parameter: sort_order'
+              examples:
+                FindKnowledgeBaseEntriesResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid query parameter: sort_order"
 
 components:
   schemas:

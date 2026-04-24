@@ -854,4 +854,150 @@ steps:
       expect(passedContext.metadata).toEqual(scheduleMeta);
     });
   });
+
+  describe('bulkScheduleWorkflow', () => {
+    const workflowA = {
+      id: 'wf-a',
+      name: 'Workflow A',
+      enabled: true,
+      definition: { triggers: [{ type: 'manual' }], steps: [] },
+      yaml: 'name: Workflow A',
+    };
+    const workflowB = {
+      id: 'wf-b',
+      name: 'Workflow B',
+      enabled: true,
+      definition: { triggers: [{ type: 'manual' }], steps: [] },
+      yaml: 'name: Workflow B',
+    };
+
+    it('returns an empty result and forwards an empty array to the engine', async () => {
+      const mockWorkflowsExecutionEngine = {
+        bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const result = await api.bulkScheduleWorkflow([], mockRequest);
+
+      expect(result).toEqual([]);
+      expect(mockWorkflowsExecutionEngine.bulkScheduleWorkflow).toHaveBeenCalledWith(
+        [],
+        mockRequest
+      );
+    });
+
+    it('forwards items to the engine with a single per-batch call and the expected context shape', async () => {
+      const engineResults = [
+        { status: 'scheduled' as const, workflowExecutionId: 'exec-1' },
+        { status: 'scheduled' as const, workflowExecutionId: 'exec-2' },
+      ];
+      const mockWorkflowsExecutionEngine = {
+        bulkScheduleWorkflow: jest.fn().mockResolvedValue(engineResults),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const result = await api.bulkScheduleWorkflow(
+        [
+          {
+            workflow: workflowA as any,
+            spaceId: 'space-one',
+            inputs: { event: { k: 1 }, manualKey: 'a' },
+            triggeredBy: 'trigger-a',
+          },
+          {
+            workflow: workflowB as any,
+            spaceId: 'space-two',
+            inputs: { event: { k: 2 } },
+            triggeredBy: 'trigger-b',
+          },
+        ],
+        mockRequest
+      );
+
+      expect(result).toBe(engineResults);
+      expect(mockWorkflowsExecutionEngine.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+
+      const [passedItems, passedRequest] =
+        mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mock.calls[0];
+      expect(passedRequest).toBe(mockRequest);
+      expect(passedItems).toEqual([
+        {
+          workflow: workflowA,
+          context: {
+            event: { k: 1 },
+            spaceId: 'space-one',
+            inputs: { manualKey: 'a' },
+            triggeredBy: 'trigger-a',
+          },
+        },
+        {
+          workflow: workflowB,
+          context: {
+            event: { k: 2 },
+            spaceId: 'space-two',
+            inputs: {},
+            triggeredBy: 'trigger-b',
+          },
+        },
+      ]);
+    });
+
+    it('passes optional metadata on each item into the forwarded execution context', async () => {
+      const mockWorkflowsExecutionEngine = {
+        bulkScheduleWorkflow: jest
+          .fn()
+          .mockResolvedValue([{ status: 'scheduled', workflowExecutionId: 'exec-meta' }]),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const meta = {
+        eventDispatchTimestamp: '2024-01-01T00:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+        eventId: 'evt-1',
+      };
+
+      await api.bulkScheduleWorkflow(
+        [
+          {
+            workflow: workflowA as any,
+            spaceId: 'default',
+            inputs: { event: { x: 1 } },
+            triggeredBy: 'cases.updated',
+            metadata: meta,
+          },
+        ],
+        mockRequest
+      );
+
+      const [passedItems] = mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mock.calls[0];
+      expect(passedItems).toHaveLength(1);
+      expect(passedItems[0].context.metadata).toEqual(meta);
+    });
+
+    it('passes the engine result through unchanged (order + per-item errors)', async () => {
+      const engineResults = [
+        { status: 'scheduled' as const, workflowExecutionId: 'exec-ok' },
+        {
+          status: 'error' as const,
+          error: { message: 'schedule failed', code: 'SCHEDULE_ERR' },
+        },
+        { status: 'scheduled' as const, workflowExecutionId: 'exec-ok-2' },
+      ];
+      const mockWorkflowsExecutionEngine = {
+        bulkScheduleWorkflow: jest.fn().mockResolvedValue(engineResults),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const result = await api.bulkScheduleWorkflow(
+        [
+          { workflow: workflowA as any, spaceId: 'default', inputs: {}, triggeredBy: 't1' },
+          { workflow: workflowB as any, spaceId: 'default', inputs: {}, triggeredBy: 't2' },
+          { workflow: workflowA as any, spaceId: 'default', inputs: {}, triggeredBy: 't3' },
+        ],
+        mockRequest
+      );
+
+      expect(result).toBe(engineResults);
+    });
+  });
 });

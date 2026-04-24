@@ -6,7 +6,7 @@
  */
 
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
-import { isInternalTool } from '@kbn/agent-builder-common/tools';
+import { ToolOrigin } from '@kbn/agent-builder-common/tools';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiLink, EuiText, EuiCode } from '@elastic/eui';
@@ -36,6 +36,8 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
   const { createAgentBuilderUrl } = useNavigation();
   const toolHref = createAgentBuilderUrl(appPaths.tools.details({ toolId }));
   const toolLinkId = `tool-link-${toolId}`;
+
+  const isLinkable = isRegistryTool(step);
   const hasResults = step.results.length > 0;
 
   return (
@@ -51,7 +53,7 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
             id="xpack.agentBuilder.thinking.toolCallThinkingItem"
             defaultMessage="Calling tool {tool}"
             values={{
-              tool: isInternalTool(toolId) ? (
+              tool: !isLinkable ? (
                 <EuiCode>{toolId}</EuiCode>
               ) : (
                 <code>
@@ -72,4 +74,10 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
       </EuiText>
     </ThinkingItemLayout>
   );
+};
+
+const isRegistryTool = (step: ToolCallStep): boolean => {
+  // For legacy conversations, missing origin means we cannot distinguish
+  // registry vs inline; treat it as registry to keep tool details linkable.
+  return step.tool_origin === undefined || step.tool_origin === ToolOrigin.registry;
 };
