@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AddPanelFlyout } from './add_panel_flyout';
 import type { DashboardApi } from '../../../../dashboard_api/types';
+import { EuiThemeProvider } from '@elastic/eui';
 
 jest.mock('../get_menu_item_groups', () => ({}));
 
@@ -26,6 +27,12 @@ jest.mock('../../../../services/kibana_services', () => {
   };
 });
 
+const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
+  <EuiThemeProvider>
+    <IntlProvider locale="en">{children}</IntlProvider>
+  </EuiThemeProvider>
+);
+
 const mockDashboardApi = {} as unknown as DashboardApi;
 
 describe('AddPanelFlyout', () => {
@@ -36,11 +43,9 @@ describe('AddPanelFlyout', () => {
     });
 
     test('renders "New" and "From library" tabs', async () => {
-      render(
-        <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
-        </IntlProvider>
-      );
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
       await waitFor(async () => {
         expect(screen.getByTestId('addToDashboardFlyout-header')).toBeInTheDocument();
       });
@@ -49,11 +54,9 @@ describe('AddPanelFlyout', () => {
     });
 
     test('defaults to "New" tab', async () => {
-      render(
-        <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
-        </IntlProvider>
-      );
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
 
       await waitFor(async () => {
         expect(screen.getByTestId('addToDashboardTab-new')).toBeInTheDocument();
@@ -62,11 +65,9 @@ describe('AddPanelFlyout', () => {
     });
 
     test('switches to "From library" tab on click', async () => {
-      render(
-        <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
-        </IntlProvider>
-      );
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
       await waitFor(async () => {
         expect(screen.getByTestId('addToDashboardTab-library')).toBeInTheDocument();
       });
@@ -78,13 +79,14 @@ describe('AddPanelFlyout', () => {
 
     test('opens to "From library" tab when initialTab is "library"', async () => {
       render(
-        <IntlProvider locale="en">
-          <AddPanelFlyout
-            dashboardApi={mockDashboardApi}
-            ariaLabelledBy="addPanelFlyout"
-            initialTab="library"
-          />
-        </IntlProvider>
+        <AddPanelFlyout
+          dashboardApi={mockDashboardApi}
+          ariaLabelledBy="addPanelFlyout"
+          initialTab="library"
+        />,
+        {
+          wrapper: ContextWrapper,
+        }
       );
 
       await waitFor(() => {
@@ -104,11 +106,9 @@ describe('AddPanelFlyout', () => {
     });
 
     test('displays "Add to dashboard" heading', async () => {
-      render(
-        <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
-        </IntlProvider>
-      );
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
       await waitFor(() => {
         expect(screen.getByText('Add to dashboard')).toBeInTheDocument();
       });
@@ -124,11 +124,9 @@ describe('AddPanelFlyout', () => {
     });
 
     test('displays getMenuItemGroups error', async () => {
-      render(
-        <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
-        </IntlProvider>
-      );
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
 
       await waitFor(() => {
         screen.getByTestId('dashboardPanelSelectionErrorIndicator');
@@ -163,11 +161,9 @@ describe('AddPanelFlyout', () => {
     });
 
     test('calls item onClick handler when item is clicked', async () => {
-      render(
-        <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
-        </IntlProvider>
-      );
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
 
       await waitFor(async () => {
         await userEvent.click(screen.getByTestId('myItem'));
@@ -176,11 +172,9 @@ describe('AddPanelFlyout', () => {
     });
 
     test('displays not found message when a user searches for an item that is not in the selection list', async () => {
-      render(
-        <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
-        </IntlProvider>
-      );
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
 
       await waitFor(async () => {
         await userEvent.type(
