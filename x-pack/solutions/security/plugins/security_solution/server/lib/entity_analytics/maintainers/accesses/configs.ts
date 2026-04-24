@@ -18,14 +18,6 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: elasticDefendIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
-    compositeAggFilters: [
-      { term: { 'event.action': 'log_on' } },
-      {
-        terms: {
-          'process.Ext.session_info.logon_type': ['RemoteInteractive', 'Interactive', 'Network'],
-        },
-      },
-    ],
     esqlWhereClause: `event.action == "log_on"
     AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive", "Network")`,
   },
@@ -35,10 +27,6 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: awsCloudtrailAccessesIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
-    compositeAggFilters: [
-      { term: { 'event.module': 'aws' } },
-      { terms: { 'event.action': ['StartSession', 'SendSSHPublicKey'] } },
-    ],
     esqlWhereClause: `event.module == "aws"
     AND event.action IN ("StartSession", "SendSSHPublicKey")`,
   },
@@ -48,18 +36,6 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: systemAuthIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
-    compositeAggFilters: [
-      {
-        bool: {
-          should: [
-            { term: { 'event.category': 'authentication' } },
-            { term: { 'event.category': 'session' } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      { term: { 'event.action': 'ssh_login' } },
-    ],
     esqlWhereClause: `event.category IN ("authentication", "session")
     AND event.action == "ssh_login"`,
   },
@@ -69,22 +45,6 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     indexPattern: systemSecurityIndexPattern,
     relationshipType: 'accesses',
     targetEntityType: 'host',
-    compositeAggFilters: [
-      { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
-      { terms: { 'event.code': ['4624', '4648'] } },
-      { terms: { 'winlog.logon.type': ['Interactive', 'RemoteInteractive', 'CachedInteractive'] } },
-      {
-        bool: {
-          must_not: [
-            {
-              terms: {
-                'user.name': EXCLUDED_USERNAMES,
-              },
-            },
-          ],
-        },
-      },
-    ],
     esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
     AND event.code IN ("4624", "4648")
     AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")

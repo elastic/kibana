@@ -14,7 +14,6 @@ const accessesConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-test-${ns}`,
   relationshipType: 'accesses',
   targetEntityType: 'host',
-  compositeAggFilters: [{ term: { 'event.action': 'log_on' } }],
   esqlWhereClause: 'event.action == "log_on"',
 };
 
@@ -24,26 +23,16 @@ const communicatesConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-okta-${ns}`,
   relationshipType: 'communicates_with',
   targetEntityType: 'user',
-  compositeAggFilters: [{ terms: { 'event.action': ['user.lifecycle.create'] } }],
   esqlWhereClause: 'event.action == "user.lifecycle.create"',
 };
 
 describe('buildCompositeAgg', () => {
-  it('uses buildCompositeAggOverride when provided', () => {
-    const override = jest.fn().mockReturnValue({ size: 0, query: { match_all: {} }, aggs: {} });
-    const config: RelationshipIntegrationConfig = {
-      ...accessesConfig,
-      buildCompositeAggOverride: override,
-    };
-    buildCompositeAgg(config, undefined);
-    expect(override).toHaveBeenCalledWith(undefined);
-  });
-
   it('includes timestamp range filter', () => {
     const result = buildCompositeAgg(accessesConfig, undefined);
-    const filters: unknown[] = (result as any).query.bool.filter;
+    const filters = (result as { query: { bool: { filter: Array<Record<string, unknown>> } } })
+      .query.bool.filter;
     const hasRange = filters.some(
-      (f: any) => f.range?.['@timestamp']
+      (f) => (f.range as Record<string, unknown> | undefined)?.['@timestamp']
     );
     expect(hasRange).toBe(true);
   });
@@ -68,10 +57,24 @@ describe('buildCompositeAgg', () => {
     expect(queryStr).not.toContain('"success"');
   });
 
-  it('includes the integration-specific compositeAggFilters', () => {
-    const result = buildCompositeAgg(accessesConfig, undefined);
-    const queryStr = JSON.stringify(result);
-    expect(queryStr).toContain('log_on');
+  it('uses actorFields as composite sources when provided', () => {
+    const config: RelationshipIntegrationConfig = {
+      ...accessesConfig,
+      actorFields: ['custom.actor.field'],
+    };
+    const result = buildCompositeAgg(config, undefined);
+    expect(JSON.stringify(result)).toContain('custom.actor.field');
+  });
+
+  it('uses actorFields in bucket filter when provided', () => {
+    const config: RelationshipIntegrationConfig = {
+      ...accessesConfig,
+      actorFields: ['custom.actor.field'],
+    };
+    const buckets: CompositeBucket[] = [{ key: { 'custom.actor.field': 'alice' }, doc_count: 1 }];
+    const result = buildBucketFilter(config, buckets);
+    expect(JSON.stringify(result)).toContain('custom.actor.field');
+    expect(JSON.stringify(result)).toContain('alice');
   });
 
   it('includes afterKey in composite sources when provided', () => {
@@ -82,17 +85,6 @@ describe('buildCompositeAgg', () => {
 });
 
 describe('buildBucketFilter', () => {
-  it('uses buildBucketFilterOverride when provided', () => {
-    const override = jest.fn().mockReturnValue({ term: { field: 'value' } });
-    const config: RelationshipIntegrationConfig = {
-      ...accessesConfig,
-      buildBucketFilterOverride: override,
-    };
-    const buckets: CompositeBucket[] = [{ key: { 'user.name': 'alice' }, doc_count: 1 }];
-    buildBucketFilter(config, buckets);
-    expect(override).toHaveBeenCalledWith(buckets);
-  });
-
   it('returns a bool/should filter for user identity fields', () => {
     const buckets: CompositeBucket[] = [
       { key: { 'user.email': 'alice@corp', 'user.name': null }, doc_count: 2 },

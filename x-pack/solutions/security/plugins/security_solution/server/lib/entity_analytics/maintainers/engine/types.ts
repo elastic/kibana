@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-
 export interface CompositeAfterKey {
   [key: string]: string | null;
 }
@@ -36,17 +34,17 @@ export interface RelationshipIntegrationConfig {
   /** Entity type of the relationship target (controls the default target EVAL). */
   targetEntityType: TargetEntityType;
   /**
-   * Integration-specific DSL filters for the composite aggregation query.
-   * The generic builder wraps these with timestamp, user-ID-existence, and
-   * (for 'accesses') host-ID-existence + event.outcome:success filters.
-   */
-  compositeAggFilters: QueryDslQueryContainer[];
-  /**
-   * Integration-specific ESQL WHERE clause (the part that varies per integration).
-   * For 'accesses': timestamp, user/host ID existence, and event.outcome == "success"
-   * are added automatically. For 'communicates_with': all needed filters must be here.
+   * Integration-specific ESQL WHERE clause — the single source of integration-specific
+   * query logic. For 'accesses': timestamp, user/host ID existence, and
+   * event.outcome == "success" are added automatically.
    */
   esqlWhereClause: string;
+  /**
+   * Actor field names used as composite aggregation sources and bucket filter keys.
+   * Defaults to ECS user identity fields. Set this for integrations whose actor is
+   * not in standard ECS user.* fields (e.g. azure_auditlogs).
+   */
+  actorFields?: string[];
   /**
    * Optional ESQL expression for the actor EUID.
    * Defaults to euid.esql.getEuidEvaluation('user', { withTypeId: true }).
@@ -65,17 +63,6 @@ export interface RelationshipIntegrationConfig {
    * Example: 'AND targetEntityId != "user:@okta"' for okta.
    */
   additionalTargetFilter?: string;
-  /**
-   * Fully overrides the composite aggregation builder.
-   * Required for integrations whose actor is not in standard ECS user.* fields
-   * and therefore cannot use the shared composite sources (e.g. azure_auditlogs).
-   */
-  buildCompositeAggOverride?: (afterKey?: CompositeAfterKey) => Record<string, unknown>;
-  /**
-   * Fully overrides the bucket user-filter builder.
-   * Required when buildCompositeAggOverride is provided and uses a non-standard field.
-   */
-  buildBucketFilterOverride?: (buckets: CompositeBucket[]) => QueryDslQueryContainer;
   /**
    * Fully overrides the ES|QL query builder.
    * Required for integrations with complex multi-type targets or non-ECS actor fields.

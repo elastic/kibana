@@ -14,8 +14,8 @@ const accessesConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-endpoint.events.security-${ns}`,
   relationshipType: 'accesses',
   targetEntityType: 'host',
-  compositeAggFilters: [],
-  esqlWhereClause: 'event.action == "log_on" AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive", "Network")',
+  esqlWhereClause:
+    'event.action == "log_on" AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive", "Network")',
 };
 
 const commWithHostConfig: RelationshipIntegrationConfig = {
@@ -24,7 +24,6 @@ const commWithHostConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
   relationshipType: 'communicates_with',
   targetEntityType: 'host',
-  compositeAggFilters: [],
   esqlWhereClause: 'user.name IS NOT NULL',
 };
 
@@ -34,7 +33,6 @@ const commWithUserConfig: RelationshipIntegrationConfig = {
   indexPattern: (ns) => `logs-okta.system-${ns}`,
   relationshipType: 'communicates_with',
   targetEntityType: 'user',
-  compositeAggFilters: [],
   esqlWhereClause: 'event.action IN ("user.lifecycle.create") AND user.target.email IS NOT NULL',
   targetEvalOverride: 'CONCAT("user:", user.target.email, "@okta")',
   additionalTargetFilter: 'AND targetEntityId != "user:@okta"',
@@ -49,7 +47,9 @@ describe('buildEsqlQuery', () => {
 
   describe('accesses template', () => {
     it('uses the namespace-derived index pattern', () => {
-      expect(buildEsqlQuery(accessesConfig, 'prod')).toContain('logs-endpoint.events.security-prod');
+      expect(buildEsqlQuery(accessesConfig, 'prod')).toContain(
+        'logs-endpoint.events.security-prod'
+      );
     });
 
     it('includes the integration esqlWhereClause', () => {
@@ -71,9 +71,9 @@ describe('buildEsqlQuery', () => {
     });
 
     it('uses a custom frequencyThreshold when provided', () => {
-      expect(
-        buildEsqlQuery({ ...accessesConfig, frequencyThreshold: 10 }, 'default')
-      ).toContain('>= 10');
+      expect(buildEsqlQuery({ ...accessesConfig, frequencyThreshold: 10 }, 'default')).toContain(
+        '>= 10'
+      );
     });
   });
 

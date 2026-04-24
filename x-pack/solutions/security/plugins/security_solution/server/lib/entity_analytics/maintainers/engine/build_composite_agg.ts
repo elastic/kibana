@@ -14,22 +14,14 @@ import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from './constants';
 
 const USER_IDENTITY_FIELDS = getEuidSourceFields('user').requiresOneOf;
 
-/**
- * Builds the composite aggregation query for the given integration config.
- * If buildCompositeAggOverride is provided on the config, delegates to it directly
- * (required for integrations like azure_auditlogs whose actor is not in ECS user.* fields).
- */
 export const buildCompositeAgg = (
   config: RelationshipIntegrationConfig,
   afterKey: CompositeAfterKey | undefined
 ): Record<string, unknown> => {
-  if (config.buildCompositeAggOverride) {
-    return config.buildCompositeAggOverride(afterKey);
-  }
+  const actorFields = config.actorFields ?? USER_IDENTITY_FIELDS;
 
   const baseFilters: QueryDslQueryContainer[] = [
     { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
-    ...config.compositeAggFilters,
     euid.dsl.getEuidDocumentsContainsIdFilter('user'),
   ];
 
@@ -46,7 +38,7 @@ export const buildCompositeAgg = (
         composite: {
           size: COMPOSITE_PAGE_SIZE,
           ...(afterKey ? { after: afterKey } : {}),
-          sources: USER_IDENTITY_FIELDS.map((field) => ({
+          sources: actorFields.map((field) => ({
             [field]: { terms: { field, missing_bucket: true } },
           })),
         },
@@ -55,18 +47,11 @@ export const buildCompositeAgg = (
   };
 };
 
-/**
- * Builds the DSL filter that scopes an ES|QL query to the users discovered
- * in a composite aggregation page.
- * If buildBucketFilterOverride is provided on the config, delegates to it directly.
- */
 export const buildBucketFilter = (
   config: RelationshipIntegrationConfig,
   buckets: CompositeBucket[]
 ): QueryDslQueryContainer => {
-  if (config.buildBucketFilterOverride) {
-    return config.buildBucketFilterOverride(buckets);
-  }
+  const actorFields = config.actorFields ?? USER_IDENTITY_FIELDS;
 
   if (buckets.length === 0) {
     return { bool: { must_not: { match_all: {} } } };
@@ -74,7 +59,7 @@ export const buildBucketFilter = (
 
   const valuesByField = new Map<string, Set<string>>();
   for (const bucket of buckets) {
-    for (const field of USER_IDENTITY_FIELDS) {
+    for (const field of actorFields) {
       const value = bucket.key[field];
       if (value != null) {
         let fieldSet = valuesByField.get(field);

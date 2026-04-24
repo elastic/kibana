@@ -6,27 +6,18 @@
  */
 
 import type { RelationshipIntegrationConfig } from '../engine/types';
-import {
-  buildCompositeAggQuery as azureBuildCompositeAgg,
-  buildBucketUserFilter as azureBuildBucketFilter,
-} from './integrations/azure_auditlogs/build_composite_agg';
 import { buildEsqlQuery as azureBuildEsqlQuery } from './integrations/azure_auditlogs/build_esql_query';
-import { getIndexPattern as oktaIndexPattern, OKTA_USER_ADMIN_EVENT_ACTIONS } from './integrations/okta/constants';
-import { getIndexPattern as jamfProIndexPattern } from './integrations/jamf_pro/constants';
-import { getIndexPattern as awsCloudtrailCommunicatesWithIndexPattern, HUMAN_IAM_IDENTITY_TYPES } from './integrations/aws_cloudtrail/constants';
-import { getIndexPattern as azureAuditlogsIndexPattern } from './integrations/azure_auditlogs/constants';
+import { AZURE_AUDITLOGS_ACTOR_UPN_FIELD } from './integrations/azure_auditlogs/constants';
+import { OKTA_USER_ADMIN_EVENT_ACTIONS } from './integrations/okta/constants';
+import { HUMAN_IAM_IDENTITY_TYPES } from './integrations/aws_cloudtrail/constants';
 
 export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     id: 'okta',
     name: 'Okta',
-    indexPattern: oktaIndexPattern,
+    indexPattern: (ns) => `logs-okta.system-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'user',
-    compositeAggFilters: [
-      { terms: { 'event.action': OKTA_USER_ADMIN_EVENT_ACTIONS } },
-      { exists: { field: 'user.target.email' } },
-    ],
     esqlWhereClause: `event.action IN (${OKTA_USER_ADMIN_EVENT_ACTIONS.map((a) => `"${a}"`).join(
       ', '
     )})
@@ -37,30 +28,17 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
   {
     id: 'jamf_pro',
     name: 'Jamf Pro',
-    indexPattern: jamfProIndexPattern,
+    indexPattern: (ns) => `logs-jamf_pro.events-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'host',
-    compositeAggFilters: [
-      { exists: { field: 'user.name' } },
-      {
-        bool: {
-          should: [{ exists: { field: 'host.name' } }, { exists: { field: 'host.id' } }],
-          minimum_should_match: 1,
-        },
-      },
-    ],
     esqlWhereClause: `user.name IS NOT NULL`,
   },
   {
     id: 'aws_cloudtrail',
     name: 'AWS CloudTrail',
-    indexPattern: awsCloudtrailCommunicatesWithIndexPattern,
+    indexPattern: (ns) => `logs-aws.cloudtrail-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'host',
-    compositeAggFilters: [
-      { terms: { 'aws.cloudtrail.user_identity.type': HUMAN_IAM_IDENTITY_TYPES } },
-      { exists: { field: 'host.target.entity.id' } },
-    ],
     esqlWhereClause: `aws.cloudtrail.user_identity.type IN (${HUMAN_IAM_IDENTITY_TYPES.map(
       (t) => `"${t}"`
     ).join(', ')})
@@ -70,15 +48,11 @@ export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] =
   {
     id: 'azure_auditlogs',
     name: 'Azure Audit Logs',
-    indexPattern: azureAuditlogsIndexPattern,
+    indexPattern: (ns) => `logs-azure.auditlogs-${ns}`,
     relationshipType: 'communicates_with',
     targetEntityType: 'user',
-    // azure_auditlogs uses a non-ECS actor field and complex multi-type targets;
-    // the standard composite agg, bucket filter, and ES|QL builders cannot be used.
-    compositeAggFilters: [],
     esqlWhereClause: '',
-    buildCompositeAggOverride: azureBuildCompositeAgg,
-    buildBucketFilterOverride: azureBuildBucketFilter,
+    actorFields: [AZURE_AUDITLOGS_ACTOR_UPN_FIELD],
     esqlQueryOverride: azureBuildEsqlQuery,
   },
 ];
