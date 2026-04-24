@@ -8,9 +8,10 @@
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { MIGRATE_AD_JOBS_TO_CPS_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 import { useMlKibana } from '../../contexts/kibana/kibana_context';
 
@@ -18,8 +19,12 @@ const CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY = 'ml.cpsUnsupportedCalloutDismissed';
 
 export const CPSUnsupportedWarning: FC = () => {
   const {
-    services: { cps, storage },
+    services: { cps, storage, uiActions },
   } = useMlKibana();
+
+  const onOpenMigrateFlyout = useCallback(() => {
+    void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {});
+  }, [uiActions]);
 
   const isCpsEnabled = Boolean(cps?.cpsManager && cps.cpsManager.getTotalProjectCount() > 1);
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -53,6 +58,18 @@ export const CPSUnsupportedWarning: FC = () => {
             defaultMessage="While we're working on this feature, all anomaly detection searches will be limited to the current project."
           />
         </p>
+        <EuiSpacer size="s" />
+        {/* TODO: remove this !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
+        <EuiButton
+          size="s"
+          color="primary"
+          onClick={onOpenMigrateFlyout}
+          data-test-subj="mlCpsUnsupportedCalloutMigrateJobs"
+        >
+          {i18n.translate('xpack.ml.cpsUnsupportedCallout.migrateButton', {
+            defaultMessage: 'Migrate anomaly detection jobs to CPS',
+          })}
+        </EuiButton>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
