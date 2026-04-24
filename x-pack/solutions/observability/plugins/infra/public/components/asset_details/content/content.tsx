@@ -44,17 +44,13 @@ export const Content = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <Callouts />
-          </EuiFlexItem>
-          {showDatePicker && (
-            <EuiFlexItem grow={false}>
-              <DatePickerWrapper />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <Callouts />
       </EuiFlexItem>
+      {showDatePicker && (
+        <EuiFlexItem grow={false}>
+          <DatePickerWrapper />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <TabPanel activeWhen={ContentTabIds.ANOMALIES}>
           <Anomalies />
