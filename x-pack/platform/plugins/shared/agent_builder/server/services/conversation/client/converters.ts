@@ -19,8 +19,10 @@ import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  ToolOrigin,
   ToolResultType,
 } from '@kbn/agent-builder-common';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
@@ -122,6 +124,7 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
               });
             }),
             progression: step.progression ?? [],
+            tool_origin: step.tool_origin ?? inferToolOrigin(step.tool_id),
           };
         } else {
           return step;
@@ -152,6 +155,15 @@ function migrateRoundState(state: RoundState & { agent: LegacyAgentStateFields }
   }
   return state;
 }
+
+const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
+  // Legacy rounds do not reliably differentiate registry vs inline tools.
+  // Only infer internal tools; leave others undefined for UI-side fallback.
+  if (isInternalTool(toolId)) {
+    return ToolOrigin.internal;
+  }
+  return undefined;
+};
 
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);

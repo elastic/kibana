@@ -114,6 +114,7 @@ export function FilterQueryInput({
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
           <EuiPopover
+            aria-label={label}
             isOpen={filterPopoverOpen}
             closePopover={onClosePopup}
             display="block"

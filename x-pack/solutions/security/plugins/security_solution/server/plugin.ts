@@ -820,20 +820,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
 
     if (plugins.workflowsExtensions) {
-      const workflowsExtensions = plugins.workflowsExtensions;
-      core
-        .getStartServices()
-        .then(async ([coreStart]) => {
-          await registerWorkflowSteps(workflowsExtensions, coreStart);
-        })
-        .catch((error) => {
-          this.logger.error(
-            `[RegisterAlertValidationSteps] Error registering alert validation steps: ${error.message}`,
-            {
-              error: error.stack,
-            }
-          );
-        });
+      registerWorkflowSteps(plugins.workflowsExtensions, core);
     }
 
     setupAlertsCapabilitiesSwitcher({

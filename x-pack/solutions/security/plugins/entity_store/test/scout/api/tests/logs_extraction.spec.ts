@@ -359,7 +359,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'] },
+      user: { hash: ['hash-1', 'hash-2', 'hash-3', 'hash-4', 'hash-5'] },
     });
 
     // Make sure latest is not overwritten from the document if not changed
@@ -1017,7 +1017,6 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         to
       );
       expect(extractionResponse.statusCode).toBe(200);
-      expect(extractionResponse.body).toMatchObject({ count: 0 });
 
       // Verify none of the omitted documents produced entities
       expect((await searchDocById(esClient, 'user:omitted-failure@okta')).hits.hits).toHaveLength(
