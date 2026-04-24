@@ -60,6 +60,8 @@ export const SigeventsOverview = ({
       data-test-subj="sigeventsOverview"
       css={css`
         width: 100%;
+        max-width: 800px;
+        align-self: center;
         box-sizing: border-box;
         padding: ${euiTheme.size.l};
       `}

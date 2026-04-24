@@ -109,7 +109,7 @@ export function SigeventsOverviewPage() {
         <EuiFlyout
           type="push"
           side="right"
-          size="m"
+          size={620}
           paddingSize="m"
           onClose={closeDetailFlyout}
           aria-labelledby={flyoutHeadingId}
