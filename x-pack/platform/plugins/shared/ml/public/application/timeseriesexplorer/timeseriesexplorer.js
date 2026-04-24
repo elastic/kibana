@@ -1223,6 +1223,7 @@ export class TimeSeriesExplorer extends React.Component {
                 lastRefresh={lastRefresh}
                 tableData={tableData}
                 sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+                telemetrySource={'single_metric_viewer_chart'}
               />
               {focusAnnotationError !== undefined && (
                 <>
@@ -1332,6 +1333,7 @@ export class TimeSeriesExplorer extends React.Component {
                   modelPlotEnabled,
                 },
               ]}
+              telemetrySource="single_metric_viewer_anomalies_table"
             />
           )}
       </TimeSeriesExplorerPage>

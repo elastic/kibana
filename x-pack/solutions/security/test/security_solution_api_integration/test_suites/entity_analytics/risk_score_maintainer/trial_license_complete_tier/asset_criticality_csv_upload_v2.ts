@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -75,7 +75,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Asset Criticality CSV Upload V2', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/265098
+  describe.skip('@ess @serverless @serverlessQA Asset Criticality CSV Upload V2', () => {
     before(async () => {
       await entityStoreUtils.enableEntityStoreV2();
 
@@ -84,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { entity: _entityFromDoc, ...restDoc } = entity.doc;
         const docId = hashEuid(entity.id);
         return [
-          { index: { _index: getLatestEntitiesIndexName('default'), _id: docId } },
+          { index: { _index: getEntitiesAlias(ENTITY_LATEST, 'default'), _id: docId } },
           {
             '@timestamp': new Date().toISOString(),
             entity: {

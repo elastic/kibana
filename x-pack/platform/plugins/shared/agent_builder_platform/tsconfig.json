@@ -13,6 +13,7 @@
     "@kbn/agent-builder-server",
     "@kbn/lens-embeddable-utils",
     "@kbn/agent-builder-genai-utils",
+    "@kbn/agent-builder-tools-base",
     "@kbn/agent-builder-common",
     "@kbn/zod",
     "@kbn/agent-builder-plugin",
@@ -31,6 +32,7 @@
     "@kbn/workflows",
     "@kbn/core-logging-server-mocks",
     "@kbn/connector-specs",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/management-settings-ids"
   ]
 }

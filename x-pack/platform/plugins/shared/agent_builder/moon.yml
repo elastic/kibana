@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/i18n'
   - '@kbn/agent-builder-genai-utils'
+  - '@kbn/agent-builder-tools-base'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n-react'
@@ -92,6 +93,7 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-notifications-browser'
   - '@kbn/ai-assistant-common'
+  - '@kbn/elastic-assistant-common'
   - '@kbn/ui-theme'
   - '@kbn/ai-assistant-management-plugin'
   - '@kbn/inference-endpoint-ui-common'
@@ -121,6 +123,7 @@ dependsOn:
   - '@kbn/search-inference-endpoints'
   - '@kbn/response-ops-oauth-hooks'
   - '@kbn/connector-specs'
+  - '@kbn/core-user-profile-browser'
 tags:
   - plugin
   - prod

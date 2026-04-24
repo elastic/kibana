@@ -18,13 +18,16 @@ import { useParams } from 'react-router-dom';
 import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
-import { useGetIntegrationById } from '../../../../common';
+import { useGetIntegrationById, isValidNameFormat, startsWithLetter } from '../../../../common';
+import { meetsMinLength } from '../../../../common/lib/helper_functions';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import { useTelemetry } from '../../../telemetry_context';
 import { useIntegrationForm } from '../../forms/integration_form';
 
-export const DataStreams = React.memo<{ integrationId?: string }>(() => {
+export const DataStreams = React.memo<{
+  onDataStreamReanalyzeSuccess?: () => void;
+}>(({ onDataStreamReanalyzeSuccess }) => {
   const {
     isCreateDataStreamFlyoutOpen,
     openCreateDataStreamFlyout,
@@ -46,15 +49,22 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
     if (!isCreateIntegrationPage) {
       return true;
     }
-    return Boolean(formData?.title?.trim()) && Boolean(formData?.description?.trim());
+    const title = formData?.title?.trim() ?? '';
+    return (
+      Boolean(title) &&
+      meetsMinLength(title) &&
+      Boolean(formData?.description?.trim()) &&
+      isValidNameFormat(title) &&
+      startsWithLetter(title)
+    );
   }, [formData?.description, formData?.title, isCreateIntegrationPage]);
 
   const handleOpenCreateDataStreamFlyout = useCallback(() => {
     openCreateDataStreamFlyout();
     reportDataStreamFlyoutOpened({
-      isFirstDataStream: !hasDataStreams,
+      integrationId,
     });
-  }, [hasDataStreams, reportDataStreamFlyoutOpened, openCreateDataStreamFlyout]);
+  }, [integrationId, reportDataStreamFlyoutOpened, openCreateDataStreamFlyout]);
 
   const renderAddDataStreamButton = useCallback(
     (layout: 'header' | 'zeroState') => {
@@ -118,7 +128,11 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
       )}
 
       {hasDataStreams && integration?.dataStreams && integrationId && (
-        <DataStreamsTable integrationId={integrationId} items={integration.dataStreams} />
+        <DataStreamsTable
+          integrationId={integrationId}
+          items={integration.dataStreams}
+          onReanalyzeSuccess={onDataStreamReanalyzeSuccess}
+        />
       )}
 
       {isCreateDataStreamFlyoutOpen && (

@@ -194,6 +194,11 @@ export const internalStateSlice = createSlice({
       state.tabs.unsavedIds = action.payload.unsavedTabIds;
     },
 
+    disconnectTab: (state, action: TabAction) =>
+      withTab(state, action.payload, (tab) => {
+        tab.initializationState = { initializationStatus: TabInitializationStatus.Disconnected };
+      }),
+
     setForceFetchOnSelect: (state, action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
@@ -411,6 +416,17 @@ export const internalStateSlice = createSlice({
         }),
     },
 
+    setProfileStateFieldsToResetWithoutResetId: (
+      state,
+      action: TabAction<Pick<TabState['defaultProfileState'], 'fieldsToReset'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.defaultProfileState = {
+          ...tab.defaultProfileState,
+          fieldsToReset: action.payload.fieldsToReset,
+        };
+      }),
+
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
@@ -538,26 +554,34 @@ export const internalStateSlice = createSlice({
 
     builder.addCase(initializeSingleTab.pending, (state, action) =>
       withTab(state, action.meta.arg, (tab) => {
-        tab.initializationState = { initializationStatus: TabInitializationStatus.InProgress };
+        if (tab.initializationState.initializationStatus !== TabInitializationStatus.Disconnected) {
+          tab.initializationState = {
+            initializationStatus: TabInitializationStatus.InProgress,
+          };
+        }
       })
     );
 
     builder.addCase(initializeSingleTab.fulfilled, (state, action) =>
       withTab(state, action.meta.arg, (tab) => {
-        tab.initializationState = {
-          initializationStatus: action.payload.showNoDataPage
-            ? TabInitializationStatus.NoData
-            : TabInitializationStatus.Complete,
-        };
+        if (tab.initializationState.initializationStatus !== TabInitializationStatus.Disconnected) {
+          tab.initializationState = {
+            initializationStatus: action.payload.showNoDataPage
+              ? TabInitializationStatus.NoData
+              : TabInitializationStatus.Complete,
+          };
+        }
       })
     );
 
     builder.addCase(initializeSingleTab.rejected, (state, action) =>
       withTab(state, action.meta.arg, (tab) => {
-        tab.initializationState = {
-          initializationStatus: TabInitializationStatus.Error,
-          error: action.error,
-        };
+        if (tab.initializationState.initializationStatus !== TabInitializationStatus.Disconnected) {
+          tab.initializationState = {
+            initializationStatus: TabInitializationStatus.Error,
+            error: action.error,
+          };
+        }
       })
     );
 

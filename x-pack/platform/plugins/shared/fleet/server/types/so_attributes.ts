@@ -103,7 +103,7 @@ export interface AgentSOAttributes {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
   last_checkin_message?: string;
   tags?: string[];
   components?: FleetServerAgentComponent[];
@@ -183,6 +183,8 @@ export interface OutputSoBaseAttributes {
   is_internal?: boolean;
   is_preconfigured?: boolean;
   config_yaml?: string | null;
+  otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];

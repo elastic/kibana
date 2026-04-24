@@ -13,8 +13,8 @@ import type {
   AnnotationLayerType,
   DataLayerType,
   LayerTypeESQL,
-  LayerTypeNoESQL,
   ReferenceLineLayerType,
+  XYLayer,
 } from '../../../schema/charts/xy';
 import { isEsqlTableTypeDataSource } from '../../../utils';
 import {
@@ -24,8 +24,6 @@ import {
   XY_REFERENCE_LAYER_TYPES,
 } from './constants';
 import { getReversibleMappings } from '../utils';
-
-type XYLayer = DataLayerType | ReferenceLineLayerType | AnnotationLayerType;
 
 export function getAccessorNameForXY(
   layer: XYLayer,
@@ -38,7 +36,7 @@ export function getAccessorNameForXY(
   return `${layer.type}_${accessorType}_${index}`;
 }
 
-export function getIdForLayer(layer: LayerTypeNoESQL | LayerTypeESQL, i: number) {
+export function getIdForLayer(layer: XYLayer, i: number) {
   return `${layer.type}_${i}`;
 }
 

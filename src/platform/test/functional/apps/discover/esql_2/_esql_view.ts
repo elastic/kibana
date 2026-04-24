@@ -30,16 +30,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
 
-  const { common, discover, dashboard, header, timePicker, unifiedFieldList, unifiedSearch } =
-    getPageObjects([
-      'common',
-      'discover',
-      'dashboard',
-      'header',
-      'timePicker',
-      'unifiedFieldList',
-      'unifiedSearch',
-    ]);
+  const {
+    appMenu,
+    common,
+    discover,
+    dashboard,
+    header,
+    timePicker,
+    unifiedFieldList,
+    unifiedSearch,
+  } = getPageObjects([
+    'appMenu',
+    'common',
+    'discover',
+    'dashboard',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+    'unifiedSearch',
+  ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -90,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(true);
-        expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
+        expect(await timePicker.timePickerExists()).to.be(true);
         expect(await testSubjects.exists('addFilter')).to.be(true);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
@@ -98,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         await testSubjects.click('app-menu-overflow-button');
-        expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
+        expect(await appMenu.menuItemExists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
@@ -112,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
         expect(await testSubjects.exists('ESQLEditor')).to.be(true);
-        expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
+        expect(await timePicker.timePickerExists()).to.be(true);
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
@@ -123,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         await testSubjects.click('app-menu-overflow-button');
-        expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
+        expect(await appMenu.menuItemExists('shareTopNavButton')).to.be(true);
         // we don't sort for the Document view
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);

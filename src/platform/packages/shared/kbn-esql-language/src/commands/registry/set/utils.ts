@@ -30,7 +30,6 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
           defaultMessage: 'Search only the current project',
         }
       ),
-      sortText: '1',
       category: SuggestionCategory.CONSTANT_VALUE,
     },
     {
@@ -43,7 +42,6 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
           defaultMessage: 'Search all projects',
         }
       ),
-      sortText: '1',
       category: SuggestionCategory.CONSTANT_VALUE,
     },
   ];

@@ -9,6 +9,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
@@ -175,6 +176,8 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       findDashboardsService,
     } as unknown as DashboardStart;
 
+    const data = dataPluginMock.createStartContract();
+
     const unifiedSearch: UnifiedSearchPublicPluginStart = {
       ui: { SearchBar: jest.fn() },
     } as unknown as UnifiedSearchPublicPluginStart;
@@ -182,6 +185,8 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     return {
       agentBuilder,
       addAttachment: mockAddAttachment,
+      canWriteDashboards: true,
+      data,
       dashboardPlugin,
       unifiedSearch,
       dashboardLocator: undefined,
@@ -216,7 +221,6 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       })
     );
   });
-
   describe('onAttachmentMount - origin sync', () => {
     it('updates origin when new dashboard is saved', async () => {
       const { getAttachment } = createMockAttachment('attachment-1');

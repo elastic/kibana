@@ -29,7 +29,6 @@ import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { asyncForEach } from '@kbn/std';
 import type { DrilldownRegistryEntry, HasDrilldowns } from '../drilldowns/types';
 import { getDrilldownRegistryEntries } from '../drilldowns/registry';
-import { getEmbeddableTriggers } from './get_embeddable_triggers';
 import { core, isCompatibleLicense } from '../kibana_services';
 import { OPEN_FLYOUT_ADD_DRILLDOWN, DRILLDOWN_ACTION_GROUP } from './constants';
 import { apiHasDrilldowns } from '../drilldowns/api_has_drilldowns';
@@ -70,7 +69,7 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
      * and triggers that current embeddable supports
      */
     const drilldownTriggers = await getAllDrilldownTriggers(getDrilldownRegistryEntries(), context);
-    return getEmbeddableTriggers(embeddable).some((trigger) => drilldownTriggers.includes(trigger));
+    return embeddable.supportedTriggers().some((trigger) => drilldownTriggers.includes(trigger));
   },
   execute: async (context: EmbeddableApiContext) => {
     const { embeddable } = context;
@@ -88,7 +87,7 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
           drilldowns$: embeddable.drilldowns$,
           setDrilldowns: embeddable.setDrilldowns,
           setupContext: context,
-          triggers: getEmbeddableTriggers(embeddable),
+          triggers: embeddable.supportedTriggers(),
           onClose: closeFlyout,
         });
       },

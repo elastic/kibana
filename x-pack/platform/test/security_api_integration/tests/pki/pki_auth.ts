@@ -152,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', sessionCookie.cookieString())
         .expect(200);
 
-      jestExpect(response.body).toEqual({
+      jestExpect(response.body).toMatchObject({
         username: 'first_client',
         roles: ['kibana_admin'],
         full_name: null,

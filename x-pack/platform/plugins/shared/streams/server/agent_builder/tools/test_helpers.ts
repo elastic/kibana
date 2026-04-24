@@ -7,21 +7,31 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { StreamsClient } from '../../lib/streams/client';
-import type { GetScopedClients } from '../../routes/types';
+import type { QueryClient } from '../../lib/streams/assets/query/query_client';
+import type { AttachmentClient } from '../../lib/streams/attachments/attachment_client';
+import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 
-type MockScopedClusterClient = ReturnType<
-  typeof elasticsearchServiceMock.createScopedClusterClient
+/**
+ * Subset of RouteHandlerScopedClients that tools actually use.
+ * Using Pick ensures property names and types stay in sync with the
+ * real interface — renames or type changes cause a compile error here.
+ */
+type ToolScopedClients = Pick<
+  RouteHandlerScopedClients,
+  'streamsClient' | 'scopedClusterClient' | 'getQueryClient' | 'attachmentClient'
 >;
 
 export const createMockGetScopedClients = () => {
-  const scopedClusterClient: MockScopedClusterClient =
-    elasticsearchServiceMock.createScopedClusterClient();
+  const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
   const esClient = scopedClusterClient.asCurrentUser;
+
   const streamsClient: jest.Mocked<
     Pick<
       StreamsClient,
@@ -30,6 +40,9 @@ export const createMockGetScopedClients = () => {
       | 'getAncestors'
       | 'getDescendants'
       | 'getDataStream'
+      | 'upsertStream'
+      | 'forkStream'
+      | 'deleteStream'
     >
   > = {
     getStream: jest.fn(),
@@ -37,16 +50,47 @@ export const createMockGetScopedClients = () => {
     getAncestors: jest.fn().mockResolvedValue([]),
     getDescendants: jest.fn().mockResolvedValue([]),
     getDataStream: jest.fn(),
+    upsertStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'updated' }),
+    forkStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'created' }),
+    deleteStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
   };
 
-  const getScopedClients = jest.fn().mockResolvedValue({
+  const queryClient: jest.Mocked<Pick<QueryClient, 'getAssets'>> = {
+    getAssets: jest.fn().mockResolvedValue([]),
+  };
+
+  const getQueryClient = jest.fn().mockResolvedValue(queryClient);
+
+  const attachmentClient: jest.Mocked<Pick<AttachmentClient, 'getAttachments'>> = {
+    getAttachments: jest.fn().mockResolvedValue([]),
+  };
+
+  // Satisfies ensures property names stay in sync with RouteHandlerScopedClients.
+  // If a property is renamed or removed from the interface, this will fail.
+  const scopedClients: {
+    [K in keyof ToolScopedClients]: unknown;
+  } = {
     streamsClient,
     scopedClusterClient,
-    esClient,
-  }) as unknown as GetScopedClients;
+    getQueryClient,
+    attachmentClient,
+  };
 
-  return { getScopedClients, streamsClient, esClient, scopedClusterClient };
+  const getScopedClients = jest
+    .fn()
+    .mockResolvedValue(scopedClients) as jest.MockedFunction<GetScopedClients>;
+
+  return {
+    getScopedClients,
+    streamsClient,
+    esClient,
+    scopedClusterClient,
+    getQueryClient,
+    attachmentClient,
+  };
 };
+
+export const createMockRequest = () => httpServerMock.createKibanaRequest();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const invokeHandler = async <TSchema extends ZodObject<any>>(
@@ -67,71 +111,88 @@ export const createMockToolContext = (): ToolHandlerContext => {
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     esClient: elasticsearchServiceMock.createScopedClusterClient(),
-    savedObjectsClient: {} as unknown as ToolHandlerContext['savedObjectsClient'],
+    savedObjectsClient: savedObjectsClientMock.create(),
     modelProvider: {
       getDefaultModel: jest.fn().mockResolvedValue({ inferenceClient }),
       getModel: jest.fn(),
-    } as unknown as ToolHandlerContext['modelProvider'],
+      getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
+    } as ToolHandlerContext['modelProvider'],
     toolProvider: {
       has: jest.fn(),
       get: jest.fn(),
       list: jest.fn(),
-    } as unknown as ToolHandlerContext['toolProvider'],
+    } as ToolHandlerContext['toolProvider'],
     runner: {
       runTool: jest.fn(),
       runInternalTool: jest.fn(),
       runAgent: jest.fn(),
-    } as unknown as ToolHandlerContext['runner'],
+    } as ToolHandlerContext['runner'],
     resultStore: {
       has: jest.fn(),
       get: jest.fn(),
       add: jest.fn(),
       delete: jest.fn(),
       asReadonly: jest.fn(),
-    } as unknown as ToolHandlerContext['resultStore'],
+    } as ToolHandlerContext['resultStore'],
     events: {
       reportProgress: jest.fn(),
       sendUiEvent: jest.fn(),
-    } as unknown as ToolHandlerContext['events'],
-    logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    } as unknown as ToolHandlerContext['logger'],
+    } as ToolHandlerContext['events'],
+    logger: loggerMock.create(),
     prompts: {
       checkConfirmationStatus: jest.fn(),
       askForConfirmation: jest.fn(),
-    } as unknown as ToolHandlerContext['prompts'],
+    } as ToolHandlerContext['prompts'],
     stateManager: {
       getState: jest.fn(),
       setState: jest.fn(),
-    } as unknown as ToolHandlerContext['stateManager'],
-    attachments: {} as unknown as ToolHandlerContext['attachments'],
+    } as ToolHandlerContext['stateManager'],
+    attachments: {
+      get: jest.fn(),
+      getAttachmentRecord: jest.fn(),
+      getActive: jest.fn().mockReturnValue([]),
+      getAll: jest.fn().mockReturnValue([]),
+      getDiff: jest.fn(),
+      add: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      restore: jest.fn(),
+      permanentDelete: jest.fn(),
+      rename: jest.fn(),
+      updateOrigin: jest.fn(),
+      evaluateStalenessForActiveAttachments: jest.fn().mockResolvedValue([]),
+      getAccessedRefs: jest.fn().mockReturnValue([]),
+      clearAccessTracking: jest.fn(),
+      resolveRefs: jest.fn().mockReturnValue([]),
+      getTotalTokenEstimate: jest.fn().mockReturnValue(0),
+      hasChanges: jest.fn().mockReturnValue(false),
+      markClean: jest.fn(),
+    } as ToolHandlerContext['attachments'],
     filestore: {
       read: jest.fn(),
       ls: jest.fn(),
       glob: jest.fn(),
       grep: jest.fn(),
-    } as unknown as ToolHandlerContext['filestore'],
+    } as ToolHandlerContext['filestore'],
     skills: {
       list: jest.fn(),
       get: jest.fn(),
       bulkGet: jest.fn(),
       convertSkillTool: jest.fn(),
-    } as unknown as ToolHandlerContext['skills'],
+    } as ToolHandlerContext['skills'],
     toolManager: {
       setEventEmitter: jest.fn(),
       addTools: jest.fn(),
       list: jest.fn(),
       recordToolUse: jest.fn(),
       getToolIdMapping: jest.fn(),
+      getToolOrigin: jest.fn(),
       getDynamicToolIds: jest.fn(),
       getSummarizer: jest.fn(),
-    } as unknown as ToolHandlerContext['toolManager'],
+    } as ToolHandlerContext['toolManager'],
     runContext: {
       runId: 'test-run-id',
       stack: [],
-    } as unknown as ToolHandlerContext['runContext'],
+    },
   };
 };

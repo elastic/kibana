@@ -7,6 +7,7 @@
 
 import React, { useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import _ from 'lodash';
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import {
   UnifiedDataTable,
@@ -30,6 +31,7 @@ import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   type EuiDataGridCellValueElementProps,
   type EuiDataGridStyle,
   EuiProgress,
@@ -40,6 +42,7 @@ import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { inputsModel } from '../../../../common/store';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';
@@ -70,6 +73,7 @@ import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_FIELDS,
+  ENTITY_GROUPING_OPTIONS,
   DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ENTITIES_TO_LOAD,
   TEST_SUBJ_DATA_GRID,
@@ -100,6 +104,11 @@ const INSPECT_TITLE = i18n.translate(
   { defaultMessage: 'Entity analytics table' }
 );
 
+const TARGET_ENTITY_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entitiesTable.targetEntityTooltip',
+  { defaultMessage: 'Primary entity in the resolution group' }
+);
+
 const COLUMN_HEADERS: Record<string, string> = {
   [ENTITY_FIELDS.ENTITY_NAME]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnEntityName',
@@ -107,7 +116,7 @@ const COLUMN_HEADERS: Record<string, string> = {
   ),
   [ENTITY_FIELDS.ENTITY_ID]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnEntityId',
-    { defaultMessage: 'Entity id' }
+    { defaultMessage: 'Entity ID' }
   ),
   [ENTITY_FIELDS.ENTITY_SOURCE]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.entitiesTable.columnDataSource',
@@ -154,18 +163,21 @@ export interface EntitiesDataTableProps {
   state: EntityURLStateResult;
   height?: number;
   groupSelectorComponent?: JSX.Element;
+  selectedGroup?: string;
 }
 
 export const EntitiesDataTable = ({
   state,
   height,
   groupSelectorComponent,
+  selectedGroup,
 }: EntitiesDataTableProps) => {
   const {
     pageSize,
     sort,
     query,
     queryError,
+    filters,
     getRowsFromPages,
     onChangeItemsPerPage,
     onResetFilters,
@@ -361,13 +373,12 @@ export const EntitiesDataTable = ({
               operation,
               dataView
             );
-            filterManager.addFilters(newFilters);
             setUrlQuery({
-              filters: filterManager.getFilters(),
+              filters: [...filters, ...newFilters],
             });
           }
         : undefined,
-    [dataView, filterManager, setUrlQuery]
+    [dataView, filterManager, filters, setUrlQuery]
   );
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
@@ -395,7 +406,45 @@ export const EntitiesDataTable = ({
       ])
     );
 
+    const isResolutionGroup = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
+
     const specificRenderers: CustomCellRenderer = {
+      ...(isResolutionGroup
+        ? {
+            [ENTITY_FIELDS.ENTITY_NAME]: ({
+              row,
+              dataView: dv,
+              fieldFormats: ff,
+            }: DataGridCellValueElementProps) => {
+              const value = row.flattened[ENTITY_FIELDS.ENTITY_NAME];
+              if (value === null || value === undefined) {
+                return getEmptyTagValue();
+              }
+              const resolvedTo = row.flattened[ENTITY_FIELDS.RESOLVED_TO];
+              const isTarget = resolvedTo === null || resolvedTo === undefined;
+              const field = dv.fields.getByName(ENTITY_FIELDS.ENTITY_NAME);
+              const formattedValue = formatFieldValue(value, row.raw, ff, dv, field, 'text');
+
+              if (isTarget) {
+                return (
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        content={TARGET_ENTITY_TOOLTIP}
+                        type="aggregate"
+                        size="s"
+                        data-test-subj="target-entity-icon"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }
+
+              return <>{formattedValue}</>;
+            },
+          }
+        : {}),
       [ENTITY_FIELDS.ENTITY_TYPE]: ({ row }: DataGridCellValueElementProps) => {
         const value = row.flattened[ENTITY_FIELDS.ENTITY_TYPE] as string | undefined;
         if (value == null) return getEmptyTagValue();
@@ -417,7 +466,14 @@ export const EntitiesDataTable = ({
         if (!doc) return null;
         const { entityType, entityName } = getEntityFields(doc);
         if (!entityName || !entityType) return null;
-        return <EntityAlertsCell entityName={entityName} entityType={entityType} />;
+        const entityRecord = doc?.raw?._source ? (doc.raw._source as EntityStoreRecord) : null;
+        return (
+          <EntityAlertsCell
+            entityRecord={entityRecord}
+            entityName={entityName}
+            entityType={entityType}
+          />
+        );
       },
     };
 
@@ -425,7 +481,7 @@ export const EntitiesDataTable = ({
       ...nullSafeRenderers,
       ...specificRenderers,
     };
-  }, [rows, currentColumns]);
+  }, [rows, currentColumns, selectedGroup]);
 
   const leadingControlColumns = useLeadingControlColumns({
     canUseTimeline,
@@ -527,7 +583,9 @@ export const EntitiesDataTable = ({
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
       <div
         data-test-subj={TEST_SUBJ_DATA_GRID}
-        className={styles.gridContainer}
+        className={classNames(styles.gridContainer, {
+          [styles.gridContainerLoading]: isLoadingGridData,
+        })}
         style={{
           height: computeDataTableRendering.wrapperHeight,
         }}

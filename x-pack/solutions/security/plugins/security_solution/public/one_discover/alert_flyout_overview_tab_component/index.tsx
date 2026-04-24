@@ -7,32 +7,13 @@
 
 import React, { useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useSelector } from 'react-redux';
+import { EuiSpacer } from '@elastic/eui';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
-import type { SecurityAppStore, State } from '../../common/store/types';
+import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
-const DataViewManagerBootstrap = () => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const initDataViewManager = useInitDataViewManager();
-  const sharedStatus = useSelector((state: State) => state.dataViewManager.shared.status);
-
-  useEffect(() => {
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
-    if (sharedStatus === 'pristine' || sharedStatus === 'error') {
-      initDataViewManager([]);
-    }
-  }, [initDataViewManager, newDataViewPickerEnabled, sharedStatus]);
-
-  return null;
-};
+import { DataViewManagerBootstrap } from './data_view_manager_bootstrap';
 
 export interface AlertFlyoutOverviewTabProps {
   /**
@@ -97,6 +78,7 @@ export const AlertFlyoutOverviewTab = ({
       <>
         <DataViewManagerBootstrap />
         {/* TODO: implement Discover cell actions - see https://github.com/elastic/kibana/issues/258858*/}
+        <EuiSpacer size="m" />
         <OverviewTab
           hit={hit}
           renderCellActions={noopCellActionRenderer}

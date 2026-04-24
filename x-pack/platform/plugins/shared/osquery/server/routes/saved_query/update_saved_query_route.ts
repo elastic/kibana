@@ -28,6 +28,7 @@ import {
   updateSavedQueryRequestParamsSchema,
 } from '../../../common/api/saved_query/update_saved_query_route';
 import { getUserInfo } from '../../lib/get_user_info';
+import { updateSavedQueryResponseSchema } from './response_schemas';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -53,6 +54,11 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               typeof updateSavedQueryRequestBodySchema,
               UpdateSavedQueryRequestBodySchema
             >(updateSavedQueryRequestBodySchema),
+          },
+          response: {
+            200: {
+              body: () => updateSavedQueryResponseSchema,
+            },
           },
         },
       },

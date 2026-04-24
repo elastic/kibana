@@ -32,8 +32,16 @@ export interface StreamsApiService {
   ) => Promise<void>;
   /** See `./types` JSDoc for casting to `@kbn/streams-schema` definition types in tests. */
   getStreamDefinition: (streamName: string) => Promise<StreamsIngestGetResponse>;
+  /** Materialize backing data stream for deferred wired roots (e.g. `logs.otel`). */
+  restoreDataStream: (streamName: string) => Promise<void>;
   deleteStream: (streamName: string) => Promise<void>;
-  updateStream: (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => Promise<void>;
+  /** Update a stream's ingest settings and/or description. */
+  updateStream: (
+    streamName: string,
+    updateBody:
+      | { ingest: IngestUpsertRequest; description?: string }
+      | { ingest?: IngestUpsertRequest; description: string }
+  ) => Promise<void>;
   clearStreamChildren: (streamName: string) => Promise<void>;
   clearStreamMappings: (streamName: string) => Promise<void>;
   clearStreamProcessors: (streamName: string) => Promise<void>;
@@ -100,6 +108,14 @@ export const getStreamsApiService = ({
         return response.data as StreamsIngestGetResponse;
       });
     },
+    restoreDataStream: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.restoreDataStream', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `${basePath}/internal/streams/${streamName}/_restore_data_stream`,
+        });
+      });
+    },
     deleteStream: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.deleteStream', async () => {
         await kbnClient.request({
@@ -108,24 +124,56 @@ export const getStreamsApiService = ({
         });
       });
     },
-    updateStream: async (streamName: string, updateBody: { ingest: IngestUpsertRequest }) => {
+    updateStream: async (
+      streamName: string,
+      updateBody:
+        | { ingest: IngestUpsertRequest; description?: string }
+        | { ingest?: IngestUpsertRequest; description: string }
+    ) => {
       await measurePerformanceAsync(log, 'streamsApi.updateStream', async () => {
-        await kbnClient.request({
-          method: 'PUT',
-          path: `${basePath}/api/streams/${streamName}/_ingest`,
-          body: updateBody,
-        });
+        if (updateBody.description !== undefined) {
+          // description can only be set via the full upsert endpoint
+          const current = await service.getStreamDefinition(streamName);
+          // The PUT endpoint rejects `processing.updated_at` (read-only field returned by GET).
+          // Strip it before sending, whether using the current ingest or the caller's override.
+          const rawIngest = updateBody.ingest ?? current.stream.ingest;
+          const rawProcessing = rawIngest?.processing;
+          const ingestForPut = rawProcessing
+            ? {
+                ...rawIngest,
+                processing: omit(rawProcessing, 'updated_at'),
+              }
+            : rawIngest;
+          await kbnClient.request({
+            method: 'PUT',
+            path: `${basePath}/api/streams/${streamName}`,
+            body: {
+              stream: {
+                type: current.stream.type,
+                description: updateBody.description,
+                ingest: ingestForPut,
+              },
+              dashboards: current.stream.dashboards ?? [],
+              rules: current.stream.rules ?? [],
+              queries: current.stream.queries ?? [],
+            },
+          });
+        } else {
+          await kbnClient.request({
+            method: 'PUT',
+            path: `${basePath}/api/streams/${streamName}/_ingest`,
+            body: { ingest: updateBody.ingest! },
+          });
+        }
       });
     },
     clearStreamChildren: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.clearStreamChildren', async () => {
         const definition = await service.getStreamDefinition(streamName);
         if (isWiredStreamDefinition(definition.stream)) {
-          await Promise.all(
-            definition.stream.ingest.wired.routing.map((child) =>
-              service.deleteStream(child.destination)
-            )
-          );
+          for (const child of definition.stream.ingest.wired.routing) {
+            await service.deleteStream(child.destination);
+          }
         }
       });
     },

@@ -105,7 +105,7 @@ describe('useRiskLevelsEsqlQuery', () => {
     const queryKey = mockUseQuery.mock.calls[0][0];
     const generatedQuery = queryKey[1];
 
-    expect(generatedQuery).toContain('FROM .entities.v2.latest.security_default');
+    expect(generatedQuery).toContain('FROM entities-latest-default');
     expect(generatedQuery).toContain('entity.attributes.watchlists == "test-watchlist"');
   });
 

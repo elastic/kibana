@@ -67,7 +67,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
     render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
 
     expect(screen.getByTestId('threatHuntingLeadsFlyout')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'All Hunting Leads' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Threat hunting leads' })).toBeInTheDocument();
   });
 
   it('close button calls onClose', () => {
@@ -97,30 +97,61 @@ describe('ThreatHuntingLeadsFlyout', () => {
     );
   });
 
-  it('info button calls onInfoClick when defined', () => {
-    const onInfoClick = jest.fn();
+  it('renders lead byline in list items', () => {
     mockUseQuery.mockReturnValue({
-      data: { leads: [createApiLead({ id: 'lead-info' })], total: 1 },
-      isLoading: false,
-    });
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} onInfoClick={onInfoClick} />);
-
-    fireEvent.click(screen.getByTestId('leadListInfoButton-lead-info'));
-
-    expect(onInfoClick).toHaveBeenCalledTimes(1);
-    expect(onInfoClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'lead-info' }));
-  });
-
-  it('info button not rendered when onInfoClick is undefined', () => {
-    mockUseQuery.mockReturnValue({
-      data: { leads: [createApiLead({ id: 'lead-no-info' })], total: 1 },
+      data: {
+        leads: [createApiLead({ id: 'lead-byline', byline: 'Host server-01 with risk score 80' })],
+        total: 1,
+      },
       isLoading: false,
     });
 
     render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
 
-    expect(screen.getByTestId('leadListItem-lead-no-info')).toBeInTheDocument();
-    expect(screen.queryByTestId('leadListInfoButton-lead-no-info')).not.toBeInTheDocument();
+    expect(screen.getByText('Host server-01 with risk score 80')).toBeInTheDocument();
+  });
+
+  it('renders tags as badges in list items', () => {
+    mockUseQuery.mockReturnValue({
+      data: {
+        leads: [createApiLead({ id: 'lead-tags', tags: ['malware'] })],
+        total: 1,
+      },
+      isLoading: false,
+    });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.getByText('malware')).toBeInTheDocument();
+  });
+
+  it('shows overflow badge when tags exceed the visible limit', () => {
+    mockUseQuery.mockReturnValue({
+      data: {
+        leads: [createApiLead({ id: 'lead-tags-overflow', tags: ['malware', 'lateral-movement'] })],
+        total: 1,
+      },
+      isLoading: false,
+    });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.getByText('malware')).toBeInTheDocument();
+    expect(screen.getByText('+1')).toBeInTheDocument();
+  });
+
+  it('does not render timestamps on lead list items', () => {
+    mockUseQuery.mockReturnValue({
+      data: {
+        leads: [createApiLead({ id: 'lead-no-time' })],
+        total: 1,
+      },
+      isLoading: false,
+    });
+
+    const { container } = render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(container.textContent).not.toContain('just now');
+    expect(container.textContent).not.toContain('ago');
   });
 });

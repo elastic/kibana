@@ -69,8 +69,9 @@ describe('getSearchEmbeddableComparators', () => {
 });
 
 describe('getDiscoverSessionEmbeddableComparators', () => {
+  const language = 'kql' as const;
   const baseTab = {
-    query: { language: 'kuery', query: '*' },
+    query: { language, expression: '*' },
     filters: [],
     sort: [],
     column_order: [],
@@ -139,8 +140,8 @@ describe('getDiscoverSessionEmbeddableComparators', () => {
 
     it('treats tab arrays as not equal when a tab differs', () => {
       const cmp = getTabsComparator();
-      const tabA = { ...baseTab, query: { language: 'kuery', query: 'a' } };
-      const tabB = { ...baseTab, query: { language: 'kuery', query: 'b' } };
+      const tabA = { ...baseTab, query: { language, expression: 'a' } };
+      const tabB = { ...baseTab, query: { language, expression: 'b' } };
       expect(runComparator(cmp, undefined, undefined, [tabA], [tabB])).toBe(false);
     });
 
