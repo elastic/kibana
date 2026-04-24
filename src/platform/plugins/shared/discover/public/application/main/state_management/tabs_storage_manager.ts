@@ -222,7 +222,9 @@ export const createTabsStorageManager = ({
       tabStateInStorage.globalState || defaultTabState.globalState
     );
 
-    let controlGroupState = attributes?.controlGroupState;
+    let controlGroupState = attributes?.controlGroupState
+      ? parseControlGroupJson(JSON.stringify(attributes.controlGroupState))
+      : attributes?.controlGroupState;
 
     // migration from the older format where controlGroupJson was stored in internalState
     if (internalState && 'controlGroupJson' in internalState && !attributes?.controlGroupState) {
