@@ -19,12 +19,16 @@ non-nitpicky.
 Prioritize findings such as:
 
 - logic bugs, broken edge cases, or clear regressions
-- missing or weakened authn/authz, privilege checks, space isolation,
-  user/tenant scoping, or saved object security
-- unsafe API, migration, config, or persistence changes that can break upgrades,
-  compatibility, or rollback safety
-- missing regression coverage for bug fixes and missing or obviously weak
-  automated coverage for behavior changes
+- missing or weakened authn/authz, privilege checks, or validation
+- missing current-user scoping, space isolation, user/tenant scoping, saved
+  object security, or data-leak protections
+- unsafe API, migration, config, or persistence changes that can break
+  upgrades, compatibility, or rollback safety
+- public contract or deprecation changes that can break backward compatibility
+- missing regression coverage for bug fixes
+- missing or obviously weak automated coverage for behavior changes
+- tests at the wrong layer for new or changed routes, services, persistence
+  logic, or UI behavior
 - user-facing UI changes with clear accessibility, loading, empty-state, or
   error-handling gaps
 - missing docs when a PR changes a public API, operator workflow, or
@@ -32,18 +36,6 @@ Prioritize findings such as:
 
 Ground architectural and maintainability findings in local code and clear
 behavioral risk, not personal preference.
-
-## Kibana-specific review checks
-
-- For server, API, or security changes, check validation, privilege handling,
-  current-user scoping, and data-leak risks across spaces, users, or tenants.
-- For new or changed routes, services, or persistence logic, expect tests at
-  the right layer for the change: unit, integration or Scout E2E tests.
-- For UI changes, look for obvious accessibility issues and coverage of the
-  changed user behavior, not just implementation details.
-- For public contracts, config changes, deprecations, and migrations, check
-  backward compatibility and whether follow-on docs or deprecation handling are
-  missing.
 
 ## Do not report
 
