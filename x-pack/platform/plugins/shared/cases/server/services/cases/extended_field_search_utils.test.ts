@@ -16,6 +16,7 @@ describe('resolveExtendedFieldFilters', () => {
   const templates = [
     {
       templateId: 'tmpl-a',
+      templateVersion: 1,
       fieldNames: [
         { name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
         { name: 'region', label: 'Region', type: 'keyword', control: 'SELECT_BASIC' },
@@ -30,6 +31,7 @@ describe('resolveExtendedFieldFilters', () => {
     },
     {
       templateId: 'tmpl-b',
+      templateVersion: 1,
       fieldNames: [
         { name: 'due_date', label: 'Due Date', type: 'date', control: 'DATE_PICKER' },
         { name: 'score', label: 'Score', type: 'double', control: 'INPUT_NUMBER' },
@@ -53,7 +55,7 @@ describe('resolveExtendedFieldFilters', () => {
           value: 'high',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
       [
@@ -62,7 +64,7 @@ describe('resolveExtendedFieldFilters', () => {
           value: 'emea',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -78,7 +80,7 @@ describe('resolveExtendedFieldFilters', () => {
           value: 'high',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -94,7 +96,7 @@ describe('resolveExtendedFieldFilters', () => {
           value: '5',
           esType: 'integer',
           control: 'INPUT_NUMBER',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -113,7 +115,7 @@ describe('resolveExtendedFieldFilters', () => {
           value: 'api',
           esType: 'keyword',
           control: 'CHECKBOX_GROUP',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -135,7 +137,7 @@ describe('resolveExtendedFieldFilters', () => {
           value: 'high',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -156,6 +158,7 @@ describe('resolveExtendedFieldFilters', () => {
       [
         {
           templateId: 'tmpl-c',
+          templateVersion: 1,
           fieldNames: [
             { name: 'reviewers', label: 'Reviewers', type: 'keyword', control: 'USER_PICKER' },
           ],
@@ -170,7 +173,7 @@ describe('resolveExtendedFieldFilters', () => {
           value: 'elastic',
           esType: 'keyword',
           control: 'USER_PICKER',
-          templateIds: ['tmpl-c'],
+          templateVersions: [{ id: 'tmpl-c', version: 1 }],
         },
       ],
     ]);
@@ -179,7 +182,7 @@ describe('resolveExtendedFieldFilters', () => {
   it('handles templates with no fieldNames', () => {
     const result = resolveExtendedFieldFilters(
       [{ label: 'Priority', value: 'high' }],
-      [{ templateId: 'tmpl-x', fieldNames: undefined }]
+      [{ templateId: 'tmpl-x', templateVersion: 1, fieldNames: undefined }]
     );
 
     expect(result).toEqual([]);
@@ -193,18 +196,21 @@ describe('resolveExtendedFieldFilters', () => {
       [
         {
           templateId: 'tmpl-x',
+          templateVersion: 1,
           fieldNames: [
             { name: 'effort', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
           ],
         },
         {
           templateId: 'tmpl-y',
+          templateVersion: 1,
           fieldNames: [
             { name: 'story_points', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
           ],
         },
         {
           templateId: 'tmpl-z',
+          templateVersion: 1,
           fieldNames: [
             { name: 'effort', label: 'Estimate', type: 'integer', control: 'INPUT_NUMBER' },
           ],
@@ -220,11 +226,14 @@ describe('resolveExtendedFieldFilters', () => {
       expect.arrayContaining([
         expect.objectContaining({
           storageKey: 'effort_as_integer',
-          templateIds: expect.arrayContaining(['tmpl-x', 'tmpl-z']),
+          templateVersions: expect.arrayContaining([
+            { id: 'tmpl-x', version: 1 },
+            { id: 'tmpl-z', version: 1 },
+          ]),
         }),
         expect.objectContaining({
           storageKey: 'story_points_as_integer',
-          templateIds: ['tmpl-y'],
+          templateVersions: [{ id: 'tmpl-y', version: 1 }],
         }),
       ])
     );
@@ -237,12 +246,14 @@ describe('resolveExtendedFieldFilters', () => {
       [
         {
           templateId: 'tmpl-1',
+          templateVersion: 1,
           fieldNames: [
             { name: 'prio', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
           ],
         },
         {
           templateId: 'tmpl-2',
+          templateVersion: 1,
           fieldNames: [
             { name: 'prio', label: 'Priority', type: 'keyword', control: 'SELECT_BASIC' },
           ],
@@ -254,8 +265,92 @@ describe('resolveExtendedFieldFilters', () => {
       [
         expect.objectContaining({
           storageKey: 'prio_as_keyword',
-          templateIds: expect.arrayContaining(['tmpl-1', 'tmpl-2']),
+          templateVersions: expect.arrayContaining([
+            { id: 'tmpl-1', version: 1 },
+            { id: 'tmpl-2', version: 1 },
+          ]),
         }),
+      ],
+    ]);
+  });
+
+  it('filters by specific template versions when same template ID has different field definitions', () => {
+    const templatesWithVersionedFields = [
+      {
+        templateId: 'incident-template',
+        templateVersion: 1,
+        fieldNames: [
+          {
+            name: 'effort_estimate',
+            label: 'Effort Estimate',
+            type: 'long',
+            control: 'INPUT_NUMBER',
+          },
+        ],
+      },
+      {
+        templateId: 'incident-template',
+        templateVersion: 2,
+        fieldNames: [
+          { name: 'some_estimate', label: 'Some Estimate', type: 'long', control: 'INPUT_NUMBER' },
+        ],
+      },
+    ];
+
+    const result = resolveExtendedFieldFilters(
+      [{ label: 'Effort Estimate', value: '5' }],
+      templatesWithVersionedFields
+    );
+
+    expect(result).toEqual([
+      [
+        {
+          storageKey: 'effort_estimate_as_long',
+          value: '5',
+          esType: 'long',
+          control: 'INPUT_NUMBER',
+          templateVersions: [{ id: 'incident-template', version: 1 }],
+        },
+      ],
+    ]);
+  });
+
+  it('includes all template versions that have the requested field', () => {
+    const templatesWithSameFieldAcrossVersions = [
+      {
+        templateId: 'incident-template',
+        templateVersion: 1,
+        fieldNames: [{ name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' }],
+      },
+      {
+        templateId: 'incident-template',
+        templateVersion: 2,
+        fieldNames: [{ name: 'priority', label: 'Priority', type: 'keyword', control: 'SELECT' }],
+      },
+      {
+        templateId: 'incident-template',
+        templateVersion: 3,
+        fieldNames: [{ name: 'severity', label: 'Severity', type: 'keyword', control: 'SELECT' }],
+      },
+    ];
+
+    const result = resolveExtendedFieldFilters(
+      [{ label: 'Priority', value: 'high' }],
+      templatesWithSameFieldAcrossVersions
+    );
+
+    expect(result).toEqual([
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT',
+          templateVersions: [
+            { id: 'incident-template', version: 1 },
+            { id: 'incident-template', version: 2 },
+          ],
+        },
       ],
     ]);
   });
@@ -293,6 +388,64 @@ describe('parseDateFilterToRange', () => {
     expect(parseDateFilterToRange('13/01/2024')).toBeUndefined();
     expect(parseDateFilterToRange('00/01/2024')).toBeUndefined();
   });
+
+  it('returns undefined for invalid day-of-month in February (non-leap year)', () => {
+    expect(parseDateFilterToRange('02/29/2023')).toBeUndefined();
+    expect(parseDateFilterToRange('02/30/2023')).toBeUndefined();
+    expect(parseDateFilterToRange('02/31/2023')).toBeUndefined();
+    expect(parseDateFilterToRange('2023-02-29')).toBeUndefined();
+    expect(parseDateFilterToRange('2023-02-30')).toBeUndefined();
+  });
+
+  it('returns undefined for invalid day-of-month in February (leap year)', () => {
+    expect(parseDateFilterToRange('02/30/2024')).toBeUndefined();
+    expect(parseDateFilterToRange('02/31/2024')).toBeUndefined();
+    expect(parseDateFilterToRange('2024-02-30')).toBeUndefined();
+  });
+
+  it('accepts valid leap day in February (leap year)', () => {
+    expect(parseDateFilterToRange('02/29/2024')).toEqual({
+      gte: '2024-02-29T00:00:00.000Z',
+      lt: '2024-03-01T00:00:00.000Z',
+    });
+    expect(parseDateFilterToRange('2024-02-29')).toEqual({
+      gte: '2024-02-29T00:00:00.000Z',
+      lt: '2024-03-01T00:00:00.000Z',
+    });
+  });
+
+  it('returns undefined for invalid day-of-month in 30-day months', () => {
+    expect(parseDateFilterToRange('04/31/2024')).toBeUndefined();
+    expect(parseDateFilterToRange('06/31/2024')).toBeUndefined();
+    expect(parseDateFilterToRange('09/31/2024')).toBeUndefined();
+    expect(parseDateFilterToRange('11/31/2024')).toBeUndefined();
+    expect(parseDateFilterToRange('2024-04-31')).toBeUndefined();
+    expect(parseDateFilterToRange('2024-06-31')).toBeUndefined();
+    expect(parseDateFilterToRange('2024-09-31')).toBeUndefined();
+    expect(parseDateFilterToRange('2024-11-31')).toBeUndefined();
+  });
+
+  it('accepts valid last day of 30-day months', () => {
+    expect(parseDateFilterToRange('04/30/2024')).toEqual({
+      gte: '2024-04-30T00:00:00.000Z',
+      lt: '2024-05-01T00:00:00.000Z',
+    });
+    expect(parseDateFilterToRange('11/30/2024')).toEqual({
+      gte: '2024-11-30T00:00:00.000Z',
+      lt: '2024-12-01T00:00:00.000Z',
+    });
+  });
+
+  it('accepts valid day 31 in 31-day months', () => {
+    expect(parseDateFilterToRange('01/31/2024')).toEqual({
+      gte: '2024-01-31T00:00:00.000Z',
+      lt: '2024-02-01T00:00:00.000Z',
+    });
+    expect(parseDateFilterToRange('12/31/2024')).toEqual({
+      gte: '2024-12-31T00:00:00.000Z',
+      lt: '2025-01-01T00:00:00.000Z',
+    });
+  });
 });
 
 describe('buildExtendedFieldRuntimeMappings', () => {
@@ -304,7 +457,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
           value: 'high',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -326,7 +479,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
           value: '5',
           esType: 'integer',
           control: 'INPUT_NUMBER',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -349,7 +502,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
           value: '3.5',
           esType: 'double',
           control: 'INPUT_NUMBER',
-          templateIds: ['tmpl-b'],
+          templateVersions: [{ id: 'tmpl-b', version: 1 }],
         },
       ],
     ]);
@@ -372,7 +525,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
           value: '2025-01-01',
           esType: 'date',
           control: 'DATE_PICKER',
-          templateIds: ['tmpl-b'],
+          templateVersions: [{ id: 'tmpl-b', version: 1 }],
         },
       ],
     ]);
@@ -391,7 +544,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
           value: '01/01/2024',
           esType: 'date',
           control: 'DATE_PICKER',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -414,7 +567,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
           value: 'elastic',
           esType: 'keyword',
           control: 'USER_PICKER',
-          templateIds: ['tmpl-c'],
+          templateVersions: [{ id: 'tmpl-c', version: 1 }],
         },
       ],
     ]);
@@ -438,7 +591,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
           value: 'api',
           esType: 'keyword',
           control: 'CHECKBOX_GROUP',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -459,7 +612,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
           value: 'high',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
       [
@@ -468,7 +621,7 @@ describe('buildExtendedFieldRuntimeMappings', () => {
           value: '5',
           esType: 'integer',
           control: 'INPUT_NUMBER',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -486,7 +639,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: 'high',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -496,7 +649,29 @@ describe('buildExtendedFieldFilterClauses', () => {
         bool: {
           filter: [
             { term: { ef_priority_as_keyword: { value: 'high' } } },
-            { terms: { 'cases.template.id': ['tmpl-a'] } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'cases.template.id': 'tmpl-a',
+                          },
+                        },
+                        {
+                          term: {
+                            'cases.template.version': 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           ],
         },
       },
@@ -511,7 +686,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: '5',
           esType: 'integer',
           control: 'INPUT_NUMBER',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -521,7 +696,29 @@ describe('buildExtendedFieldFilterClauses', () => {
         bool: {
           filter: [
             { term: { ef_effort_as_integer: { value: 5 } } },
-            { terms: { 'cases.template.id': ['tmpl-a'] } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'cases.template.id': 'tmpl-a',
+                          },
+                        },
+                        {
+                          term: {
+                            'cases.template.version': 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           ],
         },
       },
@@ -536,7 +733,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: '3.5',
           esType: 'double',
           control: 'INPUT_NUMBER',
-          templateIds: ['tmpl-b'],
+          templateVersions: [{ id: 'tmpl-b', version: 1 }],
         },
       ],
     ]);
@@ -546,7 +743,29 @@ describe('buildExtendedFieldFilterClauses', () => {
         bool: {
           filter: [
             { term: { ef_score_as_double: { value: 3.5 } } },
-            { terms: { 'cases.template.id': ['tmpl-b'] } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'cases.template.id': 'tmpl-b',
+                          },
+                        },
+                        {
+                          term: {
+                            'cases.template.version': 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           ],
         },
       },
@@ -561,7 +780,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: 'api',
           esType: 'keyword',
           control: 'CHECKBOX_GROUP',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -571,7 +790,29 @@ describe('buildExtendedFieldFilterClauses', () => {
         bool: {
           filter: [
             { term: { ef_components_as_keyword: { value: 'api' } } },
-            { terms: { 'cases.template.id': ['tmpl-a'] } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'cases.template.id': 'tmpl-a',
+                          },
+                        },
+                        {
+                          term: {
+                            'cases.template.version': 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           ],
         },
       },
@@ -586,7 +827,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: '01/01/2024',
           esType: 'date',
           control: 'DATE_PICKER',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -603,7 +844,29 @@ describe('buildExtendedFieldFilterClauses', () => {
                 },
               },
             },
-            { terms: { 'cases.template.id': ['tmpl-a'] } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'cases.template.id': 'tmpl-a',
+                          },
+                        },
+                        {
+                          term: {
+                            'cases.template.version': 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           ],
         },
       },
@@ -618,7 +881,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: '2024-01-01',
           esType: 'date',
           control: 'DATE_PICKER',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -635,7 +898,29 @@ describe('buildExtendedFieldFilterClauses', () => {
                 },
               },
             },
-            { terms: { 'cases.template.id': ['tmpl-a'] } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'cases.template.id': 'tmpl-a',
+                          },
+                        },
+                        {
+                          term: {
+                            'cases.template.version': 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           ],
         },
       },
@@ -650,7 +935,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: 'not-a-date',
           esType: 'date',
           control: 'DATE_PICKER',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -666,7 +951,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: 'elastic',
           esType: 'keyword',
           control: 'USER_PICKER',
-          templateIds: ['tmpl-c'],
+          templateVersions: [{ id: 'tmpl-c', version: 1 }],
         },
       ],
     ]);
@@ -676,7 +961,29 @@ describe('buildExtendedFieldFilterClauses', () => {
         bool: {
           filter: [
             { term: { ef_reviewers_as_keyword: { value: 'elastic' } } },
-            { terms: { 'cases.template.id': ['tmpl-c'] } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'cases.template.id': 'tmpl-c',
+                          },
+                        },
+                        {
+                          term: {
+                            'cases.template.version': 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           ],
         },
       },
@@ -691,7 +998,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: 'high',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
       [
@@ -700,7 +1007,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: 'emea',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -711,7 +1018,29 @@ describe('buildExtendedFieldFilterClauses', () => {
       bool: {
         filter: [
           { term: { ef_priority_as_keyword: { value: 'high' } } },
-          { terms: { 'cases.template.id': ['tmpl-a'] } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'cases.template.id': 'tmpl-a',
+                        },
+                      },
+                      {
+                        term: {
+                          'cases.template.version': 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
         ],
       },
     });
@@ -719,7 +1048,29 @@ describe('buildExtendedFieldFilterClauses', () => {
       bool: {
         filter: [
           { term: { ef_region_as_keyword: { value: 'emea' } } },
-          { terms: { 'cases.template.id': ['tmpl-a'] } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'cases.template.id': 'tmpl-a',
+                        },
+                      },
+                      {
+                        term: {
+                          'cases.template.version': 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
         ],
       },
     });
@@ -735,14 +1086,17 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: '3',
           esType: 'integer',
           control: 'INPUT_NUMBER',
-          templateIds: ['tmpl-x', 'tmpl-z'],
+          templateVersions: [
+            { id: 'tmpl-x', version: 1 },
+            { id: 'tmpl-z', version: 1 },
+          ],
         },
         {
           storageKey: 'story_points_as_integer',
           value: '3',
           esType: 'integer',
           control: 'INPUT_NUMBER',
-          templateIds: ['tmpl-y'],
+          templateVersions: [{ id: 'tmpl-y', version: 1 }],
         },
       ],
     ]);
@@ -755,7 +1109,45 @@ describe('buildExtendedFieldFilterClauses', () => {
               bool: {
                 filter: [
                   { term: { ef_effort_as_integer: { value: 3 } } },
-                  { terms: { 'cases.template.id': ['tmpl-x', 'tmpl-z'] } },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          bool: {
+                            must: [
+                              {
+                                term: {
+                                  'cases.template.id': 'tmpl-x',
+                                },
+                              },
+                              {
+                                term: {
+                                  'cases.template.version': 1,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            must: [
+                              {
+                                term: {
+                                  'cases.template.id': 'tmpl-z',
+                                },
+                              },
+                              {
+                                term: {
+                                  'cases.template.version': 1,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
                 ],
               },
             },
@@ -763,7 +1155,29 @@ describe('buildExtendedFieldFilterClauses', () => {
               bool: {
                 filter: [
                   { term: { ef_story_points_as_integer: { value: 3 } } },
-                  { terms: { 'cases.template.id': ['tmpl-y'] } },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          bool: {
+                            must: [
+                              {
+                                term: {
+                                  'cases.template.id': 'tmpl-y',
+                                },
+                              },
+                              {
+                                term: {
+                                  'cases.template.version': 1,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
                 ],
               },
             },
@@ -782,7 +1196,7 @@ describe('buildExtendedFieldFilterClauses', () => {
           value: 'high',
           esType: 'keyword',
           control: 'SELECT_BASIC',
-          templateIds: ['tmpl-a'],
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
         },
       ],
     ]);
@@ -793,9 +1207,127 @@ describe('buildExtendedFieldFilterClauses', () => {
       bool: {
         filter: [
           { term: { ef_priority_as_keyword: { value: 'high' } } },
-          { terms: { 'cases.template.id': ['tmpl-a'] } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'cases.template.id': 'tmpl-a',
+                        },
+                      },
+                      {
+                        term: {
+                          'cases.template.version': 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
         ],
       },
     });
+  });
+
+  it('builds ES query that filters by both template ID and version', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'effort_estimate_as_long',
+          value: '5',
+          esType: 'long',
+          control: 'INPUT_NUMBER',
+          templateVersions: [{ id: 'incident-template', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(clauses).toHaveLength(1);
+    const clause = clauses[0];
+
+    expect(clause).toEqual({
+      bool: {
+        filter: [
+          { term: { ef_effort_estimate_as_long: { value: 5 } } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  bool: {
+                    must: [
+                      { term: { 'cases.template.id': 'incident-template' } },
+                      { term: { 'cases.template.version': 1 } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('builds ES query with multiple template versions using OR logic', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'priority_as_keyword',
+          value: 'high',
+          esType: 'keyword',
+          control: 'SELECT',
+          templateVersions: [
+            { id: 'incident-template', version: 1 },
+            { id: 'incident-template', version: 2 },
+            { id: 'alert-template', version: 1 },
+          ],
+        },
+      ],
+    ]);
+
+    expect(clauses).toHaveLength(1);
+    const clause = clauses[0];
+    expect(clause?.bool?.filter).toBeDefined();
+
+    const filterArray = clause!.bool!.filter as Array<{
+      bool?: { should?: unknown[]; minimum_should_match?: number };
+    }>;
+    const templateFilter = filterArray[1];
+
+    expect(templateFilter?.bool?.should).toHaveLength(3);
+    expect(templateFilter?.bool?.minimum_should_match).toBe(1);
+    expect(templateFilter?.bool?.should).toEqual([
+      {
+        bool: {
+          must: [
+            { term: { 'cases.template.id': 'incident-template' } },
+            { term: { 'cases.template.version': 1 } },
+          ],
+        },
+      },
+      {
+        bool: {
+          must: [
+            { term: { 'cases.template.id': 'incident-template' } },
+            { term: { 'cases.template.version': 2 } },
+          ],
+        },
+      },
+      {
+        bool: {
+          must: [
+            { term: { 'cases.template.id': 'alert-template' } },
+            { term: { 'cases.template.version': 1 } },
+          ],
+        },
+      },
+    ]);
   });
 });

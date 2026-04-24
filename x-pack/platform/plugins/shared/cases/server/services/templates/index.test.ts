@@ -705,6 +705,113 @@ describe('TemplatesService', () => {
     });
   });
 
+  describe('getTemplateVersionsForExtendedFieldSearch', () => {
+    it('fetches all template versions without isLatest filter', async () => {
+      const service = createService();
+      const templateV1 = createTemplateSO('template-v1', {
+        templateId: 'incident-template',
+        name: 'Incident Template v1',
+        templateVersion: 1,
+        isLatest: false,
+        owner: 'securitySolution',
+        fieldNames: [
+          {
+            name: 'effort_estimate',
+            label: 'Effort Estimate',
+            type: 'long',
+            control: 'INPUT_NUMBER',
+          },
+        ],
+      });
+      const templateV2 = createTemplateSO('template-v2', {
+        templateId: 'incident-template',
+        name: 'Incident Template v2',
+        templateVersion: 2,
+        isLatest: true,
+        owner: 'securitySolution',
+        fieldNames: [
+          { name: 'some_estimate', label: 'Some Estimate', type: 'long', control: 'INPUT_NUMBER' },
+        ],
+      });
+
+      const searchResponse = createMockSearchResponse([templateV1, templateV2]);
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
+      savedObjectsSerializer.rawToSavedObject
+        .mockReturnValueOnce(templateV1)
+        .mockReturnValueOnce(templateV2);
+
+      const result = await service.getTemplateVersionsForExtendedFieldSearch({
+        owner: ['securitySolution'],
+        isDeleted: false,
+      });
+
+      expect(result).toHaveLength(2);
+      expect(result).toEqual([templateV1, templateV2]);
+
+      const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+      expect(searchCall.query?.bool?.filter).toBeDefined();
+      // Verify no isLatest filter is applied
+      const filterStrings = JSON.stringify(searchCall.query?.bool?.filter);
+      expect(filterStrings).not.toContain('isLatest');
+    });
+
+    it('fetches all template versions across multiple template IDs', async () => {
+      const service = createService();
+      const template1V1 = createTemplateSO('t1-v1', {
+        templateId: 'template-1',
+        name: 'Template 1 v1',
+        templateVersion: 1,
+        isLatest: false,
+        owner: 'securitySolution',
+        fieldNames: [],
+      });
+      const template1V2 = createTemplateSO('t1-v2', {
+        templateId: 'template-1',
+        name: 'Template 1 v2',
+        templateVersion: 2,
+        isLatest: true,
+        owner: 'securitySolution',
+        fieldNames: [],
+      });
+      const template2V1 = createTemplateSO('t2-v1', {
+        templateId: 'template-2',
+        name: 'Template 2 v1',
+        templateVersion: 1,
+        isLatest: true,
+        owner: 'securitySolution',
+        fieldNames: [],
+      });
+
+      const searchResponse = createMockSearchResponse([template1V1, template1V2, template2V1]);
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
+      savedObjectsSerializer.rawToSavedObject
+        .mockReturnValueOnce(template1V1)
+        .mockReturnValueOnce(template1V2)
+        .mockReturnValueOnce(template2V1);
+
+      const result = await service.getTemplateVersionsForExtendedFieldSearch({
+        owner: ['securitySolution'],
+        isDeleted: false,
+      });
+
+      expect(result).toHaveLength(3);
+    });
+
+    it('returns empty array when no templates exist for owner', async () => {
+      const service = createService();
+
+      const searchResponse = createMockSearchResponse([]);
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
+
+      const result = await service.getTemplateVersionsForExtendedFieldSearch({
+        owner: ['nonexistent'],
+        isDeleted: false,
+      });
+
+      expect(result).toEqual([]);
+    });
+  });
+
   it('persists description, tags, author, fieldCount and fieldNames on create', async () => {
     const definition = buildDefinition('Template With Metadata');
     const service = createService();

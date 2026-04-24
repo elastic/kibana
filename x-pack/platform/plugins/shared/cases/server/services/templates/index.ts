@@ -92,21 +92,85 @@ export class TemplatesService {
     return this._getTemplate(templateId, version);
   }
 
+  /**
+   * Fetches ALL template versions (not just isLatest) for extended field filtering in case search.
+   *
+   * This is critical for extended field filtering because cases may reference
+   * older template versions where field definitions have changed. We need to
+   * resolve filters against ALL versions to correctly match cases created with
+   * historical template versions.
+   *
+   * Example: If template v1 has "effort estimate" field and v2 renames it to
+   * "some estimate", searching for "effort estimate" should only match cases
+   * created with v1, not v2. By fetching ALL versions, the filter resolution
+   * correctly identifies which template versions have which fields.
+   *
+   * @param params - Find parameters (owner, isDeleted, optionally specific template version pairs)
+   * @returns Promise resolving to array of all template versions matching the criteria
+   *
+   * @example
+   * // Get all versions of Security Solution templates for extended field search
+   * const allVersions = await service.getTemplateVersionsForExtendedFieldSearch({
+   *   owner: ['securitySolution'],
+   *   isDeleted: false,
+   * });
+   *
+   * @example
+   * // Get specific template versions (more efficient for large deployments)
+   * const specificVersions = await service.getTemplateVersionsForExtendedFieldSearch({
+   *   owner: ['securitySolution'],
+   *   isDeleted: false,
+   *   templateVersionPairs: [
+   *     { id: 'incident-template', versions: [1, 2] },
+   *     { id: 'alert-template', versions: [1] },
+   *   ],
+   * });
+   */
+  async getTemplateVersionsForExtendedFieldSearch(params: {
+    owner?: string[];
+    isDeleted?: boolean;
+    templateVersionPairs?: Array<{ id: string; versions: number[] }>;
+  }): Promise<Array<SavedObject<Template>>> {
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: params.templateVersionPairs ? params.templateVersionPairs.length * 10 : 10000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      isDeleted: params.isDeleted ?? false,
+      owner: params.owner,
+      templateVersionPairs: params.templateVersionPairs,
+      // CRITICAL: Do NOT set isLatest - we want ALL versions (unless templateVersionPairs is provided)
+    });
+
+    return templates;
+  }
+
   private async _getTemplate(
     templateId: string,
     version?: string
   ): Promise<SavedObject<Template> | undefined> {
+    // If version is specified, fetch that specific version
+    if (version !== undefined) {
+      const { templates } = await this.searchTemplates({
+        page: 1,
+        perPage: 1,
+        sortField: 'templateVersion',
+        sortOrder: 'desc',
+        templateVersionPairs: [{ id: templateId, versions: [parseInt(version, 10)] }],
+      });
+      return templates[0];
+    }
+
+    // Otherwise, fetch the latest version by templateId
     const { templates } = await this.searchTemplates({
       page: 1,
-      perPage: 1,
+      perPage: 10000,
       sortField: 'templateVersion',
       sortOrder: 'desc',
-      templateId,
-      version,
-      ...(version === undefined ? { isLatest: true } : {}),
+      isLatest: true,
     });
 
-    return templates[0];
+    return templates.find((t) => t.attributes.templateId === templateId);
   }
 
   /**
@@ -118,28 +182,26 @@ export class TemplatesService {
     sortField,
     sortOrder,
     isDeleted = false,
-    templateId,
-    version,
     isLatest,
     search,
     tags,
     author,
     owner,
     isEnabled,
+    templateVersionPairs,
   }: {
     page: number;
     perPage: number;
     sortField: TemplatesFindRequest['sortField'];
     sortOrder: TemplatesFindRequest['sortOrder'];
     isDeleted?: boolean;
-    templateId?: string;
-    version?: string;
     isLatest?: boolean;
     search?: string;
     tags?: string[];
     author?: string[];
     owner?: string[];
     isEnabled?: boolean;
+    templateVersionPairs?: Array<{ id: string; versions: number[] }>;
   }): Promise<{ templates: Array<SavedObject<Template>>; total: number }> {
     interface SearchResult {
       hits: {
@@ -152,16 +214,24 @@ export class TemplatesService {
 
     const SO = CASE_TEMPLATE_SAVED_OBJECT;
 
+    // Build template version pairs filter if provided
+    // This allows fetching specific (id, version) combinations efficiently
+    const templateVersionPairsFilter = templateVersionPairs
+      ? templateVersionPairs.flatMap(({ id, versions }) =>
+          versions.map((version) =>
+            toElasticsearchQuery(
+              fromKueryExpression(
+                `${SO}.templateId: "${id}" AND ${SO}.templateVersion: "${version}"`
+              )
+            )
+          )
+        )
+      : [];
+
     const filters = [
       ...(isDeleted ? [] : [toElasticsearchQuery(fromKueryExpression(`NOT ${SO}.deletedAt: *`))]),
       ...(isEnabled !== undefined
         ? [toElasticsearchQuery(fromKueryExpression(`${SO}.isEnabled: ${isEnabled}`))]
-        : []),
-      ...(templateId
-        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateId: "${templateId}"`))]
-        : []),
-      ...(version
-        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateVersion: "${version}"`))]
         : []),
       ...(isLatest !== undefined
         ? [toElasticsearchQuery(fromKueryExpression(`${SO}.isLatest: ${isLatest}`))]
@@ -252,18 +322,32 @@ export class TemplatesService {
           ]),
     ];
 
+    // If templateVersionPairs is provided, use OR logic for specific (id, version) combinations
+    // Otherwise, use AND logic with filters
+    const query =
+      templateVersionPairsFilter.length > 0
+        ? {
+            bool: {
+              should: templateVersionPairsFilter,
+              minimum_should_match: 1,
+              // Still apply other filters (isDeleted, owner, etc.)
+              filter: filters,
+            },
+          }
+        : {
+            bool: {
+              filter: filters,
+              ...(must.length > 0 ? { must } : {}),
+            },
+          };
+
     const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
       type: CASE_TEMPLATE_SAVED_OBJECT,
       namespaces: [this.dependencies.namespace],
       from,
       size: perPage,
       sort,
-      query: {
-        bool: {
-          filter: filters,
-          ...(must.length > 0 ? { must } : {}),
-        },
-      },
+      query,
     })) as SearchResult;
 
     return {

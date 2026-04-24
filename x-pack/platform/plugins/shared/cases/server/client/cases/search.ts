@@ -122,6 +122,22 @@ export const search = async (
 
     const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
 
+    /**
+     * Extended field filter resolution with support for all template versions.
+     *
+     * Unlike getAllTemplates (which only returns isLatest:true), we need to resolve
+     * filters against ALL template versions to correctly match cases created with
+     * older template versions where field definitions may have changed.
+     *
+     * This handles edge cases where:
+     * - A field is removed in a newer template version
+     * - A field is renamed across versions
+     * - A field type changes across versions
+     *
+     * Example: Case created with template v1 (has "effort estimate" field) → template
+     * updated to v2 (renames field to "some estimate") → search for "effort estimate"
+     * should only find cases created with v1, not v2.
+     */
     const resolvedExtendedFieldFilters = await (async () => {
       const rawFilters = paramArgs.extendedFieldFilters;
       if (!rawFilters || rawFilters.length === 0) {
@@ -129,19 +145,21 @@ export const search = async (
       }
 
       const ownerArray = asArray(paramArgs.owner).filter(Boolean);
-      const templatesResult = await templatesService.getAllTemplates({
-        page: 1,
-        perPage: 10000,
-        owner: ownerArray.length > 0 ? ownerArray : [],
-        tags: [],
-        author: [],
-        sortField: 'name',
-        sortOrder: 'asc',
+
+      // Fetch ALL template versions (not filtered by isLatest) for the given owner(s)
+      const templateSOs = await templatesService.getTemplateVersionsForExtendedFieldSearch({
+        owner: ownerArray.length > 0 ? ownerArray : undefined,
         isDeleted: false,
-        search: '',
       });
 
-      return resolveExtendedFieldFilters(rawFilters, templatesResult.templates);
+      // Convert SavedObject<Template> to the format expected by resolveExtendedFieldFilters
+      const templates = templateSOs.map((so) => ({
+        templateId: so.attributes.templateId,
+        templateVersion: so.attributes.templateVersion,
+        fieldNames: so.attributes.fieldNames,
+      }));
+
+      return resolveExtendedFieldFilters(rawFilters, templates);
     })();
 
     const [cases, statusStats] = await Promise.all([

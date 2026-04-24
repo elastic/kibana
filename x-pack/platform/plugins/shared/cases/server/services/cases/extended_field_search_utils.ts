@@ -19,7 +19,7 @@ export interface ResolvedExtendedFieldFilter {
   value: string;
   esType: string;
   control: string;
-  templateIds: string[];
+  templateVersions: Array<{ id: string; version: number }>;
 }
 
 type RuntimeType = 'keyword' | 'long' | 'double' | 'date';
@@ -81,7 +81,8 @@ const buildPainlessScript = (
   }
 
   if (control === DATE_PICKER) {
-    // Emit the raw ISO string as keyword; the query layer uses a range query for date matching.
+    // Emit the raw ISO string; the runtime field type is set to keyword (see buildExtendedFieldRuntimeMappings)
+    // to preserve the ISO format, and the query layer uses a range query for date matching.
     return `${readRaw}emit(raw);`;
   }
 
@@ -106,12 +107,20 @@ const buildPainlessScript = (
 
 export const resolveExtendedFieldFilters = (
   extendedFieldFilters: ExtendedFieldFilter[],
-  templates: Array<Pick<Template, 'fieldNames' | 'templateId'>>
+  templates: Array<Pick<Template, 'fieldNames' | 'templateId' | 'templateVersion'>>
 ): ResolvedExtendedFieldFilter[][] => {
-  // labelKey → storageKey → { meta, templateIds[] }
+  // labelKey → storageKey → { meta, templateVersions[] }
   const labelToMetas = new Map<
     string,
-    Map<string, { storageKey: string; esType: string; control: string; templateIds: string[] }>
+    Map<
+      string,
+      {
+        storageKey: string;
+        esType: string;
+        control: string;
+        templateVersions: Array<{ id: string; version: number }>;
+      }
+    >
   >();
 
   for (const template of templates) {
@@ -131,12 +140,15 @@ export const resolveExtendedFieldFilters = (
           storageKey,
           esType: field.type,
           control: field.control,
-          templateIds: [],
+          templateVersions: [],
         };
         byStorageKey.set(storageKey, entry);
       }
 
-      entry.templateIds.push(template.templateId);
+      entry.templateVersions.push({
+        id: template.templateId,
+        version: template.templateVersion,
+      });
     }
   }
 
@@ -148,7 +160,7 @@ export const resolveExtendedFieldFilters = (
       value,
       esType: meta.esType,
       control: meta.control,
-      templateIds: meta.templateIds,
+      templateVersions: meta.templateVersions,
     }));
     return group.length > 0 ? [group] : [];
   });
@@ -181,6 +193,16 @@ export const parseDateFilterToRange = (value: string): { gte: string; lt: string
   const start = new Date(Date.UTC(year, month - 1, day));
   if (isNaN(start.getTime())) return undefined;
 
+  // Verify the date components match what was parsed to detect silent rollover
+  // (e.g., Feb 30 → Mar 2, Apr 31 → May 1)
+  if (
+    start.getUTCFullYear() !== year ||
+    start.getUTCMonth() !== month - 1 ||
+    start.getUTCDate() !== day
+  ) {
+    return undefined;
+  }
+
   const end = new Date(start.getTime() + 86_400_000);
   return { gte: start.toISOString(), lt: end.toISOString() };
 };
@@ -192,7 +214,8 @@ export const buildExtendedFieldRuntimeMappings = (
   const runtimeMappings: Record<string, estypes.MappingRuntimeField> = {};
 
   for (const { storageKey, esType, control } of resolvedFilterGroups.flat()) {
-    // DATE_PICKER emits a raw ISO string, so use keyword (not date) to avoid epoch-ms conversion.
+    // DATE_PICKER: use keyword type (not date) to preserve ISO string format and avoid epoch-ms conversion.
+    // For all other controls, map esType to runtime type (with keyword as fallback for unknown types).
     const runtimeType = control === DATE_PICKER ? 'keyword' : mapToRuntimeType(esType);
     runtimeMappings[`ef_${storageKey}`] = {
       type: runtimeType,
@@ -210,7 +233,7 @@ const buildSingleFilterClause = ({
   value,
   esType,
   control,
-  templateIds,
+  templateVersions,
 }: ResolvedExtendedFieldFilter): estypes.QueryDslQueryContainer | null => {
   const fieldName = `ef_${storageKey}`;
 
@@ -225,8 +248,22 @@ const buildSingleFilterClause = ({
     valueClause = { term: { [fieldName]: { value: typedValue } } };
   }
 
+  // Build filter for template (id, version) pairs
+  // Each pair must match BOTH id AND version
+  const templateVersionFilters = templateVersions.map(({ id, version }) => ({
+    bool: {
+      must: [
+        { term: { 'cases.template.id': id } },
+        { term: { 'cases.template.version': version } },
+      ],
+    },
+  }));
+
   const templateFilter: estypes.QueryDslQueryContainer = {
-    terms: { 'cases.template.id': templateIds },
+    bool: {
+      should: templateVersionFilters,
+      minimum_should_match: 1,
+    },
   };
 
   return { bool: { filter: [valueClause, templateFilter] } };

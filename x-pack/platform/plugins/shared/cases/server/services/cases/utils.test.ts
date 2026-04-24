@@ -418,7 +418,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
             value: 'high',
             esType: 'keyword',
             control: 'TEXT',
-            templateIds: ['tmpl-a'],
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
           },
         ],
       ],
@@ -431,7 +431,21 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
             bool: {
               filter: [
                 { term: { ef_priority_as_keyword: { value: 'high' } } },
-                { terms: { 'cases.template.id': ['tmpl-a'] } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -452,7 +466,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
             value: 'high',
             esType: 'keyword',
             control: 'TEXT',
-            templateIds: ['tmpl-a'],
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
           },
         ],
       ],
@@ -475,7 +489,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
             value: 'high',
             esType: 'keyword',
             control: 'TEXT',
-            templateIds: ['tmpl-a'],
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
           },
         ],
         [
@@ -484,7 +498,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
             value: 'emea',
             esType: 'keyword',
             control: 'TEXT',
-            templateIds: ['tmpl-a'],
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
           },
         ],
       ],
@@ -497,7 +511,21 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
             bool: {
               filter: [
                 { term: { ef_priority_as_keyword: { value: 'high' } } },
-                { terms: { 'cases.template.id': ['tmpl-a'] } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -505,7 +533,21 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
             bool: {
               filter: [
                 { term: { ef_region_as_keyword: { value: 'emea' } } },
-                { terms: { 'cases.template.id': ['tmpl-a'] } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
               ],
             },
           },

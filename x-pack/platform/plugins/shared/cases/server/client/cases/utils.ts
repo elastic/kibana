@@ -682,6 +682,17 @@ export const processObservables = (
   }
 };
 
+/**
+ *
+ * For cases that have a template and extended fields, fetches the template definitions
+ * and populates `extended_fields_labels` with a mapping from storage keys (e.g.,
+ * `priority_as_keyword`) to user-facing labels (e.g., "Priority"). Cases without templates
+ * or extended fields, or whose templates cannot be retrieved, are returned unchanged.
+ *
+ * @param cases - Array of cases to enrich
+ * @param templatesService - Service for fetching template definitions
+ * @returns Promise resolving to the enriched cases array, preserving original order
+ */
 export const enrichCasesWithFieldLabels = async (
   cases: Case[],
   templatesService: TemplatesService
