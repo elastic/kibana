@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
+import { useStableExpandableFlyoutState } from '../../../shared/hooks/use_stable_expandable_flyout_state';
 import { WatchlistsFlyoutKey } from '../../shared/constants';
 import { MAX_WATCHLIST_DESCRIPTION_LENGTH, MAX_WATCHLIST_NAME_LENGTH } from '../constants';
 
@@ -43,7 +43,7 @@ export const getWatchlistFieldLengthValidation = (watchlist: CreateWatchlistRequ
 });
 
 export const useResetEditsOnFlyoutOpen = (setHasUserEdits: (value: boolean) => void) => {
-  const { right } = useExpandableFlyoutState();
+  const { right } = useStableExpandableFlyoutState();
   const wasOpenRef = useRef(false);
 
   useEffect(() => {

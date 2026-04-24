@@ -4603,6 +4603,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-tools-base@link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -5412,10 +5416,6 @@
   uid ""
 
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-chrome-navigation@link:src/core/packages/chrome/navigation":
   version "0.0.0"
   uid ""
 
@@ -6824,6 +6824,10 @@
   uid ""
 
 "@kbn/esql-resource-browser@link:src/platform/packages/shared/kbn-esql-resource-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-server-utils@link:src/platform/packages/shared/kbn-esql-server-utils":
   version "0.0.0"
   uid ""
 
@@ -9576,6 +9580,10 @@
   uid ""
 
 "@kbn/ui-shared-deps-src@link:src/platform/packages/private/kbn-ui-shared-deps-src":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-side-navigation@link:src/platform/kbn-ui/side-navigation":
   version "0.0.0"
   uid ""
 
