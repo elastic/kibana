@@ -53,8 +53,6 @@ jobs:
       pr_number: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
       repo: ${{ github.repository }}
       artifact_name: prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
-    secrets:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
 steps:
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1

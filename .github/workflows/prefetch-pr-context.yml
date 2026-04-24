@@ -15,9 +15,6 @@ on:
         description: Artifact name used to publish the prefetched context.
         required: true
         type: string
-    secrets:
-      github_token:
-        required: true
 
 jobs:
   prefetch_pr_context:
@@ -29,7 +26,7 @@ jobs:
     steps:
       - name: Fetch PR context
         env:
-          GH_TOKEN: ${{ secrets.github_token }}
+          GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ inputs.repo }}
         run: |
