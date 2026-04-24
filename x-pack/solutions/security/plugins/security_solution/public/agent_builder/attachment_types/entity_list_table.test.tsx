@@ -219,5 +219,65 @@ describe('EntityListTable', () => {
       expect(mockedNavigateToHome).toHaveBeenCalledTimes(1);
       expect(mockedNavigateToHome.mock.calls[0][0].searchSession).toBe(searchSession);
     });
+
+    it('closes the canvas before navigating to the Entity Analytics flyout so it is not overlaid by the canvas', () => {
+      const closeCanvas = jest.fn();
+      let navigateCallOrder = -1;
+      mockedNavigateToFlyout.mockImplementation(() => {
+        navigateCallOrder = closeCanvas.mock.invocationCallOrder[0] ?? -1;
+      });
+
+      renderTable(
+        {
+          entity_type: 'host',
+          entity_id: 'host:web-01@default',
+          entity_name: 'web-01',
+        },
+        { closeCanvas }
+      );
+
+      fireEvent.click(screen.getByLabelText('Open entity in Entity Analytics'));
+
+      expect(closeCanvas).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToFlyout).toHaveBeenCalledTimes(1);
+      expect(navigateCallOrder).toBeGreaterThan(-1);
+      expect(closeCanvas.mock.invocationCallOrder[0]).toBeLessThan(
+        mockedNavigateToFlyout.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('closes the canvas before falling back to the Entity Analytics home page for generic entities', () => {
+      const closeCanvas = jest.fn();
+
+      renderTable(
+        {
+          entity_type: 'generic',
+          entity_id: 'generic:some-id@default',
+          entity_name: 'some-id',
+        },
+        { closeCanvas }
+      );
+
+      fireEvent.click(screen.getByLabelText('Open entity in Entity Analytics'));
+
+      expect(closeCanvas).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToHome).toHaveBeenCalledTimes(1);
+      expect(closeCanvas.mock.invocationCallOrder[0]).toBeLessThan(
+        mockedNavigateToHome.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('is a no-op when closeCanvas is not provided (inline table usage)', () => {
+      renderTable({
+        entity_type: 'host',
+        entity_id: 'host:web-01@default',
+        entity_name: 'web-01',
+      });
+
+      expect(() => {
+        fireEvent.click(screen.getByLabelText('Open entity in Entity Analytics'));
+      }).not.toThrow();
+      expect(mockedNavigateToFlyout).toHaveBeenCalledTimes(1);
+    });
   });
 });

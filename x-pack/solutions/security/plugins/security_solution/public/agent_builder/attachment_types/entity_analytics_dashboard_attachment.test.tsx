@@ -88,7 +88,12 @@ jest.mock('../../entity_analytics/components/risk_score_donut_chart', () => ({
 }));
 
 jest.mock('./entity_list_table', () => ({
-  EntityListTable: () => <div data-test-subj="entityListTableMock" />,
+  EntityListTable: ({ closeCanvas }: { closeCanvas?: () => void }) => (
+    <div
+      data-test-subj="entityListTableMock"
+      data-has-close-canvas={closeCanvas ? 'true' : 'false'}
+    />
+  ),
 }));
 
 jest.mock('./entity_explore_navigation', () => ({
@@ -121,7 +126,9 @@ const makeAttachment = (): EntityAnalyticsDashboardAttachment =>
     },
   } as unknown as EntityAnalyticsDashboardAttachment);
 
-const renderCanvas = (overrides: { searchSession?: ISessionService } = {}) => {
+const renderCanvas = (
+  overrides: { searchSession?: ISessionService; closeCanvas?: () => void } = {}
+) => {
   const application = applicationServiceMock.createStartContract();
   const definition = createEntityAnalyticsDashboardAttachmentDefinition({
     application,
@@ -133,7 +140,9 @@ const renderCanvas = (overrides: { searchSession?: ISessionService } = {}) => {
         {
           attachment: makeAttachment(),
         } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[0],
-        {} as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
+        {
+          closeCanvas: overrides.closeCanvas ?? jest.fn(),
+        } as unknown as Parameters<NonNullable<typeof definition.renderCanvasContent>>[1]
       )}
     </I18nProvider>
   );
@@ -229,5 +238,13 @@ describe('EntityAnalyticsDashboardCanvasContent', () => {
     const application = applicationServiceMock.createStartContract();
     const definition = createEntityAnalyticsDashboardAttachmentDefinition({ application });
     expect(definition.canvasWidth).toBe('50vw');
+  });
+
+  it('forwards closeCanvas from the canvas render callbacks into EntityListTable so per-row navigation can dismiss the canvas overlay', () => {
+    const closeCanvas = jest.fn();
+    renderCanvas({ closeCanvas });
+    expect(screen.getByTestId('entityListTableMock').getAttribute('data-has-close-canvas')).toBe(
+      'true'
+    );
   });
 });

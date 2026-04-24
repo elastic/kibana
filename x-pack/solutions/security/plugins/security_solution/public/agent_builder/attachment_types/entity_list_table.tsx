@@ -182,7 +182,14 @@ export const EntityListTable: React.FC<{
   entities: EntityListRow[];
   application: ApplicationStart;
   searchSession?: ISessionService;
-}> = ({ entities, application, searchSession }) => {
+  /**
+   * Dismisses the Agent Builder canvas flyout. When present, the Name-column
+   * "open entity" button closes the canvas before navigating to Entity
+   * Analytics so the just-opened URL-backed expandable flyout isn't hidden
+   * underneath the canvas overlay.
+   */
+  closeCanvas?: () => void;
+}> = ({ entities, application, searchSession, closeCanvas }) => {
   const { euiTheme } = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<EntityListRow>> = useMemo(
@@ -210,6 +217,11 @@ export const EntityListTable: React.FC<{
                       identifier: displayName,
                       entityStoreId: row.entity_id,
                     });
+                    // Close the canvas first: both navigation helpers only
+                    // update the URL (and, when wired, the Agent Builder
+                    // sidebar). Leaving the canvas open would overlay the
+                    // expandable flyout that the URL change is about to open.
+                    closeCanvas?.();
                     if (rightPanel) {
                       navigateToEntityAnalyticsWithFlyoutInApp({
                         application,
@@ -396,7 +408,7 @@ export const EntityListTable: React.FC<{
         ),
       },
     ],
-    [application, euiTheme.font.familyCode, searchSession]
+    [application, closeCanvas, euiTheme.font.familyCode, searchSession]
   );
 
   return (

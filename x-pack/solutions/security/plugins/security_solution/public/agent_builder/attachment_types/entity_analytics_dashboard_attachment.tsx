@@ -150,8 +150,15 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
   AttachmentRenderProps<EntityAnalyticsDashboardAttachment> & {
     application: ApplicationStart;
     searchSession?: ISessionService;
+    /**
+     * Dismisses the canvas flyout. Provided by the Agent Builder canvas render
+     * callbacks. Forwarded into `EntityListTable` so per-row navigation into
+     * the Entity Analytics home flyout can close the overlay first, otherwise
+     * the canvas renders on top of the just-opened entity flyout.
+     */
+    closeCanvas?: () => void;
   }
-> = ({ attachment, application, searchSession }) => {
+> = ({ attachment, application, searchSession, closeCanvas }) => {
   const data = attachment.data;
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const [isRiskPanelNarrow, setIsRiskPanelNarrow] = useState(false);
@@ -470,6 +477,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
               entities={data.entities}
               application={application}
               searchSession={searchSession}
+              closeCanvas={closeCanvas}
             />
           ) : (
             <EuiText size="s" color="subdued">
@@ -530,11 +538,12 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
   getIcon: () => 'dashboardApp',
   canvasWidth: EA_DASHBOARD_CANVAS_WIDTH,
   renderInlineContent: (props) => <EntityAnalyticsDashboardInlineContent {...props} />,
-  renderCanvasContent: (props) => (
+  renderCanvasContent: (props, { closeCanvas }) => (
     <EntityAnalyticsDashboardCanvasContent
       {...props}
       application={application}
       searchSession={searchSession}
+      closeCanvas={closeCanvas}
     />
   ),
   getActionButtons: ({ attachment, openCanvas, isCanvas, openSidebarConversation }) => {
