@@ -69,6 +69,7 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       --es-url                Elasticsearch URL (default: from kibana.dev.yml)
       --es-username           ES username (default: from kibana.dev.yml)
       --es-password           ES password (default: from kibana.dev.yml)
+      --kibana-url            Kibana base URL (default: from kibana.dev.yml)
     `,
   },
 });
