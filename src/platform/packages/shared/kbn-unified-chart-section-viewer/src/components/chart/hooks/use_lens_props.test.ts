@@ -11,7 +11,12 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLensProps } from './use_lens_props';
 import { useChartLayers } from './use_chart_layers';
-import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import {
+  LensConfigBuilder,
+  type LensAttributes,
+  type LensSeriesLayer,
+} from '@kbn/lens-embeddable-utils';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -89,12 +94,19 @@ describe('useLensProps', () => {
       IntersectionObserver: MockIntersectionObserver,
     });
 
-    LensConfigBuilderMock.prototype.build.mockImplementation(() =>
-      Promise.resolve({
-        attributes: {} as any,
-        state: {} as any,
+    // Minimal stand-in for the real LensAttributes shape: the test only
+    // asserts that these nested keys round-trip through the hook, and
+    // LensConfigBuilder.build is mocked so its true signature is irrelevant.
+    // Each call returns a fresh object so reference-identity assertions
+    // (e.g. "did a rebuild produce new attributes?") work.
+    const createMockLensAttributes = (): LensAttributes =>
+      ({
+        attributes: {},
+        state: {},
         visualizationType: 'lnsXY',
-      })
+      } as unknown as LensAttributes);
+    LensConfigBuilderMock.prototype.build.mockImplementation(() =>
+      Promise.resolve(createMockLensAttributes())
     );
     useChartLayersMock.mockReturnValue(mockChartLayers);
   });
@@ -328,7 +340,12 @@ describe('useLensProps', () => {
     it('reports the caught builder error and rebuilds with no datasource', async () => {
       const chartRef = createMockChartRef();
       const builderError = new Error('builder failed');
-      const analyticsMock = { reportEvent: jest.fn() };
+      // Minimal AnalyticsServiceStart surface — only `reportEvent` is read
+      // by reportMetricsGridError, so a partial cast avoids pulling in the
+      // full service shape.
+      const analyticsMock: Pick<AnalyticsServiceStart, 'reportEvent'> = {
+        reportEvent: jest.fn(),
+      };
 
       // First build rejects (the silent-failure path). Subsequent builds
       // fall back to the beforeEach `mockImplementation` that resolves —
@@ -347,7 +364,7 @@ describe('useLensProps', () => {
           query: 'FROM metrics-*',
           services: {
             ...(servicesMock as UnifiedHistogramServices),
-            analytics: analyticsMock as any,
+            analytics: analyticsMock as unknown as AnalyticsServiceStart,
           },
           fetchParams,
           discoverFetch$,

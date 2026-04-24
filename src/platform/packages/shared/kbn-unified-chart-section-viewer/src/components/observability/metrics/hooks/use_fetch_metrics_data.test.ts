@@ -50,6 +50,9 @@ jest.mock('../utils/report_metrics_grid_error', () => ({
 }));
 
 import { renderHook, waitFor, act } from '@testing-library/react';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
@@ -79,7 +82,7 @@ const createMockParsedMetrics = (
     dataStream: 'metrics-*',
     units: [null],
     metricTypes: ['gauge'],
-    fieldTypes: ['double' as any],
+    fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     dimensionFields: dimensions,
   })),
   allDimensions: dimensions,
@@ -92,24 +95,45 @@ const createMockParsedMetrics = (
   },
 });
 
+// Minimal DataView surface the hook-under-test and its collaborators actually
+// read. `isTimeBased` is a type predicate on DataView, so we declare the
+// stub as its plain boolean sibling and cast once at the use site via the
+// DataView `as unknown as` below.
+type MockDataView = Pick<DataView, 'getFieldByName' | 'getIndexPattern'> & {
+  isTimeBased: () => boolean;
+};
+
+const createMockDataView = (): MockDataView => ({
+  getFieldByName: jest.fn(),
+  getIndexPattern: () => 'metrics-*',
+  isTimeBased: () => true,
+});
+
+// Minimal services surface the hook-under-test reads: `data.search.search`,
+// `uiSettings`, and `analytics.reportEvent`. Declared as a partial so we
+// don't have to mock the entire UnifiedHistogramServices tree.
+interface MockServices {
+  data: { search: { search: jest.Mock } };
+  uiSettings: Record<string, unknown>;
+  analytics: { reportEvent: jest.Mock };
+}
+
+const createMockServices = (): MockServices => ({
+  data: { search: { search: jest.fn() } },
+  uiSettings: {},
+  analytics: { reportEvent: jest.fn() },
+});
+
 const createDefaultParams = (overrides?: Record<string, unknown>) => ({
   fetchParams: getFetchParamsMock({
     query: { esql: 'TS metrics-*' },
-    dataView: {
-      getFieldByName: jest.fn(),
-      getIndexPattern: () => 'metrics-*',
-      isTimeBased: () => true,
-    } as any,
+    dataView: createMockDataView() as unknown as DataView,
     timeRange: { from: 'now-15m', to: 'now' },
     filters: [],
     esqlVariables: [],
     ...overrides,
   }),
-  services: {
-    data: { search: { search: jest.fn() } },
-    uiSettings: {},
-    analytics: { reportEvent: jest.fn() },
-  } as any,
+  services: createMockServices() as unknown as ChartSectionProps['services'],
   isComponentVisible: true,
   selectedDimensionNames: undefined as Dimension[] | undefined,
 });
