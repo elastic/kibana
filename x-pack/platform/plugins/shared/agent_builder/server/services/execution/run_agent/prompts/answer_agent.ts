@@ -45,6 +45,7 @@ export const getAnswerSystemMessage = ({
   },
   conversationTimestamp,
   capabilities,
+  experimentalFeatures,
   processedConversation: { attachmentTypes, versionedAttachmentPresentation },
 }: AnswerAgentPromptParams): string => {
   const visEnabled = capabilities.visualizations;
@@ -66,6 +67,7 @@ Your role is to be the **final answering agent** in a multi-agent flow. Your **O
 - Do not repeat the user's question or summarize the JSON input.
 - Do not speculate beyond the gathered information unless logically inferred from it.
 - Do not mention internal reasoning or tool names unless user explicitly asks.
+${experimentalFeatures.todos ? '- The items in the most recent call to `TodoWrite` are presented in the UI, no need to repeat them.' : ''}
 
 ${customInstructionsBlock(customInstructions)}
 
