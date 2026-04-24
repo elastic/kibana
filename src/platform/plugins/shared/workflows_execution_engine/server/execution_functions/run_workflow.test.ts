@@ -169,6 +169,26 @@ describe('runWorkflow', () => {
     expect(emittedPayload.error).not.toHaveProperty('stepName');
   });
 
+  it('should not query execution for suppression check when triggerEvents is enabled', async () => {
+    mockWorkflowExecutionLoop.mockResolvedValue(undefined);
+    mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.COMPLETED);
+
+    await runWorkflow({
+      workflowRunId,
+      spaceId,
+      taskAbortController: new AbortController(),
+      logger: logger as Logger,
+      config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+      fakeRequest,
+      dependencies,
+      workflowsExecutionEngine: {
+        triggerEvents: { isEnabled: true, emitEvent: mockEmitEvent },
+      } as any,
+    });
+
+    expect(mockGetWorkflowExecutionById).not.toHaveBeenCalled();
+  });
+
   it('does not emit when execution status is not FAILED', async () => {
     mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Step failed'));
     mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.COMPLETED);

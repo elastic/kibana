@@ -64,36 +64,39 @@ export async function runWorkflow({
 
   setupSpan?.end();
 
-  const execution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId,
-    spaceId
-  );
-  if (execution) {
-    const triggeredBy = execution.triggeredBy;
-    const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
-    if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
-      const cancelledAt = new Date().toISOString();
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowRunId,
-        status: ExecutionStatus.SKIPPED,
-        cancellationReason: 'Event-driven execution disabled by operator',
-        cancelledAt,
-        cancelledBy: 'system',
-      });
-      logger.debug(
-        `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
-      );
-      telemetryClient.reportEventDrivenExecutionSuppressed({
-        workflowExecution: {
-          ...execution,
+  if (!workflowsExecutionEngine.triggerEvents.isEnabled) {
+    // Check if the workflow execution is event-driven and skip if it is
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (execution) {
+      const triggeredBy = execution.triggeredBy;
+      const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
+      if (isEventDriven) {
+        const cancelledAt = new Date().toISOString();
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: workflowRunId,
           status: ExecutionStatus.SKIPPED,
           cancellationReason: 'Event-driven execution disabled by operator',
           cancelledAt,
           cancelledBy: 'system',
-        },
-        logTriggerEventsEnabled: workflowsExecutionEngine.triggerEvents.isLogEventsEnabled,
-      });
-      return;
+        });
+        logger.debug(
+          `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
+        );
+        telemetryClient.reportEventDrivenExecutionSuppressed({
+          workflowExecution: {
+            ...execution,
+            status: ExecutionStatus.SKIPPED,
+            cancellationReason: 'Event-driven execution disabled by operator',
+            cancelledAt,
+            cancelledBy: 'system',
+          },
+          logTriggerEventsEnabled: workflowsExecutionEngine.triggerEvents.isLogEventsEnabled,
+        });
+        return;
+      }
     }
   }
 
