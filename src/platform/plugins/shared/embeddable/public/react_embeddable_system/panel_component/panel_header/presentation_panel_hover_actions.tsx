@@ -23,7 +23,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/public';
 
 import { css } from '@emotion/react';
@@ -39,9 +39,8 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { uiActions } from '../../kibana_services';
-import type { AnyApiAction } from '../../panel_actions/types';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { PresentationPanelQuickActionContext } from './presentation_panel_quick_action_context';
+import { EmbeddableRendererContext } from '../../embeddable_renderer_context';
 import { DEFAULT_QUICK_ACTION_IDS } from '../constants';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
@@ -65,7 +64,7 @@ const getContextMenuAriaLabel = (title?: string, index?: number) => {
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
 const createClickHandler =
-  (action: AnyApiAction, context: ActionExecutionContext<EmbeddableApiContext>) =>
+  (action: Action<EmbeddableApiContext>, context: ActionExecutionContext<EmbeddableApiContext>) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
       // from react-router's <Link/>
@@ -104,11 +103,11 @@ export const PresentationPanelHoverActions = ({
   viewMode,
   showNotifications = true,
 }: PresentationPanelHoverActionsProps) => {
-  const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
+  const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [showNotification, setShowNotification] = useState<boolean>(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
+  const [notifications, setNotifications] = useState<Action<EmbeddableApiContext>[]>([]);
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
@@ -132,13 +131,13 @@ export const PresentationPanelHoverActions = ({
   const hideTitle = hidePanelTitle || parentHideTitle;
   const showDescription = description && (!title || hideTitle);
 
-  const contextActionIds = useContext(PresentationPanelQuickActionContext);
+  const contextQuickActions = useContext(EmbeddableRendererContext)?.quickActions;
   const quickActionIds = useMemo(() => {
     const actionMode = viewMode === 'edit' ? 'edit' : 'view';
-    return (contextActionIds?.[actionMode] ?? DEFAULT_QUICK_ACTION_IDS[actionMode])?.filter(
+    return (contextQuickActions?.[actionMode] ?? DEFAULT_QUICK_ACTION_IDS[actionMode])?.filter(
       (actionId) => actionId && (disabledActionIds ?? [])?.indexOf(actionId) === -1
     );
-  }, [viewMode, contextActionIds, disabledActionIds]);
+  }, [viewMode, contextQuickActions, disabledActionIds]);
 
   const onClose = useCallback(() => {
     setIsContextMenuOpen(false);
@@ -156,7 +155,7 @@ export const PresentationPanelHoverActions = ({
     const handleActionCompatibilityChange = (
       type: 'quickActions' | 'notifications',
       isCompatible: boolean,
-      action: AnyApiAction
+      action: Action<EmbeddableApiContext>
     ) => {
       if (canceled) return;
       (type === 'quickActions' ? setQuickActions : setNotifications)((currentActions) => {
@@ -190,7 +189,7 @@ export const PresentationPanelHoverActions = ({
               handleActionCompatibilityChange(
                 'quickActions',
                 isCompatible,
-                frequentlyChangingAction as AnyApiAction
+                frequentlyChangingAction as Action<EmbeddableApiContext>
               );
             });
           subscriptions.add(compatibilitySubscription);
@@ -223,7 +222,7 @@ export const PresentationPanelHoverActions = ({
               handleActionCompatibilityChange(
                 'notifications',
                 isCompatible,
-                frequentlyChangingNotification as AnyApiAction
+                frequentlyChangingNotification as Action<EmbeddableApiContext>
               );
             });
           subscriptions.add(compatibilitySubscription);
@@ -251,7 +250,7 @@ export const PresentationPanelHoverActions = ({
             embeddable: api,
           })) ?? []
         );
-      })()) as AnyApiAction[];
+      })()) as Action<EmbeddableApiContext>[];
       if (canceled) return;
 
       if (disabledActionIds) {

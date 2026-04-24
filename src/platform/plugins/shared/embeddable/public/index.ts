@@ -15,12 +15,15 @@ export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/typ
 export { getAddFromLibraryType, useAddFromLibraryTypes } from './add_from_library/registry';
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
 export { EmbeddableStateTransfer } from './state_transfer';
+export { ACTION_EDIT_PANEL } from './ui_actions/edit_panel_action/constants';
+export { ACTION_REMOVE_PANEL } from './ui_actions/remove_panel_action/constants';
 export {
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
   isRowClickTriggerContext,
   isValueClickTriggerContext,
 } from './ui_actions/triggers';
+
 export type {
   CellValueContext,
   ChartActionContext,
@@ -37,6 +40,7 @@ export type { EmbeddableSetup, EmbeddableStart } from './types';
 
 export {
   EmbeddableRenderer,
+  EmbeddableRendererContext,
   type DefaultEmbeddableApi,
   type EmbeddableFactory,
 } from './react_embeddable_system';

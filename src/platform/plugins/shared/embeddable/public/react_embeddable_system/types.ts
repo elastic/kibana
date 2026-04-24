@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import type { DefaultPresentationPanelApi } from './panel_component';
 import type {
   CanLockHoverActions,
   HasSerializableState,

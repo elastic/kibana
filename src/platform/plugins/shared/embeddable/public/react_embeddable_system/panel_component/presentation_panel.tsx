@@ -38,7 +38,7 @@ export const PresentationPanel = <
     const results = await Promise.allSettled([
       startServicesPromise,
       componentPromise,
-      import('./panel_module'),
+      import('../../async_module'),
     ]);
 
     let loadErrorReason: string | undefined;

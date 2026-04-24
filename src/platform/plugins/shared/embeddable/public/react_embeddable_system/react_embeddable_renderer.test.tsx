@@ -8,7 +8,6 @@
  */
 
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
-import { setStubKibanaServices as setupPresentationPanelServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 
@@ -46,7 +45,6 @@ describe('embeddable renderer', () => {
 
   beforeAll(() => {
     registerEmbeddablePublicDefinition('test', getTestEmbeddableFactory);
-    setupPresentationPanelServices();
   });
 
   it('builds the embeddable', async () => {

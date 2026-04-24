@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/content-management-plugin'
-  - '@kbn/presentation-panel-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/analytics'
   - '@kbn/content-management-utils'

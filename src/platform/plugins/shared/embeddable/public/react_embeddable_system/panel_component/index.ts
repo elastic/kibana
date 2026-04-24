@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PLUGIN_ID = 'presentationPanel';
-export const PLUGIN_NAME = 'presentationPanel';
+export { PresentationPanel } from './presentation_panel';
+export type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';

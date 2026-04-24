@@ -15,10 +15,10 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { triggers } from '@kbn/ui-actions-plugin/public';
+import { Action, triggers } from '@kbn/ui-actions-plugin/public';
 import { uiActions } from '../../kibana_services';
-import type { AnyApiAction } from '../../panel_actions/types';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 
 const disabledNotifications = ['ACTION_FILTERS_NOTIFICATION'];
 
@@ -30,8 +30,8 @@ export const usePresentationPanelHeaderActions = <
   api: ApiType,
   getActions: PresentationPanelInternalProps['getActions']
 ) => {
-  const [badges, setBadges] = useState<AnyApiAction[]>([]);
-  const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
+  const [badges, setBadges] = useState<Action<EmbeddableApiContext>[]>([]);
+  const [notifications, setNotifications] = useState<Action<EmbeddableApiContext>[]>([]);
 
   const { euiTheme } = useEuiTheme();
 
@@ -44,10 +44,10 @@ export const usePresentationPanelHeaderActions = <
     const subscriptions = new Subscription();
     const getTriggerCompatibleActions = getActions ?? uiActions.getTriggerCompatibleActions;
     const getActionsForTrigger = async (triggerId: string) => {
-      let nextActions: AnyApiAction[] =
+      let nextActions: Action<EmbeddableApiContext>[] =
         ((await getTriggerCompatibleActions(triggerId, {
           embeddable: api,
-        })) as AnyApiAction[]) ?? [];
+        })) as Action<EmbeddableApiContext>[]) ?? [];
 
       const disabledActions = (api.disabledActionIds$?.value ?? []).concat(disabledNotifications);
       nextActions = nextActions.filter((badge) => disabledActions.indexOf(badge.id) === -1);
@@ -57,7 +57,7 @@ export const usePresentationPanelHeaderActions = <
     const handleActionCompatibilityChange = (
       type: 'badge' | 'notification',
       isCompatible: boolean,
-      action: AnyApiAction
+      action: Action<EmbeddableApiContext>
     ) => {
       if (canceled) return;
       (type === 'badge' ? setBadges : setNotifications)((currentActions) => {
@@ -96,7 +96,7 @@ export const usePresentationPanelHeaderActions = <
             })
           )
           .subscribe(async (isCompatible) => {
-            handleActionCompatibilityChange('badge', isCompatible, badge as AnyApiAction);
+            handleActionCompatibilityChange('badge', isCompatible, badge as Action<EmbeddableApiContext>);
           });
         subscriptions.add(compatibilitySubject);
       }
@@ -124,7 +124,7 @@ export const usePresentationPanelHeaderActions = <
               handleActionCompatibilityChange(
                 'notification',
                 isCompatible,
-                notification as AnyApiAction
+                notification as Action<EmbeddableApiContext>
               );
             });
           subscriptions.add(compatibilitySubject);

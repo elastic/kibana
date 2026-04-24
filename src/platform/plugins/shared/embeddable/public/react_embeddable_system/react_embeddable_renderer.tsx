@@ -13,9 +13,7 @@ import { v4 as generateId } from 'uuid';
 
 import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
-
+import { PresentationPanel, type PresentationPanelProps } from './panel_component';
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';

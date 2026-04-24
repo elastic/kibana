@@ -8,7 +8,6 @@
  */
 
 import { ON_OPEN_PANEL_MENU, PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { uiActions } from '../kibana_services';
 import { ACTION_EDIT_PANEL } from './edit_panel_action/constants';
 import { ACTION_INSPECT_PANEL } from './inspect_panel_action/constants';
 import { ACTION_REMOVE_PANEL } from './remove_panel_action/constants';
@@ -18,47 +17,59 @@ import {
   CPS_USAGE_OVERRIDES_BADGE,
 } from './customize_panel_action/constants';
 import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
+import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN } from './constants';
+import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 
-export const registerActions = () => {
+export const registerActions = (uiActions: UiActionsSetup) => {
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {
-    const { RemovePanelAction } = await import('../panel_component/panel_module');
+    const { RemovePanelAction } = await import('../async_module');
     return new RemovePanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_REMOVE_PANEL);
 
   uiActions.registerActionAsync(CUSTOM_TIME_RANGE_BADGE, async () => {
-    const { CustomTimeRangeBadge } = await import('../panel_component/panel_module');
+    const { CustomTimeRangeBadge } = await import('../async_module');
     return new CustomTimeRangeBadge();
   });
   uiActions.attachAction(PANEL_BADGE_TRIGGER, CUSTOM_TIME_RANGE_BADGE);
 
   uiActions.registerActionAsync(CPS_USAGE_OVERRIDES_BADGE, async () => {
-    const { CpsUsageOverridesBadge } = await import('../panel_component/panel_module');
+    const { CpsUsageOverridesBadge } = await import('../async_module');
     return new CpsUsageOverridesBadge();
   });
   uiActions.attachAction(PANEL_BADGE_TRIGGER, CPS_USAGE_OVERRIDES_BADGE);
 
   uiActions.registerActionAsync(ACTION_INSPECT_PANEL, async () => {
-    const { InspectPanelAction } = await import('../panel_component/panel_module');
+    const { InspectPanelAction } = await import('../async_module');
     return new InspectPanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_INSPECT_PANEL);
 
   uiActions.registerActionAsync(ACTION_EDIT_PANEL, async () => {
-    const { EditPanelAction } = await import('../panel_component/panel_module');
+    const { EditPanelAction } = await import('../async_module');
     return new EditPanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EDIT_PANEL);
 
   uiActions.registerActionAsync(ACTION_CUSTOMIZE_PANEL, async () => {
-    const { CustomizePanelAction } = await import('../panel_component/panel_module');
+    const { CustomizePanelAction } = await import('../async_module');
     return new CustomizePanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_CUSTOMIZE_PANEL);
 
   uiActions.registerActionAsync(ACTION_SHOW_CONFIG_PANEL, async () => {
-    const { ShowConfigPanelAction } = await import('../panel_component/panel_module');
+    const { ShowConfigPanelAction } = await import('../async_module');
     return new ShowConfigPanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_SHOW_CONFIG_PANEL);
+
+  uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, OPEN_FLYOUT_ADD_DRILLDOWN, async () => {
+    const { openCreateDrilldownFlyout } = await import('../async_module');
+    return openCreateDrilldownFlyout;
+  });
+
+  uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, OPEN_FLYOUT_EDIT_DRILLDOWN, async () => {
+    const { openManageDrilldownsFlyout } = await import('../async_module');
+    return openManageDrilldownsFlyout;
+  });
 };
