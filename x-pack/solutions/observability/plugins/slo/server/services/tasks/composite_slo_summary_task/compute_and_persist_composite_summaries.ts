@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import pLimit from 'p-limit';
 import type {
   ElasticsearchClient,
   Logger,
@@ -169,24 +170,29 @@ async function fetchMemberDefinitions(
   stats: RunStats
 ): Promise<Map<string, MemberDefinitionMap>> {
   const memberMapBySpace = new Map<string, MemberDefinitionMap>();
+  const limiter = pLimit(10);
   await Promise.allSettled(
-    [...bySpace.entries()].map(async ([spaceId, items]) => {
-      const allIds = [
-        ...new Set(items.flatMap(({ compositeSlo }) => compositeSlo.members.map((m) => m.sloId))),
-      ];
-      try {
-        const slos = await findMemberSLOs(allIds, spaceId, soClient, logger);
-        memberMapBySpace.set(spaceId, new Map(slos.map((slo) => [slo.id, slo])));
-      } catch (err) {
-        stats.spaceErrors++;
-        logger.error(
-          `Failed to fetch member SLOs for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
-        );
-      }
-    })
+    [...bySpace.entries()].map(([spaceId, items]) =>
+      limiter(async () => {
+        const allIds = [
+          ...new Set(items.flatMap(({ compositeSlo }) => compositeSlo.members.map((m) => m.sloId))),
+        ];
+        try {
+          const slos = await findMemberSLOs(allIds, spaceId, soClient, logger);
+          memberMapBySpace.set(spaceId, new Map(slos.map((slo) => [slo.id, slo])));
+        } catch (err) {
+          stats.spaceErrors++;
+          logger.error(
+            `Failed to fetch member SLOs for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
+          );
+        }
+      })
+    )
   );
   return memberMapBySpace;
 }
+
+const COMPUTE_SUMMARIES_BATCH_SIZE = 300;
 
 async function fetchMemberSummaries(
   bySpace: Map<string, SpaceItems>,
@@ -196,44 +202,51 @@ async function fetchMemberSummaries(
   stats: RunStats
 ): Promise<Map<string, SummaryResultMap>> {
   const summaryResultBySpace = new Map<string, SummaryResultMap>();
+  const limiter = pLimit(10);
   await Promise.allSettled(
-    [...bySpace.entries()].map(async ([spaceId, items]) => {
-      const memberDefinitionMap = memberMapBySpace.get(spaceId);
-      if (!memberDefinitionMap) return;
+    [...bySpace.entries()].map(([spaceId, items]) =>
+      limiter(async () => {
+        const memberDefinitionMap = memberMapBySpace.get(spaceId);
+        if (!memberDefinitionMap) return;
 
-      const seen = new Map<
-        string,
-        { slo: SLODefinition; instanceId: string; timeWindowOverride: TimeWindow }
-      >();
-      for (const { compositeSlo } of items) {
-        const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
-        for (const member of compositeSlo.members) {
-          const slo = memberDefinitionMap.get(member.sloId);
-          if (!slo) continue;
-          const instanceId = member.instanceId ?? ALL_VALUE;
-          const key = buildMemberSummaryKey(member.sloId, instanceId, richTimeWindow);
-          if (!seen.has(key)) {
-            seen.set(key, { slo, instanceId, timeWindowOverride: richTimeWindow });
+        const seen = new Map<
+          string,
+          { slo: SLODefinition; instanceId: string; timeWindowOverride: TimeWindow }
+        >();
+        for (const { compositeSlo } of items) {
+          const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
+          for (const member of compositeSlo.members) {
+            const slo = memberDefinitionMap.get(member.sloId);
+            if (!slo) continue;
+            const instanceId = member.instanceId ?? ALL_VALUE;
+            const key = buildMemberSummaryKey(member.sloId, instanceId, richTimeWindow);
+            if (!seen.has(key)) {
+              seen.set(key, { slo, instanceId, timeWindowOverride: richTimeWindow });
+            }
           }
         }
-      }
 
-      if (seen.size === 0) {
-        summaryResultBySpace.set(spaceId, new Map());
-        return;
-      }
+        if (seen.size === 0) {
+          summaryResultBySpace.set(spaceId, new Map());
+          return;
+        }
 
-      const keys = [...seen.keys()];
-      try {
-        const results = await summaryClient.computeSummaries([...seen.values()]);
-        summaryResultBySpace.set(spaceId, new Map(keys.map((k, i) => [k, results[i]])));
-      } catch (err) {
-        stats.spaceErrors++;
-        logger.error(
-          `Failed to compute member summaries for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
-        );
-      }
-    })
+        const keys = [...seen.keys()];
+        const values = [...seen.values()];
+        try {
+          const batches = chunk(values, COMPUTE_SUMMARIES_BATCH_SIZE);
+          const results = (
+            await Promise.all(batches.map((batch) => summaryClient.computeSummaries(batch)))
+          ).flat();
+          summaryResultBySpace.set(spaceId, new Map(keys.map((k, i) => [k, results[i]])));
+        } catch (err) {
+          stats.spaceErrors++;
+          logger.error(
+            `Failed to compute member summaries for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
+          );
+        }
+      })
+    )
   );
   return summaryResultBySpace;
 }
