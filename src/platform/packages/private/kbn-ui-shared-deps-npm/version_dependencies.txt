@@ -61,7 +61,7 @@
 @types/lodash@4.17.0
 @types/mdast@3.0.3
 @types/minimatch@3.0.3
-@types/node@22.19.1
+@types/node@24.10.13
 @types/numeral@2.0.5
 @types/parse-json@4.0.0
 @types/parse5@5.0.3
@@ -485,7 +485,7 @@ tslib@1.14.1
 tslib@2.8.1
 tty-browserify@0.0.1
 typed-array-buffer@1.0.3
-undici-types@6.21.0
+undici-types@7.16.0
 unherit@1.1.0
 unified@9.2.2
 unist-builder@2.0.3
