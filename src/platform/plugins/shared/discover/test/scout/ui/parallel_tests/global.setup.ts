@@ -9,7 +9,10 @@
 
 import { globalSetupHook } from '@kbn/scout';
 import { getSynthtraceClient } from '@kbn/scout-synthtrace';
-import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
+import {
+  createMetricsTestIndexIfNeeded,
+  DIMENSIONS_WIPE_CONFIG,
+} from '../fixtures/metrics_experience';
 import {
   TRACES,
   richTrace,
@@ -37,6 +40,17 @@ globalSetupHook(
       created
         ? '[setup:metrics] metrics test index created successfully'
         : '[setup:metrics] metrics test index already exists, skipping'
+    );
+
+    // Companion index for stream-switch coverage
+    log.debug(
+      '[setup:metrics] creating companion metrics test index (only if it does not exist)...'
+    );
+    const createdOther = await createMetricsTestIndexIfNeeded(esClient, DIMENSIONS_WIPE_CONFIG);
+    log.debug(
+      createdOther
+        ? '[setup:metrics] companion metrics test index created successfully'
+        : '[setup:metrics] companion metrics test index already exists, skipping'
     );
 
     // Traces Experience setup (not supported in serverless security or search - no Fleet/APM privileges)
