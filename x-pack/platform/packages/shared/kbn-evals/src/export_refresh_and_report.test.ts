@@ -11,7 +11,9 @@ import type { EvaluationReporter } from './utils/reporting/evaluation_reporter';
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 
-function createMockDocument(overrides: Partial<EvaluationScoreDocument> = {}): EvaluationScoreDocument {
+function createMockDocument(
+  overrides: Partial<EvaluationScoreDocument> = {}
+): EvaluationScoreDocument {
   return {
     '@timestamp': '2025-01-01T00:00:00Z',
     run_id: 'run-1',
@@ -119,12 +121,10 @@ describe('exportRefreshAndReport', () => {
       taskModelId: 'gpt-4',
     });
 
-    expect(mockReportModelScore).toHaveBeenCalledWith(
-      mockScoreRepository,
-      'test-run',
-      mockLog,
-      { taskModelId: 'gpt-4', suiteId: undefined }
-    );
+    expect(mockReportModelScore).toHaveBeenCalledWith(mockScoreRepository, 'test-run', mockLog, {
+      taskModelId: 'gpt-4',
+      suiteId: undefined,
+    });
   });
 
   it('passes suiteId through to reportModelScore', async () => {
@@ -139,12 +139,10 @@ describe('exportRefreshAndReport', () => {
       suiteId: 'pci-compliance',
     });
 
-    expect(mockReportModelScore).toHaveBeenCalledWith(
-      mockScoreRepository,
-      'test-run',
-      mockLog,
-      { taskModelId: 'gpt-4', suiteId: 'pci-compliance' }
-    );
+    expect(mockReportModelScore).toHaveBeenCalledWith(mockScoreRepository, 'test-run', mockLog, {
+      taskModelId: 'gpt-4',
+      suiteId: 'pci-compliance',
+    });
   });
 
   it('does not refresh or report when export throws', async () => {

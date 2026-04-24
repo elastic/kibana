@@ -416,10 +416,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         });
       } catch (error) {
         log.error(
-          new Error(
-            `Failed to export/report evaluation results for run ID: ${currentRunId}.`,
-            { cause: error }
-          )
+          new Error(`Failed to export/report evaluation results for run ID: ${currentRunId}.`, {
+            cause: error,
+          })
         );
         throw error;
       }
