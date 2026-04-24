@@ -119,11 +119,9 @@ export function getTourStepsConfig(): TourStepConfig[] {
     STREAMS_LIST_STEP,
     RETENTION_STEP,
     PROCESSING_STEP,
+    ATTACHMENTS_STEP,
+    ADVANCED_STEP,
   ];
-
-  baseSteps.push(ATTACHMENTS_STEP);
-
-  baseSteps.push(ADVANCED_STEP);
 
   const stepsTotal = baseSteps.length;
 
