@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -58,7 +58,6 @@ const RuleCanvasContent = ({
   attachment,
   registerActionButtons,
   updateOrigin,
-  refreshAttachment,
   rulesApi,
   application,
   basePath,
@@ -71,8 +70,7 @@ const RuleCanvasContent = ({
   // Mirrors the dashboard pattern: start false so the first effect registers [],
   // matching the canvas_flyout clear effect. The second cycle (mounted=true)
   // registers the real buttons after the parent clear has already fired.
-  const [mounted, setMounted] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(data.enabled ?? false);
+  const [mounted, setMounted] = React.useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -115,58 +113,11 @@ const RuleCanvasContent = ({
 
     registerActionButtons([
       {
-        label: 'Update Rule',
-        icon: 'save',
-        type: ActionButtonType.PRIMARY,
-        handler: async () => {
-          const updated = await rulesApi.updateRule(ruleId, {
-            metadata: data.metadata,
-            schedule: data.schedule,
-            evaluation: { query: data.evaluation?.query },
-            state_transition: data.state_transition ?? null,
-            ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
-            ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
-            ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
-            ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
-          });
-          await refreshAttachment(updated);
-          notifications.toasts.addSuccess(`Rule "${data.metadata.name}" updated`);
-        },
-      },
-      {
-        label: isEnabled ? 'Disable' : 'Enable',
-        icon: isEnabled ? 'pause' : 'play',
-        type: ActionButtonType.SECONDARY,
-        handler: async () => {
-          if (isEnabled) {
-            await rulesApi.bulkDisableRules({ ids: [ruleId] });
-            setIsEnabled(false);
-            const latest = await rulesApi.getRule(ruleId);
-            await refreshAttachment(latest);
-            notifications.toasts.addSuccess(`Rule "${data.metadata.name}" disabled`);
-          } else {
-            await rulesApi.bulkEnableRules({ ids: [ruleId] });
-            setIsEnabled(true);
-            const latest = await rulesApi.getRule(ruleId);
-            await refreshAttachment(latest);
-            notifications.toasts.addSuccess(`Rule "${data.metadata.name}" enabled`);
-          }
-        },
-      },
-      {
         label: 'View in Rules',
         icon: 'popout',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.PRIMARY,
         handler: () => {
           application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));
-        },
-      },
-      {
-        label: 'Delete Rule',
-        icon: 'trash',
-        type: ActionButtonType.OVERFLOW,
-        handler: async () => {
-          await rulesApi.deleteRule(ruleId);
         },
       },
     ]);
@@ -174,10 +125,8 @@ const RuleCanvasContent = ({
     mounted,
     isSaved,
     origin,
-    isEnabled,
     registerActionButtons,
     updateOrigin,
-    refreshAttachment,
     rulesApi,
     application,
     basePath,
