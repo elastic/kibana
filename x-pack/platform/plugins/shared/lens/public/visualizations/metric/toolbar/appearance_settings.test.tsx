@@ -292,7 +292,7 @@ describe('appearance settings', () => {
     );
   });
 
-  it('clears style template when editing layout options manually', () => {
+  it('set custom style template when editing layout options manually', () => {
     renderComponent({ styleTemplate: 'top' });
 
     const btnGroup = new EuiButtonGroupTestHarness(
