@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: DeletePrivMonUser
       summary: Delete a monitored user
+      description: Removes a privileged user from monitoring by their document ID.
       parameters:
         - name: id
           in: path
@@ -32,3 +33,9 @@ paths:
                   message:
                     type: string
                     description: A message providing additional information about the deletion status
+              examples:
+                DeletePrivMonUserResponse:
+                  summary: User deleted successfully
+                  value:
+                    acknowledged: true
+                    message: User deleted successfully

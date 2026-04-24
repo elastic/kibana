@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { asPercent } from '@kbn/observability-plugin/common';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
 export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
@@ -15,7 +15,10 @@ export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType
 };
 
 export const isLatencyThresholdRuleType = (ruleTypeId: string) =>
-  ruleTypeId === 'apm.transaction_duration';
+  ruleTypeId === ApmRuleType.TransactionDuration;
+
+export const isFailedTransactionRateRuleType = (ruleTypeId: string) =>
+  ruleTypeId === ApmRuleType.TransactionErrorRate;
 
 export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);

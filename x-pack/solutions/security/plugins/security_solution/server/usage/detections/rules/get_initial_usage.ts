@@ -6,6 +6,7 @@
  */
 
 import type {
+  AiCreatedRulesUsage,
   EventLogStatusMetric,
   MaxAvgMin,
   RulesTypeUsage,
@@ -171,6 +172,12 @@ export const getInitialMaxAvgMin = (): MaxAvgMin => ({
 export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
   total: 0,
   customized: 0,
+  enabled: 0,
+  disabled: 0,
+});
+
+export const getInitialAiCreatedRulesUsage = (): AiCreatedRulesUsage => ({
+  total: 0,
   enabled: 0,
   disabled: 0,
 });

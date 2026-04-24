@@ -124,7 +124,7 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
-            "lineNumber": 252,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -140,7 +140,7 @@
                   "SavedObjectsStartDeps"
                 ],
                 "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
-                "lineNumber": 252,
+                "lineNumber": 250,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -160,7 +160,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
-            "lineNumber": 475,
+            "lineNumber": 482,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -185,7 +185,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_create.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -201,7 +201,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_create.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -218,7 +218,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_create.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -241,7 +241,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_delete.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -257,7 +257,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_delete.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -274,7 +274,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_delete.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -297,7 +297,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -313,7 +313,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -330,7 +330,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -353,7 +353,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -369,7 +369,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -386,7 +386,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -409,7 +409,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_update.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -425,7 +425,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_update.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -442,7 +442,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_update.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -465,7 +465,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts",
-        "lineNumber": 30,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -481,7 +481,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts",
-            "lineNumber": 31,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -498,7 +498,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts",
-            "lineNumber": 32,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -521,7 +521,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -537,7 +537,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -554,7 +554,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -574,10 +574,10 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { kibanaIndex, kibanaVersion }: RouteDependencies) => void"
+          ", { kibanaVersion }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
-        "lineNumber": 19,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -593,7 +593,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
-            "lineNumber": 20,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -604,13 +604,13 @@
             "id": "def-server.registerDeleteUnknownTypesRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ kibanaIndex, kibanaVersion }",
+            "label": "{ kibanaVersion }",
             "description": [],
             "signature": [
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
-            "lineNumber": 21,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -689,7 +689,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/find.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -705,7 +705,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/find.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -722,7 +722,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/find.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -745,7 +745,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/get.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -761,7 +761,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/get.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -778,7 +778,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/get.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -973,7 +973,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -989,7 +989,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1006,7 +1006,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1029,7 +1029,7 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/update.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1045,7 +1045,7 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/update.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1062,7 +1062,7 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/update.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1103,7 +1103,7 @@
         "label": "SAVED_OBJECT_TYPES_COUNT",
         "description": [],
         "signature": [
-          "155"
+          "156"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
         "lineNumber": 14,

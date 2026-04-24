@@ -2422,7 +2422,7 @@
           "[]>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 52,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2435,7 +2435,7 @@
             "label": "{\n  resource,\n  esClient,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 55,
+            "lineNumber": 59,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -2448,7 +2448,7 @@
                 "label": "resource",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 56,
+                "lineNumber": 60,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3452,7 +3452,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 57,
+                "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3470,7 +3470,7 @@
         "tags": [],
         "label": "getIndexFields",
         "description": [
-          "\nResolves field information for a list of indices, transparently handling\nthe local-vs-CCS split. Local indices use the _mapping API (preserving\nthe full mapping tree in `rawMapping`), while CCS indices fall back to\nthe batched _field_caps API."
+          "\nResolves field information for a list of indices, transparently handling\nthe local-vs-CCS split. Local inputs are classified via `_resolve/index`\nand routed to the appropriate mapping / field-caps fetcher; CCS inputs\ngo directly to the batched _field_caps API."
         ],
         "signature": [
           "({ indices, esClient, cleanup, }: { indices: string[]; esClient: ",
@@ -3486,7 +3486,7 @@
           ">>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 119,
+        "lineNumber": 172,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3499,7 +3499,7 @@
             "label": "{\n  indices,\n  esClient,\n  cleanup = true,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 123,
+            "lineNumber": 176,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -3515,7 +3515,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 124,
+                "lineNumber": 177,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4519,7 +4519,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 125,
+                "lineNumber": 178,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4535,7 +4535,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 126,
+                "lineNumber": 179,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6823,7 +6823,7 @@
           "(name: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 24,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6839,7 +6839,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 24,
+            "lineNumber": 28,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -9234,7 +9234,7 @@
           "<T extends { name: string; }>(resources: T[]) => { local: T[]; remote: T[]; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 30,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -9250,7 +9250,7 @@
               "T[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 31,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12001,11 +12001,27 @@
         "label": "IndexFieldsResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 108,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
+            "id": "def-server.IndexFieldsResult.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"index\" | \"alias\" | \"indexPattern\" | \"dataStream\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.IndexFieldsResult.fields",
@@ -12024,7 +12040,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 109,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12041,7 +12057,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 110,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12603,6 +12619,23 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-genai-utils",
+        "id": "def-server.IndexFieldType",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexFieldType",
+        "description": [],
+        "signature": [
+          "\"index\" | \"alias\" | \"indexPattern\" | \"dataStream\""
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.listIndices",
         "type": "boolean",
         "tags": [],
@@ -12643,7 +12676,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/visualization/chart_type_registry.ts",
-        "lineNumber": 150,
+        "lineNumber": 152,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -1,0 +1,26 @@
+---
+# This file is used to generate "Product intercept settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Product intercept settings in Kibana
+id: product-intercept-settings-kb
+page_description: |
+  Configure the product intercept settings in your `kibana.yml` configuration file.
+  A product intercept is a prompt for feedback about the Elastic product that appears periodically in the Kibana UI.
+
+groups:
+  - group: Product intercept settings
+    id: product-intercept-settings
+    settings:
+
+      - setting: xpack.product_intercept.enabled
+        description: |
+          Enable or disable Elastic product feedback prompts.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          self: ga

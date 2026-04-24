@@ -67,13 +67,25 @@ const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
 const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
 
-const createMockHit = (flattened: Record<string, unknown> = {}): DataTableRecord =>
+const createMockHit = (
+  flattened: Record<string, unknown> = {},
+  index: string = 'test-index'
+): DataTableRecord =>
   ({
     id: 'test-id',
-    raw: { _id: 'test-id', _index: 'test-index' },
+    raw: { _id: 'test-id', _index: index },
     flattened,
     isAnchor: false,
   } as DataTableRecord);
+
+const remoteAlertHit = createMockHit(
+  { 'event.kind': 'signal' },
+  'remote-cluster:.alerts-security.alerts-default'
+);
+const remoteEventHit = createMockHit(
+  { 'event.kind': 'event' },
+  'remote-cluster:.alerts-security.alerts-default'
+);
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
@@ -375,6 +387,98 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
       expect(getByText('Add note')).toBeInTheDocument();
       expect(queryByText('Run workflow')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('remote document', () => {
+    const timelineItem = { name: 'Investigate in timeline', onClick: jest.fn() };
+    const caseItem = { name: 'Add to case', onClick: jest.fn() };
+    const statusItem = { name: 'Mark as acknowledged', onClick: jest.fn() };
+    const assigneeItem = { name: 'Assign alert', onClick: jest.fn() };
+    const tagsItem = { name: 'Apply alert tags', onClick: jest.fn() };
+    const workflowItem = { name: 'Run workflow', onClick: jest.fn() };
+
+    beforeEach(() => {
+      mockUseAddToCaseActions.mockReturnValue({ addToCaseActionItems: [caseItem] });
+      mockUseAlertsActions.mockReturnValue({ actionItems: [statusItem], panels: [] });
+      mockUseAlertAssigneesActions.mockReturnValue({
+        alertAssigneesItems: [assigneeItem],
+        alertAssigneesPanels: [],
+      });
+      mockUseAlertTagsActions.mockReturnValue({
+        alertTagsItems: [tagsItem],
+        alertTagsPanels: [],
+      });
+      mockUseInvestigateInTimeline.mockReturnValue({
+        investigateInTimelineActionItems: [timelineItem],
+      });
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [workflowItem],
+        runAlertWorkflowPanel: [],
+      });
+      mockUseIsInSecurityApp.mockReturnValue(true);
+    });
+
+    it('should show only Investigate in Timeline for a remote alert', () => {
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: remoteAlertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Investigate in timeline')).toBeInTheDocument();
+      expect(queryByText('Add to case')).not.toBeInTheDocument();
+      expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+      expect(queryByText('Assign alert')).not.toBeInTheDocument();
+      expect(queryByText('Apply alert tags')).not.toBeInTheDocument();
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
+      expect(queryByText('Add note')).not.toBeInTheDocument();
+    });
+
+    it('should show only Investigate in Timeline for a remote event', () => {
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: remoteEventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Investigate in timeline')).toBeInTheDocument();
+      expect(queryByText('Add to case')).not.toBeInTheDocument();
+      expect(queryByText('Add note')).not.toBeInTheDocument();
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
+    });
+
+    it('should show no items for a remote document when not in Security app', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: remoteAlertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
+      expect(queryByText('Explore in Alerts')).not.toBeInTheDocument();
+    });
+
+    it('should show the full menu for a local alert (regression guard)', () => {
+      const localAlertHit = createMockHit({ 'event.kind': 'signal' });
+      const { getByTestId, getByText, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: localAlertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Add to case')).toBeInTheDocument();
+      expect(getByText('Mark as acknowledged')).toBeInTheDocument();
+      expect(getByText('Assign alert')).toBeInTheDocument();
+      expect(getByText('Apply alert tags')).toBeInTheDocument();
+      expect(getByText('Run workflow')).toBeInTheDocument();
+      expect(getByText('Investigate in timeline')).toBeInTheDocument();
+      expect(queryByText('Add note')).not.toBeInTheDocument();
     });
   });
 

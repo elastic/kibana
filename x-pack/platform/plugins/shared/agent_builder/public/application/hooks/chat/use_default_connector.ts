@@ -6,9 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import type { AIConnector } from '@kbn/elastic-assistant';
+import type { AIConnector } from '@kbn/inference-connectors';
 import { PREFERRED_DEFAULT_CONNECTOR_ID } from '../../../../common/constants';
-import { getFirstRecommendedConnectorId } from '../../../../common/recommended_connectors';
 
 interface UseDefaultConnectorParams {
   connectors: AIConnector[];
@@ -30,7 +29,8 @@ export function useDefaultConnector({
     }
 
     // 2. Prefer the first recommended connector when available (SOTA per provider + open-weight)
-    const recommendedId = getFirstRecommendedConnectorId(connectors.map((c) => c.id));
+    const recommendedConnector = connectors.find((c) => c.isRecommended);
+    const recommendedId = recommendedConnector?.id;
     if (recommendedId) {
       return recommendedId;
     }

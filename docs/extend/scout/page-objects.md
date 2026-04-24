@@ -56,6 +56,16 @@ export class NewPage {
 }
 ```
 
+`gotoApp` accepts an optional second argument with `params` (query string) and `hash` (URL hash):
+
+```ts
+// Navigate to '/app/myPlugin?_g=(time:(from:now-15m,to:now))'
+await this.page.gotoApp('myPlugin', { params: { _g: '(time:(from:now-15m,to:now))' } });
+
+// Navigate to '/app/dashboards#/view/abc-123'
+await this.page.gotoApp('dashboards', { hash: '/view/abc-123' });
+```
+
 :::::::::
 
 :::::::::{step} Register a plugin page object
