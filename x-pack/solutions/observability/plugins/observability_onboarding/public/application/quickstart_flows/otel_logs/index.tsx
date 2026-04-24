@@ -65,9 +65,7 @@ const SHOW_TROUBLESHOOTING_DELAY = 120_000;
 
 interface OtelLogsPanelProps {
   /**
-   * When set, the panel renders for a single, fixed platform and hides the
-   * OS selector UI. The parent is expected to set its own breadcrumb in this
-   * mode, so the panel skips its default breadcrumb.
+   * When set, the panel renders for a single, fixed platform and hides the OS selector UI.
    */
   lockedPlatform?: 'linux' | 'mac' | 'windows';
 }
