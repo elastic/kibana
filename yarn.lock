@@ -4607,6 +4607,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-visualization-common@link:x-pack/platform/packages/shared/presentation/agent-visualization-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-visualization@link:x-pack/platform/packages/shared/presentation/agent-visualization":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -9784,6 +9792,10 @@
   uid ""
 
 "@kbn/vis-type-xy-plugin@link:src/platform/plugins/private/vis_types/xy":
+  version "0.0.0"
+  uid ""
+
+"@kbn/visualization-agent-plugin@link:x-pack/platform/plugins/shared/visualization_agent":
   version "0.0.0"
   uid ""
 

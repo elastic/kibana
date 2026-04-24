@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/agent-visualization",
+  "owner": ["@elastic/kibana-presentation"],
+  "group": "platform",
+  "visibility": "shared"
+}

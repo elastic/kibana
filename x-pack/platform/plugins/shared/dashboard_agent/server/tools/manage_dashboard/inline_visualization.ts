@@ -6,8 +6,8 @@
  */
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
 import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
+import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-visualization';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { type AttachmentPanel } from '@kbn/dashboard-agent-common';

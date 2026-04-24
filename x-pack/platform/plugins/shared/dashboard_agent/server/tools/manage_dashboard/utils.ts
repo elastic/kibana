@@ -7,12 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { DASHBOARD_ATTACHMENT_TYPE, isDashboardAttachment } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { z } from '@kbn/zod/v4';
+import {
+  VISUALIZATION_ATTACHMENT_TYPE,
+  visualizationAttachmentDataSchema,
+} from '@kbn/agent-visualization-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 /**
@@ -31,15 +33,11 @@ export const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
 };
 
-const visualizationAttachmentDataSchema = z.object({
-  visualization: z.record(z.string(), z.unknown()),
-});
-
 const resolvePanelsFromAttachment = (
   type: string,
   data: unknown
 ): Pick<AttachmentPanel, 'type' | 'config'>[] => {
-  if (type === AttachmentType.visualization) {
+  if (type === VISUALIZATION_ATTACHMENT_TYPE) {
     const parseResult = visualizationAttachmentDataSchema.safeParse(data);
     if (!parseResult.success) {
       throw new Error('Visualization attachment does not contain a valid visualization payload.');
@@ -53,7 +51,7 @@ const resolvePanelsFromAttachment = (
   }
 
   throw new Error(
-    `Attachment type "${type}" is not supported in add_panels_from_attachments. Only "${AttachmentType.visualization}" is supported.`
+    `Attachment type "${type}" is not supported in add_panels_from_attachments. Only "${VISUALIZATION_ATTACHMENT_TYPE}" is supported.`
   );
 };
 

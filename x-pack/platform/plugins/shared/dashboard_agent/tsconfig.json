@@ -10,6 +10,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
+    "@kbn/agent-visualization-common",
+    "@kbn/agent-visualization",
     "@kbn/agent-builder-tools-base",
     "@kbn/agent-builder-server",
     "@kbn/dashboard-plugin",

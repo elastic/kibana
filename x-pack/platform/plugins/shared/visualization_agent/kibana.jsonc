@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/visualization-agent-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "visualizationAgent",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "visualizationAgent"],
+    "requiredPlugins": ["agentBuilder", "data", "dataViews", "lens", "uiActions"]
+  }
+}

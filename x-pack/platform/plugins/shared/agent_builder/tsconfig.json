@@ -12,6 +12,8 @@
     "@kbn/inference-plugin",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-browser",
+    "@kbn/agent-visualization-common",
+    "@kbn/agent-visualization",
     "@kbn/core-http-server",
     "@kbn/agent-builder-common",
     "@kbn/core-elasticsearch-server",

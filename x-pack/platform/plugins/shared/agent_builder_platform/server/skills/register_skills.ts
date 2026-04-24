@@ -7,9 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { graphCreationSkill } from './graph_creation_skill';
-import { visualizationCreationSkill } from './visualization_creation_skill';
 
 export const registerSkills = (agentBuilder: AgentBuilderPluginSetup) => {
-  agentBuilder.skills.register(visualizationCreationSkill);
   agentBuilder.skills.register(graphCreationSkill);
 };
