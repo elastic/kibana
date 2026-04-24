@@ -116,6 +116,46 @@ describe('pciScopeDiscoveryTool', () => {
       expect(data.discovered[0].index).toBe('packetbeat-network-1');
     });
 
+    it('resolves custom wildcard patterns to concrete indices instead of storing the pattern', async () => {
+      (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mockResolvedValue([
+        { index: 'custom-firewall-2024' },
+        { index: 'custom-firewall-2025' },
+        { index: 'unrelated-index' },
+      ]);
+
+      (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mockResolvedValue({
+        fields: {
+          'source.ip': {
+            ip: { type: 'ip', indices: ['custom-firewall-2024', 'custom-firewall-2025'] },
+          },
+          'destination.ip': {
+            ip: { type: 'ip', indices: ['custom-firewall-2024', 'custom-firewall-2025'] },
+          },
+        },
+      });
+
+      const result = (await tool.handler(
+        { scopeType: 'all', customIndices: ['custom-firewall-*'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const call = (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mock.calls[0][0];
+      // The pattern should NOT appear as a literal index in the fieldCaps call
+      expect(call.index).not.toContain('custom-firewall-*');
+      expect(call.index).toContain('custom-firewall-2024');
+      expect(call.index).toContain('custom-firewall-2025');
+
+      const data = result.results[0].data as {
+        discovered: Array<{ index: string; ecsCoveragePercent: number }>;
+      };
+      const firewallIndices = data.discovered.filter((d) => d.index.startsWith('custom-firewall-'));
+      // Both concrete indices should be discovered with non-zero coverage
+      expect(firewallIndices).toHaveLength(2);
+      for (const idx of firewallIndices) {
+        expect(idx.ecsCoveragePercent).toBeGreaterThan(0);
+      }
+    });
+
     it('attaches a scopeClaim with the PCI DSS version + disclaimer', async () => {
       (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mockResolvedValue([
         { index: 'packetbeat-network-1' },

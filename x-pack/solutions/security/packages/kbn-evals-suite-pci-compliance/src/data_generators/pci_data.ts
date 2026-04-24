@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -40,7 +39,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
  * Kept intentionally small (tens of docs each) so evals are fast and reproducible.
  */
 
-const RANDOM_PREFIX = crypto.randomBytes(3).toString('hex');
+const RANDOM_PREFIX = Math.random().toString(36).substring(2, 8);
 
 export const PCI_INDICES = {
   auth: `logs-${RANDOM_PREFIX}-auth`,
