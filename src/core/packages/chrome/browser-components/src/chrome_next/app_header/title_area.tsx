@@ -15,7 +15,8 @@ import { BackButton } from './back_button';
 
 export const TitleArea = React.memo(() => {
   const { euiTheme } = useEuiTheme();
-  const back = useBackButton();
+  const backTargets = useBackButton();
+  const hasBack = backTargets.length > 0;
   const title = useTitle();
 
   const styles = useMemo(() => {
@@ -35,15 +36,15 @@ export const TitleArea = React.memo(() => {
     return { wrapper, titleOffset };
   }, [euiTheme]);
 
-  if (!title && !back) {
+  if (!title && !hasBack) {
     return null;
   }
 
   return (
     <div css={styles.wrapper}>
-      {back && <BackButton />}
+      {hasBack && <BackButton />}
       {title && (
-        <EuiTitle size="xs" css={!back ? styles.titleOffset : undefined}>
+        <EuiTitle size="xs" css={!hasBack ? styles.titleOffset : undefined}>
           <h1 className="eui-textTruncate">{title}</h1>
         </EuiTitle>
       )}

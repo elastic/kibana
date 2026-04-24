@@ -37,6 +37,7 @@ import {
   EnvironmentIndicator,
   type EnvironmentInfo,
 } from '../toolbar_items/environment/environment_indicator';
+import { CloudEnvironmentToggle } from '../toolbar_items/cloud/cloud_environment_toggle';
 import { useMinimized } from '../hooks/use_minimized';
 import { SettingsModal } from './settings_modal';
 import { useToolbarState } from '../hooks/use_toolbar_state';
@@ -344,6 +345,12 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
               {state.isEnabled('memoryMonitor') && (
                 <EuiFlexItem grow={false}>
                   <MemoryUsageIndicator />
+                </EuiFlexItem>
+              )}
+
+              {state.isEnabled('cloudEnvironment') && (
+                <EuiFlexItem grow={false}>
+                  <CloudEnvironmentToggle />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

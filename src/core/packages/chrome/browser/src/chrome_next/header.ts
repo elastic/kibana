@@ -61,9 +61,10 @@ export interface ChromeNextHeaderConfig {
 
   /**
    * Optional explicit back navigation for the Chrome-Next header back control.
-   * When `href` is set, overrides breadcrumb-derived back destination.
+   * When set, overrides breadcrumb-derived back destinations.
+   * A single object produces a direct link; an array produces a popover menu.
    */
-  back?: ChromeNextHeaderBack;
+  back?: ChromeNextHeaderBack | ChromeNextHeaderBack[];
 }
 
 /** Explicit back target for {@link ChromeNextHeaderConfig.back}. */

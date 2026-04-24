@@ -15,12 +15,15 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { createHelpMenuLinks } from './help_menu_links';
 
+const CLOUD_DEV_OVERRIDE_KEY = '__kibana_dev_cloud_enabled';
+
 export interface MaybeAddCloudLinksDeps {
   core: CoreStart;
   security: SecurityPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
   isServerless: boolean;
+  isDev?: boolean;
 }
 
 export function maybeAddCloudLinks({
@@ -28,13 +31,18 @@ export function maybeAddCloudLinks({
   security,
   cloud,
   isServerless,
+  isDev,
 }: MaybeAddCloudLinksDeps): void {
   const userObservable = defer(() => security.authc.getCurrentUser()).pipe(
     // Check if user is a cloud user.
     map((user) => user.elastic_cloud_user),
     // If user is not defined due to an unexpected error, then fail *open*.
     catchError(() => of(true)),
-    filter((isElasticCloudUser) => isElasticCloudUser === true),
+    filter(
+      (isElasticCloudUser) =>
+        isElasticCloudUser === true ||
+        (isDev === true && window.localStorage.getItem(CLOUD_DEV_OVERRIDE_KEY) === 'true')
+    ),
     switchMap(() => {
       if (cloud.deploymentUrl) {
         core.chrome.setCustomNavLink({

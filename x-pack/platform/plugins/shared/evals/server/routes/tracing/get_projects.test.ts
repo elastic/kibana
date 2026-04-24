@@ -10,6 +10,8 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { EVALS_TRACING_PROJECTS_URL, API_VERSIONS, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { registerGetTracingProjectsRoute } from './get_projects';
 
 const buildProjectBucket = ({
@@ -60,7 +62,13 @@ describe('GET /internal/evals/tracing/projects', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetTracingProjectsRoute({ router, logger });
+    registerGetTracingProjectsRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      getEncryptedSavedObjectsStart: async () => ({} as EncryptedSavedObjectsPluginStart),
+      getInternalRemoteConfigsSoClient: async () => ({} as SavedObjectsClientContract),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_TRACING_PROJECTS_URL).versions[

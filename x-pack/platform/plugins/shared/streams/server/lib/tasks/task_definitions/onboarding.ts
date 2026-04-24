@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   GeneratedSignificantEventQuery,
   IdentifyFeaturesResult,
@@ -13,7 +13,7 @@ import type {
   SignificantEventsQueriesGenerationResult,
   TaskResult,
 } from '@kbn/streams-schema';
-import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
+import { OnboardingStep, TaskStatus, normalizeEsqlSafe } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
@@ -21,7 +21,10 @@ import type { LogMeta } from '@kbn/logging';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
-import type { QueryClient } from '../../streams/assets/query/query_client';
+import type {
+  QueryClient,
+  QueryClientBulkIndexOperation,
+} from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
@@ -44,7 +47,6 @@ export interface OnboardingTaskParams {
   from: number;
   to: number;
   steps: OnboardingStep[];
-  saveQueries: boolean;
   connectors?: {
     features?: string;
     queries?: string;
@@ -53,9 +55,8 @@ export interface OnboardingTaskParams {
 
 export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 
-export function getOnboardingTaskId(streamName: string, saveQueries: boolean = true) {
-  const base = `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
-  return saveQueries ? base : `${base}_no_save_queries`;
+export function getOnboardingTaskId(streamName: string) {
+  return `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
 }
 
 const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
@@ -96,8 +97,8 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               }
               const { fakeRequest } = runContext;
 
-              const { streamName, from, to, steps, saveQueries, connectors, _task } = runContext
-                .taskInstance.params as TaskParams<OnboardingTaskParams>;
+              const { streamName, from, to, steps, connectors, _task } = runContext.taskInstance
+                .params as TaskParams<OnboardingTaskParams>;
 
               const { taskClient, getQueryClient, streamsClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
@@ -140,7 +141,12 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         featuresTaskResult = await waitForSubtask<
                           FeaturesIdentificationTaskParams,
                           IdentifyFeaturesResult
-                        >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                        >(
+                          featuresTaskId,
+                          runContext.taskInstance.id,
+                          taskClient,
+                          taskContext.logger
+                        );
                       }
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
@@ -164,18 +170,16 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       queriesTaskResult = await waitForSubtask<
                         SignificantEventsQueriesGenerationTaskParams,
                         SignificantEventsQueriesGenerationResult
-                      >(queriesTaskId, runContext.taskInstance.id, taskClient);
+                      >(queriesTaskId, runContext.taskInstance.id, taskClient, taskContext.logger);
 
                       if (queriesTaskResult.status !== TaskStatus.Completed) {
                         return;
                       }
 
-                      if (saveQueries) {
-                        await persistQueries(streamName, queriesTaskResult.queries, {
-                          queryClient: await getQueryClient(),
-                          streamsClient,
-                        });
-                      }
+                      await persistQueries(streamName, queriesTaskResult.queries, {
+                        queryClient: await getQueryClient(),
+                        streamsClient,
+                      });
                       break;
 
                     default:
@@ -190,7 +194,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
-                    saveQueries,
                     connectors,
                   },
                   { featuresTaskResult, queriesTaskResult }
@@ -266,7 +269,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
-                    saveQueries,
                     connectors,
                   },
                   errorMessage
@@ -290,9 +292,15 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>(
   subtaskId: string,
   parentTaskId: string,
-  taskClient: TaskClient<StreamsTaskType>
+  taskClient: TaskClient<StreamsTaskType>,
+  logger: Logger
 ): Promise<TaskResult<TPayload>> {
+  let lastStatus: TaskStatus | undefined;
+  let pollCount = 0;
+  const startedAt = Date.now();
+
   while (true) {
+    pollCount++;
     const parentTask = await taskClient.get(parentTaskId);
 
     if (parentTask.status === TaskStatus.BeingCanceled) {
@@ -301,11 +309,21 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
 
     const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
+    if (result.status !== lastStatus) {
+      logger.debug(`Subtask ${subtaskId}: status changed to ${result.status}`);
+      lastStatus = result.status;
+    }
+
     if (result.status === TaskStatus.Failed) {
       throw new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`);
     }
 
     if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
+      logger.debug(
+        `Subtask ${subtaskId} finished with status ${result.status} after ${pollCount} polls (${
+          Date.now() - startedAt
+        }ms)`
+      );
       return result;
     }
 
@@ -369,19 +387,60 @@ export async function persistQueries(
 
   const definition = await streamsClient.getStream(streamName);
 
-  await queryClient.bulk(
-    definition,
-    queries.map((query) => ({
-      index: {
-        id: v4(),
-        type: query.type,
-        esql: query.esql,
-        title: query.title,
-        description: query.description,
-        severity_score: query.severity_score,
-        evidence: query.evidence,
-      },
-    })),
-    { createRules: false }
+  const { [streamName]: existingLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
+  const existingById = new Map(existingLinks.map((link) => [link.query.id, link.query]));
+  const existingEsqls = new Set(
+    existingLinks.map((link) => normalizeEsqlSafe(link.query.esql.query))
   );
+  const ruleBackedIds = new Set(
+    existingLinks.filter((link) => link.rule_backed).map((link) => link.query.id)
+  );
+
+  const standardOps: QueryClientBulkIndexOperation[] = [];
+  const ruleBackedReplaceOps: QueryClientBulkIndexOperation[] = [];
+
+  for (const query of queries) {
+    const fields = {
+      type: query.type,
+      esql: query.esql,
+      title: query.title,
+      description: query.description,
+      severity_score: query.severity_score,
+      evidence: query.evidence,
+    };
+
+    const normalizedEsql = normalizeEsqlSafe(query.esql.query);
+
+    if (existingEsqls.has(normalizedEsql)) {
+      continue;
+    }
+
+    existingEsqls.add(normalizedEsql);
+
+    if (query.replaces && existingById.has(query.replaces)) {
+      const op = { index: { id: query.replaces, ...fields } };
+      if (ruleBackedIds.has(query.replaces)) {
+        ruleBackedReplaceOps.push(op);
+      } else {
+        standardOps.push(op);
+      }
+    } else {
+      standardOps.push({ index: { id: v4(), ...fields } });
+    }
+  }
+
+  if (standardOps.length === 0 && ruleBackedReplaceOps.length === 0) {
+    return;
+  }
+
+  if (standardOps.length > 0) {
+    await queryClient.bulk(definition, standardOps, { createRules: false });
+  }
+
+  // Rule-backed replacements go through the default path (syncQueries) so
+  // that backing Kibana rules are updated/recreated when the ES|QL changes,
+  // or properly uninstalled when the replacement is STATS-shaped.
+  if (ruleBackedReplaceOps.length > 0) {
+    await queryClient.bulk(definition, ruleBackedReplaceOps);
+  }
 }

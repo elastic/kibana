@@ -17,15 +17,15 @@ const AppMenuComponent = lazy(async () => {
   return { default: Component };
 });
 
-/** Fallback chain: AppMenuConfig -> legacy HeaderActionMenu -> nothing. */
+/** Fallback chain: AppMenuConfig + staticItems -> Legacy HeaderActionMenu -> nothing. */
 export const AppMenu = React.memo(() => {
-  const appMenuConfig = useAppHeaderMenu();
+  const { config, staticItems } = useAppHeaderMenu();
   const hasLegacyActionMenu = useHasLegacyActionMenu();
 
-  if (appMenuConfig) {
+  if (config) {
     return (
       <Suspense>
-        <AppMenuComponent config={appMenuConfig} />
+        <AppMenuComponent config={config} staticItems={staticItems} />
       </Suspense>
     );
   }

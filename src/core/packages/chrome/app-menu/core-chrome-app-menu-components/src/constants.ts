@@ -18,3 +18,4 @@ export const APP_MENU_ITEM_LIMIT = 3;
 export const APP_MENU_NOTIFICATION_INDICATOR_TOP = 2;
 export const APP_MENU_NOTIFICATION_INDICATOR_LEFT = 25;
 export const DEFAULT_POPOVER_WIDTH = 200;
+export const APP_MENU_SHARE_ID = 'share';

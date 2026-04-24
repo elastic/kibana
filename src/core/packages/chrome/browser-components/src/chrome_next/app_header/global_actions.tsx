@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useNextHeader } from '../../shared/chrome_hooks';
+import { useShareAction } from './hooks';
 
 const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.appHeader.globalShareAriaLabel', {
   defaultMessage: 'Share',
@@ -28,49 +29,65 @@ const useGlobalActionsStyles = () => {
       gap: ${euiTheme.size.xs};
     `;
 
+    const iconButton = css`
+      color: ${euiTheme.colors.textSubdued};
+    `;
+
     const favoriteSlot = css`
       display: flex;
       flex-shrink: 0;
       align-items: center;
+
+      .euiButtonIcon {
+        color: ${euiTheme.colors.textSubdued};
+        block-size: 24px;
+        inline-size: 24px;
+      }
     `;
 
-    return { root, favoriteSlot };
+    return { root, iconButton, favoriteSlot };
   }, [euiTheme]);
 };
 
 /**
  * Fixed-order global object actions (editTitle, share, favorite) next to the title.
- * Only renders actions the page opts into via `chrome.next.header.set({ globalActions })`.
+ * Share is auto-extracted from the app menu (item with id 'share') or explicitly set
+ * via `chrome.next.header.set({ globalActions: { share } })`.
  * Favorite is a `ReactNode` slot so plugins own full behavior (clients, context, React Query).
  */
 export const GlobalActions = React.memo(() => {
   const config = useNextHeader();
   const styles = useGlobalActionsStyles();
-  const globalActions = config?.globalActions;
+  const shareAction = useShareAction();
+  const favorite = config?.globalActions?.favorite;
 
-  if (!globalActions) {
+  if (!shareAction && !favorite) {
     return null;
   }
 
-  const { share, favorite } = globalActions;
-
-  if (!share && !favorite) {
-    return null;
-  }
+  const shareTooltipContent = shareAction?.tooltipContent ?? SHARE_ARIA_LABEL;
+  const hasCustomTooltip = !!shareAction?.tooltipContent || !!shareAction?.tooltipTitle;
 
   return (
     <div css={styles.root} data-test-subj="chromeNextAppHeaderGlobalActions">
-      {/* TODO: editTitle — Chrome-controlled inline title editor; wire onSave from config */}
-      {share ? (
-        <EuiButtonIcon
-          iconType="share"
-          color="text"
-          display="empty"
-          size="s"
-          aria-label={SHARE_ARIA_LABEL}
-          data-test-subj="chromeNextAppHeaderGlobalShare"
-          onClick={share.onClick}
-        />
+      {shareAction ? (
+        <EuiToolTip
+          content={shareTooltipContent}
+          title={shareAction.tooltipTitle}
+          delay="long"
+          {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
+        >
+          <EuiButtonIcon
+            iconType="share"
+            color="text"
+            display="empty"
+            size="xs"
+            css={styles.iconButton}
+            aria-label={SHARE_ARIA_LABEL}
+            data-test-subj={`chromeNextAppHeaderGlobalShare ${shareAction.testId ?? ''}`.trim()}
+            onClick={shareAction.onClick}
+          />
+        </EuiToolTip>
       ) : null}
       {favorite ? (
         <div css={styles.favoriteSlot} data-test-subj="chromeNextAppHeaderGlobalFavoriteSlot">

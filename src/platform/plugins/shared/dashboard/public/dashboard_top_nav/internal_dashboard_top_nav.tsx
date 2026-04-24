@@ -14,8 +14,9 @@ import UseUnmount from 'react-use/lib/useUnmount';
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiHorizontalRule,
+  EuiButtonEmpty,
   EuiIcon,
+  EuiHorizontalRule,
   EuiLink,
   EuiPopover,
   EuiScreenReaderOnly,
@@ -31,7 +32,6 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import type { ChromeNextHeaderGlobalActions } from '@kbn/core-chrome-browser';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -183,15 +183,16 @@ export function InternalDashboardTopNav({
           viewMode === 'edit' ? (
             <>
               {dashboardTitle}
-              <EuiIcon
-                tabIndex={0}
-                role="button"
-                aria-label={topNavStrings.settings.description}
-                size="s"
-                type="pencil"
+              <EuiButtonEmpty
                 onClick={() => openSettingsFlyout(dashboardApi)}
-                css={styles.updateIcon}
-              />
+                size="xs"
+                aria-label={topNavStrings.settings.description}
+                color="text"
+                textProps={false}
+                css={styles.updateEditButton}
+              >
+                <EuiIcon size="s" type="pencil" aria-hidden={true} />
+              </EuiButtonEmpty>
             </>
           ) : (
             dashboardTitle
@@ -232,7 +233,7 @@ export function InternalDashboardTopNav({
     dashboardApi,
     viewMode,
     customLeadingBreadCrumbs,
-    styles.updateIcon,
+    styles.updateEditButton,
   ]);
 
   /**
@@ -304,31 +305,24 @@ export function InternalDashboardTopNav({
     [redirectTo]
   );
 
-  const { viewModeTopNavConfig, editModeTopNavConfig, chromeNextHeaderShareGlobalAction } =
-    useDashboardMenuItems({
-      isLabsShown,
-      setIsLabsShown,
-      maybeRedirect,
-      showResetChange,
-    });
+  const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
+    isLabsShown,
+    setIsLabsShown,
+    maybeRedirect,
+    showResetChange,
+  });
 
   useEffect(() => {
-    const globalActions: ChromeNextHeaderGlobalActions = {};
-    if (chromeNextHeaderShareGlobalAction) {
-      globalActions.share = chromeNextHeaderShareGlobalAction;
-    }
-    if (chromeNextHeaderFavoriteGlobalAction) {
-      globalActions.favorite = chromeNextHeaderFavoriteGlobalAction;
-    }
-
     coreServices.chrome.next.header.set({
       title: title ?? '',
-      globalActions: Object.keys(globalActions).length > 0 ? globalActions : undefined,
+      ...(chromeNextHeaderFavoriteGlobalAction
+        ? { globalActions: { favorite: chromeNextHeaderFavoriteGlobalAction } }
+        : {}),
     });
     return () => {
-      coreServices.chrome.next.header.set(undefined);
+      coreServices.chrome.next.header.reset();
     };
-  }, [title, chromeNextHeaderShareGlobalAction, chromeNextHeaderFavoriteGlobalAction]);
+  }, [title, chromeNextHeaderFavoriteGlobalAction]);
 
   UseUnmount(() => {
     dashboardApi.clearOverlays();
@@ -476,12 +470,10 @@ const topNavStyles = {
         paddingTop: 0,
       },
     }),
-  updateIcon: ({ euiTheme }: UseEuiTheme) =>
+  updateEditButton: ({ euiTheme }: UseEuiTheme) =>
     css({
-      '.kbnBody &': {
-        marginLeft: euiTheme.size.xs,
-        marginTop: `calc(-1 * ${euiTheme.size.xxs})`,
-        cursor: 'pointer',
-      },
+      blockSize: '100%',
+      marginLeft: euiTheme.size.xxs,
+      padding: 0,
     }),
 };

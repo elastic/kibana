@@ -22,6 +22,14 @@ const useBadgesStyle = () => {
   return useMemo(() => {
     const badgesContainer = css`
       margin-left: ${euiTheme.size.s};
+
+      /* Deprecated renderCustomBadge items may return null at runtime,
+         leaving empty EuiFlexItem wrappers in the DOM. Hide the container
+         when none of its children have visible content to avoid a stale
+         margin-left gap next to the title. */
+      &:not(:has(.euiFlexItem:not(:empty))) {
+        display: none;
+      }
     `;
 
     return { badgesContainer };

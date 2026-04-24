@@ -12,6 +12,7 @@
     "@kbn/core-chrome-layout-components",
     "@kbn/config-schema",
     "@kbn/core-chrome-browser-internal-types",
+    "@kbn/measure-component",
     "@kbn/core-chrome-feature-flags",
   ]
 }

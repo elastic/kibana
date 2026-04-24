@@ -48,6 +48,7 @@ spaceTest.describe(
 
         for (const title of charts.expectedTitles) {
           await expect(charts.getChartTitle(title)).toBeVisible();
+          await expect(charts.getChartError(title)).toBeHidden();
         }
       });
     });
@@ -66,6 +67,7 @@ spaceTest.describe(
 
         for (const title of charts.expectedTitles) {
           await expect(charts.getChartTitle(title)).toBeVisible();
+          await expect(charts.getChartError(title)).toBeHidden();
         }
       });
     });

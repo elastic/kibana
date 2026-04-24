@@ -79,6 +79,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         />
         <EuiSpacer size="s" />
 
+        <EuiSwitch
+          label="Cloud Environment Toggle"
+          checked={isEnabled('cloudEnvironment')}
+          onChange={() => toggleItemEnabled('cloudEnvironment')}
+        />
+        <EuiSpacer size="s" />
+
         {items.length > 0 && (
           <>
             {items.map((item) => {

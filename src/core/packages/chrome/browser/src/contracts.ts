@@ -51,11 +51,11 @@ export interface ChromeSetup {
  * ```
  *
  * @example
- * How to set the help dropdown extension (React-first, preferred):
+ * How to set the help dropdown extension:
  * ```tsx
  * core.chrome.setHelpExtension({
  *   appName: 'My App',
- *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
+ *   links: [{ linkType: 'documentation', href: docLinks.links.myApp.guide }],
  * });
  * ```
  *
@@ -232,7 +232,6 @@ export interface ChromeStart {
 
   /**
    * Override the current set of custom help content.
-   * Use {@link ChromeHelpExtension.content} to render custom React content below the links.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
@@ -325,6 +324,32 @@ export interface ChromeStart {
 
   /** {@inheritdoc ChromeNext} */
   next: ChromeNext;
+
+  /**
+   * Register a handler that opens the feedback UI.
+   * Called by the feedback plugin during `start`.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerFeedbackHandler(handler: () => void): () => void;
+
+  /**
+   * Get an observable of the currently registered feedback handler, or `undefined` if none.
+   */
+  getFeedbackHandler$(): Observable<(() => void) | undefined>;
+
+  /**
+   * Register a handler that opens the newsfeed UI.
+   * Called by the newsfeed plugin during `start`.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerNewsfeedHandler(handler: { open: () => void; hasNew$: Observable<boolean> }): () => void;
+
+  /**
+   * Get an observable of the currently registered newsfeed handler, or `undefined` if none.
+   */
+  getNewsfeedHandler$(): Observable<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
 
   /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers

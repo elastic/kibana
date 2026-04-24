@@ -11,7 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { waitFor } from '@kbn/detections-response-ftr-services';
 import expect from '@kbn/expect';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
-import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
+import { ENTITY_LATEST, ENTITY_STORE_ROUTES, getEntitiesAlias } from '@kbn/entity-store/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 import { dataViewRouteHelpersFactory } from './data_view';
@@ -290,6 +290,7 @@ export const EntityStoreUtils = (
       dataViewPattern = 'logs-*',
       waitForEntities = true,
       entityTypes = ['user', 'host'],
+      maintainerAutoStart = false,
       ...installBody
     } = body;
     const installRequestBody = { ...installBody, entityTypes };
@@ -349,7 +350,7 @@ export const EntityStoreUtils = (
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .set('elastic-api-version', '2')
-      .send({});
+      .send({ autoStart: maintainerAutoStart });
 
     expect([200, 201]).to.contain(maintainersRes.status);
     return res;
@@ -382,6 +383,58 @@ export const EntityStoreUtils = (
     return response;
   };
 
+  const unlinkEntitiesViaResolutionApi = async ({ entityIds }: { entityIds: string[] }) => {
+    let url: string = ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK;
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+
+    const response = await supertest
+      .post(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
+      .send({ entity_ids: entityIds });
+
+    if (response.status !== 200) {
+      log.error('Failed to unlink entities via resolution API');
+      log.error(JSON.stringify(response.body));
+    }
+    expect(response.status).to.eql(200);
+    return response;
+  };
+
+  const forceExtractEntities = async ({
+    entityType,
+    fromDateISO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    toDateISO = new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  }: {
+    entityType: EntityType;
+    fromDateISO?: string;
+    toDateISO?: string;
+  }) => {
+    let url = `/internal/security/entity_store/${entityType}/force_log_extraction`;
+    if (namespace !== 'default') {
+      url = `/s/${namespace}${url}`;
+    }
+
+    log.info(`Force extracting entities for type: ${entityType}`);
+    const response = await supertest
+      .post(url)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2')
+      .send({ fromDateISO, toDateISO });
+
+    log.info(
+      `Force extraction for ${entityType}: status=${response.status}, body=${JSON.stringify(
+        response.body
+      )}`
+    );
+    expect([200, 202]).to.contain(response.status);
+    return response;
+  };
+
   return {
     cleanEngines,
     deleteEntityV2,
@@ -394,6 +447,8 @@ export const EntityStoreUtils = (
     enableEntityStoreV2,
     installEntityStoreV2,
     forceUpdateEntityViaCrud,
+    unlinkEntitiesViaResolutionApi,
+    forceExtractEntities,
     waitForEngineStatus,
     initEntityEngineForEntityType,
   };

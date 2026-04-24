@@ -18,9 +18,31 @@ export class NextHeaderService {
   public start() {
     return {
       get$: () => this.config.$,
-      set: (value?: ChromeNextHeaderConfig) => this.config.set(value),
-      /** @internal Reset to initial state (e.g. on app change). */
-      reset: () => this.config.set(undefined),
+      set: (partial: Partial<ChromeNextHeaderConfig>) => {
+        const current = this.config.get() ?? {};
+        const next = { ...current };
+        for (const [key, value] of Object.entries(partial)) {
+          if (value !== undefined) {
+            (next as Record<string, unknown>)[key] = value;
+          }
+        }
+        this.config.set(
+          Object.keys(next).length > 0 ? (next as ChromeNextHeaderConfig) : undefined
+        );
+      },
+      reset: (...keys: Array<keyof ChromeNextHeaderConfig>) => {
+        if (keys.length === 0) {
+          this.config.set(undefined);
+          return;
+        }
+        const current = this.config.get();
+        if (!current) return;
+        const next = { ...current };
+        for (const key of keys) {
+          delete next[key];
+        }
+        this.config.set(Object.keys(next).length > 0 ? next : undefined);
+      },
     };
   }
 

@@ -220,9 +220,16 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         titleBreadcrumbText: persistedDiscoverSession?.title,
         services,
       });
+      chrome.next.header.set({
+        title: persistedDiscoverSession?.title || 'Discover',
+      });
     }
+    return () => {
+      chrome.next.header.reset('title');
+    };
   }, [
     chrome.docTitle,
+    chrome.next.header,
     persistedDiscoverSession?.title,
     customizationContext.displayMode,
     services,

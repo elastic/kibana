@@ -114,7 +114,6 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
-  - '@kbn/core-chrome-browser'
   - '@kbn/test-jest-helpers'
   - '@kbn/scout'
   - '@kbn/cps-utils'
@@ -123,10 +122,12 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-transforms'
-  - '@kbn/core-http-common'
-  - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/lens-common'
+  - '@kbn/dashboard-navigation-options-common'
+  - '@kbn/dashboard-navigation-options-components'
+  - '@kbn/dashboard-navigation-options-schema'
+  - '@kbn/as-code-shared-telemetry'
   - '@kbn/core-chrome-browser'
 tags:
   - plugin
@@ -137,7 +138,6 @@ tags:
 fileGroups:
   src:
     - '*.ts'
-    - .storybook/**/*.ts
     - common/**/*
     - public/**/*
     - server/**/*

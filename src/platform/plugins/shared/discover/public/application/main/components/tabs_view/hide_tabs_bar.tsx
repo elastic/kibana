@@ -39,7 +39,7 @@ export const HideTabsBar: FC<{
     if (isNextChrome && customizationContext.displayMode === 'standalone' && topNavMenuItems) {
       chrome.next.header.set({ appMenu: topNavMenuItems });
       return () => {
-        chrome.next.header.set(undefined);
+        chrome.next.header.reset('appMenu');
       };
     }
   }, [isNextChrome, customizationContext.displayMode, topNavMenuItems, chrome.next.header]);
