@@ -199,13 +199,17 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
         await testSubjects.click(this.TEST_IDS.FLYOUT_SAVE_BUTTON);
       },
       async removeSynonym(index: number) {
-        // get the badges and click on the one with the index
-        const badges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
-        if (index >= badges.length) {
+        const initialBadges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
+        if (index >= initialBadges.length) {
           throw new Error(`Badge with index ${index} not found`);
         }
-        const deleteButton = await badges[index].findByTagName('button');
+        const expectedCount = initialBadges.length - 1;
+        const deleteButton = await initialBadges[index].findByTagName('button');
         await deleteButton.click();
+        await retry.waitFor('badge to be removed', async () => {
+          const currentBadges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
+          return currentBadges.length === expectedCount;
+        });
       },
     },
   };
