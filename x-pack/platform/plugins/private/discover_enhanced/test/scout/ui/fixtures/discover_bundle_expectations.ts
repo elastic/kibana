@@ -23,9 +23,12 @@ export function evaluateDiscoverBundlePluginAssertion(
     // navigation. Named plugin entry chunks (plugin-discover, etc.) are preloaded
     // during bootstrap and not re-fetched. On-demand chunks get the aggregated
     // 'rspack-chunk' label. Validate that every loaded label is either in the
-    // expected set, the RSPack-only allowlist, or is an aggregated rspack-chunk.
+    // expected set, the RSPack-only allowlist, or a lazy-loaded named split chunk
+    // (e.g. lazy_application_dependencies, lazySiemMigrationsService).
     const rspackAllowed = new Set([...expectedPlugins, ...rspackOnlyBundleLabels]);
-    const subsetOk = loadedPluginNamesSorted.every((name) => rspackAllowed.has(name));
+    const subsetOk = loadedPluginNamesSorted.every(
+      (name) => rspackAllowed.has(name) || name.startsWith('lazy')
+    );
     if (subsetOk) {
       return { ok: true };
     }

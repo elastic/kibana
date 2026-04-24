@@ -15,6 +15,8 @@ import { testData } from '../fixtures';
  * Extra bundle labels produced only by the unified RSPack build (split chunks + shell).
  * In RSPack dist mode, unnamed split chunks are labelled 'rspack-chunk' by
  * getLogicalBundlePluginLabel. In dev mode, named labels like 'plugin-discover' appear.
+ * Named lazy split chunks (lazy_*, from dynamic import() magic comments) are handled
+ * dynamically in evaluateDiscoverBundlePluginAssertion and do not need to be listed here.
  * [rspack-transition] Remove this allowlist when the legacy webpack optimizer is gone
  * and tests only target RSPack output — see packages/kbn-rspack-optimizer/LEGACY_REMOVAL_CHECKLIST.md
  */
