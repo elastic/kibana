@@ -16,7 +16,7 @@ secrets:
 engine:
   id: claude
   model: llm-gateway/claude-opus-4-7
-  max-turns: 5
+  max-turns: 30
   env:
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
 permissions: read-all
