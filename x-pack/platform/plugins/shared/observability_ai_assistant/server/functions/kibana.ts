@@ -151,6 +151,10 @@ export function registerKibanaFunction({
       try {
         return await makeRequest(primaryUrl);
       } catch (e) {
+        // Fallback: when publicBaseUrl is not resolvable from Kibana's runtime
+        // retry using the local server address from core.http.getServerInfo().
+        // This will not work when server.ssl.clientAuthentication is set to 'required',
+        // as the outbound request won't present a client certificate.
         const localUrl = isEnotfoundError(e) ? getLocalServerUrl() : undefined;
 
         if (!localUrl) {
