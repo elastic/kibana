@@ -1356,8 +1356,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       };
     }, [defaultColumns, paginationMode, throttledHandleOnScroll]);
 
-    const isRenderComplete = loadingState !== DataLoadingState.loading;
-
     if (!rowCount && loadingState === DataLoadingState.loading) {
       return (
         <div
@@ -1379,15 +1377,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     if (!rowCount) {
       return (
-        <div
-          className="euiDataGrid__noResults"
-          css={styles.emptyRow}
-          data-render-complete={isRenderComplete}
-          data-shared-item=""
-          data-title={searchTitle}
-          data-description={searchDescription}
-          data-document-number={0}
-        >
+        <div className="euiDataGrid__noResults" css={styles.emptyRow} data-document-number={0}>
           <EuiText size="xs" color="subdued" textAlign="center">
             <EuiIcon type="discoverApp" size="m" color="subdued" aria-hidden="true" />
             <EuiSpacer size="s" />
@@ -1408,11 +1398,6 @@ const InternalUnifiedDataTable = React.forwardRef<
             ref={setDataGridWrapper}
             key={isCompareActive ? 'comparisonTable' : 'docTable'}
             data-test-subj="discoverDocTable"
-            data-render-complete={isRenderComplete}
-            data-shared-item=""
-            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
-            data-title={searchTitle}
-            data-description={searchDescription}
             data-document-number={displayedRows.length}
             className={classnames(className, 'unifiedDataTable__table')}
             css={[styles.dataTable, inTableSearchTermCss]}

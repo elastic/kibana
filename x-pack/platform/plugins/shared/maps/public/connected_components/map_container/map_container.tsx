@@ -10,7 +10,6 @@ import React, { Component } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import type { Observable } from 'rxjs';
@@ -25,21 +24,17 @@ import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { isScreenshotMode } from '../../kibana_services';
 import type { RawValue } from '../../../common/constants';
-import { RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import type { MapSettings } from '../../../common/descriptor_types';
 import { MapSettingsPanel } from '../map_settings_panel';
 import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import type { ILayer } from '../../classes/layers/layer';
 
-const RENDER_COMPLETE_EVENT = 'renderComplete';
-
 export interface Props {
   addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
-  isMapLoading: boolean;
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;
   flyoutDisplay: FLYOUT_STATE;
@@ -48,23 +43,13 @@ export interface Props {
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
   renderTooltipContent?: RenderToolTipContent;
-  title?: string;
-  description?: string;
   settings: MapSettings;
   layerList: ILayer[];
   waitUntilTimeLayersLoad$: Observable<void>;
-  /*
-   * Set to false to exclude sharing attributes 'data-*'.
-   * An example usage is tile_map and region_map visualizations. The visualizations use MapEmbeddable for rendering.
-   * Visualize Embeddable handles sharing attributes so sharing attributes are not needed in the children.
-   */
-  isSharable: boolean;
   euiTheme?: any;
 }
 
 interface State {
-  isInitialLoadRenderTimeoutComplete: boolean;
-  domId: string;
   showFitToBoundsButton: boolean;
   showTimesliderButton: boolean;
 }
@@ -73,11 +58,8 @@ const mapWrapperStyles = css({ position: 'relative' });
 
 export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
-  private _isInitalLoadRenderTimerStarted: boolean = false;
 
   state: State = {
-    isInitialLoadRenderTimeoutComplete: false,
-    domId: uuidv4(),
     showFitToBoundsButton: false,
     showTimesliderButton: false,
   };
@@ -91,35 +73,12 @@ export class MapContainer extends Component<Props, State> {
   componentDidUpdate() {
     this._loadShowFitToBoundsButton();
     this._loadShowTimesliderButton();
-    if (
-      this.props.isSharable &&
-      !this.props.isMapLoading &&
-      !this._isInitalLoadRenderTimerStarted
-    ) {
-      this._isInitalLoadRenderTimerStarted = true;
-      this._startInitialLoadRenderTimer();
-    }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
     this.props.cancelAllInFlightRequests();
   }
-
-  // Reporting uses both a `data-render-complete` attribute and a DOM event listener to determine
-  // if a visualization is done loading. The process roughly is:
-  // - See if the `data-render-complete` attribute is "true". If so we're done!
-  // - If it's not, then reporting injects a listener into the browser for a custom "renderComplete" event.
-  // - When that event is fired, we snapshot the viz and move on.
-  // Failure to not have the dom attribute, or custom event, will timeout the job.
-  // See x-pack/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
-  _onInitialLoadRenderComplete = () => {
-    const el = document.querySelector(`[data-dom-id="${this.state.domId}"]`);
-
-    if (el) {
-      el.dispatchEvent(new CustomEvent(RENDER_COMPLETE_EVENT, { bubbles: true }));
-    }
-  };
 
   async _loadShowFitToBoundsButton() {
     const promises = this.props.layerList.map(async (layer) => {
@@ -150,15 +109,6 @@ export class MapContainer extends Component<Props, State> {
     }
   }
 
-  _startInitialLoadRenderTimer = () => {
-    window.setTimeout(() => {
-      if (this._isMounted) {
-        this.setState({ isInitialLoadRenderTimeoutComplete: true });
-        this._onInitialLoadRenderComplete();
-      }
-    }, RENDER_TIMEOUT);
-  };
-
   render() {
     const {
       addFilters,
@@ -174,23 +124,16 @@ export class MapContainer extends Component<Props, State> {
 
     if (mapInitError) {
       return (
-        <div
-          data-render-complete
-          data-shared-item
-          data-title={this.props.title}
-          data-description={this.props.description}
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
+            defaultMessage: 'Unable to initialize map',
+          })}
+          color="danger"
+          iconType="cross"
         >
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
-              defaultMessage: 'Unable to initialize map',
-            })}
-            color="danger"
-            iconType="cross"
-          >
-            <p>{mapInitError}</p>
-          </EuiCallOut>
-        </div>
+          <p>{mapInitError}</p>
+        </EuiCallOut>
       );
     }
 
@@ -198,18 +141,9 @@ export class MapContainer extends Component<Props, State> {
     if (isFullScreen) {
       exitFullScreenButton = <ExitFullScreenButton onExit={exitFullScreen} />;
     }
-    const shareAttributes = this.props.isSharable
-      ? {
-          ['data-dom-id']: this.state.domId,
-          ['data-render-complete']: this.state.isInitialLoadRenderTimeoutComplete,
-          ['data-shared-item']: true,
-          ['data-title']: this.props.title,
-          ['data-description']: this.props.description,
-        }
-      : {};
 
     return (
-      <EuiFlexGroup gutterSize="none" responsive={false} {...shareAttributes}>
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem
           css={mapWrapperStyles}
           style={{ backgroundColor: this.props.settings.backgroundColor }}

@@ -13,7 +13,7 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';
-import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
+import { APP_ID, getEditPath } from '../../common/constants';
 import type { MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -41,6 +41,10 @@ import {
   setEventHandlers,
 } from '../reducers/non_serializable_instances';
 import type { SavedMap } from '../routes';
+
+// Maplibre does not provide any feedback when rendering is complete.
+// Workaround is hard-coded timeout period.
+export const RENDER_TIMEOUT = 1000;
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {

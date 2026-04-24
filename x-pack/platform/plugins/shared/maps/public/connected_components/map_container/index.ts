@@ -16,7 +16,6 @@ import {
 } from '../../selectors/ui_selectors';
 import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
 import {
-  isMapLoading,
   getLayerList,
   getMapInitError,
   getMapSettings,
@@ -27,7 +26,6 @@ import type { MapStoreState } from '../../reducers/store';
 function mapStateToProps(state: MapStoreState) {
   return {
     isTimesliderOpen: getIsTimesliderOpen(state),
-    isMapLoading: isMapLoading(state),
     flyoutDisplay: getFlyoutDisplay(state),
     isFullScreen: getIsFullScreen(state),
     mapInitError: getMapInitError(state),

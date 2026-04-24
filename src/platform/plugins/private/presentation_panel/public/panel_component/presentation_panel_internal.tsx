@@ -16,6 +16,7 @@ import { PanelLoader } from '@kbn/panel-loader';
 import type { PublishesHideBorder, PublishesTitle } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
+  apiPublishesRendered,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -25,6 +26,7 @@ import type { PresentationPanelHoverActionsProps } from './panel_header/presenta
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import { useReporting } from './use_reporting';
 
 const PresentationPanelChrome = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -63,6 +65,7 @@ const PresentationPanelChrome = <
 
   const [
     dataLoading,
+    rendered,
     blockingError,
     panelTitle,
     hidePanelTitle,
@@ -73,6 +76,7 @@ const PresentationPanelChrome = <
     parentHidePanelTitle,
   ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading$,
+    apiPublishesRendered(api) ? api.rendered$ : undefined,
     api?.blockingError$,
     api?.title$,
     api?.hideTitle$,
@@ -89,16 +93,14 @@ const PresentationPanelChrome = <
     Boolean(parentHidePanelTitle) ||
     !Boolean(panelTitle ?? defaultPanelTitle);
 
-  const contentAttrs = useMemo(() => {
-    const attrs: { [key: string]: boolean } = {};
-    if (dataLoading) {
-      attrs['data-loading'] = true;
-    } else {
-      attrs['data-render-complete'] = true;
-    }
-    if (blockingError) attrs['data-error'] = true;
-    return attrs;
-  }, [dataLoading, blockingError]);
+  const { reportingAttributes, reportingRef } = useReporting({
+    apiReady: Boolean(api),
+    blockingError,
+    dataLoading: dataLoading ?? false,
+    rendered: rendered ?? true,
+    title: panelTitle ?? defaultPanelTitle,
+    description: panelDescription ?? defaultPanelDescription,
+  });
 
   return (
     <PresentationPanelHoverActionsWrapper
@@ -122,8 +124,9 @@ const PresentationPanelChrome = <
         hasShadow={showShadow}
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
-        {...contentAttrs}
+        {...reportingAttributes}
         css={styles.embPanel}
+        panelRef={(ref) => (reportingRef.current = ref as HTMLElement)}
       >
         {!hideHeader && api && (
           <PresentationPanelHeader

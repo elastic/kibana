@@ -170,7 +170,6 @@ export const getStatsOverviewEmbeddableFactory = (
               style={{
                 width: '100%',
               }}
-              data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
               <StatsOverviewComponent reload$={reload$} filters={filters || DEFAULT_FILTERS} />
             </div>

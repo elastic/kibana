@@ -269,15 +269,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
             />
           );
 
-        return (
-          <div
-            css={flexCss}
-            data-shared-item
-            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
-          >
-            {editorContent}
-          </div>
-        );
+        return <div css={flexCss}>{editorContent}</div>;
       },
     };
   },

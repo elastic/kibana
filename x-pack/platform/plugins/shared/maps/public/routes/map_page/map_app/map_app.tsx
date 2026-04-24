@@ -607,10 +607,7 @@ export class MapApp extends React.Component<Props, State> {
           {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}
-            title={this.props.savedMap.getAttributes().title}
-            description={this.props.savedMap.getAttributes().description}
             waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this.props.savedMap.getStore())}
-            isSharable
           />
         </div>
       </div>
