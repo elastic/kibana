@@ -72,7 +72,10 @@ export const filterGroundingEvaluator = {
         : undefined;
     const taskDocs = taskOutput?.sample_documents as Array<Record<string, unknown>> | undefined;
 
-    if (!taskDocs && (!input.sample_documents || input.sample_documents.length === 0)) {
+    if (
+      (!taskDocs || taskDocs.length === 0) &&
+      (!input.sample_documents || input.sample_documents.length === 0)
+    ) {
       return { score: null, explanation: 'No sample documents available' };
     }
 
