@@ -120,6 +120,7 @@ export const executeRuleOperations = (
         next = {
           ...next,
           schedule: {
+            ...next.schedule,
             every: op.every ?? existingEvery,
             ...(op.lookback !== undefined ? { lookback: op.lookback } : {}),
           },
