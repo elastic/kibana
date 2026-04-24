@@ -184,6 +184,16 @@ If the plugin centralizes descriptions in a constants file (e.g. `*_DESCRIPTION`
 
 For OAS to include response body documentation, the route must define `validate.response` with a schema and description for each status code. If a route is missing response validation, the generated OAS will have no response schema — add one.
 
+Always define response schemas as factory functions so the schema object is not allocated in production — response validation is only used at dev time for OAS generation:
+
+```typescript
+// Correct: schema is only instantiated when called
+const myResponseSchema = () => schema.object({ id: schema.string(), name: schema.string() });
+
+// Wrong: schema is eagerly allocated at module load
+const myResponseSchema = schema.object({ id: schema.string(), name: schema.string() });
+```
+
 Use these standard response descriptions for consistency across plugins:
 
 | Status | Description |
