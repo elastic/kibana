@@ -13215,7 +13215,7 @@
           "\nA record of {@link SavedObjectsModelVersion | model versions} for a given savedObjects type.\nThe record's keys must be integers, starting with 1 for the first entry, and there shouldn't be gaps.\n"
         ],
         "signature": [
-          "\"1\" | \"7\" | \"6\" | \"5\" | \"4\" | \"3\" | \"2\" | \"8\" | \"9\" | \"10\" | \"11\" | \"12\" | \"13\" | \"14\" | \"15\" | \"16\" | \"17\" | \"18\" | \"19\" | \"20\" | \"21\" | \"22\" | \"23\" | \"24\" | \"25\" | \"26\" | \"27\" | \"28\" | \"29\" | \"30\" | \"31\" | \"32\" | \"33\" | \"34\" | \"35\" | \"36\" | \"37\" | \"38\" | \"39\" | \"40\""
+          "\"1\" | \"2\" | \"7\" | \"6\" | \"5\" | \"4\" | \"3\" | \"8\" | \"9\" | \"10\" | \"11\" | \"12\" | \"13\" | \"14\" | \"15\" | \"16\" | \"17\" | \"18\" | \"19\" | \"20\" | \"21\" | \"22\" | \"23\" | \"24\" | \"25\" | \"26\" | \"27\" | \"28\" | \"29\" | \"30\" | \"31\" | \"32\" | \"33\" | \"34\" | \"35\" | \"36\" | \"37\" | \"38\" | \"39\" | \"40\""
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
         "lineNumber": 156,
@@ -14063,6 +14063,10 @@
           "SavedObjectsModelVersion",
           " | ",
           "SavedObjectsFullModelVersion",
+          " | undefined; 2?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 7?: ",
           "SavedObjectsModelVersion",
           " | ",
@@ -14080,10 +14084,6 @@
           " | ",
           "SavedObjectsFullModelVersion",
           " | undefined; 3?: ",
-          "SavedObjectsModelVersion",
-          " | ",
-          "SavedObjectsFullModelVersion",
-          " | undefined; 2?: ",
           "SavedObjectsModelVersion",
           " | ",
           "SavedObjectsFullModelVersion",

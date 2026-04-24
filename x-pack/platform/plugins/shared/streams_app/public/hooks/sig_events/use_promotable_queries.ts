@@ -29,7 +29,7 @@ export function usePromotableQueries(streamName: string) {
     perPage: 1_000,
   });
 
-  const { getOnboardingTaskStatus } = useOnboardingApi({ saveQueries: true });
+  const { getOnboardingTaskStatus } = useOnboardingApi();
 
   const onboardingTaskStatusResult = useQuery({
     queryKey: ['onboardingTaskStatus', streamName, 'promotableQueries'],

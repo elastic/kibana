@@ -6,14 +6,23 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { QueriesGetResponse, QueriesOccurrencesGetResponse } from '@kbn/streams-schema';
+import type {
+  QueriesGetResponse,
+  QueriesOccurrencesGetResponse,
+  SignificantEventsQueriesGenerationResult,
+} from '@kbn/streams-schema';
+import { generatedSignificantEventQuerySchema } from '@kbn/streams-schema';
 import { sortForQueriesTable } from '../../../../lib/sig_events/utils';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { generateKIQueries } from '../../../../lib/sig_events/ki_queries_generation_service';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
 import { searchModeSchema } from '../../../utils/search_mode';
+import type { PersistQueriesResult } from '../../../../lib/sig_events/persist_queries';
+import { persistQueries } from '../../../../lib/sig_events/persist_queries';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -61,20 +70,17 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
 
     const queryClient = await getQueryClient();
     const minSeverityScore = params?.query?.minSeverityScore;
-    const count = await queryClient.getUnbackedQueriesCount({ minSeverityScore });
+    const count = await queryClient.countPromotableUnbackedQueries({ minSeverityScore });
     return { count };
   },
 });
 
 /**
- * Promotes unbacked queries to rule-backed status.
- *
- * Returns `{ promoted, skipped_stats }`:
- * - `promoted`: number of queries that were successfully backed by a new rule.
- * - `skipped_stats`: number of STATS-type queries that were skipped because
- *    they cannot produce document-level alerts required by the rule executor.
- *
- * Clients should branch on these values for accurate user feedback.
+ * Promotes unbacked queries to rule-backed status. Returns
+ * `{ promoted, skipped_stats }`. Since STATS queries are filtered at
+ * candidate selection (see `QueryClient.promoteUnbackedQueries`),
+ * `skipped_stats` is reliably `0` on this route and is retained only for
+ * response-shape stability.
  */
 export const promoteUnbackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_promote',
@@ -102,7 +108,6 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
   }): Promise<{ promoted: number; skipped_stats: number }> => {
     const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
@@ -111,43 +116,15 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const queryClient = await getQueryClient();
-    const minSeverityScore = params?.body?.minSeverityScore;
-    const all = await queryClient.getAllUnbackedQueries({ minSeverityScore });
-    const requestedQueryIds = params?.body?.queryIds ?? [];
-
-    let toPromote = all;
-
-    if (requestedQueryIds.length > 0) {
-      const uniqueRequestedQueryIds = new Set(requestedQueryIds);
-
-      toPromote = all.filter((query) => uniqueRequestedQueryIds.has(query.query.id));
-    }
-
-    const byStream = toPromote.reduce<Record<string, string[]>>((acc, link) => {
-      const stream = link.stream_name;
-      if (!acc[stream]) acc[stream] = [];
-      acc[stream].push(link.query.id);
-      return acc;
-    }, {});
-
-    const streamDefinitions = await streamsClient.listStreams();
-    const streamDefinitionsByName = new Map(
-      streamDefinitions.map((streamDefinition) => [streamDefinition.name, streamDefinition])
+    const streamDefinitions = new Map(
+      (await streamsClient.listStreams()).map((definition) => [definition.name, definition])
     );
 
-    let promoted = 0;
-    let skippedStats = 0;
-    for (const [streamName, queryIds] of Object.entries(byStream)) {
-      const definition = streamDefinitionsByName.get(streamName);
-      if (!definition) {
-        logger.warn(`Skipping promotion for missing stream ${streamName}`);
-        continue;
-      }
-      const result = await queryClient.promoteQueries(definition, queryIds);
-      promoted += result.promoted;
-      skippedStats += result.skipped_stats;
-    }
-    return { promoted, skipped_stats: skippedStats };
+    return queryClient.promoteUnbackedQueries({
+      queryIds: params?.body?.queryIds,
+      minSeverityScore: params?.body?.minSeverityScore,
+      streamDefinitions,
+    });
   },
 });
 
@@ -349,10 +326,128 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
   },
 });
 
+const generateQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/queries/_generate',
+  params: z.object({
+    path: z.object({
+      streamName: z.string().describe('The name of the stream'),
+    }),
+    body: z
+      .object({
+        connectorId: z
+          .string()
+          .optional()
+          .describe(
+            'Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry.'
+          ),
+        maxExistingQueriesForContext: z
+          .number()
+          .optional()
+          .describe('Max number of existing queries to include as context for the LLM.'),
+      })
+      .nullish(),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Generate significant events queries',
+    description: 'Runs a single iteration of KI queries generation for the given stream.',
+    timeout: { idleSocket: 600_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+  }): Promise<SignificantEventsQueriesGenerationResult> => {
+    const {
+      streamsClient,
+      inferenceClient,
+      soClient,
+      getFeatureClient,
+      getQueryClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { streamName } = params.path;
+    const { connectorId, maxExistingQueriesForContext } = params.body ?? {};
+
+    const [featureClient, queryClient] = await Promise.all([getFeatureClient(), getQueryClient()]);
+
+    const { queries, tokensUsed } = await generateKIQueries(
+      { streamName, connectorId, maxExistingQueriesForContext },
+      {
+        streamsClient,
+        inferenceClient,
+        soClient,
+        featureClient,
+        queryClient,
+        esClient: scopedClusterClient.asCurrentUser,
+        uiSettingsClient,
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        request,
+        logger: logger.get('significant_events_queries_generation'),
+        signal: getRequestAbortSignal(request),
+        telemetry,
+      }
+    );
+
+    return { queries, tokensUsed };
+  },
+});
+
+const persistQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/queries/_persist',
+  params: z.object({
+    path: z.object({
+      streamName: z.string().describe('The name of the stream'),
+    }),
+    body: z.object({
+      queries: z.array(generatedSignificantEventQuerySchema),
+    }),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Persist generated queries with deduplication',
+    description:
+      'Persists generated significant event queries for a stream, deduplicating by ES|QL and handling rule-backed replacements.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({ params, request, getScopedClients, server }): Promise<PersistQueriesResult> => {
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { streamName } = params.path;
+    const { queries } = params.body;
+    const queryClient = await getQueryClient();
+
+    return persistQueries(streamName, queries, { queryClient, streamsClient });
+  },
+});
+
 export const internalQueriesRoutes = {
   ...getUnbackedQueriesCountRoute,
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
   ...getDiscoveryQueriesRoute,
   ...getDiscoveryQueriesOccurrencesRoute,
+  ...generateQueriesRoute,
+  ...persistQueriesRoute,
 };

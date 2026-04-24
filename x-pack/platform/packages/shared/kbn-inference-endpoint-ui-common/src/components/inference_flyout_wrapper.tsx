@@ -104,7 +104,6 @@ interface InferenceFlyoutWrapperProps {
   enforceAdaptiveAllocations?: boolean;
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
-  enableEisPromoTour?: boolean;
   focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
   /** When set, only these task types will be available for selection in the form. */
   allowedTaskTypes?: InferenceTaskType[];
@@ -120,7 +119,6 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   enforceAdaptiveAllocations = false,
   onSubmitSuccess,
   inferenceEndpoint,
-  enableEisPromoTour,
   focusTrapProps,
   allowedTaskTypes,
   excludeProviders,
@@ -192,7 +190,6 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               enforceAdaptiveAllocations,
               isPreconfigured,
               reenterSecretsOnEdit: false,
-              enableEisPromoTour,
               allowedTaskTypes,
               excludeProviders,
             }}

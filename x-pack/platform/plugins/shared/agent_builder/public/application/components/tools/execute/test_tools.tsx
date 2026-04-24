@@ -409,7 +409,10 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose 
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLink href={`${docLinksService.tools}#testing-your-tools`} target="_blank">
+            <EuiLink
+              href={`${docLinksService.agentBuilderTools}#testing-your-tools`}
+              target="_blank"
+            >
               {i18n.translate('xpack.agentBuilder.tools.testFlyout.documentationLink', {
                 defaultMessage: 'Documentation - Testing tools',
               })}
