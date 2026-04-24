@@ -13,7 +13,7 @@ import {
   URI_PARTS_SUCCESS_SUBFIELDS,
 } from '../../../actions/uri_parts/constants';
 import { conditionToESQLAst } from '../condition_to_esql';
-import { buildIgnoreMissingFilter, buildWhereCondition, combineOr } from './common';
+import { buildIgnoreMissingFilter, buildWhereCondition, combineAnd, combineOr } from './common';
 
 /**
  * Converts a Streamlang UriPartsProcessor into a list of ES|QL AST commands.
@@ -29,19 +29,23 @@ import { buildIgnoreMissingFilter, buildWhereCondition, combineOr } from './comm
  *    command is a no-op for rows failing the condition.
  *
  * Option parity with the ES `uri_parts` ingest processor:
- *  - `keep_original` (default true): emit `EVAL <to>.original = <from>` so the
- *    raw URI stays alongside the extracted parts, matching the ingest
- *    processor's `target_field.original` shape. In the conditional path the
- *    assignment is gated (`CASE(condition, <from>, NULL)`) so rows that failed
- *    the condition are not touched.
+ *  - `keep_original` (default true): emit
+ *    `EVAL <to>.original = CASE(<success>, <from>, NULL)` so the raw URI
+ *    only lands alongside the extracted parts when the parse actually
+ *    succeeded — matching the ingest processor, which writes `target_field`
+ *    (including `.original`) atomically on success and nothing when
+ *    `ignore_failure: true` swallows an unparseable input. In the
+ *    conditional path the assignment is gated on `condition AND <success>`
+ *    so rows that failed the condition are not touched either.
  *  - `remove_if_successful` (default false): emit
- *    `EVAL <from> = CASE(<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL
- *    OR <to>.path IS NOT NULL OR ..., NULL, <from>)`.
- *    The csv-spec (elasticsearch#140004) shows ES|QL URI_PARTS accepts
- *    relative URIs — `/app/login?session=expired` parses to null scheme +
- *    null domain + populated path/query — so the success signal must OR
- *    across all primary sub-fields. Only an unparseable input nulls every
- *    column. Both options are less idiomatic in ES|QL but are included for
+ *    `EVAL <from> = CASE(<success>, NULL, <from>)`.
+ *  - `<success>` is `<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL
+ *    OR <to>.path IS NOT NULL OR ...` across every primary sub-field. The
+ *    csv-spec (elasticsearch#140004) shows ES|QL URI_PARTS accepts relative
+ *    URIs — `/app/login?session=expired` parses to null scheme + null
+ *    domain + populated path/query — so the success signal must OR across
+ *    all primary sub-fields. Only an unparseable input nulls every column.
+ *    Both options are less idiomatic in ES|QL but are included for
  *    transpiler parity (see streams-program#554).
  *
  * @example
@@ -67,7 +71,11 @@ import { buildIgnoreMissingFilter, buildWhereCondition, combineOr } from './comm
  *   | URI_PARTS `attributes.parts` = __temp_uri_parts_where_attributes.url__
  *   | DROP __temp_uri_parts_where_attributes.url__
  *   | EVAL `attributes.parts.original` = CASE(
- *       NOT(`attributes.url` IS NULL), `attributes.url`, NULL
+ *       NOT(`attributes.url` IS NULL)
+ *         AND (`attributes.parts.scheme` IS NOT NULL
+ *           OR `attributes.parts.domain` IS NOT NULL
+ *           OR ...),
+ *       `attributes.url`, NULL
  *     )
  *   ```
  */
@@ -137,6 +145,26 @@ export function convertUriPartsProcessorToESQL(processor: UriPartsProcessor): ES
   return commands;
 }
 
+/**
+ * `<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL OR ...` across every
+ * primary URI sub-field. Per the ES|QL URI_PARTS csv-spec, only an
+ * unparseable input nulls every column (with a warning); valid relative
+ * URIs leave scheme/domain null but populate path/query. Shared by
+ * `keep_original` and `remove_if_successful` so both options key off the
+ * exact same "parse succeeded" signal.
+ */
+function buildSuccessPredicate(targetPrefix: string): ESQLAstItem {
+  const predicates = URI_PARTS_SUCCESS_SUBFIELDS.map((suffix) =>
+    Builder.expression.func.call('NOT', [
+      Builder.expression.func.postfix(
+        'IS NULL',
+        Builder.expression.column(`${targetPrefix}.${suffix}`)
+      ),
+    ])
+  );
+  return combineOr(predicates)!;
+}
+
 /** `URI_PARTS <prefix> = <expression>` — assignment-style processing command. */
 function buildUriPartsCommand(prefix: ESQLAstItem, expression: ESQLAstItem): ESQLAstCommand {
   return Builder.command({
@@ -146,9 +174,13 @@ function buildUriPartsCommand(prefix: ESQLAstItem, expression: ESQLAstItem): ESQ
 }
 
 /**
- * `EVAL <prefix>.original = <from>` (or `= CASE(condition, <from>, NULL)` when
- * a `gatedCondition` is provided so the assignment only applies to rows the
- * conditional URI_PARTS actually ran for).
+ * `EVAL <prefix>.original = CASE(<success>, <from>, NULL)` — or
+ * `CASE(gatedCondition AND <success>, <from>, NULL)` when a conditional
+ * (`ignore_missing` / `where`) predicate is in play. Gating on the success
+ * predicate keeps parity with the ES ingest `uri_parts` processor, which
+ * only writes `target_field.original` when the parse succeeded; with
+ * `ignore_failure: true` an unparseable URI produces no `target_field.*`
+ * at all, so ES|QL must not silently populate `<prefix>.original` either.
  */
 function buildKeepOriginalEval(
   targetPrefix: string,
@@ -156,49 +188,42 @@ function buildKeepOriginalEval(
   gatedCondition: ESQLAstItem | null
 ): ESQLAstCommand {
   const originalColumn = Builder.expression.column(`${targetPrefix}.original`);
-  const rhs: ESQLAstItem = gatedCondition
-    ? Builder.expression.func.call('CASE', [
-        gatedCondition,
-        sourceColumn,
-        Builder.expression.literal.nil(),
-      ])
-    : (sourceColumn as ESQLAstItem);
+  const successPredicate = buildSuccessPredicate(targetPrefix);
+  const predicate =
+    gatedCondition !== null ? combineAnd([gatedCondition, successPredicate])! : successPredicate;
   return Builder.command({
     name: 'eval',
-    args: [Builder.expression.func.binary('=', [originalColumn, rhs])],
+    args: [
+      Builder.expression.func.binary('=', [
+        originalColumn,
+        Builder.expression.func.call('CASE', [
+          predicate,
+          sourceColumn,
+          Builder.expression.literal.nil(),
+        ]),
+      ]),
+    ],
   });
 }
 
 /**
- * `EVAL <from> = CASE(<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL
- * OR <to>.path IS NOT NULL OR ..., NULL, <from>)`.
- * Nulls the source field only on rows where the parse populated at least one
- * sub-field. Per the ES|QL URI_PARTS csv-spec, only an unparseable input
- * nulls every column (with a warning); valid relative URIs leave scheme and
- * domain null but populate path/query. Matches the ingest processor's
- * "remove only on success" semantics.
+ * `EVAL <from> = CASE(<success>, NULL, <from>)`.
+ * Nulls the source field only on rows where the parse populated at least
+ * one sub-field. Matches the ingest processor's "remove only on success"
+ * semantics. `<success>` is the same predicate used to gate `keep_original`.
  */
 function buildRemoveIfSuccessfulEval(
   targetPrefix: string,
   sourceName: string,
   sourceColumn: ESQLAstItem
 ): ESQLAstCommand {
-  const successPredicates = URI_PARTS_SUCCESS_SUBFIELDS.map((suffix) =>
-    Builder.expression.func.call('NOT', [
-      Builder.expression.func.postfix(
-        'IS NULL',
-        Builder.expression.column(`${targetPrefix}.${suffix}`)
-      ),
-    ])
-  );
-  const success = combineOr(successPredicates)!;
   return Builder.command({
     name: 'eval',
     args: [
       Builder.expression.func.binary('=', [
         Builder.expression.column(sourceName),
         Builder.expression.func.call('CASE', [
-          success,
+          buildSuccessPredicate(targetPrefix),
           Builder.expression.literal.nil(),
           sourceColumn,
         ]),

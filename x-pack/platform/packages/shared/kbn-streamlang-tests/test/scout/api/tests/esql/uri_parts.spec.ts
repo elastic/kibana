@@ -184,8 +184,11 @@ apiTest.describe('Streamlang to ES|QL - URI Parts Processor', () => {
       ]) {
         expect(doc?.[sub]).toBeNull();
       }
-      // keep_original still copies the raw value over so the source round-trips.
-      expect(doc?.['url.original']).toBe('not a valid uri');
+      // keep_original is gated on the same success predicate as
+      // remove_if_successful, so unparseable inputs null `url.original` in
+      // ES|QL to match the ingest processor (which writes nothing when
+      // `ignore_failure: true` swallows a parse failure).
+      expect(doc?.['url.original']).toBeNull();
     }
   );
 

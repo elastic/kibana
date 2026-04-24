@@ -22,7 +22,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         from: 'attributes.request_url',
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toBe(
-        'WHERE NOT(`attributes.request_url` IS NULL) | URI_PARTS url = `attributes.request_url` | EVAL `url.original` = `attributes.request_url`'
+        'WHERE NOT(`attributes.request_url` IS NULL) | URI_PARTS url = `attributes.request_url` | EVAL `url.original` = CASE(NOT(`url.scheme` IS NULL) OR NOT(`url.domain` IS NULL) OR NOT(`url.path` IS NULL) OR NOT(`url.query` IS NULL) OR NOT(`url.fragment` IS NULL) OR NOT(`url.user_info` IS NULL) OR NOT(`url.port` IS NULL), `attributes.request_url`, NULL)'
       );
     });
 
@@ -33,7 +33,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         to: 'attributes.parsed',
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toBe(
-        'WHERE NOT(`attributes.href` IS NULL) | URI_PARTS `attributes.parsed` = `attributes.href` | EVAL `attributes.parsed.original` = `attributes.href`'
+        'WHERE NOT(`attributes.href` IS NULL) | URI_PARTS `attributes.parsed` = `attributes.href` | EVAL `attributes.parsed.original` = CASE(NOT(`attributes.parsed.scheme` IS NULL) OR NOT(`attributes.parsed.domain` IS NULL) OR NOT(`attributes.parsed.path` IS NULL) OR NOT(`attributes.parsed.query` IS NULL) OR NOT(`attributes.parsed.fragment` IS NULL) OR NOT(`attributes.parsed.user_info` IS NULL) OR NOT(`attributes.parsed.port` IS NULL), `attributes.href`, NULL)'
       );
     });
   });
@@ -58,7 +58,25 @@ describe('convertUriPartsProcessorToESQL', () => {
         keep_original: true,
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toBe(
-        'WHERE NOT(url IS NULL) | URI_PARTS parts = url | EVAL `parts.original` = url'
+        'WHERE NOT(url IS NULL) | URI_PARTS parts = url | EVAL `parts.original` = CASE(NOT(`parts.scheme` IS NULL) OR NOT(`parts.domain` IS NULL) OR NOT(`parts.path` IS NULL) OR NOT(`parts.query` IS NULL) OR NOT(`parts.fragment` IS NULL) OR NOT(`parts.user_info` IS NULL) OR NOT(`parts.port` IS NULL), url, NULL)'
+      );
+    });
+
+    it('gates `<prefix>.original` on the parse success predicate so unparseable inputs do not silently populate it', () => {
+      // Regression for the ingest-vs-ESQL divergence: with keep_original=true
+      // and ignore_failure=true the ingest `uri_parts` processor writes NO
+      // fields on unparseable input, including `<target_field>.original`.
+      // ES|QL URI_PARTS emits a warning + null sub-fields on the same input,
+      // so we must wrap the `.original` assignment in a CASE that keys off
+      // the same OR-chain used by remove_if_successful.
+      const processor: UriPartsProcessor = {
+        action: 'uri_parts',
+        from: 'attributes.href',
+        keep_original: true,
+      };
+      const query = commandsToString(convertUriPartsProcessorToESQL(processor));
+      expect(query).toContain(
+        'EVAL `url.original` = CASE(NOT(`url.scheme` IS NULL) OR NOT(`url.domain` IS NULL) OR NOT(`url.path` IS NULL) OR NOT(`url.query` IS NULL) OR NOT(`url.fragment` IS NULL) OR NOT(`url.user_info` IS NULL) OR NOT(`url.port` IS NULL), `attributes.href`, NULL)'
       );
     });
   });
@@ -71,7 +89,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         ignore_missing: true,
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toMatchInlineSnapshot(
-        `"EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(NOT(\`attributes.url\` IS NULL), \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(NOT(\`attributes.url\` IS NULL), \`attributes.url\`, NULL)"`
+        `"EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(NOT(\`attributes.url\` IS NULL), \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(NOT(\`attributes.url\` IS NULL) AND (NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL)), \`attributes.url\`, NULL)"`
       );
     });
   });
@@ -84,7 +102,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         where: { field: 'attributes.enabled', eq: true },
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toMatchInlineSnapshot(
-        `"WHERE NOT(\`attributes.url\` IS NULL) | EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(\`attributes.enabled\` == TRUE, \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(\`attributes.enabled\` == TRUE, \`attributes.url\`, NULL)"`
+        `"WHERE NOT(\`attributes.url\` IS NULL) | EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(\`attributes.enabled\` == TRUE, \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(\`attributes.enabled\` == TRUE AND (NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL)), \`attributes.url\`, NULL)"`
       );
     });
 
@@ -110,7 +128,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         where: { field: 'attributes.enabled', eq: true },
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toMatchInlineSnapshot(
-        `"EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(NOT(\`attributes.url\` IS NULL) AND \`attributes.enabled\` == TRUE, \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(NOT(\`attributes.url\` IS NULL) AND \`attributes.enabled\` == TRUE, \`attributes.url\`, NULL)"`
+        `"EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(NOT(\`attributes.url\` IS NULL) AND \`attributes.enabled\` == TRUE, \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(NOT(\`attributes.url\` IS NULL) AND \`attributes.enabled\` == TRUE AND (NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL)), \`attributes.url\`, NULL)"`
       );
     });
   });
@@ -123,7 +141,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         remove_if_successful: true,
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toMatchInlineSnapshot(
-        `"WHERE NOT(\`attributes.url\` IS NULL) | URI_PARTS url = \`attributes.url\` | EVAL \`url.original\` = \`attributes.url\` | EVAL \`attributes.url\` = CASE(NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL), NULL, \`attributes.url\`)"`
+        `"WHERE NOT(\`attributes.url\` IS NULL) | URI_PARTS url = \`attributes.url\` | EVAL \`url.original\` = CASE(NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL), \`attributes.url\`, NULL) | EVAL \`attributes.url\` = CASE(NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL), NULL, \`attributes.url\`)"`
       );
     });
 

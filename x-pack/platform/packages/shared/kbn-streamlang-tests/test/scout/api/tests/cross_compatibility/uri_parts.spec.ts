@@ -263,6 +263,9 @@ apiTest.describe(
         expect(ingestResult[0]['url.scheme']).toBeUndefined();
         expect(ingestResult[0]['url.domain']).toBeUndefined();
         expect(ingestResult[0]['url.path']).toBeUndefined();
+        // `url.original` must stay undefined on the ingest path — keep_original
+        // is coupled to a successful parse in the ES processor.
+        expect(ingestResult[0]['url.original']).toBeUndefined();
 
         // ES|QL: the source keeps its value, every output column is null.
         expect(esqlDoc?.['attributes.href']).toBe('not a valid uri');
@@ -271,6 +274,9 @@ apiTest.describe(
         expect(esqlDoc?.['url.path']).toBeNull();
         expect(esqlDoc?.['url.query']).toBeNull();
         expect(esqlDoc?.['url.fragment']).toBeNull();
+        // Parity: `url.original` must be null on the ES|QL path too, matching
+        // the ingest processor's "nothing written on parse failure" behavior.
+        expect(esqlDoc?.['url.original']).toBeNull();
       }
     );
 
