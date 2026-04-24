@@ -202,7 +202,10 @@ export class FeatureClient {
     await this.clients.storageClient.clean();
   }
 
-  async bulk(stream: string, operations: FeatureBulkOperation[]): Promise<{ applied: number }> {
+  async bulk(
+    stream: string,
+    operations: FeatureBulkOperation[]
+  ): Promise<{ applied: number; skipped: number }> {
     validateFeatures(
       operations
         .filter((operation) => 'index' in operation)
@@ -210,9 +213,10 @@ export class FeatureClient {
     );
 
     const resolvedOperations = await this.filterValidOperations(stream, operations);
+    const skipped = operations.length - resolvedOperations.length;
 
     if (resolvedOperations.length === 0) {
-      return { applied: 0 };
+      return { applied: 0, skipped };
     }
 
     await this.clients.storageClient.bulk({
@@ -232,7 +236,7 @@ export class FeatureClient {
       throwOnFail: true,
     });
 
-    return { applied: resolvedOperations.length };
+    return { applied: resolvedOperations.length, skipped };
   }
 
   async getFeatures(

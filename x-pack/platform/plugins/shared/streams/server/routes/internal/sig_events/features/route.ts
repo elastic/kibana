@@ -315,7 +315,7 @@ export const bulkDeleteFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<{ succeeded: number; failed: number }> => {
+  }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
     const { getFeatureClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -334,19 +334,20 @@ export const bulkDeleteFeaturesRoute = createServerRoute({
     );
 
     // featureClient.bulk silently drops ops for stale or mis-routed UUIDs. We
-    // treat those as no-ops (neither succeeded nor failed) since deleting
-    // something that is not there is idempotent. Only thrown batches count as
-    // failed.
+    // surface that count as `skipped` so callers can distinguish "already gone"
+    // (idempotent no-op) from "real failure". Only thrown batches count as failed.
     let succeeded = 0;
     let failed = 0;
+    let skipped = 0;
 
     for (const [streamName, ids] of Object.entries(byStream)) {
       try {
-        const { applied } = await featureClient.bulk(
+        const { applied, skipped: streamSkipped } = await featureClient.bulk(
           streamName,
           ids.map((id) => ({ delete: { id } }))
         );
         succeeded += applied;
+        skipped += streamSkipped;
       } catch (error) {
         logger.error(
           `Bulk feature delete failed for stream ${streamName}: ${
@@ -357,7 +358,7 @@ export const bulkDeleteFeaturesRoute = createServerRoute({
       }
     }
 
-    return { succeeded, failed };
+    return { succeeded, failed, skipped };
   },
 });
 

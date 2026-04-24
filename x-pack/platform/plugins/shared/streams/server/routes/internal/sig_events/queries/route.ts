@@ -213,7 +213,7 @@ export const bulkDeleteQueriesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<{ succeeded: number; failed: number }> => {
+  }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
     const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -228,6 +228,11 @@ export const bulkDeleteQueriesRoute = createServerRoute({
       queryIds: params.body.queryIds,
       ruleUnbacked: 'include',
     });
+
+    // Count requested IDs that getQueryLinks did not find — these are idempotent
+    // no-ops (already gone / never existed) and reported as `skipped`, not failed.
+    const foundIds = new Set(queryLinks.map((link) => link.query.id));
+    const skipped = params.body.queryIds.filter((id) => !foundIds.has(id)).length;
 
     // Capture backed rule IDs per stream to log on mid-flight failure.
     const byStream = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
@@ -278,7 +283,7 @@ export const bulkDeleteQueriesRoute = createServerRoute({
       }
     }
 
-    return { succeeded, failed };
+    return { succeeded, failed, skipped };
   },
 });
 

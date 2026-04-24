@@ -202,7 +202,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200)
           .then((res) => res.body);
 
-        expect(response).to.eql({ succeeded: 2, failed: 0 });
+        expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
 
         const { features } = await listFeatures(apiClient, STREAM_NAME, {
           includeExcluded: true,
@@ -211,7 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(features.find((f) => f.uuid === uuid2)).to.be(undefined);
       });
 
-      it('treats stale/unknown UUIDs as idempotent no-ops (succeeded=0, failed=0)', async () => {
+      it('treats stale/unknown UUIDs as idempotent no-ops (succeeded=0, failed=0, skipped=1)', async () => {
         const response = await apiClient
           .fetch('POST /internal/streams/features/_bulk_delete', {
             params: {
@@ -223,7 +223,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200)
           .then((res) => res.body);
 
-        expect(response).to.eql({ succeeded: 0, failed: 0 });
+        expect(response).to.eql({ succeeded: 0, failed: 0, skipped: 1 });
       });
     });
   });

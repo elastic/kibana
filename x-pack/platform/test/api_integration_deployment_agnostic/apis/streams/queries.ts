@@ -536,7 +536,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200)
           .then((res) => res.body);
 
-        expect(response).to.eql({ succeeded: 2, failed: 0 });
+        expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
         expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
         expect((await getQueries(apiClient, SECOND_STREAM_NAME)).queries).to.eql([]);
       });
