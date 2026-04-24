@@ -15,6 +15,8 @@ import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
 import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
+import { experimentalFeaturesUiSettings } from '../ui_settings/experimental_features_setting';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/experimental_features';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { buildScopedRulesClientFactory } from '../agent_builder/scoped_rules_client_factory';
@@ -49,7 +51,9 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       alertingVTwo: {},
     }));
 
-    container.get(CoreSetup('uiSettings')).registerGlobal(dispatcherUiSettings);
+    const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
+    uiSettingsSetup.registerGlobal(dispatcherUiSettings);
+    uiSettingsSetup.registerGlobal(experimentalFeaturesUiSettings);
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
@@ -72,7 +76,21 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       agentBuilder.sml.registerType(
         createRuleSmlType({ getScopedRulesClient, getInternalRepository })
       );
-      registerSkills(agentBuilder);
+
+      const getStartServices = container.get(CoreSetup('getStartServices'));
+      getStartServices()
+        .then(([coreStart]) => {
+          const soClient = coreStart.savedObjects.createInternalRepository();
+          const uiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(soClient);
+          return uiSettingsClient.get<boolean>(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
+        })
+        .then((enabled) => {
+          if (enabled) {
+            registerSkills(agentBuilder);
+            logger.info('Rule management skill registered (experimental features enabled)');
+          }
+        })
+        .catch(() => {});
     }
 
     if (container.isBound(usageCollectionToken)) {
