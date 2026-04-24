@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Build script for @kbn/ui-side-navigation standalone package.
+#
+# Steps:
+#   1. Validate types (packaging types match source types).
+#   2. Bundle via webpack (source + aliases -> single JS file).
+#   3. Generate TypeScript declarations from the standalone types.
+#   4. Copy package.json into the output directory.
+#   5. Generate metadata.json (name, version, git SHA, timestamp, peerDeps).
+#   6. Pack into .tgz (installable via npm/yarn).
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PACKAGING_DIR="$(dirname "$SCRIPT_DIR")"
+NAV_ROOT="$(dirname "$PACKAGING_DIR")"
+KBN_UI_ROOT="$(dirname "$NAV_ROOT")"
+TOOLING_DIR="$KBN_UI_ROOT/_tooling"
+TARGET_DIR="${BUILD_OUTPUT_DIR:-$NAV_ROOT/target}"
+
+echo "==> Step 1: Type validation"
+yarn -s tsc --project "$PACKAGING_DIR/tsconfig.json" --noEmit
+echo "    Types OK"
+
+echo "==> Step 2: Webpack bundle"
+yarn -s webpack --config "$PACKAGING_DIR/webpack.config.js"
+echo "    Bundle OK"
+
+echo "==> Step 3: TypeScript declarations"
+# Emit as a regular module (not --outFile ambient wrapper) so consumers can
+# `import { NavigationProps } from '@kbn/ui-side-navigation'`.
+yarn -s tsc "$PACKAGING_DIR/react/types.ts" \
+  --declaration --emitDeclarationOnly \
+  --outDir "$TARGET_DIR" \
+  --rootDir "$PACKAGING_DIR/react" \
+  --moduleResolution node \
+  --esModuleInterop \
+  --skipLibCheck
+mv "$TARGET_DIR/types.d.ts" "$TARGET_DIR/index.d.ts"
+echo "    Declarations OK"
+
+echo "==> Step 4: Package manifest"
+cp "$PACKAGING_DIR/package.json" "$TARGET_DIR/package.json"
+echo "    Manifest OK"
+
+echo "==> Step 5: Build metadata"
+node "$TOOLING_DIR/metadata.js" "$TARGET_DIR"
+echo "    Metadata OK"
+
+echo "==> Step 6: Tarball"
+rm -f "$TARGET_DIR"/*.tgz
+# npm pack refuses private packages without --force; this artifact is
+# distributed out-of-band rather than via the public registry.
+(cd "$TARGET_DIR" && npm pack --force --pack-destination "$TARGET_DIR" >/dev/null)
+TARBALL="$(ls -t "$TARGET_DIR"/*.tgz | head -1)"
+echo "    Tarball: $(basename "$TARBALL")"
+
+echo ""
+echo "Build artifacts in: $TARGET_DIR"
