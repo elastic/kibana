@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import dedent from 'dedent';
@@ -15,7 +15,7 @@ import { classifyError } from '../error_utils';
 import { cancelKiIdentificationToolHandler } from './handler';
 
 export const STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID =
-  platformStreamsSigEventsTools.kiIdentificationCancel;
+  'platform.streams.sig_events.ki_identification_cancel';
 
 const cancelSchema = z.object({
   stream_name: z.string().describe('Target stream name, e.g. "logs.ecs.nginx".'),

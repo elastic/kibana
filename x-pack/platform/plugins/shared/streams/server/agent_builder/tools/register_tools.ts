@@ -23,14 +23,6 @@ import { createGetFailedDocumentsTool } from './read/get_failed_documents';
 import { createGetLifecycleStatsTool } from './read/get_lifecycle_stats';
 import { createGetSchemaTool } from './read/get_schema';
 import { createGetStreamTool } from './read/get_stream';
-import {
-  createKiIdentificationCancelTool,
-  STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
-} from './ki_identification_cancel/tool';
-import {
-  createKiIdentificationStatusTool,
-  STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID,
-} from './ki_identification_status/tool';
 import { createListStreamsTool } from './read/list_streams';
 import { createQueryDocumentsTool } from './read/query_documents';
 import {
@@ -42,10 +34,6 @@ import { createForkStreamTool } from './write/fork_stream';
 import { createMapFieldsTool } from './write/map_fields';
 import { createSetFailureStoreTool } from './write/set_failure_store';
 import { createSetRetentionTool } from './write/set_retention';
-import {
-  createKiIdentificationStartTool,
-  STREAMS_KI_IDENTIFICATION_START_TOOL_ID,
-} from './ki_identification_start/tool';
 import { createUpdateProcessorsTool } from './write/update_processors';
 import { createUpdateStreamDescriptionTool } from './write/update_stream_description';
 import { StreamsWriteQueue } from './write_queue';
@@ -70,9 +58,6 @@ export {
 } from './tool_ids';
 
 export {
-  STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
-  STREAMS_KI_IDENTIFICATION_START_TOOL_ID,
-  STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID,
   STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID,
   STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
@@ -104,7 +89,6 @@ export function registerAgentBuilderTools({
     createGetLifecycleStatsTool({ getScopedClients }),
     createGetSchemaTool({ getScopedClients }),
     createGetStreamTool({ getScopedClients }),
-    createKiIdentificationStatusTool({ getScopedClients }),
     createListStreamsTool({ getScopedClients }),
     createQueryDocumentsTool({ getScopedClients }),
 
@@ -112,10 +96,8 @@ export function registerAgentBuilderTools({
     createDeleteStreamTool({ getScopedClients, writeQueue }),
     createForkStreamTool({ getScopedClients, writeQueue }),
     createMapFieldsTool({ getScopedClients, writeQueue }),
-    createKiIdentificationCancelTool({ getScopedClients }),
     createSetFailureStoreTool({ getScopedClients, writeQueue }),
     createSetRetentionTool({ getScopedClients, writeQueue }),
-    createKiIdentificationStartTool({ getScopedClients, telemetry }),
     createUpdateProcessorsTool({ getScopedClients, writeQueue }),
     createUpdateStreamDescriptionTool({ getScopedClients, writeQueue }),
 

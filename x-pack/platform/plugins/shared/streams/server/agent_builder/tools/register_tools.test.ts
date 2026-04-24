@@ -10,9 +10,6 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { registerAgentBuilderTools } from './register_tools';
 import { STREAMS_READ_TOOL_IDS, STREAMS_WRITE_TOOL_IDS } from './tool_ids';
 import {
-  STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
-  STREAMS_KI_IDENTIFICATION_START_TOOL_ID,
-  STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 } from './register_tools';
 import { createMockGetScopedClients } from './test_helpers';
@@ -53,9 +50,6 @@ describe('registerAgentBuilderTools', () => {
       expect(registeredIds).toContain(id);
     }
     expect(registeredIds).toContain(STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID);
-    expect(registeredIds).toContain(STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID);
-    expect(registeredIds).toContain(STREAMS_KI_IDENTIFICATION_START_TOOL_ID);
-    expect(registeredIds).toContain(STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID);
   });
 
   it('registers tools with non-empty descriptions and schemas', () => {

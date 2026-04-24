@@ -50,9 +50,6 @@ export const platformStreamsSigEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.ki_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_query_create`,
-  kiIdentificationStart: `${internalNamespaces.platformStreams}.sig_events.ki_identification_start`,
-  kiIdentificationStatus: `${internalNamespaces.platformStreams}.sig_events.ki_identification_status`,
-  kiIdentificationCancel: `${internalNamespaces.platformStreams}.sig_events.ki_identification_cancel`,
 } as const;
 
 export const attachmentTools = {

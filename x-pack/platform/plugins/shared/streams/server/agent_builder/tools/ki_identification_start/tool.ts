@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { OnboardingStep } from '@kbn/streams-schema';
@@ -17,7 +17,7 @@ import { classifyError } from '../error_utils';
 import { startKiIdentificationToolHandler } from './handler';
 
 export const STREAMS_KI_IDENTIFICATION_START_TOOL_ID =
-  platformStreamsSigEventsTools.kiIdentificationStart;
+  'platform.streams.sig_events.ki_identification_start';
 
 const onboardingStartSchema = z.object({
   stream_name: z.string().describe('Target stream name, e.g. "logs.ecs.nginx".'),
