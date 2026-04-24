@@ -23,7 +23,7 @@ export const savedFieldSettingsSchema = schema.oneOf(
   ],
   {
     meta: {
-      id: 'kbn-field-settings-entry',
+      id: 'kbn-saved-field-settings-entry',
       title: 'Field settings or runtime field',
       description:
         'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
@@ -61,5 +61,5 @@ export const savedDataViewSpecSchema = schema.object(
       schema.recordOf(schema.string({ minLength: 1 }), savedFieldSettingsSchema)
     ),
   },
-  { meta: { id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' } }
+  { meta: { id: 'kbn-saved-data-view-spec-schema', title: 'Saved data view spec' } }
 );
