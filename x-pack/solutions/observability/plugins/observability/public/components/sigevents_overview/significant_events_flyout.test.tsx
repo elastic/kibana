@@ -7,15 +7,10 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { SignificantEventsFlyout } from './significant_events_flyout';
 
-jest.mock('@elastic/charts', () => ({
-  Chart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Settings: () => null,
-  Metric: () => <div data-test-subj="mock-metric" />,
-  LayoutDirection: { Vertical: 'vertical' },
-  LIGHT_THEME: {},
-}));
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('SignificantEventsFlyout', () => {
   const mockEvents = [
@@ -40,8 +35,7 @@ describe('SignificantEventsFlyout', () => {
     events: mockEvents,
     onAttachEvent: jest.fn(),
     onRemediate: jest.fn(),
-    onRunInBackground: jest.fn(),
-    onOpenConversation: jest.fn(),
+    onOpenDetails: jest.fn(),
   };
 
   beforeEach(() => {
@@ -49,23 +43,23 @@ describe('SignificantEventsFlyout', () => {
   });
 
   it('renders with correct title', () => {
-    render(<SignificantEventsFlyout {...defaultProps} />);
+    renderWithIntl(<SignificantEventsFlyout {...defaultProps} />);
     expect(screen.getByText('Active significant events')).toBeInTheDocument();
   });
 
   it('renders all events in the list', () => {
-    render(<SignificantEventsFlyout {...defaultProps} />);
+    renderWithIntl(<SignificantEventsFlyout {...defaultProps} />);
     expect(screen.getByText('Fleet Server Dependency Chain')).toBeInTheDocument();
     expect(screen.getByText('Central Authentication Server')).toBeInTheDocument();
   });
 
   it('renders event count in heading', () => {
-    render(<SignificantEventsFlyout {...defaultProps} />);
+    renderWithIntl(<SignificantEventsFlyout {...defaultProps} />);
     expect(screen.getByText('Significant events (2)')).toBeInTheDocument();
   });
 
   it('renders metadata cards', () => {
-    render(
+    renderWithIntl(
       <SignificantEventsFlyout
         {...defaultProps}
         healthyEntities={24}
@@ -79,28 +73,28 @@ describe('SignificantEventsFlyout', () => {
   });
 
   it('calls onClose when close button is clicked', () => {
-    render(<SignificantEventsFlyout {...defaultProps} />);
+    renderWithIntl(<SignificantEventsFlyout {...defaultProps} />);
     const closeButton = screen.getByRole('button', { name: /close/i });
     fireEvent.click(closeButton);
     expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
   });
 
   it('calls onAttachEvent when attach button is clicked', () => {
-    render(<SignificantEventsFlyout {...defaultProps} />);
+    renderWithIntl(<SignificantEventsFlyout {...defaultProps} />);
     const attachButtons = screen.getAllByRole('button', { name: /attach context/i });
     fireEvent.click(attachButtons[0]);
     expect(defaultProps.onAttachEvent).toHaveBeenCalledWith(mockEvents[0]);
   });
 
   it('opens child flyout when expand button is clicked', () => {
-    render(<SignificantEventsFlyout {...defaultProps} />);
+    renderWithIntl(<SignificantEventsFlyout {...defaultProps} />);
     const expandButton = screen.getByTestId('sigeventsOverviewSigEventExpand-1');
     fireEvent.click(expandButton);
     expect(screen.getByTestId('sigeventsOverviewSignificantEventChildFlyout')).toBeInTheDocument();
   });
 
   it('closes child flyout when collapse button is clicked', () => {
-    render(<SignificantEventsFlyout {...defaultProps} />);
+    renderWithIntl(<SignificantEventsFlyout {...defaultProps} />);
     const expandButton = screen.getByTestId('sigeventsOverviewSigEventExpand-1');
     fireEvent.click(expandButton);
     expect(screen.getByTestId('sigeventsOverviewSignificantEventChildFlyout')).toBeInTheDocument();
@@ -111,7 +105,7 @@ describe('SignificantEventsFlyout', () => {
   });
 
   it('closes child flyout via its close button', () => {
-    render(<SignificantEventsFlyout {...defaultProps} />);
+    renderWithIntl(<SignificantEventsFlyout {...defaultProps} />);
     const expandButton = screen.getByTestId('sigeventsOverviewSigEventExpand-1');
     fireEvent.click(expandButton);
     expect(screen.getByTestId('sigeventsOverviewSignificantEventChildFlyout')).toBeInTheDocument();

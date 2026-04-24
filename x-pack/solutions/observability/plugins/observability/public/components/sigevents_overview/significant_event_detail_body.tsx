@@ -15,13 +15,13 @@ import {
   EuiHorizontalRule,
   EuiText,
 } from '@elastic/eui';
-import type { EuiBadgeProps } from '@elastic/eui';
+import type { EuiBadgeProps, EuiHealthProps, EuiIconProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InfoPanel } from './info_panel';
-import { MetadataIconCard } from './metadata_icon_card';
-import { StreamsMetricTiles } from './streams_metric_tiles';
-import { RemediationPlanPanel } from './remediation_plan_panel';
-import type { StreamMetricConfig, RemediationStep } from '.';
+import { RecommendationsPlanPanel } from './recommendations_plan_panel';
+import { RootCausePanel } from './root_cause_panel';
+import { SignificantEventDetailHeader } from './significant_event_detail_header';
+import type { RecommendationStep } from '.';
 
 export interface SignificantEventDetailFields {
   id: string;
@@ -33,24 +33,56 @@ export interface SignificantEventDetailFields {
 
 export interface SignificantEventDetailBodyProps {
   event: SignificantEventDetailFields;
-  relevanceScore?: number;
-  suggestionsCount?: number;
-  metrics?: StreamMetricConfig[];
-  remediationSteps?: RemediationStep[];
+  detectedAtLabel?: string;
+  hideHeader?: boolean;
+  criticalityLabel?: string;
+  criticalityColor?: EuiHealthProps['color'];
+  impactLabel?: string;
+  impactColor?: EuiBadgeProps['color'];
+  recommendedActionLabel?: string;
+  recommendedActionIconType?: EuiIconProps['type'];
+  confidenceLabel?: string;
+  impactingLabel?: string;
+  recommendationSteps?: RecommendationStep[];
   onRemediate?: () => void;
-  onRunInBackground?: () => void;
-  onOpenConversation?: () => void;
+  onOpenDetails?: () => void;
 }
+
+const DEFAULT_CRITICALITY_LABEL = i18n.translate(
+  'xpack.observability.sigeventsOverview.sigEvents.defaultCriticalityLabel',
+  { defaultMessage: 'High' }
+);
+
+const DEFAULT_IMPACT_LABEL = i18n.translate(
+  'xpack.observability.sigeventsOverview.sigEvents.defaultImpactLabel',
+  { defaultMessage: 'High' }
+);
+
+const DEFAULT_CONFIDENCE_LABEL = i18n.translate(
+  'xpack.observability.sigeventsOverview.sigEvents.defaultConfidenceLabel',
+  { defaultMessage: 'High (95%)' }
+);
+
+const DEFAULT_IMPACTING_LABEL = i18n.translate(
+  'xpack.observability.sigeventsOverview.sigEvents.defaultImpactingLabel',
+  { defaultMessage: '4 services' }
+);
 
 export function SignificantEventDetailBody({
   event,
-  relevanceScore = 75,
-  suggestionsCount = 2,
-  metrics,
-  remediationSteps,
+  detectedAtLabel,
+  hideHeader = false,
+  criticalityLabel = DEFAULT_CRITICALITY_LABEL,
+  criticalityColor,
+  impactLabel = DEFAULT_IMPACT_LABEL,
+  impactColor = 'danger',
+  recommendedActionLabel,
+  recommendedActionIconType,
+  confidenceLabel = DEFAULT_CONFIDENCE_LABEL,
+  impactingLabel = DEFAULT_IMPACTING_LABEL,
+  recommendationSteps,
   onRemediate,
-  onRunInBackground,
-  onOpenConversation,
+  onOpenDetails,
 }: SignificantEventDetailBodyProps) {
   const summaryPanelTitle = i18n.translate(
     'xpack.observability.sigeventsOverview.sigEvents.childSummaryTitle',
@@ -72,29 +104,51 @@ export function SignificantEventDetailBody({
     [event.label, event.subtitle]
   );
 
-  const metaSeverityTitle = i18n.translate(
-    'xpack.observability.sigeventsOverview.sigEvents.childMetaSeverity',
-    { defaultMessage: 'Severity' }
-  );
-
-  const metaStreamTitle = i18n.translate(
-    'xpack.observability.sigeventsOverview.sigEvents.childMetaStream',
-    { defaultMessage: 'Relevance' }
-  );
-
-  const metaWindowTitle = i18n.translate(
-    'xpack.observability.sigeventsOverview.sigEvents.childMetaWindow',
-    { defaultMessage: 'Suggestions' }
-  );
-
-  const severityHealthColor = useMemo(() => {
-    if (event.severityColor === 'danger') return 'danger' as const;
-    if (event.severityColor === 'warning') return 'warning' as const;
-    return 'subdued' as const;
-  }, [event.severityColor]);
+  const resolvedCriticalityColor: EuiHealthProps['color'] = useMemo(() => {
+    if (criticalityColor) return criticalityColor;
+    if (event.severityColor === 'danger') return 'danger';
+    if (event.severityColor === 'warning') return 'warning';
+    if (event.severityColor === 'success') return 'success';
+    return 'subdued';
+  }, [criticalityColor, event.severityColor]);
 
   const generalInfoDescriptionItems = useMemo(() => {
     return [
+      {
+        title: i18n.translate(
+          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermSeverity',
+          { defaultMessage: 'Severity' }
+        ),
+        description: <EuiBadge color={event.severityColor}>{event.severityLabel}</EuiBadge>,
+      },
+      {
+        title: i18n.translate(
+          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermCriticality',
+          { defaultMessage: 'Criticality' }
+        ),
+        description: <EuiHealth color={resolvedCriticalityColor}>{criticalityLabel}</EuiHealth>,
+      },
+      {
+        title: i18n.translate(
+          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermConfidence',
+          { defaultMessage: 'Confidence' }
+        ),
+        description: confidenceLabel,
+      },
+      {
+        title: i18n.translate(
+          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermImpact',
+          { defaultMessage: 'Impact' }
+        ),
+        description: <EuiBadge color={impactColor}>{impactLabel}</EuiBadge>,
+      },
+      {
+        title: i18n.translate(
+          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermImpacting',
+          { defaultMessage: 'Impacting' }
+        ),
+        description: impactingLabel,
+      },
       {
         title: i18n.translate(
           'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermStream',
@@ -102,54 +156,18 @@ export function SignificantEventDetailBody({
         ),
         description: event.subtitle,
       },
-      {
-        title: i18n.translate(
-          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermSeverity',
-          { defaultMessage: 'Severity' }
-        ),
-        description: event.severityLabel,
-      },
-      {
-        title: i18n.translate(
-          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermBaseline',
-          { defaultMessage: 'Baseline' }
-        ),
-        description: i18n.translate(
-          'xpack.observability.sigeventsOverview.sigEvents.childGeneralDescBaseline',
-          {
-            defaultMessage:
-              '7-day rolling average with hour-of-day cohort; minimum density enforced for sparse streams.',
-          }
-        ),
-      },
-      {
-        title: i18n.translate(
-          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermDetection',
-          { defaultMessage: 'Detection' }
-        ),
-        description: i18n.translate(
-          'xpack.observability.sigeventsOverview.sigEvents.childGeneralDescDetection',
-          {
-            defaultMessage:
-              'Flags statistically significant deviation from the learned pattern for the selected window.',
-          }
-        ),
-      },
-      {
-        title: i18n.translate(
-          'xpack.observability.sigeventsOverview.sigEvents.childGeneralTermGuidance',
-          { defaultMessage: 'Guidance' }
-        ),
-        description: i18n.translate(
-          'xpack.observability.sigeventsOverview.sigEvents.childGeneralDescGuidance',
-          {
-            defaultMessage:
-              'Confirm blast radius and downstream dependencies before remediation; attach context from related services.',
-          }
-        ),
-      },
     ];
-  }, [event.severityLabel, event.subtitle]);
+  }, [
+    confidenceLabel,
+    criticalityLabel,
+    event.severityColor,
+    event.severityLabel,
+    event.subtitle,
+    impactColor,
+    impactLabel,
+    impactingLabel,
+    resolvedCriticalityColor,
+  ]);
 
   return (
     <EuiFlexGroup
@@ -157,42 +175,25 @@ export function SignificantEventDetailBody({
       gutterSize="m"
       data-test-subj="sigeventsOverviewSignificantEventDetailBody"
     >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" responsive={true} wrap>
-          <EuiFlexItem grow={true}>
-            <MetadataIconCard
-              hideIcon
-              title={metaSeverityTitle}
-              value={<EuiHealth color={severityHealthColor}>{event.severityLabel}</EuiHealth>}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <MetadataIconCard
-              hideIcon
-              title={metaStreamTitle}
-              value={<EuiBadge color="accent">{relevanceScore}</EuiBadge>}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <MetadataIconCard hideIcon title={metaWindowTitle} value={String(suggestionsCount)} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {!hideHeader ? (
+        <EuiFlexItem grow={false}>
+          <SignificantEventDetailHeader
+            title={event.label}
+            detectedAtLabel={detectedAtLabel}
+            severityLabel={event.severityLabel}
+            severityColor={event.severityColor}
+            criticalityLabel={criticalityLabel}
+            criticalityColor={resolvedCriticalityColor}
+            impactLabel={impactLabel}
+            impactColor={impactColor}
+            recommendedActionLabel={recommendedActionLabel}
+            recommendedActionIconType={recommendedActionIconType}
+          />
+        </EuiFlexItem>
+      ) : null}
 
       <EuiFlexItem grow={false}>
-        <InfoPanel title={summaryPanelTitle}>
-          <EuiText size="s">
-            <p>{summaryBody}</p>
-          </EuiText>
-        </InfoPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <StreamsMetricTiles metrics={metrics} />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <InfoPanel title={generalInfoTitle}>
+        <InfoPanel title={generalInfoTitle} collapsible initialCollapsed>
           {generalInfoDescriptionItems.map((listItem, index) => (
             <React.Fragment key={listItem.title}>
               <EuiDescriptionList
@@ -210,11 +211,22 @@ export function SignificantEventDetailBody({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <RemediationPlanPanel
-          steps={remediationSteps}
+        <InfoPanel title={summaryPanelTitle}>
+          <EuiText size="s">
+            <p>{summaryBody}</p>
+          </EuiText>
+        </InfoPanel>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <RootCausePanel />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <RecommendationsPlanPanel
+          steps={recommendationSteps}
           onRemediate={onRemediate}
-          onRunInBackground={onRunInBackground}
-          onOpenConversation={onOpenConversation}
+          onOpenDetails={onOpenDetails}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { screen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -18,7 +18,33 @@ import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { SigeventsOverviewPage } from './sigevents_overview';
 
 jest.mock('../../components/sigevents_overview', () => ({
-  SigeventsOverview: () => <div data-test-subj="sigeventsOverview">SigeventsOverview</div>,
+  SigeventsOverview: ({ onViewDetails }: { onViewDetails?: () => void }) => (
+    <div data-test-subj="sigeventsOverview">
+      <button data-test-subj="mockSigeventsViewDetailsButton" onClick={onViewDetails}>
+        View Details
+      </button>
+    </div>
+  ),
+}));
+
+jest.mock('../../components/sigevents_overview/significant_event_detail_body', () => ({
+  SignificantEventDetailBody: ({
+    event,
+    hideHeader,
+  }: {
+    event: { label: string };
+    hideHeader?: boolean;
+  }) => (
+    <div data-test-subj="mockSignificantEventDetailBody" data-hide-header={String(!!hideHeader)}>
+      {event.label}
+    </div>
+  ),
+}));
+
+jest.mock('../../components/sigevents_overview/significant_event_detail_header', () => ({
+  SignificantEventDetailHeader: ({ title }: { title: string }) => (
+    <div data-test-subj="sigeventsOverviewSignificantEventDetailHeader">{title}</div>
+  ),
 }));
 
 const mockCore = coreMock.createStart();
@@ -89,6 +115,39 @@ describe('SigeventsOverviewPage', () => {
       expect(
         screen.queryByTestSubject('agentBuilderEmbeddableConversation')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('detail flyout', () => {
+    it('does not render the flyout by default', () => {
+      renderWithProviders();
+      expect(screen.queryByTestSubject('obltSigeventsDetailFlyout')).not.toBeInTheDocument();
+    });
+
+    it('opens the push flyout with the significant event header and body when View Details is clicked', () => {
+      renderWithProviders();
+
+      fireEvent.click(screen.getByTestSubject('mockSigeventsViewDetailsButton'));
+
+      expect(screen.getByTestSubject('obltSigeventsDetailFlyout')).toBeInTheDocument();
+      expect(
+        screen.getByTestSubject('sigeventsOverviewSignificantEventDetailHeader')
+      ).toBeInTheDocument();
+      expect(screen.getByTestSubject('mockSignificantEventDetailBody')).toBeInTheDocument();
+      expect(screen.getByTestSubject('mockSignificantEventDetailBody')).toHaveAttribute(
+        'data-hide-header',
+        'true'
+      );
+    });
+
+    it('closes the flyout when its close button is clicked', () => {
+      renderWithProviders();
+
+      fireEvent.click(screen.getByTestSubject('mockSigeventsViewDetailsButton'));
+      expect(screen.getByTestSubject('obltSigeventsDetailFlyout')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /close/i }));
+      expect(screen.queryByTestSubject('obltSigeventsDetailFlyout')).not.toBeInTheDocument();
     });
   });
 });

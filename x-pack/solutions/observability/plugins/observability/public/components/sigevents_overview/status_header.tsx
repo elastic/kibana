@@ -42,7 +42,7 @@ const DEFAULT_DESCRIPTION = i18n.translate(
   'xpack.observability.sigeventsOverview.introDescription',
   {
     defaultMessage:
-      'Our system is detecting more unusual behaviour than normal, review your Blast radius summary and initiate actions.',
+      'We are detecting more unusual behaviour than normal, review the impact and details and start remediation or further actions.',
   }
 );
 
@@ -70,12 +70,7 @@ export const StatusHeader = ({
       </EuiFlexItem>
       <EuiSpacer size="s" />
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          responsive={false}
-          alignItems="center"
-          gutterSize="m"
-          justifyContent="center"
-        >
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m" justifyContent="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type={iconType} size="l" color={iconColor} aria-hidden />
           </EuiFlexItem>

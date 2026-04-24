@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { InfoPanel } from './info_panel';
+
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('InfoPanel', () => {
   it('renders with the correct title', () => {
@@ -55,5 +58,51 @@ describe('InfoPanel', () => {
     expect(
       container.querySelector('[data-test-subj="sigeventsOverviewInfoPanel"]')
     ).toBeInTheDocument();
+  });
+
+  describe('collapsible', () => {
+    it('hides the children by default when collapsible and initialCollapsed', () => {
+      renderWithIntl(
+        <InfoPanel title="Details" collapsible initialCollapsed>
+          <p>hidden content</p>
+        </InfoPanel>
+      );
+
+      expect(screen.getByText('Details')).toBeInTheDocument();
+      expect(screen.queryByText('hidden content')).not.toBeInTheDocument();
+      expect(screen.getByTestId('sigeventsOverviewInfoPanelToggle')).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+    });
+
+    it('shows the children by default when collapsible and not initialCollapsed', () => {
+      renderWithIntl(
+        <InfoPanel title="Details" collapsible initialCollapsed={false}>
+          <p>visible content</p>
+        </InfoPanel>
+      );
+
+      expect(screen.getByText('visible content')).toBeInTheDocument();
+      expect(screen.getByTestId('sigeventsOverviewInfoPanelToggle')).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      );
+    });
+
+    it('toggles the children when the header is clicked', () => {
+      renderWithIntl(
+        <InfoPanel title="Details" collapsible initialCollapsed>
+          <p>togglable content</p>
+        </InfoPanel>
+      );
+
+      const toggle = screen.getByTestId('sigeventsOverviewInfoPanelToggle');
+      fireEvent.click(toggle);
+      expect(screen.getByText('togglable content')).toBeInTheDocument();
+
+      fireEvent.click(toggle);
+      expect(screen.queryByText('togglable content')).not.toBeInTheDocument();
+    });
   });
 });

@@ -6,16 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { SignificantEventDetailBody } from './significant_event_detail_body';
 
-jest.mock('@elastic/charts', () => ({
-  Chart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Settings: () => null,
-  Metric: () => <div data-test-subj="mock-metric" />,
-  LayoutDirection: { Vertical: 'vertical' },
-  LIGHT_THEME: {},
-}));
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('SignificantEventDetailBody', () => {
   const mockEvent = {
@@ -29,51 +24,94 @@ describe('SignificantEventDetailBody', () => {
   const defaultProps = {
     event: mockEvent,
     onRemediate: jest.fn(),
-    onRunInBackground: jest.fn(),
-    onOpenConversation: jest.fn(),
+    onOpenDetails: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders event severity', () => {
-    render(<SignificantEventDetailBody {...defaultProps} />);
+  it('renders the event title as the header', () => {
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Fleet Server Dependency Chain' })
+    ).toBeInTheDocument();
+  });
+
+  it('renders the default detected-at timestamp below the header', () => {
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
+    expect(screen.getByText('Detected 5 minutes ago')).toBeInTheDocument();
+  });
+
+  it('renders a custom detected-at label', () => {
+    renderWithIntl(
+      <SignificantEventDetailBody {...defaultProps} detectedAtLabel="Detected 12:30 UTC" />
+    );
+    expect(screen.getByText('Detected 12:30 UTC')).toBeInTheDocument();
+  });
+
+  it('does not render the header when hideHeader is true', () => {
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} hideHeader />);
+    expect(
+      screen.queryByTestId('sigeventsOverviewSignificantEventDetailHeader')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders all four metadata cards with the expected titles', () => {
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
+    expect(screen.getAllByText('Severity').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Criticality').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Impact').length).toBeGreaterThan(0);
+    expect(screen.getByText('Recommended action')).toBeInTheDocument();
+  });
+
+  it('renders the default values inside the metadata cards', () => {
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
+    // Severity badge value (from event.severityLabel)
     expect(screen.getAllByText('Critical').length).toBeGreaterThan(0);
-  });
-
-  it('renders relevance score', () => {
-    render(<SignificantEventDetailBody {...defaultProps} relevanceScore={75} />);
-    expect(screen.getByText('75')).toBeInTheDocument();
-  });
-
-  it('renders suggestions count', () => {
-    render(<SignificantEventDetailBody {...defaultProps} suggestionsCount={3} />);
-    expect(screen.getByText('3')).toBeInTheDocument();
+    // Criticality + Impact default to "High"
+    expect(screen.getAllByText('High').length).toBeGreaterThanOrEqual(2);
+    // Recommended action default to "Escalate"
+    expect(screen.getAllByText('Escalate').length).toBeGreaterThan(0);
   });
 
   it('renders summary panel', () => {
-    render(<SignificantEventDetailBody {...defaultProps} />);
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
     expect(screen.getByText('Summary')).toBeInTheDocument();
   });
 
-  it('renders general information panel', () => {
-    render(<SignificantEventDetailBody {...defaultProps} />);
+  it('renders the general information panel collapsed by default', () => {
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
     expect(screen.getByText('General information')).toBeInTheDocument();
+    // "Confidence" and "Impacting" only live inside the general info panel
+    expect(screen.queryByText('Confidence')).not.toBeInTheDocument();
+    expect(screen.queryByText('Impacting')).not.toBeInTheDocument();
+    expect(screen.queryByText('logs · fleet-coordination')).not.toBeInTheDocument();
   });
 
-  it('renders stream information', () => {
-    render(<SignificantEventDetailBody {...defaultProps} />);
+  it('expands the general information panel when its toggle is clicked', () => {
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('sigeventsOverviewInfoPanelToggle'));
+
+    expect(screen.getByText('Confidence')).toBeInTheDocument();
+    expect(screen.getByText('Impacting')).toBeInTheDocument();
     expect(screen.getByText('logs · fleet-coordination')).toBeInTheDocument();
   });
 
-  it('renders remediation plan panel', () => {
-    render(<SignificantEventDetailBody {...defaultProps} />);
-    expect(screen.getByText('Remediation plan')).toBeInTheDocument();
+  it('renders the recommendations plan panel', () => {
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
+    expect(screen.getByText('Recommendations plan')).toBeInTheDocument();
+  });
+
+  it('renders the root cause panel', () => {
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
+    expect(screen.getByTestId('sigeventsOverviewRootCausePanel')).toBeInTheDocument();
+    expect(screen.getByText('Root cause')).toBeInTheDocument();
   });
 
   it('has the correct test subject', () => {
-    const { container } = render(<SignificantEventDetailBody {...defaultProps} />);
+    const { container } = renderWithIntl(<SignificantEventDetailBody {...defaultProps} />);
     expect(
       container.querySelector('[data-test-subj="sigeventsOverviewSignificantEventDetailBody"]')
     ).toBeInTheDocument();
@@ -85,7 +123,7 @@ describe('SignificantEventDetailBody', () => {
       severityLabel: 'High',
       severityColor: 'warning' as const,
     };
-    render(<SignificantEventDetailBody {...defaultProps} event={warningEvent} />);
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={warningEvent} />);
     expect(screen.getAllByText('High').length).toBeGreaterThan(0);
   });
 
@@ -95,7 +133,7 @@ describe('SignificantEventDetailBody', () => {
       severityLabel: 'Low',
       severityColor: 'hollow' as const,
     };
-    render(<SignificantEventDetailBody {...defaultProps} event={unknownSeverityEvent} />);
+    renderWithIntl(<SignificantEventDetailBody {...defaultProps} event={unknownSeverityEvent} />);
     expect(screen.getAllByText('Low').length).toBeGreaterThan(0);
   });
 });

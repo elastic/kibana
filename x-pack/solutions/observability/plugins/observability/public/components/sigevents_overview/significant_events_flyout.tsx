@@ -28,9 +28,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { InfoPanel } from './info_panel';
 import { MetadataIconCard } from './metadata_icon_card';
-import { StreamsMetricTiles } from './streams_metric_tiles';
 import { SignificantEventDetailBody } from './significant_event_detail_body';
-import type { StreamMetricConfig, RemediationStep } from '.';
+import type { RecommendationStep } from '.';
 
 export type SigEventSeverity = 'critical' | 'high' | 'medium' | 'low';
 
@@ -49,12 +48,10 @@ export interface SignificantEventsFlyoutProps {
   affectedSystems?: number;
   atRiskCount?: number;
   summaryDescription?: string;
-  metrics?: StreamMetricConfig[];
-  remediationSteps?: RemediationStep[];
+  recommendationSteps?: RecommendationStep[];
   onAttachEvent?: (event: SignificantEvent) => void;
   onRemediate?: () => void;
-  onRunInBackground?: () => void;
-  onOpenConversation?: () => void;
+  onOpenDetails?: () => void;
 }
 
 export function SignificantEventsFlyout({
@@ -64,12 +61,10 @@ export function SignificantEventsFlyout({
   affectedSystems = 20,
   atRiskCount = 4,
   summaryDescription,
-  metrics,
-  remediationSteps,
+  recommendationSteps,
   onAttachEvent,
   onRemediate,
-  onRunInBackground,
-  onOpenConversation,
+  onOpenDetails,
 }: SignificantEventsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const headingId = useGeneratedHtmlId({ prefix: 'sigEventsFlyout' });
@@ -177,10 +172,6 @@ export function SignificantEventsFlyout({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <StreamsMetricTiles metrics={metrics} />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
               <h3>
                 {i18n.translate(
@@ -196,6 +187,9 @@ export function SignificantEventsFlyout({
             <EuiPanel
               hasBorder
               paddingSize="none"
+              css={css`
+                border-radius: 8px;
+              `}
               data-test-subj="sigeventsOverviewSigEventsListPanel"
             >
               {events.map((ev, index) => {
@@ -341,11 +335,9 @@ export function SignificantEventsFlyout({
           <EuiFlyoutBody>
             <SignificantEventDetailBody
               event={selectedEvent}
-              metrics={metrics}
-              remediationSteps={remediationSteps}
+              recommendationSteps={recommendationSteps}
               onRemediate={onRemediate}
-              onRunInBackground={onRunInBackground}
-              onOpenConversation={onOpenConversation}
+              onOpenDetails={onOpenDetails}
             />
           </EuiFlyoutBody>
         </EuiFlyout>

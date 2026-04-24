@@ -75,8 +75,8 @@ export const Default: Story = {
     onClose: action('onClose'),
     onAttachEvent: action('onAttachEvent'),
     onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
+
+    onOpenDetails: action('onOpenDetails'),
   },
 };
 
@@ -89,8 +89,8 @@ export const HighImpact: Story = {
     onClose: action('onClose'),
     onAttachEvent: action('onAttachEvent'),
     onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
+
+    onOpenDetails: action('onOpenDetails'),
   },
 };
 
@@ -103,8 +103,8 @@ export const FewEvents: Story = {
     onClose: action('onClose'),
     onAttachEvent: action('onAttachEvent'),
     onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
+
+    onOpenDetails: action('onOpenDetails'),
   },
 };
 
@@ -119,35 +119,7 @@ export const CustomSummary: Story = {
     onClose: action('onClose'),
     onAttachEvent: action('onAttachEvent'),
     onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
-  },
-};
 
-export const WithCustomMetrics: Story = {
-  args: {
-    events: defaultEvents,
-    healthyEntities: 24,
-    affectedSystems: 20,
-    atRiskCount: 4,
-    metrics: [
-      {
-        subtitle: 'logs.error.count',
-        value: 85000,
-        domainMax: 150000,
-        extra: { value: '+35%' },
-      },
-      {
-        subtitle: 'metrics.latency.p99',
-        value: 450,
-        domainMax: 1000,
-        extra: { value: '+120%' },
-      },
-    ],
-    onClose: action('onClose'),
-    onAttachEvent: action('onAttachEvent'),
-    onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
+    onOpenDetails: action('onOpenDetails'),
   },
 };
