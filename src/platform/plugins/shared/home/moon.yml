@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/deeplinks-observability'
   - '@kbn/react-kibana-context-theme'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
