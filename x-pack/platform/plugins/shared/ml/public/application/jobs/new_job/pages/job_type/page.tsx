@@ -29,7 +29,6 @@ import { LinkCard } from '../../../../components/link_card';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
-import { CPSUnsupportedWarning } from '../../../../components/cps_unsupported_warning';
 
 export const Page: FC = () => {
   const {
@@ -287,8 +286,6 @@ export const Page: FC = () => {
         />
       </MlPageHeader>
       <EuiSpacer size="l" />
-
-      <CPSUnsupportedWarning />
 
       {isTimeBasedIndex === false && (
         <>
