@@ -9,10 +9,13 @@ import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import type { AssetDetailsPageTabName } from './asset_details_tab';
 import { AssetDetailsTab } from './asset_details_tab';
 
+const KPI_METRICS = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'] as const;
+
 export class OverviewTab extends AssetDetailsTab {
   public readonly tabName: AssetDetailsPageTabName = 'Overview';
   public readonly tab: Locator;
 
+  public readonly kpiGrid: Locator;
   public readonly kpiCpuUsageChart: Locator;
   public readonly kpiNormalizedLoadChart: Locator;
   public readonly kpiMemoryUsageChart: Locator;
@@ -67,10 +70,11 @@ export class OverviewTab extends AssetDetailsTab {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
 
-    this.kpiCpuUsageChart = this.page.getByTestId('infraAssetDetailsKPIcpuUsage');
-    this.kpiNormalizedLoadChart = this.page.getByTestId('infraAssetDetailsKPInormalizedLoad1m');
-    this.kpiMemoryUsageChart = this.page.getByTestId('infraAssetDetailsKPImemoryUsage');
-    this.kpiDiskUsageChart = this.page.getByTestId('infraAssetDetailsKPIdiskUsage');
+    this.kpiGrid = this.page.getByTestId('infraAssetDetailsKPIGrid');
+    this.kpiCpuUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPIcpuUsage');
+    this.kpiNormalizedLoadChart = this.kpiGrid.getByTestId('infraAssetDetailsKPInormalizedLoad1m');
+    this.kpiMemoryUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPImemoryUsage');
+    this.kpiDiskUsageChart = this.kpiGrid.getByTestId('infraAssetDetailsKPIdiskUsage');
 
     this.metadataSection = this.page
       .getByTestId('infraAssetDetailsCollapseExpandSection')
@@ -175,6 +179,26 @@ export class OverviewTab extends AssetDetailsTab {
     );
     this.metricsDiskIOChart = this.metricsDiskSection.getByTestId(
       'infraAssetDetailsMetricChartdiskIOReadWrite'
+    );
+  }
+
+  public getKPIValue(metric: string): Locator {
+    return this.kpiGrid
+      .getByTestId(`infraAssetDetailsKPI${metric}`)
+      .locator('.echMetricText__value');
+  }
+
+  /**
+   * Waits for all KPI Lens charts to finish rendering in parallel. The
+   * `.echMetricText__value` element only appears once elastic-charts has
+   * painted, so it's a sufficient single signal: it implies the outer panel
+   * dropped `-loading`, Lens attributes resolved, and the chart didn't end up
+   * in the `-error` state. Running the waits concurrently shares the budget
+   * across all 4 charts instead of cascading it.
+   */
+  public async waitForKPIChartsToLoad(timeout?: number) {
+    await Promise.all(
+      KPI_METRICS.map((metric) => this.getKPIValue(metric).waitFor({ state: 'visible', timeout }))
     );
   }
 }
