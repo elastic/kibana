@@ -6,12 +6,15 @@
  */
 
 import * as t from 'io-ts';
+import { throwError, type Observable } from 'rxjs';
 import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import type { ServerSentEvent } from '@kbn/sse-utils';
 import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
 import { isIndexNotFoundError } from '@kbn/agent-builder-plugin/server/utils/is_index_not_found_error';
 import { isNoMatchingProjectError } from '@kbn/agent-builder-plugin/server/utils/is_no_matching_project_error';
+import { getSSEResponseHeaders } from '@kbn/agent-builder-plugin/server/routes/utils';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getLogAiInsights } from './get_log_ai_insights';
@@ -154,6 +157,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
     }),
     handler: async ({ request, core, params, response, logger, plugins }) => {
       const { index, id, fields } = params.body;
+      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
 
       const hasDocIdentity = typeof index === 'string' && typeof id === 'string';
       // if a user is in ESQL mode, there is currently no id or index metadata
@@ -194,6 +198,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
           logger,
         });
         return response.ok({
+          headers: getSSEResponseHeaders(isCloudEnabled),
           body: observableIntoEventSourceStream(result.events$, {
             logger,
             signal: getRequestAbortedSignal(request),
@@ -202,10 +207,13 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       } catch (error) {
         logger.error(error);
         if (isIndexNotFoundError(error) || isNoMatchingProjectError(error)) {
-          return response.notFound({
-            body: {
-              message: error instanceof Error ? error.message : String(error),
-            },
+          const err$ = throwError(error) as Observable<ServerSentEvent>;
+          return response.ok({
+            headers: getSSEResponseHeaders(isCloudEnabled),
+            body: observableIntoEventSourceStream(err$, {
+              logger,
+              signal: getRequestAbortedSignal(request),
+            }),
           });
         }
         throw error;
