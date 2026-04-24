@@ -5,29 +5,16 @@
  * 2.0.
  */
 
-import React, { createContext, memo, useContext, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { FieldTypesProvider } from '../../threat_intelligence/containers/field_types_provider';
 import { useIndicatorById } from '../../cases/attachments/indicator/hooks/use_indicator_by_id';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
-import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
-import type { IOCDetailsProps } from './types';
 import { FlyoutError } from '../shared/components/flyout_error';
+import { IOCDetailsContext } from '../../flyout_v2/ioc_details/context';
+import type { IOCDetailsProps } from './types';
 
-export interface IOCDetailsContext {
-  /**
-   * Id of the indicator document
-   */
-  id: string;
-  /**
-   * The indicator document
-   */
-  indicator: Indicator;
-}
-
-/**
- * A context provider shared by the right, left and preview panels in expandable ioc details flyout
- */
-export const IOCDetailsContext = createContext<IOCDetailsContext | undefined>(undefined);
+// Re-export context and hook from v2
+export { IOCDetailsContext, useIOCDetailsContext } from '../../flyout_v2/ioc_details/context';
 
 export type IOCDetailsProviderProps = {
   /**
@@ -36,6 +23,9 @@ export type IOCDetailsProviderProps = {
   children: React.ReactNode;
 } & Partial<IOCDetailsProps['params']>;
 
+/**
+ * A context provider for the expandable flyout that handles loading and error states.
+ */
 export const IOCDetailsProvider = memo(({ id, children }: IOCDetailsProviderProps) => {
   const { indicator, isLoading } = useIndicatorById(id || '');
 
@@ -65,16 +55,4 @@ export const IOCDetailsProvider = memo(({ id, children }: IOCDetailsProviderProp
   );
 });
 
-IOCDetailsProvider.displayName = 'DocumentDetailsProvider';
-
-export const useIOCDetailsContext = (): IOCDetailsContext => {
-  const contextValue = useContext(IOCDetailsContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'DocumentDetailsContext can only be used within DocumentDetailsContext provider'
-    );
-  }
-
-  return contextValue;
-};
+IOCDetailsProvider.displayName = 'IOCDetailsProvider';

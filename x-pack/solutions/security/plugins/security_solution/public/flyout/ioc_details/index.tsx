@@ -6,34 +6,37 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIOCDetailsContext } from './context';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
+import { useIOCDetailsContext } from '../../flyout_v2/ioc_details/context';
+import { Header } from '../../flyout_v2/ioc_details/header';
+import { Content } from '../../flyout_v2/ioc_details/content';
+import { Footer } from '../../flyout_v2/ioc_details/footer';
+import { getTabsDisplayed } from '../../flyout_v2/ioc_details/tabs';
+import type { RightPanelPaths } from '../../flyout_v2/ioc_details/tabs';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
+import { FlyoutHeader } from '../shared/components/flyout_header';
 import type { IOCDetailsProps } from './types';
 import { IOCRightPanelKey } from './constants/panel_keys';
 import { useTabs } from './hooks/use_tabs';
-import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../flyout_v2/ioc_details/constants/local_storage';
 import { useKibana } from '../../common/lib/kibana';
-import { PanelHeader } from './header';
-import { PanelContent } from './content';
-import type { RightPanelTabType } from './tabs';
-import { PanelFooter } from './footer';
-
-export type RightPanelPaths = 'overview' | 'table' | 'json';
+import { FLYOUT_FOOTER_TEST_ID } from '../document_details/right/test_ids';
+import { iocFlyoutBodyCss } from '../../flyout_v2/ioc_details';
 
 /**
- * Panel to be displayed in the document details expandable flyout right section
+ * Panel to be displayed in the ioc details expandable flyout right section
  */
 export const IOCPanel: FC<Partial<IOCDetailsProps>> = memo(({ path }) => {
   const { storage } = useKibana().services;
   const { indicator } = useIOCDetailsContext();
   const { openRightPanel } = useExpandableFlyoutApi();
 
-  const { tabsDisplayed, selectedTabId } = useTabs({ path });
+  const { selectedTabId } = useTabs({ path });
 
   const setSelectedTabId = useCallback(
-    (tabId: RightPanelTabType['id']) => {
+    (tabId: RightPanelPaths) => {
       openRightPanel({
         id: IOCRightPanelKey,
         path: {
@@ -44,22 +47,33 @@ export const IOCPanel: FC<Partial<IOCDetailsProps>> = memo(({ path }) => {
         },
       });
 
-      // saving which tab is currently selected in the right panel in local storage
-      storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
+      storage.set(FLYOUT_STORAGE_KEYS.SELECTED_TAB, tabId);
     },
     [indicator._id, openRightPanel, storage]
   );
 
+  const onViewAllFieldsInTable = useCallback(() => {
+    setSelectedTabId('table');
+  }, [setSelectedTabId]);
+
+  const tabs = useMemo(() => getTabsDisplayed(onViewAllFieldsInTable), [onViewAllFieldsInTable]);
+
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <PanelHeader
-        tabs={tabsDisplayed}
-        selectedTabId={selectedTabId}
-        setSelectedTabId={setSelectedTabId}
-      />
-      <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
-      <PanelFooter />
+      <FlyoutHeader css={{ '.euiPanel': { 'padding-bottom': '0' } }}>
+        <Header tabs={tabs} selectedTabId={selectedTabId} setSelectedTabId={setSelectedTabId} />
+      </FlyoutHeader>
+      <EuiFlyoutBody css={iocFlyoutBodyCss}>
+        <EuiPanel hasShadow={false} color="transparent" css={{ height: '100%' }}>
+          <Content tabs={tabs} selectedTabId={selectedTabId} />
+        </EuiPanel>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
+        <EuiPanel color="transparent">
+          <Footer />
+        </EuiPanel>
+      </EuiFlyoutFooter>
     </>
   );
 });
