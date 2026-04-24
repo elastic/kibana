@@ -1475,10 +1475,7 @@ describe('getEntityTool', () => {
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const result = (await tool.handler(
-        { entityId: 'd1' },
-        context
-      )) as ToolHandlerStandardReturn;
+      const result = (await tool.handler({ entityId: 'd1' }, context)) as ToolHandlerStandardReturn;
 
       expect(context.attachments.add).not.toHaveBeenCalled();
       expect(context.attachments.update).not.toHaveBeenCalled();
