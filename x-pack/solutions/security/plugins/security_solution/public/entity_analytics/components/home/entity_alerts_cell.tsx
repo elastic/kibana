@@ -127,7 +127,11 @@ export const EntityAlertsCell: React.FC<{
             to: ALERTS_CELL_TO_STR,
             entityFilters,
           }),
-          signal,
+          // react-query v4 types `signal` as `AbortSignal | undefined`, but
+          // `fetchQueryAlerts` requires a non-optional `AbortSignal`. Fall back
+          // to a fresh controller so the call type-checks when react-query
+          // hasn't supplied one.
+          signal: signal ?? new AbortController().signal,
         });
         endTracking('success');
         return response;
