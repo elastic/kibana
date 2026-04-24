@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useLayoutEffect } from 'react';
-import { EuiFlexGroup, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,7 +28,6 @@ import {
 } from '@kbn/rule-data-utils';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { EuiCallOut } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import {
@@ -134,7 +133,7 @@ export function AlertDetailsAppSection({
     return [
       {
         label: i18n.translate('xpack.apm.alertDetails.source.errorGroupingKey', {
-          defaultMessage: `${ERROR_GROUP_ID}`,
+          defaultMessage: 'error.grouping_key',
         }),
         value: (
           <EuiLink data-test-subj="apmAlertDetailsErrorGroupKeyLink" href={errorDetailsHref}>

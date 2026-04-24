@@ -120,16 +120,13 @@ export function AlertDetailsCharts({
     ),
   };
 
-  const primaryChart = chartRenderers[chartLayout.primary](true);
-  const secondaryCharts = chartLayout.secondary.map((chartId) => chartRenderers[chartId](false));
-
   return (
     <EuiFlexItem>
-      {primaryChart}
+      {chartRenderers[chartLayout.primary](true)}
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize="s">
-        {secondaryCharts.map((chart, index) => (
-          <React.Fragment key={index}>{chart}</React.Fragment>
+        {chartLayout.secondary.map((chartId) => (
+          <React.Fragment key={chartId}>{chartRenderers[chartId](false)}</React.Fragment>
         ))}
       </EuiFlexGroup>
     </EuiFlexItem>
