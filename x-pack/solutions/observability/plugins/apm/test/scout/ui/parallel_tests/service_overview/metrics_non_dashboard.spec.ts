@@ -40,7 +40,6 @@ test.describe(
     });
 
     test('renders generic service metrics for Go agent (elastic agent without dashboard)', async ({
-      page,
       pageObjects: { serviceDetailsPage },
     }) => {
       await serviceDetailsPage.metricsTab.goToTab({
@@ -50,7 +49,7 @@ test.describe(
       });
 
       await test.step('Metrics charts are visible', async () => {
-        await expect(page.getByTestId('cpu_usage_chart')).toBeVisible({
+        await expect(serviceDetailsPage.metricsTab.cpuUsageChart).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
@@ -65,7 +64,6 @@ test.describe(
     });
 
     test('renders serverless metrics for AWS Lambda', async ({
-      page,
       pageObjects: { serviceDetailsPage },
     }) => {
       await serviceDetailsPage.metricsTab.goToTab({
@@ -75,7 +73,7 @@ test.describe(
       });
 
       await test.step('Serverless summary is visible', async () => {
-        await expect(page.getByTestId('apmServerlessSummaryGiveFeedbackLink')).toBeVisible({
+        await expect(serviceDetailsPage.metricsTab.serverlessSummaryFeedbackLink).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
