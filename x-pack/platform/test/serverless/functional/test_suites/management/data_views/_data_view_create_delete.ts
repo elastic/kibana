@@ -32,9 +32,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern'
       );
-      await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
-      );
+      // Retry around https://github.com/elastic/kibana/issues/246273: the FTR
+      // client reuses the same FormData stream across its internal retries,
+      // which deadlocks this hook if Kibana drops the first _import under CI
+      // load. Each outer attempt rebuilds a fresh FormData.
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          await Promise.race([
+            kibanaServer.importExport.load(
+              'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+            ),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error(`attempt ${attempt} timed out`)), 90_000)
+            ),
+          ]);
+          break;
+        } catch (err) {
+          if (attempt === 3) throw err;
+          log.warning(
+            `kbn_archiver load attempt ${attempt}/3 failed, retrying: ${
+              (err as Error)?.message ?? err
+            }`
+          );
+          await new Promise((r) => setTimeout(r, 2000));
+        }
+      }
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
