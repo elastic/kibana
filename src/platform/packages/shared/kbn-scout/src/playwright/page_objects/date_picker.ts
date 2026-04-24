@@ -219,10 +219,7 @@ export class DatePicker {
     if (await this.isNewDateRangePicker()) {
       await this.page.testSubj.locator('dateRangePickerControlButton').click();
       await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor();
-      // `main_panel` builds data-test-subj from the display label with all whitespace
-      // replaced by underscores. Mirror FTR `time_picker.setCommonlyUsedTime`.
-      const presetId = option.replace(/\s+/g, '_');
-      const presetItem = this.page.testSubj.locator(`dateRangePickerPresetItem-${presetId}`);
+      const presetItem = this.page.testSubj.locator(`dateRangePickerPresetItem-${option}`);
       await expect(presetItem).toBeVisible();
       await presetItem.click();
     } else {
