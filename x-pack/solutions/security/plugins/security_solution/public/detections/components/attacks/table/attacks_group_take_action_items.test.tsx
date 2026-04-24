@@ -307,7 +307,7 @@ describe('AttacksGroupTakeActionItems', () => {
     it('renders only the Investigate in Timeline action', () => {
       const { queryByText } = renderAttack(mockAttack, true);
 
-      expect(queryByText('Investigate in timeline')).toBeInTheDocument();
+      expect(queryByText('Investigate in Timeline')).toBeInTheDocument();
     });
 
     it('hides all other actions', () => {
