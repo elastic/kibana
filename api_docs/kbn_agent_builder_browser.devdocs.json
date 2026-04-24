@@ -27,7 +27,7 @@
         "label": "AgentBuilderAnnouncementModal",
         "description": [],
         "signature": [
-          "({ onRevert, onContinue, canRevertToAssistant, }: ",
+          "({ variant, onRevert, onContinue, }: ",
           {
             "pluginId": "@kbn/agent-builder-browser",
             "scope": "common",
@@ -38,7 +38,7 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-        "lineNumber": 40,
+        "lineNumber": 97,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,7 +48,7 @@
             "id": "def-common.AgentBuilderAnnouncementModal.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onRevert,\n  onContinue,\n  canRevertToAssistant = true,\n}",
+            "label": "{\n  variant,\n  onRevert,\n  onContinue,\n}",
             "description": [],
             "signature": [
               {
@@ -60,7 +60,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 40,
+            "lineNumber": 97,
             "columnNumber": 93,
             "deprecated": false,
             "trackAdoption": false,
@@ -168,11 +168,27 @@
         "label": "AgentBuilderAnnouncementModalProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-        "lineNumber": 30,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentBuilderAnnouncementModalProps.variant",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "variant",
+            "description": [],
+            "signature": [
+              "\"1b\" | \"1a\" | \"2a\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/agent-builder-browser",
             "id": "def-common.AgentBuilderAnnouncementModalProps.onRevert",
@@ -184,7 +200,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 31,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -202,30 +218,12 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 32,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/agent-builder-browser",
-            "id": "def-common.AgentBuilderAnnouncementModalProps.canRevertToAssistant",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "canRevertToAssistant",
-            "description": [
-              "\nWhen false, the revert action is hidden and the body shows a short FYI plus a link to\ndocumentation (no bullets or history callout), since the user cannot change Gen AI settings."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/agent_builder_announcement_modal.tsx",
-            "lineNumber": 33,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -286,7 +284,7 @@
           "\nPublic-facing contract for the attachment service."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-        "lineNumber": 160,
+        "lineNumber": 167,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -316,7 +314,7 @@
               "<TAttachment>) => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 164,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -334,7 +332,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 171,
+                "lineNumber": 178,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -360,7 +358,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 172,
+                "lineNumber": 179,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -394,7 +392,7 @@
               "<TAttachment> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 175,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -412,7 +410,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 182,
+                "lineNumber": 189,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -625,6 +623,24 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.canvasWidth",
+            "type": "string",
+            "tags": [],
+            "label": "canvasWidth",
+            "description": [
+              "\nOptional preferred width for the canvas flyout when opened in full-screen context.\nAccepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).\nDefaults to `'50vw'` when not specified.\nHas no effect in sidebar context."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
             "id": "def-common.AttachmentUIDefinition.renderCanvasContent",
             "type": "Function",
             "tags": [],
@@ -640,7 +656,7 @@
               ") => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 131,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -657,7 +673,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 142,
+                "lineNumber": 149,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -674,7 +690,7 @@
                   "CanvasRenderCallbacks"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 143,
+                "lineNumber": 150,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -700,7 +716,7 @@
               "[]) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 145,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -717,7 +733,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 149,
+                "lineNumber": 156,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -741,7 +757,7 @@
               "<TAttachment>) => void | (() => void)) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 150,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -758,7 +774,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 157,
+                "lineNumber": 164,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1454,6 +1470,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.AgentBuilderAnnouncementVariant",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderAnnouncementVariant",
+        "description": [],
+        "signature": [
+          "\"1b\" | \"1a\" | \"2a\""
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/announcement_modal/translations.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/agent-builder-browser",
         "id": "def-common.BrowserChatEvent",
