@@ -31,7 +31,7 @@ pageLoadAssetSize:
   crossClusterReplication: 7691
   customIntegrations: 636
   dashboard: 452
-  dashboardAgent: 951
+  dashboardAgent: 919
   dashboardMarkdown: 2058
   data: 11799
   dataQuality: 5836
@@ -162,17 +162,17 @@ pageLoadAssetSize:
   searchQueryRules: 2167
   searchSynonyms: 1919
   security: 215
-  securitySolution: 119099
+  securitySolution: 118003
   securitySolutionEss: 19938
   securitySolutionServerless: 33422
   serverless: 1272
-  serverlessObservability: 14446
+  serverlessObservability: 14430
   serverlessSearch: 18261
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 379
-  shared-core: 354973
-  shared-misc: 39075
+  shared-core: 315647
+  shared-misc: 78357
   shared-packages: 3141411
   shared-plugins: 10954901
   shared-solution-packages: 184340
