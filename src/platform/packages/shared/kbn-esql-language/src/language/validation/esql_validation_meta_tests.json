@@ -286,8 +286,7 @@
         {
           "sample": "SyntaxError: mismatched input",
           "inverse": false
-        },
-        "Unknown column \"\""
+        }
       ],
       "warning": []
     },
