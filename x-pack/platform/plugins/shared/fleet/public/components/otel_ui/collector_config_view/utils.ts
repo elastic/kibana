@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-/**
- * Single source of truth for all url building logic in the app.
- */
-export const appPaths = {
-  home: '/',
-};
+export const ALL_PIPELINES = '__all__';
+export const SIGNAL_PREFIX = '__signal__';
+
+export const getSignalType = (pipelineId: string): string => pipelineId.split('/')[0];

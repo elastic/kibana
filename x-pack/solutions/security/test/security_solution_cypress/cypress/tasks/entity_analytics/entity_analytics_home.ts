@@ -67,6 +67,16 @@ export const interceptEntityStoreSearch = () => {
   cy.intercept('POST', ENTITY_STORE_SEARCH_API).as('entityStoreSearch');
 };
 
+export const interceptEntityStoreStatus = (status: 'running' | 'not_installed') => {
+  cy.intercept(
+    { method: 'GET', pathname: '/api/security/entity_store/status' },
+    {
+      statusCode: 200,
+      body: { status, engines: [] },
+    }
+  ).as('entityStoreStatus');
+};
+
 /**
  * Opens the grouping dropdown and selects the given option.
  * Waits for in-flight search requests via API intercept before interacting.

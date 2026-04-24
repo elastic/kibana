@@ -48,6 +48,8 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
 import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
@@ -147,6 +149,11 @@ export const EntityAnalyticsHomePage = () => {
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
 
+  const { data: entityStoreStatusData } = useEntityStoreStatus();
+  const entityStoreDisabled =
+    entityStoreStatusData?.status === 'not_installed' ||
+    entityStoreStatusData?.status === 'stopped';
+
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
@@ -171,6 +178,10 @@ export const EntityAnalyticsHomePage = () => {
 
   if (showEmptyPrompt) {
     return <EmptyPrompt />;
+  }
+
+  if (entityStoreDisabled) {
+    return <EntityStoreDisabledEmptyPrompt />;
   }
 
   return (
