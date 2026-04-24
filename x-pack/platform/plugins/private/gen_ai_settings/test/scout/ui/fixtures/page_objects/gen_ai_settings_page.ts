@@ -24,8 +24,13 @@ export class GenAiSettingsPage {
    * Navigate to the GenAI Settings page in Stack Management
    */
   async navigateTo() {
-    await this.page.gotoApp('management/ai/genAiSettings');
-    await this.waitForPageToLoad();
+    await expect(async () => {
+      await this.page.gotoApp('management/ai/genAiSettings');
+      await this.page.testSubj.waitForSelector('genAiSettingsPage', {
+        state: 'visible',
+        timeout: 3_000,
+      });
+    }).toPass({ timeout: 30_000, intervals: [500, 1_000, 2_000] });
   }
 
   /**

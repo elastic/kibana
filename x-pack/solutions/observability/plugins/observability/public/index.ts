@@ -41,14 +41,7 @@ export {
   apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
 export { alertsLocatorID, uptimeOverviewLocatorID } from '../common';
-export {
-  ruleDetailsLocatorID,
-  rulesLocatorID,
-  sloDetailsLocatorID,
-  sloEditLocatorID,
-} from '@kbn/deeplinks-observability';
-
-export type { RulesLocatorParams } from '@kbn/deeplinks-observability';
+export { sloDetailsLocatorID, sloEditLocatorID } from '@kbn/deeplinks-observability';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker';

@@ -13,6 +13,7 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
+import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 import { getWatchlistRiskLevelsQueryBodyV2 } from '../queries/watchlist_risk_level_query';
@@ -23,16 +24,26 @@ export const useRiskLevelsEsqlQuery = ({
   watchlistId,
   skip,
   spaceId,
+  applyGlobalTimeFilter = true,
 }: {
   watchlistId?: string;
   skip?: boolean;
   spaceId: string;
+  /**
+   * When true (default), the query is filtered by the global date picker's
+   * time range. Set to false on surfaces where the date picker is hidden or
+   * intentionally decoupled (e.g. the Entity Analytics home page), so the
+   * query returns risk levels across all time.
+   */
+  applyGlobalTimeFilter?: boolean;
 }) => {
   const { data } = useKibana().services;
 
   const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
 
-  const filterQuery = useEsqlGlobalFilterQuery();
+  const esqlGlobalFilterQuery = useEsqlGlobalFilterQuery();
+  const { filterQuery: filterQueryNoTime } = useGlobalFilterQuery();
+  const filterQuery = applyGlobalTimeFilter ? esqlGlobalFilterQuery : filterQueryNoTime;
 
   const query = `FROM ${index} ${getWatchlistRiskLevelsQueryBodyV2(watchlistId || undefined)}`;
 
