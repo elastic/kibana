@@ -10,7 +10,10 @@ import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
-import { useEsqlGlobalFilterQuery } from '../../../../common/hooks/esql/use_esql_global_filter';
+import {
+  useEsqlFixedRangeFilterQuery,
+  useEsqlGlobalFilterQuery,
+} from '../../../../common/hooks/esql/use_esql_global_filter';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
@@ -27,14 +30,38 @@ export interface EntityMetadata {
   entityType: string;
 }
 
+interface FixedTimeRange {
+  from: string;
+  to: string;
+}
+
+/**
+ * Internal helper: pick between the global-date-picker filter and a fixed
+ * range filter. Both underlying hooks must be called unconditionally to obey
+ * the rules of hooks; only the selected value is returned.
+ */
+const useRecentAnomaliesFilterQuery = (timeRange?: FixedTimeRange) => {
+  const globalFilterQuery = useEsqlGlobalFilterQuery();
+  const fixedFilterQuery = useEsqlFixedRangeFilterQuery(
+    timeRange?.from ?? 'now-15m',
+    timeRange?.to ?? 'now'
+  );
+  return timeRange ? fixedFilterQuery : globalFilterQuery;
+};
+
 const useRecentAnomaliesTopRowsQuery = (params: {
   anomalyBands: AnomalyBand[];
   viewBy: ViewByMode;
   watchlistId?: string;
   spaceId?: string;
+  /**
+   * When provided, this time range is used for filtering instead of the
+   * global date picker's range. Used on surfaces that hide the picker.
+   */
+  timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const filterQuery = useEsqlGlobalFilterQuery();
+  const filterQuery = useRecentAnomaliesFilterQuery(params.timeRange);
   const rowField = params.viewBy === 'jobId' ? 'job_id' : 'entity_id';
 
   const topRowsEsqlSource = useRecentAnomaliesTopRowsEsqlSource({
@@ -85,9 +112,14 @@ export const useRecentAnomaliesQuery = (params: {
   viewBy: ViewByMode;
   watchlistId?: string;
   spaceId?: string;
+  /**
+   * When provided, this time range is used for filtering instead of the
+   * global date picker's range. Used on surfaces that hide the picker.
+   */
+  timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const filterQuery = useEsqlGlobalFilterQuery();
+  const filterQuery = useRecentAnomaliesFilterQuery(params.timeRange);
 
   const {
     rowLabels,
@@ -99,6 +131,7 @@ export const useRecentAnomaliesQuery = (params: {
   const anomalyDataEsqlSource = useRecentAnomaliesDataEsqlSource({
     ...params,
     rowLabels,
+    timeRange: params.timeRange,
   });
 
   const {

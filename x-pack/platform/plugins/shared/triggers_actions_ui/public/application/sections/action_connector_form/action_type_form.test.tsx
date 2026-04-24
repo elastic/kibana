@@ -5,7 +5,6 @@
  * 2.0.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -17,9 +16,8 @@ import type {
   NotifyWhenSelectOptions,
 } from '../../../types';
 import { ActionConnectorMode } from '../../../types';
-import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
-import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
@@ -177,40 +175,37 @@ describe('action_type_form', () => {
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
-    const wrapper = mountWithIntl(
-      getActionTypeForm({
-        index: 1,
-        ruleTypeId: '.es-query',
-        actionItem: {
-          id: '123',
-          actionTypeId: '.pagerduty',
-          group: 'recovered',
-          params: {
-            eventAction: 'recovered',
-            dedupKey: undefined,
-            summary: '2323',
-            source: 'source',
-            severity: '1',
-            timestamp: new Date().toISOString(),
-            component: 'test',
-            group: 'group',
-            class: 'test class',
+    const setActionParamsProperty = jest.fn();
+
+    render(
+      <I18nProvider>
+        {getActionTypeForm({
+          index: 1,
+          ruleTypeId: '.es-query',
+          setActionParamsProperty,
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: undefined,
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
+            },
           },
-        },
-      })
+        })}
+      </I18nProvider>
     );
 
-    // Wait for active space to resolve before requesting the component to update
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await waitFor(() => {
+      expect(setActionParamsProperty).toBeCalledWith('dedupKey', 'test', 1);
     });
-
-    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toBeCalledWith(
-      'dedupKey',
-      'test',
-      1
-    );
   });
 
   it('renders the actionParamsField with the execution mode set to ActionForm', async () => {
@@ -256,11 +251,9 @@ describe('action_type_form', () => {
       </I18nProvider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('executionModeFieldActionForm')).toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('executionModeFieldActionForm')).toBeInTheDocument();
+    expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
   });
 
   it('renders the alerts filters with the producerId set to SIEM', async () => {
@@ -308,10 +301,8 @@ describe('action_type_form', () => {
       </I18nProvider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('alertsFilterQueryToggle')).toBeInTheDocument();
-      expect(screen.getByTestId('alertsFilterTimeframeToggle')).toBeInTheDocument();
-    });
+    await screen.findByTestId('alertsFilterQueryToggle');
+    await screen.findByTestId('alertsFilterTimeframeToggle');
   });
 
   it('does not call "setActionParamsProperty" because dedupKey is not empty', async () => {
@@ -332,38 +323,38 @@ describe('action_type_form', () => {
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
-    const wrapper = mountWithIntl(
-      getActionTypeForm({
-        index: 1,
-        ruleTypeId: '.es-query',
-        actionItem: {
-          id: '123',
-          actionTypeId: '.pagerduty',
-          group: 'recovered',
-          params: {
-            eventAction: 'recovered',
-            dedupKey: '232323',
-            summary: '2323',
-            source: 'source',
-            severity: '1',
-            timestamp: new Date().toISOString(),
-            component: 'test',
-            group: 'group',
-            class: 'test class',
+    const setActionParamsProperty = jest.fn();
+
+    render(
+      <I18nProvider>
+        {getActionTypeForm({
+          index: 1,
+          ruleTypeId: '.es-query',
+          setActionParamsProperty,
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: '232323',
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
+            },
           },
-        },
-      })
+        })}
+      </I18nProvider>
     );
 
-    // Wait for active space to resolve before requesting the component to update
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    // Give the component time to settle; setActionParamsProperty should not be called
+    await waitFor(() => {
+      expect(setActionParamsProperty).toBeCalledTimes(0);
     });
-
-    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toBeCalledTimes(
-      0
-    );
   });
 
   it('shows an error icon when there is a form error and the action accordion is closed ', async () => {
@@ -385,49 +376,56 @@ describe('action_type_form', () => {
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
 
-    const wrapper = mountWithIntl(
-      getActionTypeForm({
-        index: 1,
-        ruleTypeId: '.es-query',
-        actionItem: {
-          id: '123',
-          actionTypeId: '.pagerduty',
-          group: 'recovered',
-          params: {
-            eventAction: 'recovered',
-            dedupKey: '232323',
-            summary: '2323',
-            source: 'source',
-            severity: '1',
-            timestamp: new Date().toISOString(),
-            component: 'test',
-            group: 'group',
-            class: 'test class',
+    const { container } = render(
+      <I18nProvider>
+        {getActionTypeForm({
+          index: 1,
+          ruleTypeId: '.es-query',
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: '232323',
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
+            },
           },
-        },
-      })
+        })}
+      </I18nProvider>
     );
 
-    // Wait for active space to resolve before requesting the component to update
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    // Wait for validation to settle — error icon should not show while accordion is expanded
+    await waitFor(() => {
+      expect(screen.queryByTestId('action-group-error-icon')).not.toBeInTheDocument();
     });
 
-    expect(wrapper.exists('[data-test-subj="action-group-error-icon"]')).toBeFalsy();
-    wrapper.find('.euiAccordion__button').last().simulate('click');
-    // Make sure that the accordion is collapsed
-    expect(wrapper.find('.euiAccordion-isOpen').exists()).toBeFalsy();
-    expect(wrapper.exists('[data-test-subj="action-group-error-icon"]')).toBeTruthy();
+    // Click the accordion button to collapse it
+    const accordionButton = container.querySelector('.euiAccordion__button');
+    if (accordionButton) {
+      await userEvent.click(accordionButton);
+    }
 
-    // Verify that the tooltip renders
+    await screen.findByTestId('action-group-error-icon');
+
+    // Verify that the tooltip content is accessible via aria
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
     jest.useFakeTimers({ legacyFakeTimers: true });
-    wrapper.find('[data-test-subj="action-group-error-icon"]').first().simulate('mouseOver');
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) });
+    await user.hover(screen.getByTestId('action-group-error-icon'));
     // Run the timers so the EuiTooltip will be visible
     jest.runOnlyPendingTimers();
-    wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').last().text()).toBe('Action contains errors.');
+    await waitFor(() => {
+      expect(document.querySelector('.euiToolTipPopover')).toHaveTextContent(
+        'Action contains errors.'
+      );
+    });
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();
   });
@@ -458,7 +456,7 @@ describe('action_type_form', () => {
       frequency: DEFAULT_FREQUENCY,
     };
     const wrapper = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         {getActionTypeForm({
           index: 1,
           actionItem,
@@ -471,7 +469,7 @@ describe('action_type_form', () => {
             };
           },
         })}
-      </IntlProvider>
+      </I18nProvider>
     );
 
     const summaryOrPerRuleSelect = wrapper.getByTestId('summaryOrPerRuleSelect');
@@ -533,7 +531,7 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         {getActionTypeForm({
           index: 1,
           ruleTypeId: 'test',
@@ -555,14 +553,12 @@ describe('action_type_form', () => {
             },
           },
         })}
-      </IntlProvider>
+      </I18nProvider>
     );
 
     expect(wrapper.getByTestId('mustacheAutocompleteSwitch')).toBeTruthy();
 
-    await act(async () => {
-      wrapper.getByTestId('mustacheAutocompleteSwitch').click();
-    });
+    await userEvent.click(wrapper.getByTestId('mustacheAutocompleteSwitch'));
     expect(setActionParamsProperty).toHaveBeenCalledWith('dedupKey', '', 1);
   });
 
@@ -596,14 +592,14 @@ describe('action_type_form', () => {
         },
       };
       const wrapper = render(
-        <IntlProvider locale="en">
+        <I18nProvider>
           {getActionTypeForm({
             index: 1,
             ruleTypeId: '.es-query',
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
           })}
-        </IntlProvider>
+        </I18nProvider>
       );
 
       await userEvent.click(wrapper.getByTestId('notifyWhenSelect'));
@@ -648,14 +644,14 @@ describe('action_type_form', () => {
         },
       };
       const wrapper = render(
-        <IntlProvider locale="en">
+        <I18nProvider>
           {getActionTypeForm({
             index: 1,
             ruleTypeId: '.es-query',
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
           })}
-        </IntlProvider>
+        </I18nProvider>
       );
 
       await userEvent.click(wrapper.getByTestId('notifyWhenSelect'));

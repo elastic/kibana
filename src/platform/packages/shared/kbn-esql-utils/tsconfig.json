@@ -33,7 +33,6 @@
     "@kbn/index-management-shared-types",
     "@kbn/licensing-types",
     "@kbn/controls-constants",
-    "@kbn/utility-types",
     "@kbn/presentation-publishing",
     "@kbn/controls-schemas",
   ]
