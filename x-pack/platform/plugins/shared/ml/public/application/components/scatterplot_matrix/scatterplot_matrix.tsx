@@ -491,9 +491,6 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 <EuiSwitch
                   data-test-subj="mlScatterplotMatrixRandomizeQuerySwitch"
                   name="mlScatterplotMatrixRandomizeQuery"
-                  label={i18n.translate('xpack.ml.splom.randomScoringLabel', {
-                    defaultMessage: 'Random scoring',
-                  })}
                   showLabel={false}
                   checked={randomizeQuery}
                   onChange={randomizeQueryOnChange}
