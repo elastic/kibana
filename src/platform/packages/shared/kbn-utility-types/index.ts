@@ -18,7 +18,7 @@ export type {
 } from './src/serializable';
 
 /**
- * A type that may or may not be a `Promise`.
+ * A type that may or may not be a `Promise`. Useful for functions that can be sync or async.
  */
 export type MaybePromise<T> = T | Promise<T>;
 
