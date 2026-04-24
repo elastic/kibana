@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { type Error } from '@kbn/apm-types';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { ApmDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
-
+import { compactMap } from '../../utils/compact_map';
 import {
   ID,
   ERROR_CULPRIT,
@@ -30,8 +29,57 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
-export const requiredFields = asMutableArray([
+export async function getApmTraceError(params: {
+  apmEventClient: APMEventClient;
+  traceId: string;
+  docId?: string;
+  start: number;
+  end: number;
+}) {
+  const response = await getApmTraceErrorQuery(params);
+
+  return compactMap(response.hits.hits, (hit): Error | undefined => {
+    const errorSource = 'error' in hit._source ? hit._source : undefined;
+    const event = hit.fields
+      ? accessKnownApmEventFields(hit.fields).requireFields(requiredFields)
+      : undefined;
+
+    if (!event) {
+      return undefined;
+    }
+
+    const { _id: id, parent, error, ...unflattened } = event.unflatten();
+
+    return {
+      id,
+      parent: {
+        id: parent?.id ?? unflattened.span?.id,
+      },
+      trace: unflattened.trace,
+      span: unflattened.span,
+      transaction: unflattened.transaction,
+      timestamp: unflattened.timestamp,
+      service: { name: unflattened.service.name },
+      error: {
+        exception:
+          (errorSource?.error.exception?.length ?? 0) > 0
+            ? errorSource?.error?.exception?.[0]
+            : error.exception,
+        grouping_key: error?.grouping_key,
+        culprit: error?.culprit,
+        id: error?.id,
+        log: errorSource?.error.log,
+      },
+      index: hit._index,
+    };
+  });
+}
+
+const requiredFields = asMutableArray([
   TIMESTAMP_US,
   TRACE_ID,
   SERVICE_NAME,
@@ -41,7 +89,7 @@ export const requiredFields = asMutableArray([
   ID,
 ] as const);
 
-export const optionalFields = asMutableArray([
+const optionalFields = asMutableArray([
   PARENT_ID,
   TRANSACTION_ID,
   SPAN_ID,
@@ -55,7 +103,7 @@ export const optionalFields = asMutableArray([
 
 const excludedLogLevels = ['debug', 'info', 'warning'];
 
-export function getApmTraceErrorQuery({
+function getApmTraceErrorQuery({
   apmEventClient,
   traceId,
   docId,

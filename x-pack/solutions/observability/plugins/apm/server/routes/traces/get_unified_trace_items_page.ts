@@ -43,7 +43,6 @@ import {
   TRANSACTION_RESULT,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 
 export const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -175,6 +174,8 @@ async function getUnifiedTraceItemsPage({
 }
 
 type PageHits = Awaited<ReturnType<typeof getUnifiedTraceItemsPage>>['hits'];
+
+const MAX_ITEMS_PER_PAGE = 10000; // 10000 is the max allowed by ES
 
 async function paginate({
   apmEventClient,

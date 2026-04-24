@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             entryTransactionId: string;
           }) {
             return await apmApiClient.readUser({
-              endpoint: `GET /internal/apm/traces/{traceId}`,
+              endpoint: `GET /internal/apm/unified_traces/{traceId}`,
               params: {
                 path: { traceId },
                 query: {
@@ -84,7 +84,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               });
               traces = tracesResponse.body;
             });
-
+            // TODO: caue test it
             it('contains two children link on Span A', () => {
               expect(Object.values(traces.traceItems.spanLinksCountById).length).to.equal(1);
               expect(
