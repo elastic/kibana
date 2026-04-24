@@ -40,6 +40,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const config = getService('config');
+    const kibanaServerUrl = `${config.get('servers.kibana.protocol')}://${config.get(
+      'servers.kibana.hostname'
+    )}:${config.get('servers.kibana.port')}`;
 
     let projectMonitors: ProjectMonitorsRequest;
     let httpProjectMonitors: ProjectMonitorsRequest;
@@ -1387,6 +1391,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           projectId: project,
           locationName: testPrivateLocationName,
           locationId: testPolicyId,
+          kibanaUrl: kibanaServerUrl,
         })
       );
     });
