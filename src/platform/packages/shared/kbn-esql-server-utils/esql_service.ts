@@ -22,7 +22,7 @@ import type {
   InferenceEndpointAutocompleteItem,
   InferenceEndpointsAutocompleteResult,
 } from '@kbn/esql-types';
-import { getListOfCCSIndices } from '../lookup/utils';
+import { getListOfCCSIndices } from './lookup_utils';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;

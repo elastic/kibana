@@ -6,19 +6,15 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { generateEsql } from '..';
 import { createVisualizationGraph } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
-jest.mock('..', () => ({
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
-}));
-
-jest.mock('../../langchain', () => ({
-  extractTextContent: (response: unknown) => String(response),
 }));
 
 jest.mock('./chart_type_registry', () => ({
