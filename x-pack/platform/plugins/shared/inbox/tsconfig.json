@@ -18,6 +18,7 @@
     "@kbn/shared-ux-router",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/logging-mocks"
   ]
 }
