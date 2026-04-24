@@ -175,7 +175,10 @@ export function ServiceMapEditorFlyout({
     Array<EuiComboBoxOptionOption<string>>
   >([{ value: environment, label: getEnvironmentLabel(environment) }]);
 
-  const { start, end } = getTimeRange(timeRange);
+  const { start, end } = useMemo(
+    () => getTimeRange(timeRange),
+    [timeRange?.from, timeRange?.to]
+  );
 
   const {
     terms: serviceNameTerms,
