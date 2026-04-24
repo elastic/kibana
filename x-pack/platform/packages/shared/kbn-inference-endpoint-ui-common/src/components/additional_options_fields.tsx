@@ -28,10 +28,13 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as LABELS from '../translations';
 import { CHAT_COMPLETION_TASK_TYPE, DEFAULT_TASK_TYPE } from '../constants';
 import type { Config } from '../types/types';
+import type { TaskTypeOption } from '../utils/helpers';
 
 interface AdditionalOptionsFieldsProps {
   config: Config;
   selectedTaskType?: string;
+  taskTypeOptions: TaskTypeOption[];
+  isEdit?: boolean;
   allowContextWindowLength?: boolean;
   allowTemperature?: boolean;
 }
@@ -39,13 +42,17 @@ interface AdditionalOptionsFieldsProps {
 export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
   config,
   selectedTaskType,
+  taskTypeOptions,
+  isEdit,
   allowContextWindowLength,
   allowTemperature,
 }) => {
   const { setFieldValue } = useFormContext();
 
   const showContextWindow =
-    selectedTaskType === CHAT_COMPLETION_TASK_TYPE && allowContextWindowLength;
+    (taskTypeOptions?.some((option) => option.id === CHAT_COMPLETION_TASK_TYPE) ||
+      (isEdit && selectedTaskType === CHAT_COMPLETION_TASK_TYPE)) &&
+    allowContextWindowLength;
   const showTemperature =
     (selectedTaskType === CHAT_COMPLETION_TASK_TYPE || selectedTaskType === DEFAULT_TASK_TYPE) &&
     allowTemperature;

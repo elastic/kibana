@@ -687,6 +687,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           <AdditionalOptionsFields
             config={config}
             selectedTaskType={selectedTaskType}
+            taskTypeOptions={taskTypeOptions}
+            isEdit={isEdit}
             allowContextWindowLength={allowContextWindowLength}
             allowTemperature={allowTemperature}
           />

@@ -33,6 +33,18 @@ const mockConfig = {
   taskType: CHAT_COMPLETION_TASK_TYPE,
 } as unknown as Config;
 
+const chatCompletionTaskTypeOptions = [
+  {
+    id: CHAT_COMPLETION_TASK_TYPE,
+    value: CHAT_COMPLETION_TASK_TYPE,
+    label: CHAT_COMPLETION_TASK_TYPE,
+  },
+];
+
+const textEmbeddingTaskTypeOptions = [
+  { id: textEmbeddingTask, value: textEmbeddingTask, label: textEmbeddingTask },
+];
+
 describe('AdditionalOptionsFields', () => {
   describe('contextWindowLength', () => {
     it('should render contextWindowLength field when selectedTaskType is chat_completion', () => {
@@ -42,6 +54,7 @@ describe('AdditionalOptionsFields', () => {
             config={mockConfig}
             allowContextWindowLength={true}
             selectedTaskType={CHAT_COMPLETION_TASK_TYPE}
+            taskTypeOptions={chatCompletionTaskTypeOptions}
           />
         </MockFormProvider>
       );
@@ -61,6 +74,7 @@ describe('AdditionalOptionsFields', () => {
             }}
             allowContextWindowLength={true}
             selectedTaskType={CHAT_COMPLETION_TASK_TYPE}
+            taskTypeOptions={chatCompletionTaskTypeOptions}
           />
         </MockFormProvider>
       );
@@ -80,6 +94,7 @@ describe('AdditionalOptionsFields', () => {
             config={mockConfig}
             allowContextWindowLength={true}
             selectedTaskType={textEmbeddingTask}
+            taskTypeOptions={textEmbeddingTaskTypeOptions}
           />
         </MockFormProvider>
       );
@@ -95,6 +110,7 @@ describe('AdditionalOptionsFields', () => {
             config={mockConfig}
             allowContextWindowLength={false}
             selectedTaskType={CHAT_COMPLETION_TASK_TYPE}
+            taskTypeOptions={chatCompletionTaskTypeOptions}
           />
         </MockFormProvider>
       );
@@ -111,6 +127,7 @@ describe('AdditionalOptionsFields', () => {
             allowContextWindowLength={false}
             allowTemperature={false}
             selectedTaskType={textEmbeddingTask}
+            taskTypeOptions={textEmbeddingTaskTypeOptions}
           />
         </MockFormProvider>
       );
