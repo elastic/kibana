@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '@kbn/core-chrome-navigation';
+import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '@kbn/ui-side-navigation';
 import { useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
 import React, { useMemo } from 'react';
 
