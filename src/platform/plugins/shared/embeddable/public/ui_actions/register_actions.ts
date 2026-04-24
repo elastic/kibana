@@ -18,7 +18,7 @@ import {
 } from './customize_panel_action/constants';
 import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
 import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN } from './constants';
-import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 
 export const registerActions = (uiActions: UiActionsSetup) => {
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {

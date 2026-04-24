@@ -15,10 +15,11 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { Action, triggers } from '@kbn/ui-actions-plugin/public';
+import type { Action} from '@kbn/ui-actions-plugin/public';
+import { triggers } from '@kbn/ui-actions-plugin/public';
 import { uiActions } from '../../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 
 const disabledNotifications = ['ACTION_FILTERS_NOTIFICATION'];
 

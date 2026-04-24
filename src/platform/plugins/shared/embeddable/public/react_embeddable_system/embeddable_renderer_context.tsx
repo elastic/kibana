@@ -8,7 +8,7 @@
  */
 
 import { createContext } from 'react';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 export const EmbeddableRendererContext = createContext<
   {
