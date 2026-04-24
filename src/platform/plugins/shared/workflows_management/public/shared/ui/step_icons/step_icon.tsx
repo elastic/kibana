@@ -44,8 +44,20 @@ interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   onClick?: React.MouseEventHandler;
 }
 
+/**
+ * `EuiIcon` drops the `title` prop when its `type` is a React component (e.g. the
+ * lazy-loaded connector icons), so a consumer that sets `title` on StepIcon
+ * otherwise gets no tooltip. Wrapping the resolved icon in a span[title] covers
+ * every rendering branch uniformly with the browser's native tooltip.
+ */
+const tooltipWrapperStyle = css({
+  display: 'inline-flex',
+  alignItems: 'center',
+  lineHeight: 0,
+});
+
 export const StepIcon = React.memo(
-  ({ stepType, executionStatus, onClick, ...rest }: StepIconProps) => {
+  ({ stepType, executionStatus, onClick, title, ...rest }: StepIconProps) => {
     const { euiTheme } = useEuiTheme();
     const { triggersActionsUi, workflowsExtensions } = useKibana().services;
     const { actionTypeRegistry } = triggersActionsUi;
@@ -70,6 +82,15 @@ export const StepIcon = React.memo(
       );
     }
 
+    const withTooltip = (content: React.ReactElement): React.ReactElement =>
+      title ? (
+        <span title={title} css={tooltipWrapperStyle}>
+          {content}
+        </span>
+      ) : (
+        content
+      );
+
     let iconType: IconType;
     if (stepType.startsWith('trigger_')) {
       iconType = getTriggerTypeIconType(stepType);
@@ -80,7 +101,7 @@ export const StepIcon = React.memo(
         workflowsExtensions.getStepDefinition(stepType) ??
         findStepDefinitionByBaseType(stepType, workflowsExtensions);
       if (stepDefinition?.icon) {
-        return (
+        return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
             <EuiIcon type={stepDefinition.icon} size="m" {...rest} aria-hidden={true} />
           </Suspense>
@@ -89,7 +110,7 @@ export const StepIcon = React.memo(
 
       const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
       if (actionTypeIcon) {
-        return (
+        return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
             <EuiIcon type={actionTypeIcon} size="m" {...rest} aria-hidden={true} />
           </Suspense>
@@ -103,7 +124,7 @@ export const StepIcon = React.memo(
       const statusColor = shouldApplyColorToIcon
         ? getExecutionStatusColors(euiTheme, executionStatus).color
         : undefined;
-      return (
+      return withTooltip(
         <span
           css={css`
             display: inline-block;
@@ -115,7 +136,6 @@ export const StepIcon = React.memo(
             mask-position: center;
             background-color: ${statusColor ?? euiTheme.colors.textParagraph};
           `}
-          title={rest.title}
           onClick={onClick}
           aria-hidden={true}
         />
@@ -123,9 +143,8 @@ export const StepIcon = React.memo(
     }
 
     if (typeof iconType === 'string' && iconType.startsWith('token')) {
-      return (
+      return withTooltip(
         <EuiToken
-          title={rest.title}
           iconType={iconType}
           size="s"
           color={
@@ -139,7 +158,7 @@ export const StepIcon = React.memo(
       );
     }
 
-    return (
+    return withTooltip(
       <EuiIcon
         type={iconType}
         size="m"

@@ -130,14 +130,12 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
       >
         {visibleItems.map((baseType) => (
           <EuiFlexItem grow={false} key={baseType}>
-            {/* Native HTML title so hovering the icon surfaces the base type as a
-                modest browser tooltip. EuiIcon swallows `title` when `type` is a
-                React component (e.g. lazy-loaded connector icons), so wrapping
-                the icon in a span[title] is the only path that works for every
-                rendering branch. */}
-            <span title={getStepTypeLabel(baseType)}>
-              <StepIcon stepType={baseType} executionStatus={undefined} size="m" />
-            </span>
+            <StepIcon
+              stepType={baseType}
+              executionStatus={undefined}
+              size="m"
+              title={getStepTypeLabel(baseType)}
+            />
           </EuiFlexItem>
         ))}
         {hasOverflow && (
