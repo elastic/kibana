@@ -23,7 +23,6 @@ import {
   CloudForwarderPage,
 } from './pages';
 import type { ObservabilityOnboardingAppServices } from '..';
-import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
 
 const queryClient = new QueryClient();
@@ -37,8 +36,6 @@ export function ObservabilityOnboardingFlow() {
       context: { isDev, isCloud, isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
-
-  useFlowBreadcrumb(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);

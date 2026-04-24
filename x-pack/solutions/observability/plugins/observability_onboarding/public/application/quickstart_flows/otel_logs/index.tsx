@@ -73,18 +73,11 @@ interface OtelLogsPanelProps {
 }
 
 export const OtelLogsPanel: React.FC<OtelLogsPanelProps> = ({ lockedPlatform }) => {
-  useFlowBreadcrumb(
-    lockedPlatform
-      ? null
-      : {
-          text: i18n.translate(
-            'xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost',
-            {
-              defaultMessage: 'OpenTelemetry: Logs & Metrics',
-            }
-          ),
-        }
-  );
+  useFlowBreadcrumb({
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost', {
+      defaultMessage: 'OpenTelemetry: Logs & Metrics',
+    }),
+  });
   const { onPageReady } = usePerformanceContext();
   const {
     services: { share, docLinks },

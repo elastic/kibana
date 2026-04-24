@@ -62,11 +62,7 @@ export const UnifiedHostPanel: React.FC<UnifiedHostPanelProps> = ({
           <EuiSpacer size="l" />
         </>
       )}
-      {collector === 'agent' ? (
-        <AutoDetectPanel suppressBreadcrumb />
-      ) : (
-        <OtelLogsPanel lockedPlatform={platform} />
-      )}
+      {collector === 'agent' ? <AutoDetectPanel /> : <OtelLogsPanel lockedPlatform={platform} />}
     </>
   );
 };
