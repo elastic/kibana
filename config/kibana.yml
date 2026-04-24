@@ -180,14 +180,3 @@
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
-
-# You, know, for the demo.
-telemetry.banner: false
-uiSettings:
-  globalOverrides:
-    hideAnnouncements: true
-  overrides:
-    observability:streamsEnableSignificantEvents: true
-    observability:streamsEnableSignificantEventsDiscovery: true
-    theme:darkMode: system
-xpack.spaces.defaultSolution: oblt 
