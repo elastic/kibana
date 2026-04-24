@@ -34,7 +34,7 @@ spaceTest.describe(
 
     spaceTest(
       'drops a selected dimension when switching to a stream that does not emit it, and keeps the chart rendered',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, page }) => {
         const { discover, metricsExperience } = pageObjects;
         const { ONLY_IN_A } = testData.METRICS_DIMENSION_FIELDS;
 
@@ -46,10 +46,14 @@ spaceTest.describe(
           await expect(
             metricsExperience.breakdownSelector.getToggleWithSelection(ONLY_IN_A)
           ).toBeVisible();
+          await discover.waitUntilSearchingHasFinished();
+          await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
         });
 
         await spaceTest.step('switch to a stream that does not emit it', async () => {
-          await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS_OTHER);
+          await discover.codeEditor.setCodeEditorValue(testData.ESQL_QUERIES.TS_OTHER);
+          await page.testSubj.click('querySubmitButton');
+          await discover.waitUntilSearchingHasFinished();
           await expect(metricsExperience.grid).toBeVisible();
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
           await expect(
@@ -58,7 +62,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('switch back to the first stream', async () => {
-          await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+          await discover.codeEditor.setCodeEditorValue(testData.ESQL_QUERIES.TS);
+          await page.testSubj.click('querySubmitButton');
+          await discover.waitUntilSearchingHasFinished();
           await expect(metricsExperience.grid).toBeVisible();
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
           await expect(
