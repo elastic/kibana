@@ -4,16 +4,103 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { asPercent } from '@kbn/observability-plugin/common';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
-import {
-  ANOMALY_ALERT_SEVERITY_TYPES,
-  getApmMlDetectorLabel,
-} from '../../../../../common/rules/apm_rule_types';
+import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { ANOMALY_ALERT_SEVERITY_TYPES } from '../../../../../common/rules/apm_rule_types';
+
+const ANOMALY_DETECTOR_VALUE_LABELS: Record<
+  ML_ANOMALY_SEVERITY,
+  Record<AnomalyDetectorType, string>
+> = {
+  [ML_ANOMALY_SEVERITY.CRITICAL]: {
+    [AnomalyDetectorType.txLatency]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.critical.latency',
+      { defaultMessage: 'Critical latency anomaly' }
+    ),
+    [AnomalyDetectorType.txThroughput]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.critical.throughput',
+      { defaultMessage: 'Critical throughput anomaly' }
+    ),
+    [AnomalyDetectorType.txFailureRate]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.critical.failureRate',
+      { defaultMessage: 'Critical failure rate anomaly' }
+    ),
+  },
+  [ML_ANOMALY_SEVERITY.MAJOR]: {
+    [AnomalyDetectorType.txLatency]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.major.latency',
+      { defaultMessage: 'Major latency anomaly' }
+    ),
+    [AnomalyDetectorType.txThroughput]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.major.throughput',
+      { defaultMessage: 'Major throughput anomaly' }
+    ),
+    [AnomalyDetectorType.txFailureRate]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.major.failureRate',
+      { defaultMessage: 'Major failure rate anomaly' }
+    ),
+  },
+  [ML_ANOMALY_SEVERITY.MINOR]: {
+    [AnomalyDetectorType.txLatency]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.minor.latency',
+      { defaultMessage: 'Minor latency anomaly' }
+    ),
+    [AnomalyDetectorType.txThroughput]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.minor.throughput',
+      { defaultMessage: 'Minor throughput anomaly' }
+    ),
+    [AnomalyDetectorType.txFailureRate]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.minor.failureRate',
+      { defaultMessage: 'Minor failure rate anomaly' }
+    ),
+  },
+  [ML_ANOMALY_SEVERITY.WARNING]: {
+    [AnomalyDetectorType.txLatency]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.warning.latency',
+      { defaultMessage: 'Warning latency anomaly' }
+    ),
+    [AnomalyDetectorType.txThroughput]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.warning.throughput',
+      { defaultMessage: 'Warning throughput anomaly' }
+    ),
+    [AnomalyDetectorType.txFailureRate]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.warning.failureRate',
+      { defaultMessage: 'Warning failure rate anomaly' }
+    ),
+  },
+  [ML_ANOMALY_SEVERITY.LOW]: {
+    [AnomalyDetectorType.txLatency]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.low.latency',
+      { defaultMessage: 'Low latency anomaly' }
+    ),
+    [AnomalyDetectorType.txThroughput]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.low.throughput',
+      { defaultMessage: 'Low throughput anomaly' }
+    ),
+    [AnomalyDetectorType.txFailureRate]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.low.failureRate',
+      { defaultMessage: 'Low failure rate anomaly' }
+    ),
+  },
+  [ML_ANOMALY_SEVERITY.UNKNOWN]: {
+    [AnomalyDetectorType.txLatency]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.unknown.latency',
+      { defaultMessage: 'Unknown latency anomaly' }
+    ),
+    [AnomalyDetectorType.txThroughput]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.unknown.throughput',
+      { defaultMessage: 'Unknown throughput anomaly' }
+    ),
+    [AnomalyDetectorType.txFailureRate]: i18n.translate(
+      'xpack.apm.alertDetails.anomalyValueLabel.unknown.failureRate',
+      { defaultMessage: 'Unknown failure rate anomaly' }
+    ),
+  },
+};
 
 export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
   if (ruleAggType === '95th') return LatencyAggregationType.p95;
@@ -21,39 +108,39 @@ export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType
   return LatencyAggregationType.avg;
 };
 
-export const isLatencyThresholdRuleType = (ruleTypeId: string) =>
+export const isLatencyThresholdRuleType = (ruleTypeId: ApmRuleType) =>
   ruleTypeId === ApmRuleType.TransactionDuration;
 
-export const isFailedTransactionRateRuleType = (ruleTypeId: string) =>
+export const isFailedTransactionRateRuleType = (ruleTypeId: ApmRuleType) =>
   ruleTypeId === ApmRuleType.TransactionErrorRate;
 
-export const isAnomalyRuleType = (ruleTypeId: string) => ruleTypeId === ApmRuleType.Anomaly;
+export const isAnomalyRuleType = (ruleTypeId: ApmRuleType) => ruleTypeId === ApmRuleType.Anomaly;
 
 export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);
 };
 
-export function formatAnomalySeverityValue(alertSeverity: string, detectorType?: string): string {
-  const detectorLabel = detectorType
-    ? getApmMlDetectorLabel(detectorType as AnomalyDetectorType)
-    : undefined;
-
-  if (detectorLabel) {
-    return i18n.translate('xpack.apm.alertDetails.anomalyValueLabel', {
-      defaultMessage: '{severity} {detector} anomaly',
-      values: {
-        severity: capitalize(alertSeverity),
-        detector: capitalize(detectorLabel),
-      },
+export function formatAnomalySeverityValue(
+  alertSeverity: ML_ANOMALY_SEVERITY,
+  detectorType?: AnomalyDetectorType
+): string {
+  if (!detectorType) {
+    return i18n.translate('xpack.apm.alertDetails.anomalyValueLabelWithoutDetector', {
+      defaultMessage: `{severity, select,
+      critical {Critical anomaly}
+      major {Major anomaly}
+      minor {Minor anomaly}
+      warning {Warning anomaly}
+      other {{severity} anomaly}
+    }`,
+      values: { severity: alertSeverity },
     });
   }
 
-  return i18n.translate('xpack.apm.alertDetails.anomalyValueLabelWithoutDetector', {
-    defaultMessage: '{severity} anomaly',
-    values: {
-      severity: capitalize(alertSeverity),
-    },
-  });
+  return (
+    ANOMALY_DETECTOR_VALUE_LABELS[alertSeverity]?.[detectorType] ??
+    `${alertSeverity} ${detectorType} anomaly`
+  );
 }
 
 export function formatAnomalySeverityThreshold(alertEvaluationThreshold: number): string {
@@ -62,9 +149,15 @@ export function formatAnomalySeverityThreshold(alertEvaluationThreshold: number)
   );
 
   return i18n.translate('xpack.apm.alertDetails.anomalySeveritySubtitle', {
-    defaultMessage: 'Alert when {severity} or above',
+    defaultMessage: `{severity, select,
+      critical {Alert when critical or above}
+      major {Alert when major or above}
+      minor {Alert when minor or above}
+      warning {Alert when warning or above}
+      other {Alert when {severity} or above}
+    }`,
     values: {
-      severity: severityMatch?.label ?? alertEvaluationThreshold,
+      severity: severityMatch?.label ?? String(alertEvaluationThreshold),
     },
   });
 }

@@ -31,7 +31,10 @@ export const DEFAULT_LAYOUT: ChartLayout = {
   secondary: ['throughput', 'failedTransactionRate'],
 };
 
-export const RULE_TYPE_CHART_LAYOUTS: Record<string, ChartLayout> = {
+export const RULE_TYPE_CHART_LAYOUTS: Record<
+  ApmRuleType.TransactionDuration | ApmRuleType.TransactionErrorRate,
+  ChartLayout
+> = {
   [ApmRuleType.TransactionDuration]: DEFAULT_LAYOUT,
   [ApmRuleType.TransactionErrorRate]: {
     primary: 'failedTransactionRate',
@@ -51,12 +54,9 @@ const ANOMALY_DETECTOR_CHART_LAYOUTS: Record<AnomalyDetectorType, ChartLayout> =
   },
 };
 
-export const getAnomalyChartLayout = (detectorType?: string): ChartLayout => {
-  if (detectorType && detectorType in ANOMALY_DETECTOR_CHART_LAYOUTS) {
-    return ANOMALY_DETECTOR_CHART_LAYOUTS[detectorType as AnomalyDetectorType];
-  }
-
-  return DEFAULT_LAYOUT;
+export const getAnomalyChartLayout = (detectorType?: AnomalyDetectorType): ChartLayout => {
+  if (!detectorType) return DEFAULT_LAYOUT;
+  return ANOMALY_DETECTOR_CHART_LAYOUTS[detectorType] ?? DEFAULT_LAYOUT;
 };
 
 export interface AlertDetailsAppSectionProps extends ObsAlertDetailsAppSectionProps {

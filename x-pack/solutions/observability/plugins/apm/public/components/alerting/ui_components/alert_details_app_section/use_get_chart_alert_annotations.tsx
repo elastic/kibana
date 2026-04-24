@@ -8,6 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import type { ReactElement } from 'react';
 import { ALERT_END, ALERT_EVALUATION_THRESHOLD, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import {
   AlertActiveTimeRangeAnnotation,
@@ -22,7 +23,7 @@ interface UseGetChartAlertAnnotationsProps {
   alert: TopAlert;
   dateFormat: string;
   customAlertEvaluationThreshold?: number;
-  isMatchingRuleType: (ruleTypeId: string) => boolean;
+  isMatchingRuleType: (ruleTypeId: ApmRuleType) => boolean;
   normalizeThreshold?: (value: number) => number;
 }
 
@@ -35,12 +36,10 @@ export const useGetChartAlertAnnotations = ({
 }: UseGetChartAlertAnnotationsProps): ReactElement[] | undefined => {
   const { euiTheme } = useEuiTheme();
 
-  const isAnomaly = isAnomalyRuleType(alert.fields[ALERT_RULE_TYPE_ID]);
+  const ruleTypeId = alert.fields[ALERT_RULE_TYPE_ID] as ApmRuleType;
+  const isAnomaly = isAnomalyRuleType(ruleTypeId);
 
-  if (
-    !isMatchingRuleType(alert.fields[ALERT_RULE_TYPE_ID]) &&
-    customAlertEvaluationThreshold == null
-  ) {
+  if (!isMatchingRuleType(ruleTypeId) && customAlertEvaluationThreshold == null) {
     return undefined;
   }
 

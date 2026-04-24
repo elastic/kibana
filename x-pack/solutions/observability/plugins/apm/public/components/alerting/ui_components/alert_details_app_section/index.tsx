@@ -27,8 +27,11 @@ import {
   ALERT_SEVERITY,
   ALERT_START,
 } from '@kbn/rule-data-utils';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { EuiCallOut } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import {
   ANOMALY_DETECTOR_TYPE,
   SERVICE_ENVIRONMENT,
@@ -56,17 +59,19 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
   const { services } = useKibana();
   createCallApmApi(services as CoreStart);
 
-  const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
+  const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID] as Exclude<
+    ApmRuleType,
+    ApmRuleType.ErrorCount
+  >;
   const alertEvaluationValue = alert.fields[ALERT_EVALUATION_VALUE];
   const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
-  const alertSeverity = alert.fields[ALERT_SEVERITY];
-  const detectorType = alert.fields[ANOMALY_DETECTOR_TYPE];
+  const alertSeverity = alert.fields[ALERT_SEVERITY] as ML_ANOMALY_SEVERITY | undefined;
+  const detectorType = alert.fields[ANOMALY_DETECTOR_TYPE] as AnomalyDetectorType | undefined;
 
   const isAnomaly = isAnomalyRuleType(alertRuleTypeId);
 
   const chartLayout = useMemo(() => {
     if (isAnomaly) return getAnomalyChartLayout(detectorType);
-
     return RULE_TYPE_CHART_LAYOUTS[alertRuleTypeId] ?? DEFAULT_LAYOUT;
   }, [isAnomaly, detectorType, alertRuleTypeId]);
 
