@@ -12,7 +12,10 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { useGetPackageInfoByKeyQuery } from '../../../../../../hooks/use_request/epm';
 import { useDashboardLocator } from '../../../../../../hooks/use_locator';
 
-import { FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE } from '../../../../../../../common/constants';
+import {
+  FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE,
+  DASHBOARD_LOCATORS_IDS,
+} from '../../../../../../../common/constants';
 
 import { AgentDashboardLink } from './agent_dashboard_link';
 
@@ -253,7 +256,7 @@ describe('AgentDashboardLink', () => {
     );
 
     expect(getRedirectUrl).toHaveBeenCalledWith({
-      dashboardId: 'otel_collector_internal_telemetry-8f77b7f6-0ec0-462b-bb59-0607ffc464e1',
+      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_COLLECTOR_INTERNAL_TELEMETRY,
       query: {
         language: 'kuery',
         query: 'service.instance.id:"opamp-agent"',
@@ -300,7 +303,7 @@ describe('AgentDashboardLink', () => {
     );
 
     expect(getRedirectUrl).toHaveBeenCalledWith({
-      dashboardId: 'otel_collector_internal_telemetry-8f77b7f6-0ec0-462b-bb59-0607ffc464e1',
+      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_COLLECTOR_INTERNAL_TELEMETRY,
       query: {
         language: 'kuery',
         query: 'service.instance.id:"my-collector-host"',
