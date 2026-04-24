@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiPanel } from '@elastic/eui';
 import { QuickSnoozePanel } from './quick_snooze_panel';
@@ -27,23 +27,7 @@ export default meta;
 type Story = StoryObj<typeof QuickSnoozePanel>;
 
 const InteractiveWrapper = () => {
-  const [scheduleState, setScheduleState] = useState<{
-    endDate: string | null | undefined;
-    label: string;
-  }>({ endDate: null, label: 'Snoozed indefinitely' });
-
-  const handleChange = useCallback((endDate: string | null | undefined) => {
-    if (endDate === undefined) {
-      setScheduleState({ endDate: undefined, label: 'Invalid selection (snooze button disabled)' });
-    } else if (endDate === null) {
-      setScheduleState({ endDate: null, label: 'Snoozed indefinitely' });
-    } else {
-      setScheduleState({
-        endDate,
-        label: `Alert will unsnooze at: ${new Date(endDate).toLocaleString()}`,
-      });
-    }
-  }, []);
+  const handleChange = useCallback((_endDate: string | null | undefined) => {}, []);
 
   return (
     <EuiPanel paddingSize="m">
