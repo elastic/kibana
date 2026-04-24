@@ -359,7 +359,6 @@ describe('validation logic', () => {
     describe('drop', () => {
       testErrorsAndWarnings('from index | drop ', [
         expect.stringContaining('SyntaxError: mismatched input'),
-        'Unknown column ""',
       ]);
       testErrorsAndWarnings('from index | drop 4.5', [
         expect.stringContaining('SyntaxError:'),

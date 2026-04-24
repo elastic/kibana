@@ -833,6 +833,66 @@ export const PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
   },
 };
 
+export const WATCHLIST_API_CALL_EVENT: EventTypeOpts<{
+  endpoint: string;
+  watchlist_id?: string;
+  watchlist_name?: string;
+  risk_modifier?: number;
+  is_managed?: boolean;
+  entity_source_count?: number;
+  entity_source_types?: string[];
+  error?: string;
+}> = {
+  eventType: 'watchlist_api_call',
+  schema: {
+    endpoint: {
+      type: 'keyword',
+      _meta: { description: 'The watchlist route path that was called' },
+    },
+    watchlist_id: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'The ID of the watchlist' },
+    },
+    watchlist_name: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'Name of the watchlist, only captured for managed/prebuilt watchlists',
+      },
+    },
+    risk_modifier: {
+      type: 'float',
+      _meta: { optional: true, description: 'Risk modifier value applied to the watchlist (0–2)' },
+    },
+    is_managed: {
+      type: 'boolean',
+      _meta: {
+        optional: true,
+        description: 'Whether the watchlist is a managed/prebuilt watchlist',
+      },
+    },
+    entity_source_count: {
+      type: 'integer',
+      _meta: { optional: true, description: 'Number of entity sources linked at creation time' },
+    },
+    entity_source_types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Type of entity source (index, entity_analytics_integration, store)',
+          optional: false,
+        },
+      },
+      _meta: { optional: true, description: 'Types of entity sources linked at creation time' },
+    },
+    error: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Error message if the call failed' },
+    },
+  },
+};
+
 export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
   suppressionAlertsCreated: number;
   suppressionAlertsSuppressed: number;
@@ -1912,6 +1972,7 @@ export const events = [
   ENTITY_HIGHLIGHTS_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
+  WATCHLIST_API_CALL_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,

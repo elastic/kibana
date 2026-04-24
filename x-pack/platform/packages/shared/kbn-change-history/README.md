@@ -150,8 +150,7 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `object.snapshot`       | (unmapped)  | Full snapshot after the change.                                             |
 | `tags`                  | `keyword`   | Optional list of tags for the event.                                       |
 | `metadata`              | `flattened` | Optional structured metadata; does not form part of the diff or ECS schema. |
-| `kibana`                | `object`    | Kibana context.                                                             |
-| `kibana.space_ids`       | `keyword`   | ID of the space that the event belongs to.                                   |
+| `kibana.space_ids`      | `keyword`   | Injected by `@kbn/data-streams` (not part of this package’s index mappings). Space IDs the document belongs to (e.g. `['default']`). |
 | `service`               | `object`    | Service context.                                                            |
 | `service.type`          | `keyword`   | Service type (e.g. `kibana`).                                               |
 | `service.version`       | `keyword`   | Version of Kibana.                                                           |
