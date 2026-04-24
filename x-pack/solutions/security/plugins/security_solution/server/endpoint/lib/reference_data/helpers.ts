@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import pRetry from 'p-retry';
 import type { ExperimentalFeatures } from '../../../../common';
 import { ReferenceDataClient } from './reference_data_client';
 import { REF_DATA_KEYS } from './constants';
@@ -50,15 +51,34 @@ export const initializeEndpointExceptionsPerPolicyOptInStatus = async (
 ): Promise<void> => {
   const logger = _logger.get('initEndpointExceptionsPerPolicyOptIn');
 
-  const referenceDataClient = new ReferenceDataClient(soClient, experimentalFeatures, logger);
+  await pRetry(
+    async () => {
+      const referenceDataClient = new ReferenceDataClient(soClient, experimentalFeatures, logger);
 
-  const result = await referenceDataClient.get<OptInStatusMetadata>(
-    REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
-  );
+      const result = await referenceDataClient.get<OptInStatusMetadata>(
+        REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
+      );
 
-  logger.info(
-    `Endpoint Exceptions per-policy opt-in status is '${result.metadata.status}'${
-      result.metadata.reason ? ` (reason: '${result.metadata.reason}').` : '.'
-    }`
-  );
+      logger.info(
+        `Endpoint Exceptions per-policy opt-in status is '${result.metadata.status}'${
+          result.metadata.reason ? ` (reason: '${result.metadata.reason}').` : '.'
+        }`
+      );
+    },
+    {
+      retries: 5,
+      minTimeout: 1000,
+      maxTimeout: 3000,
+
+      onFailedAttempt: (error) => {
+        logger.debug(
+          `Attempt ${error.attemptNumber} to initialize Endpoint Exceptions per-policy opt-in status failed. There are ${error.retriesLeft} retries left. Error: ${error.message}`
+        );
+      },
+    }
+  ).catch((error) => {
+    logger.error(
+      `Error initializing Endpoint Exceptions per-policy opt-in status: ${error.message}`
+    );
+  });
 };
