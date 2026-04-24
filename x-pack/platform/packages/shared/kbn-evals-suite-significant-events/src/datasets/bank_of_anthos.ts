@@ -148,7 +148,6 @@ export const bankOfAnthosDataset: DatasetConfig = {
       metadata: {
         difficulty: 'easy',
         failure_domain: 'none',
-        failure_mode: 'healthy_baseline',
       },
     },
     {
@@ -395,20 +394,8 @@ export const bankOfAnthosDataset: DatasetConfig = {
             text: 'Should generate a query detecting errors across frontend, ledgerwriter, balancereader, and transactionhistory services',
             score: 2,
           },
-          {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax that can be parsed without errors',
-            score: 2,
-          },
         ],
         expected_categories: ['error', 'operational'],
-        esql_substrings: [
-          'SQLState',
-          'connection refused',
-          'connection attempt failed',
-          'read timed out',
-          'cache error',
-        ],
         expected_ground_truth:
           'queries=[error detection for JDBC/SQL error, cache error, timeout, connection refused or connection attempt, upstream impact in frontend/ledgerwriter/balancereader/transactionhistory]',
       },

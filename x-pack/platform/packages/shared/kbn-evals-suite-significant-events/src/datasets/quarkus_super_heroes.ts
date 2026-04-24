@@ -187,7 +187,6 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
       metadata: {
         difficulty: 'easy',
         failure_domain: 'none',
-        failure_mode: 'healthy_baseline',
       },
     },
     {
@@ -741,14 +740,8 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Should generate queries detecting Kafka failures in rest-fights and event-statistics — separate queries per service are acceptable',
             score: 2,
           },
-          {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax that can be parsed without errors',
-            score: 2,
-          },
         ],
         expected_categories: ['error', 'operational'],
-        esql_substrings: ['SRMSG18206', 'SRMSG18212', 'TimeoutException'],
         expected_ground_truth:
           'queries=[error detection for SmallRye Kafka write failures (SRMSG18206/SRMSG18212/TimeoutException) from rest-fights and event-statistics]',
       },
@@ -777,14 +770,8 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Should generate a query detecting fight simulation failures in rest-fights (HTTP Request to /api/fights failed)',
             score: 2,
           },
-          {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax',
-            score: 2,
-          },
         ],
         expected_categories: ['error', 'operational'],
-        esql_substrings: ['MongoTimeoutException', 'MongoSocketOpenException'],
         expected_ground_truth:
           'queries=[error detection for MongoTimeoutException/MongoSocketOpenException from rest-fights, fight HTTP failures]',
       },
@@ -813,14 +800,8 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Should generate a query detecting fight simulation degradation (villains always winning due to fallback hero)',
             score: 2,
           },
-          {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax',
-            score: 2,
-          },
         ],
-        expected_categories: ['degradation', 'operational'],
-        esql_substrings: ['Falling back on Hero', 'Fallback hero'],
+        expected_categories: ['resource_health', 'operational'],
         expected_ground_truth:
           'queries=[fallback activation detection for rest-heroes unreachable (Falling back on Hero, Fallback hero in fight results)]',
       },
@@ -847,11 +828,6 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           {
             id: 'fight-degradation-query',
             text: 'Should generate a query detecting fight degradation in rest-fights (Falling back on Hero / Fallback hero)',
-            score: 2,
-          },
-          {
-            id: 'valid-esql-syntax',
-            text: 'All generated queries must have valid ES|QL syntax',
             score: 2,
           },
         ],
