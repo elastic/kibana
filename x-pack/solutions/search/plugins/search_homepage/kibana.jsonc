@@ -24,6 +24,7 @@
       "sampleDataIngest",
       "dataViews",
       "agentBuilder",
+      "encryptedSavedObjects",
     ],
     "requiredBundles": [
       "kibanaReact"

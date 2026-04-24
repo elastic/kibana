@@ -45,6 +45,7 @@
     "@kbn/cloud",
     "@kbn/agent-builder-plugin",
     "@kbn/scout-search",
+    "@kbn/encrypted-saved-objects-plugin",
   ],
   "exclude": [
     "target/**/*"

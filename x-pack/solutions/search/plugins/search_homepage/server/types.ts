@@ -12,6 +12,7 @@ export interface SearchHomepagePluginStart {}
 
 export interface RouterContextData {
   isServerless: boolean;
+  getStartServices?: () => Promise<[unknown, unknown, unknown]>;
 }
 
 export interface StatsResponse {
