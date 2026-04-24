@@ -359,7 +359,7 @@ export async function rollbackInstallation(options: {
       appContextService.getExperimentalFeatures().enableResolveDependencies &&
       previousDependencyVersions?.length
     ) {
-      await _rollbackDependencies({
+      const failedDeps = await _rollbackDependencies({
         esClient,
         savedObjectsClient,
         pkgName,
@@ -367,6 +367,14 @@ export async function rollbackInstallation(options: {
         previousDependencyVersions,
         logger,
       });
+      if (failedDeps.length > 0) {
+        await packagePolicyService.restoreRollback(savedObjectsClient, rollbackResult);
+        throw new PackageRollbackError(
+          `Failed to roll back dependenc${failedDeps.length === 1 ? 'y' : 'ies'}: ${failedDeps.join(
+            ', '
+          )}. The previous_dependency_versions snapshot has been preserved for retry.`
+        );
+      }
     }
 
     // Roll back package.
@@ -435,7 +443,9 @@ async function _rollbackDependencies({
   spaceId: string;
   previousDependencyVersions: Array<{ name: string; previousVersion: string | null }>;
   logger: Logger;
-}) {
+}): Promise<string[]> {
+  const failedDeps: string[] = [];
+
   for (const { name: depName, previousVersion } of previousDependencyVersions) {
     try {
       if (previousVersion === null) {
@@ -486,8 +496,11 @@ async function _rollbackDependencies({
       logger.warn(
         `_rollbackDependencies: failed to roll back dependency ${depName}: ${err.message}`
       );
+      failedDeps.push(depName);
     }
   }
+
+  return failedDeps;
 }
 
 function sendRollbackTelemetry({

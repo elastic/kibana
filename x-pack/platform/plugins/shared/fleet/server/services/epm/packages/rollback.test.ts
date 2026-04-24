@@ -770,6 +770,97 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
     );
     expect(removeInstallation).not.toHaveBeenCalled();
   });
+
+  it('throws and preserves the snapshot when a dependency rollback fails', async () => {
+    const savedObjectsClient = buildSavedObjectsClient(
+      [{ name: depName, previousVersion: depPreviousVersion }],
+      [{ name: pkgName, version: newPkgVersion }]
+    );
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+    // Make installPackage fail on the first call (the dep reinstall), succeed on subsequent calls.
+    (installPackage as jest.Mock)
+      .mockRejectedValueOnce(new Error('registry unavailable'))
+      .mockResolvedValue({ pkgName });
+
+    await expect(
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
+    ).rejects.toThrow(`Failed to roll back dependency: ${depName}`);
+
+    // The composable package itself must NOT have been reinstalled.
+    expect(installPackage).toHaveBeenCalledTimes(1);
+    // The snapshot must NOT have been cleared so a retry can re-attempt.
+    expect(savedObjectsClient.update).not.toHaveBeenCalledWith(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      { previous_dependency_versions: null }
+    );
+  });
+
+  it('does not clear the snapshot when dependency rollback partially fails', async () => {
+    const dep2Name = 'dep-pkg-2';
+    const savedObjectsClient = {
+      find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+        if (search === pkgName) {
+          return Promise.resolve({
+            saved_objects: [
+              {
+                id: pkgName,
+                type: PACKAGES_SAVED_OBJECT_TYPE,
+                attributes: {
+                  install_source: 'registry',
+                  previous_version: oldPkgVersion,
+                  version: newPkgVersion,
+                  previous_dependency_versions: [
+                    { name: depName, previousVersion: depPreviousVersion },
+                    { name: dep2Name, previousVersion: '2.0.0' },
+                  ],
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({
+          saved_objects: [
+            {
+              id: search,
+              type: PACKAGES_SAVED_OBJECT_TYPE,
+              attributes: {
+                name: search,
+                install_started_at: new Date().toISOString(),
+                is_dependency_of: [{ name: pkgName, version: newPkgVersion }],
+              },
+            },
+          ],
+        });
+      }),
+      update: jest.fn().mockResolvedValue({}),
+    } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+    // First dep succeeds, second fails.
+    (installPackage as jest.Mock)
+      .mockResolvedValueOnce({ pkgName })
+      .mockRejectedValueOnce(new Error('dep2 unavailable'));
+
+    await expect(
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
+    ).rejects.toThrow(dep2Name);
+
+    expect(savedObjectsClient.update).not.toHaveBeenCalledWith(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      { previous_dependency_versions: null }
+    );
+  });
 });
 
 describe('isIntegrationRollbackTTLExpired', () => {
