@@ -12,10 +12,7 @@ import { inject, injectable } from 'inversify';
 import { EsServiceInternalToken } from '../../services/es_service/tokens';
 import { RULE_DOCTOR_FINDINGS_INDEX } from '../../../resources/indices/rule_doctor_findings';
 import type { LatestTaskStateSchema } from './task_state';
-import {
-  CLEANUP_FINDINGS_TASK_INTERVAL,
-  CLEANUP_FINDINGS_RETENTION_DAYS,
-} from './task_definition';
+import { CLEANUP_FINDINGS_TASK_INTERVAL, CLEANUP_FINDINGS_RETENTION_DAYS } from './task_definition';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
@@ -52,10 +49,9 @@ export class FindingsCleanupTaskRunner {
         this.logger.debug('No stale findings to clean up');
       }
     } catch (e) {
-      this.logger.error(
-        `Error executing findings cleanup task: ${(e as Error).message}`,
-        { error: { stack_trace: (e as Error).stack } }
-      );
+      this.logger.error(`Error executing findings cleanup task: ${(e as Error).message}`, {
+        error: { stack_trace: (e as Error).stack },
+      });
     }
 
     return {

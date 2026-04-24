@@ -12,10 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { RULE_DOCTOR_FINDINGS_INDEX } from '../../../resources/indices/rule_doctor_findings';
 import { FindingsCleanupTaskRunner } from './task_runner';
-import {
-  CLEANUP_FINDINGS_TASK_INTERVAL,
-  CLEANUP_FINDINGS_RETENTION_DAYS,
-} from './task_definition';
+import { CLEANUP_FINDINGS_TASK_INTERVAL, CLEANUP_FINDINGS_RETENTION_DAYS } from './task_definition';
 
 describe('FindingsCleanupTaskRunner', () => {
   let esClient: DeeplyMockedApi<ElasticsearchClient>;
