@@ -6,21 +6,40 @@
  */
 
 import expect from '@kbn/expect';
-import type { BaseFeature } from '@kbn/streams-schema';
+import type { BaseFeature, Streams } from '@kbn/streams-schema';
+import { emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
+  deleteStream,
   disableStreams,
   enableStreams,
   upsertFeature,
   listFeatures,
   bulkFeatures,
   deleteFeature,
+  putStream,
 } from './helpers/requests';
 
 const STREAM_NAME = 'logs.otel';
+const SECOND_STREAM_NAME = 'logs.otel.features-cross-stream-test';
+
+const secondStreamDefinition: Streams.WiredStream.UpsertRequest['stream'] = {
+  type: 'wired',
+  description: '',
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [] },
+    settings: {},
+    wired: {
+      routing: [],
+      fields: {},
+    },
+    failure_store: { inherit: {} },
+  },
+};
 
 const testFeature: BaseFeature = {
   id: 'test-feature',
@@ -181,6 +200,54 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('POST /internal/streams/features/_bulk', () => {
+      beforeEach(async () => {
+        await putStream(apiClient, SECOND_STREAM_NAME, {
+          stream: secondStreamDefinition,
+          ...emptyAssets,
+        });
+      });
+
+      afterEach(async () => {
+        await deleteStream(apiClient, SECOND_STREAM_NAME);
+      });
+
+      it('deletes features across multiple streams in one request', async () => {
+        const featureA: BaseFeature = { ...testFeature, id: 'cross-stream-delete-a' };
+        const featureB: BaseFeature = {
+          ...testFeature,
+          id: 'cross-stream-delete-b',
+          stream_name: SECOND_STREAM_NAME,
+        };
+
+        const { uuid: uuidA } = await upsertFeature(apiClient, STREAM_NAME, featureA);
+        const { uuid: uuidB } = await upsertFeature(apiClient, SECOND_STREAM_NAME, featureB);
+
+        const response = await apiClient
+          .fetch('POST /internal/streams/features/_bulk', {
+            params: {
+              body: {
+                operations: [
+                  { streamName: STREAM_NAME, delete: { id: uuidA } },
+                  { streamName: SECOND_STREAM_NAME, delete: { id: uuidB } },
+                ],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
+
+        const { features: streamAFeatures } = await listFeatures(apiClient, STREAM_NAME, {
+          includeExcluded: true,
+        });
+        const { features: streamBFeatures } = await listFeatures(apiClient, SECOND_STREAM_NAME, {
+          includeExcluded: true,
+        });
+        expect(streamAFeatures.find((f) => f.uuid === uuidA)).to.be(undefined);
+        expect(streamBFeatures.find((f) => f.uuid === uuidB)).to.be(undefined);
+      });
+
       it('deletes multiple features in one request and returns the right counts', async () => {
         const feature1: BaseFeature = { ...testFeature, id: 'bulk-delete-1' };
         const feature2: BaseFeature = { ...testFeature, id: 'bulk-delete-2' };

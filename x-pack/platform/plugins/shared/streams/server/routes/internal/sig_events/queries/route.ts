@@ -254,10 +254,23 @@ export const bulkDeleteQueriesRoute = createServerRoute({
       byStream.set(link.stream_name, bucket);
     }
 
-    const streamDefinitions = await streamsClient.listStreams();
-    const streamDefinitionsByName = new Map(
-      streamDefinitions.map((streamDefinition) => [streamDefinition.name, streamDefinition])
+    // Fetch only the stream definitions we actually need. Rejections (e.g. the
+    // stream definition no longer exists) are treated the same way as the old
+    // `listStreams() + Map.get === undefined` check: that stream's batch is
+    // counted as failed below.
+    const streamNames = Array.from(byStream.keys());
+    const streamDefinitionResults = await Promise.allSettled(
+      streamNames.map((name) => streamsClient.getStream(name))
     );
+    const streamDefinitionsByName = new Map<
+      string,
+      Awaited<ReturnType<typeof streamsClient.getStream>>
+    >();
+    streamDefinitionResults.forEach((result, i) => {
+      if (result.status === 'fulfilled') {
+        streamDefinitionsByName.set(streamNames[i], result.value);
+      }
+    });
 
     // syncQueries uninstalls rules before writing storage, so a mid-flight
     // throw can leave rules gone while stored links still reference them. Log
