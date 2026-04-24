@@ -8,15 +8,14 @@
 import React from 'react';
 
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { CostSavingsKeyInsight } from './cost_savings_key_insight';
 import { useKibana } from '../../../common/lib/kibana';
 import { licenseService } from '../../../common/hooks/use_license';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
-import { useAIConnectors } from '../../../common/hooks/use_ai_connectors';
 import { MessageRole } from '@kbn/inference-common';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
 import type { StartServices } from '../../../types';
@@ -48,8 +47,8 @@ jest.mock('../../hooks/use_find_cost_savings_prompts', () => ({
   useFindCostSavingsPrompts: jest.fn(),
 }));
 
-jest.mock('../../../common/hooks/use_ai_connectors', () => ({
-  useAIConnectors: jest.fn(),
+jest.mock('@kbn/inference-connectors', () => ({
+  useLoadConnectors: jest.fn(),
 }));
 
 jest.mock('../../providers/ai_value/export_provider', () => ({
@@ -64,7 +63,7 @@ const mockSetInsightInExportContext = jest.fn();
 const mockUseFindCostSavingsPrompts = useFindCostSavingsPrompts as jest.MockedFunction<
   typeof useFindCostSavingsPrompts
 >;
-const mockUseAIConnectors = useAIConnectors as jest.MockedFunction<typeof useAIConnectors>;
+const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
 
 const mockLensResponse = {
   tables: [],
@@ -138,16 +137,15 @@ describe('CostSavingsKeyInsight', () => {
       part2: 'Test prompt part 2',
     });
 
-    mockUseAIConnectors.mockReturnValue({
-      aiConnectors: [
+    mockUseLoadConnectors.mockReturnValue({
+      data: [
         {
           id: 'test-connector-id',
           name: 'Test Connector',
           actionTypeId: '.gen-ai',
-        } as ActionConnector,
+        },
       ],
       isLoading: false,
-      error: null,
     });
 
     mockUseKibana.mockReturnValue(
@@ -271,14 +269,10 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('shows loading state when connectorId is null', () => {
-    mockUseKibana.mockReturnValue(
-      createMockKibanaServices({
-        // @ts-ignore
-        uiSettings: {
-          get: jest.fn().mockReturnValue(null),
-        },
-      })
-    );
+    mockUseLoadConnectors.mockReturnValue({
+      data: [],
+      isLoading: false,
+    });
     render(<CostSavingsKeyInsight {...defaultProps} />, { wrapper });
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });

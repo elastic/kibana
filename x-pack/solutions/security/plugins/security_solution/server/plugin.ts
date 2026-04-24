@@ -486,6 +486,15 @@ export class Plugin implements ISecuritySolutionPlugin {
           recommendedEndpoints: [],
         });
       }
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: 'ai_value_report',
+        featureName: 'AI Value Report',
+        featureDescription: 'AI Value Report inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
     }
 
     const requestContextFactory = new RequestContextFactory({
