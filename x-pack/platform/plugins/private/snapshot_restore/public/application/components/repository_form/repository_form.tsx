@@ -24,6 +24,11 @@ interface Props {
   saveError?: React.ReactNode;
   clearSaveError: () => void;
   onSave: (repository: Repository | EmptyRepository) => void;
+  onCancel?: () => void;
+  isDefaultRepository?: boolean;
+  isAlreadyDefaultRepository?: boolean;
+  isFirstRepository?: boolean;
+  onToggleDefault?: (value: boolean) => void;
 }
 
 export const RepositoryForm: React.FunctionComponent<Props> = ({
@@ -34,6 +39,11 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   saveError,
   clearSaveError,
   onSave,
+  onCancel,
+  isDefaultRepository,
+  isAlreadyDefaultRepository,
+  isFirstRepository,
+  onToggleDefault,
 }) => {
   const [currentStep, setCurrentStep] = useState<1 | 2>(isEditing ? 2 : 1);
 
@@ -98,6 +108,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     <RepositoryFormStepOne
       repository={repository}
       onNext={() => goToNextStep()}
+      onCancel={onCancel ?? (() => {})}
       updateRepository={updateRepository}
       validation={validation}
     />
@@ -114,6 +125,11 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       validation={validation}
       saveError={saveError}
       onBack={() => goToPreviousStep()}
+      onCancel={onCancel}
+      isDefaultRepository={isDefaultRepository}
+      isAlreadyDefaultRepository={isAlreadyDefaultRepository}
+      isFirstRepository={isFirstRepository}
+      onToggleDefault={onToggleDefault}
     />
   );
 

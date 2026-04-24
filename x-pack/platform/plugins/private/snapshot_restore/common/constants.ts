@@ -55,6 +55,8 @@ export const REPOSITORY_PLUGINS_MAP: { [key: string]: RepositoryType } = {
 export const APP_REQUIRED_CLUSTER_PRIVILEGES = [
   'cluster:admin/snapshot',
   'cluster:admin/repository',
+  'cluster:admin/settings/update',
+  'cluster:monitor/settings/get',
 ];
 export const APP_RESTORE_INDEX_PRIVILEGES = ['monitor'];
 export const APP_SLM_CLUSTER_PRIVILEGES = ['manage_slm', 'cluster:monitor/state'];
