@@ -757,4 +757,68 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns']);
   });
+
+  const makeEsqlCols = (names: string[]) =>
+    names.map((name) => ({ id: name, name, meta: { type: 'string' as const } }));
+
+  test('#230185: switching from a STATS query to a zero-result query should clear stale columns', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    // First fetch: STATS (transformational) → sets defaultColumns to ['count', 'bucket']
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        { id: '1', raw: { count: 1, bucket: 'a' }, flattened: {} } as unknown as DataTableRecord,
+      ],
+      esqlQueryColumns: makeEsqlCols(['count', 'bucket']),
+      query: { esql: 'from the-data-view-title | stats count=count(*) by bucket' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['count', 'bucket'] },
+    });
+    replaceUrlState.mockClear();
+
+    // Second fetch: different non-transformational query, zero rows, > 5 schema fields
+    const manyFields = makeEsqlCols(['f1', 'f2', 'f3', 'f4', 'f5', 'f6']);
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: manyFields,
+      query: { esql: 'from the-data-view-title | where field1 > 9999999' },
+    });
+
+    // prevEsqlData.defaultColumns was ['count','bucket'], nextDefaultColumns is [] → dispatch
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({ tabId, appState: { columns: [] } });
+  });
+
+  test('#230185: same non-transformational query returning 0 rows should not change columns', async () => {
+    const { replaceUrlState, dataState } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    const manyEsqlCols = makeEsqlCols(['f1', 'f2', 'f3', 'f4', 'f5', 'f6']);
+    const manyRaw = { f1: 1, f2: 2, f3: 3, f4: 4, f5: 5, f6: 6 };
+
+    // First fetch: > 5 columns, non-transformational → prevEsqlData.defaultColumns = []
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [{ id: '1', raw: manyRaw, flattened: manyRaw } as unknown as DataTableRecord],
+      esqlQueryColumns: manyEsqlCols,
+      query: { esql: 'from the-data-view-title' },
+    });
+    replaceUrlState.mockClear();
+
+    // Same query, tighter time range → 0 results, same schema
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      esqlQueryColumns: manyEsqlCols,
+      query: { esql: 'from the-data-view-title' },
+    });
+
+    // nextDefaultColumns = [] (same), prevEsqlData.defaultColumns = [] → no dispatch
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+  });
 });
