@@ -6,8 +6,6 @@
  */
 
 import { hostname as osHostname } from 'os';
-import type { Client as EsClient } from '@elastic/elasticsearch';
-import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -36,14 +34,11 @@ import {
   buildSingleScoreDocument,
 } from './utils/report_model_score';
 import { getGitMetadata } from './utils/git_metadata';
-import {
-  createDefaultTerminalReporter,
-  type EvaluationReporter,
-} from './utils/reporting/evaluation_reporter';
+import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
-import { EvaluationScoreRepository, type EvaluationScoreDocument } from './utils/score_repository';
+import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
   createCachedTokensEvaluator,
@@ -60,36 +55,6 @@ import type {
   EvaluationSpecificWorkerFixtures,
   Example,
 } from './types';
-
-export interface ExportAndReportOptions {
-  documents: EvaluationScoreDocument[];
-  scoreRepository: EvaluationScoreRepository;
-  evaluationsEsClient: EsClient;
-  reportModelScore: EvaluationReporter;
-  runId: string;
-  log: SomeDevLog;
-  taskModelId?: string;
-  suiteId?: string;
-}
-
-export async function exportRefreshAndReport({
-  documents,
-  scoreRepository,
-  evaluationsEsClient,
-  reportModelScore,
-  runId,
-  log,
-  taskModelId,
-  suiteId,
-}: ExportAndReportOptions): Promise<void> {
-  await exportEvaluations(documents, scoreRepository, log);
-
-  // Ensure all score documents (including those written incrementally via
-  // indexSingleScore with refresh:false) are visible before querying stats.
-  await evaluationsEsClient.indices.refresh({ index: 'kibana-evaluations' }).catch(() => {});
-
-  await reportModelScore(scoreRepository, runId, log, { taskModelId, suiteId });
-}
 
 function isElasticCloudEsUrl(esUrl: string): boolean {
   try {
@@ -408,24 +373,28 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       });
 
       try {
-        await exportRefreshAndReport({
-          documents,
-          scoreRepository,
-          evaluationsEsClient,
-          reportModelScore,
-          runId: currentRunId,
-          log,
-          taskModelId: model.id,
-          suiteId: process.env.EVAL_SUITE_ID,
-        });
+        await exportEvaluations(documents, scoreRepository, log);
       } catch (error) {
         log.error(
-          new Error(`Failed to export/report evaluation results for run ID: ${currentRunId}.`, {
-            cause: error,
-          })
+          new Error(
+            `Failed to export evaluation results to Elasticsearch for run ID: ${currentRunId}.`,
+            { cause: error }
+          )
         );
         throw error;
       }
+
+      // indexSingleScore uses refresh:false; the bulk re-export may 409-conflict
+      // on those docs so its refresh:'wait_for' won't cover them. Force a refresh
+      // to make every score visible before the stats query.
+      await evaluationsEsClient.indices
+        .refresh({ index: 'kibana-evaluations' })
+        .catch(() => {});
+
+      await reportModelScore(scoreRepository, currentRunId, log, {
+        taskModelId: model.id,
+        suiteId: process.env.EVAL_SUITE_ID,
+      });
     },
     {
       scope: 'worker',
