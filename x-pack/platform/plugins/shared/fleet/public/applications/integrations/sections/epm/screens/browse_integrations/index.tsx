@@ -140,12 +140,16 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
             }}
           >
             {isManageIntegrationsView ? (
-              <ManageIntegrationsTable
-                integrations={integrations}
-                isLoading={isLoadingCreatedIntegrations}
-                isError={isCreatedIntegrationsError}
-                onRefetch={refetchCreatedIntegrations}
-              />
+              <>
+                <EuiSpacer size="m" />
+                <ManageIntegrationsTable
+                  integrations={integrations}
+                  isLoading={isLoadingCreatedIntegrations}
+                  isError={isCreatedIntegrationsError}
+                  onRefetch={refetchCreatedIntegrations}
+                  prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+                />
+              </>
             ) : filteredCards.length === 0 && !isLoading ? (
               <NoDataPrompt />
             ) : (

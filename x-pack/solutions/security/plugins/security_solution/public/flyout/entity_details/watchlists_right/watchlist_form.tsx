@@ -25,6 +25,7 @@ import {
   WATCHLIST_DESCRIPTION_LABEL,
   WATCHLIST_NAME_LABEL,
   WATCHLIST_RISK_SCORE_WEIGHTING_LABEL,
+  WATCHLIST_RISK_SCORE_WEIGHTING_ERROR,
   WATCHLIST_CSV_DATA_SOURCE_TITLE,
   WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION,
 } from './translations';
@@ -39,6 +40,7 @@ export interface WatchlistFormProps {
   isEditMode: boolean;
   isNameTooLong: boolean;
   isDescriptionTooLong: boolean;
+  isRiskModifierInvalid: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
@@ -62,6 +64,7 @@ export const WatchlistForm = ({
   isEditMode,
   isNameTooLong,
   isDescriptionTooLong,
+  isRiskModifierInvalid,
   onFieldChange,
   onSourceValidationChange,
 }: WatchlistFormProps) => {
@@ -113,14 +116,19 @@ export const WatchlistForm = ({
           disabled={isDescriptionDisabled}
         />
       </EuiFormRow>
-      <EuiFormRow label={WATCHLIST_RISK_SCORE_WEIGHTING_LABEL}>
+      <EuiFormRow
+        label={WATCHLIST_RISK_SCORE_WEIGHTING_LABEL}
+        isInvalid={isRiskModifierInvalid}
+        error={isRiskModifierInvalid ? [WATCHLIST_RISK_SCORE_WEIGHTING_ERROR] : undefined}
+      >
         <EuiRange
           min={0}
           max={2}
           step={0.5}
           showTicks
           showInput
-          value={watchlist.riskModifier}
+          isInvalid={isRiskModifierInvalid}
+          value={Number.isFinite(watchlist.riskModifier) ? watchlist.riskModifier : ''}
           onChange={(e) => onFieldChange('riskModifier', Number(e.currentTarget.value))}
         />
       </EuiFormRow>

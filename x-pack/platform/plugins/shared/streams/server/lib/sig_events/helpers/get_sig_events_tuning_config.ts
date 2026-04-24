@@ -24,11 +24,16 @@ export async function getSigEventsTuningConfig(
 ): Promise<SigEventsTuningConfig> {
   let stored: Partial<SigEventsTuningConfig>;
   try {
-    stored = await globalUiSettingsClient.get<Partial<SigEventsTuningConfig>>(
+    const raw = await globalUiSettingsClient.get<string>(
       OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG
     );
-  } catch {
-    // Setting not found or unparseable -- use all defaults
+    stored = JSON.parse(raw);
+  } catch (err) {
+    logger.warn(
+      `Failed to read Significant Events tuning config, falling back to defaults: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
     return { ...DEFAULT_SIG_EVENTS_TUNING_CONFIG };
   }
 

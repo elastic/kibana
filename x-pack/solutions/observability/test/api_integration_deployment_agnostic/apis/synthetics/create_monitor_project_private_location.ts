@@ -40,6 +40,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const config = getService('config');
+    const kibanaProtocol = config.get('servers.kibana.protocol') as string;
+    const kibanaHostname = config.get('servers.kibana.hostname') as string;
+    const kibanaPort = config.get('servers.kibana.port') as number;
+    // Omit default ports (80 for http, 443 for https) to match server.publicBaseUrl behavior
+    const isDefaultPort =
+      (kibanaProtocol === 'https' && kibanaPort === 443) ||
+      (kibanaProtocol === 'http' && kibanaPort === 80);
+    const kibanaServerUrl = isDefaultPort
+      ? `${kibanaProtocol}://${kibanaHostname}`
+      : `${kibanaProtocol}://${kibanaHostname}:${kibanaPort}`;
 
     let projectMonitors: ProjectMonitorsRequest;
     let httpProjectMonitors: ProjectMonitorsRequest;
@@ -1387,6 +1398,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           projectId: project,
           locationName: testPrivateLocationName,
           locationId: testPolicyId,
+          kibanaUrl: kibanaServerUrl,
         })
       );
     });
