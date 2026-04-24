@@ -87,6 +87,10 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       if (processor.keep_original !== false) {
         fields.push(`${prefix}.original`);
       }
+      // remove_if_successful nulls the source field on a successful parse.
+      if (processor.remove_if_successful === true && processor.from) {
+        fields.push(processor.from);
+      }
       break;
     }
 
