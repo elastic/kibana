@@ -20,12 +20,10 @@ import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
-import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
-import {
-  getAgentMarks,
-  type AgentMark,
-} from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { getCriticalPath, type CriticalPathSegment } from './critical_path';
+import type { ErrorMark } from '../charts/timeline/marker/error_marker';
+import { getAgentMarks } from '../charts/timeline/marker/get_agent_marks';
+import type { AgentMark } from '../charts/timeline/marker/agent_marker';
 
 export type TraceWaterfallScrollStrategy = 'parent' | 'window';
 

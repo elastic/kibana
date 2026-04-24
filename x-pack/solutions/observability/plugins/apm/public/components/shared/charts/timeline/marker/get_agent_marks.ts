@@ -6,12 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import type { Mark } from '.';
-
-// Extends Mark without adding new properties to it.
-export interface AgentMark extends Mark {
-  type: 'agentMark';
-}
+import type { AgentMark } from './agent_marker';
 
 export function getAgentMarks(marks?: Record<string, number>): AgentMark[] {
   if (!marks) {
