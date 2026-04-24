@@ -31,6 +31,9 @@ import type { RuleResponse } from '../../../../common/api/detection_engine/model
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { RULES_PATH, SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { hasCapabilities } from '../../../common/lib/capabilities';
+import { FiltersDisplay } from './filters_display';
+import { RuleTypeDetails } from './rule_type_details';
+
 const INDEX_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.indexFieldLabel',
   { defaultMessage: 'Index patterns' }
@@ -82,9 +85,6 @@ const ESQL_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.esqlRuleTypeDescription',
   { defaultMessage: 'ES|QL' }
 );
-import { FiltersDisplay } from './filters_display';
-
-import { RuleTypeDetails } from './rule_type_details';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
 
