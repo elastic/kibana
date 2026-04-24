@@ -364,7 +364,7 @@ export function EpisodeDetailsPage() {
               ]}
             />
             <EuiSpacer size="l" />
-            <EuiTitle size="xxs">
+            <EuiTitle size="xs">
               <h3 data-test-subj="alertingV2EpisodeDetailsActionsOverviewHeading">
                 {i18n.ACTIONS_OVERVIEW_TITLE}
               </h3>
@@ -396,6 +396,19 @@ export function EpisodeDetailsPage() {
                         },
                       ]
                     : []),
+                  ...(groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
+                    ? [
+                        {
+                          title: i18n.LABEL_RESOLVED_BY,
+                          description: (
+                            <EpisodeAssigneeCell
+                              assigneeUid={groupAction.lastDeactivateActor}
+                              userProfile={services.userProfile}
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
                   ...(groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE
                     ? [
                         {
@@ -407,18 +420,14 @@ export function EpisodeDetailsPage() {
                             />
                           ),
                         },
-                      ]
-                    : []),
-                  ...(groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
-                    ? [
                         {
-                          title: i18n.LABEL_RESOLVED_BY,
-                          description: (
-                            <EpisodeAssigneeCell
-                              assigneeUid={groupAction.lastDeactivateActor}
-                              userProfile={services.userProfile}
-                            />
-                          ),
+                          title: i18n.LABEL_SNOOZED_UNTIL,
+                          description: groupAction.snoozeExpiry
+                            ? new Date(groupAction.snoozeExpiry).toLocaleString(undefined, {
+                                dateStyle: 'medium',
+                                timeStyle: 'short',
+                              })
+                            : '—',
                         },
                       ]
                     : []),
@@ -435,7 +444,7 @@ export function EpisodeDetailsPage() {
                   gutterSize="s"
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
+                    <EuiTitle size="xs">
                       <h3 data-test-subj="alertingV2EpisodeDetailsRuleOverviewHeading">
                         {i18n.RULE_OVERVIEW_TITLE}
                       </h3>

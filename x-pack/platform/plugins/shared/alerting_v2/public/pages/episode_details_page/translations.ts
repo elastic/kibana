@@ -158,6 +158,13 @@ export const LABEL_SNOOZED_BY = i18n.translate('xpack.alertingV2.episodeDetails.
   defaultMessage: 'Snoozed by',
 });
 
+export const LABEL_SNOOZED_UNTIL = i18n.translate(
+  'xpack.alertingV2.episodeDetails.snoozedUntilLabel',
+  {
+    defaultMessage: 'Snoozed until',
+  }
+);
+
 export const LABEL_RESOLVED_BY = i18n.translate('xpack.alertingV2.episodeDetails.resolvedByLabel', {
   defaultMessage: 'Resolved by',
 });
