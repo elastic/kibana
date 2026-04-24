@@ -22,8 +22,8 @@ export const formatAlertEvaluationValue = (ruleTypeId?: string, evaluationValue?
       return asMillisecondDuration(evaluationValue);
     case ALERT_EVALUATION_UNIT_TYPE.PERCENT:
       return asPercent(evaluationValue, 100);
-    case ALERT_EVALUATION_UNIT_TYPE.COUNT:
-      return i18n.translate('xpack.observability.alertEvaluation.countValue', {
+    case ALERT_EVALUATION_UNIT_TYPE.ERROR_COUNT:
+      return i18n.translate('xpack.observability.alertEvaluation.errorCountValue', {
         defaultMessage: '{formattedValue} {value, plural, one {error} other {errors}}',
         values: { value: evaluationValue, formattedValue: asInteger(evaluationValue) },
       });
