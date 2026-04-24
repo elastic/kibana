@@ -11,6 +11,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { type WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { z } from '@kbn/zod/v4';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
@@ -20,8 +22,19 @@ describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
   let mockWorkflowsService: jest.Mocked<WorkflowsService>;
   let mockRequest: KibanaRequest;
+  let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockWorkflowsExecutionEngine = workflowsExecutionEngineMock.createStart();
+    mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValue({
+      workflowExecutionId: 'test-exec-id',
+    });
+    mockWorkflowsExecutionEngine.scheduleWorkflow.mockResolvedValue({
+      workflowExecutionId: 'sched-exec-id',
+    });
+    mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
+
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
@@ -30,14 +43,7 @@ describe('WorkflowsManagementApi', () => {
       deleteWorkflows: jest.fn(),
       bulkCreateWorkflows: jest.fn(),
       validateWorkflow: jest.fn(),
-      getWorkflowsExecutionEngine: jest.fn().mockResolvedValue({
-        executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'test-exec-id' }),
-        executeWorkflowStep: jest.fn(),
-        scheduleWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'sched-exec-id' }),
-        cancelWorkflowExecution: jest.fn(),
-        cancelAllActiveWorkflowExecutions: jest.fn(),
-        resumeWorkflowExecution: jest.fn(),
-      }),
+      getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
 
     api = new WorkflowsManagementApi(mockWorkflowsService, true);
@@ -841,10 +847,7 @@ steps:
     };
 
     it('returns an empty result and forwards an empty array to the engine', async () => {
-      const mockWorkflowsExecutionEngine = {
-        bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
-      };
-      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+      mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
 
       const result = await api.bulkScheduleWorkflow([], mockRequest);
 
@@ -860,10 +863,7 @@ steps:
         { status: 'scheduled' as const, workflowExecutionId: 'exec-1' },
         { status: 'scheduled' as const, workflowExecutionId: 'exec-2' },
       ];
-      const mockWorkflowsExecutionEngine = {
-        bulkScheduleWorkflow: jest.fn().mockResolvedValue(engineResults),
-      };
-      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+      mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue(engineResults);
 
       const result = await api.bulkScheduleWorkflow(
         [
@@ -912,12 +912,9 @@ steps:
     });
 
     it('passes optional metadata on each item into the forwarded execution context', async () => {
-      const mockWorkflowsExecutionEngine = {
-        bulkScheduleWorkflow: jest
-          .fn()
-          .mockResolvedValue([{ status: 'scheduled', workflowExecutionId: 'exec-meta' }]),
-      };
-      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+      mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([
+        { status: 'scheduled', workflowExecutionId: 'exec-meta' },
+      ]);
 
       const meta = {
         eventDispatchTimestamp: '2024-01-01T00:00:00.000Z',
@@ -952,10 +949,7 @@ steps:
         },
         { status: 'scheduled' as const, workflowExecutionId: 'exec-ok-2' },
       ];
-      const mockWorkflowsExecutionEngine = {
-        bulkScheduleWorkflow: jest.fn().mockResolvedValue(engineResults),
-      };
-      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+      mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue(engineResults);
 
       const result = await api.bulkScheduleWorkflow(
         [

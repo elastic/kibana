@@ -18,6 +18,8 @@ import { errors } from '@elastic/elasticsearch';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server/types';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_INDEX,
@@ -357,7 +359,7 @@ function assertOperationsConsistent(
   routeKey: string,
   privileges: string[],
   esOps: EsOperation[],
-  executionEngineMethods: Record<string, jest.Mock>,
+  executionEngineMethods: jest.Mocked<WorkflowsExecutionEnginePluginStart>,
   eventLoggerSearch: jest.Mock,
   internalReadExceptions: string[] = []
 ) {
@@ -403,7 +405,7 @@ function assertOperationsConsistent(
 describe('Route privilege/ES-operation consistency', () => {
   const capturedRoutes = new Map<string, CapturedRoute>();
   let mockEsClient: Record<string, any>;
-  let mockExecutionEngine: Record<string, jest.Mock>;
+  let mockExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
   let mockEventLoggerSearch: jest.Mock;
 
   beforeAll(async () => {
@@ -415,7 +417,8 @@ describe('Route privilege/ES-operation consistency', () => {
       warnings: [],
     });
 
-    mockEventLoggerSearch = jest.fn().mockResolvedValue({ logs: [], total: 0 });
+    mockExecutionEngine = workflowsExecutionEngineMock.createStart();
+    mockEventLoggerSearch = mockExecutionEngine.workflowEventLoggerService.searchLogs as jest.Mock;
 
     // ── Spy ES client with index-aware search responses ──
 
@@ -471,24 +474,21 @@ describe('Route privilege/ES-operation consistency', () => {
 
     // ── Execution engine mock ──
 
-    mockExecutionEngine = {
-      executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'test-exec-id' }),
-      executeWorkflowStep: jest.fn().mockResolvedValue({ workflowExecutionId: 'test-exec-id' }),
-      cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-      resumeWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-      scheduleWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'test-exec-id' }),
-    };
-
-    const mockExecutionEngineStart = {
-      ...mockExecutionEngine,
-      workflowEventLoggerService: { search: mockEventLoggerSearch },
-      triggerEvents: {
-        isEnabled: true,
-        isLogEventsEnabled: true,
-        maxEventChainDepth: 10,
-        maxWorkflowDepth: 10,
-      },
-    };
+    mockExecutionEngine.executeWorkflow.mockResolvedValue({
+      workflowExecutionId: 'test-exec-id',
+    });
+    mockExecutionEngine.executeWorkflowStep.mockResolvedValue({
+      workflowExecutionId: 'test-exec-id',
+    });
+    mockExecutionEngine.cancelWorkflowExecution.mockResolvedValue(undefined);
+    mockExecutionEngine.resumeWorkflowExecution.mockResolvedValue(undefined);
+    mockExecutionEngine.scheduleWorkflow.mockResolvedValue({
+      workflowExecutionId: 'test-exec-id',
+    });
+    // mockExecutionEngine.workflowEventLoggerService.search.mockResolvedValue({
+    //   logs: [],
+    //   total: 0,
+    // });
 
     // ── WorkflowsService ──
 
@@ -500,7 +500,7 @@ describe('Route privilege/ES-operation consistency', () => {
     };
 
     const mockPluginsStart = {
-      workflowsExecutionEngine: mockExecutionEngineStart,
+      workflowsExecutionEngine: mockExecutionEngine,
       actions: {
         getUnsecuredActionsClient: jest.fn().mockResolvedValue({
           getAll: jest.fn().mockResolvedValue([]),
@@ -683,12 +683,15 @@ describe('Route privilege/ES-operation consistency', () => {
   // ── Negative test: verify the assertion catches violations ──
 
   describe('assertOperationsConsistent', () => {
+    let noopEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
+
+    beforeEach(() => {
+      noopEngine = workflowsExecutionEngineMock.createStart();
+      jest.clearAllMocks();
+    });
+
     it('should detect read operations not covered by privileges', () => {
       const esOps: EsOperation[] = [{ method: 'search', type: 'read', index: WORKFLOWS_INDEX }];
-      const noopEngine = {
-        executeWorkflow: jest.fn(),
-        cancelWorkflowExecution: jest.fn(),
-      };
       const noopLogger = jest.fn();
 
       expect(() =>
@@ -704,10 +707,6 @@ describe('Route privilege/ES-operation consistency', () => {
 
     it('should detect write operations not covered by privileges', () => {
       const esOps: EsOperation[] = [{ method: 'index', type: 'write', index: WORKFLOWS_INDEX }];
-      const noopEngine = {
-        executeWorkflow: jest.fn(),
-        cancelWorkflowExecution: jest.fn(),
-      };
       const noopLogger = jest.fn();
 
       expect(() =>
@@ -722,17 +721,14 @@ describe('Route privilege/ES-operation consistency', () => {
     });
 
     it('should detect execution engine delegation not covered by privileges', () => {
-      const engineMock = {
-        executeWorkflow: jest.fn(),
-      };
-      engineMock.executeWorkflow();
+      (noopEngine as any).executeWorkflow();
 
       expect(() =>
         assertOperationsConsistent(
           'TEST:/fake',
           [WorkflowsManagementApiActions.read],
           [],
-          engineMock,
+          noopEngine,
           jest.fn()
         )
       ).toThrow();
@@ -743,7 +739,6 @@ describe('Route privilege/ES-operation consistency', () => {
         { method: 'search', type: 'read', index: WORKFLOWS_INDEX },
         { method: 'index', type: 'write', index: WORKFLOWS_INDEX },
       ];
-      const noopEngine = { executeWorkflow: jest.fn() };
 
       expect(() =>
         assertOperationsConsistent(

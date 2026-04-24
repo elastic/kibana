@@ -24,7 +24,7 @@ jest.mock('../utils/route_error_handlers', () => ({
 const createLicensingContext = () => ({
   workflows: Promise.resolve({
     isWorkflowsAvailable: true,
-    getWorkflowsClient: () => ({ emitEvent: jest.fn() }),
+    emitEvent: jest.fn(),
   }),
   licensing: Promise.resolve({
     license: {

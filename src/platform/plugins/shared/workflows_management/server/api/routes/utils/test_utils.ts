@@ -29,7 +29,6 @@ export const getWorkflowExecutionEngineMock = (enabled = true, logEventsEnabled 
       isEnabled: enabled,
       isLogEventsEnabled: logEventsEnabled,
       maxEventChainDepth: 10,
-      maxWorkflowDepth: 10,
     },
   });
 

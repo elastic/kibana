@@ -25,7 +25,7 @@ describe('Execution Routes', () => {
   const mockContext = {
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
-      getWorkflowsClient: () => ({ emitEvent: jest.fn() }),
+      emitEvent: jest.fn(),
     }),
     licensing: Promise.resolve({
       license: {
