@@ -33,7 +33,7 @@ import type { DashboardApi } from '../../../../dashboard_api/types';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { getMenuItemGroups } from '../get_menu_item_groups';
 import { Groups } from './groups';
-import { selectFeaturedVisualizationActions, FEATURED_ACTION_IDS } from './select_featured_items';
+import { FeaturedItems } from './featured_menu_items';
 import { embeddableService } from '../../../../services/kibana_services';
 
 type FlyoutTab = 'new' | 'library';
@@ -95,21 +95,22 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
     );
   }, [groups, searchTerm]);
 
-  const { lens, esql } = useMemo(
-    () => selectFeaturedVisualizationActions(filteredGroups),
-    [filteredGroups]
-  );
-
-  const groupsForList = useMemo(
-    () =>
-      filteredGroups
-        .map((group) => ({
-          ...group,
-          items: group.items.filter((item) => !FEATURED_ACTION_IDS.has(item.id)),
-        }))
-        .filter((group) => group.items.length > 0),
-    [filteredGroups]
-  );
+  const { featuredItems, groupsForList } = useMemo(() => {
+    const featuredItemIds = Object.keys(FeaturedItems);
+    const featured: Array<MenuItem & { id: keyof typeof FeaturedItems }> = [];
+    const list: MenuItemGroup[] = [];
+    filteredGroups.forEach((group, index) => {
+      list.push({ ...group, items: [] });
+      group.items.forEach((item) => {
+        if (featuredItemIds.includes(item.id)) {
+          featured.push({ ...item, id: item.id as keyof typeof FeaturedItems });
+        } else {
+          list[index].items.push(item);
+        }
+      });
+    });
+    return { featuredItems: featured, groupsForList: list };
+  }, [filteredGroups]);
 
   return (
     <EuiSkeletonText isLoading={loading}>
@@ -146,74 +147,36 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
             </EuiFormRow>
           </EuiForm>
         </EuiFlexItem>
-        {(lens || esql) && (
+        {featuredItems.length && (
           <EuiFlexItem
             grow={false}
             css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}
           >
-            {lens && !lens.isDisabled && (
-              <EuiPanel
-                hasBorder
-                paddingSize="none"
-                onClick={lens.onClick}
-                data-test-subj="create-action-Lens"
-                css={{ cursor: 'pointer', padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="visBarVertical" size="m" aria-hidden={true} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>
-                        {i18nFn.translate('dashboard.addPanelFlyout.featured.visualizationTitle', {
-                          defaultMessage: 'Visualization',
-                        })}
-                      </strong>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      {i18nFn.translate(
-                        'dashboard.addPanelFlyout.featured.visualizationDescription',
-                        {
-                          defaultMessage:
-                            'Build charts, metrics, and tables with a point-and-click editor',
-                        }
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            )}
-            {esql && !esql.isDisabled && (
-              <EuiPanel
-                hasBorder
-                paddingSize="none"
-                onClick={esql.onClick}
-                data-test-subj="create-action-ES|QL"
-                css={{ cursor: 'pointer', padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="editorCodeBlock" size="m" aria-hidden={true} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>
-                        {i18nFn.translate(
-                          'dashboard.addPanelFlyout.featured.esqlVisualizationTitle',
-                          { defaultMessage: 'Visualization (query)' }
-                        )}
-                      </strong>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      {i18nFn.translate(
-                        'dashboard.addPanelFlyout.featured.esqlVisualizationDescription',
-                        { defaultMessage: 'Build charts, metrics, and tables with ES|QL' }
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
+            {featuredItems.map(
+              (item) =>
+                !item.isDisabled && (
+                  <EuiPanel
+                    hasBorder
+                    paddingSize="none"
+                    onClick={item.onClick}
+                    data-test-subj={item['data-test-subj']}
+                    css={{ cursor: 'pointer', padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}
+                  >
+                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type={FeaturedItems[item.id].icon} size="m" aria-hidden={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s">
+                          <strong>{FeaturedItems[item.id].title}</strong>
+                        </EuiText>
+                        <EuiText size="xs" color="subdued">
+                          {FeaturedItems[item.id].description}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                )
             )}
           </EuiFlexItem>
         )}
