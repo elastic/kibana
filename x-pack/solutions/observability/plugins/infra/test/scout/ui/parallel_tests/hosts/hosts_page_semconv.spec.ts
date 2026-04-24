@@ -13,7 +13,7 @@ import {
   SEMCONV_HOST1_NAME,
   DATE_WITH_SEMCONV_DATA_FROM,
   DATE_WITH_SEMCONV_DATA_TO,
-  EXTENDED_TIMEOUT,
+  KPI_RENDER_TIMEOUT,
 } from '../../fixtures/constants';
 
 test.describe(
@@ -21,6 +21,10 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
+      // Semconv KPI + flyout suites rely on Lens + elastic-charts rendering
+      // on top of the OTel data stream; first-load timing in CI exceeds
+      // Scout's 60s default. Extend the budget to 180s.
+      test.setTimeout(180_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
         from: DATE_WITH_SEMCONV_DATA_FROM,
@@ -47,7 +51,7 @@ test.describe(
     test('should display KPI metrics for semconv data', async ({ pageObjects: { hostsPage } }) => {
       const kpiTiles = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
 
-      await hostsPage.waitForHostKPIChartsToLoad(kpiTiles, EXTENDED_TIMEOUT);
+      await hostsPage.waitForHostKPIChartsToLoad(kpiTiles, KPI_RENDER_TIMEOUT);
 
       for (const metric of kpiTiles) {
         await test.step(`verify ${metric} KPI tile has a value`, async () => {
@@ -94,7 +98,7 @@ test.describe(
       await hostsPage.openHostFlyout(SEMCONV_HOST1_NAME);
 
       await test.step('verify overview tab loads with KPI charts', async () => {
-        await assetDetailsPage.hostOverviewTab.waitForKPIChartsToLoad(EXTENDED_TIMEOUT);
+        await assetDetailsPage.hostOverviewTab.waitForKPIChartsToLoad(KPI_RENDER_TIMEOUT);
         await expect(
           assetDetailsPage.hostOverviewTab.kpiCpuUsageChart.getByRole('heading', {
             name: 'CPU Usage',

@@ -15,6 +15,7 @@ import {
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
   EXTENDED_TIMEOUT,
+  KPI_RENDER_TIMEOUT,
 } from '../../fixtures/constants';
 
 test.describe(
@@ -22,6 +23,12 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
+      // Flyout suites open Lens + elastic-charts in the host overview tab.
+      // Under CI contention the cumulative cost of navigation, flyout init,
+      // and first-time chart rendering exceeds Scout's default 60s test
+      // timeout; extend it to 180s. Re-run the flaky runner if tightening is
+      // possible later.
+      test.setTimeout(180_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
@@ -37,7 +44,7 @@ test.describe(
       await hostsPage.openHostFlyout(HOST1_NAME);
 
       await test.step('verify KPI charts are rendered', async () => {
-        await assetDetailsPage.hostOverviewTab.waitForKPIChartsToLoad(EXTENDED_TIMEOUT);
+        await assetDetailsPage.hostOverviewTab.waitForKPIChartsToLoad(KPI_RENDER_TIMEOUT);
         await expect(
           assetDetailsPage.hostOverviewTab.kpiCpuUsageChart.getByRole('heading', {
             name: 'CPU Usage',

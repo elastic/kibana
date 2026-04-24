@@ -16,7 +16,7 @@ import {
   HOSTS,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
-  EXTENDED_TIMEOUT,
+  KPI_RENDER_TIMEOUT,
 } from '../../fixtures/constants';
 
 const EXPECTED_HOST_COUNT = HOSTS.length;
@@ -26,6 +26,10 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage }, page }) => {
+      // The hosts table suite waits on Lens + elastic-charts KPI rendering in
+      // beforeEach; under CI contention first-load timing exceeds Scout's 60s
+      // default. Extend the budget to 180s.
+      test.setTimeout(180_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
@@ -39,7 +43,7 @@ test.describe(
           page
             .getByTestId('infraAssetDetailsKPIcpuUsage')
             .getByRole('progressbar', { name: 'Loading' })
-        ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+        ).toBeHidden({ timeout: KPI_RENDER_TIMEOUT });
       });
     });
 
@@ -101,7 +105,7 @@ test.describe(
 
       const kpiTiles = ['cpuUsage', 'memoryUsage', 'normalizedLoad1m', 'diskUsage'];
 
-      await hostsPage.waitForHostKPIChartsToLoad(kpiTiles, EXTENDED_TIMEOUT);
+      await hostsPage.waitForHostKPIChartsToLoad(kpiTiles, KPI_RENDER_TIMEOUT);
 
       for (const metric of kpiTiles) {
         await test.step(`verify ${metric} KPI is present`, async () => {
