@@ -23,6 +23,29 @@ export interface Step {
   [key: string]: unknown;
 }
 
+/**
+ * Conversation-level attachment record as returned by
+ * `GET /api/agent_builder/conversations/{id}/attachments`. Mirrors the shape
+ * of `VersionedAttachment` in `@kbn/agent-builder-common/attachments` but kept
+ * local here so the evals suite does not pull in that package for a single
+ * structural type.
+ */
+export interface AttachmentRecord {
+  id: string;
+  type: string;
+  current_version: number;
+  versions: Array<{
+    version: number;
+    data: unknown;
+    created_at?: string;
+    content_hash?: string;
+  }>;
+  description?: string;
+  active?: boolean;
+  hidden?: boolean;
+  origin?: string;
+}
+
 interface ConverseFunctionParams {
   messages: Messages;
   conversationId?: string;
@@ -35,6 +58,7 @@ type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
   steps?: Step[];
   traceId?: string;
   modelUsage?: ModelUsageStats;
+  attachments?: AttachmentRecord[];
 }>;
 
 interface ModelUsageStats {
@@ -52,6 +76,7 @@ interface CallConverseApiResults {
   modelUsage?: ModelUsageStats;
   steps?: Step[];
   traceId?: string;
+  attachments?: AttachmentRecord[];
 }
 
 export class EvaluationChatClient {
@@ -88,12 +113,15 @@ export class EvaluationChatClient {
         model_usage: modelUsage,
       } = response;
 
+      const attachments = await this.fetchAttachments(conversationIdFromResponse);
+
       return {
         conversationId: conversationIdFromResponse,
         messages: [...messages, latestResponse],
         steps,
         traceId,
         modelUsage,
+        attachments,
         errors: [],
       };
     };
@@ -143,6 +171,36 @@ export class EvaluationChatClient {
           },
         ],
       };
+    }
+  };
+
+  /**
+   * Fetches conversation-level attachments created as a side effect of the
+   * latest converse call (e.g. `security.get_entity` persisting a
+   * `security.entity` attachment). Returns an empty array on any error so
+   * attachment assertions in specs report "no attachments found" with tool-call
+   * context instead of the test failing at fetch time.
+   */
+  private fetchAttachments = async (conversationId: string): Promise<AttachmentRecord[]> => {
+    if (!conversationId) {
+      return [];
+    }
+    try {
+      const response: { results?: AttachmentRecord[] } = await this.fetch(
+        `/api/agent_builder/conversations/${encodeURIComponent(conversationId)}/attachments`,
+        {
+          method: 'GET',
+          version: '2023-10-31',
+        }
+      );
+      return response.results ?? [];
+    } catch (error) {
+      this.log.warning(
+        new Error(`Failed to fetch attachments for conversation "${conversationId}"`, {
+          cause: error instanceof Error ? error : undefined,
+        })
+      );
+      return [];
     }
   };
 }

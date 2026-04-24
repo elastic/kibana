@@ -32,7 +32,7 @@ export const servers: ScoutServerConfig = {
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       `--uiSettings.overrides.agentBuilder:experimentalFeatures=true`,
       `--uiSettings.overrides.securitySolution:entityStoreEnableV2=true`,
-      `--xpack.securitySolution.enableExperimental=["entityAnalyticsEntityStoreV2"]`,
+      `--xpack.securitySolution.enableExperimental=["entityAnalyticsEntityStoreV2","entityAttachmentRichRenderer"]`,
     ],
   },
 };
