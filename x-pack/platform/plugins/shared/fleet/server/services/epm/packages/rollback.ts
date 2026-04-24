@@ -196,6 +196,11 @@ export async function rollbackAvailableCheck(
         });
         if (depSORes.saved_objects.length === 0) {
           continue;
+        } else if (depSORes.saved_objects.length > 1) {
+          return {
+            isAvailable: false,
+            reason: `Expected exactly one saved object for dependency ${depName}`,
+          };
         }
         const depSO = depSORes.saved_objects[0];
         const otherDependants = (depSO.attributes.is_dependency_of ?? []).filter(

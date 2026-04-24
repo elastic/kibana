@@ -1378,6 +1378,59 @@ describe('rollbackAvailableCheck', () => {
         reason: `Rollback not available: TTL expired for dependency ${depName}`,
       });
     });
+
+    it('returns unavailable when multiple saved objects match a dependency name', async () => {
+      const depName = 'aws';
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+        {
+          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+            if (search === pkgName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: pkgName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: {
+                      name: pkgName,
+                      install_source: 'registry',
+                      previous_version: oldPkgVersion,
+                      version: newPkgVersion,
+                      previous_dependency_versions: [{ name: depName, previousVersion: '1.0.0' }],
+                    },
+                  },
+                ],
+              });
+            }
+            if (search === depName) {
+              return Promise.resolve({
+                saved_objects: [
+                  {
+                    id: depName,
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: { name: depName, install_started_at: new Date().toISOString() },
+                  },
+                  {
+                    id: 'aws-logs',
+                    type: PACKAGES_SAVED_OBJECT_TYPE,
+                    attributes: { name: 'aws-logs', install_started_at: new Date().toISOString() },
+                  },
+                ],
+              });
+            }
+            return Promise.resolve({ saved_objects: [] });
+          }),
+        }
+      );
+      packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+
+      const response = await rollbackAvailableCheck(pkgName, []);
+      expect(response).toEqual({
+        isAvailable: false,
+        reason: `Expected exactly one saved object for dependency ${depName}`,
+      });
+    });
   });
 
   describe('bulkRollbackAvailableCheck', () => {
