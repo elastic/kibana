@@ -16,6 +16,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { runBuild } from './run_build';
 import type { ThemeTag } from './types';
 import { validateLimitsForAllBundles, updateBundleLimits, DEFAULT_LIMITS_PATH } from './limits';
+import { resolveBundlesDir, METRICS_FILENAME } from './paths';
 import { discoverPlugins } from './utils/plugin_discovery';
 import { getInspectExecArgv } from './utils/inspect';
 
@@ -165,7 +166,7 @@ export function runRspackCli(options: CliOptions = {}): void {
       }
 
       if (updateLimits) {
-        const metricsPath = Path.resolve(outputRoot, 'target/public/bundles/metrics.json');
+        const metricsPath = Path.resolve(resolveBundlesDir(outputRoot), METRICS_FILENAME);
         updateBundleLimits(log, metricsPath, limitsPath);
       }
 

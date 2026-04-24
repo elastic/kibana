@@ -11,6 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 import type { Compiler } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { STATS_FILENAME } from '../paths';
 
 /**
  * Context directories for focused plugins, used to match modules by file path.
@@ -137,7 +138,7 @@ export class EmitStatsPlugin {
 
   apply(compiler: Compiler) {
     compiler.hooks.afterDone.tap('EmitStatsPlugin', (stats) => {
-      const statsPath = Path.resolve(this.outputDir, 'stats.json');
+      const statsPath = Path.resolve(this.outputDir, STATS_FILENAME);
 
       this.log?.info('Generating stats.json for bundle analysis...');
 

@@ -8,6 +8,7 @@
  */
 
 import { rspack, type Compiler, type Chunk } from '@rspack/core';
+import { CHUNK_MANIFEST_FILENAME } from '../paths';
 
 /**
  * Emits `chunk-manifest.json` with a single field:
@@ -89,7 +90,7 @@ export class ChunkPreloadManifestPlugin {
           allChunkFiles.sort();
 
           compilation.emitAsset(
-            'chunk-manifest.json',
+            CHUNK_MANIFEST_FILENAME,
             new rspack.sources.RawSource(JSON.stringify({ allChunks: allChunkFiles }))
           );
         }

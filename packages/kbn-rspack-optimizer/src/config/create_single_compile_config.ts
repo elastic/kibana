@@ -19,6 +19,7 @@ import {
   getPackageMapPath,
   type PluginEntry,
 } from '../utils/plugin_discovery';
+import { resolveBundlesDir, resolveEntryWrappersDir } from '../paths';
 import { loadDllManifest } from './dll_manifest';
 import { getExternals } from './externals';
 import {
@@ -277,7 +278,7 @@ export async function createSingleCompileConfig(
 
   // Create a SINGLE unified entry that imports ALL plugins
   // This ensures RSPack can properly deduplicate modules across all plugins
-  const wrapperDir = Path.resolve(outputRoot, 'target/.rspack-entry-wrappers');
+  const wrapperDir = resolveEntryWrappersDir(outputRoot);
   if (!Fs.existsSync(wrapperDir)) {
     Fs.mkdirSync(wrapperDir, { recursive: true });
   }
@@ -309,8 +310,7 @@ export async function createSingleCompileConfig(
   // are initialized in the correct order. The `externals` only covers
   // npm packages from @kbn/ui-shared-deps.
 
-  // Output directory for all bundles (used in output.path and profiling plugins)
-  const bundlesDir = Path.resolve(outputRoot, 'target/public/bundles');
+  const bundlesDir = resolveBundlesDir(outputRoot);
 
   return {
     name: 'kibana',

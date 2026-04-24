@@ -10,6 +10,7 @@
 import Path from 'path';
 import { rspack, type Compiler, type Chunk } from '@rspack/core';
 import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import { METRICS_FILENAME } from '../paths';
 
 /**
  * Per-plugin/core metrics info used internally by BundleMetricsPlugin.
@@ -453,7 +454,7 @@ export class BundleMetricsPlugin {
           );
 
           compilation.emitAsset(
-            'metrics.json',
+            METRICS_FILENAME,
             new rspack.sources.RawSource(JSON.stringify(metrics, null, 2))
           );
         }

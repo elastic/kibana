@@ -15,6 +15,7 @@ import { createSingleCompileConfig } from './config/create_single_compile_config
 import { isHmrEnabled } from './hmr/hmr_enabled';
 import { HmrServer } from './hmr/hmr_server';
 import type { ThemeTag } from './types';
+import { BUNDLES_SUBDIR } from './paths';
 
 export interface BuildOptions {
   repoRoot: string;
@@ -180,7 +181,7 @@ async function runProductionBuild(
       const result = processStats(stats, log, { duration });
 
       if (result.success) {
-        log?.debug('Bundles ready at target/public/bundles/');
+        log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
       }
 
       compiler.close(() => {
@@ -304,7 +305,7 @@ async function runWatchBuild(
             for (const asset of result.assets ?? []) {
               previousAssetSizes.set(asset.name, asset.size);
             }
-            log?.debug('Bundles ready at target/public/bundles/');
+            log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
             if (stats.hash && hmrServer) {
               hmrServer.broadcast(stats.hash);
               cleanupStaleHotUpdates(stats.hash);
@@ -351,7 +352,7 @@ async function runWatchBuild(
           });
           const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
 
-          log?.debug('Bundles ready at target/public/bundles/');
+          log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
           if (stats.hash && hmrServer) {
             const changedFiles = compiler.modifiedFiles
               ? [...compiler.modifiedFiles]
