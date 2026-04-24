@@ -7,38 +7,37 @@
 
 import React from 'react';
 import {
-  EuiBadge,
+  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiIconProps } from '@elastic/eui';
+import type { EuiAvatarProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 const MAX_DESCRIPTION_WIDTH = 640;
 
+export type StatusHeaderVariant = 'critical' | 'noCriticalEvents';
+
 export interface StatusHeaderProps {
-  modeLabel?: string;
+  variant?: StatusHeaderVariant;
   title?: string;
   description?: string;
-  iconType?: EuiIconProps['type'];
-  iconColor?: EuiIconProps['color'];
+  iconType?: NonNullable<EuiAvatarProps['iconType']>;
+  iconColor?: EuiAvatarProps['color'];
+  iconGlyphColor?: EuiAvatarProps['iconColor'];
+  iconSize?: EuiAvatarProps['size'];
 }
 
-const DEFAULT_MODE_LABEL = i18n.translate('xpack.observability.sigeventsOverview.modeBadge', {
-  defaultMessage: 'SIGNIFICANT EVENTS',
-});
+const DEFAULT_CRITICAL_TITLE = i18n.translate(
+  'xpack.observability.sigeventsOverview.mainHeading',
+  { defaultMessage: 'Your system requires attention' }
+);
 
-const DEFAULT_TITLE = i18n.translate('xpack.observability.sigeventsOverview.mainHeading', {
-  defaultMessage: 'Your system requires attention',
-});
-
-const DEFAULT_DESCRIPTION = i18n.translate(
+const DEFAULT_CRITICAL_DESCRIPTION = i18n.translate(
   'xpack.observability.sigeventsOverview.introDescription',
   {
     defaultMessage:
@@ -46,14 +45,56 @@ const DEFAULT_DESCRIPTION = i18n.translate(
   }
 );
 
+const DEFAULT_NO_CRITICAL_TITLE = i18n.translate(
+  'xpack.observability.sigeventsOverview.statusHeader.noCriticalEvents.title',
+  { defaultMessage: 'You have no critical significant events' }
+);
+
+const DEFAULT_NO_CRITICAL_DESCRIPTION = i18n.translate(
+  'xpack.observability.sigeventsOverview.statusHeader.noCriticalEvents.description',
+  {
+    defaultMessage:
+      'Here are some low and medium severity suggestions of significant events we recommend reviewing.',
+  }
+);
+
 export const StatusHeader = ({
-  modeLabel = DEFAULT_MODE_LABEL,
-  title = DEFAULT_TITLE,
-  description = DEFAULT_DESCRIPTION,
-  iconType = 'radar',
-  iconColor = 'danger',
+  variant = 'critical',
+  title,
+  description,
+  iconType,
+  iconColor,
+  iconGlyphColor,
+  iconSize = 'l',
 }: StatusHeaderProps) => {
   const { euiTheme } = useEuiTheme();
+
+  const isNoCriticalVariant = variant === 'noCriticalEvents';
+
+  const resolvedTitle =
+    title ?? (isNoCriticalVariant ? DEFAULT_NO_CRITICAL_TITLE : DEFAULT_CRITICAL_TITLE);
+
+  const resolvedDescription =
+    description ??
+    (isNoCriticalVariant ? DEFAULT_NO_CRITICAL_DESCRIPTION : DEFAULT_CRITICAL_DESCRIPTION);
+
+  const resolvedIconType = iconType ?? (isNoCriticalVariant ? 'faceHappy' : 'radar');
+  const resolvedIconColor =
+    iconColor ??
+    (isNoCriticalVariant
+      ? euiTheme.colors.backgroundLightSuccess
+      : euiTheme.colors.backgroundLightDanger);
+  const resolvedIconGlyphColor =
+    iconGlyphColor ??
+    (isNoCriticalVariant ? euiTheme.colors.severity.success : euiTheme.colors.severity.danger);
+
+  const titleColorCss = isNoCriticalVariant
+    ? css`
+        color: ${euiTheme.colors.textHeading};
+      `
+    : css`
+        color: ${euiTheme.colors.dangerText};
+      `;
 
   return (
     <EuiFlexGroup
@@ -64,29 +105,22 @@ export const StatusHeader = ({
       data-test-subj="sigeventsOverviewStatusHeader"
     >
       <EuiFlexItem grow={false}>
-        <EuiBadge iconType="moon" color="hollow">
-          {modeLabel}
-        </EuiBadge>
+        <EuiAvatar
+          size={iconSize}
+          name={resolvedTitle}
+          iconType={resolvedIconType}
+          color={resolvedIconColor}
+          iconColor={resolvedIconGlyphColor}
+          aria-hidden
+        />
       </EuiFlexItem>
-      <EuiSpacer size="s" />
+
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={iconType} size="l" color={iconColor} aria-hidden />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2
-                css={css`
-                  color: ${euiTheme.colors.dangerText};
-                `}
-              >
-                {title}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="m">
+          <h2 css={titleColorCss}>{resolvedTitle}</h2>
+        </EuiTitle>
       </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         <EuiText
           size="xs"
@@ -96,7 +130,7 @@ export const StatusHeader = ({
             max-width: ${MAX_DESCRIPTION_WIDTH}px;
           `}
         >
-          <p>{description}</p>
+          <p>{resolvedDescription}</p>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
