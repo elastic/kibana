@@ -15,6 +15,7 @@ import {
   within,
   fireEvent,
 } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -919,14 +920,16 @@ describe('dimension editor', () => {
     describe('data section', () => {
       function renderBreakdownEditorDataSection(overrides = {}) {
         const rtlRender = render(
-          <DimensionEditorDataExtraComponent
-            {...props}
-            groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
-            state={{ ...fullState, breakdownByAccessor: accessor }}
-            accessor={accessor}
-            setState={mockSetState}
-            {...overrides}
-          />
+          <EuiThemeProvider colorMode="light">
+            <DimensionEditorDataExtraComponent
+              {...props}
+              groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
+              state={{ ...fullState, breakdownByAccessor: accessor }}
+              accessor={accessor}
+              setState={mockSetState}
+              {...overrides}
+            />
+          </EuiThemeProvider>
         );
 
         const selectCollapseBy = async (collapseFn: string) => {
@@ -939,14 +942,16 @@ describe('dimension editor', () => {
           selectCollapseBy,
           rerender: (newOverrides = {}) => {
             rtlRender.rerender(
-              <DimensionEditorDataExtraComponent
-                {...props}
-                groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
-                state={{ ...fullState, breakdownByAccessor: accessor }}
-                accessor={accessor}
-                setState={mockSetState}
-                {...newOverrides}
-              />
+              <EuiThemeProvider colorMode="light">
+                <DimensionEditorDataExtraComponent
+                  {...props}
+                  groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
+                  state={{ ...fullState, breakdownByAccessor: accessor }}
+                  accessor={accessor}
+                  setState={mockSetState}
+                  {...newOverrides}
+                />
+              </EuiThemeProvider>
             );
           },
         };

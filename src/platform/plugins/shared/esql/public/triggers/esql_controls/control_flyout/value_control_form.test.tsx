@@ -94,8 +94,7 @@ describe('ValueControlForm', () => {
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
       expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-      const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-      expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+      expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
 
       // variable name input should be rendered and with the default value
       expect(await findByTestId('esqlVariableName')).toHaveValue('?interval');
@@ -238,8 +237,7 @@ describe('ValueControlForm', () => {
         );
         // control type dropdown should be rendered and default to 'Values from a query'
         expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-        const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-        expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(
+        expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(
           `Values from a query`
         );
 
@@ -266,8 +264,7 @@ describe('ValueControlForm', () => {
         fireEvent.change(variableNameInput, { target: { value: '??field' } });
 
         expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-        const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-        expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+        expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
         // identifiers dropdown should be rendered
         const identifiersOptionsDropdown = await findByTestId('esqlIdentifiersOptions');
         expect(identifiersOptionsDropdown).toBeInTheDocument();

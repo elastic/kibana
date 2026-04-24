@@ -19,6 +19,7 @@ import {
   createPromptRequestEvent,
   createReasoningEvent,
   createTextChunkEvent,
+  createBackgroundAgentCompleteEvent,
   createThinkingCompleteEvent,
   createToolCallEvent,
   createToolResultEvent,
@@ -39,6 +40,7 @@ import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
 import type { ToolCallResult } from './actions';
 import {
   isAnswerAction,
+  isBackgroundExecutionCompleteAction,
   isExecuteToolAction,
   isStructuredAnswerAction,
   isToolCallAction,
@@ -105,10 +107,12 @@ export const convertGraphEvents = ({
           const nextAction = addedActions[addedActions.length - 1];
 
           if (isToolCallAction(nextAction)) {
-            const { tool_calls: toolCalls, message: messageText = '' } = nextAction;
+            const {
+              tool_calls: toolCalls,
+              tool_call_group_id: toolCallGroupId,
+              message: messageText = '',
+            } = nextAction;
             if (toolCalls.length > 0) {
-              const toolCallGroupId = uuidv4();
-
               if (messageText.trim().length > 0) {
                 events.push(createReasoningEvent(messageText, { toolCallGroupId }));
               }
@@ -139,6 +143,7 @@ export const convertGraphEvents = ({
                       toolCallId,
                       params: toolCallArgs,
                       toolCallGroupId,
+                      toolOrigin: toolManager.getToolOrigin(toolId),
                     })
                   );
                 }
@@ -209,6 +214,22 @@ export const convertGraphEvents = ({
 
           if (resultEvents.length > 0) {
             return of(...resultEvents);
+          }
+        }
+
+        // emit background execution complete events
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.checkBackgroundWork)) {
+          const addedActions = (event.data.output as Partial<StateType>).mainActions ?? [];
+          const bgEvents: ConvertedEvents[] = [];
+
+          for (const action of addedActions) {
+            if (isBackgroundExecutionCompleteAction(action)) {
+              bgEvents.push(createBackgroundAgentCompleteEvent(action.execution));
+            }
+          }
+
+          if (bgEvents.length > 0) {
+            return of(...bgEvents);
           }
         }
 

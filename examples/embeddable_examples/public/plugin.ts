@@ -63,7 +63,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     const startServicesPromise = core.getStartServices();
 
-    embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
+    embeddable.registerEmbeddablePublicDefinition(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
         './react_embeddables/field_list/field_list_embeddable'
       );
@@ -71,7 +71,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return getFieldListFactory(coreStart, deps);
     });
 
-    embeddable.registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
+    embeddable.registerEmbeddablePublicDefinition(DATA_TABLE_ID, async () => {
       const { getDataTableFactory } = await import(
         './react_embeddables/data_table/data_table_react_embeddable'
       );
