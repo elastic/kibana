@@ -94,7 +94,17 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m" alignItems="center">
+      <EuiFlexGroup
+        gutterSize="m"
+        alignItems="center"
+        responsive={false}
+        wrap
+        css={css`
+          & > .euiFlexItem {
+            flex-shrink: 0;
+          }
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiSelect
             prepend="View by"
@@ -105,7 +115,9 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
             compressed
           />
         </EuiFlexItem>
-        <AnomalySeverityFilter anomalyBands={bands} toggleHiddenBand={toggleHiddenBand} />
+        <EuiFlexItem grow={false}>
+          <AnomalySeverityFilter anomalyBands={bands} toggleHiddenBand={toggleHiddenBand} />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup>
         {viewBy === 'entity' && entityMetadata ? (

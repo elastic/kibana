@@ -252,7 +252,7 @@ export const EntityAnalyticsHomePage = () => {
 
             <EuiFlexItem>
               <EuiFlexGroup wrap gutterSize="m">
-                <RiskPanelFlexItem>
+                <RiskPanelFlexItem grow={3}>
                   <EuiPanel hasBorder>
                     <DynamicRiskLevelPanel
                       watchlistId={selectedWatchlistId}
@@ -261,7 +261,7 @@ export const EntityAnalyticsHomePage = () => {
                     />
                   </EuiPanel>
                 </RiskPanelFlexItem>
-                <AnomaliesPanelFlexItem>
+                <AnomaliesPanelFlexItem grow={5}>
                   <EuiPanel hasBorder>
                     <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
                   </EuiPanel>
