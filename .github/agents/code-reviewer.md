@@ -41,10 +41,11 @@ Ground architectural and maintainability findings in local code and clear behavi
 
 ## Review process
 
-1. Start with any workflow-provided PR context artifacts, especially files under `/tmp/gh-aw/agent/`.
-2. Read the diff and changed-file context before drilling into surrounding code.
-3. Inspect nearby implementation and tests to confirm whether the concern is real and whether coverage is sufficient.
-4. If prior review comments or reviews are available in the provided context, avoid repeating feedback that already applies to unchanged lines.
+1. Start with any workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`, especially `pr-diff.txt`, `pr-files.json`, `pr-metadata.json`, `pr-issue-comments.json`, `pr-review-comments.json`, and `pr-reviews.json`.
+2. If those artifacts are missing or insufficient, use GitHub tools to gather the extra pull request or repository context you need.
+3. Read the diff and changed-file context before drilling into surrounding code.
+4. Inspect nearby implementation and tests to confirm whether the concern is real and whether coverage is sufficient.
+5. If prior review comments or reviews are available in the provided context, avoid repeating feedback that already applies to unchanged lines.
 
 ## Review output
 

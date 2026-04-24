@@ -7,6 +7,8 @@ on:
         description: Pull request number to review
         required: true
         type: string
+resources:
+  - utils/prefetch-pr-context.yml
 imports:
   - .github/agents/code-reviewer.md
 secrets:
@@ -26,27 +28,21 @@ network:
     - defaults
     - github
     - elastic.litellm-prod.ai
+jobs:
+  prefetch_pr_context:
+    uses: ./.github/workflows/utils/prefetch-pr-context.yml
+    with:
+      pr_number: ${{ github.event.inputs.pr_number }}
+      repo: ${{ github.repository }}
+      artifact_name: prefetched-pr-context-${{ github.event.inputs.pr_number }}
+    secrets:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
 steps:
-  - name: Prefetch PR context
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      PR_NUMBER: ${{ github.event.inputs.pr_number }}
-      REPO: ${{ github.repository }}
-    run: |
-      mkdir -p /tmp/gh-aw/agent
-      gh pr view "$PR_NUMBER" --repo "$REPO" \
-        --json number,title,body,url,isDraft,author,baseRefName,headRefName,labels \
-        > /tmp/gh-aw/agent/pr-metadata.json
-      gh api "repos/$REPO/pulls/$PR_NUMBER/files?per_page=100" --paginate \
-        > /tmp/gh-aw/agent/pr-files.json
-      gh api "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" --paginate \
-        > /tmp/gh-aw/agent/pr-issue-comments.json
-      gh api "repos/$REPO/pulls/$PR_NUMBER/comments?per_page=100" --paginate \
-        > /tmp/gh-aw/agent/pr-review-comments.json
-      gh api "repos/$REPO/pulls/$PR_NUMBER/reviews?per_page=100" --paginate \
-        > /tmp/gh-aw/agent/pr-reviews.json
-      gh pr diff "$PR_NUMBER" --repo "$REPO" \
-        > /tmp/gh-aw/agent/pr-diff.txt
+  - name: Download prefetched PR context
+    uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+    with:
+      name: prefetched-pr-context-${{ github.event.inputs.pr_number }}
+      path: /tmp/gh-aw/agent
 safe-outputs:
   create-pull-request-review-comment:
     max: 10
@@ -62,24 +58,6 @@ safe-outputs:
 
 Review pull request #${{ github.event.inputs.pr_number }} in `${{ github.repository }}` using the imported reviewer instructions.
 
-## Workflow context
+This workflow is manual and test-only for now.
 
-- This workflow is manual and test-only for now.
-- Start with the prefetched files in `/tmp/gh-aw/agent/`:
-  - `pr-metadata.json`
-  - `pr-files.json`
-  - `pr-diff.txt`
-  - `pr-issue-comments.json`
-  - `pr-review-comments.json`
-  - `pr-reviews.json`
-- Use GitHub tools for extra repository or pull request context only when the prefetched files are not enough.
-
-## Output rules
-
-- Review only the changes in this pull request.
-- Use `create-pull-request-review-comment` for concrete line-level findings.
-- Submit exactly one final review with `submit-pull-request-review`.
-- Keep the final review event as `COMMENT`.
-- If there are no findings, the final review body must be exactly `No issues found.`
-- Do not post any other GitHub comments.
-- Do not handle `@claude` comments, review replies, or follow-up conversational requests in this workflow.
+Do not handle `@claude` comments, review replies, or follow-up conversational requests in this workflow.
