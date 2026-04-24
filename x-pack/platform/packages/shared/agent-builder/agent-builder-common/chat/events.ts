@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderEvent } from '../base/events';
+import type { ToolOrigin } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
   ConversationInternalState,
@@ -47,6 +48,7 @@ export interface ToolCallEventData {
   tool_id: string;
   params: Record<string, unknown>;
   tool_call_group_id?: string;
+  tool_origin?: ToolOrigin;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;

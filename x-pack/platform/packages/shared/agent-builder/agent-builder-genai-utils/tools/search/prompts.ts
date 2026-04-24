@@ -6,23 +6,27 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { SearchTarget } from './types';
 import { cleanPrompt } from '../../prompts';
+import type { ResourceDescriptor } from '../index_explorer';
+import { formatResource } from '../index_explorer';
 
 import {
   naturalLanguageSearchToolName as nlTool,
+  noMatchingResourceToolName as noMatchTool,
   relevanceSearchToolName as relevanceTool,
 } from './inner_tools';
 
-export const getSearchPrompt = ({
+export const getSearchDispatcherPrompt = ({
   nlQuery,
-  searchTarget,
+  resources,
   customInstructions,
 }: {
   nlQuery: string;
-  searchTarget: SearchTarget;
+  resources: ResourceDescriptor[];
   customInstructions?: string;
 }): BaseMessageLike[] => {
+  const resourceListing = resources.map(formatResource).join('\n');
+
   const systemPrompt =
     cleanPrompt(`You are a search dispatcher. Your ONLY task is to call the appropriate search tool with the correct parameters.
 
@@ -30,38 +34,33 @@ export const getSearchPrompt = ({
 
 - You MUST call exactly ONE tool. Do NOT respond with text.
 - Do NOT ask clarifying questions. Make your best judgment.
+- The \`index\` parameter MUST be the name of one of the available resources listed below.
+- Call \`${noMatchTool}\` only when no listed resource can plausibly answer the query.
 
-## Search Target
+## Tool Selection Guidance
 
-- Name: \`${searchTarget.name}\`
-- Type: ${searchTarget.type}
-- Use this value for the \`index\` parameter in your tool call.
+### '${relevanceTool}' (full-text search)
+Use when the target resource has text or semantic_text fields AND the query is about finding content by topic, concept, or matching unstructured text.
+Examples: "find information about our Q3 earnings report", "search for documents mentioning 'data privacy'"
 
-## Available Tools
+### '${nlTool}' (structured/analytical search)
+Use for filtering by specific values, aggregations, calculations, sorting, counting, entity lookups by ID, or any structured data analysis. If the resource's field metadata explicitly shows it has no text or semantic_text fields, always use this tool. If field metadata is missing or unknown (e.g. for aliases), use your best judgment based on the query intent.
+Examples: "what is the average order value?", "find the customer with ID 914255", "how many errors were logged in the past hour?"
 
-### 1. Relevance Search Tool ('${relevanceTool}')
-- **Purpose**: For full-text, relevance-based searches. Use this when the user is looking for documents based on topics, concepts, or matching unstructured text. The results are ranked by a relevance score.
-- **Schema**: { index: string, term: string }
-- **Use Case Examples**:
-  - "find information about our Q3 earnings report"
-  - "search for documents mentioning 'data privacy'"
-  - "what is our policy on remote work?"
-
-### 2. Natural Language Analytic Tool ('${nlTool}')
-- **Purpose**: For structured queries, aggregations, and calculations. Use this for any query that requires sorting by a specific field, filtering by exact values, counting, or creating data breakdowns.
-- **Schema**: { index: string, query: string }
-- **Use Case Examples**:
-  - "show me the last 5 documents"
-  - "what is the average order value?"
-  - "list all products where status is 'in_stock' and price is less than 50"
-  - "how many errors were logged in the past hour?"
+### '${noMatchTool}' (escape hatch)
+Use ONLY when none of the listed resources can plausibly answer the query. Call with no arguments.
 
 ${customInstructions ? `## Additional Instructions\n\n${customInstructions}\n` : ''}
+## Available Resources
+
+<available_resources>
+${resourceListing}
+</available_resources>
 `);
 
   const userPrompt = `Execute the following user query: "${nlQuery}"
 
-Call exactly ONE tool now with index="${searchTarget.name}".`;
+Call exactly ONE tool now. Select the most relevant resource as the index and the appropriate search strategy.`;
 
   return [
     ['system', systemPrompt],
