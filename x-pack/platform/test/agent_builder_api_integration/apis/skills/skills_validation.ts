@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Skills Validation API', function () {
     this.tags(['skipServerless']);
     const createdSkillIds: string[] = [];
-    const BUILTIN_SKILL_ID = 'data-exploration';
+    const BUILTIN_SKILL_ID = 'visualization-creation';
 
     after(async () => {
       for (const skillId of createdSkillIds) {
