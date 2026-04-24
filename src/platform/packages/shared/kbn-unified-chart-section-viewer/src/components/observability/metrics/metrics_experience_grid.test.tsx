@@ -394,10 +394,12 @@ describe('MetricsExperienceGrid', () => {
 
       // Discover already breaks down by `host.name`, which survives the
       // prune; the wipe must leave it untouched.
-      useDiscoverFieldForBreakdownMock.mockReturnValue('host.name');
-
       render(
-        <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
+        <MetricsExperienceGrid
+          {...defaultProps}
+          breakdownField="host.name"
+          onBreakdownFieldChange={onBreakdownFieldChange}
+        />,
         { wrapper: IntlProvider }
       );
 
