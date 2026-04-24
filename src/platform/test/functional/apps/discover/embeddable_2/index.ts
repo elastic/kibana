@@ -13,7 +13,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover/embeddable', function () {
+  describe('discover/embeddable_2', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });
@@ -24,6 +24,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_saved_search_embeddable'));
+    loadTestFile(require.resolve('../embeddable/multiple_data_views'));
+    loadTestFile(require.resolve('../embeddable/_log_stream_embeddable'));
+    loadTestFile(require.resolve('../embeddable/_esql_embeddable'));
+    loadTestFile(require.resolve('../embeddable/_new_panel_embeddable'));
+    loadTestFile(require.resolve('../embeddable/_save_session_to_dashboard'));
   });
 }

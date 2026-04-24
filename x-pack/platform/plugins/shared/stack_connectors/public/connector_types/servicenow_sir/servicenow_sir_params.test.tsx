@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { act, screen, waitFor, within } from '@testing-library/react';
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
@@ -15,6 +14,7 @@ import ServiceNowSIRParamsFields from './servicenow_sir_params';
 import type { Choice } from '../lib/servicenow/types';
 import { merge } from 'lodash';
 import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -151,19 +151,18 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('all params fields is rendered', () => {
-    const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+    renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="correlation_idInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="correlation_displayInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('short_descriptionInput')).toBeInTheDocument();
+    expect(screen.getByTestId('correlation_idInput')).toBeInTheDocument();
+    expect(screen.getByTestId('correlation_displayInput')).toBeInTheDocument();
+    expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('categorySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('subcategorySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('commentsTextArea')).toBeInTheDocument();
   });
 
   test('If short_description has errors, form row is invalid', () => {
@@ -171,9 +170,9 @@ describe('ServiceNowSIRParamsFields renders', () => {
       ...defaultProps,
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
-    const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);
-    const title = wrapper.find('[data-test-subj="short_descriptionInput"]').first();
-    expect(title.prop('isInvalid')).toBeTruthy();
+    renderWithI18n(<ServiceNowSIRParamsFields {...newProps} />);
+    const titleInput = screen.getByTestId('short_descriptionInput');
+    expect(titleInput).toHaveAttribute('aria-invalid', 'true');
   });
 
   test('When subActionParams is undefined, set to default', () => {
@@ -183,7 +182,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);
+    renderWithI18n(<ServiceNowSIRParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {
         correlation_id: '{{rule.id}}:{{alert.id}}',
@@ -199,14 +198,21 @@ describe('ServiceNowSIRParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);
+    renderWithI18n(<ServiceNowSIRParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual('pushToService');
   });
 
   test('Resets fields when connector changes', () => {
-    const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+    const { rerender } = renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
-    wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
+    rerender(
+      <I18nProvider>
+        <ServiceNowSIRParamsFields
+          {...defaultProps}
+          actionConnector={{ ...connector, id: '1234' }}
+        />
+      </I18nProvider>
+    );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {
@@ -217,13 +223,19 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('it transforms the categories to options correctly', async () => {
-    const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+    renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
 
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="categorySelect"]').first().prop('options')).toEqual([
+    const categorySelect = screen.getByTestId('categorySelect');
+    const options = within(categorySelect)
+      .getAllByRole('option')
+      .map((opt) => ({
+        value: (opt as HTMLOptionElement).value,
+        text: opt.textContent,
+      }));
+    expect(options).toEqual([
       { value: 'Priviledge Escalation', text: 'Priviledge Escalation' },
       {
         value: 'Criminal activity/investigation',
@@ -235,13 +247,19 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('it transforms the subcategories to options correctly', async () => {
-    const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+    renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
 
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="subcategorySelect"]').first().prop('options')).toEqual([
+    const subcategorySelect = screen.getByTestId('subcategorySelect');
+    const options = within(subcategorySelect)
+      .getAllByRole('option')
+      .map((opt) => ({
+        value: (opt as HTMLOptionElement).value,
+        text: opt.textContent,
+      }));
+    expect(options).toEqual([
       {
         text: 'Inbound or outbound',
         value: '12',
@@ -258,13 +276,19 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('it transforms the priorities to options correctly', async () => {
-    const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+    renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
 
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('options')).toEqual([
+    const prioritySelect = screen.getByTestId('prioritySelect');
+    const options = within(prioritySelect)
+      .getAllByRole('option')
+      .map((opt) => ({
+        value: (opt as HTMLOptionElement).value,
+        text: opt.textContent,
+      }));
+    expect(options).toEqual([
       {
         text: '1 - Critical',
         value: '1',
@@ -287,6 +311,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
       },
     ]);
   });
+
   it('should hide subcategory if selecting a category without subcategories', async () => {
     const newProps = merge({}, defaultProps, {
       actionParams: {
@@ -298,54 +323,88 @@ describe('ServiceNowSIRParamsFields renders', () => {
         },
       },
     });
-    const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);
+    renderWithI18n(<ServiceNowSIRParamsFields {...newProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
+    expect(screen.queryByTestId('subcategorySelect')).not.toBeInTheDocument();
   });
 
   describe('UI updates', () => {
-    const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
     const simpleFields = [
-      { dataTestSubj: 'input[data-test-subj="short_descriptionInput"]', key: 'short_description' },
-      { dataTestSubj: 'input[data-test-subj="correlation_idInput"]', key: 'correlation_id' },
       {
-        dataTestSubj: 'input[data-test-subj="correlation_displayInput"]',
-        key: 'correlation_display',
+        dataTestSubj: 'short_descriptionInput',
+        key: 'short_description',
+        changeValue: 'Bug',
+        fieldType: 'text' as const,
       },
-      { dataTestSubj: 'textarea[data-test-subj="descriptionTextArea"]', key: 'description' },
-      { dataTestSubj: '[data-test-subj="prioritySelect"]', key: 'priority' },
-      { dataTestSubj: '[data-test-subj="categorySelect"]', key: 'category' },
-      { dataTestSubj: '[data-test-subj="subcategorySelect"]', key: 'subcategory' },
+      {
+        dataTestSubj: 'correlation_idInput',
+        key: 'correlation_id',
+        changeValue: 'Bug',
+        fieldType: 'text' as const,
+      },
+      {
+        dataTestSubj: 'correlation_displayInput',
+        key: 'correlation_display',
+        changeValue: 'Bug',
+        fieldType: 'text' as const,
+      },
+      {
+        dataTestSubj: 'descriptionTextArea',
+        key: 'description',
+        changeValue: 'Bug',
+        fieldType: 'text' as const,
+      },
+      {
+        dataTestSubj: 'prioritySelect',
+        key: 'priority',
+        changeValue: '1',
+        fieldType: 'select' as const,
+      },
+      {
+        dataTestSubj: 'categorySelect',
+        key: 'category',
+        changeValue: 'Denial of Service',
+        fieldType: 'select' as const,
+      },
+      {
+        dataTestSubj: 'subcategorySelect',
+        key: 'subcategory',
+        changeValue: '12',
+        fieldType: 'select' as const,
+      },
     ];
 
     simpleFields.forEach((field) =>
-      test(`${field.key} update triggers editAction :D`, () => {
-        const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+      test(`${field.key} update triggers editAction`, async () => {
+        renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
         act(() => {
           onChoicesSuccess(choicesResponse.choices);
         });
-        wrapper.update();
-        const theField = wrapper.find(field.dataTestSubj).first();
-        theField.prop('onChange')!(changeEvent);
-        expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(changeEvent.target.value);
+        const theField = screen.getByTestId(field.dataTestSubj);
+        if (field.fieldType === 'select') {
+          await userEvent.selectOptions(theField, field.changeValue);
+          expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(field.changeValue);
+        } else {
+          await userEvent.tripleClick(theField);
+          await userEvent.paste(field.changeValue);
+          expect(editAction.mock.calls.at(-1)![1].incident[field.key]).toEqual(field.changeValue);
+        }
       })
     );
 
-    test('A comment triggers editAction', () => {
-      const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
-      const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
-      expect(comments.simulate('change', changeEvent));
-      expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
+    test('A comment triggers editAction', async () => {
+      renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
+      const commentsTextArea = screen.getByTestId('commentsTextArea');
+      await userEvent.tripleClick(commentsTextArea);
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)![1].comments.length).toEqual(1);
     });
 
     it('updates additional fields', async () => {
       const newValue = JSON.stringify({ bar: 'test' });
-      render(<ServiceNowSIRParamsFields {...defaultProps} />, {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      });
+      renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
 
       await userEvent.click(await screen.findByTestId('additional_fieldsJsonEditor'));
       await userEvent.paste(newValue);
