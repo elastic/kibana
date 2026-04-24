@@ -7,5 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** `type` discriminator for as-code `data_source`: ES|QL query. */
-export const AS_CODE_ESQL_DATA_SOURCE_TYPE = 'esql' as const;
+import { schema } from '@kbn/config-schema';
+
+export const indexPatternSchema = schema.string({
+  meta: {
+    description:
+      'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".',
+  },
+});
+
+export const timeFieldSchema = schema.maybe(
+  schema.string({
+    meta: {
+      description:
+        'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
+    },
+  })
+);

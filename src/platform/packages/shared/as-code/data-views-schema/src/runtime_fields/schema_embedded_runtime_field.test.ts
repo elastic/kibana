@@ -15,8 +15,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import type {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
-} from './schema_runtime_field';
-import { runtimeFieldSchema } from './schema_runtime_field';
+} from './schema_embedded_runtime_field';
+import { runtimeFieldSchema } from './schema_embedded_runtime_field';
 
 const buildPrimitiveRuntimeField = (
   params: Partial<TypeOf<typeof primitiveRuntimeFieldSchema>>

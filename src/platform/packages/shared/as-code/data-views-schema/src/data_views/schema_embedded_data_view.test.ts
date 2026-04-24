@@ -9,7 +9,7 @@
 
 import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
-import { dataViewSpecSchema } from './schema_data_view';
+import { dataViewSpecSchema } from './schema_embedded_data_view';
 
 describe('dataViewSpecSchema field_settings', () => {
   it('accepts indexed field overrides', () => {
