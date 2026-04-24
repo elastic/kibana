@@ -13,14 +13,15 @@ import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common'
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
-function isEnotfoundError(e: unknown): boolean {
-  if (e instanceof Error) {
-    if ((e as NodeJS.ErrnoException).code === 'ENOTFOUND') {
-      return true;
-    }
-    if ('cause' in e && e.cause) {
-      return isEnotfoundError(e.cause);
-    }
+function isEnotfoundError(e: unknown, depth = 0): boolean {
+  if (depth > 5 || !(e instanceof Error)) {
+    return false;
+  }
+  if ((e as NodeJS.ErrnoException).code === 'ENOTFOUND') {
+    return true;
+  }
+  if ('cause' in e && e.cause) {
+    return isEnotfoundError(e.cause, depth + 1);
   }
   return false;
 }
