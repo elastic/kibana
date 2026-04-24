@@ -23,7 +23,7 @@ import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { EmbeddableStateTransfer } from '.';
 import { setKibanaServices } from './kibana_services';
 import { EmbeddablePublicPlugin } from './plugin';
-import { registerReactEmbeddableFactory } from './react_embeddable_system';
+import { registerEmbeddablePublicDefinition } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
 import type {
   EmbeddableSetup,
@@ -52,7 +52,9 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerDrilldown: jest.fn(),
-    registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
+    registerEmbeddablePublicDefinition: jest
+      .fn()
+      .mockImplementation(registerEmbeddablePublicDefinition),
     registerLegacyURLTransform: jest.fn(),
   };
   return setupContract;
