@@ -26,8 +26,8 @@ export const stopEntityEngineRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'public',
-      path: '/api/entity_store/engines/{entityType}/stop',
+      access: 'internal',
+      path: '/internal/entity_store/engines/{entityType}/stop',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -36,7 +36,7 @@ export const stopEntityEngineRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(StopEntityEngineRequestParams),

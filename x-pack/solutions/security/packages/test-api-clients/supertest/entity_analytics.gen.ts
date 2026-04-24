@@ -121,9 +121,11 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
    */
   applyEntityEngineDataviewIndices(kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/api/entity_store/engines/apply_dataview_indices', kibanaSpace))
+      .post(
+        getRouteUrlForSpace('/internal/entity_store/engines/apply_dataview_indices', kibanaSpace)
+      )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
@@ -293,20 +295,20 @@ If a record already exists for the specified entity, that record is overwritten 
     return supertest
       .delete(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
   deleteEntityEngines(props: DeleteEntityEnginesProps, kibanaSpace: string = 'default') {
     return supertest
-      .delete(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
+      .delete(getRouteUrlForSpace('/internal/entity_store/engines', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
@@ -357,12 +359,12 @@ The entity will be immediately deleted from the latest index.  It will remain av
     return supertest
       .delete(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/entities/{entityType}', props.params),
+          replaceParams('/internal/entity_store/entities/{entityType}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -482,12 +484,12 @@ The entity will be immediately deleted from the latest index.  It will remain av
     return supertest
       .get(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   getEntitySource(props: GetEntitySourceProps, kibanaSpace: string = 'default') {
@@ -507,9 +509,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
    */
   getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/api/entity_store/status', kibanaSpace))
+      .get(getRouteUrlForSpace('/internal/entity_store/status', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
@@ -575,12 +577,12 @@ The entity will be immediately deleted from the latest index.  It will remain av
     return supertest
       .post(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}/init', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -589,9 +591,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
    */
   initEntityStore(props: InitEntityStoreProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/api/entity_store/enable', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/entity_store/enable', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -650,9 +652,9 @@ Each row will match up to 10,000 entities.
    */
   listEntities(props: ListEntitiesProps, kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/api/entity_store/entities/list', kibanaSpace))
+      .get(getRouteUrlForSpace('/internal/entity_store/entities/list', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
@@ -661,9 +663,9 @@ Each row will match up to 10,000 entities.
    */
   listEntityEngines(kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
+      .get(getRouteUrlForSpace('/internal/entity_store/engines', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   listEntitySources(props: ListEntitySourcesProps, kibanaSpace: string = 'default') {
@@ -815,12 +817,12 @@ Each row will match up to 10,000 entities.
     return supertest
       .post(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}/start', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
@@ -830,12 +832,12 @@ Each row will match up to 10,000 entities.
     return supertest
       .post(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
+          replaceParams('/internal/entity_store/engines/{entityType}/stop', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   syncWatchlist(props: SyncWatchlistProps, kibanaSpace: string = 'default') {
@@ -992,9 +994,9 @@ The creation is asynchronous. The time for a document to be present in the  fina
       */
   upsertEntitiesBulk(props: UpsertEntitiesBulkProps, kibanaSpace: string = 'default') {
     return supertest
-      .put(getRouteUrlForSpace('/api/entity_store/entities/bulk', kibanaSpace))
+      .put(getRouteUrlForSpace('/internal/entity_store/entities/bulk', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object)
       .query(props.query);
@@ -1010,12 +1012,12 @@ If the specified entity already exists, it is updated with the provided values. 
     return supertest
       .put(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_store/entities/{entityType}', props.params),
+          replaceParams('/internal/entity_store/entities/{entityType}', props.params),
           kibanaSpace
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object)
       .query(props.query);
