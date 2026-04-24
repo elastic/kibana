@@ -394,6 +394,73 @@ describe('useLensAttributes', () => {
     expect(result?.current).toBeNull();
   });
 
+  it('uses overridePatterns to build a negated exclusion filter for removed patterns (CPS-safe)', () => {
+    // The "should return null if no indices exist" test (above this one in execution order)
+    // changes useDataView to the default (no matched indices), so restore it here.
+    // The scope includes both event and alert-backing index patterns.
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-*', '.alerts-security.alerts-default']));
+
+    // Caller passes overridePatterns = filterAlertsFromIndexPatterns(selectedPatterns),
+    // i.e. the alert pattern has been removed.
+    const overridePatterns = ['auditbeat-*'];
+
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+          overridePatterns,
+        }),
+      { wrapper }
+    );
+
+    // The _index filter must be a NEGATED exclusion for the REMOVED pattern
+    // ('.alerts-security.alerts-default'), NOT an allowlist of overridePatterns.
+    // A negated filter allows CPS remote cluster documents to pass through while
+    // still excluding alert-backing index documents.
+    const negatedAlertFilter = getIndexFilters(['.alerts-security.alerts-default']).map((f) => ({
+      ...f,
+      meta: { ...f.meta, negate: true },
+    }));
+
+    // Default beforeEach route: hosts/events/mockHost, so pageFilters + tabsFilters apply.
+    expect(result?.current?.state.filters).toEqual([
+      ...getEventsHistogramLensAttributes(params).state.filters,
+      ...getDetailsPageFilter('hosts', 'mockHost'),
+      ...fieldNameExistsFilter('hosts'),
+      ...negatedAlertFilter,
+      ...filterFromSearchBar,
+    ]);
+  });
+
+  it('signalIndexName scope is maintained even when overridePatterns is also provided', () => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
+
+    // When signalIndexName is present the negated-exclusion path is bypassed so that
+    // the Alerts trend chart always scopes to the local signal index only.
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+          signalIndexName: '.alerts-security.alerts-default',
+          overridePatterns: ['logs-*'],
+        }),
+      { wrapper }
+    );
+
+    // _index filter is the allowlist for [signalIndexName], not affected by overridePatterns.
+    expect(result?.current?.state.filters).toEqual([
+      ...getEventsHistogramLensAttributes(params).state.filters,
+      ...getDetailsPageFilter('hosts', 'mockHost'),
+      ...fieldNameExistsFilter('hosts'),
+      ...getIndexFilters(['.alerts-security.alerts-default']),
+      ...filterFromSearchBar,
+    ]);
+  });
+
   it('should return Lens attributes if adHocDataViews exist', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',

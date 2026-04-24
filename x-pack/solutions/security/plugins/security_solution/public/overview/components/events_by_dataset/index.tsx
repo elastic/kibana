@@ -58,6 +58,13 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   hideQueryToggle?: boolean;
   sourcererScopeId?: PageScope;
   applyGlobalQueriesAndFilters?: boolean;
+  /**
+   * When provided, the Lens chart's `_index` filter is built from these
+   * patterns instead of the scope's full `selectedPatterns`. Pass
+   * alert-index–filtered patterns here so the histogram counts only event
+   * documents and excludes `.alerts-security.alerts-*` documents.
+   */
+  eventIndexPatterns?: string[];
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -89,6 +96,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   to,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters,
+  eventIndexPatterns,
 }) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
@@ -196,6 +204,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       chartHeight={CHART_HEIGHT}
       hideQueryToggle={hideQueryToggle}
       applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
+      overridePatterns={eventIndexPatterns}
     />
   );
 };

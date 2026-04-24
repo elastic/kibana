@@ -200,6 +200,22 @@ export const sourceOrDestinationIpExistsFilter: Filter[] = [
   },
 ];
 
+/**
+ * Index-name prefix shared by all Security Solution alerts backing indices
+ * (e.g. `.alerts-security.alerts-default`). Patterns that start with this
+ * prefix are alert indices and must be excluded from the Events charts so that
+ * alert documents are not counted as events.
+ */
+export const ALERTS_INDEX_PATTERN = '.alerts-security.alerts';
+
+/**
+ * Return a copy of `patterns` with any Security Solution alerts-backing index
+ * patterns removed. Equivalent to "duplicating the selected data view and
+ * filtering out the alerts indices" without creating a full DataView object.
+ */
+export const filterAlertsFromIndexPatterns = (patterns: string[]): string[] =>
+  patterns.filter((p) => !p.startsWith(ALERTS_INDEX_PATTERN));
+
 export const getIndexFilters = (selectedPatterns: string[]) =>
   selectedPatterns.length >= 1
     ? [
@@ -223,6 +239,49 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
         },
       ]
     : [];
+
+/**
+ * Compute the `_index` filters to inject into a Lens chart.
+ *
+ * When `overridePatterns` is provided (and `signalIndexName` is absent), the
+ * caller has supplied a subset of `selectedPatterns` with some entries removed
+ * (e.g. alert-backing indices stripped by `filterAlertsFromIndexPatterns`).
+ * Rather than emitting an allowlist filter from `overridePatterns` — which
+ * would block CPS remote-cluster documents whose index names carry a
+ * cluster-alias prefix — we instead emit *negated* filters for the removed
+ * patterns only. This lets all remote-event documents through while still
+ * excluding local alert-backing index documents.
+ */
+export const buildIndexFilters = ({
+  hasAdHocDataViews,
+  selectedPatterns,
+  overridePatterns,
+  signalIndexName,
+}: {
+  hasAdHocDataViews: boolean;
+  selectedPatterns: string[];
+  overridePatterns?: string[];
+  signalIndexName?: string | null;
+}): Filter[] => {
+  // Ad-hoc data views embed their index scope inside the Lens attributes directly.
+  if (hasAdHocDataViews) return [];
+
+  // CPS-safe exclusion path: the caller stripped a subset of patterns (e.g. alert
+  // indices) before passing overridePatterns. Instead of an allowlist — which would
+  // silently drop remote-cluster documents whose index names carry a cluster-alias
+  // prefix — emit negated filters for only the removed patterns.
+  if (overridePatterns != null && !signalIndexName) {
+    const removedPatterns = selectedPatterns.filter((p) => !overridePatterns.includes(p));
+    if (removedPatterns.length === 0) return [];
+    return getIndexFilters(removedPatterns).map((filter) => ({
+      ...filter,
+      meta: { ...filter.meta, negate: true },
+    }));
+  }
+
+  // Default: allowlist the full selected patterns.
+  return getIndexFilters(selectedPatterns);
+};
 
 export const getESQLGlobalFilters = (globalFilterQuery: ESBoolQuery | undefined) => [
   {

@@ -7,7 +7,10 @@
 
 import {
   buildAnyFieldExistsFilter,
+  buildIndexFilters,
+  filterAlertsFromIndexPatterns,
   getDetailsPageFilter,
+  getIndexFilters,
   getNetworkDetailsPageFilter,
   getRequestsAndResponses,
   hostNameExistsFilter,
@@ -15,6 +18,94 @@ import {
   userNameExistsFilter,
 } from './utils';
 import { mockRequests } from './__mocks__/utils';
+
+describe('filterAlertsFromIndexPatterns', () => {
+  test('removes the exact alerts-backing index pattern', () => {
+    const input = [
+      'logs-*',
+      '.alerts-security.alerts-default',
+      'auditbeat-*',
+      '.alerts-security.alerts-custom-space',
+    ];
+    expect(filterAlertsFromIndexPatterns(input)).toEqual(['logs-*', 'auditbeat-*']);
+  });
+
+  test('removes the wildcard alerts pattern', () => {
+    expect(filterAlertsFromIndexPatterns(['.alerts-security.alerts-*'])).toEqual([]);
+  });
+
+  test('preserves patterns that merely contain the alerts prefix substring', () => {
+    // Only entries that START with `.alerts-security.alerts` are removed.
+    // Patterns like `metrics-*` are kept even though they contain unrelated substrings.
+    expect(filterAlertsFromIndexPatterns(['metrics-*', 'logs-*'])).toEqual(['metrics-*', 'logs-*']);
+  });
+
+  test('preserves remote cluster–prefixed event patterns for CPS', () => {
+    const input = ['cluster-a:logs-*', 'cluster-a:auditbeat-*', '.alerts-security.alerts-default'];
+    expect(filterAlertsFromIndexPatterns(input)).toEqual([
+      'cluster-a:logs-*',
+      'cluster-a:auditbeat-*',
+    ]);
+  });
+
+  test('returns an empty array when all patterns are alert patterns', () => {
+    expect(
+      filterAlertsFromIndexPatterns([
+        '.alerts-security.alerts-default',
+        '.alerts-security.alerts-*',
+      ])
+    ).toEqual([]);
+  });
+
+  test('returns the original array reference when nothing is filtered', () => {
+    const input = ['logs-*', 'auditbeat-*'];
+    const output = filterAlertsFromIndexPatterns(input);
+    // All entries kept — no mutation, just a fresh array without alert patterns
+    expect(output).toEqual(input);
+  });
+});
+
+describe('buildIndexFilters', () => {
+  const selectedPatterns = ['logs-*', '.alerts-security.alerts-default'];
+  const overridePatterns = ['logs-*'];
+
+  test('returns [] when hasAdHocDataViews is true regardless of patterns', () => {
+    expect(buildIndexFilters({ hasAdHocDataViews: true, selectedPatterns })).toEqual([]);
+    expect(buildIndexFilters({ hasAdHocDataViews: true, selectedPatterns, overridePatterns })).toEqual([]);
+  });
+
+  test('returns getIndexFilters(selectedPatterns) when no overridePatterns', () => {
+    expect(buildIndexFilters({ hasAdHocDataViews: false, selectedPatterns })).toEqual(
+      getIndexFilters(selectedPatterns)
+    );
+  });
+
+  test('returns getIndexFilters(selectedPatterns) when signalIndexName is present (overridePatterns ignored)', () => {
+    expect(
+      buildIndexFilters({
+        hasAdHocDataViews: false,
+        selectedPatterns,
+        overridePatterns,
+        signalIndexName: '.alerts-security.alerts-default',
+      })
+    ).toEqual(getIndexFilters(selectedPatterns));
+  });
+
+  test('returns negated exclusion filters for removed patterns when overridePatterns is provided', () => {
+    const result = buildIndexFilters({ hasAdHocDataViews: false, selectedPatterns, overridePatterns });
+    const expected = getIndexFilters(['.alerts-security.alerts-default']).map((f) => ({
+      ...f,
+      meta: { ...f.meta, negate: true },
+    }));
+    expect(result).toEqual(expected);
+  });
+
+  test('returns [] when overridePatterns equals selectedPatterns (nothing excluded)', () => {
+    expect(
+      buildIndexFilters({ hasAdHocDataViews: false, selectedPatterns, overridePatterns: selectedPatterns })
+    ).toEqual([]);
+  });
+});
 
 describe('buildAnyFieldExistsFilter', () => {
   test('meta.value serializes the same bool query as query', () => {

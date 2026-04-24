@@ -43,6 +43,7 @@ import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
+import { filterAlertsFromIndexPatterns } from '../../common/components/visualization_actions/utils';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -71,6 +72,15 @@ const OverviewComponent = () => {
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
+
+  // Patterns from the data view with alert-backing indices stripped out.
+  // The Events histogram and Host/Network event count panels must count only
+  // non-alert documents; remote event indices are preserved unchanged so that
+  // Cross-Project Search continues to work through the data view.
+  const eventIndexPatterns = useMemo(
+    () => filterAlertsFromIndexPatterns(selectedPatterns),
+    [selectedPatterns]
+  );
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -143,6 +153,7 @@ const OverviewComponent = () => {
                       from={from}
                       dataViewSpec={oldSourcererDataViewSpec}
                       dataView={experimentalDataView}
+                      eventIndexPatterns={eventIndexPatterns}
                       query={query}
                       queryType="overview"
                       to={to}
@@ -153,7 +164,7 @@ const OverviewComponent = () => {
                     <EventCounts
                       filters={filters}
                       from={from}
-                      indexNames={selectedPatterns}
+                      indexNames={eventIndexPatterns}
                       dataViewSpec={oldSourcererDataViewSpec}
                       dataView={experimentalDataView}
                       query={query}

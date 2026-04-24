@@ -47,6 +47,13 @@ export interface UseLensAttributesProps {
    * Indices to use when fetching the lens componen
    */
   signalIndexName?: string | null;
+  /**
+   * When provided, replaces the scope's `selectedPatterns` as the source for
+   * the `_index` filter injected by `useLensAttributes`. Use this to scope the
+   * chart to a subset of the data view's index patterns (e.g. events-only,
+   * without alert-backing indices) without mutating the shared sourcerer scope.
+   */
+  overridePatterns?: string[];
 }
 
 export enum VisualizationContextMenuActions {
@@ -130,6 +137,11 @@ export interface LensEmbeddableComponentProps {
    * Indices to use when fetching the lens component
    */
   signalIndexName?: string | null;
+  /**
+   * When provided, replaces the scope's `selectedPatterns` as the source for
+   * the `_index` filter. See `UseLensAttributesProps.overridePatterns`.
+   */
+  overridePatterns?: string[];
   width?: string | number;
   withActions?: VisualizationContextMenuActions[];
   /**
