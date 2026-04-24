@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLoadingSpinner,
-  EuiPopover,
+  EuiPanel,
   EuiProgress,
-  EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -38,100 +37,6 @@ const getThresholdColor = (percent: number): 'success' | 'warning' | 'danger' =>
   if (percent >= 100) return 'danger';
   if (percent >= 75) return 'warning';
   return 'success';
-};
-
-const BudgetProgressBar = ({
-  currentEcu,
-  budget,
-}: {
-  currentEcu: number;
-  budget: BillingBudget;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const percent = Math.round((currentEcu / budget.amount) * 100);
-  const remaining = budget.amount - currentEcu;
-  const color = getThresholdColor(percent);
-
-  const thresholds = budget.alerts
-    .filter((a) => a.thresholdType === 'percentage')
-    .map((a) => a.threshold)
-    .sort((a, b) => a - b);
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem>
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.searchHomepage.billingUsage.currentVsBudgeted', {
-            defaultMessage: 'Current vs Budgeted (ECU)',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s">
-          <strong
-            css={css({
-              color:
-                color === 'danger'
-                  ? euiTheme.colors.danger
-                  : color === 'warning'
-                  ? euiTheme.colors.warning
-                  : undefined,
-            })}
-          >
-            {percent}
-            <FormattedMessage
-              id="xpack.searchHomepage.budgetProgressBar.strong.Label"
-              defaultMessage="% –"
-            />
-            {currentEcu.toFixed(2)} / {budget.amount.toFixed(2)}
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <div css={css({ position: 'relative' })}>
-          <EuiProgress value={Math.min(percent, 100)} max={100} color={color} size="m" />
-          {thresholds.map((t) => (
-            <div
-              key={t}
-              css={css({
-                position: 'absolute',
-                left: `${t}%`,
-                top: 0,
-                bottom: 0,
-                width: '2px',
-                backgroundColor: euiTheme.colors.darkShade,
-              })}
-              title={`${t}%`}
-            />
-          ))}
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
-          <EuiFlexItem grow>
-            <EuiText size="xs" color={color === 'danger' ? 'danger' : 'subdued'}>
-              {remaining >= 0
-                ? i18n.translate('xpack.searchHomepage.billingUsage.ecuRemaining', {
-                    defaultMessage: '{remaining} ECU remaining',
-                    values: { remaining: remaining.toFixed(2) },
-                  })
-                : i18n.translate('xpack.searchHomepage.billingUsage.ecuOver', {
-                    defaultMessage: '{over} ECU over budget',
-                    values: { over: Math.abs(remaining).toFixed(2) },
-                  })}
-            </EuiText>
-          </EuiFlexItem>
-          {thresholds.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {thresholds.map((t) => `${t}%`).join('  ')}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 };
 
 const ApiKeyForm = ({ onSaved }: { onSaved: () => void }) => {
@@ -203,163 +108,129 @@ const ApiKeyForm = ({ onSaved }: { onSaved: () => void }) => {
   );
 };
 
-const UsageDisplay = ({
-  totalEcu,
-  budgets,
-  instances,
+const BudgetProgressBar = ({
+  currentEcu,
+  budget,
 }: {
-  totalEcu: number;
-  budgets: BillingBudget[];
-  instances: Array<{ id: string; name: string; type: string; totalEcu: number }>;
+  currentEcu: number;
+  budget: BillingBudget;
 }) => {
-  const orgBudget = budgets.find((b) => b.scopeType === 'organization');
-  const activeInstances = instances.filter((inst) => inst.totalEcu > 0);
+  const { euiTheme } = useEuiTheme();
+  const percent = Math.round((currentEcu / budget.amount) * 100);
+  const remaining = budget.amount - currentEcu;
+  const color = getThresholdColor(percent);
+
+  const thresholds = budget.alerts
+    .filter((a) => a.thresholdType === 'percentage')
+    .map((a) => a.threshold)
+    .sort((a, b) => a - b);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {orgBudget ? (
-        <EuiFlexItem>
-          <BudgetProgressBar currentEcu={totalEcu} budget={orgBudget} />
-        </EuiFlexItem>
-      ) : (
-        <EuiFlexItem>
-          <EuiText size="s">
-            <strong data-test-subj="billingTotalEcu">
-              {totalEcu.toFixed(2)}{' '}
-              {i18n.translate('xpack.searchHomepage.usageDisplay.strong.ecuLabel', {
-                defaultMessage: 'ECU',
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem>
+        <EuiFlexGroup alignItems="baseline" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText
+              css={css({
+                fontWeight: euiTheme.font.weight.bold,
+                color:
+                  color === 'danger'
+                    ? euiTheme.colors.danger
+                    : color === 'warning'
+                    ? euiTheme.colors.warning
+                    : undefined,
               })}
-            </strong>
-          </EuiText>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.searchHomepage.billingUsage.currentPeriod', {
-              defaultMessage: '{monthName} 1 - {day}, {year}',
-              values: {
-                monthName: new Date().toLocaleString('en', { month: 'long' }),
-                day: new Date().getDate(),
-                year: new Date().getFullYear(),
-              },
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      )}
-
-      {activeInstances.length > 0 && (
-        <>
-          <EuiHorizontalRule margin="xs" />
-          {activeInstances.map((inst) => (
-            <EuiFlexItem key={inst.id}>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
-                <EuiFlexItem grow>
-                  <EuiText size="xs">{inst.name || inst.type}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <strong>
-                      {inst.totalEcu.toFixed(2)}{' '}
-                      {i18n.translate('xpack.searchHomepage.usageDisplay.strong.ecuLabel', {
-                        defaultMessage: 'ECU',
-                      })}
-                    </strong>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            >
+              {percent}%
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="xs" color="subdued">
+          {currentEcu.toFixed(0)} / {budget.amount.toFixed(0)}
+          <FormattedMessage
+            id="xpack.searchHomepage.budgetProgressBar.ecuTextLabel"
+            defaultMessage="ECU"
+          />
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <div css={css({ position: 'relative' })}>
+          <EuiProgress value={Math.min(percent, 100)} max={100} color={color} size="s" />
+          {thresholds.map((t) => (
+            <div
+              key={t}
+              css={css({
+                position: 'absolute',
+                left: `${t}%`,
+                top: 0,
+                bottom: 0,
+                width: '2px',
+                backgroundColor: euiTheme.colors.darkShade,
+              })}
+              title={`${t}%`}
+            />
           ))}
-        </>
-      )}
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="xs" color={color === 'danger' ? 'danger' : 'subdued'}>
+          {remaining >= 0
+            ? i18n.translate('xpack.searchHomepage.billingUsage.ecuRemaining', {
+                defaultMessage: '{remaining} ECU remaining',
+                values: { remaining: remaining.toFixed(2) },
+              })
+            : i18n.translate('xpack.searchHomepage.billingUsage.ecuOver', {
+                defaultMessage: '{over} ECU over budget',
+                values: { over: Math.abs(remaining).toFixed(2) },
+              })}
+        </EuiText>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-export const BillingUsageBadge = () => {
+export const BillingUsagePanel = () => {
   const {
     services: { cloud },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [billingUrl, setBillingUrl] = useState<string>();
   const { data: billingData, isLoading } = useBillingUsage();
-
-  useEffect(() => {
-    cloud?.getPrivilegedUrls().then((urls) => {
-      if (urls.billingUrl) {
-        setBillingUrl(urls.billingUrl);
-      }
-    });
-  }, [cloud]);
-
-  if (!billingUrl) {
-    return null;
-  }
+  const [isDismissed, setIsDismissed] = useState(false);
 
   const baseUrl = cloud?.getUrls().baseUrl ?? '';
-  const usageUrl = `${baseUrl}/billing/usage`;
   const budgetsUrl = `${baseUrl}/billing/budgets`;
 
   const orgBudget = billingData?.budgets?.find((b) => b.scopeType === 'organization');
 
-  const badgeLabel = (() => {
-    if (!billingData?.configured || billingData.totalEcu === undefined) {
-      return i18n.translate('xpack.searchHomepage.billingUsage.badgeLabel', {
-        defaultMessage: 'View usage',
-      });
-    }
-    if (orgBudget) {
-      const percent = Math.round((billingData.totalEcu / orgBudget.amount) * 100);
-      return `${percent}% — ${billingData.totalEcu.toFixed(2)} / ${orgBudget.amount.toFixed(
-        2
-      )} ECU`;
-    }
-    return `${billingData.totalEcu.toFixed(2)} ECU`;
-  })();
-
-  const badgeColor = (() => {
-    if (!billingData?.configured || billingData.totalEcu === undefined) return 'hollow';
-    if (orgBudget) {
-      const percent = (billingData.totalEcu / orgBudget.amount) * 100;
-      return getThresholdColor(percent);
-    }
-    return 'accent';
-  })();
-
-  const badge = (
-    <EuiBadge
-      css={css({
-        borderRadius: euiTheme.size.l,
-        padding: `0 ${euiTheme.size.m}`,
-        cursor: 'pointer',
-      })}
-      color={badgeColor}
-      onClick={() => setIsPopoverOpen((open) => !open)}
-      onClickAriaLabel={i18n.translate('xpack.searchHomepage.billingUsage.badgeAriaLabel', {
-        defaultMessage: 'View billing usage',
-      })}
-      data-test-subj="billingUsageBadge"
-    >
-      {badgeLabel}
-    </EuiBadge>
-  );
+  if (isDismissed) {
+    return null;
+  }
 
   return (
-    <EuiPopover
-      button={badge}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      anchorPosition="downLeft"
-      panelPaddingSize="m"
-      data-test-subj="billingUsagePopover"
-    >
-      <EuiFlexGroup direction="column" gutterSize="m" css={css({ width: euiTheme.base * 22 })}>
+    <EuiPanel hasBorder paddingSize="m" data-test-subj="billingUsagePanel">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xxxs">
-            <h4>
-              {i18n.translate('xpack.searchHomepage.billingUsage.popoverTitle', {
-                defaultMessage: 'Cloud billing',
-              })}
-            </h4>
-          </EuiTitle>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
+            <EuiFlexItem grow>
+              <EuiText size="xs">
+                <strong>
+                  {i18n.translate('xpack.searchHomepage.billingUsage.panelTitle', {
+                    defaultMessage: 'Billing and Usage',
+                  })}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.searchHomepage.billingUsage.last30days', {
+                  defaultMessage: 'Last 30 days',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         {isLoading && (
@@ -368,63 +239,150 @@ export const BillingUsageBadge = () => {
           </EuiFlexItem>
         )}
 
-        {!isLoading && billingData?.configured && billingData.totalEcu !== undefined && (
-          <EuiFlexItem>
-            <UsageDisplay
-              totalEcu={billingData.totalEcu}
-              budgets={billingData.budgets ?? []}
-              instances={billingData.instances ?? []}
-            />
-          </EuiFlexItem>
-        )}
-
         {!isLoading && !billingData?.configured && (
           <EuiFlexItem>
-            <ApiKeyForm onSaved={() => setIsPopoverOpen(false)} />
+            <ApiKeyForm onSaved={() => {}} />
           </EuiFlexItem>
         )}
 
-        <EuiHorizontalRule margin="xs" />
+        {!isLoading && billingData?.configured && billingData.totalEcu !== undefined && (
+          <>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="xs" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs">
+                        <strong>
+                          {i18n.translate('xpack.searchHomepage.billingUsage.ecuUsageLabel', {
+                            defaultMessage: 'ECU usage',
+                          })}
+                        </strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="iInCircle" size="s" color="subdued" aria-hidden={true} />
+                    </EuiFlexItem>
+                    {orgBudget && (
+                      <>
+                        <EuiFlexItem grow />
+                        <EuiFlexItem grow={false}>
+                          <EuiText
+                            size="xs"
+                            css={css({
+                              fontWeight: euiTheme.font.weight.bold,
+                              color:
+                                getThresholdColor(
+                                  Math.round((billingData.totalEcu / orgBudget.amount) * 100)
+                                ) === 'danger'
+                                  ? euiTheme.colors.danger
+                                  : getThresholdColor(
+                                      Math.round((billingData.totalEcu / orgBudget.amount) * 100)
+                                    ) === 'warning'
+                                  ? euiTheme.colors.warning
+                                  : undefined,
+                            })}
+                          >
+                            {Math.round((billingData.totalEcu / orgBudget.amount) * 100)}%
+                          </EuiText>
+                        </EuiFlexItem>
+                      </>
+                    )}
+                  </EuiFlexGroup>
+                  {orgBudget ? (
+                    <BudgetProgressBar currentEcu={billingData.totalEcu} budget={orgBudget} />
+                  ) : (
+                    <>
+                      <EuiText css={css({ fontWeight: euiTheme.font.weight.bold })}>
+                        {billingData.totalEcu.toFixed(0)}{' '}
+                        {i18n.translate('xpack.searchHomepage.billingUsagePanel.ecuTextLabel', {
+                          defaultMessage: 'ECU',
+                        })}
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate('xpack.searchHomepage.billingUsage.noBudgetSet', {
+                          defaultMessage: 'No budget set.',
+                        })}
+                      </EuiText>
+                    </>
+                  )}
+                </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            href={usageUrl}
-            target="_blank"
-            iconType="sortRight"
-            iconSide="left"
-            flush="both"
-            size="s"
-            data-test-subj="billingUsageGoToUsageLink"
-          >
-            {i18n.translate('xpack.searchHomepage.billingUsage.goToUsage', {
-              defaultMessage: 'Go to usage',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            href={budgetsUrl}
-            target="_blank"
-            iconType="sortRight"
-            iconSide="left"
-            flush="both"
-            size="s"
-            data-test-subj="billingUsageBudgetsLink"
-          >
-            {i18n.translate('xpack.searchHomepage.billingUsage.budgetsAndNotifications', {
-              defaultMessage: 'Budgets and notifications',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.searchHomepage.billingUsage.costsDisclaimer', {
-              defaultMessage: 'Costs are updated within 24 hours.',
-            })}
-          </EuiText>
-          <EuiSpacer size="xs" />
-        </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="xs" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs">
+                        <strong>
+                          {i18n.translate('xpack.searchHomepage.billingUsage.modelUsageLabel', {
+                            defaultMessage: 'Model usage',
+                          })}
+                        </strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="iInCircle" size="s" color="subdued" aria-hidden={true} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiText css={css({ fontWeight: euiTheme.font.weight.bold })}>
+                    {i18n.translate('xpack.searchHomepage.billingUsage.modelUsageValue', {
+                      defaultMessage: '—',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiHorizontalRule margin="xs" />
+
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
+                <EuiFlexItem grow>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('xpack.searchHomepage.billingUsage.addBudgetPrompt', {
+                      defaultMessage: 'Track your spending with budget alerts.',
+                    })}
+                    &nbsp;
+                    <EuiButtonEmpty
+                      href={budgetsUrl}
+                      target="_blank"
+                      flush="both"
+                      size="xs"
+                      iconType="popout"
+                      iconSide="right"
+                      data-test-subj="billingUsageBudgetsLink"
+                    >
+                      {orgBudget
+                        ? i18n.translate('xpack.searchHomepage.billingUsage.manageBudget', {
+                            defaultMessage: 'Manage budget',
+                          })
+                        : i18n.translate('xpack.searchHomepage.billingUsage.addBudget', {
+                            defaultMessage: 'Add a budget',
+                          })}
+                    </EuiButtonEmpty>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    aria-label={i18n.translate(
+                      'xpack.searchHomepage.billingUsage.dismissAriaLabel',
+                      {
+                        defaultMessage: 'Dismiss billing panel',
+                      }
+                    )}
+                    size="xs"
+                    color="text"
+                    onClick={() => setIsDismissed(true)}
+                    data-test-subj="billingUsageDismiss"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
-    </EuiPopover>
+    </EuiPanel>
   );
 };
+
+export const BillingUsageBadge = BillingUsagePanel;

@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, useEuiTheme } 
 
 import { css } from '@emotion/react';
 import { MetricPanels } from './metric_panels';
+import { BillingUsagePanel } from './billing_usage_badge';
 import { CloudResources } from './cloud_resources';
 import { BodyLinks } from './body_links';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
@@ -33,6 +34,12 @@ export const SearchHomepageBody = () => {
       css={css({ padding: `0 ${euiTheme.size.l}` })}
     >
       <EuiFlexGroup gutterSize="l" direction="column">
+        {cloud?.isCloudEnabled && (
+          <EuiFlexItem>
+            <EuiSpacer size="l" />
+            <BillingUsagePanel />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <EuiSpacer size="l" />
           <MetricPanels />
