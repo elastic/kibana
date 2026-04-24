@@ -64,7 +64,7 @@ export interface ExportAndReportOptions {
   reportModelScore: import('./utils/reporting/evaluation_reporter').EvaluationReporter;
   runId: string;
   log: import('@kbn/some-dev-log').SomeDevLog;
-  taskModelId: string;
+  taskModelId?: string;
   suiteId?: string;
 }
 
