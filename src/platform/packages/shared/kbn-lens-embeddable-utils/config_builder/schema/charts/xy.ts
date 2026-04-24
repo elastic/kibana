@@ -254,6 +254,27 @@ export const xyDataLayerSharedSchema = {
   ),
 };
 
+const legendSeriesHeaderSchema = schema.object(
+  {
+    visible: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, shows the legend table series header.' },
+      })
+    ),
+    text: schema.maybe(
+      schema.string({
+        meta: { description: 'Legend table series header text.' },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'xyLegendSeriesHeader',
+      description: 'Legend table series header configuration.',
+    },
+  }
+);
+
 /**
  * Common legend configuration properties for positioning and statistics
  */
@@ -265,6 +286,7 @@ const sharedLegendSchema = {
       maxSize: statisticsOptionsSize,
     })
   ),
+  series_header: schema.maybe(legendSeriesHeaderSchema),
 };
 
 /**

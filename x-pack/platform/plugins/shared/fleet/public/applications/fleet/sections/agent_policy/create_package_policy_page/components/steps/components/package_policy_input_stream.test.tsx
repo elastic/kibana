@@ -223,7 +223,7 @@ describe('PackagePolicyInputStreamConfig', () => {
         updatePackagePolicyInputStream={mockUpdatePackagePolicyInputStream}
         inputStreamValidationResults={{ vars: {} }}
         forceShowErrors={false}
-        totalStreams={2}
+        hasStreamToggle={true}
         inputPolicyTemplate={inputPolicyTemplate}
       />
     );
@@ -297,7 +297,7 @@ describe('PackagePolicyInputStreamConfig', () => {
           updatePackagePolicyInputStream={mockUpdatePackagePolicyInputStream}
           inputStreamValidationResults={{ vars: {} }}
           forceShowErrors={false}
-          totalStreams={2}
+          hasStreamToggle={true}
         />
       );
 
