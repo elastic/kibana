@@ -28,6 +28,7 @@ export interface TracesFlyout {
 
   readonly traceSummary: {
     readonly section: Locator;
+    readonly waterfallClickArea: Locator;
     readonly fullScreenButton: Locator;
     readonly openInDiscoverButton: Locator;
     readonly tourOkButton: Locator;
@@ -105,40 +106,32 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
       openInDiscoverButton: page.testSubj.locator('docViewerSimilarSpansOpenInDiscoverButton'),
     },
 
-    traceSummary: (() => {
-      const waterfallClickArea = page.testSubj.locator(
+    traceSummary: {
+      section: page.testSubj.locator('unifiedDocViewerTraceSummarySection'),
+      waterfallClickArea: page.testSubj.locator(
         'unifiedDocViewerTraceSummaryTraceWaterfallClickArea'
-      );
-      return {
-        section: page.testSubj.locator('unifiedDocViewerTraceSummarySection'),
-        fullScreenButton: page.testSubj.locator(
-          'unifiedDocViewerObservabilityTracesTraceFullScreenButton'
-        ),
-        openInDiscoverButton: page.testSubj.locator(
-          'unifiedDocViewerObservabilityTracesOpenInDiscoverButton'
-        ),
-        tourOkButton: page.testSubj.locator('traceWaterfallFullScreenActionTourOkButton'),
-        getServiceBadge(name: string) {
-          return page.testSubj
-            .locator('traceItemRowWrapper')
-            .filter({ hasText: name })
-            .locator('[data-test-subj="apmBarDetailsServiceNameBadge"]');
-        },
-        // Click the waterfall preview area near its right edge to avoid the
-        // service badge links rendered along the left side of each row, which
-        // would otherwise navigate to APM instead of opening the full-screen flyout.
-        async clickWaterfallPreview() {
-          await waterfallClickArea.waitFor({ state: 'visible' });
-          const box = await waterfallClickArea.boundingBox();
-          if (!box) {
-            throw new Error('waterfallClickArea is not visible');
-          }
-          await waterfallClickArea.click({
-            position: { x: box.width - 10, y: 10 },
-          });
-        },
-      };
-    })(),
+      ),
+      fullScreenButton: page.testSubj.locator(
+        'unifiedDocViewerObservabilityTracesTraceFullScreenButton'
+      ),
+      openInDiscoverButton: page.testSubj.locator(
+        'unifiedDocViewerObservabilityTracesOpenInDiscoverButton'
+      ),
+      tourOkButton: page.testSubj.locator('traceWaterfallFullScreenActionTourOkButton'),
+      getServiceBadge(name: string) {
+        return page.testSubj
+          .locator('traceItemRowWrapper')
+          .filter({ hasText: name })
+          .locator('[data-test-subj="apmBarDetailsServiceNameBadge"]');
+      },
+      async clickWaterfallPreview() {
+        const waterfallClickArea = page.testSubj.locator(
+          'unifiedDocViewerTraceSummaryTraceWaterfallClickArea'
+        );
+        await waterfallClickArea.waitFor({ state: 'visible' });
+        await waterfallClickArea.dispatchEvent('click');
+      },
+    },
 
     errors: {
       section: page.testSubj.locator('unifiedDocViewerErrorsAccordion'),
