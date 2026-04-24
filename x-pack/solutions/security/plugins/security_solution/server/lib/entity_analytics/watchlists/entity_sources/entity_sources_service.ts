@@ -229,21 +229,6 @@ export const createEntitySourcesService = ({
     };
 
     const { sources } = await descriptorClient.list({});
-    const entitiesBySource = await Promise.all(
-      sources
-        .filter((s) => sourceIds.includes(s.id))
-        .map(async (source) => {
-          const identity = buildIdentityProvider(source);
-          const { entityIdsByType, watchlistsByEuid, ...rest } =
-            await watchlistEntitiesService.listEntityStoreEntities(identity);
-          return {
-            sourceId: source.id,
-            entityStoreEntityIdsByType: entityIdsByType,
-            watchlistsByEuid,
-            ...rest,
-          };
-        })
-    );
 
     const indexSyncService = createIndexSyncService({
       esClient,
@@ -253,7 +238,39 @@ export const createEntitySourcesService = ({
       watchlist: meta,
     });
 
-    await indexSyncService.plainIndexSync(entitiesBySource);
+    await Promise.all(
+      sources
+        .filter((s) => sourceIds.includes(s.id))
+        .map(async (source) => {
+          const identity = buildIdentityProvider(source);
+          let prevMaxEntityId: string | undefined;
+          let lastWatchlistsByEuid: WatchlistsByEuid = new Map();
+
+          for await (const page of watchlistEntitiesService.listEntityStoreEntities(identity)) {
+            await indexSyncService.plainIndexSync([
+              {
+                sourceId: source.id,
+                entityStoreEntityIdsByType: page.entityIdsByType,
+                correlationMap: page.correlationMap,
+                watchlistsByEuid: page.watchlistsByEuid,
+                pageRange: { gt: prevMaxEntityId, lte: page.maxEntityId },
+              },
+            ]);
+            prevMaxEntityId = page.maxEntityId;
+            lastWatchlistsByEuid = page.watchlistsByEuid;
+          }
+
+          // Tail pass: catch watchlist entries with entity.id beyond the last store page.
+          await indexSyncService.plainIndexSync([
+            {
+              sourceId: source.id,
+              entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+              watchlistsByEuid: lastWatchlistsByEuid,
+              pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,
+            },
+          ]);
+        })
+    );
     await cleanupOrphanedEntities(meta, sourceIds);
 
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);

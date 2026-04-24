@@ -16,13 +16,16 @@ export interface SyncSourceEntry {
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType;
   correlationMap?: CorrelationMap;
   watchlistsByEuid: WatchlistsByEuid;
+  /** entity.id range for this page, used to scope deletion detection. */
+  pageRange?: { gt?: string; lte?: string };
 }
 
 export type SourceProcessor = (
   source: MonitoringEntitySource,
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
   correlationMap: CorrelationMap | undefined,
-  watchlistsByEuid: WatchlistsByEuid
+  watchlistsByEuid: WatchlistsByEuid,
+  pageRange?: { gt?: string; lte?: string }
 ) => Promise<void>;
 
 export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
@@ -46,10 +49,17 @@ export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
       entityStoreEntityIdsByType,
       correlationMap,
       watchlistsByEuid,
+      pageRange,
     } of sources) {
       try {
         const source = await descriptorClient.get(sourceId);
-        await process(source, entityStoreEntityIdsByType, correlationMap, watchlistsByEuid);
+        await process(
+          source,
+          entityStoreEntityIdsByType,
+          correlationMap,
+          watchlistsByEuid,
+          pageRange
+        );
       } catch (error) {
         logger.warn(`[WatchlistSync] Source processing failed for ${sourceId}: ${String(error)}`);
       }

@@ -80,24 +80,20 @@ describe('createEntitySourcesService', () => {
       ],
     });
     mockListEntityStoreEntities
-      .mockResolvedValueOnce({
-        entityIdsByType: {
-          user: ['user:1'],
-          host: [],
-          service: [],
-          generic: [],
-        },
-        correlationMap: new Map(),
-        watchlistsByEuid: new Map(),
+      .mockImplementationOnce(async function* () {
+        yield {
+          entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+          correlationMap: new Map(),
+          watchlistsByEuid: new Map(),
+          maxEntityId: 'user:1',
+        };
       })
-      .mockResolvedValueOnce({
-        entityIdsByType: {
-          user: ['user:2'],
-          host: ['host:1'],
-          service: [],
-          generic: [],
-        },
-        watchlistsByEuid: new Map(),
+      .mockImplementationOnce(async function* () {
+        yield {
+          entityIdsByType: { user: ['user:2'], host: ['host:1'], service: [], generic: [] },
+          watchlistsByEuid: new Map(),
+          maxEntityId: 'user:2',
+        };
       });
     mockPlainIndexSync.mockResolvedValue(undefined);
     mockGetIndexForWatchlist.mockReturnValue('.lists-watchlist-vip-users-default');
@@ -119,28 +115,32 @@ describe('createEntitySourcesService', () => {
     expect(mockGetIndexForWatchlist).toHaveBeenCalledWith(namespace);
 
     expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(2);
-    expect(mockListEntityStoreEntities).toHaveBeenNthCalledWith(1, {
-      type: 'index',
-      field: 'user.id',
-    });
-    expect(mockListEntityStoreEntities).toHaveBeenNthCalledWith(2, {
+    expect(mockListEntityStoreEntities).toHaveBeenCalledWith({ type: 'index', field: 'user.id' });
+    expect(mockListEntityStoreEntities).toHaveBeenCalledWith({
       type: 'integration',
       name: 'entityanalytics_okta',
     });
 
+    // Each source gets one plainIndexSync call per page + one tail call (4 total, order may vary)
+    expect(mockPlainIndexSync).toHaveBeenCalledTimes(4);
+
     expect(mockPlainIndexSync).toHaveBeenCalledWith([
-      {
+      expect.objectContaining({
         sourceId: 'source-a',
-        entityStoreEntityIdsByType: {
-          user: ['user:1'],
-          host: [],
-          service: [],
-          generic: [],
-        },
+        entityStoreEntityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
         correlationMap: expect.any(Map),
         watchlistsByEuid: expect.any(Map),
-      },
-      {
+        pageRange: expect.objectContaining({ lte: expect.any(String) }),
+      }),
+    ]);
+    expect(mockPlainIndexSync).toHaveBeenCalledWith([
+      expect.objectContaining({
+        sourceId: 'source-a',
+        entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+      }),
+    ]);
+    expect(mockPlainIndexSync).toHaveBeenCalledWith([
+      expect.objectContaining({
         sourceId: 'source-c',
         entityStoreEntityIdsByType: {
           user: ['user:2'],
@@ -149,7 +149,14 @@ describe('createEntitySourcesService', () => {
           generic: [],
         },
         watchlistsByEuid: expect.any(Map),
-      },
+        pageRange: expect.objectContaining({ lte: expect.any(String) }),
+      }),
+    ]);
+    expect(mockPlainIndexSync).toHaveBeenCalledWith([
+      expect.objectContaining({
+        sourceId: 'source-c',
+        entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+      }),
     ]);
 
     expect(logger.info).toHaveBeenCalledWith(
@@ -260,8 +267,8 @@ describe('createEntitySourcesService', () => {
           staleEntities: [{ docId: 'user:alice:doc1', sourceId: 'orphaned-source-1' }],
         })
       );
-      // plainIndexSync still runs (with empty sources) but cleanup handles orphans
-      expect(mockPlainIndexSync).toHaveBeenCalledWith([]);
+      // no active sources so plainIndexSync is never called
+      expect(mockPlainIndexSync).not.toHaveBeenCalled();
     });
 
     it('continues syncing remaining watchlists when one fails', async () => {
