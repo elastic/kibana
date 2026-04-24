@@ -37,7 +37,7 @@ const getDefaultLayoutConfig = (
   primaryMetricPosition: MetricStyleTemplatePresetId,
   { hasMetricIcon, hasSecondaryMetric }: { hasMetricIcon: boolean; hasSecondaryMetric: boolean }
 ): MetricLayoutWithDefault => {
-  let config = { ...LENS_METRIC_STYLE_TEMPLATE[primaryMetricPosition] };
+  let config: MetricLayoutWithDefault = { ...LENS_METRIC_STYLE_TEMPLATE[primaryMetricPosition] };
 
   if (!hasMetricIcon) {
     const { iconAlign, ...rest } = config;

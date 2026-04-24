@@ -36,7 +36,7 @@ export const LENS_LEGACY_METRIC_STATE_DEFAULTS: Pick<MetricStateDefaults, 'iconA
  */
 export const LENS_METRIC_STYLE_TEMPLATE: Record<
   MetricStyleTemplatePresetId,
-  MetricLayoutWithDefault
+  Required<MetricLayoutWithDefault>
 > = {
   bottom: {
     titlesTextAlign: 'left',
@@ -69,10 +69,7 @@ const defaultStyleTemplate = LENS_METRIC_STYLE_TEMPLATE[DEFAULT_STYLE_TEMPLATE];
  */
 export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   ...defaultStyleTemplate,
-  iconAlign: defaultStyleTemplate.iconAlign ?? 'right',
-  secondaryAlign: defaultStyleTemplate.secondaryAlign ?? 'right',
   valueFontMode: 'default',
-  primaryPosition: defaultStyleTemplate.primaryPosition ?? 'bottom',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
 };
