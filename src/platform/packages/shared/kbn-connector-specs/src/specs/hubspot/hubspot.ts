@@ -34,9 +34,7 @@ export const HubSpotConnector: ConnectorSpec = {
     id: '.hubspot',
     displayName: 'HubSpot',
     description: i18n.translate('core.kibanaConnectorSpecs.hubspot.metadata.description', {
-      defaultMessage:
-        'Search and list CRM records, search across object types, filter deals, list pipelines and owners, ' +
-        'fetch records by ID, and search engagements.',
+      defaultMessage: 'Search contacts, companies, deals, tickets, and engagements in HubSpot CRM.',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -156,7 +154,7 @@ export const HubSpotConnector: ConnectorSpec = {
           `${HUBSPOT_API_BASE}/crm/v3/objects/${input.objectType}/${input.objectId}`,
           { params }
         );
-        const ticketData = response.data as Record<string, unknown>;
+        const record = response.data as Record<string, unknown>;
 
         if (input.objectType === 'tickets') {
           try {
@@ -166,7 +164,7 @@ export const HubSpotConnector: ConnectorSpec = {
               { validateStatus: () => true }
             );
             if (assocResponse.status !== 200) {
-              return { ...ticketData, notes: [] };
+              return { ...record, notes: [] };
             }
             const assocResults = assocResponse.data?.results as
               | Array<{ to?: Array<{ toObjectId: string }> }>
@@ -174,7 +172,7 @@ export const HubSpotConnector: ConnectorSpec = {
             const noteIds =
               assocResults?.flatMap((r) => r.to?.map((t) => t.toObjectId) ?? []) ?? [];
             if (noteIds.length === 0) {
-              return { ...ticketData, notes: [] };
+              return { ...record, notes: [] };
             }
             const notesResponse = await ctx.client.post(
               `${HUBSPOT_API_BASE}/crm/v3/objects/notes/batch/read`,
@@ -186,7 +184,7 @@ export const HubSpotConnector: ConnectorSpec = {
               { validateStatus: () => true }
             );
             if (notesResponse.status !== 200) {
-              return { ...ticketData, notes: [] };
+              return { ...record, notes: [] };
             }
             const rawResults =
               (
@@ -207,15 +205,13 @@ export const HubSpotConnector: ConnectorSpec = {
               archived: note.archived,
               body: (note.properties?.hs_note_body as string) ?? '',
             }));
-            return { ...ticketData, notes: notesResults };
+            return { ...record, notes: notesResults };
           } catch {
             // Return ticket without notes if associations or notes API fails (e.g. missing scope)
           }
         }
 
-        return input.objectType === 'tickets'
-          ? { ...ticketData, notes: ticketData.notes ?? [] }
-          : ticketData;
+        return input.objectType === 'tickets' ? { ...record, notes: record.notes ?? [] } : record;
       },
     },
 
@@ -321,10 +317,10 @@ export const HubSpotConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       try {
-        const response = await ctx.client.get(
-          `${HUBSPOT_API_BASE}/crm/v3/objects/contacts?limit=1`,
-          { validateStatus: () => true }
-        );
+        const response = await ctx.client.get(`${HUBSPOT_API_BASE}/crm/v3/objects/contacts`, {
+          params: { limit: 1 },
+          validateStatus: () => true,
+        });
         if (response.status === 200 || response.status === 204) {
           return { ok: true, message: 'Successfully connected to HubSpot API' };
         }

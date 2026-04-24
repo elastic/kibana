@@ -329,8 +329,8 @@ describe('HubSpotConnector', () => {
       const result = await test.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.hubapi.com/crm/v3/objects/contacts?limit=1',
-        { validateStatus: expect.any(Function) }
+        'https://api.hubapi.com/crm/v3/objects/contacts',
+        { params: { limit: 1 }, validateStatus: expect.any(Function) }
       );
       expect(result).toEqual({ ok: true, message: 'Successfully connected to HubSpot API' });
     });
