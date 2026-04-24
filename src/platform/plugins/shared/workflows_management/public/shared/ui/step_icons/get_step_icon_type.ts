@@ -17,9 +17,6 @@ export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
       return 'play';
     case 'trigger_alert':
       return 'warning';
-    case 'trigger_document':
-    case 'trigger_event':
-      return 'document';
     case 'trigger_scheduled':
       return 'clock';
     default:
@@ -55,6 +52,7 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'workflow.fail':
       iconType = HardcodedIcons['workflow.fail'];
       break;
+    // `workflow` (bare base type) is handled in StepIcon's BASE_TYPE_AGGREGATE_ICONS.
 
     // flow control nodes
     case 'wait':

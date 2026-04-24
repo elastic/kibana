@@ -19,8 +19,24 @@ import type {
   WorkflowsExtensionsPublicPluginStart,
 } from '@kbn/workflows-extensions/public';
 import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
+import { HardcodedIcons } from './hardcoded_icons';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
+
+/**
+ * Aggregate icons for bare base types returned by `getBaseConnectorType` when the
+ * workflow list collapses family members (e.g. `ai.prompt` + `ai.agent` → `ai`).
+ *
+ * Takes precedence over extension-family inheritance so the category icon stays
+ * stable regardless of which members happen to be registered or what icons they
+ * chose individually. Concretely: `ai` uses the EUI `productAgent` robot icon (the
+ * AI family is thematic, not branded), and `workflow` uses the workflow.execute
+ * glyph (no `workflow.*` step defs live in the extensions registry at all).
+ */
+const BASE_TYPE_AGGREGATE_ICONS: Record<string, IconType> = {
+  ai: 'productAgent',
+  workflow: HardcodedIcons['workflow.execute'],
+};
 
 interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   stepType: string;
@@ -57,6 +73,8 @@ export const StepIcon = React.memo(
     let iconType: IconType;
     if (stepType.startsWith('trigger_')) {
       iconType = getTriggerTypeIconType(stepType);
+    } else if (BASE_TYPE_AGGREGATE_ICONS[stepType]) {
+      iconType = BASE_TYPE_AGGREGATE_ICONS[stepType];
     } else {
       const stepDefinition =
         workflowsExtensions.getStepDefinition(stepType) ??
@@ -167,10 +185,15 @@ function getActionTypeIcon(
 // List rows aggregate by base type (e.g. `cases` from `cases.createCase`), but extension steps
 // register full ids (e.g. `cases.createCase`). Fall back to the first registered step whose id
 // starts with `${baseType}.` so the list inherits the extension icon chosen for that family.
+// Prefer a sibling that has an icon — some family members (e.g. `ai.agent`) intentionally omit
+// one, and returning those here would drop the family back to the plugs fallback.
 function findStepDefinitionByBaseType(
   baseType: string,
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart
 ): PublicStepDefinition | undefined {
   const prefix = `${baseType}.`;
-  return workflowsExtensions.getAllStepDefinitions().find((def) => def.id.startsWith(prefix));
+  const family = workflowsExtensions
+    .getAllStepDefinitions()
+    .filter((def) => def.id.startsWith(prefix));
+  return family.find((def) => def.icon) ?? family[0];
 }

@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import { runAgentStepCommonDefinition, RunAgentOutputSchema } from '../../common/step_types';
 
 export const runAgentStepDefinition = createPublicStepDefinition({
   ...runAgentStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
   editorHandlers: {
     config: {
       'connector-id': {
