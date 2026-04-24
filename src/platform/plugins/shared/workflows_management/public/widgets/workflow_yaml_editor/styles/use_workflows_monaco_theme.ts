@@ -41,7 +41,7 @@ export function useWorkflowsMonacoTheme() {
         'editor.hoverHighlightBackground': chroma(
           transparentize(euiTheme.colors.primary, 0.15)
         ).hex(),
-        'editorLineNumber.foreground': euiTheme.colors.textPrimary,
+        'editorLineNumber.foreground': euiTheme.colors.textSubdued,
         'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
         'editorIndentGuide.background1': euiTheme.colors.backgroundLightText,
         'editorIndentGuide.activeBackground1': euiTheme.colors.borderBaseDisabled,
