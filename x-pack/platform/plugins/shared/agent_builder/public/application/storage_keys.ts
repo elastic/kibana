@@ -10,6 +10,7 @@ export const storageKeys = {
   welcomeMessageDismissed: 'agentBuilder.welcomeMessageDismissed',
   autoIncludeWarningDismissed: 'agentBuilder.autoIncludeWarningDismissed',
   mcpClientBannerDismissedIds: 'agentBuilder.mcpClientBannerDismissedIds',
+  pinnedConversations: 'agentBuilder.pinnedConversations',
 
   getAgentIdKey: (spaceId: string): string => `agentBuilder.agentId.${spaceId}`,
 
