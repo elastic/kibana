@@ -4,7 +4,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
 "FROM test-index-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
@@ -281,7 +281,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
 "FROM test-index-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
@@ -596,7 +596,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
 "FROM test-index-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
@@ -1232,7 +1232,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
 "FROM test-index-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((service.name IS NOT NULL AND service.name != \\"\\"))
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
@@ -1480,7 +1480,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
 "FROM test-index-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
@@ -1757,7 +1757,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for generic e
 "FROM test-index-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
   | STATS document_count = COUNT()"
@@ -1767,7 +1767,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for host enti
 "FROM test-index-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
   | STATS document_count = COUNT()"
@@ -1777,7 +1777,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for service e
 "FROM test-index-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((service.name IS NOT NULL AND service.name != \\"\\"))
   | STATS document_count = COUNT()"
@@ -1787,7 +1787,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for user enti
 "FROM test-index-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
   | STATS document_count = COUNT()"

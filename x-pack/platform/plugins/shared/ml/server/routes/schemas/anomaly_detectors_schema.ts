@@ -16,13 +16,14 @@ const customRulesSchema = schema.maybe(
           schema.literal('skip_result'),
           schema.literal('skip_model_update'),
           schema.literal('force_time_shift'),
-        ])
+        ]),
+        { maxSize: 10000 }
       ),
-      conditions: schema.maybe(schema.arrayOf(schema.any())),
+      conditions: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 10000 })),
       scope: schema.maybe(schema.any()),
       params: schema.maybe(schema.any()),
     }),
-    { meta: { description: 'Custom rules' } }
+    { maxSize: 10000, meta: { description: 'Custom rules' } }
   )
 );
 
@@ -65,7 +66,9 @@ const customSettingsSchema = schema.object(
     created_by: schema.maybe(
       schema.string({ meta: { description: 'Indicates the creator entity' } })
     ),
-    custom_urls: schema.maybe(schema.arrayOf(schema.maybe(schema.object(customUrlSchema)))),
+    custom_urls: schema.maybe(
+      schema.arrayOf(schema.maybe(schema.object(customUrlSchema)), { maxSize: 10000 })
+    ),
   },
   { unknowns: 'allow' } // Create / Update job API allows other fields to be added to custom_settings.
 );
@@ -83,12 +86,13 @@ export const anomalyDetectionUpdateJobSchema = schema.object({
           /** Custom rules */
           custom_rules: customRulesSchema,
         })
-      )
+      ),
+      { maxSize: 10000 }
     )
   ),
   custom_settings: schema.maybe(customSettingsSchema),
   analysis_limits: schema.maybe(AnalysisLimits),
-  groups: schema.maybe(schema.arrayOf(schema.string())),
+  groups: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
   model_snapshot_retention_days: schema.maybe(schema.number()),
   daily_model_snapshot_retention_after_days: schema.maybe(schema.number()),
 });
@@ -96,11 +100,11 @@ export const anomalyDetectionUpdateJobSchema = schema.object({
 export const analysisConfigSchema = schema.object({
   bucket_span: schema.string(),
   summary_count_field_name: schema.maybe(schema.string()),
-  detectors: schema.arrayOf(detectorSchema),
-  influencers: schema.arrayOf(schema.string()),
+  detectors: schema.arrayOf(detectorSchema, { maxSize: 10000 }),
+  influencers: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   categorization_field_name: schema.maybe(schema.string()),
   categorization_analyzer: schema.maybe(schema.any()),
-  categorization_filters: schema.maybe(schema.arrayOf(schema.string())),
+  categorization_filters: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
   latency: schema.maybe(schema.number()),
   multivariate_by_fields: schema.maybe(schema.boolean()),
   per_partition_categorization: schema.maybe(
@@ -131,7 +135,7 @@ export const anomalyDetectionJobSchema = {
   job_id: schema.maybe(schema.string()),
   job_type: schema.maybe(schema.string()),
   job_version: schema.maybe(schema.string()),
-  groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
+  groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()), { maxSize: 10000 })),
   model_plot_config: schema.maybe(schema.any()),
   model_plot: schema.maybe(schema.any()),
   model_size_stats: schema.maybe(schema.any()),
@@ -230,6 +234,6 @@ export const jobForCloningSchema = schema.object({
 export const getAnomalyDetectorsResponse = () => {
   return schema.object({
     count: schema.number(),
-    jobs: schema.arrayOf(schema.any()),
+    jobs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   });
 };
