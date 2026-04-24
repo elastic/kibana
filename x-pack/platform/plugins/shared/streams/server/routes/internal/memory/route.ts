@@ -36,6 +36,7 @@ import {
 } from '../../../lib/tasks/task_definitions/memory_consolidation';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../utils/resolve_connector_for_feature';
 import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import type { MemoryGenerationResult } from '../../../lib/sig_events/memory_generation';
 import { generateMemory } from '../../../lib/sig_events/memory_generation';
 
@@ -523,10 +524,6 @@ const consolidateMemoryRoute = createServerRoute({
   },
 });
 
-const isMemoryEnabled = async (uiSettingsClient: IUiSettingsClient): Promise<boolean> => {
-  return uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
-};
-
 const generateMemoryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/memory/_generate',
   params: z.object({
@@ -557,9 +554,12 @@ const generateMemoryRoute = createServerRoute({
   }): Promise<
     MemoryGenerationResult & { skipped?: boolean; reason?: string; connectorId?: string }
   > => {
-    const { inferenceClient, uiSettingsClient } = await getScopedClients({ request });
+    const { inferenceClient, uiSettingsClient, licensing } = await getScopedClients({ request });
 
-    if (!(await isMemoryEnabled(uiSettingsClient))) {
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const memoryEnabled = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+    if (!memoryEnabled) {
       return {
         streamsProcessed: 0,
         tokensUsed: EMPTY_TOKENS,
@@ -569,8 +569,9 @@ const generateMemoryRoute = createServerRoute({
     }
 
     const { streamName } = params.path;
-    const { features, queries: rawQueries } = params.body;
+    const { features: rawFeatures, queries: rawQueries } = params.body;
 
+    const features = rawFeatures?.filter((f) => f.stream_name === streamName);
     const queries = rawQueries?.map((query) => ({ streamName, query }));
 
     const connectorId = await resolveConnectorForSignificantEventsDiscovery({

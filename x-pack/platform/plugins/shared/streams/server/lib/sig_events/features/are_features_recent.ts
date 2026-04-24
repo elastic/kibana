@@ -33,6 +33,11 @@ export async function areFeaturesRecent({
 
   const newestLastSeen = hits[0].last_seen;
   const newestTimestamp = new Date(newestLastSeen).getTime();
+
+  if (Number.isNaN(newestTimestamp)) {
+    return { isRecent: false, newestLastSeen };
+  }
+
   const thresholdMs = thresholdHours * 3_600_000;
   const isRecent = Date.now() - newestTimestamp < thresholdMs;
 

@@ -196,18 +196,18 @@ const groupInputsByStream = ({
 const buildIndicatorSummaries = (indicators: MemoryIndicator[]): string => {
   return indicators
     .map((item, index) => {
-      if ('impact' in item) {
+      if ('impact' in item && 'evidence' in item) {
         const title = item.title ?? 'Untitled insight';
         return `[${index}] **Insight** (${item.impact}): ${title}`;
       }
 
-      if ('confidence' in item) {
+      if ('type' in item && 'stream_name' in item && 'confidence' in item) {
         const title = item.title ?? item.id ?? 'Untitled feature';
         const subtype = item.subtype ? `/${item.subtype}` : '';
         return `[${index}] **Feature** (${item.type}${subtype}): ${title}`;
       }
 
-      if ('esql' in item) {
+      if ('esql' in item && 'severity_score' in item) {
         const title = item.title ?? 'Untitled query';
         return `[${index}] **Query** (severity ${item.severity_score}): ${title}`;
       }
