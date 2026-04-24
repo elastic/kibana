@@ -72,10 +72,10 @@ export const GetCrmObjectInputSchema = z.object({
     .describe('CRM object type to retrieve when you already have the record ID.'),
   objectId: z.string().describe('HubSpot internal object ID for the record.'),
   properties: z
-    .string()
+    .array(z.string())
     .optional()
     .describe(
-      'Optional comma-separated property internal names (e.g. "firstname,lastname,email"). Omit for default properties.'
+      'Property internal names to return (e.g. ["firstname","lastname","email"]). Omit for default properties.'
     ),
 });
 export type GetCrmObjectInput = z.infer<typeof GetCrmObjectInputSchema>;

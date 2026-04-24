@@ -191,7 +191,7 @@ describe('HubSpotConnector', () => {
       await HubSpotConnector.actions.getCrmObject.handler(mockContext, {
         objectType: 'deals',
         objectId: '200',
-        properties: 'dealname,amount',
+        properties: ['dealname', 'amount'],
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(

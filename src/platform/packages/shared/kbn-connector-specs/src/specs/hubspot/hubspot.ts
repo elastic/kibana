@@ -47,9 +47,6 @@ export const HubSpotConnector: ConnectorSpec = {
     types: [
       {
         type: 'bearer',
-        defaults: {
-          token: '',
-        },
         overrides: {
           meta: {
             token: {
@@ -152,8 +149,8 @@ export const HubSpotConnector: ConnectorSpec = {
       input: GetCrmObjectInputSchema,
       handler: async (ctx, input: GetCrmObjectInput) => {
         const params: Record<string, unknown> = {};
-        if (input.properties) {
-          params.properties = input.properties;
+        if (input.properties?.length) {
+          params.properties = input.properties.join(',');
         }
 
         const response = await ctx.client.get(

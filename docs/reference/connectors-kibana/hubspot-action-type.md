@@ -49,6 +49,11 @@ The HubSpot connector has the following actions:
     - **Deal Stage** (optional): The deal stage ID to filter by (for example, `closedwon`, `closedlost`). Use the **List Pipelines** action to discover valid stage IDs.
     - **Limit** (optional): Maximum number of results to return (default: 10).
 
+**Search Broad**
+:   Run a single keyword search across contacts, companies, deals, and tickets simultaneously. Returns results grouped by object type.
+    - **Query** (required): Keyword or phrase to search across all four object types in parallel.
+    - **Limit** (optional): Maximum number of results per object type (default: 5).
+
 **List Owners**
 :   List HubSpot owners (users with CRM access) to discover who is assigned to contacts, companies, or deals.
     - **Limit** (optional): Maximum number of owners to return (default: 20).
