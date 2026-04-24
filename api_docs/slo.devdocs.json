@@ -133,33 +133,7 @@
               },
               ") => ",
               "LinkProps",
-              "; rulesLocator: ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/deeplinks-observability",
-                "scope": "common",
-                "docId": "kibKbnDeeplinksObservabilityPluginApi",
-                "section": "def-common.RulesLocatorParams",
-                "text": "RulesLocatorParams"
-              },
-              ">; ruleDetailsLocator: ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              "RuleDetailsLocatorParams",
-              ">; config: ",
+              "; config: ",
               {
                 "pluginId": "observability",
                 "scope": "public",
