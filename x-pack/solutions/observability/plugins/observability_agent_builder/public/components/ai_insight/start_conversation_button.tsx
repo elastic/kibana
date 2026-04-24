@@ -7,13 +7,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { upperFirst } from 'lodash';
 import { EuiButton } from '@elastic/eui';
 import { robotIconType } from '@kbn/observability-nav-icons';
 
-export function StartConversationButton(props: React.ComponentProps<typeof EuiButton>) {
+export function StartConversationButton({
+  insightType,
+  ...props
+}: React.ComponentProps<typeof EuiButton> & { insightType: string }) {
   return (
     <EuiButton
-      data-test-subj="aiAgentStartConversationButton"
+      data-test-subj={`observabilityAgentBuilder${upperFirst(insightType)}StartConversationButton`}
       fill
       iconType={robotIconType}
       size="s"
