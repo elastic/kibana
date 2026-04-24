@@ -18,6 +18,13 @@ import {
   expectTracesExperienceEnabled,
 } from '../../fixtures/traces_experience';
 
+// APM chart toolbars re-layout as sparkline data streams in, which can push the
+// "Open in Discover" icon out of the actionability window while Playwright is
+// retrying a click. Scout's default actionTimeout is 10s; on cloud CI the chart
+// can still be settling past that budget. Give these clicks the same 20s head
+// room we use for the waterfall render.
+const CHART_LINK_CLICK_TIMEOUT = 20000;
+
 const APM_TIME_RANGE = {
   rangeFrom: TRACES.DEFAULT_START_TIME,
   rangeTo: TRACES.DEFAULT_END_TIME,
@@ -80,7 +87,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Latency chart opens traces experience', async () => {
-          await page.testSubj.locator('apmLatencyChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmLatencyChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
           await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeVisible();
@@ -88,13 +97,17 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Throughput chart opens traces experience', async () => {
-          await page.testSubj.locator('apmServiceOverviewThroughputChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmServiceOverviewThroughputChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
-          await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmFailedTransactionRateChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
@@ -121,19 +134,25 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Latency chart opens traces experience', async () => {
-          await page.testSubj.locator('apmLatencyChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmLatencyChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Throughput chart opens traces experience', async () => {
-          await page.testSubj.locator('apmServiceOverviewThroughputChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmServiceOverviewThroughputChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
-          await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmFailedTransactionRateChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
@@ -166,19 +185,25 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Latency chart opens traces experience', async () => {
-          await page.testSubj.locator('apmLatencyChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmLatencyChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Throughput chart opens traces experience', async () => {
-          await page.testSubj.locator('apmServiceOverviewThroughputChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmServiceOverviewThroughputChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
 
         await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
-          await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmFailedTransactionRateChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
@@ -227,7 +252,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
-          await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await page.testSubj
+            .locator('apmFailedTransactionRateChartOpenInDiscover')
+            .click({ timeout: CHART_LINK_CLICK_TIMEOUT });
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
