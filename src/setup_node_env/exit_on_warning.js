@@ -112,6 +112,12 @@ var IGNORE_WARNINGS = [
     name: 'DeprecationWarning',
     code: 'DEP0169',
   },
+  // child_process: passing args with shell option true. emitted by storybook's bundled execa.
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0190',
+    file: '/node_modules/@storybook/core/dist/telemetry/index.cjs',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {
