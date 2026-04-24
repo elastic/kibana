@@ -90,11 +90,7 @@ export class AttachmentsService {
   /**
    * Persists new data for an existing attachment, creating a new version if the content changed.
    */
-  async updateData(
-    conversationId: string,
-    attachmentId: string,
-    data: unknown
-  ): Promise<void> {
+  async updateData(conversationId: string, attachmentId: string, data: unknown): Promise<void> {
     await this.http.put(
       `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
       { body: JSON.stringify({ data }) }

@@ -83,9 +83,7 @@ export const createRuleAttachmentType = ({
       }
       return false;
     } catch (error) {
-      logger.warn(
-        `Failed to check staleness for rule attachment "${attachment.origin}": ${error}`
-      );
+      logger.warn(`Failed to check staleness for rule attachment "${attachment.origin}": ${error}`);
       return false;
     }
   },
