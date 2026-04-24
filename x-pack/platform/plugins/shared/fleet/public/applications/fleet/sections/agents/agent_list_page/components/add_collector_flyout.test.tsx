@@ -17,6 +17,7 @@ import {
   sendGetOneAgentPolicy,
   useGetFleetServerHosts,
   useFleetStatus,
+  useStartServices,
 } from '../../../../hooks';
 import { usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
@@ -30,6 +31,7 @@ jest.mock('../../../../hooks', () => ({
   sendGetEnrollmentAPIKeys: jest.fn(),
   useGetFleetServerHosts: jest.fn(),
   useFleetStatus: jest.fn(),
+  useStartServices: jest.fn(),
 }));
 jest.mock('../../../../components', () => ({
   AgentEnrollmentConfirmationStep: () => ({
@@ -49,6 +51,7 @@ const mockedUseGetFleetServerHosts = jest.mocked(useGetFleetServerHosts);
 const mockedUsePollingAgentCount = jest.mocked(usePollingAgentCount);
 const mockedUseFleetStatus = jest.mocked(useFleetStatus);
 const mockedUseGetCreateApiKey = jest.mocked(useGetCreateApiKey);
+const mockedUseStartServices = jest.mocked(useStartServices);
 
 describe('AddCollectorFlyout', () => {
   let renderer: TestRenderer;
@@ -80,6 +83,7 @@ describe('AddCollectorFlyout', () => {
     } as any);
 
     mockedUseFleetStatus.mockReturnValue({ spaceId: 'default' } as any);
+    mockedUseStartServices.mockReturnValue({ cloud: { isCloudEnabled: false } } as any);
     mockedUseGetCreateApiKey.mockReturnValue({
       apiKey: undefined,
       apiKeyEncoded: undefined,
@@ -283,6 +287,37 @@ describe('AddCollectorFlyout', () => {
 
       await waitFor(() => {
         expect(component.getByText('Create API key').closest('button')).toBeDisabled();
+      });
+    });
+  });
+
+  describe('TLS configuration', () => {
+    beforeEach(() => {
+      mockedSendGetOneAgentPolicy.mockResolvedValue({ data: { item: { id: 'opamp' } } } as any);
+      mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+        data: { items: [{ api_key: 'test-token' }] },
+      } as any);
+    });
+
+    it('includes insecure_skip_verify when not on cloud', async () => {
+      mockedUseStartServices.mockReturnValue({ cloud: { isCloudEnabled: false } } as any);
+
+      const component = renderFlyout();
+
+      await waitFor(() => {
+        const yaml = component.getByTestId('opampConfigYaml').textContent ?? '';
+        expect(yaml).toContain('insecure_skip_verify: true');
+      });
+    });
+
+    it('omits insecure_skip_verify when on cloud', async () => {
+      mockedUseStartServices.mockReturnValue({ cloud: { isCloudEnabled: true } } as any);
+
+      const component = renderFlyout();
+
+      await waitFor(() => {
+        const yaml = component.getByTestId('opampConfigYaml').textContent ?? '';
+        expect(yaml).not.toContain('insecure_skip_verify');
       });
     });
   });

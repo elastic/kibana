@@ -339,7 +339,10 @@ import type {
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
-import type { ScheduleRiskEngineNowResponse } from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
+import type {
+  ScheduleRiskEngineNowRequestBodyInput,
+  ScheduleRiskEngineNowResponse,
+} from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { ReadRiskEngineSettingsResponse } from './entity_analytics/risk_engine/engine_settings_route.gen';
 import type { GetRiskEngineStatusResponse } from './entity_analytics/risk_engine/engine_status_route.gen';
 import type {
@@ -575,13 +578,13 @@ export class Client {
     this.log = options.log;
   }
   /**
-    * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
-the migration process. A successful migration will result in both the old and new indices being present.
-As such, the old, orphaned index can (and likely should) be deleted.
+    * **DEPRECATED.** Cleanup API for old migration artifacts. Do not add new call sites.
+**WARNING:** This schedules deletions; ensure no production reads still point at the source index.
 
-While you can delete these indices manually,
-the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
-after 30 days. It also deletes other artifacts specific to the migration implementation.
+Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
+the migration process. A successful migration can leave both the old and new indices present, so the old
+index may be deleted. While you can delete these indices manually, the endpoint applies a deletion policy
+to the relevant index, causing it to be deleted after 30 days, and removes other migration-specific artifacts.
 
     */
   async alertsMigrationCleanup(props: AlertsMigrationCleanupProps) {
@@ -784,8 +787,12 @@ rules and alerts without calling this API.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Initiate a migration of detection alerts.
-Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
+    * **DEPRECATED.** Legacy API for on-demand reindexing of old `.siem-signals-*` alert indices. Do not build new
+integrations; upgrade the Elastic Stack and rely on product-managed data lifecycle instead.
+**WARNING:** Migrations can be resource intensive and should be planned during a maintenance window.
+
+Initiate a migration of detection alerts. Migrations are initiated per index. The process is not destructive
+and should not remove existing data, but it can consume significant cluster resources. Plan capacity accordingly.
 
     */
   async createAlertsMigration(props: CreateAlertsMigrationProps) {
@@ -1085,6 +1092,12 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Permanently deletes the Elastic Security alerts backing index in the current space, including the alerts
+stored in it. Use with caution; prefer lifecycle policies or the UI when available.
+Call `GET /api/detection_engine/index` first to confirm the index that will be removed.
+
+    */
   async deleteAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API DeleteAlertsIndex`);
     return this.kbnClient
@@ -1668,9 +1681,12 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
-The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
-finalize it.
+    * **DEPRECATED.** Completes a legacy alert index migration. Do not automate against this in new code.
+**WARNING:** Finalizing swaps read aliases; confirm the migration has finished successfully before calling.
+
+Finalize successful migrations of detection alerts. This replaces the original index's alias with the
+successfully migrated index's alias. The endpoint is idempotent, so you can poll until a migration
+finishes and then call this operation once.
 
     */
   async finalizeAlertsMigration(props: FinalizeAlertsMigrationProps) {
@@ -2849,6 +2865,12 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Returns the backing Elasticsearch index for Elastic Security detection alerts in the current space, and
+whether its mapping is outdated. Use this to verify that an alert index is provisioned before creating
+or running rules that write alerts to it.
+
+    */
   async readAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API ReadAlertsIndex`);
     return this.kbnClient
@@ -2862,8 +2884,14 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
-   */
+    * **DEPRECATED.** This endpoint was used for historical `.siem-signals-*` index migration workflows. Do not use
+for new automations; there is no supported replacement in this public API.
+**WARNING:** Prefer upgrading through supported Elastic stack upgrades rather than ad-hoc index migrations.
+
+Retrieves indices that contain detection alerts of a particular age, along with migration information for
+each of those indices.
+
+    */
   async readAlertsMigrationStatus(props: ReadAlertsMigrationStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadAlertsMigrationStatus`);
     return this.kbnClient
@@ -3031,6 +3059,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Simulates a detection rule using the same rule type and query logic as a persisted rule, over a short
+time window, without persisting a rule or writing alerts. Use the response to validate queries, see sample
+matching documents, and inspect execution logs. Pair `invocationCount` and `timeframeEnd` to cap run time.
+
+    */
   async rulePreview(props: RulePreviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API RulePreview`);
     return this.kbnClient
@@ -3091,7 +3125,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   /**
    * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
    */
-  async scheduleRiskEngineNow() {
+  async scheduleRiskEngineNow(props: ScheduleRiskEngineNowProps) {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleRiskEngineNow`);
     return this.kbnClient
       .request<ScheduleRiskEngineNowResponse>({
@@ -3100,6 +3134,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3185,7 +3220,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * And tags to detection alerts, and remove them from alerts.
+    * Add tags to detection alerts, and remove them from alerts, by alert IDs or a query, in a single request.
 > info
 > You cannot add and remove the same alert tag in the same request.
 
@@ -4048,6 +4083,9 @@ export interface RulePreviewProps {
 }
 export interface RunScriptActionProps {
   body: RunScriptActionRequestBodyInput;
+}
+export interface ScheduleRiskEngineNowProps {
+  body: ScheduleRiskEngineNowRequestBodyInput;
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
