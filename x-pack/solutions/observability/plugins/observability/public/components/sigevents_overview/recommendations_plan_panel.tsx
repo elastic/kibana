@@ -155,11 +155,7 @@ export const RecommendationsPlanPanel = ({
   );
 
   return (
-    <EuiPanel
-      hasBorder
-      css={panelCss}
-      data-test-subj="sigeventsOverviewRecommendationsPlanPanel"
-    >
+    <EuiPanel hasBorder css={panelCss} data-test-subj="sigeventsOverviewRecommendationsPlanPanel">
       <div css={headerStripCss}>
         <EuiFlexGroup
           alignItems="center"

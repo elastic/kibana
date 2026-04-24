@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiAvatar,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { EuiAvatarProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -32,10 +25,9 @@ export interface StatusHeaderProps {
   iconSize?: EuiAvatarProps['size'];
 }
 
-const DEFAULT_CRITICAL_TITLE = i18n.translate(
-  'xpack.observability.sigeventsOverview.mainHeading',
-  { defaultMessage: 'Your system requires attention' }
-);
+const DEFAULT_CRITICAL_TITLE = i18n.translate('xpack.observability.sigeventsOverview.mainHeading', {
+  defaultMessage: 'Your system requires attention',
+});
 
 const DEFAULT_CRITICAL_DESCRIPTION = i18n.translate(
   'xpack.observability.sigeventsOverview.introDescription',

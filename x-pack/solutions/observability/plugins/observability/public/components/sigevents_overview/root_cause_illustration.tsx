@@ -65,12 +65,7 @@ export const RootCauseIllustration = ({
         strokeWidth="1.04464"
         strokeMiterlimit="10"
       />
-      <path
-        d="M25.959 3.25V14.3569"
-        stroke="#153385"
-        strokeWidth="1.04464"
-        strokeMiterlimit="10"
-      />
+      <path d="M25.959 3.25V14.3569" stroke="#153385" strokeWidth="1.04464" strokeMiterlimit="10" />
       <path
         d="M25.959 37.6914V48.7983"
         stroke="#153385"

@@ -103,11 +103,7 @@ describe('SigeventsOverview', () => {
 
   it('passes a custom main event title', () => {
     renderWithIntl(
-      <SigeventsOverview
-        {...defaultProps}
-        state="critical"
-        mainEventTitle="Custom event title"
-      />
+      <SigeventsOverview {...defaultProps} state="critical" mainEventTitle="Custom event title" />
     );
     expect(screen.getByText('Custom event title')).toBeInTheDocument();
   });
@@ -137,9 +133,7 @@ describe('SigeventsOverview', () => {
   });
 
   it('does not render the impacted cards section when empty', () => {
-    renderWithIntl(
-      <SigeventsOverview {...defaultProps} state="critical" impactedCards={[]} />
-    );
+    renderWithIntl(<SigeventsOverview {...defaultProps} state="critical" impactedCards={[]} />);
     expect(screen.queryByTestId('sigeventsOverviewImpactedCards')).not.toBeInTheDocument();
   });
 });

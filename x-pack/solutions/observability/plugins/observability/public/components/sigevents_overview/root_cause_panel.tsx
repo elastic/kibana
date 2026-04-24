@@ -20,10 +20,9 @@ export interface RootCausePanelProps {
   illustrationSize?: number;
 }
 
-const DEFAULT_TITLE = i18n.translate(
-  'xpack.observability.sigeventsOverview.rootCausePanel.title',
-  { defaultMessage: 'Root cause' }
-);
+const DEFAULT_TITLE = i18n.translate('xpack.observability.sigeventsOverview.rootCausePanel.title', {
+  defaultMessage: 'Root cause',
+});
 
 /**
  * Renders a span styled with the theme's monospace font.
@@ -54,16 +53,14 @@ const DefaultDescription = () => {
 
   return (
     <p>
-      {'The checkout service\'s '}
-      <span css={codeCss}>placeOrder</span>
-      {' '}
-      <span css={codeCss}>gRPC</span>
+      {"The checkout service's "}
+      <span css={codeCss}>placeOrder</span> <span css={codeCss}>gRPC</span>
       {' call fails with '}
       <span css={codeCss}>ECONNREFUSED</span>
       {' to '}
       <span css={codeCss}>10.103.136.237:9999</span>
       {
-        " — the payment service's upstream dependency remains unreachable. Confirmed by KI query \"Payment processing failures\" returning 5 rows at 09:08 UTC, all showing "
+        ' — the payment service\'s upstream dependency remains unreachable. Confirmed by KI query "Payment processing failures" returning 5 rows at 09:08 UTC, all showing '
       }
       <span css={codeCss}>gRPC code 13</span>
       {' INTERNAL with connection refused errors originating from the frontend pod ('}

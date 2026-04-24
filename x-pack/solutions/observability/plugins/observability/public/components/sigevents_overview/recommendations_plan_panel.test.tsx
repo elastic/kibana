@@ -102,11 +102,7 @@ describe('RecommendationsPlanPanel', () => {
 
   it('starts with all steps collapsed when initialOpenStepIds is empty', () => {
     renderWithIntl(
-      <RecommendationsPlanPanel
-        {...defaultProps}
-        initialDetailsOpen
-        initialOpenStepIds={[]}
-      />
+      <RecommendationsPlanPanel {...defaultProps} initialDetailsOpen initialOpenStepIds={[]} />
     );
     expect(screen.getByText(/Continue monitoring order-flow signal volumes/)).not.toBeVisible();
   });
