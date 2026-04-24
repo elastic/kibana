@@ -144,7 +144,7 @@ function getEnvironmentOptions(environments: string[]) {
 const DEFAULT_RANGE_FROM = 'now-15m';
 const DEFAULT_RANGE_TO = 'now';
 
-function getTimeRange(timeRange?: TimeRange) {
+function getTimeRange(timeRange?: Partial<TimeRange>) {
   const rangeFrom = timeRange?.from ?? DEFAULT_RANGE_FROM;
   const rangeTo = timeRange?.to ?? DEFAULT_RANGE_TO;
   const start = datemath.parse(rangeFrom)?.toISOString() ?? rangeFrom;
