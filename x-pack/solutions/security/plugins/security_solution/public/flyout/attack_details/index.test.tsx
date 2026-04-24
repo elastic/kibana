@@ -16,7 +16,9 @@ import { useTabs } from './hooks/use_tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useKibana } from '../../common/lib/kibana';
 
-const mockFlyoutNavigation = jest.fn(() => <div data-test-subj="flyoutNavigation" />);
+const mockFlyoutNavigation = jest.fn((_props?: unknown) => (
+  <div data-test-subj="flyoutNavigation" />
+));
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('./context');
