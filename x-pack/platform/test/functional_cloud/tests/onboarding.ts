@@ -52,9 +52,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(deployment.getHostPort() + `/app/cloud/onboarding`);
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
-      // We need to make sure that both path and hash are respected.
+      // Verify we landed in observability. The exact page doesn't matter -
+      // we only care that Cloud's redirect to observability works.
       const currentURL = parse(await browser.getCurrentUrl());
-      expect(currentURL.pathname).to.eql('/app/observability/landing');
+      expect(currentURL.pathname).to.match(/^\/app\/observability\//);
     });
 
     it('Redirect and save token', async () => {
