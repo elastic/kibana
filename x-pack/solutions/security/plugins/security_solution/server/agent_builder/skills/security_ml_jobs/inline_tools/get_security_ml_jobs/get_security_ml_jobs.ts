@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -22,10 +22,14 @@ import { findMatchingMlJobs } from './find_matching_ml_jobs';
 
 export const SECURITY_ML_JOBS_INLINE_TOOL = `security.ml.jobs`;
 
-export const mlJobsToolSchema = z.object({
-  entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
-  prompt: z.string().describe('The original question or prompt that the agent is trying to answer'),
-});
+export const mlJobsToolSchema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
+    prompt: z
+      .string()
+      .describe('The original question or prompt that the agent is trying to answer'),
+  })
+);
 
 export type MlJobsToolType = Omit<z.infer<typeof mlJobsToolSchema>, 'entityType'> & {
   entityType: EntityType;

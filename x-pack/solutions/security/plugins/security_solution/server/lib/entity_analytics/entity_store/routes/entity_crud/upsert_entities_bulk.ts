@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { preprocessUpsertEntitiesBulkRequestBody } from '../../../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
@@ -20,9 +20,8 @@ import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_e
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
 
-const UpsertEntitiesBulkRequestBodyPreprocessed = z.preprocess(
-  preprocessUpsertEntitiesBulkRequestBody,
-  UpsertEntitiesBulkRequestBody
+const UpsertEntitiesBulkRequestBodyPreprocessed = lazySchema(() =>
+  z.preprocess(preprocessUpsertEntitiesBulkRequestBody, UpsertEntitiesBulkRequestBody)
 );
 
 export const upsertEntitiesBulk = (

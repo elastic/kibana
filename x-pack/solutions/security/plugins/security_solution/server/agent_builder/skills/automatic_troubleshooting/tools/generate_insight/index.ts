@@ -7,23 +7,25 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { GENERATE_INSIGHT_TOOL_ID } from '../..';
 import { createGenerateInsightGraph } from './graph';
 
-const generateInsightSchema = z.object({
-  problemDescription: z
-    .string()
-    .min(1)
-    .describe('A brief description of the original problem being diagnosed.'),
-  remediation: z.string().min(1).describe('A detailed guide for how to remediate the problem.'),
-  endpointIds: z.array(z.string()).min(1).describe('Related endpoint IDs'),
-  data: z
-    .array(z.object({}).catchall(z.unknown()))
-    .min(1)
-    .describe('Relevant raw unedited documents.'),
-});
+const generateInsightSchema = lazySchema(() =>
+  z.object({
+    problemDescription: z
+      .string()
+      .min(1)
+      .describe('A brief description of the original problem being diagnosed.'),
+    remediation: z.string().min(1).describe('A detailed guide for how to remediate the problem.'),
+    endpointIds: z.array(z.string()).min(1).describe('Related endpoint IDs'),
+    data: z
+      .array(z.object({}).catchall(z.unknown()))
+      .min(1)
+      .describe('Relevant raw unedited documents.'),
+  })
+);
 
 export const generateInsightTool = (): BuiltinSkillBoundedTool<typeof generateInsightSchema> => {
   return {

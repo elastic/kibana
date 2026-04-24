@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { getSavedObjectsTypes } from '@kbn/cases-plugin/common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -34,16 +34,20 @@ const hasInternalKibanaOriginHeader = (headerValue: unknown): boolean => {
   return false;
 };
 
-const UpdateCaseTimestampsParams = z.object({
-  caseId: z.string(),
-});
+const UpdateCaseTimestampsParams = lazySchema(() =>
+  z.object({
+    caseId: z.string(),
+  })
+);
 
-const UpdateCaseTimestampsBody = z.object({
-  /**
-   * ISO timestamp that will be applied to `created_at`.
-   */
-  timestamp: z.string().datetime(),
-});
+const UpdateCaseTimestampsBody = lazySchema(() =>
+  z.object({
+    /**
+     * ISO timestamp that will be applied to `created_at`.
+     */
+    timestamp: z.string().datetime(),
+  })
+);
 
 /**
  * Internal-only, dev-only routes used by the Security Solution data generator script.

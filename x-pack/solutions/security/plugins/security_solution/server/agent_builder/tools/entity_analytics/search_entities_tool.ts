@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -63,129 +63,131 @@ const intervalToMinutes = (interval: string): number => {
   return Number(value) * minutesMap[unit];
 };
 
-const schema = z.object({
-  entityTypes: z
-    .array(IdentifierType)
-    .optional()
-    .describe('Filter by entity type(s): host, user, service, or generic.'),
-  riskScoreChangeInterval: z
-    .string()
-    .regex(
-      /^\d+[smhdwM]$/,
-      `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
-    )
-    .refine(
-      (val) => {
-        try {
-          return intervalToMinutes(val) >= MINUTES_PER_DAY;
-        } catch {
-          return false;
+const schema = lazySchema(() =>
+  z.object({
+    entityTypes: z
+      .array(IdentifierType)
+      .optional()
+      .describe('Filter by entity type(s): host, user, service, or generic.'),
+    riskScoreChangeInterval: z
+      .string()
+      .regex(
+        /^\d+[smhdwM]$/,
+        `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
+      )
+      .refine(
+        (val) => {
+          try {
+            return intervalToMinutes(val) >= MINUTES_PER_DAY;
+          } catch {
+            return false;
+          }
+        },
+        {
+          message: 'riskScoreChangeInterval must be at least 1 day (e.g. "1d", "1w", "1M")',
         }
-      },
-      {
-        message: 'riskScoreChangeInterval must be at least 1 day (e.g. "1d", "1w", "1M")',
-      }
-    )
-    .describe(
-      `The time interval to search for risk score changes (e.g. '30d', '7d', '1w'). Must be at least 1 day. Intervals should be in format {value}{unit} where value is a number and unit is one of 'd' (day), 'w' (week), or 'M' (month)`
-    )
-    .optional(),
-  riskScoreMin: z
-    .number()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe(
-      'Minimum normalized risk score (0-100). Only returns entities with entity.risk.calculated_score_norm >= this value.'
-    ),
-  riskScoreMax: z
-    .number()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe(
-      'Maximum normalized risk score (0-100). Only returns entities with entity.risk.calculated_score_norm <= this value.'
-    ),
-  riskLevels: z
-    .array(EntityRiskLevels)
-    .optional()
-    .describe('Filter by risk level(s). Valid values: Unknown, Low, Moderate, High, Critical.'),
-  criticalityLevels: z
-    .array(AssetCriticalityLevel)
-    .optional()
-    .describe(
-      'Filter by asset criticality level(s). Valid values: low_impact, medium_impact, high_impact, extreme_impact.'
-    ),
-  watchlists: z
-    .array(z.string().min(1))
-    .optional()
-    .describe(
-      'Filter for entities that belong to any of the specified watchlists (entity.attributes.watchlists).'
-    ),
-  managedOnly: z
-    .boolean()
-    .optional()
-    .describe('When true, only returns managed entities (entity.attributes.managed == true).'),
-  mfaEnabledOnly: z
-    .boolean()
-    .optional()
-    .describe(
-      'When true, only returns entities with MFA enabled (entity.attributes.mfa_enabled == true).'
-    ),
-  assetOnly: z
-    .boolean()
-    .optional()
-    .describe(
-      'When true, only returns entities that are assets (entity.attributes.asset == true).'
-    ),
-  firstSeenAfter: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .optional()
-    .describe(
-      'Filter for entities first seen after a certain date. Date must be in ISO 8601 datetime format.'
-    ),
-  firstSeenBefore: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .optional()
-    .describe(
-      'Filter for entities first seen before a certain date. Date must be in ISO 8601 datetime format.'
-    ),
-  lastSeenAfter: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .optional()
-    .describe(
-      'Filter for entities last seen after a certain date. Date must be in ISO 8601 datetime format.'
-    ),
-  lastSeenBefore: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .optional()
-    .describe(
-      'Filter for entities last seen before a certain date. Date must be in ISO 8601 datetime format.'
-    ),
-  maxResults: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('Maximum number of entities to return (1-100, default 10).'),
-});
+      )
+      .describe(
+        `The time interval to search for risk score changes (e.g. '30d', '7d', '1w'). Must be at least 1 day. Intervals should be in format {value}{unit} where value is a number and unit is one of 'd' (day), 'w' (week), or 'M' (month)`
+      )
+      .optional(),
+    riskScoreMin: z
+      .number()
+      .min(0)
+      .max(100)
+      .optional()
+      .describe(
+        'Minimum normalized risk score (0-100). Only returns entities with entity.risk.calculated_score_norm >= this value.'
+      ),
+    riskScoreMax: z
+      .number()
+      .min(0)
+      .max(100)
+      .optional()
+      .describe(
+        'Maximum normalized risk score (0-100). Only returns entities with entity.risk.calculated_score_norm <= this value.'
+      ),
+    riskLevels: z
+      .array(EntityRiskLevels)
+      .optional()
+      .describe('Filter by risk level(s). Valid values: Unknown, Low, Moderate, High, Critical.'),
+    criticalityLevels: z
+      .array(AssetCriticalityLevel)
+      .optional()
+      .describe(
+        'Filter by asset criticality level(s). Valid values: low_impact, medium_impact, high_impact, extreme_impact.'
+      ),
+    watchlists: z
+      .array(z.string().min(1))
+      .optional()
+      .describe(
+        'Filter for entities that belong to any of the specified watchlists (entity.attributes.watchlists).'
+      ),
+    managedOnly: z
+      .boolean()
+      .optional()
+      .describe('When true, only returns managed entities (entity.attributes.managed == true).'),
+    mfaEnabledOnly: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, only returns entities with MFA enabled (entity.attributes.mfa_enabled == true).'
+      ),
+    assetOnly: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, only returns entities that are assets (entity.attributes.asset == true).'
+      ),
+    firstSeenAfter: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .optional()
+      .describe(
+        'Filter for entities first seen after a certain date. Date must be in ISO 8601 datetime format.'
+      ),
+    firstSeenBefore: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .optional()
+      .describe(
+        'Filter for entities first seen before a certain date. Date must be in ISO 8601 datetime format.'
+      ),
+    lastSeenAfter: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .optional()
+      .describe(
+        'Filter for entities last seen after a certain date. Date must be in ISO 8601 datetime format.'
+      ),
+    lastSeenBefore: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .optional()
+      .describe(
+        'Filter for entities last seen before a certain date. Date must be in ISO 8601 datetime format.'
+      ),
+    maxResults: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Maximum number of entities to return (1-100, default 10).'),
+  })
+);
 type ToolParams = z.infer<typeof schema>;
 
 export const SECURITY_SEARCH_ENTITIES_TOOL_ID = securityTool('search_entities');

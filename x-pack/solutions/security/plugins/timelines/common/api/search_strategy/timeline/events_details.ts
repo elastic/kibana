@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { TimelineEventsQueries } from '../model/timeline_events_queries';
 import { requestPaginated } from './request_paginated';
 
-export const timelineEventsDetailsSchema = requestPaginated.partial().extend({
-  indexName: z.string(),
-  eventId: z.string(),
-  authFilter: z.object({}).optional(),
-  runtimeMappings,
-  factoryQueryType: z.literal(TimelineEventsQueries.details),
-});
+export const timelineEventsDetailsSchema = lazySchema(() =>
+  requestPaginated.partial().extend({
+    indexName: z.string(),
+    eventId: z.string(),
+    authFilter: z.object({}).optional(),
+    runtimeMappings,
+    factoryQueryType: z.literal(TimelineEventsQueries.details),
+  })
+);
 
 export type TimelineEventsDetailsRequestOptionsInput = z.input<typeof timelineEventsDetailsSchema>;
 

@@ -6,7 +6,7 @@
  */
 
 import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { UpsertEntityResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 import {
@@ -31,7 +31,7 @@ import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/e
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
 /** Permissive body schema so we validate in the handler with the schema that matches entityType (union order would otherwise reject valid host/user bodies). */
-const UpsertBodyPermissive = z.record(z.string(), z.unknown());
+const UpsertBodyPermissive = lazySchema(() => z.record(z.string(), z.unknown()));
 
 const ENTITY_TYPE_SCHEMAS: Record<
   'host' | 'user' | 'service' | 'generic',

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const timerange = z.object({
-  interval: z.string(),
-  from: z.string(),
-  to: z.string(),
-});
+export const timerange = lazySchema(() =>
+  z.object({
+    interval: z.string(),
+    from: z.string(),
+    to: z.string(),
+  })
+);

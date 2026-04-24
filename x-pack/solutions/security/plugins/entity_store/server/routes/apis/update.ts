@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -16,9 +16,11 @@ import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { LogExtractionUpdadeSchema } from './utils/log_extraction_validator';
 
-const bodySchema = z.object({
-  logExtraction: LogExtractionUpdadeSchema,
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    logExtraction: LogExtractionUpdadeSchema,
+  })
+);
 
 export function registerUpdate(router: EntityStorePluginRouter) {
   router.versioned

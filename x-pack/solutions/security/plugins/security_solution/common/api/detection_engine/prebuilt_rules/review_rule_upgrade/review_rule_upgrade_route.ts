@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SortOrder, type RuleObjectId, type RuleSignatureId, type RuleTagArray } from '../../model';
 import type { PartialThreeWayRuleDiff } from '../model';
 import type { RuleResponse, RuleVersion } from '../../model/rule_schema';
@@ -13,30 +13,34 @@ import { FindRulesSortField } from '../../rule_management';
 import { ReviewPrebuiltRuleUpgradeFilter } from '../common/review_prebuilt_rules_upgrade_filter';
 
 export type ReviewRuleUpgradeSort = z.infer<typeof ReviewRuleUpgradeSort>;
-export const ReviewRuleUpgradeSort = z.object({
-  /**
-   * Field to sort by
-   */
-  field: FindRulesSortField.optional(),
-  /**
-   * Sort order
-   */
-  order: SortOrder.optional(),
-});
+export const ReviewRuleUpgradeSort = lazySchema(() =>
+  z.object({
+    /**
+     * Field to sort by
+     */
+    field: FindRulesSortField.optional(),
+    /**
+     * Sort order
+     */
+    order: SortOrder.optional(),
+  })
+);
 
 export type ReviewRuleUpgradeRequestBody = z.infer<typeof ReviewRuleUpgradeRequestBody>;
-export const ReviewRuleUpgradeRequestBody = z
-  .object({
-    filter: ReviewPrebuiltRuleUpgradeFilter.optional(),
-    sort: ReviewRuleUpgradeSort.optional(),
+export const ReviewRuleUpgradeRequestBody = lazySchema(() =>
+  z
+    .object({
+      filter: ReviewPrebuiltRuleUpgradeFilter.optional(),
+      sort: ReviewRuleUpgradeSort.optional(),
 
-    page: z.coerce.number().int().min(1).optional().default(1),
-    /**
-     * Rules per page
-     */
-    per_page: z.coerce.number().int().min(0).max(500).optional().default(20),
-  })
-  .nullable();
+      page: z.coerce.number().int().min(1).optional().default(1),
+      /**
+       * Rules per page
+       */
+      per_page: z.coerce.number().int().min(0).max(500).optional().default(20),
+    })
+    .nullable()
+);
 
 export interface ReviewRuleUpgradeResponseBody {
   /**

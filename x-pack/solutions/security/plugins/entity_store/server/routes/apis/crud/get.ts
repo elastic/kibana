@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { ArrayFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
@@ -18,79 +18,81 @@ import { BadCRUDRequestError } from '../../../domain/errors';
 import type { ListEntitiesParams } from '../../../domain/crud/crud_client';
 
 /** `ArrayFromString` expects a Zod schema; align with search / CRUD entity types. */
-const entityTypeSchema = z.enum(['user', 'host', 'service', 'generic']);
+const entityTypeSchema = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
 
-const querySchema = z
-  .object({
-    filter: z
-      .string()
-      .optional()
-      .describe('A Kibana Query Language (KQL) filter for the search-after mode.'),
-    size: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .optional()
-      .describe('Number of entities to return in search-after mode.'),
-    searchAfter: z
-      .string()
-      .optional()
-      .describe('JSON-encoded search_after value for cursor-based pagination.'),
-    source: z.array(z.string()).optional().describe('Fields to include in the response source.'),
-    fields: ArrayFromString(z.string()).optional().describe('Fields to include in the response.'),
-    sort_field: z.string().optional().describe('Field to sort results by in page mode.'),
-    sort_order: z.enum(['asc', 'desc']).optional().describe('Sort order in page mode.'),
-    page: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .optional()
-      .describe('Page number to return (1-indexed) in page mode.'),
-    per_page: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(10_000)
-      .optional()
-      .describe('Number of entities per page in page mode.'),
-    filterQuery: z
-      .string()
-      .optional()
-      .describe('An Elasticsearch query string to filter entities in page mode.'),
-    entity_types: ArrayFromString(entityTypeSchema)
-      .optional()
-      .describe('Entity types to include in the results.'),
-  })
-  .superRefine((data, ctx) => {
-    const usesPagePagination = data.page !== undefined || data.per_page !== undefined;
-    const usesSearchAfter = data.searchAfter !== undefined;
-    const hasPageModeFields =
-      usesPagePagination ||
-      data.sort_field !== undefined ||
-      data.sort_order !== undefined ||
-      data.filterQuery !== undefined ||
-      (data.entity_types !== undefined && data.entity_types.length > 0);
+const querySchema = lazySchema(() =>
+  z
+    .object({
+      filter: z
+        .string()
+        .optional()
+        .describe('A Kibana Query Language (KQL) filter for the search-after mode.'),
+      size: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe('Number of entities to return in search-after mode.'),
+      searchAfter: z
+        .string()
+        .optional()
+        .describe('JSON-encoded search_after value for cursor-based pagination.'),
+      source: z.array(z.string()).optional().describe('Fields to include in the response source.'),
+      fields: ArrayFromString(z.string()).optional().describe('Fields to include in the response.'),
+      sort_field: z.string().optional().describe('Field to sort results by in page mode.'),
+      sort_order: z.enum(['asc', 'desc']).optional().describe('Sort order in page mode.'),
+      page: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe('Page number to return (1-indexed) in page mode.'),
+      per_page: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(10_000)
+        .optional()
+        .describe('Number of entities per page in page mode.'),
+      filterQuery: z
+        .string()
+        .optional()
+        .describe('An Elasticsearch query string to filter entities in page mode.'),
+      entity_types: ArrayFromString(entityTypeSchema)
+        .optional()
+        .describe('Entity types to include in the results.'),
+    })
+    .superRefine((data, ctx) => {
+      const usesPagePagination = data.page !== undefined || data.per_page !== undefined;
+      const usesSearchAfter = data.searchAfter !== undefined;
+      const hasPageModeFields =
+        usesPagePagination ||
+        data.sort_field !== undefined ||
+        data.sort_order !== undefined ||
+        data.filterQuery !== undefined ||
+        (data.entity_types !== undefined && data.entity_types.length > 0);
 
-    if (usesPagePagination && usesSearchAfter) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Cannot combine page/per_page with searchAfter',
-      });
-    }
-    if (usesPagePagination && data.size !== undefined) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Cannot combine page/per_page with size; use per_page for page mode',
-      });
-    }
-    if (data.filter !== undefined && hasPageModeFields) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          'Cannot combine KQL `filter` with page search parameters (entity_types, filterQuery, page, per_page, sort_field, sort_order)',
-      });
-    }
-  });
+      if (usesPagePagination && usesSearchAfter) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Cannot combine page/per_page with searchAfter',
+        });
+      }
+      if (usesPagePagination && data.size !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Cannot combine page/per_page with size; use per_page for page mode',
+        });
+      }
+      if (data.filter !== undefined && hasPageModeFields) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            'Cannot combine KQL `filter` with page search parameters (entity_types, filterQuery, page, per_page, sort_field, sort_order)',
+        });
+      }
+    })
+);
 
 const parseJsonParam = <T>(raw: string | undefined, label: string): T | undefined => {
   if (raw === undefined) return undefined;

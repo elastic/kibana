@@ -6,17 +6,19 @@
  */
 
 import type { Action, Middleware } from 'redux';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { selectTimelineById } from '../selectors';
 import { updateColumnWidth } from '../actions';
 
-const LocalStorageColumnSettingsSchema = z.record(
-  z.string(),
-  z.object({
-    initialWidth: z.number().optional(),
-    id: z.string(),
-  })
+const LocalStorageColumnSettingsSchema = lazySchema(() =>
+  z.record(
+    z.string(),
+    z.object({
+      initialWidth: z.number().optional(),
+      id: z.string(),
+    })
+  )
 );
 export type LocalStorageColumnSettings = z.infer<typeof LocalStorageColumnSettingsSchema>;
 

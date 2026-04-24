@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { PrebuiltRulesFilter } from './prebuilt_rules_filter';
 
 export type ReviewPrebuiltRuleUpgradeFilter = z.infer<typeof ReviewPrebuiltRuleUpgradeFilter>;
-export const ReviewPrebuiltRuleUpgradeFilter = PrebuiltRulesFilter.merge(
-  z.object({
-    /**
-     * Rule IDs to return upgrade info for
-     */
-    rule_ids: z.array(z.string()).optional(),
-  })
+export const ReviewPrebuiltRuleUpgradeFilter = lazySchema(() =>
+  PrebuiltRulesFilter.merge(
+    z.object({
+      /**
+       * Rule IDs to return upgrade info for
+       */
+      rule_ids: z.array(z.string()).optional(),
+    })
+  )
 );

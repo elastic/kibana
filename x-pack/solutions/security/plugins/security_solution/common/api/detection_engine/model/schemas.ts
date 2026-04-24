@@ -7,86 +7,94 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export type FileName = z.infer<typeof file_name>;
-export const file_name = z.string();
+export const file_name = lazySchema(() => z.string());
 
 export type ExcludeExportDetails = z.infer<typeof exclude_export_details>;
-export const exclude_export_details = z.boolean();
+export const exclude_export_details = lazySchema(() => z.boolean());
 
-export const saved_id = z.string();
+export const saved_id = lazySchema(() => z.string());
 
 export type SavedIdOrUndefined = z.infer<typeof savedIdOrUndefined>;
-export const savedIdOrUndefined = saved_id.optional();
+export const savedIdOrUndefined = lazySchema(() => saved_id.optional());
 
-export const status = z.enum(['open', 'closed', 'acknowledged', 'in-progress']);
+export const status = lazySchema(() => z.enum(['open', 'closed', 'acknowledged', 'in-progress']));
 export type Status = z.infer<typeof status>;
 
-export const closingReason = z.enum([
-  'false_positive',
-  'duplicate',
-  'true_positive',
-  'benign_positive',
-  'automated_closure',
-  'other',
-]);
+export const closingReason = lazySchema(() =>
+  z.enum([
+    'false_positive',
+    'duplicate',
+    'true_positive',
+    'benign_positive',
+    'automated_closure',
+    'other',
+  ])
+);
 export type ClosingReason = z.infer<typeof closingReason>;
 
-export const signal_ids = z.array(z.string());
+export const signal_ids = lazySchema(() => z.array(z.string()));
 export type SignalIds = z.infer<typeof signal_ids>;
 
-export const alert_tag_ids = z.array(z.string());
+export const alert_tag_ids = lazySchema(() => z.array(z.string()));
 export type AlertTagIds = z.infer<typeof alert_tag_ids>;
 
-export const indexRecord = z.record(
-  z.string(),
+export const indexRecord = lazySchema(() =>
+  z.record(
+    z.string(),
+    z.object({
+      all: z.boolean(),
+      maintenance: z.boolean(),
+      read: z.boolean(),
+      create_index: z.boolean(),
+      index: z.boolean(),
+      monitor: z.boolean(),
+      delete: z.boolean(),
+      manage: z.boolean(),
+      delete_index: z.boolean(),
+      create_doc: z.boolean(),
+      view_index_metadata: z.boolean(),
+      create: z.boolean(),
+      write: z.boolean(),
+    })
+  )
+);
+
+export const privilege = lazySchema(() =>
   z.object({
-    all: z.boolean(),
-    maintenance: z.boolean(),
-    read: z.boolean(),
-    create_index: z.boolean(),
-    index: z.boolean(),
-    monitor: z.boolean(),
-    delete: z.boolean(),
-    manage: z.boolean(),
-    delete_index: z.boolean(),
-    create_doc: z.boolean(),
-    view_index_metadata: z.boolean(),
-    create: z.boolean(),
-    write: z.boolean(),
+    username: z.string(),
+    has_all_requested: z.boolean(),
+    cluster: z.object({
+      monitor_ml: z.boolean(),
+      manage_index_templates: z.boolean(),
+      monitor_transform: z.boolean(),
+      manage_security: z.boolean(),
+      manage_own_api_key: z.boolean(),
+      all: z.boolean(),
+      monitor: z.boolean(),
+      manage: z.boolean(),
+      manage_transform: z.boolean(),
+      manage_ml: z.boolean(),
+      manage_pipeline: z.boolean(),
+    }),
+    index: indexRecord,
+    is_authenticated: z.boolean(),
+    has_encryption_key: z.boolean(),
   })
 );
 
-export const privilege = z.object({
-  username: z.string(),
-  has_all_requested: z.boolean(),
-  cluster: z.object({
-    monitor_ml: z.boolean(),
-    manage_index_templates: z.boolean(),
-    monitor_transform: z.boolean(),
-    manage_security: z.boolean(),
-    manage_own_api_key: z.boolean(),
-    all: z.boolean(),
-    monitor: z.boolean(),
-    manage: z.boolean(),
-    manage_transform: z.boolean(),
-    manage_ml: z.boolean(),
-    manage_pipeline: z.boolean(),
-  }),
-  index: indexRecord,
-  is_authenticated: z.boolean(),
-  has_encryption_key: z.boolean(),
-});
-
 export type Privilege = z.infer<typeof privilege>;
 
-export const alert_tags = z.object({
-  tags_to_add: z.array(z.string()),
-  tags_to_remove: z.array(z.string()),
-});
+export const alert_tags = lazySchema(() =>
+  z.object({
+    tags_to_add: z.array(z.string()),
+    tags_to_remove: z.array(z.string()),
+  })
+);
 
 export type AlertTags = z.infer<typeof alert_tags>;
 
-export const user_search_term = z.string();
+export const user_search_term = lazySchema(() => z.string());
 export type UserSearchTerm = z.infer<typeof user_search_term>;

@@ -6,7 +6,7 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
@@ -20,42 +20,48 @@ export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
 // timeout: intentionally excluded from LogExtractionBodyParams
 // TODO: add timeout once we have a way to set it as a task override param
-export const LogExtractionInstallParams = LogExtractionConfig.pick({
-  filter: true,
-  fieldHistoryLength: true,
-  additionalIndexPatterns: true,
-  lookbackPeriod: true,
-  frequency: true,
-  delay: true,
-  docsLimit: true,
-  maxLogsPerPage: true,
-}).partial();
+export const LogExtractionInstallParams = lazySchema(() =>
+  LogExtractionConfig.pick({
+    filter: true,
+    fieldHistoryLength: true,
+    additionalIndexPatterns: true,
+    lookbackPeriod: true,
+    frequency: true,
+    delay: true,
+    docsLimit: true,
+    maxLogsPerPage: true,
+  }).partial()
+);
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
 
-export const LogExtractionUpdateParams = z.object({
-  filter: z.string().optional(),
-  fieldHistoryLength: z.number().int().optional(),
-  additionalIndexPatterns: z.array(z.string()).optional(),
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  docsLimit: z.number().int().min(1).optional(),
-  maxLogsPerPage: z.number().int().min(1).optional(),
-});
+export const LogExtractionUpdateParams = lazySchema(() =>
+  z.object({
+    filter: z.string().optional(),
+    fieldHistoryLength: z.number().int().optional(),
+    additionalIndexPatterns: z.array(z.string()).optional(),
+    lookbackPeriod: z
+      .string()
+      .regex(/[smdh]$/)
+      .optional(),
+    frequency: z
+      .string()
+      .regex(/[smdh]$/)
+      .optional(),
+    delay: z
+      .string()
+      .regex(/[smdh]$/)
+      .optional(),
+    docsLimit: z.number().int().min(1).optional(),
+    maxLogsPerPage: z.number().int().min(1).optional(),
+  })
+);
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
 
 export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
-export const HistorySnapshotBodyParams = HistorySnapshotState.pick({
-  frequency: true,
-}).partial();
+export const HistorySnapshotBodyParams = lazySchema(() =>
+  HistorySnapshotState.pick({
+    frequency: true,
+  }).partial()
+);

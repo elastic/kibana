@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import { DEFAULT_DATA_VIEW_ID, DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
@@ -14,13 +14,17 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../lib/entity_analytics
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 
-export const entityAnalyticsCommonSchema = z.object({
-  entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
-  prompt: z.string().describe('The prompt or question that calling this tool will help to answer.'),
-  queryExtraContext: z
-    .string()
-    .describe('Information from previous chat messages like an ESQL filter that should be used.'),
-});
+export const entityAnalyticsCommonSchema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
+    prompt: z
+      .string()
+      .describe('The prompt or question that calling this tool will help to answer.'),
+    queryExtraContext: z
+      .string()
+      .describe('Information from previous chat messages like an ESQL filter that should be used.'),
+  })
+);
 
 export type EntityAnalyticsCommonType = Omit<
   z.infer<typeof entityAnalyticsCommonSchema>,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
@@ -18,9 +18,11 @@ import {
 } from '../tools';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-export const alertAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  alert: z.string(),
-});
+export const alertAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    alert: z.string(),
+  })
+);
 
 /**
  * Data for an alert attachment.

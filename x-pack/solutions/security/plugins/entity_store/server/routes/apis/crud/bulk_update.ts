@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { unflattenObject } from '@kbn/object-utils';
 import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
@@ -17,22 +17,26 @@ import { wrapMiddlewares } from '../../middleware';
 import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
-const bodySchema = z.object({
-  entities: z
-    .array(
-      z.object({
-        type: z.enum(ALL_ENTITY_TYPES).describe('The entity type of this record.'),
-        doc: z.preprocess((val) => unflattenObject(val as Record<string, unknown>), Entity),
-      })
-    )
-    .describe('The entities to update.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entities: z
+      .array(
+        z.object({
+          type: z.enum(ALL_ENTITY_TYPES).describe('The entity type of this record.'),
+          doc: z.preprocess((val) => unflattenObject(val as Record<string, unknown>), Entity),
+        })
+      )
+      .describe('The entities to update.'),
+  })
+);
 
-const querySchema = z.object({
-  force: BooleanFromString.optional()
-    .default(false)
-    .describe('When true, allows updating protected fields.'),
-});
+const querySchema = lazySchema(() =>
+  z.object({
+    force: BooleanFromString.optional()
+      .default(false)
+      .describe('When true, allows updating protected fields.'),
+  })
+);
 
 export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
   router.versioned

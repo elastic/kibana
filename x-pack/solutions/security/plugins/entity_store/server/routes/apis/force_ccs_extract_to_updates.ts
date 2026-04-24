@@ -6,7 +6,7 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
@@ -17,16 +17,20 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 
 const DEFAULT_DOCS_LIMIT = 10000;
 
-const paramsSchema = z.object({
-  entityType: EntityType,
-});
+const paramsSchema = lazySchema(() =>
+  z.object({
+    entityType: EntityType,
+  })
+);
 
-const bodySchema = z.object({
-  indexPatterns: z.array(z.string()).min(1),
-  fromDateISO: z.string().datetime(),
-  toDateISO: z.string().datetime(),
-  docsLimit: z.number().int().min(1).optional(),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    indexPatterns: z.array(z.string()).min(1),
+    fromDateISO: z.string().datetime(),
+    toDateISO: z.string().datetime(),
+    docsLimit: z.number().int().min(1).optional(),
+  })
+);
 
 export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter) {
   router.versioned

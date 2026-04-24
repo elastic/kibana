@@ -8,7 +8,7 @@
 import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { unflattenObject } from '@kbn/object-utils';
 import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
@@ -21,9 +21,11 @@ import {
 } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
-const paramsSchema = z.object({
-  entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to create.'),
-});
+const paramsSchema = lazySchema(() =>
+  z.object({
+    entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to create.'),
+  })
+);
 
 export function registerCRUDCreate(router: EntityStorePluginRouter) {
   router.versioned

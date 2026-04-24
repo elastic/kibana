@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SortOrder } from '../../model';
 
 export type PrebuiltRuleAssetsSortField = z.infer<typeof PrebuiltRuleAssetsSortField>;
-export const PrebuiltRuleAssetsSortField = z.enum(['name', 'risk_score', 'severity']);
+export const PrebuiltRuleAssetsSortField = lazySchema(() =>
+  z.enum(['name', 'risk_score', 'severity'])
+);
 
 export type PrebuiltRuleAssetsSortItem = z.infer<typeof PrebuiltRuleAssetsSortItem>;
-export const PrebuiltRuleAssetsSortItem = z.object({
-  /**
-   * Field to sort by
-   */
-  field: PrebuiltRuleAssetsSortField,
-  /**
-   * Sort order
-   */
-  order: SortOrder,
-});
+export const PrebuiltRuleAssetsSortItem = lazySchema(() =>
+  z.object({
+    /**
+     * Field to sort by
+     */
+    field: PrebuiltRuleAssetsSortField,
+    /**
+     * Sort order
+     */
+    order: SortOrder,
+  })
+);
 
 export type PrebuiltRuleAssetsSort = z.infer<typeof PrebuiltRuleAssetsSort>;
-export const PrebuiltRuleAssetsSort = z.array(PrebuiltRuleAssetsSortItem);
+export const PrebuiltRuleAssetsSort = lazySchema(() => z.array(PrebuiltRuleAssetsSortItem));

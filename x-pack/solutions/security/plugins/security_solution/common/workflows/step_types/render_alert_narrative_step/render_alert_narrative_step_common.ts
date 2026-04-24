@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 
-export const renderAlertNarrativeInputSchema = z.object({
-  alertId: z.string().describe('The alert ID'),
-  alertIndex: z.string().describe('The index that contains the alert'),
-});
+export const renderAlertNarrativeInputSchema = lazySchema(() =>
+  z.object({
+    alertId: z.string().describe('The alert ID'),
+    alertIndex: z.string().describe('The index that contains the alert'),
+  })
+);
 
-export const renderAlertNarrativeOutputSchema = z.object({
-  alert_id: z.string(),
-  alert_index: z.string(),
-  timeline_string: z.string().describe('A Timeline-like English string for the alert'),
-  message: z.string(),
-});
+export const renderAlertNarrativeOutputSchema = lazySchema(() =>
+  z.object({
+    alert_id: z.string(),
+    alert_index: z.string(),
+    timeline_string: z.string().describe('A Timeline-like English string for the alert'),
+    message: z.string(),
+  })
+);
 
 export const renderAlertNarrativeStepCommonDefinition: BaseStepDefinition<
   typeof renderAlertNarrativeInputSchema,

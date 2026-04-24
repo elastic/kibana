@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { TimelineEventsQueries } from '../model/timeline_events_queries';
 import { timelineRequestBasicOptionsSchema } from './request_basic';
 
-export const timelineKpiRequestOptionsSchema = timelineRequestBasicOptionsSchema.extend({
-  factoryQueryType: z.literal(TimelineEventsQueries.kpi),
-});
+export const timelineKpiRequestOptionsSchema = lazySchema(() =>
+  timelineRequestBasicOptionsSchema.extend({
+    factoryQueryType: z.literal(TimelineEventsQueries.kpi),
+  })
+);
 
 export type TimelineKpiRequestOptionsInput = z.input<typeof timelineKpiRequestOptionsSchema>;
 

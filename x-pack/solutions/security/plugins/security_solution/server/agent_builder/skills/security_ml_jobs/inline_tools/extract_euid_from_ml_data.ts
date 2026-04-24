@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -16,11 +16,13 @@ const ALLOWED_ENTITY_TYPES = ['host', 'user'] as const;
 
 export const EXTRACT_EUID_FROM_SECURITY_ML_JOBS_INLINE_TOOL = `security.ml.jobs.extract_euid`;
 
-export const extractEuidToolSchema = z.object({
-  anomalyRecords: z
-    .array(z.record(z.string(), z.unknown()))
-    .describe('Array of anomaly records from ML jobs'),
-});
+export const extractEuidToolSchema = lazySchema(() =>
+  z.object({
+    anomalyRecords: z
+      .array(z.record(z.string(), z.unknown()))
+      .describe('Array of anomaly records from ML jobs'),
+  })
+);
 
 export type ExtractEuidToolType = z.infer<typeof extractEuidToolSchema>;
 

@@ -6,6 +6,7 @@
  */
 
 import * as z from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 import { PaginationOptions, SortingOptions } from '../../../../rule_management/logic';
 
@@ -14,36 +15,44 @@ export enum RuleSource {
   Custom = 'custom',
 }
 
-export const RulesTableSavedFilter = z
-  .object({
-    searchTerm: z.string(),
-    source: z.nativeEnum(RuleSource),
-    tags: z.array(z.string()),
-    enabled: z.boolean(),
-    ruleExecutionStatus: RuleExecutionStatus,
-  })
-  .partial();
+export const RulesTableSavedFilter = lazySchema(() =>
+  z
+    .object({
+      searchTerm: z.string(),
+      source: z.nativeEnum(RuleSource),
+      tags: z.array(z.string()),
+      enabled: z.boolean(),
+      ruleExecutionStatus: RuleExecutionStatus,
+    })
+    .partial()
+);
 
 export type RulesTableSavedFilter = z.infer<typeof RulesTableSavedFilter>;
 
-export const RulesTableSavedSorting = SortingOptions.pick({
-  field: true,
-  order: true,
-}).partial();
+export const RulesTableSavedSorting = lazySchema(() =>
+  SortingOptions.pick({
+    field: true,
+    order: true,
+  }).partial()
+);
 
 export type RulesTableSavedSorting = z.infer<typeof RulesTableSavedSorting>;
 
-export const RulesTableStorageSavedPagination = PaginationOptions.pick({
-  perPage: true,
-}).partial();
+export const RulesTableStorageSavedPagination = lazySchema(() =>
+  PaginationOptions.pick({
+    perPage: true,
+  }).partial()
+);
 
 export type RulesTableStorageSavedPagination = z.infer<typeof RulesTableStorageSavedPagination>;
 
 export type RulesTableUrlSavedPagination = z.infer<typeof RulesTableUrlSavedPagination>;
-export const RulesTableUrlSavedPagination = PaginationOptions.pick({
-  page: true,
-  perPage: true,
-}).partial();
+export const RulesTableUrlSavedPagination = lazySchema(() =>
+  PaginationOptions.pick({
+    page: true,
+    perPage: true,
+  }).partial()
+);
 
 export type RulesTableStorageSavedState = RulesTableSavedFilter &
   RulesTableSavedSorting &

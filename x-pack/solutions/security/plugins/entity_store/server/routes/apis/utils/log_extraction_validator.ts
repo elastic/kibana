@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { LogExtractionBodyParams } from '../../constants';
@@ -140,10 +140,10 @@ export function validateLogExtractionParams(
   validateDelayVsLookbackPeriod(data, ctx);
 }
 
-export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine(
-  validateLogExtractionParams
-).optional();
+export const LogExtractionInstallSchema = lazySchema(() =>
+  LogExtractionInstallParams.superRefine(validateLogExtractionParams).optional()
+);
 
-export const LogExtractionUpdadeSchema = LogExtractionUpdateParams.superRefine(
-  validateLogExtractionParams
+export const LogExtractionUpdadeSchema = lazySchema(() =>
+  LogExtractionUpdateParams.superRefine(validateLogExtractionParams)
 );

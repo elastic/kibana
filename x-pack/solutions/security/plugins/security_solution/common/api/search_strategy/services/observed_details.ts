@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { inspect } from '../model/inspect';
 import { timerange } from '../model/timerange';
 import { ServicesQueries } from '../model/factory_query_type';
 
-export const observedServiceDetailsSchema = requestBasicOptionsSchema.extend({
-  serviceName: z.string(),
-  skip: z.boolean().optional(),
-  timerange,
-  inspect,
-  factoryQueryType: z.literal(ServicesQueries.observedDetails),
-});
+export const observedServiceDetailsSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    serviceName: z.string(),
+    skip: z.boolean().optional(),
+    timerange,
+    inspect,
+    factoryQueryType: z.literal(ServicesQueries.observedDetails),
+  })
+);
 
 export type ObservedServiceDetailsRequestOptionsInput = z.input<
   typeof observedServiceDetailsSchema

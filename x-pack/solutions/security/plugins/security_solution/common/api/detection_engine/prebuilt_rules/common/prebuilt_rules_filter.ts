@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export enum RuleCustomizationStatus {
   CUSTOMIZED = 'CUSTOMIZED',
@@ -13,17 +13,19 @@ export enum RuleCustomizationStatus {
 }
 
 export type PrebuiltRulesFilter = z.infer<typeof PrebuiltRulesFilter>;
-export const PrebuiltRulesFilter = z.object({
-  /**
-   * Tags to filter by
-   */
-  tags: z.array(z.string()).optional(),
-  /**
-   * Rule name to filter by
-   */
-  name: z.string().optional(),
-  /**
-   * Rule customization status to filter by
-   */
-  customization_status: z.nativeEnum(RuleCustomizationStatus).optional(),
-});
+export const PrebuiltRulesFilter = lazySchema(() =>
+  z.object({
+    /**
+     * Tags to filter by
+     */
+    tags: z.array(z.string()).optional(),
+    /**
+     * Rule name to filter by
+     */
+    name: z.string().optional(),
+    /**
+     * Rule customization status to filter by
+     */
+    customization_status: z.nativeEnum(RuleCustomizationStatus).optional(),
+  })
+);

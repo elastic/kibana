@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { mapValues } from 'lodash';
 import { AggregatedPrebuiltRuleError, DiffableAllFields, ThreeWayDiffConflict } from '../model';
 import { RuleObjectId, RuleSignatureId, RuleVersion } from '../../model';
 import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';
 
 export type Mode = z.infer<typeof Mode>;
-export const Mode = z.enum(['ALL_RULES', 'SPECIFIC_RULES']);
+export const Mode = lazySchema(() => z.enum(['ALL_RULES', 'SPECIFIC_RULES']));
 export type ModeEnum = typeof Mode.enum;
-export const ModeEnum = Mode.enum;
+export const ModeEnum = lazySchema(() => Mode.enum);
 
 export type PickVersionValues = z.infer<typeof PickVersionValues>;
-export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
+export const PickVersionValues = lazySchema(() => z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']));
 export type PickVersionValuesEnum = typeof PickVersionValues.enum;
-export const PickVersionValuesEnum = PickVersionValues.enum;
+export const PickVersionValuesEnum = lazySchema(() => PickVersionValues.enum);
 
 // Specific handling of special fields according to:
 // https://github.com/elastic/kibana/issues/186544
@@ -67,7 +67,9 @@ export const DiffableFieldsToOmit = NON_UPGRADEABLE_DIFFABLE_FIELDS.reduce((acc,
  * See: https://github.com/elastic/kibana/issues/186544
  */
 export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
-export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit);
+export const DiffableUpgradableFields = lazySchema(() =>
+  DiffableAllFields.omit(DiffableFieldsToOmit)
+);
 
 export type FieldUpgradeSpecifier<T> = z.infer<
   ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>
@@ -92,71 +94,82 @@ type FieldUpgradeSpecifiers<TFields> = {
 };
 
 export type RuleFieldsToUpgrade = FieldUpgradeSpecifiers<DiffableUpgradableFields>;
-export const RuleFieldsToUpgrade = z
-  .object(
-    mapValues(DiffableUpgradableFields.shape, (fieldSchema) => {
-      return fieldUpgradeSpecifier(fieldSchema).optional();
-    })
-  )
-  .strict();
+export const RuleFieldsToUpgrade = lazySchema(() =>
+  z
+    .object(
+      mapValues(DiffableUpgradableFields.shape, (fieldSchema) => {
+        return fieldUpgradeSpecifier(fieldSchema).optional();
+      })
+    )
+    .strict()
+);
 
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
-export const RuleUpgradeSpecifier = z.object({
-  rule_id: RuleSignatureId,
-  revision: z.number(),
-  version: RuleVersion,
-  pick_version: PickVersionValues.optional(),
-  // Fields that can be customized during the upgrade workflow
-  // as decided in: https://github.com/elastic/kibana/issues/186544
-  fields: RuleFieldsToUpgrade.optional(),
-});
+export const RuleUpgradeSpecifier = lazySchema(() =>
+  z.object({
+    rule_id: RuleSignatureId,
+    revision: z.number(),
+    version: RuleVersion,
+    pick_version: PickVersionValues.optional(),
+    // Fields that can be customized during the upgrade workflow
+    // as decided in: https://github.com/elastic/kibana/issues/186544
+    fields: RuleFieldsToUpgrade.optional(),
+  })
+);
 
 export type UpgradeConflictResolution = z.infer<typeof UpgradeConflictResolution>;
-export const UpgradeConflictResolution = z.enum(['SKIP', 'UPGRADE_SOLVABLE']);
+export const UpgradeConflictResolution = lazySchema(() => z.enum(['SKIP', 'UPGRADE_SOLVABLE']));
 export type UpgradeConflictResolutionEnum = typeof UpgradeConflictResolution.enum;
-export const UpgradeConflictResolutionEnum = UpgradeConflictResolution.enum;
+export const UpgradeConflictResolutionEnum = lazySchema(() => UpgradeConflictResolution.enum);
 
 export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;
-export const UpgradeSpecificRulesRequest = z.object({
-  mode: z.literal('SPECIFIC_RULES'),
-  rules: z.array(RuleUpgradeSpecifier).min(1),
-  pick_version: PickVersionValues.optional(),
-  on_conflict: UpgradeConflictResolution.optional(),
-  dry_run: z.boolean().optional(),
-});
+export const UpgradeSpecificRulesRequest = lazySchema(() =>
+  z.object({
+    mode: z.literal('SPECIFIC_RULES'),
+    rules: z.array(RuleUpgradeSpecifier).min(1),
+    pick_version: PickVersionValues.optional(),
+    on_conflict: UpgradeConflictResolution.optional(),
+    dry_run: z.boolean().optional(),
+  })
+);
 
 export type UpgradeAllRulesRequest = z.infer<typeof UpgradeAllRulesRequest>;
-export const UpgradeAllRulesRequest = z.object({
-  mode: z.literal('ALL_RULES'),
-  pick_version: PickVersionValues.optional(),
-  filter: PrebuiltRulesFilter.optional(),
-  on_conflict: UpgradeConflictResolution.optional(),
-  dry_run: z.boolean().optional(),
-});
+export const UpgradeAllRulesRequest = lazySchema(() =>
+  z.object({
+    mode: z.literal('ALL_RULES'),
+    pick_version: PickVersionValues.optional(),
+    filter: PrebuiltRulesFilter.optional(),
+    on_conflict: UpgradeConflictResolution.optional(),
+    dry_run: z.boolean().optional(),
+  })
+);
 
 export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;
-export const SkipRuleUpgradeReason = z.enum(['RULE_UP_TO_DATE', 'CONFLICT']);
+export const SkipRuleUpgradeReason = lazySchema(() => z.enum(['RULE_UP_TO_DATE', 'CONFLICT']));
 export type SkipRuleUpgradeReasonEnum = typeof SkipRuleUpgradeReason.enum;
-export const SkipRuleUpgradeReasonEnum = SkipRuleUpgradeReason.enum;
+export const SkipRuleUpgradeReasonEnum = lazySchema(() => SkipRuleUpgradeReason.enum);
 
 export type RuleUpToDateSkipReason = z.infer<typeof RuleUpToDateSkipReason>;
-export const RuleUpToDateSkipReason = z.object({
-  reason: z.literal(SkipRuleUpgradeReasonEnum.RULE_UP_TO_DATE),
-  rule_id: z.string(),
-});
+export const RuleUpToDateSkipReason = lazySchema(() =>
+  z.object({
+    reason: z.literal(SkipRuleUpgradeReasonEnum.RULE_UP_TO_DATE),
+    rule_id: z.string(),
+  })
+);
 
 export type UpgradeConflictSkipReason = z.infer<typeof UpgradeConflictSkipReason>;
-export const UpgradeConflictSkipReason = z.object({
-  reason: z.literal(SkipRuleUpgradeReasonEnum.CONFLICT),
-  rule_id: z.string(),
-  conflict: z.nativeEnum(ThreeWayDiffConflict),
-});
+export const UpgradeConflictSkipReason = lazySchema(() =>
+  z.object({
+    reason: z.literal(SkipRuleUpgradeReasonEnum.CONFLICT),
+    rule_id: z.string(),
+    conflict: z.nativeEnum(ThreeWayDiffConflict),
+  })
+);
 
 export type SkippedRuleUpgrade = z.infer<typeof SkippedRuleUpgrade>;
-export const SkippedRuleUpgrade = z.discriminatedUnion('reason', [
-  RuleUpToDateSkipReason,
-  UpgradeConflictSkipReason,
-]);
+export const SkippedRuleUpgrade = lazySchema(() =>
+  z.discriminatedUnion('reason', [RuleUpToDateSkipReason, UpgradeConflictSkipReason])
+);
 
 export type UpgradedRuleBasicInfo = z.infer<typeof UpgradedRuleBasicInfo>;
 export const UpgradedRuleBasicInfo = z.object({
@@ -166,22 +179,23 @@ export const UpgradedRuleBasicInfo = z.object({
 });
 
 export type PerformRuleUpgradeResponseBody = z.infer<typeof PerformRuleUpgradeResponseBody>;
-export const PerformRuleUpgradeResponseBody = z.object({
-  summary: z.object({
-    total: z.number(),
-    succeeded: z.number(),
-    skipped: z.number(),
-    failed: z.number(),
-  }),
-  results: z.object({
-    updated: z.array(UpgradedRuleBasicInfo),
-    skipped: z.array(SkippedRuleUpgrade),
-  }),
-  errors: z.array(AggregatedPrebuiltRuleError),
-});
+export const PerformRuleUpgradeResponseBody = lazySchema(() =>
+  z.object({
+    summary: z.object({
+      total: z.number(),
+      succeeded: z.number(),
+      skipped: z.number(),
+      failed: z.number(),
+    }),
+    results: z.object({
+      updated: z.array(UpgradedRuleBasicInfo),
+      skipped: z.array(SkippedRuleUpgrade),
+    }),
+    errors: z.array(AggregatedPrebuiltRuleError),
+  })
+);
 
 export type PerformRuleUpgradeRequestBody = z.infer<typeof PerformRuleUpgradeRequestBody>;
-export const PerformRuleUpgradeRequestBody = z.discriminatedUnion('mode', [
-  UpgradeAllRulesRequest,
-  UpgradeSpecificRulesRequest,
-]);
+export const PerformRuleUpgradeRequestBody = lazySchema(() =>
+  z.discriminatedUnion('mode', [UpgradeAllRulesRequest, UpgradeSpecificRulesRequest])
+);

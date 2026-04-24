@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { LogExtractionInstallSchema, validateKql } from './log_extraction_validator';
 
-const TestSchema = z.object({ logExtraction: LogExtractionInstallSchema });
+const TestSchema = lazySchema(() => z.object({ logExtraction: LogExtractionInstallSchema }));
 
 describe('LogExtractionInstallParams additionalIndexPatterns', () => {
   it('accepts valid index patterns', () => {

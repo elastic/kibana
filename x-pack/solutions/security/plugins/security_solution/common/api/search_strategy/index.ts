@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   threatIntelSourceRequestOptionsSchema,
@@ -69,30 +69,32 @@ export * from './model/factory_query_type';
 
 export * from './model/runtime_mappings';
 
-export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryType', [
-  firstLastSeenRequestOptionsSchema,
-  allHostsSchema,
-  hostDetailsSchema,
-  hostOverviewSchema,
-  hostUncommonProcessesSchema,
-  usersSchema,
-  observedUserDetailsSchema,
-  managedUserDetailsSchema,
-  userAuthenticationsSchema,
-  observedServiceDetailsSchema,
-  riskScoreRequestOptionsSchema,
-  riskScoreKpiRequestOptionsSchema,
-  relatedHostsRequestOptionsSchema,
-  relatedUsersRequestOptionsSchema,
-  networkDetailsSchema,
-  networkDnsSchema,
-  networkHttpSchema,
-  networkOverviewSchema,
-  networkTlsSchema,
-  networkTopCountriesSchema,
-  networkTopNFlowSchema,
-  networkTopNFlowCountSchema,
-  networkUsersSchema,
-  threatIntelSourceRequestOptionsSchema,
-  eventEnrichmentRequestOptionsSchema,
-]);
+export const searchStrategyRequestSchema = lazySchema(() =>
+  z.discriminatedUnion('factoryQueryType', [
+    firstLastSeenRequestOptionsSchema,
+    allHostsSchema,
+    hostDetailsSchema,
+    hostOverviewSchema,
+    hostUncommonProcessesSchema,
+    usersSchema,
+    observedUserDetailsSchema,
+    managedUserDetailsSchema,
+    userAuthenticationsSchema,
+    observedServiceDetailsSchema,
+    riskScoreRequestOptionsSchema,
+    riskScoreKpiRequestOptionsSchema,
+    relatedHostsRequestOptionsSchema,
+    relatedUsersRequestOptionsSchema,
+    networkDetailsSchema,
+    networkDnsSchema,
+    networkHttpSchema,
+    networkOverviewSchema,
+    networkTlsSchema,
+    networkTopCountriesSchema,
+    networkTopNFlowSchema,
+    networkTopNFlowCountSchema,
+    networkUsersSchema,
+    threatIntelSourceRequestOptionsSchema,
+    eventEnrichmentRequestOptionsSchema,
+  ])
+);

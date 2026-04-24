@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { HostsQueries } from '../model/factory_query_type';
 import { pagination } from '../model/pagination';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 
-export const hostUncommonProcessesSchema = requestBasicOptionsSchema.extend({
-  sort,
-  pagination,
-  timerange,
-  factoryQueryType: z.literal(HostsQueries.uncommonProcesses),
-});
+export const hostUncommonProcessesSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    sort,
+    pagination,
+    timerange,
+    factoryQueryType: z.literal(HostsQueries.uncommonProcesses),
+  })
+);
 
 export type HostUncommonProcessesRequestOptionsInput = z.input<typeof hostUncommonProcessesSchema>;
 

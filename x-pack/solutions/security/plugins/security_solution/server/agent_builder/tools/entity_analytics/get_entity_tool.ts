@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -30,37 +30,39 @@ const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_n
 const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const ENTITY_STORE_ENTITY_ID_FIELD = 'entity.id';
 
-const schema = z.object({
-  entityType: IdentifierType.describe(
-    'The type of entity: host, user, service, or generic'
-  ).optional(),
-  entityId: z
-    .string()
-    .min(1)
-    .describe(
-      'The entity id (EUID) to fetch. Supports both prefixed and non-prefixed forms (for example "host:server1" and "server1").'
-    ),
-  interval: z
-    .string()
-    .regex(
-      /^\d+[smhdwM]$/,
-      `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
-    )
-    .describe(
-      `The time interval to get entity profile snapshot history (e.g. '30d', '24h', '1w'). Intervals should be in format {value}{unit} where value is a number and unit is one of 's' (second), 'm' (minute), 'h' (hour), 'd' (day), 'w' (week), or 'M' (month)`
-    )
-    .optional(),
-  date: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .describe(
-      `Get the entity's profile on a certain date. Date must be in ISO 8601 datetime format. When specified, both the current profile and the profile snapshot will be fetched.`
-    )
-    .optional(),
-});
+const schema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe(
+      'The type of entity: host, user, service, or generic'
+    ).optional(),
+    entityId: z
+      .string()
+      .min(1)
+      .describe(
+        'The entity id (EUID) to fetch. Supports both prefixed and non-prefixed forms (for example "host:server1" and "server1").'
+      ),
+    interval: z
+      .string()
+      .regex(
+        /^\d+[smhdwM]$/,
+        `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
+      )
+      .describe(
+        `The time interval to get entity profile snapshot history (e.g. '30d', '24h', '1w'). Intervals should be in format {value}{unit} where value is a number and unit is one of 's' (second), 'm' (minute), 'h' (hour), 'd' (day), 'w' (week), or 'M' (month)`
+      )
+      .optional(),
+    date: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .describe(
+        `Get the entity's profile on a certain date. Date must be in ISO 8601 datetime format. When specified, both the current profile and the profile snapshot will be fetched.`
+      )
+      .optional(),
+  })
+);
 
 export const SECURITY_GET_ENTITY_TOOL_ID = securityTool('get_entity');
 

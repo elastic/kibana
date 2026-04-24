@@ -10,7 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { take } from 'lodash/fp';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { WATCHLISTS_INDICES_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
@@ -31,9 +31,11 @@ const WATCHLIST_ENTITY_FIELDS = [
 
 const LIMIT = 20;
 
-const SearchWatchlistIndicesRequestQuery = z.object({
-  searchQuery: z.string().optional(),
-});
+const SearchWatchlistIndicesRequestQuery = lazySchema(() =>
+  z.object({
+    searchQuery: z.string().optional(),
+  })
+);
 
 export const searchWatchlistIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -25,13 +25,15 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
-const createDetectionRuleSchema = z.object({
-  user_query: z
-    .string()
-    .describe(
-      'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
-    ),
-});
+const createDetectionRuleSchema = lazySchema(() =>
+  z.object({
+    user_query: z
+      .string()
+      .describe(
+        'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
+      ),
+  })
+);
 
 export function createDetectionRuleTool(
   core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,

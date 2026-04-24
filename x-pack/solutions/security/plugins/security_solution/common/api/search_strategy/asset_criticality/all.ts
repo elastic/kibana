@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
-export const assetCriticalityRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  pagination: z
-    .object({
-      cursorStart: z.number(),
-      querySize: z.number(),
-    })
-    .optional(),
-});
+export const assetCriticalityRequestOptionsSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    pagination: z
+      .object({
+        cursorStart: z.number(),
+        querySize: z.number(),
+      })
+      .optional(),
+  })
+);
 
 export type AssetCriticalityRequestOptions = z.infer<typeof assetCriticalityRequestOptionsSchema>;

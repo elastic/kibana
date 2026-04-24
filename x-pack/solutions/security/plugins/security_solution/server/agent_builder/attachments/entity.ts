@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-const riskEntityAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  identifierType: z.enum(['host', 'user', 'service', 'generic']),
-  identifier: z.string().min(1),
-});
+const riskEntityAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    identifierType: z.enum(['host', 'user', 'service', 'generic']),
+    identifier: z.string().min(1),
+  })
+);
 
 /**
  * Creates the definition for the `entity` attachment type.

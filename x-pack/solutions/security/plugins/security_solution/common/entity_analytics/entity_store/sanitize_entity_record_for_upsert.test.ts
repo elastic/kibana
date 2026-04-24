@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { HostEntity } from '../../api/entity_analytics/entity_store/entities/common.gen';
 import { UpsertEntitiesBulkRequestBody } from '../../api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import {
@@ -13,9 +13,8 @@ import {
   sanitizeEntityRecordForUpsert,
 } from './sanitize_entity_record_for_upsert';
 
-const bulkBodySchema = z.preprocess(
-  preprocessUpsertEntitiesBulkRequestBody,
-  UpsertEntitiesBulkRequestBody
+const bulkBodySchema = lazySchema(() =>
+  z.preprocess(preprocessUpsertEntitiesBulkRequestBody, UpsertEntitiesBulkRequestBody)
 );
 
 describe('sanitize_entity_record_for_upsert', () => {
