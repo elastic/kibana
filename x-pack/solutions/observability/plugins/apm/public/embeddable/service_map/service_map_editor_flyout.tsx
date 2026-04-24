@@ -234,7 +234,7 @@ export function ServiceMapEditorFlyout({
   const handleSave = useCallback(() => {
     const state: ServiceMapEmbeddableState = {
       environment,
-      kuery,
+      kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
     };
     onSave(state);

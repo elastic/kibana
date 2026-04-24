@@ -46,14 +46,14 @@ const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
 
 interface ServiceMapCustomState {
   environment: string;
-  kuery: string;
+  kuery: string | undefined;
   service_name: string | undefined;
   service_group_id: string | undefined;
 }
 
 const defaultCustomState: ServiceMapCustomState = {
   environment: ENVIRONMENT_ALL.value,
-  kuery: '',
+  kuery: undefined,
   service_name: undefined,
   service_group_id: undefined,
 };
@@ -105,8 +105,8 @@ function buildFiltersFromState(
   return filters;
 }
 
-function buildQueryFromKuery(kuery: string): Query | undefined {
-  const trimmed = kuery.trim();
+function buildQueryFromKuery(kuery: string | undefined): Query | undefined {
+  const trimmed = (kuery ?? '').trim();
   if (!trimmed) {
     return undefined;
   }
@@ -143,7 +143,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
 
       const drilldownsManager = await initializeDrilldownsManager(uuid, state);
 
-      const query$ = new BehaviorSubject<Query | undefined>(buildQueryFromKuery(state.kuery ?? ''));
+      const query$ = new BehaviorSubject<Query | undefined>(buildQueryFromKuery(state.kuery));
       const filters$ = new BehaviorSubject<Filter[] | undefined>(
         buildFiltersFromState(state.service_name, state.environment)
       );
@@ -221,9 +221,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       if (newState.environment !== undefined) {
                         customStateManager.api.setEnvironment(newState.environment);
                       }
-                      if (newState.kuery !== undefined) {
-                        customStateManager.api.setKuery(newState.kuery);
-                      }
+                      customStateManager.api.setKuery(newState.kuery);
                       customStateManager.api.setServiceName(newState.service_name);
                       closeFlyout();
                     }}

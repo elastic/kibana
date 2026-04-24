@@ -148,7 +148,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
       await waitFor(() => {
         expect(onSave).toHaveBeenCalledWith({
           environment: ENVIRONMENT_ALL.value,
-          kuery: '',
+          kuery: undefined,
           service_name: undefined,
         });
       });
