@@ -21,7 +21,6 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
   const transientPackIds: string[] = [];
 
   test.beforeAll(async ({ apiServices }) => {
-
     const body = getMinimalSavedQuery({
       id: `scout-pack-sq-${Date.now()}`,
       query: 'select * from uptime;',

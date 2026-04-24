@@ -83,8 +83,7 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
           });
           matched = data.data?.find((row) => row.packName === packName);
           if (matched) break;
-        } catch {
-        }
+        } catch {}
 
         await new Promise((r) => setTimeout(r, 5_000));
       }

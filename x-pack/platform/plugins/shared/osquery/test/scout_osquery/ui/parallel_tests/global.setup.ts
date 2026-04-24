@@ -530,8 +530,7 @@ globalSetupHook(
           );
           break;
         }
-      } catch {
-      }
+      } catch {}
 
       await new Promise((r) => setTimeout(r, 2_000));
     }
