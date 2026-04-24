@@ -20,8 +20,8 @@ const SERVICE_MAP_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];
 export const serviceMapCustomStateSchema = schema.object({
   environment: schema.string({ defaultValue: ENVIRONMENT_ALL.value }),
   kuery: schema.maybe(schema.string()),
-  serviceName: schema.maybe(schema.string()),
-  serviceGroupId: schema.maybe(schema.string()),
+  service_name: schema.maybe(schema.string()),
+  service_group_id: schema.maybe(schema.string()),
 });
 
 export const getServiceMapEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>

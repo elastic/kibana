@@ -47,22 +47,22 @@ const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
 interface ServiceMapCustomState {
   environment: string;
   kuery: string;
-  serviceName: string | undefined;
-  serviceGroupId: string | undefined;
+  service_name: string | undefined;
+  service_group_id: string | undefined;
 }
 
 const defaultCustomState: ServiceMapCustomState = {
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
-  serviceName: undefined,
-  serviceGroupId: undefined,
+  service_name: undefined,
+  service_group_id: undefined,
 };
 
 const customStateComparators: StateComparators<ServiceMapCustomState> = {
   environment: 'referenceEquality',
   kuery: 'referenceEquality',
-  serviceName: 'referenceEquality',
-  serviceGroupId: 'referenceEquality',
+  service_name: 'referenceEquality',
+  service_group_id: 'referenceEquality',
 };
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
@@ -135,8 +135,8 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         {
           environment: state.environment,
           kuery: state.kuery,
-          serviceName: state.serviceName,
-          serviceGroupId: state.serviceGroupId,
+          service_name: state.service_name,
+          service_group_id: state.service_group_id,
         },
         defaultCustomState
       );
@@ -145,7 +145,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
 
       const query$ = new BehaviorSubject<Query | undefined>(buildQueryFromKuery(state.kuery ?? ''));
       const filters$ = new BehaviorSubject<Filter[] | undefined>(
-        buildFiltersFromState(state.serviceName, state.environment)
+        buildFiltersFromState(state.service_name, state.environment)
       );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
@@ -224,7 +224,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       if (newState.kuery !== undefined) {
                         customStateManager.api.setKuery(newState.kuery);
                       }
-                      customStateManager.api.setServiceName(newState.serviceName);
+                      customStateManager.api.setServiceName(newState.service_name);
                       closeFlyout();
                     }}
                   />

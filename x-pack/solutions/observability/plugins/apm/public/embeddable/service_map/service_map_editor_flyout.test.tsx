@@ -114,7 +114,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
     const initialState = {
       environment: 'production' as const,
       kuery: 'service.name: foo',
-      serviceName: 'my-service',
+      service_name: 'my-service',
     };
 
     it('displays the edit title', async () => {
@@ -149,7 +149,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
         expect(onSave).toHaveBeenCalledWith({
           environment: ENVIRONMENT_ALL.value,
           kuery: '',
-          serviceName: undefined,
+          service_name: undefined,
         });
       });
     });
@@ -168,7 +168,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
         expect(onSave).toHaveBeenCalledWith({
           environment: ENVIRONMENT_ALL.value,
           kuery: 'host.name: server1',
-          serviceName: undefined,
+          service_name: undefined,
         });
       });
     });
@@ -307,7 +307,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
       await waitFor(() => {
         expect(onSave).toHaveBeenCalledWith(
           expect.objectContaining({
-            serviceName: undefined,
+            service_name: undefined,
           })
         );
       });

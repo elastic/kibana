@@ -170,7 +170,7 @@ describe('createAddServiceMapPanelAction', () => {
       const closeFlyout = jest.fn();
       const result = await loadContent({ closeFlyout, ariaLabelledBy: 'test-aria-label' });
 
-      const state = { environment: 'production', kuery: '', serviceName: 'test-service' };
+      const state = { environment: 'production', kuery: '', service_name: 'test-service' };
       const flyoutProps = getFlyoutProps(result);
       flyoutProps.onSave(state);
 

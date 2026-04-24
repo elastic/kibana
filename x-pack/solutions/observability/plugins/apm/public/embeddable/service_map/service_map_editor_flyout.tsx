@@ -166,7 +166,7 @@ export function ServiceMapEditorFlyout({
     initialState?.environment ?? ENVIRONMENT_ALL.value
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
-  const [serviceName, setServiceName] = useState(initialState?.serviceName ?? '');
+  const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
 
   const [selectedServiceOption, setSelectedServiceOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
@@ -235,7 +235,7 @@ export function ServiceMapEditorFlyout({
     const state: ServiceMapEmbeddableState = {
       environment,
       kuery,
-      serviceName: serviceName || undefined,
+      service_name: serviceName || undefined,
     };
     onSave(state);
   }, [environment, kuery, serviceName, onSave]);

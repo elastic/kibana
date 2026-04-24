@@ -103,8 +103,8 @@ describe('getServiceMapEmbeddableFactory', () => {
       getLatestState: jest.fn(() => ({
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
-        serviceName: undefined,
-        serviceGroupId: undefined,
+        service_name: undefined,
+        service_group_id: undefined,
       })),
       anyStateChange$: customStateAnyStateChange$,
       reinitializeState: jest.fn(),
@@ -151,8 +151,8 @@ describe('getServiceMapEmbeddableFactory', () => {
       time_range: { from: 'now-15m', to: 'now' },
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
-      serviceName: undefined,
-      serviceGroupId: undefined,
+      service_name: undefined,
+      service_group_id: undefined,
     });
   });
 
@@ -265,8 +265,8 @@ describe('getServiceMapEmbeddableFactory', () => {
       getLatestState: jest.fn(() => ({
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
-        serviceName: undefined,
-        serviceGroupId: undefined,
+        service_name: undefined,
+        service_group_id: undefined,
       })),
       anyStateChange$: customStateAnyStateChange$,
       reinitializeState: customStateReinitialize,
@@ -286,8 +286,8 @@ describe('getServiceMapEmbeddableFactory', () => {
         time_range: { from: 'now-24h', to: 'now-1h' },
         environment: 'staging',
         kuery: 'service.environment: staging',
-        serviceName: 'service-a',
-        serviceGroupId: 'group-a',
+        service_name: 'service-a',
+        service_group_id: 'group-a',
       },
       finalizeApi,
       uuid: 'panel-2',
@@ -308,7 +308,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       expect.objectContaining({
         title: 'referenceEquality',
         time_range: 'deepEquality',
-        serviceGroupId: 'referenceEquality',
+        service_group_id: 'referenceEquality',
       })
     );
 
@@ -316,8 +316,8 @@ describe('getServiceMapEmbeddableFactory', () => {
       time_range: { from: 'now-30m', to: 'now' },
       environment: 'qa',
       kuery: 'trace.id: 1',
-      serviceName: 'service-b',
-      serviceGroupId: 'group-b',
+      service_name: 'service-b',
+      service_group_id: 'group-b',
       title: 'Reset title',
     });
     expect(timeRangeReinitialize).toHaveBeenCalledWith({
@@ -327,8 +327,8 @@ describe('getServiceMapEmbeddableFactory', () => {
       expect.objectContaining({
         environment: 'qa',
         kuery: 'trace.id: 1',
-        serviceName: 'service-b',
-        serviceGroupId: 'group-b',
+        service_name: 'service-b',
+        service_group_id: 'group-b',
       })
     );
 
@@ -493,7 +493,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     });
 
     it('exposes filters$ with service name filter', async () => {
-      const api = await buildEmbeddableWithApi({ serviceName: 'checkout-service' });
+      const api = await buildEmbeddableWithApi({ service_name: 'checkout-service' });
 
       expect(api.filters$).toBeDefined();
       const filters = api.filters$.getValue();
@@ -535,7 +535,7 @@ describe('getServiceMapEmbeddableFactory', () => {
 
     it('combines service name and environment filters', async () => {
       const api = await buildEmbeddableWithApi({
-        serviceName: 'api-gateway',
+        service_name: 'api-gateway',
         environment: 'staging',
       });
 
@@ -556,7 +556,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     const deps = { coreStart: {} } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
     const embeddable = await factory.buildEmbeddable({
-      initialState: { serviceName: 'test-service', environment: 'production', kuery: 'test' },
+      initialState: { service_name: 'test-service', environment: 'production', kuery: 'test' },
       finalizeApi,
       uuid: 'panel-cleanup',
       parentApi,
