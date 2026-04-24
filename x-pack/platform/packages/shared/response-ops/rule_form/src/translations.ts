@@ -296,6 +296,20 @@ export const ADD_ACTION_DESCRIPTION_TEXT = i18n.translate(
   }
 );
 
+export const ADD_ACTION_MESSAGE_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionMessageLabel',
+  {
+    defaultMessage: 'Message',
+  }
+);
+
+export const ADD_ACTION_SETTINGS_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionSettingsLabel',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export const RULE_NAME_INPUT_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.ruleNameInputTitle',
   {

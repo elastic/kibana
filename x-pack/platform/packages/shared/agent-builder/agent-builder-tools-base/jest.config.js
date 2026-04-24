@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { EsResourceType } from '@kbn/agent-builder-common';
-
-export interface SearchTarget {
-  type: EsResourceType;
-  name: string;
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base'],
+};
