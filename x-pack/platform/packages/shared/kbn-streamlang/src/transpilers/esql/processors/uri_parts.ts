@@ -11,7 +11,7 @@ import type { UriPartsProcessor } from '../../../../types/processors';
 import {
   URI_PARTS_DEFAULT_TARGET,
   URI_PARTS_SUCCESS_SUBFIELDS,
-} from '../../../actions/uri_parts/constants';
+} from '../../../../types/processors/uri_parts';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, buildWhereCondition, combineAnd, combineOr } from './common';
 

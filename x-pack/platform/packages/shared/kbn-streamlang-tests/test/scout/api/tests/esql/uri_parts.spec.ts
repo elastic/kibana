@@ -90,7 +90,7 @@ apiTest.describe('Streamlang to ES|QL - URI Parts Processor', () => {
     async ({ testBed, esql }) => {
       // Mirrors the csv-spec `testNoSchemeUri` case. Critical because our
       // `remove_if_successful` implementation assumes relative URIs count as a
-      // successful parse — see src/actions/uri_parts/constants.ts.
+      // successful parse — see types/processors/uri_parts.ts.
       const indexName = 'stream-e2e-test-esql-uri-parts-no-scheme';
       const streamlangDSL: StreamlangDSL = {
         steps: [

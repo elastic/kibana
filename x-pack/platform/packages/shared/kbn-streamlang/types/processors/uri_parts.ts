@@ -6,15 +6,16 @@
  */
 
 /**
- * Runtime constants for the `uri_parts` Streamlang action.
+ * Runtime constants for the `uri_parts` Streamlang processor.
  *
- * Per-action runtime metadata (default target, sub-field lists, success
- * signal for `remove_if_successful`) lives under `src/actions/<action>/`
- * alongside the global `src/actions/action_metadata.ts`. Consumed by the
- * ES|QL transpiler and the validation layer.
+ * Colocated next to `uriPartsProcessorSchema` / `UriPartsProcessor` in
+ * `types/processors/` because they define the shape of the processor's output
+ * (default target, sub-field lists, success signal). They are consumed by the
+ * ES|QL transpiler and the validation layer; the Ingest Pipeline transpiler
+ * and the UI form do not need them.
  *
- * The `UriPartsProcessor` interface and `uriPartsProcessorSchema` remain in
- * `types/processors/index.ts` with every other processor's contract.
+ * Runtime values living under `types/` has precedent — see
+ * `types/utils/grok_to_regex.ts` for grok pattern helpers and constants.
  */
 
 /**

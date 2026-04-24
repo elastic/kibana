@@ -11,7 +11,7 @@ import {
   URI_PARTS_DEFAULT_TARGET,
   URI_PARTS_NUMBER_SUBFIELDS,
   URI_PARTS_STRING_SUBFIELDS,
-} from '../actions/uri_parts/constants';
+} from '../../types/processors/uri_parts';
 import { isAlwaysCondition } from '../../types/conditions';
 import { parseGrokPattern, parseDissectPattern } from '../../types/utils';
 import {
