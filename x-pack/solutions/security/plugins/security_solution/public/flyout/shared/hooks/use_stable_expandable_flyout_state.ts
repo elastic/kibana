@@ -27,9 +27,7 @@ import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
  * downstream hook dependencies reference-stable across the echo, which stops
  * the cascade into the rest of the tree.
  */
-export const useStableExpandableFlyoutState = (): ReturnType<
-  typeof useExpandableFlyoutState
-> => {
+export const useStableExpandableFlyoutState = (): ReturnType<typeof useExpandableFlyoutState> => {
   const raw = useExpandableFlyoutState();
   const ref = useRef(raw);
   if (ref.current !== raw && deepEqual(ref.current, raw)) {

@@ -9,10 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { CellActionsProps } from '@kbn/cell-actions';
-import {
-  ENTITY_RISK_LEVEL_FIELD,
-  RiskLevelBreakdownTable,
-} from './risk_level_breakdown_table';
+import { ENTITY_RISK_LEVEL_FIELD, RiskLevelBreakdownTable } from './risk_level_breakdown_table';
 import { TestProviders } from '../../../common/mock';
 import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import type { SeverityCount } from '../severity/types';

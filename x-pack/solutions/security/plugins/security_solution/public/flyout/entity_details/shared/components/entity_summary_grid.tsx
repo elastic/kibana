@@ -27,11 +27,7 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import {
-  EntitySourceValue,
-  TruncatedBadgeList,
-  toEntitySourceArray,
-} from './entity_source_value';
+import { EntitySourceValue, TruncatedBadgeList, toEntitySourceArray } from './entity_source_value';
 
 const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.grid.watchlistsOverflowTitle',

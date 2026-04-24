@@ -69,7 +69,9 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
   params: GenericEntityPanelProps;
 }
 
-export const GenericEntityPanel = memo(function GenericEntityPanel(params: GenericEntityPanelProps) {
+export const GenericEntityPanel = memo(function GenericEntityPanel(
+  params: GenericEntityPanelProps
+) {
   const { isPreviewMode, scopeId, isEngineMetadataExist } = params;
 
   // When you destructuring params in the function signature TypeScript loses track

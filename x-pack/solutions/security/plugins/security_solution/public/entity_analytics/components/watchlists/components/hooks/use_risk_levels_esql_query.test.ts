@@ -168,9 +168,7 @@ describe('useRiskLevelsEsqlQuery', () => {
   });
 
   it('skips the global time filter when applyGlobalTimeFilter is false', async () => {
-    renderHook(() =>
-      useRiskLevelsEsqlQuery({ spaceId: 'default', applyGlobalTimeFilter: false })
-    );
+    renderHook(() => useRiskLevelsEsqlQuery({ spaceId: 'default', applyGlobalTimeFilter: false }));
 
     const queryFn = mockUseQuery.mock.calls[0][1];
     const getEsqlResults = jest.requireMock('@kbn/esql-utils').getESQLResults;

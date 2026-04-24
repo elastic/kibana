@@ -38,16 +38,15 @@ const wrapper = ({ children }: PropsWithChildren) => (
   </TestProviders>
 );
 
-const flattenFilters = (
-  filters: Array<Record<string, unknown>>
-): Array<Record<string, unknown>> =>
+const flattenFilters = (filters: Array<Record<string, unknown>>): Array<Record<string, unknown>> =>
   filters.flatMap((f) =>
     typeof f === 'object' &&
     f !== null &&
     'bool' in f &&
     (f as { bool?: { filter?: unknown } }).bool?.filter
-      ? ((f as { bool: { filter: Array<Record<string, unknown>> } }).bool
-          .filter as Array<Record<string, unknown>>)
+      ? ((f as { bool: { filter: Array<Record<string, unknown>> } }).bool.filter as Array<
+          Record<string, unknown>
+        >)
       : [f]
   );
 

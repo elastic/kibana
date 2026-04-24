@@ -245,7 +245,9 @@ describe('EntitiesDataTable', () => {
   describe('entity.source column renderer', () => {
     const renderCell = (value: unknown) => {
       const state = createMockState();
-      (state.getRowsFromPages as jest.Mock).mockReturnValue([{ flattened: { 'entity.source': value } }]);
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([
+        { flattened: { 'entity.source': value } },
+      ]);
 
       renderWithProviders(state);
 

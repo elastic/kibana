@@ -64,9 +64,7 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
     if (useLegacy) {
       return combinedRiskStats.severityCount ?? EMPTY_SEVERITY_COUNT;
     }
-    return esqlRecordsToSeverityCount(
-      (riskLevelsStats.records ?? []) as EsqlSeverityRecord[]
-    );
+    return esqlRecordsToSeverityCount((riskLevelsStats.records ?? []) as EsqlSeverityRecord[]);
   }, [useLegacy, combinedRiskStats.severityCount, riskLevelsStats.records]);
 
   const loading = useLegacy ? combinedRiskStats.loading : riskLevelsStats.isLoading;

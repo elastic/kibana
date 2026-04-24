@@ -25,10 +25,7 @@ export const useEsqlGlobalFilterQuery = (): ESBoolQuery | undefined => {
  * always query a specific range (e.g. a panel hardcoded to "last 30 days")
  * while still respecting pinned KQL and filters from the global filter bar.
  */
-export const useEsqlFixedRangeFilterQuery = (
-  from: string,
-  to: string
-): ESBoolQuery | undefined => {
+export const useEsqlFixedRangeFilterQuery = (from: string, to: string): ESBoolQuery | undefined => {
   const extraFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
   const { filterQuery } = useGlobalFilterQuery({ extraFilter });
 

@@ -118,8 +118,6 @@ export const esqlRecordsToSeverityCount = (records: EsqlSeverityRecord[]): Sever
     [RiskSeverity.High]: sumWhere((r) => r.level === RiskSeverity.High),
     [RiskSeverity.Moderate]: sumWhere((r) => r.level === RiskSeverity.Moderate),
     [RiskSeverity.Low]: sumWhere((r) => r.level === RiskSeverity.Low),
-    [RiskSeverity.Unknown]: sumWhere(
-      (r) => r.level === RiskSeverity.Unknown || r.level === null
-    ),
+    [RiskSeverity.Unknown]: sumWhere((r) => r.level === RiskSeverity.Unknown || r.level === null),
   };
 };
