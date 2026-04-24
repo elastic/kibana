@@ -4,7 +4,7 @@ exports[`buildLogPaginationCursorProbeEsql adds sort, cap, inline count, and sli
 "FROM logs-*
     METADATA _index, _id
   | WHERE 
-      @timestamp > TO_DATETIME(\\"2024-01-01T00:00:00.000Z\\")
+      @timestamp >= TO_DATETIME(\\"2024-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2024-01-02T00:00:00.000Z\\")
       AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
   | INLINE STATS total_logs = count(*)

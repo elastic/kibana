@@ -82,7 +82,8 @@ export const deleteWatchlistRoute = (
               statusCode: error.statusCode,
             });
           }
-        }
+        },
+        'platinum'
       )
     );
 };
