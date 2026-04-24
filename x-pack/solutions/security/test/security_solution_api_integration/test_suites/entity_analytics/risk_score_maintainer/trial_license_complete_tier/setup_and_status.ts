@@ -198,7 +198,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(savedObjects[0].id).to.eql(
           getRiskEngineConfigurationSavedObjectId({ namespace: 'default' })
         );
-        expect(savedObjects[0].attributes.pageSize).to.eql(1234);
+        expect(savedObjects[0].attributes.pageSize).to.eql(10_000);
         expect(savedObjects[0].attributes.enableResetToZero).to.eql(false);
         expect(savedObjects[0].attributes.excludeAlertStatuses).to.eql(['open']);
         expect(savedObjects[0].attributes.filters).to.eql([
