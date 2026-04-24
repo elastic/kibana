@@ -257,11 +257,21 @@ export const useUpdateExample = () => {
         }
       );
     },
-    onSuccess: async (_response, { datasetId }) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
-      ]);
+    onSuccess: async (response, { datasetId, exampleId }) => {
+      queryClient.setQueryData<GetEvaluationDatasetResponse>(
+        queryKeys.datasets.detail(datasetId),
+        (old) => {
+          if (!old) return old;
+          const { dataset_id: _, ...updatedExample } = response;
+          return {
+            ...old,
+            examples: old.examples.map((e) => (e.id === exampleId ? updatedExample : e)),
+          };
+        }
+      );
+      await queryClient.invalidateQueries({
+        queryKey: ['evals', 'datasets', 'list'],
+      });
     },
   });
 };
@@ -282,11 +292,20 @@ export const useDeleteExample = () => {
         }
       );
     },
-    onSuccess: async (_response, { datasetId }) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
-      ]);
+    onSuccess: async (_response, { datasetId, exampleId }) => {
+      queryClient.setQueryData<GetEvaluationDatasetResponse>(
+        queryKeys.datasets.detail(datasetId),
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            examples: old.examples.filter((e) => e.id !== exampleId),
+          };
+        }
+      );
+      await queryClient.invalidateQueries({
+        queryKey: ['evals', 'datasets', 'list'],
+      });
     },
   });
 };
@@ -400,6 +419,7 @@ export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
       }
       return true;
     },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -491,6 +511,7 @@ export const useExampleScores = (exampleId: string) => {
       });
     },
     enabled: exampleId.length > 0,
+    refetchOnWindowFocus: false,
   });
 };
 
