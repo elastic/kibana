@@ -3485,45 +3485,6 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
-        "id": "def-common.isCCSRemoteIndexName",
-        "type": "Function",
-        "tags": [],
-        "label": "isCCSRemoteIndexName",
-        "description": [
-          "\nCheck whether the index expression represents a remote index (CCS) or not.\nThe index name is assumed to be individual index (no commas) but can contain `-`, wildcards,\ndatemath, remote cluster name and any other syntax permissible in index expression component.\n\n2025/01/21 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java\n"
-        ],
-        "signature": [
-          "(indexExpression: string) => boolean"
-        ],
-        "path": "src/platform/packages/shared/kbn-es-query/src/utils.ts",
-        "lineNumber": 40,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.isCCSRemoteIndexName.$1",
-            "type": "string",
-            "tags": [],
-            "label": "indexExpression",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-es-query/src/utils.ts",
-            "lineNumber": 49,
-            "columnNumber": 38,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
         "id": "def-common.isCombinedFilter",
         "type": "Function",
         "tags": [],
@@ -3966,6 +3927,45 @@
         "returnComment": [
           "`true` if a filter is an `MatchAllFilter`"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.isNonLocalIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "isNonLocalIndexName",
+        "description": [
+          "\nCheck whether the index expression represents a non-local index or not. This can happen in:\n- CCS for a remote cluster\n- CPS for a linked project\nThe index name is assumed to be individual index (no commas) but can contain `-`, wildcards,\ndatemath, remote cluster name and any other syntax permissible in index expression component.\n\n2025/01/21 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java\n"
+        ],
+        "signature": [
+          "(indexExpression: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/utils.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.isNonLocalIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexExpression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/utils.ts",
+            "lineNumber": 51,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {

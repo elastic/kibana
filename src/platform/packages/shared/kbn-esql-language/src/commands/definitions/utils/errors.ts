@@ -32,7 +32,11 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
 }: {
   messageId: K;
   values: ErrorValues<K>;
-}): { message: string; type?: 'error' | 'warning'; underlinedWarning?: boolean } {
+}): {
+  message: string;
+  type?: ESQLMessage['type'];
+  underlinedWarning?: ESQLMessage['underlinedWarning'];
+} {
   // Use a less strict type instead of doing a typecast on each message type
   const out = values as unknown as Record<string, string>;
   // i18n validation wants to the values prop to be declared inline, so need to unpack and redeclare again all props
@@ -519,11 +523,11 @@ export function getMessageFromId<K extends ErrorTypes>({
 }
 
 export function createMessage(
-  type: 'error' | 'warning',
+  type: ESQLMessage['type'],
   message: string,
-  location: ESQLLocation,
+  location: ESQLMessage['location'],
   messageId: string,
-  underlinedWarning?: boolean
+  underlinedWarning?: ESQLMessage['underlinedWarning']
 ): ESQLMessage {
   return {
     type,

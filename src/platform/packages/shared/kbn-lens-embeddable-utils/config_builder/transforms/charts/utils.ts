@@ -224,3 +224,18 @@ export function getScaleTypeFromColumnType(columnType: string | undefined): XSca
     return 'ordinal';
   }
 }
+
+/**
+ * Determines the column metadata type based on the API x-axis scale type.
+ */
+export function getColumnTypeFromScaleType(
+  scaleType: XScaleSchemaType
+): 'date' | 'number' | 'string' {
+  if (scaleType === 'temporal') {
+    return 'date';
+  } else if (scaleType === 'linear') {
+    return 'number';
+  } else {
+    return 'string';
+  }
+}
