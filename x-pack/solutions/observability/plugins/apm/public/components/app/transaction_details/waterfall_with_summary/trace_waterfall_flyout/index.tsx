@@ -131,6 +131,7 @@ export function TraceWaterfallFlyout({
           indexes={indexes}
           activeSection={activeSection}
           onCloseFlyout={closeDetailFlyout}
+          dataTestSubj="apmTraceWaterfallSpanDetailFlyout"
           size="fill"
         />
       )}
