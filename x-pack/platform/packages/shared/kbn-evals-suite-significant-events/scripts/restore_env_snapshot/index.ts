@@ -42,6 +42,7 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       'es-url',
       'es-username',
       'es-password',
+      'kibana-url',
       'snapshot-name',
       'gcs-bucket',
       'gcs-base-path',

@@ -32,6 +32,7 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
       'es-url',
       'es-username',
       'es-password',
+      'kibana-url',
       'snapshot-name',
       'run-id',
       'logs-index',
