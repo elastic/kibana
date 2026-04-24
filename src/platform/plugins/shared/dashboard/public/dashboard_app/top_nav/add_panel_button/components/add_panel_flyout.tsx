@@ -109,7 +109,10 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
         }
       });
     });
-    return { featuredItems: featured, groupsForList: list };
+    return {
+      featuredItems: featured,
+      groupsForList: list.filter((group) => group.items.length > 0),
+    };
   }, [filteredGroups]);
 
   return (
