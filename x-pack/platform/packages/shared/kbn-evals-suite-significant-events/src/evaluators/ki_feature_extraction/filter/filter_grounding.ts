@@ -66,10 +66,25 @@ export const filterGroundingEvaluator = {
       return { score: null, explanation: 'No entity features with filters to check' };
     }
 
-    const flatDocs = input.sample_documents.map((hit) => ({
-      ...(hit.fields ?? {}),
-      ...getFlattenedObject(hit._source ?? {}),
-    }));
+    const taskOutput =
+      output != null && !Array.isArray(output)
+        ? (output as unknown as Record<string, unknown>)
+        : undefined;
+    const taskDocs = taskOutput?.sample_documents as Array<Record<string, unknown>> | undefined;
+
+    if (!taskDocs && (!input.sample_documents || input.sample_documents.length === 0)) {
+      return { score: null, explanation: 'No sample documents available' };
+    }
+
+    const flatDocs = taskDocs
+      ? taskDocs.map((doc) => ({
+          ...((doc.fields as Record<string, unknown>) ?? {}),
+          ...getFlattenedObject((doc._source as Record<string, unknown>) ?? doc),
+        }))
+      : (input.sample_documents ?? []).map((hit) => ({
+          ...(hit.fields ?? {}),
+          ...getFlattenedObject(hit._source ?? {}),
+        }));
 
     const perEntityDetails: Array<{
       id: string;
