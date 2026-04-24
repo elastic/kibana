@@ -8,6 +8,7 @@
 import type { ScoutPage, KibanaUrl, Locator } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { rulesAppRoute } from '@kbn/rule-data-utils';
 import { FormMonitorType } from '../constants';
 
 export class SyntheticsAppPage {
@@ -421,7 +422,8 @@ export class SyntheticsAppPage {
   }
 
   async goToRulesPage() {
-    await this.page.goto(this.kbnUrl.get('/app/observability/alerts/rules'));
+    await this.page.goto(this.kbnUrl.get(rulesAppRoute));
+    await this.page.testSubj.waitForSelector('rulesList');
   }
 
   async navigateToAlertsPage() {
