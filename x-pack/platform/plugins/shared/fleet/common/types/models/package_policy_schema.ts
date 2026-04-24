@@ -315,9 +315,7 @@ export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
  */
 export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
   {
-    enabled: schema.maybe(schema.boolean()),
-    inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
-    package: schema.maybe(schema.any()),
+    global_data_tags: NewPackagePolicySchema.getPropSchemas().global_data_tags,
   },
   { unknowns: 'ignore' }
 );
