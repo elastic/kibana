@@ -1,5 +1,5 @@
 ---
-description: Manual and test-only Claude reviewer for pull requests using gh-aw safe review outputs.
+name: Claude Reviewer
 on:
   workflow_dispatch:
     inputs:
