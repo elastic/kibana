@@ -9,14 +9,7 @@ set -euo pipefail
 #
 # Content-hash versioning (baked into each package's build.sh) means
 # identical inputs produce identical versions, so the registry naturally
-# refuses duplicate publishes — the pipeline is safe to re-run.
-#
-# Cloud-owned dependencies (flagged for handoff):
-#   - Vault secrets for Artifactory access
-#   - The Artifactory npm registry URL itself
-#   - Whether the secret layout below matches what Cloud provisioned
-# Edits to those values are expected during the Cloud handoff; search
-# for TODO(cloud) in this file.
+# refuses duplicate publishes.
 #
 # Env overrides:
 #   DRY_RUN=1         — build everything but skip the publish step.
@@ -31,7 +24,6 @@ report_step() {
 KIBANA_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$KIBANA_ROOT"
 
-# shellcheck source=./../common/vault_fns.sh
 source .buildkite/scripts/common/vault_fns.sh
 
 if [[ "${SKIP_BOOTSTRAP:-}" == "1" ]]; then
@@ -104,7 +96,7 @@ if [[ "${DRY_RUN:-}" == "1" ]]; then
 fi
 
 report_step "Fetching Artifactory credentials"
-# TODO(cloud): confirm secret layout. Expected fields at
+# TODO: confirm secret layout. Expected fields at
 # `secret/ci/elastic-kibana/kbn-ui-artifactory`:
 #   registry   - full npm registry URL
 #   npm_token  - auth token (bearer / basic, whatever the registry expects)
@@ -118,8 +110,6 @@ fi
 # Scoped .npmrc for this run only; cleaned up on exit.
 NPMRC="$(mktemp)"
 trap 'rm -f "$NPMRC"' EXIT
-# TODO(cloud): adjust the auth line if the registry uses basic auth / a
-# different header. Most Artifactory npm repos accept `_authToken`.
 REGISTRY_HOST="${NPM_REGISTRY#https:}"
 REGISTRY_HOST="${REGISTRY_HOST#http:}"
 cat > "$NPMRC" <<EOF

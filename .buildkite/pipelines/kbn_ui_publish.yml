@@ -8,7 +8,3 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
-    # Intentionally no `branches:` filter here — the intent is that this
-    # pipeline is wired in Buildkite's UI to trigger only on merges to
-    # `main` (and manual runs). If that configuration isn't in place when
-    # this lands, add `branches: main` as a safety net.
