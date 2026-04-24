@@ -183,7 +183,6 @@ describe('createRuleAttachmentDefinition', () => {
             {
               registerActionButtons: jest.fn(),
               updateOrigin: jest.fn(),
-              refreshAttachment: jest.fn(),
               closeCanvas: jest.fn(),
             }
           )}
@@ -207,7 +206,6 @@ describe('createRuleAttachmentDefinition', () => {
             {
               registerActionButtons,
               updateOrigin: jest.fn(),
-              refreshAttachment: jest.fn(),
               closeCanvas: jest.fn(),
             }
           )}
@@ -233,7 +231,6 @@ describe('createRuleAttachmentDefinition', () => {
             {
               registerActionButtons,
               updateOrigin: jest.fn(),
-              refreshAttachment: jest.fn(),
               closeCanvas: jest.fn(),
             }
           )}
@@ -262,7 +259,6 @@ describe('createRuleAttachmentDefinition', () => {
               {
                 registerActionButtons,
                 updateOrigin,
-                refreshAttachment: jest.fn(),
                 closeCanvas: jest.fn(),
               }
             )}
@@ -295,7 +291,6 @@ describe('createRuleAttachmentDefinition', () => {
               {
                 registerActionButtons,
                 updateOrigin: jest.fn(),
-                refreshAttachment: jest.fn(),
                 closeCanvas: jest.fn(),
               }
             )}
@@ -328,7 +323,6 @@ describe('createRuleAttachmentDefinition', () => {
               {
                 registerActionButtons,
                 updateOrigin: jest.fn(),
-                refreshAttachment: jest.fn(),
                 closeCanvas: jest.fn(),
               }
             )}

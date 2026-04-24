@@ -43,12 +43,6 @@ export interface CanvasRenderCallbacks {
   registerActionButtons: (buttons: ActionButton[]) => void;
   /** Update the attachment's origin reference (e.g., after saving to library) */
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
-  /**
-   * Persist new attachment data and refresh the conversation.
-   * Use after mutating the underlying resource (e.g. enable/disable) to keep the
-   * stored attachment in sync and suppress the "outdated" staleness banner.
-   */
-  refreshAttachment: (data: unknown) => Promise<void>;
   /** Close the canvas (expanded flyout view) */
   closeCanvas: () => void;
   /**
