@@ -8,6 +8,7 @@
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
@@ -18,6 +19,23 @@ import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/quer
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 
+export interface AlertsSource {
+  index: string;
+  ruleIdField: string;
+  extraFilters?: QueryDslQueryContainer[];
+}
+
+export const V1_ALERTS_SOURCE: AlertsSource = {
+  index: '.alerts-streams.alerts-default',
+  ruleIdField: 'kibana.alert.rule.uuid',
+};
+
+export const V2_ALERTS_SOURCE: AlertsSource = {
+  index: '.rule-events',
+  ruleIdField: 'rule.id',
+  extraFilters: [{ term: { type: 'signal' } }, { term: { status: 'breached' } }],
+};
+
 export async function readSignificantEventsFromAlertsIndices(
   params: {
     streamNames?: string[];
@@ -27,6 +45,7 @@ export async function readSignificantEventsFromAlertsIndices(
     query?: string;
     filters?: QueryLinkFilters;
     searchMode?: SearchMode;
+    alertsSource?: AlertsSource;
   },
   dependencies: {
     queryClient: QueryClient;
@@ -34,7 +53,16 @@ export async function readSignificantEventsFromAlertsIndices(
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { streamNames = [], from, to, bucketSize, query, filters, searchMode } = params;
+  const {
+    streamNames = [],
+    from,
+    to,
+    bucketSize,
+    query,
+    filters,
+    searchMode,
+    alertsSource = V1_ALERTS_SOURCE,
+  } = params;
 
   const queryLinks = query
     ? await queryClient.findQueries(streamNames, query, filters, searchMode)
@@ -72,7 +100,7 @@ export async function readSignificantEventsFromAlertsIndices(
         }>;
       }
     >({
-      index: '.alerts-streams.alerts-default',
+      index: alertsSource.index,
       query: {
         bool: {
           filter: [
@@ -86,9 +114,10 @@ export async function readSignificantEventsFromAlertsIndices(
             },
             {
               terms: {
-                'kibana.alert.rule.uuid': ruleIds,
+                [alertsSource.ruleIdField]: ruleIds,
               },
             },
+            ...(alertsSource.extraFilters ?? []),
           ],
         },
       },
@@ -105,7 +134,7 @@ export async function readSignificantEventsFromAlertsIndices(
         },
         by_rule: {
           terms: {
-            field: 'kibana.alert.rule.uuid',
+            field: alertsSource.ruleIdField,
             size: 10000,
           },
           aggs: {

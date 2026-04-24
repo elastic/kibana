@@ -94,24 +94,7 @@ export class QueryService implements QueryServiceContract {
     try {
       context.throwIfAborted();
 
-      const response = await this.esClient.esql.query(
-        {
-          query,
-          drop_null_columns: false,
-          filter,
-          params,
-          format: 'arrow',
-        },
-        { asStream: true, signal: context.signal }
-      );
-
-      if (this.isReadable(response)) {
-        yield* this.parseArrowStream<T>(response, context);
-      } else {
-        // Fall back to object rows to keep the stream contract stable.
-        context.throwIfAborted();
-        yield this.toRows<T>(response as EsqlQueryResponse);
-      }
+      yield* this.executeArrowQuery<T>({ query, filter, params }, context);
 
       this.logger.debug({
         message: `QueryService: Streaming query completed successfully`,
@@ -121,15 +104,49 @@ export class QueryService implements QueryServiceContract {
         this.logger.debug({
           message: 'QueryService: Streaming query aborted',
         });
-      } else {
-        this.logger.error({
-          error,
-          code: 'ESQL_QUERY_ERROR',
-          type: 'QueryServiceError',
-        });
+        throw error;
       }
 
+      if (isArrowFormatError(error)) {
+        this.logger.debug({
+          message:
+            'QueryService: Arrow format unsupported for this query, falling back to JSON format',
+        });
+        const jsonResponse = await this.executeQuery({ query, filter, params, abortSignal });
+        yield this.toRows<T>(jsonResponse);
+        return;
+      }
+
+      this.logger.error({
+        error,
+        code: 'ESQL_QUERY_ERROR',
+        type: 'QueryServiceError',
+      });
+
       throw error;
+    }
+  }
+
+  private async *executeArrowQuery<T>(
+    { query, filter, params }: Omit<ExecuteQueryParams, 'abortSignal'>,
+    context: ExecutionContext
+  ): AsyncIterable<T[]> {
+    const response = await this.esClient.esql.query(
+      {
+        query,
+        drop_null_columns: false,
+        filter,
+        params,
+        format: 'arrow',
+      },
+      { asStream: true, signal: context.signal }
+    );
+
+    if (this.isReadable(response)) {
+      yield* this.parseArrowStream<T>(response, context);
+    } else {
+      context.throwIfAborted();
+      yield this.toRows<T>(response as EsqlQueryResponse);
     }
   }
 
@@ -140,6 +157,30 @@ export class QueryService implements QueryServiceContract {
     let reader: AsyncRecordBatchStreamReader;
     const scope = context.createScope();
     const passthrough = new PassThrough();
+
+    // Peek at the first chunk before wiring the pipeline.
+    // With `asStream: true` the ES client bypasses HTTP status checking, so
+    // ES|QL errors arrive as a JSON body in the same Readable stream. Without
+    // this guard, the Arrow reader interprets JSON bytes as IPC message sizes,
+    // producing a misleading "size out of range" error that masks the real one.
+    const firstChunk = await new Promise<Buffer | null>((resolve) => {
+      response.once('data', (chunk: Buffer) => resolve(chunk));
+      response.once('end', () => resolve(null));
+      response.once('error', () => resolve(null));
+    });
+
+    if (firstChunk !== null && firstChunk.length > 0 && firstChunk[0] === 0x7b) {
+      const remaining: Buffer[] = [];
+      for await (const chunk of response) {
+        remaining.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      const body = Buffer.concat([firstChunk, ...remaining]).toString('utf-8');
+      throw new Error(`ES|QL query failed: ${body}`);
+    }
+
+    if (firstChunk !== null) {
+      passthrough.write(firstChunk);
+    }
     const streamPipeline = pipeline(response, passthrough, { signal: context.signal });
 
     scope.add(() => {
@@ -150,8 +191,6 @@ export class QueryService implements QueryServiceContract {
       context.throwIfAborted();
       reader = await AsyncRecordBatchStreamReader.from(Readable.from(passthrough));
     } catch (error) {
-      // ES returns JSON instead of Arrow format when there's an error
-      // Apache Arrow will fail to parse it, so we throw a more descriptive error
       throw this.buildParseError(error);
     }
 
@@ -233,6 +272,11 @@ export class QueryService implements QueryServiceContract {
       return coerceBigInts(row) as T;
     });
   }
+}
+
+function isArrowFormatError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return error.message.includes('not supported by the Arrow format');
 }
 
 /**

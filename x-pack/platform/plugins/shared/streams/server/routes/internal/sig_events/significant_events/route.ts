@@ -14,6 +14,7 @@ import {
 import { z } from '@kbn/zod/v4';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import { searchModeSchema } from '../../../utils/search_mode';
 import {
   getSignificantEventsQueriesGenerationTaskId,
@@ -197,6 +198,7 @@ const readAllSignificantEventsRoute = createServerRoute({
 
     const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
 
+    const alertsSource = await resolveAlertsSource(uiSettingsClient);
     const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
@@ -206,6 +208,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         query,
         streamNames,
         searchMode,
+        alertsSource,
       },
       { queryClient, scopedClusterClient }
     );

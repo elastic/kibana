@@ -13,6 +13,7 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import { searchModeSchema } from '../../../utils/search_mode';
 
 const dateFromString = z.string().transform((input) => new Date(input));
@@ -233,6 +234,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       searchMode,
     } = params.query;
 
+    const alertsSource = await resolveAlertsSource(uiSettingsClient);
     const queryClient = await getQueryClient();
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
       {
@@ -243,6 +245,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         streamNames,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
         searchMode,
+        alertsSource,
       },
       { queryClient, scopedClusterClient }
     );
@@ -290,6 +293,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 
     const { from, to, bucketSize, query, streamNames } = params.query;
 
+    const alertsSource = await resolveAlertsSource(uiSettingsClient);
     const queryClient = await getQueryClient();
     const { aggregated_occurrences: aggregatedOccurrenceBuckets } =
       await readSignificantEventsFromAlertsIndices(
@@ -299,6 +303,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
           bucketSize,
           query,
           streamNames,
+          alertsSource,
         },
         { queryClient, scopedClusterClient }
       );

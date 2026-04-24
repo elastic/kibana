@@ -20,6 +20,7 @@ import { previewSignificantEvents } from '../../../../lib/sig_events/preview_sig
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
@@ -140,6 +141,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize, query, searchMode } = params.query;
 
+    const alertsSource = await resolveAlertsSource(uiSettingsClient);
     const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
@@ -149,6 +151,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         searchMode,
+        alertsSource,
       },
       { queryClient, scopedClusterClient }
     );
