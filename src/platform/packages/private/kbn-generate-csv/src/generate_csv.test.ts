@@ -1794,6 +1794,70 @@ describe('CsvGenerator', () => {
     `);
   });
 
+  it('throws a retryable task run error for transport connection failures', async () => {
+    mockDataClient.search = jest.fn().mockImplementation(() => {
+      const err = new Error('Connection closed while reading the body');
+      (err as Error & { code?: string }).code = 'ECONNRESET';
+      throw err;
+    });
+
+    const generateCsv = new CsvGenerator(
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      mockConfig,
+      mockTaskInstanceFields,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      mockLogger,
+      stream,
+      false, // isServerless
+      jobId
+    );
+
+    await expect(generateCsv.generateData()).rejects.toThrow(
+      'CSV export search error: Connection closed while reading the body'
+    );
+  });
+
+  it('throws a retryable task run error for transport failures by code only', async () => {
+    mockDataClient.search = jest.fn().mockImplementation(() => {
+      const err = new Error('upstream request failed');
+      (err as Error & { cause?: unknown }).cause = { code: 'ETIMEDOUT' };
+      throw err;
+    });
+
+    const generateCsv = new CsvGenerator(
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      mockConfig,
+      mockTaskInstanceFields,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      mockLogger,
+      stream,
+      false, // isServerless
+      jobId
+    );
+
+    await expect(generateCsv.generateData()).rejects.toThrow(
+      'CSV export search error: upstream request failed'
+    );
+  });
+
   it('handles unknown errors', async () => {
     const streamWriteSpy = jest.spyOn(stream, 'write');
     mockDataClient.search = jest.fn().mockImplementation(() => {

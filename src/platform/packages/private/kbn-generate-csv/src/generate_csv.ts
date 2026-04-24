@@ -53,6 +53,65 @@ interface Dependencies {
   fieldFormatsRegistry: IFieldFormatsRegistry;
 }
 
+const RETRYABLE_TRANSPORT_ERROR_CODES = new Set([
+  'ECONNABORTED',
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'EPIPE',
+  'ETIMEDOUT',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_HEADERS_TIMEOUT',
+  'UND_ERR_SOCKET',
+]);
+
+const RETRYABLE_TRANSPORT_ERROR_MESSAGES = [
+  'connection closed while reading the body',
+  'socket hang up',
+  'request timed out',
+  'connect timeout',
+];
+
+const getErrorCode = (error: unknown): string | undefined => {
+  if (!error || typeof error !== 'object') {
+    return;
+  }
+
+  const code = (error as { code?: unknown }).code;
+  if (typeof code === 'string') {
+    return code;
+  }
+};
+
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+};
+
+const isRetryableTransportError = (error: unknown): boolean => {
+  const message = getErrorMessage(error).toLowerCase();
+  if (RETRYABLE_TRANSPORT_ERROR_MESSAGES.some((snippet) => message.includes(snippet))) {
+    return true;
+  }
+
+  const code = getErrorCode(error);
+  if (code && RETRYABLE_TRANSPORT_ERROR_CODES.has(code)) {
+    return true;
+  }
+
+  const cause =
+    error && typeof error === 'object' ? (error as { cause?: unknown }).cause : undefined;
+  if (cause) {
+    return isRetryableTransportError(cause);
+  }
+
+  return false;
+};
+
 export class CsvGenerator {
   private csvContainsFormulas = false;
   private maxSizeReached = false;
@@ -464,6 +523,10 @@ export class CsvGenerator {
         warnings.push(i18nTexts.escapedFormulaValuesMessage);
       }
     } catch (err) {
+      if (isRetryableTransportError(err)) {
+        throw createTaskRunError(err instanceof Error ? err : new Error(String(err)));
+      }
+
       logger.error(err, { tags: [this.jobId] });
       if (err instanceof esErrors.ResponseError) {
         if ([401, 403].includes(err.statusCode ?? 0)) {
