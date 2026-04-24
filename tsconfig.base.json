@@ -1912,6 +1912,8 @@
       "@kbn/resizable-layout-examples-plugin/*": ["examples/resizable_layout_examples/*"],
       "@kbn/resolver-test-plugin": ["x-pack/solutions/security/test/plugin_functional/plugins/resolver_test"],
       "@kbn/resolver-test-plugin/*": ["x-pack/solutions/security/test/plugin_functional/plugins/resolver_test/*"],
+      "@kbn/response-ops-alert-snooze": ["x-pack/platform/packages/shared/response-ops/alert-snooze"],
+      "@kbn/response-ops-alert-snooze/*": ["x-pack/platform/packages/shared/response-ops/alert-snooze/*"],
       "@kbn/response-ops-alerts-apis": ["x-pack/platform/packages/shared/response-ops/alerts-apis"],
       "@kbn/response-ops-alerts-apis/*": ["x-pack/platform/packages/shared/response-ops/alerts-apis/*"],
       "@kbn/response-ops-alerts-delete": ["x-pack/platform/packages/shared/response-ops/alerts-delete"],
