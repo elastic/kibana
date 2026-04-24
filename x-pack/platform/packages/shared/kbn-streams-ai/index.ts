@@ -31,7 +31,7 @@ export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
-export { sumTokens } from './src/helpers/sum_tokens';
+export { EMPTY_TOKENS, sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,
   toPreviouslyIdentifiedFeature,

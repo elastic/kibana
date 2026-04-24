@@ -285,5 +285,86 @@ describe('createEntitySourcesService', () => {
       // Second watchlist still synced
       expect(mockWatchlistGet).toHaveBeenCalledWith('wl-2');
     });
+
+    it('stops syncing remaining watchlists when abort signal fires between iterations', async () => {
+      mockWatchlistList.mockResolvedValue([
+        { id: 'wl-1', name: 'First' },
+        { id: 'wl-2', name: 'Second' },
+      ]);
+
+      const controller = new AbortController();
+      const service = createService();
+
+      // Abort after the first watchlist completes
+      mockWatchlistGet.mockImplementationOnce(async () => {
+        controller.abort();
+        return { name: 'First' };
+      });
+      mockGetEntitySourceIds.mockResolvedValue([]);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      await service.syncAllWatchlists({ abortSignal: controller.signal });
+
+      expect(mockWatchlistGet).toHaveBeenCalledTimes(1);
+      expect(mockWatchlistGet).toHaveBeenCalledWith('wl-1');
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Abort signal received: stopping watchlist sync')
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Watchlist sync for namespace "default" stopped (abort) before all 2 watchlist(s) were processed'
+        )
+      );
+      expect(logger.info).not.toHaveBeenCalledWith(
+        expect.stringMatching(/Completed sync of 2 watchlist/)
+      );
+    });
+
+    it('does not sync any watchlists when abort signal is already fired', async () => {
+      mockWatchlistList.mockResolvedValue([{ id: 'wl-1', name: 'VIP Users' }]);
+
+      const controller = new AbortController();
+      controller.abort();
+
+      const service = createService();
+      await service.syncAllWatchlists({ abortSignal: controller.signal });
+
+      expect(mockWatchlistGet).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Watchlist sync for namespace "default" stopped (abort) before all 1 watchlist(s) were processed'
+        )
+      );
+    });
+  });
+
+  describe('syncWatchlist abort handling', () => {
+    const createService = () =>
+      createEntitySourcesService({ esClient, soClient, logger, namespace });
+
+    it('skips cleanup when abort signal fires after plainIndexSync', async () => {
+      const controller = new AbortController();
+
+      // Abort mid-way through syncWatchlist, after plainIndexSync runs
+      mockPlainIndexSync.mockImplementation(async () => {
+        controller.abort();
+      });
+
+      mockGetEntitySourceIds.mockResolvedValue([]);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      const service = createService();
+      await service.syncWatchlist('watchlist-1', controller.signal);
+
+      expect(mockPlainIndexSync).toHaveBeenCalledTimes(1);
+      // cleanupOrphanedEntities triggers an esClient.search for orphaned source agg —
+      // it should not be called after abort
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Abort signal received: after index sync for watchlist watchlist-1, skipping cleanup'
+        )
+      );
+    });
   });
 });
