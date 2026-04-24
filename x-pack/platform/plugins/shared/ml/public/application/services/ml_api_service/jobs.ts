@@ -31,6 +31,7 @@ import type { Category } from '../../../../common/types/categories';
 import type {
   JobsExistResponse,
   BulkCreateResults,
+  BulkUpdateProjectRoutingResponse,
   ResetJobsResponse,
 } from '../../../../common/types/job_service';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
@@ -416,6 +417,26 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     const body = JSON.stringify(jobs);
     return httpService.http<BulkCreateResults>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/bulk_create`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  bulkUpdateProjectRouting({
+    projectRouting,
+    jobIds,
+    auto,
+    simulate,
+  }: {
+    projectRouting: string;
+    jobIds?: string[];
+    auto?: boolean;
+    simulate?: boolean;
+  }) {
+    const body = JSON.stringify({ projectRouting, jobIds, auto, simulate });
+    return httpService.http<BulkUpdateProjectRoutingResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/bulk_update_project_routing`,
       method: 'POST',
       body,
       version: '1',

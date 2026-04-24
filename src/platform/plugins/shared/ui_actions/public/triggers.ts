@@ -39,6 +39,7 @@ import {
   CATEGORIZE_FIELD_TRIGGER,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
+  MIGRATE_AD_JOBS_TO_CPS_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
@@ -286,6 +287,15 @@ export const triggers: { [key: string]: Trigger } = {
     }),
     description: i18n.translate('uiActions.triggers.ml.actions.createADJobFromPatternAnalysis', {
       defaultMessage: 'Create categorization anomaly detection job',
+    }),
+  },
+  [MIGRATE_AD_JOBS_TO_CPS_TRIGGER]: {
+    id: MIGRATE_AD_JOBS_TO_CPS_TRIGGER,
+    title: i18n.translate('uiActions.triggers.ml.actions.migrateADJobsToCps.title', {
+      defaultMessage: 'Migrate anomaly detection jobs to cross-project search',
+    }),
+    description: i18n.translate('uiActions.triggers.ml.actions.migrateADJobsToCps.description', {
+      defaultMessage: 'Start the job migration to use cross-project search with your detectors.',
     }),
   },
   [SWIM_LANE_SELECTION_TRIGGER]: {

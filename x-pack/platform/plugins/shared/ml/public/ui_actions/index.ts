@@ -10,6 +10,7 @@ import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_PANEL_TRIGGER,
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
+  MIGRATE_AD_JOBS_TO_CPS_TRIGGER,
   ON_OPEN_PANEL_MENU,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
@@ -116,6 +117,14 @@ export function registerMlUiActions(
     async () => {
       const { createCategorizationADJobAction } = await import('./async_module');
       return createCategorizationADJobAction(core.getStartServices);
+    }
+  );
+  uiActions.addTriggerActionAsync(
+    MIGRATE_AD_JOBS_TO_CPS_TRIGGER,
+    'migrate-ad-jobs-to-cps-action',
+    async () => {
+      const { migrateADJobsToCps } = await import('./async_module');
+      return migrateADJobsToCps(core.getStartServices);
     }
   );
 }

@@ -7,7 +7,9 @@
 
 export {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
+  MIGRATE_AD_JOBS_TO_CPS_ACTION,
   type CreateCategorizationADJobContext,
+  type MigrateADJobsToCpsContext,
 } from './src/ml/ui_actions';
 
 export { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from './src/aiops/ui_actions';

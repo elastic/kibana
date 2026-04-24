@@ -232,6 +232,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
    * - When `auto` is true, every datafeed with no `project_routing` is also included.
    * - Datafeed IDs are deduplicated in a Set before updates are applied.
    * - When `simulate` is true, no updates are sent; the same selection is returned with `simulated: true` per result.
+   * - `results` is keyed by job ID; each value includes the corresponding `datafeedId`.
    */
   async function bulkUpdateProjectRouting(
     projectRouting: string,
@@ -265,19 +266,22 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     );
 
     const results: {
-      [datafeedId: string]: {
+      [jobId: string]: {
         success: boolean;
         error?: unknown;
-        jobId?: string;
+        datafeedId: string;
         simulated?: boolean;
       };
     } = Object.create(null);
 
     for (const datafeedId of datafeedIdsToUpdate) {
       const jobId = datafeedIdToJobId.get(datafeedId);
+      if (jobId === undefined) {
+        throw new Error(`bulkUpdateProjectRouting: missing job_id for datafeed_id ${datafeedId}`);
+      }
 
       if (simulate === true) {
-        results[datafeedId] = { success: true, jobId, simulated: true };
+        results[jobId] = { success: true, datafeedId, simulated: true };
         continue;
       }
 
@@ -286,19 +290,18 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
           datafeed_id: datafeedId,
           body: { project_routing: projectRouting },
         });
-        results[datafeedId] = { success: true, jobId };
+        results[jobId] = { success: true, datafeedId };
       } catch (error) {
-        results[datafeedId] = {
+        results[jobId] = {
           success: false,
           error: (error as { body?: unknown }).body ?? error,
-          jobId,
+          datafeedId,
         };
       }
     }
 
     return {
       simulate: simulate === true,
-      datafeedIds: [...datafeedIdsToUpdate],
       results,
     };
   }

@@ -50,6 +50,18 @@ export interface BulkCreateResults {
   };
 }
 
+export interface BulkUpdateProjectRoutingResponse {
+  simulate: boolean;
+  results: {
+    [jobId: string]: {
+      success: boolean;
+      error?: unknown;
+      datafeedId: string;
+      simulated?: boolean;
+    };
+  };
+}
+
 export interface ResetJobsResponse {
   [jobId: string]: {
     reset: boolean;

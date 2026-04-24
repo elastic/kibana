@@ -17,3 +17,10 @@ export interface CreateCategorizationADJobContext {
 }
 
 export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION = 'createMLADCategorizationJobAction';
+
+/**
+ * Context for the migrate AD jobs to CPS action; extend when a caller provides job selection.
+ */
+export type MigrateADJobsToCpsContext = Record<string, never>;
+
+export const MIGRATE_AD_JOBS_TO_CPS_ACTION = 'migrateADJobsToCpsAction';
