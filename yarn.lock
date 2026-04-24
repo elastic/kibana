@@ -8367,6 +8367,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-alert-snooze@link:x-pack/platform/packages/shared/response-ops/alert-snooze":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-ops-alerts-apis@link:x-pack/platform/packages/shared/response-ops/alerts-apis":
   version "0.0.0"
   uid ""
