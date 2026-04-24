@@ -10,8 +10,8 @@ import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { generateEsql } from '..';
-import { extractTextContent } from '../../langchain';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
@@ -211,7 +211,7 @@ export const createVisualizationGraph = (
     try {
       // Invoke model without schema validation
       const response = await model.chatModel.invoke(prompt);
-      const responseText = extractTextContent(response);
+      const responseText = extractTextFromMessage(response);
 
       // Try to extract JSON from markdown code blocks
       const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
