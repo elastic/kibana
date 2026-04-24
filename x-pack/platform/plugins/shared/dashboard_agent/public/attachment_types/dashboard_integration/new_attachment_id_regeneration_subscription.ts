@@ -8,25 +8,8 @@
 import { filter, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { v4 as uuidv4 } from 'uuid';
+import type { IdGenerator } from '..';
 
-export interface IdGenerator {
-  readonly current: string;
-  next: () => string;
-}
-
-export const createIdGenerator = (): IdGenerator => {
-  let id = uuidv4();
-  return {
-    get current() {
-      return id;
-    },
-    next() {
-      id = uuidv4();
-      return id;
-    },
-  };
-};
 interface NewAttachmentIdRegenerationSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
   draftAttachmentId: IdGenerator;

@@ -184,6 +184,11 @@ const createMockAttachment = (id: string, origin?: string) => {
   };
 };
 
+const flushAsyncServices = async () => {
+  await Promise.resolve();
+  await Promise.resolve();
+};
+
 describe('registerDashboardAttachmentUiDefinition', () => {
   let deps: ReturnType<typeof createMockDeps>;
   let uiDefinition: AttachmentUIDefinition<DashboardAttachment>;
@@ -252,7 +257,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     };
   };
 
-  const mountAttachment = ({
+  const mountAttachment = async ({
     getAttachment,
     api,
     conversationId = 'conversation-1',
@@ -278,6 +283,8 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         toVersionedDashboardAttachment(attachment),
       ]),
     });
+
+    await flushAsyncServices();
 
     return () => {
       deps.dashboardAppClientApi$.next(undefined);
@@ -341,9 +348,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         dashboardAppClientApi$,
         findDashboardsService,
       } as unknown as DashboardStart,
-      filterManager: {
-        setFilters: jest.fn(),
-      } as unknown as DataPublicPluginStart['query']['filterManager'],
+      data: dataPluginMock.createStartContract(),
       unifiedSearch: {
         ui: { SearchBar: jest.fn() },
       } as unknown as UnifiedSearchPublicPluginStart,
@@ -361,7 +366,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = mountAttachment({
+      const cleanup = await mountAttachment({
         getAttachment,
         api: mockApi as unknown as DashboardApi,
       });
@@ -396,7 +401,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1', 'original-dashboard-id');
       const mockApi = createMockDashboardApi('different-dashboard-id');
 
-      const cleanup = mountAttachment({
+      const cleanup = await mountAttachment({
         getAttachment,
         api: mockApi as unknown as DashboardApi,
       });
@@ -422,7 +427,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       unregister = registerDashboardAttachmentUiDefinition(deps);
       uiDefinition = deps.addAttachmentType.mock.calls.at(-1)?.[1];
 
-      const cleanup = mountAttachment({
+      const cleanup = await mountAttachment({
         getAttachment,
         api: mockApi as unknown as DashboardApi,
       });
@@ -444,11 +449,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       cleanup?.();
     });
 
-    it('cleans up subscriptions properly', () => {
+    it('cleans up subscriptions properly', async () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = mountAttachment({
+      const cleanup = await mountAttachment({
         getAttachment,
         api: mockApi as unknown as DashboardApi,
       });
@@ -468,7 +473,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       jest.useRealTimers();
     });
 
-    it('does not attach the dashboard when navigating to a dashboard with an existing conversation already open', () => {
+    it('does not attach the dashboard when navigating to a dashboard with an existing conversation already open', async () => {
       const mockApi = createMockDashboardApi();
 
       deps.emitConversationChange({
@@ -476,16 +481,18 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         conversation: createMockConversation('conversation-1', []),
       });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+      await flushAsyncServices();
       jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
     });
 
-    it('attaches the dashboard when navigating to a dashboard with a new conversation already open', () => {
+    it('attaches the dashboard when navigating to a dashboard with a new conversation already open', async () => {
       const mockApi = createMockDashboardApi();
 
       deps.emitConversationChange({ id: undefined });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+      await flushAsyncServices();
       jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
@@ -496,7 +503,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       );
     });
 
-    it('does not attach the dashboard when opening an existing conversation from a dashboard', () => {
+    it('does not attach the dashboard when opening an existing conversation from a dashboard', async () => {
       const mockApi = createMockDashboardApi();
 
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
@@ -504,16 +511,18 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         id: 'conversation-1',
         conversation: createMockConversation('conversation-1', []),
       });
+      await flushAsyncServices();
       jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).not.toHaveBeenCalled();
     });
 
-    it('attaches the dashboard when opening a new conversation from a dashboard', () => {
+    it('attaches the dashboard when opening a new conversation from a dashboard', async () => {
       const mockApi = createMockDashboardApi();
 
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       deps.emitConversationChange({ id: undefined });
+      await flushAsyncServices();
       jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
@@ -524,7 +533,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       );
     });
 
-    it('waits for the chat to open before activating dashboard integration', () => {
+    it('waits for the chat to open before activating dashboard integration', async () => {
       const mockApi = createMockDashboardApi();
 
       deps.currentAppId$.next(null);
@@ -534,6 +543,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       expect(deps.addAttachment).not.toHaveBeenCalled();
 
       deps.currentAppId$.next('agentBuilder');
+      await flushAsyncServices();
       jest.runOnlyPendingTimers();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
@@ -554,11 +564,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       jest.useRealTimers();
     });
 
-    it('updates dashboard state on roundComplete with updated/created attachment', () => {
+    it('updates dashboard state on roundComplete with updated/created attachment', async () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = mountAttachment({
+      const cleanup = await mountAttachment({
         getAttachment,
         api: mockApi as unknown as DashboardApi,
       });
@@ -590,11 +600,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       cleanup?.();
     });
 
-    it('does not update state for read-only operations or missing attachments', () => {
+    it('does not update state for read-only operations or missing attachments', async () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = mountAttachment({
+      const cleanup = await mountAttachment({
         getAttachment,
         api: mockApi as unknown as DashboardApi,
       });
@@ -629,7 +639,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       cleanup?.();
     });
 
-    it('respects dashboard origin matching', () => {
+    it('respects dashboard origin matching', async () => {
       // Different dashboard - no update
       const { getAttachment: getAttachment1 } = createMockAttachment(
         'attachment-1',
@@ -637,7 +647,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       );
       const mockApi1 = createMockDashboardApi('different-dashboard-id');
 
-      const cleanup1 = mountAttachment({
+      const cleanup1 = await mountAttachment({
         getAttachment: getAttachment1,
         api: mockApi1 as unknown as DashboardApi,
       });
@@ -663,7 +673,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       );
       const mockApi2 = createMockDashboardApi('same-dashboard-id');
 
-      const cleanup2 = mountAttachment({
+      const cleanup2 = await mountAttachment({
         getAttachment: getAttachment2,
         api: mockApi2 as unknown as DashboardApi,
       });
@@ -678,11 +688,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       cleanup2?.();
     });
 
-    it('cleans up chat$ subscription on cleanup or API unavailable', () => {
+    it('cleans up chat$ subscription on cleanup or API unavailable', async () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = mountAttachment({
+      const cleanup = await mountAttachment({
         getAttachment,
         api: mockApi as unknown as DashboardApi,
       });

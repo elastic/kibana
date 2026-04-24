@@ -18,11 +18,9 @@ import {
 } from '@kbn/dashboard-agent-common';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createManualChangesSubscription } from './manual_changes_subscription';
-import {
-  type IdGenerator,
-  createNewAttachmentIdRegenerationSubscription,
-} from './new_attachment_id_regeneration_subscription';
+import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
+import type { IdGenerator } from '..';
 
 export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;

@@ -23,6 +23,7 @@ import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import { registerDashboardAppIntegration } from './dashboard_app_integration';
+import type { IdGenerator } from '..';
 
 const createDashboardSaveState = (): DashboardSaveEvent['dashboardState'] => ({
   title: 'Saved Dashboard',
@@ -192,6 +193,7 @@ describe('registerDashboardAppIntegration', () => {
   let updateAttachmentOrigin: jest.Mock;
   let getUpdateOrigin: jest.Mock;
   let checkSavedDashboardExist: jest.Mock;
+  let draftAttachmentId: IdGenerator;
   let emitConversationChange: (change: {
     id?: string;
     attachments?: VersionedAttachment[];
@@ -209,6 +211,16 @@ describe('registerDashboardAppIntegration', () => {
         updateAttachmentOrigin('conversation-1', attachmentId, origin)
     );
     checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
+    let currentDraftAttachmentId = 'draft-attachment-id-1';
+    draftAttachmentId = {
+      get current() {
+        return currentDraftAttachmentId;
+      },
+      next: jest.fn(() => {
+        currentDraftAttachmentId = 'draft-attachment-id-2';
+        return currentDraftAttachmentId;
+      }),
+    };
   });
 
   afterEach(() => {
@@ -234,6 +246,7 @@ describe('registerDashboardAppIntegration', () => {
     cleanup = registerDashboardAppIntegration({
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
+      draftAttachmentId,
       checkSavedDashboardExist,
       getUpdateOrigin,
     });
