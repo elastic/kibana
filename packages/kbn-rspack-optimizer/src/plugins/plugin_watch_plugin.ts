@@ -97,8 +97,6 @@ export class PluginWatchPlugin {
           testPlugins: this.options.testPlugins || false,
         });
 
-        this.hasInitialDiscovery = true;
-
         // Collect plugin entries
         const pluginEntries = collectPluginEntries(this.options.repoRoot, currentPlugins);
 
@@ -130,6 +128,7 @@ export class PluginWatchPlugin {
           }
         }
 
+        this.hasInitialDiscovery = true;
         callback();
       } catch (err) {
         callback(err as Error);
