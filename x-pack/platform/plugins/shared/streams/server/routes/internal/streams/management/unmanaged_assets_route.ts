@@ -7,6 +7,7 @@
 
 import { Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
+import { isNotFoundError } from '@kbn/es-errors';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { WrongStreamTypeError } from '../../../../lib/streams/errors/wrong_stream_type_error';
@@ -54,7 +55,17 @@ export const unmanagedAssetsRoute = createServerRoute({
       );
     }
 
-    const dataStream = await streamsClient.getDataStream(params.path.name);
+    // Classic streams wrap an existing data stream; if the backing data
+    // stream is missing, surface a typed 404 instead of a raw ES error.
+    const dataStream = await streamsClient.getDataStream(params.path.name).catch((err) => {
+      if (isNotFoundError(err)) {
+        throw new StatusError(
+          `Stream ${params.path.name} has no backing data stream`,
+          404
+        );
+      }
+      throw err;
+    });
 
     if (dataStream.replicated === true) {
       throw new StatusError(

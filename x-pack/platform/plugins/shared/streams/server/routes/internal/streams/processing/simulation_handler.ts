@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
+import { isNotFoundError } from '@kbn/es-errors';
 import type {
   IngestDocument,
   IngestProcessorContainer,
@@ -56,6 +57,7 @@ import {
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { createStreamlangResolverOptions } from '../../../../lib/streams/resolvers';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { buildSimulationProcessorsWithConditionNoops } from './simulation_condition_noops';
 
 export interface ProcessingSimulationParams {
@@ -993,10 +995,24 @@ const getStreamIndex = async (
   indexState: IndicesIndexState;
   fieldCaps: FieldCapsResponse['fields'];
 }> => {
-  const dataStream = await streamsClient.getDataStream(streamName);
+  // A stream definition can exist without a materialized backing data
+  // stream yet. Convert that into a typed 404 so the UI can show a clear
+  // message instead of a raw ES transport error.
+  let dataStream;
+  try {
+    dataStream = await streamsClient.getDataStream(streamName);
+  } catch (err) {
+    if (isNotFoundError(err)) {
+      throw new StatusError(
+        `Stream ${streamName} has no backing data stream yet. Onboard data to this stream before running a processing simulation.`,
+        404
+      );
+    }
+    throw err;
+  }
   const lastIndexRef = dataStream.indices.at(-1);
   if (!lastIndexRef) {
-    throw new Error(`No writing index found for stream ${streamName}`);
+    throw new StatusError(`No writing index found for stream ${streamName}`, 404);
   }
 
   const [lastIndex, lastIndexFieldCaps] = await Promise.all([

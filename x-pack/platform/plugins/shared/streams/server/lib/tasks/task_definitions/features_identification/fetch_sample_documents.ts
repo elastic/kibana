@@ -12,6 +12,7 @@ import type { FeatureWithFilter } from '@kbn/streams-schema';
 import { getDiverseSampleDocuments, getSampleDocuments } from '@kbn/ai-tools';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import type { Condition } from '@kbn/streamlang';
+import { isNotFoundError } from '@kbn/es-errors';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../../streams/errors/parse_error';
 
@@ -19,19 +20,7 @@ const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits
 
 type SamplingStrategy = 'entity-filtered' | 'diverse' | 'random';
 
-export async function fetchSampleDocuments({
-  esClient,
-  index,
-  start,
-  end,
-  features,
-  logger,
-  size,
-  entityFilteredRatio,
-  diverseRatio,
-  maxEntityFilters,
-  diverseOffset = 0,
-}: {
+interface FetchSampleDocumentsOptions {
   esClient: ElasticsearchClient;
   index: string;
   start: number;
@@ -43,7 +32,59 @@ export async function fetchSampleDocuments({
   diverseRatio: number;
   diverseOffset?: number;
   maxEntityFilters: number;
-}) {
+}
+
+interface FetchSampleDocumentsResult {
+  documents: Array<SearchHit<Record<string, unknown>>>;
+  totalFilters: number;
+  filtersCapped: boolean;
+  hasFilteredDocuments: boolean;
+  nextOffset: number;
+}
+
+function emptyResult(diverseOffset: number): FetchSampleDocumentsResult {
+  return {
+    documents: [],
+    totalFilters: 0,
+    filtersCapped: false,
+    hasFilteredDocuments: false,
+    nextOffset: diverseOffset,
+  };
+}
+
+export async function fetchSampleDocuments(
+  options: FetchSampleDocumentsOptions
+): Promise<FetchSampleDocumentsResult> {
+  try {
+    return await fetchSampleDocumentsInner(options);
+  } catch (err) {
+    // A stream definition can exist without a materialized backing data
+    // stream yet (e.g. wired root streams before any data is onboarded).
+    // Treat that as "no documents to sample" rather than a failure.
+    if (isNotFoundError(err)) {
+      options.logger.debug(
+        () =>
+          `No sample documents for ${options.index}: backing data stream not materialized yet`
+      );
+      return emptyResult(options.diverseOffset ?? 0);
+    }
+    throw err;
+  }
+}
+
+async function fetchSampleDocumentsInner({
+  esClient,
+  index,
+  start,
+  end,
+  features,
+  logger,
+  size,
+  entityFilteredRatio,
+  diverseRatio,
+  maxEntityFilters,
+  diverseOffset = 0,
+}: FetchSampleDocumentsOptions): Promise<FetchSampleDocumentsResult> {
   if (entityFilteredRatio < 0 || diverseRatio < 0) {
     throw new Error(
       `entityFilteredRatio (${entityFilteredRatio}) and diverseRatio (${diverseRatio}) must be >= 0`

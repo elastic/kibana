@@ -11,6 +11,7 @@ import {
   isEnabledFailureStore,
   namedFieldDefinitionConfigSchema,
 } from '@kbn/streams-schema';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { z } from '@kbn/zod/v4';
 import { streamlangDSLSchema } from '@kbn/streamlang';
@@ -313,8 +314,18 @@ export const failureStoreSamplesRoute = createServerRoute({
       );
     }
 
-    // Check if failure store is enabled for this stream
-    const dataStream = await streamsClient.getDataStream(params.path.name);
+    // Check if failure store is enabled for this stream. A stream definition
+    // can exist without a materialized backing data stream yet — in that case
+    // there are no failure store samples to return.
+    const dataStream = await streamsClient.getDataStream(params.path.name).catch((err) => {
+      if (isNotFoundError(err)) {
+        return null;
+      }
+      throw err;
+    });
+    if (!dataStream) {
+      return { documents: [] };
+    }
     const effectiveFailureStore = getFailureStore({
       dataStream: dataStream as DataStreamWithFailureStore,
     });
