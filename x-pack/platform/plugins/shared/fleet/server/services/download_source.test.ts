@@ -209,7 +209,7 @@ describe('Download Service', () => {
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     jest
       .mocked(appContextService.getExperimentalFeatures)
-      .mockReturnValue({ useSpaceAwareness: true } as any);
+      .mockReturnValue({} as any);
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
       canEncrypt: true,
     } as any);

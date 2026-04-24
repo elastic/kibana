@@ -589,7 +589,7 @@ describe('createDefaultSettings', () => {
 
     const result = createDefaultSettings();
 
-    expect(result).toEqual({ prerelease_integrations_enabled: true });
+    expect(result).toEqual({ prerelease_integrations_enabled: true, use_space_awareness_migration_status: 'success' });
   });
 
   it('should return default settings with prerelease_integrations_enabled set to false if config.prereleaseEnabledByDefault is false', () => {
@@ -608,7 +608,7 @@ describe('createDefaultSettings', () => {
 
     const result = createDefaultSettings();
 
-    expect(result).toEqual({ prerelease_integrations_enabled: false });
+    expect(result).toEqual({ prerelease_integrations_enabled: false, use_space_awareness_migration_status: 'success' });
   });
 
   it('should return default settings with prerelease_integrations_enabled as false if config is not defined', () => {
@@ -616,10 +616,10 @@ describe('createDefaultSettings', () => {
 
     const result = createDefaultSettings();
 
-    expect(result).toEqual({ prerelease_integrations_enabled: false });
+    expect(result).toEqual({ prerelease_integrations_enabled: false, use_space_awareness_migration_status: 'success' });
   });
 
-  it('should return default settings with use_space_awareness_migration_status:success if feature flag is enabled', () => {
+  it('should return default settings with use_space_awareness_migration_status:success', () => {
     mockedAppContextService.getConfig.mockReturnValue({
       prereleaseEnabledByDefault: true,
       enabled: true,
@@ -632,10 +632,6 @@ describe('createDefaultSettings', () => {
         },
       },
     });
-
-    mockedAppContextService.getExperimentalFeatures.mockReturnValueOnce({
-      useSpaceAwareness: true,
-    } as any);
 
     const result = createDefaultSettings();
 
@@ -668,6 +664,7 @@ describe('createDefaultSettings', () => {
     expect(result).toEqual({
       integration_knowledge_enabled: true,
       prerelease_integrations_enabled: true,
+      use_space_awareness_migration_status: 'success',
     });
   });
 
@@ -693,6 +690,7 @@ describe('createDefaultSettings', () => {
     expect(result).toEqual({
       integration_knowledge_enabled: true,
       prerelease_integrations_enabled: true,
+      use_space_awareness_migration_status: 'success',
     });
   });
 });

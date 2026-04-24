@@ -7,7 +7,7 @@
 
 import path from 'path';
 
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
+
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 import { SETTINGS_API_ROUTES } from '../../constants';
@@ -33,12 +33,8 @@ import {
   putSpaceSettingsHandler,
 } from './settings_handler';
 
-export const registerRoutes = (
-  router: FleetAuthzRouter,
-  experimentalFeatures: ExperimentalFeatures
-) => {
-  if (experimentalFeatures.useSpaceAwareness) {
-    router.versioned
+export const registerRoutes = (router: FleetAuthzRouter) => {
+  router.versioned
       // @ts-ignore https://github.com/elastic/kibana/issues/203170
       .get({
         path: SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
@@ -113,7 +109,6 @@ export const registerRoutes = (
         },
         putSpaceSettingsHandler
       );
-  }
 
   router.versioned
     .get({

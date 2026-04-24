@@ -30,9 +30,7 @@ const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
 jest.mock('../app_context', () => ({
   appContextService: {
-    getExperimentalFeatures: jest.fn().mockReturnValue({
-      useSpaceAwareness: false,
-    }),
+    getExperimentalFeatures: jest.fn().mockReturnValue({}),
     getInternalUserSOClient: jest.fn(),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     getLogger: () =>

@@ -23,31 +23,28 @@ export const PENDING_MIGRATION_TIMEOUT = 60 * 60 * 1000;
  * Return true if user optin for the space awareness feature.
  */
 export async function isSpaceAwarenessEnabled(): Promise<boolean> {
-  if (!appContextService.getExperimentalFeatures().useSpaceAwareness) {
-    return false;
-  }
   const cache = getIsSpaceAwarenessEnabledCache();
   if (typeof cache === 'boolean') {
     return cache;
   }
 
-  const settings = await getSettingsOrUndefined(appContextService.getInternalUserSOClient());
+  try {
+    const settings = await getSettingsOrUndefined(appContextService.getInternalUserSOClient());
 
-  // @ts-expect-error upgrade typescript v5.9.3
-  const res = settings?.use_space_awareness_migration_status === 'success' ?? false;
-  setIsSpaceAwarenessEnabledCache(res);
+    // @ts-expect-error upgrade typescript v5.9.3
+    const res = settings?.use_space_awareness_migration_status === 'success' ?? false;
+    setIsSpaceAwarenessEnabledCache(res);
 
-  return res;
+    return res;
+  } catch (e) {
+    return false;
+  }
 }
 
 /**
  * Return true if space awareness migration is currently running
  */
 export async function isSpaceAwarenessMigrationPending(): Promise<boolean> {
-  if (!appContextService.getExperimentalFeatures().useSpaceAwareness) {
-    return false;
-  }
-
   const settings = await getSettingsOrUndefined(appContextService.getInternalUserSOClient());
 
   if (

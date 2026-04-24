@@ -52,11 +52,12 @@ describe('CloudConnectorService', () => {
     // Setup mocks
     mockLogger = loggerMock.create();
     mockAppContextService.getLogger = jest.fn().mockReturnValue(mockLogger);
-    mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
-      useSpaceAwareness: false,
-    });
+    mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({});
 
     mockSoClient = createSavedObjectClientMock();
+    mockAppContextService.getInternalUserSOClientForSpaceId = jest
+      .fn()
+      .mockReturnValue(mockSoClient);
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     service = new CloudConnectorService();
   });

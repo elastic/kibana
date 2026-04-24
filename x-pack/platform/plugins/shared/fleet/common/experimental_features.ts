@@ -7,7 +7,7 @@
 
 const _allowedExperimentalValues = {
   showExperimentalShipperOptions: false,
-  useSpaceAwareness: true,
+
   enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: true,
   enableSSLSecrets: true,

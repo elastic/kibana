@@ -170,7 +170,7 @@ describe('Config schema', () => {
 
     it('should only add one deprecation when enabling an existing experimental feature with enableExperimental', () => {
       const res = applyConfigDeprecations({
-        enableExperimental: ['useSpaceAwareness'],
+        enableExperimental: ['enableAutoInstallContentPackages'],
       });
 
       expect(res.messages).toMatchInlineSnapshot(`
@@ -197,7 +197,7 @@ describe('Config schema', () => {
     it('should not add a deprecation when enabling an existing experimental feature with experimentalFeatures', () => {
       const res = applyConfigDeprecations({
         experimentalFeatures: {
-          useSpaceAwareness: true,
+          enableAutoInstallContentPackages: true,
         },
       });
 

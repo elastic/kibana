@@ -194,9 +194,7 @@ export function createDefaultSettings(): BaseSettings {
     prerelease_integrations_enabled: !!config?.prereleaseEnabledByDefault,
   };
 
-  if (appContextService.getExperimentalFeatures().useSpaceAwareness) {
-    settings.use_space_awareness_migration_status = 'success';
-  }
+  settings.use_space_awareness_migration_status = 'success';
 
   if (
     config?.experimentalFeatures?.integrationKnowledge ??

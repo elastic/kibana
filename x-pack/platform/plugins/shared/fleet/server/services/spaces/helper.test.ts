@@ -6,19 +6,12 @@
  */
 
 import type { Settings } from '../../types';
-import { appContextService } from '../app_context';
 import { getSettingsOrUndefined } from '../settings';
 
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './helpers';
 
 jest.mock('../app_context');
 jest.mock('../settings');
-
-function mockFeatureFlag(val: boolean) {
-  jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
-    useSpaceAwareness: val,
-  } as any);
-}
 
 function mockGetSettings(settings?: Partial<Settings>) {
   if (settings) {
@@ -30,16 +23,10 @@ function mockGetSettings(settings?: Partial<Settings>) {
 
 describe('isSpaceAwarenessEnabled', () => {
   beforeEach(() => {
-    jest.mocked(appContextService.getExperimentalFeatures).mockReset();
     jest.mocked(getSettingsOrUndefined).mockReset();
   });
-  it('should return false if feature flag is disabled', async () => {
-    mockFeatureFlag(false);
-    await expect(isSpaceAwarenessEnabled()).resolves.toBe(false);
-  });
 
-  it('should return false if feature flag is enabled but user did not optin', async () => {
-    mockFeatureFlag(true);
+  it('should return false if user did not optin', async () => {
     mockGetSettings({
       use_space_awareness_migration_status: undefined,
     });
@@ -48,16 +35,14 @@ describe('isSpaceAwarenessEnabled', () => {
     expect(res).toBe(false);
   });
 
-  it('should return false if feature flag is enabled and settings do not exists', async () => {
-    mockFeatureFlag(true);
+  it('should return false if settings do not exist', async () => {
     mockGetSettings();
     const res = await isSpaceAwarenessEnabled();
 
     expect(res).toBe(false);
   });
 
-  it('should return true if feature flag is enabled and user optin', async () => {
-    mockFeatureFlag(true);
+  it('should return true if user optin', async () => {
     mockGetSettings({
       use_space_awareness_migration_status: 'success',
     });
@@ -65,22 +50,21 @@ describe('isSpaceAwarenessEnabled', () => {
 
     expect(res).toBe(true);
   });
+
+  it('should return false if settings lookup throws', async () => {
+    jest.mocked(getSettingsOrUndefined).mockRejectedValue(new Error('SO client not available'));
+    const res = await isSpaceAwarenessEnabled();
+
+    expect(res).toBe(false);
+  });
 });
 
 describe('isSpaceAwarenessMigrationPending', () => {
   beforeEach(() => {
-    jest.mocked(appContextService.getExperimentalFeatures).mockReset();
     jest.mocked(getSettingsOrUndefined).mockReset();
   });
-  it('should return false if feature flag is disabled', async () => {
-    mockFeatureFlag(false);
-    const res = await isSpaceAwarenessMigrationPending();
 
-    expect(res).toBe(false);
-  });
-
-  it('should return false if feature flag is enabled but user did not optin', async () => {
-    mockFeatureFlag(true);
+  it('should return false if user did not optin', async () => {
     mockGetSettings({
       use_space_awareness_migration_status: undefined,
     });
@@ -89,16 +73,14 @@ describe('isSpaceAwarenessMigrationPending', () => {
     expect(res).toBe(false);
   });
 
-  it('should return false if feature flag is enabled and settings do not exists', async () => {
-    mockFeatureFlag(true);
+  it('should return false if settings do not exist', async () => {
     mockGetSettings();
     const res = await isSpaceAwarenessMigrationPending();
 
     expect(res).toBe(false);
   });
 
-  it('should return false if feature flag is enabled and migration is complete', async () => {
-    mockFeatureFlag(true);
+  it('should return false if migration is complete', async () => {
     mockGetSettings({
       use_space_awareness_migration_status: 'success',
     });
@@ -107,8 +89,7 @@ describe('isSpaceAwarenessMigrationPending', () => {
     expect(res).toBe(false);
   });
 
-  it('should return true if feature flag is enabled and migration is in progress', async () => {
-    mockFeatureFlag(true);
+  it('should return true if migration is in progress', async () => {
     mockGetSettings({
       use_space_awareness_migration_status: 'pending',
       use_space_awareness_migration_started_at: new Date().toISOString(),
@@ -118,8 +99,7 @@ describe('isSpaceAwarenessMigrationPending', () => {
     expect(res).toBe(true);
   });
 
-  it('should return false if feature flag is enabled and an old migration is in progress', async () => {
-    mockFeatureFlag(true);
+  it('should return false if an old migration is in progress', async () => {
     mockGetSettings({
       use_space_awareness_migration_status: 'pending',
       use_space_awareness_migration_started_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),

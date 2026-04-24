@@ -129,10 +129,7 @@ import { disableBrowserInputWhenBothEnabled } from './model_versions/synthetics_
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-export const getSavedObjectTypes = (
-  options = { useSpaceAwareness: false }
-): { [key: string]: SavedObjectsType } => {
-  const { useSpaceAwareness } = options;
+export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => {
 
   return {
     [FLEET_SETUP_LOCK_TYPE]: {
@@ -1535,7 +1532,7 @@ export const getSavedObjectTypes = (
       name: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'single',
       management: {
         importableAndExportable: false,
       },
@@ -1818,11 +1815,8 @@ export const getSavedObjectTypes = (
   };
 };
 
-export function registerSavedObjects(
-  savedObjects: SavedObjectsServiceSetup,
-  options = { useSpaceAwareness: false }
-) {
-  const savedObjectTypes = getSavedObjectTypes({ useSpaceAwareness: options.useSpaceAwareness });
+export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
+  const savedObjectTypes = getSavedObjectTypes();
   Object.values(savedObjectTypes).forEach((type) => {
     savedObjects.registerType(type);
   });
