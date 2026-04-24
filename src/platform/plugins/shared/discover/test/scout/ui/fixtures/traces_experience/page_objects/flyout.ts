@@ -33,6 +33,7 @@ export interface TracesFlyout {
     readonly openInDiscoverButton: Locator;
     readonly tourOkButton: Locator;
     getServiceBadge(name: string): Locator;
+    clickWaterfallPreview(): Promise<void>;
   };
 
   readonly errors: {
@@ -122,6 +123,13 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
           .locator('traceItemRowWrapper')
           .filter({ hasText: name })
           .locator('[data-test-subj="apmBarDetailsServiceNameBadge"]');
+      },
+      async clickWaterfallPreview() {
+        const waterfallClickArea = page.testSubj.locator(
+          'unifiedDocViewerTraceSummaryTraceWaterfallClickArea'
+        );
+        await waterfallClickArea.waitFor({ state: 'visible' });
+        await waterfallClickArea.dispatchEvent('click');
       },
     },
 
