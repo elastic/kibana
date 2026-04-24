@@ -92,6 +92,7 @@ import {
   getAxesConfiguration,
   getLinesCausedPaddings,
   validateExtent,
+  getDecimalsFromFormatParams,
   getOriginalAxisPosition,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
@@ -361,6 +362,8 @@ export function XYChart({
   const xAxisFormatter = formatFactory(
     xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
+
+  const xTickDecimals = getDecimalsFromFormatParams(xAxisFormatter.params());
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -951,6 +954,7 @@ export function XYChart({
                 }
                 return value;
               }}
+              maximumFractionDigits={xTickDecimals}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
@@ -964,6 +968,10 @@ export function XYChart({
               />
             )}
             {yAxesConfiguration.map((axis) => {
+              const tickDecimals = axis.formatter
+                ? getDecimalsFromFormatParams(axis.formatter?.params())
+                : undefined;
+
               return (
                 <Axis
                   key={axis.groupId}
@@ -982,6 +990,7 @@ export function XYChart({
                     }
                     return value;
                   }}
+                  maximumFractionDigits={tickDecimals}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}
