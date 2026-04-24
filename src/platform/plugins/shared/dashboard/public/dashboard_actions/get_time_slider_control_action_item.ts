@@ -68,6 +68,6 @@ export async function getTimeSliderActionItem(api: DashboardApi): Promise<MenuIt
       isDisabled,
     };
   } catch (error) {
-    return undefined; // TODO: Handle this better
+    return undefined; // silence error
   }
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n as i18nFn } from '@kbn/i18n';
 import {
@@ -24,10 +24,11 @@ import {
   EuiTabs,
   EuiTitle,
   EuiFieldSearch,
-  useEuiTheme,
   EuiSkeletonText,
   EuiText,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DashboardApi } from '../../../../dashboard_api/types';
 import type { MenuItem, MenuItemGroup } from '../types';
@@ -36,14 +37,11 @@ import { Groups } from './groups';
 import { FeaturedItems } from './featured_menu_items';
 import { embeddableService } from '../../../../services/kibana_services';
 
-type FlyoutTab = 'new' | 'library';
-
 const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
+type FlyoutTab = typeof TAB_NEW_ID | typeof TAB_LIBRARY_ID;
 
 function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
-  const { euiTheme } = useEuiTheme();
-
   const {
     value: groups,
     loading,
@@ -51,9 +49,6 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
   } = useAsync(async () => {
     return await getMenuItemGroups(dashboardApi);
   }, [dashboardApi]);
-
-  const groupsRef = useRef(groups);
-  groupsRef.current = groups;
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
@@ -123,17 +118,9 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
         responsive={false}
         gutterSize="m"
       >
-        <EuiFlexItem
-          grow={false}
-          css={{
-            position: 'sticky',
-            top: euiTheme.size.m,
-            zIndex: 1,
-            boxShadow: `0 -${euiTheme.size.m} 0 4px ${euiTheme.colors.backgroundBasePlain}`,
-          }}
-        >
+        <EuiFlexItem grow={false} css={styles.stickySearchBar}>
           <EuiForm component="form" fullWidth>
-            <EuiFormRow css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
+            <EuiFormRow>
               <EuiFieldSearch
                 autoFocus
                 compressed
@@ -151,10 +138,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
           </EuiForm>
         </EuiFlexItem>
         {featuredItems.length > 0 && (
-          <EuiFlexItem
-            grow={false}
-            css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}
-          >
+          <EuiFlexItem grow={false} css={styles.featuredPanelsWrapper}>
             {featuredItems.map(
               (item) =>
                 !item.isDisabled && (
@@ -163,7 +147,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                     paddingSize="none"
                     onClick={item.onClick}
                     data-test-subj={item['data-test-subj']}
-                    css={{ cursor: 'pointer', padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}
+                    className="featuredPanelItem"
                   >
                     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                       <EuiFlexItem grow={false}>
@@ -183,17 +167,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
             )}
           </EuiFlexItem>
         )}
-        <EuiFlexItem
-          css={{
-            minHeight: '20vh',
-            ...(error
-              ? {
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }
-              : {}),
-          }}
-        >
+        <EuiFlexItem css={styles.flyoutContentWrapper}>
           {error ? (
             <EuiEmptyPrompt
               iconType="warning"
@@ -305,3 +279,26 @@ export function AddPanelFlyout({
     </>
   );
 }
+
+const styles = {
+  stickySearchBar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'sticky',
+      top: euiTheme.size.m,
+      zIndex: euiTheme.levels.header,
+      boxShadow: `0 -${euiTheme.size.m} 0 4px ${euiTheme.colors.backgroundBasePlain}`,
+    }),
+  featuredPanelsWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: euiTheme.size.s,
+      '.featuredPanelItem': {
+        cursor: 'pointer',
+        padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+      },
+    }),
+  flyoutContentWrapper: css({
+    minHeight: '20vh',
+  }),
+};
