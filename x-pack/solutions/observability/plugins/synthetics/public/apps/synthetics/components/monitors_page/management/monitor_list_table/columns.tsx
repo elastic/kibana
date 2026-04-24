@@ -473,7 +473,7 @@ export function useMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
-      render: (_: unknown, monitor: MonitorListItem) => {
+      render: (monitor: MonitorListItem) => {
         if (isRemoteMonitor(monitor)) {
           return <EuiText size="s">{DASH}</EuiText>;
         }

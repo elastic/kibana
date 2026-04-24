@@ -64,7 +64,7 @@ function mapRemoteToListItem(remote: RemoteMonitorListItem): MonitorListItem {
     _isRemote: true,
     _remote: remote.remote,
     _remoteLocations: remote.locations,
-  } as MonitorListItem;
+  } as unknown as MonitorListItem;
 }
 
 interface Props {
