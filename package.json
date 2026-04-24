@@ -943,6 +943,7 @@
     "@kbn/resizable-layout": "link:src/platform/packages/shared/kbn-resizable-layout",
     "@kbn/resizable-layout-examples-plugin": "link:examples/resizable_layout_examples",
     "@kbn/resolver-test-plugin": "link:x-pack/solutions/security/test/plugin_functional/plugins/resolver_test",
+    "@kbn/response-ops-alert-snooze": "link:x-pack/platform/packages/shared/response-ops/alert-snooze",
     "@kbn/response-ops-alerts-apis": "link:x-pack/platform/packages/shared/response-ops/alerts-apis",
     "@kbn/response-ops-alerts-delete": "link:x-pack/platform/packages/shared/response-ops/alerts-delete",
     "@kbn/response-ops-alerts-fields-browser": "link:x-pack/platform/packages/shared/response-ops/alerts-fields-browser",

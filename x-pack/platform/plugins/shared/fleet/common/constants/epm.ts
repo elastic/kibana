@@ -19,6 +19,7 @@ export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
+export const FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE = 'otel_collector_internal_telemetry';
 export const FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE = 'profiler_symbolizer';
 export const FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE = 'profiler_collector';
 export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
