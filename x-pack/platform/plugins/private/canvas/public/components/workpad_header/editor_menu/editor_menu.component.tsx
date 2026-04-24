@@ -47,7 +47,7 @@ export const EditorMenu: FC<Props> = ({
         };
         const actionName = item.getDisplayName(context);
         const icon =
-          (item.id === 'addVegaPanelAction' ? item.getIconType(context) : 'code') ?? 'empty';
+          (item.id === 'addVegaPanelAction' ? 'code' : item.getIconType(context)) ?? 'empty';
         return {
           name: actionName,
           icon: typeof icon === 'string' ? icon : 'empty',
