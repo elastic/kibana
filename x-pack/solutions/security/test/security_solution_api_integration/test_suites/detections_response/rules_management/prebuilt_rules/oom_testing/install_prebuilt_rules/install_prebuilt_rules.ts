@@ -109,7 +109,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           page: 1,
-          per_page: 10_000,
+          // https://github.com/elastic/kibana/pull/264443 set the max per_page limit
+          per_page: 500,
         })
         .expect(200);
 

@@ -30,13 +30,9 @@ jest.mock('@kbn/presentation-panel-plugin/public/kibana_services', () => ({
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  EuiCodeBlock: ({
-    children,
-    dangerouslySetInnerHTML,
-  }: {
-    children?: string;
-    dangerouslySetInnerHTML?: { __html: string };
-  }) => <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>,
+  EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
+    <code data-test-subj="codeBlock">{children ?? ''}</code>
+  ),
 }));
 
 jest.mock('./utils/has_error_fields', () => ({
@@ -81,7 +77,10 @@ const dataView = {
       })),
   },
   metaFields: ['_index', '_score'],
-  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  getFormatterForField: jest.fn(() => ({
+    convert: (value: unknown) => value,
+    reactConvert: (value: unknown) => value,
+  })),
 } as unknown as DataView;
 
 dataView.fields.getByName = (name: string) => {
@@ -393,7 +392,8 @@ describe('LogsOverview with accordion state', () => {
 describe('LogsOverview with APM links', () => {
   describe('Highlights section', () => {
     describe('When APM is enabled', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
+        Element.prototype.scrollIntoView = jest.fn();
         setUnifiedDocViewerServices(
           merge(
             mockUnifiedDocViewerServices,
@@ -402,7 +402,9 @@ describe('LogsOverview with APM links', () => {
             })
           )
         );
-        renderLogsOverview();
+        await act(async () => {
+          renderLogsOverview();
+        });
       });
       it('should not render service name link', () => {
         expect(
@@ -424,15 +426,23 @@ describe('LogsOverview with APM links', () => {
 describe('LogsOverview content breakdown', () => {
   it('should render message value', async () => {
     const message = 'This is a message';
-    renderLogsOverview({ hit: buildHit({ message }) });
-    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(message);
+    await act(async () => {
+      renderLogsOverview({ hit: buildHit({ message }) });
+    });
+    const codeBlock = screen.queryByTestId('codeBlock');
+    expect(codeBlock).toBeInTheDocument();
+    expect(codeBlock?.textContent).toBe(message);
   });
 
   it('should render formatted JSON message value', async () => {
     const json = { foo: { bar: true } };
     const message = JSON.stringify(json);
-    renderLogsOverview({ hit: buildHit({ message }) });
-    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(JSON.stringify(json, null, 2));
+    await act(async () => {
+      renderLogsOverview({ hit: buildHit({ message }) });
+    });
+    const codeBlock = screen.queryByTestId('codeBlock');
+    expect(codeBlock).toBeInTheDocument();
+    expect(codeBlock?.textContent).toBe(JSON.stringify(json, null, 2));
   });
 });
 

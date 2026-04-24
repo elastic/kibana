@@ -1,5 +1,5 @@
 {
-  "sha1": "776c83ec2cbd8d1513a3a8fcf7962eb19ca51c21",
+  "sha1": "605b1108c55730eb022e6c1d683c2f130a3ca90d",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -3353,6 +3353,22 @@
       }
     },
     {
+      "id": "caff8dcf425ad2d-d68cdb7b08b22ef",
+      "title": "ES|QL source enrichment - stream description in autocomplete popup shows stream description and management link in ES|QL autocomplete popup",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/esql_source_enrichment.spec.ts",
+        "line": 30,
+        "column": 9
+      }
+    },
+    {
       "id": "7ce2670a3e19b7c-cd54fa739417889",
       "title": "Query streams - Create query stream should properly handle errors for invalid query streams",
       "expectedStatus": "passed",
@@ -3391,6 +3407,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
         "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "7ce2670a3e19b7c-af09f3b002dfd4f",
+      "title": "Query streams - Create query stream rejects invalid child query stream names inline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
+        "line": 119,
         "column": 7
       }
     },
