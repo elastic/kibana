@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EuiCallOut, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { QuickSnoozePanel } from './quick_snooze_panel';
 
 const meta: Meta<typeof QuickSnoozePanel> = {
@@ -48,13 +48,6 @@ const InteractiveWrapper = () => {
   return (
     <EuiPanel paddingSize="m">
       <QuickSnoozePanel onScheduleChange={handleChange} />
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        color={scheduleState.endDate === undefined ? 'warning' : 'success'}
-        title={scheduleState.label}
-        iconType={scheduleState.endDate === undefined ? 'alert' : 'clock'}
-      />
     </EuiPanel>
   );
 };
@@ -65,25 +58,4 @@ const InteractiveWrapper = () => {
  */
 export const Default: Story = {
   render: () => <InteractiveWrapper />,
-};
-
-/**
- * Demonstrates the full panel embedded inside a popover-like container,
- * mirroring the real usage in the alerts table snooze action.
- */
-export const InPopover: Story = {
-  render: () => (
-    <div
-      style={{
-        display: 'inline-block',
-        border: '1px solid #D3DAE6',
-        borderRadius: 6,
-        boxShadow: '0 4px 16px rgba(0,0,0,.15)',
-        padding: 16,
-        minWidth: 360,
-      }}
-    >
-      <QuickSnoozePanel onScheduleChange={() => {}} />
-    </div>
-  ),
 };

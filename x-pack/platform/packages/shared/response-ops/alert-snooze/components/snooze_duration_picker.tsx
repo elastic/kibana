@@ -44,7 +44,7 @@ export const SnoozeDurationPicker = ({
         onChange={(id) => {
           onChange({ mode: id as CustomSnoozeMode });
         }}
-        buttonSize="m"
+        buttonSize="compressed"
         isFullWidth
         data-test-subj="buttonGroupModeOptions"
       />

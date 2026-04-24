@@ -7,7 +7,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import moment from 'moment';
-import { EuiButtonGroup, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiButtonGroup, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import type { SnoozeUnit, QuickDurationId, CustomDurationState } from './types';
 import { SNOOZE_DATE_DISPLAY_FORMAT, SNOOZE_UNIT_OPTIONS } from './constants';
 import { validateDuration, computeEndDate } from '../utils/duration_validation';
@@ -94,8 +95,20 @@ export const QuickSnoozePanel = ({ onScheduleChange }: QuickSnoozePanelProps) =>
         options={SNOOZE_PRESET_OPTIONS}
         idSelected={selectedDuration}
         onChange={(id) => setSelectedDuration(id as QuickDurationId)}
-        buttonSize="m"
         data-test-subj="quickSnoozeDurationOptions"
+        buttonSize="compressed"
+        isFullWidth
+        css={css`
+          .euiButtonGroup__buttons > *:nth-of-type(1) {
+            flex-grow: 2.4;
+          }
+          .euiButtonGroup__buttons > *:nth-of-type(4) {
+            flex-grow: 1.2;
+          }
+          .euiButtonGroup__buttons > *:nth-of-type(5) {
+            flex-grow: 2;
+          }
+        `}
       />
 
       {selectedDuration === 'custom' && (
@@ -113,9 +126,11 @@ export const QuickSnoozePanel = ({ onScheduleChange }: QuickSnoozePanelProps) =>
       <EuiHorizontalRule margin="m" />
 
       {previewText !== null && (
-        <EuiText size="s" data-test-subj="quickSnoozeUnsnoozeTime">
-          <p>{previewText}</p>
-        </EuiText>
+        <EuiPanel color="subdued" paddingSize="s" hasBorder={false} hasShadow={false}>
+          <EuiText size="s" data-test-subj="quickSnoozeUnsnoozeTime">
+            <p>{previewText}</p>
+          </EuiText>
+        </EuiPanel>
       )}
 
       <EuiSpacer size="m" />
