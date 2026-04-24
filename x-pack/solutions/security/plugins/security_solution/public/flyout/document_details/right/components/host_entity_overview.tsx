@@ -117,7 +117,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -382,6 +382,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
         </EuiFlexItem>
       )}
       <AlertCountInsight
+        entityRecord={entityRecord}
         identityFields={identityFields}
         entityType={EntityType.host}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${HOST_ENTITY_OVERVIEW_ID}`}

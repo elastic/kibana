@@ -90,7 +90,19 @@ import {
 
 describe(
   'Alert details expandable flyout right panel overview tab',
-  { tags: ['@ess', '@serverless'] },
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+          ])}`,
+        ],
+      },
+    },
+  },
   () => {
     const rule = { ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } };
 
