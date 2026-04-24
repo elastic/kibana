@@ -20,7 +20,7 @@ import {
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
-test.describe.only(
+test.describe(
   'Stream data routing - AI suggestions generation',
   { tag: tags.stateful.classic },
   () => {
