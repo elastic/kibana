@@ -438,25 +438,21 @@ describe('appendEsqlFilterExpressionToQuery', () => {
     expect(appendEsqlFilterExpressionToQuery('from logs-*', '   ')).toBe('from logs-*');
   });
 
-  it('appends | WHERE when the query has no trailing WHERE command', () => {
+  it('appends | WHERE when the query has no trailing WHERE command (newline + tab before `| WHERE` (and a space before WHERE))', () => {
     expect(appendEsqlFilterExpressionToQuery('from logs-*', '`status` : 200')).toBe(
-      `from logs-*
-| WHERE \`status\` : 200`
+      'from logs-*\n\t| WHERE `status` : 200'
     );
   });
 
   it('appends AND when the last command is WHERE', () => {
     expect(appendEsqlFilterExpressionToQuery('from logs-*\n| WHERE `a` : 1', '`b` : 2')).toBe(
-      `from logs-*
-| WHERE \`a\` : 1
-AND \`b\` : 2`
+      `from logs-*\n| WHERE \`a\` : 1 AND \`b\` : 2`
     );
   });
 
   it('falls back to | WHERE when parsing fails', () => {
     expect(appendEsqlFilterExpressionToQuery('not valid esql !!!', '`x` : 1')).toBe(
-      `not valid esql !!!
-| WHERE \`x\` : 1`
+      `not valid esql !!!\n| WHERE \`x\` : 1`
     );
   });
 });
