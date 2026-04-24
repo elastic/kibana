@@ -269,6 +269,22 @@ describe('SearchSource', () => {
       expect(searchSource.getField('aggs')).toStrictEqual({ i: 5 });
     });
 
+    test('resolves function-valued fields with search source context', () => {
+      const resolveFilter = jest.fn(function (
+        this: SearchSource,
+        currentSearchSource?: SearchSource
+      ): Filter[] {
+        expect(this).toBe(searchSource);
+        expect(currentSearchSource).toBe(searchSource);
+        return [];
+      });
+
+      searchSource.setField('filter', resolveFilter);
+      searchSource.getSearchRequestBody();
+
+      expect(resolveFilter).toHaveBeenCalledTimes(1);
+    });
+
     test('sets the value for the property with AggConfigs', () => {
       const typesRegistry = mockAggTypesRegistry();
 
@@ -1225,6 +1241,19 @@ describe('SearchSource', () => {
         expect(complete).toBeCalledTimes(1);
         expect(complete2).toBeCalledTimes(1);
         expect(searchSourceDependencies.search).toHaveBeenCalledTimes(1);
+      });
+
+      test('uses index field as indexPattern fallback when flattened index is a string', async () => {
+        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+        const flattenSpy = jest
+          .spyOn(searchSource as unknown as { flatten: () => unknown }, 'flatten')
+          .mockReturnValue({ body: {}, index: 'legacy-index-id' });
+        const options: SearchSourceSearchOptions = {};
+
+        await firstValueFrom(searchSource.fetch$(options));
+
+        expect(options.indexPattern).toBe(indexPattern);
+        flattenSpy.mockRestore();
       });
     });
 

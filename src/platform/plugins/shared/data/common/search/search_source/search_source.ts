@@ -126,10 +126,15 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.SORT_OPTIONS,
 ];
 
+type SearchSourceDataViewsDependencies = Pick<
+  DataViewsContract,
+  'getMetaFields' | 'getShortDotsEnable'
+>;
+
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
-  dataViews: DataViewsContract;
+  dataViews: SearchSourceDataViewsDependencies;
   scriptedFieldsEnabled: boolean;
 }
 
@@ -360,8 +365,16 @@ export class SearchSource {
       switchMap(() => {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
-        if (searchRequest.index && typeof searchRequest.index !== 'string') {
-          options.indexPattern = searchRequest.index;
+        const indexPatternFromRequest =
+          searchRequest.index != null && typeof searchRequest.index !== 'string'
+            ? searchRequest.index
+            : undefined;
+        const indexField = this.getField('index');
+        const indexPatternFromField =
+          indexField != null && typeof indexField !== 'string' ? indexField : undefined;
+        const resolvedIndexPattern = indexPatternFromRequest ?? indexPatternFromField;
+        if (resolvedIndexPattern) {
+          options.indexPattern = resolvedIndexPattern;
         }
 
         return this.fetchSearch$(searchRequest, options);
@@ -623,10 +636,13 @@ export class SearchSource {
     key: K
   ): false | void {
     if (typeof val === 'function') {
-      // filter and aggs fields can be functions (see SearchSourceFields).
-      // Call the function to resolve the value; the function takes no arguments.
-      const fn = val as unknown as () => SearchSourceFields[K];
-      val = fn();
+      // Historically, function-valued fields were invoked as `fn(this)` so callbacks
+      // could receive the SearchSource. Preserve that contract (including `this` binding).
+      const fn = val as unknown as (
+        this: SearchSource,
+        searchSource: SearchSource
+      ) => SearchSourceFields[K];
+      val = fn.call(this, this);
     }
     if (val == null || !key) return;
 

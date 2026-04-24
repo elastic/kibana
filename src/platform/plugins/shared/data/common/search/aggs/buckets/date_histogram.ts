@@ -52,21 +52,19 @@ export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
   buckets: TimeBuckets;
 }
 
-const hasTimeBuckets = (
-  obj: object
-): obj is { buckets: { setBounds: Function; setInterval: Function } } => {
-  if (!('buckets' in obj) || typeof obj.buckets !== 'object' || obj.buckets === null) {
+function hasTimeBuckets(agg: object): agg is IBucketDateHistogramAggConfig {
+  if (!('buckets' in agg) || typeof agg.buckets !== 'object' || agg.buckets === null) {
     return false;
   }
 
-  const { buckets } = obj;
+  const { buckets } = agg;
   return (
     'setBounds' in buckets &&
     typeof buckets.setBounds === 'function' &&
     'setInterval' in buckets &&
     typeof buckets.setInterval === 'function'
   );
-};
+}
 
 export function isDateHistogramBucketAggConfig(agg: unknown): agg is IBucketDateHistogramAggConfig {
   return typeof agg === 'object' && agg !== null && hasTimeBuckets(agg);

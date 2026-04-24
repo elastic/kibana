@@ -21,8 +21,9 @@ import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
-import { QueryStringInput } from './query_string_input';
+import { QueryStringInput, type QueryStringInputProps } from './query_string_input';
 import { autocompleteStartMock } from '../../autocomplete/mocks';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -59,27 +60,33 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-function wrapQueryStringInputInContext(testProps: any, storage?: any) {
+function wrapQueryStringInputInContext(
+  testProps: Partial<QueryStringInputProps>,
+  storage?: IStorageWrapper
+) {
   const mockDataPlugin = dataPluginMock.createStartContract();
 
-  const defaultOptions = {
+  const baseProps: QueryStringInputProps = {
     screenTitle: 'Another Screen',
-    intl: null as any,
+    appName: 'test',
+    indexPatterns: [],
+    query: kqlQuery,
     deps: {
       autocomplete: autocompleteStartMock,
       data: mockDataPlugin,
-      appName: testProps.appName || 'test',
-      storage: storage || createMockStorage(),
+      storage: storage ?? createMockStorage(),
       usageCollection: { reportUiCounter: () => {} },
       uiSettings: startMock.uiSettings,
       http: startMock.http,
       docLinks: startMock.docLinks,
+      notifications: startMock.notifications,
+      dataViews: mockDataPlugin.dataViews,
     },
   };
 
   return (
     <I18nProvider>
-      <QueryStringInput {...defaultOptions} {...testProps} />
+      <QueryStringInput {...baseProps} {...testProps} />
     </I18nProvider>
   );
 }

@@ -116,10 +116,11 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 }
 
 export function isMetricAggType(aggConfig: unknown): aggConfig is MetricAggType {
-  return (
-    typeof aggConfig === 'object' &&
-    aggConfig !== null &&
-    'type' in aggConfig &&
-    aggConfig.type === metricType
-  );
+  if (typeof aggConfig !== 'object' || aggConfig === null) {
+    return false;
+  }
+  if (!('type' in aggConfig)) {
+    return false;
+  }
+  return aggConfig.type === metricType;
 }

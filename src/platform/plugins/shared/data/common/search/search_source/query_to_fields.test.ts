@@ -9,12 +9,12 @@
 
 import type { EsQuerySortValue, SearchRequest } from '../..';
 import { queryToFields, SortDirection } from '../..';
-import type { DataViewLazy } from '@kbn/data-views-plugin/common';
+import type { DataViewLazyQueryToFields } from './query_to_fields';
 import { type Filter, FILTERS } from '@kbn/es-query';
 
 describe('SearchSource#queryToFields', () => {
   it('should include time field', async () => {
-    const dataView = {
+    const dataView: DataViewLazyQueryToFields = {
       timeFieldName: '@timestamp',
       getSourceFiltering: jest.fn(),
       getFields: jest.fn().mockResolvedValue({
@@ -22,13 +22,13 @@ describe('SearchSource#queryToFields', () => {
       }),
     };
     const request: SearchRequest = { query: [] };
-    await queryToFields({ dataView: dataView as unknown as DataViewLazy, request });
+    await queryToFields({ dataView, request });
     const { fieldName } = dataView.getFields.mock.calls[0][0];
     expect(fieldName).toEqual(['@timestamp']);
   });
 
   it('should include sort field', async () => {
-    const dataView = {
+    const dataView: DataViewLazyQueryToFields = {
       getSourceFiltering: jest.fn(),
       getFields: jest.fn().mockResolvedValue({
         getFieldMapSorted: jest.fn(),
@@ -36,13 +36,13 @@ describe('SearchSource#queryToFields', () => {
     };
     const sort: EsQuerySortValue = { bytes: SortDirection.asc };
     const request: SearchRequest = { query: [] };
-    await queryToFields({ dataView: dataView as unknown as DataViewLazy, sort, request });
+    await queryToFields({ dataView, sort, request });
     const { fieldName } = dataView.getFields.mock.calls[0][0];
     expect(fieldName).toEqual(['bytes']);
   });
 
   it('should include request KQL query fields', async () => {
-    const dataView = {
+    const dataView: DataViewLazyQueryToFields = {
       timeFieldName: '@timestamp',
       getSourceFiltering: jest.fn(),
       getFields: jest.fn().mockResolvedValue({
@@ -57,13 +57,13 @@ describe('SearchSource#queryToFields', () => {
         },
       ],
     };
-    await queryToFields({ dataView: dataView as unknown as DataViewLazy, request });
+    await queryToFields({ dataView, request });
     const { fieldName } = dataView.getFields.mock.calls[0][0];
     expect(fieldName).toEqual(['@timestamp', 'log.level', 'message']);
   });
 
   it('should not include request Lucene query fields', async () => {
-    const dataView = {
+    const dataView: DataViewLazyQueryToFields = {
       timeFieldName: '@timestamp',
       getSourceFiltering: jest.fn(),
       getFields: jest.fn().mockResolvedValue({
@@ -78,13 +78,13 @@ describe('SearchSource#queryToFields', () => {
         },
       ],
     };
-    await queryToFields({ dataView: dataView as unknown as DataViewLazy, request });
+    await queryToFields({ dataView, request });
     const { fieldName } = dataView.getFields.mock.calls[0][0];
     expect(fieldName).toEqual(['@timestamp']);
   });
 
   it('should include fields from nested combined filters', async () => {
-    const dataView = {
+    const dataView: DataViewLazyQueryToFields = {
       getSourceFiltering: jest.fn().mockReturnValue({ excludes: [] }),
       getFields: jest.fn().mockResolvedValue({
         getFieldMapSorted: jest.fn(),
@@ -128,7 +128,7 @@ describe('SearchSource#queryToFields', () => {
       filters: [combinedFilter],
     };
 
-    await queryToFields({ dataView: dataView as unknown as DataViewLazy, request });
+    await queryToFields({ dataView, request });
 
     const { fieldName } = dataView.getFields.mock.calls[0][0];
     expect(fieldName).toEqual(['process.name', 'attributes.process.name', 'stream.name']);

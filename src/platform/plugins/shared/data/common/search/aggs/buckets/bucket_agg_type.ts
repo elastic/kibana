@@ -98,10 +98,11 @@ export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfi
 }
 
 export function isBucketAggType(aggConfig: unknown): aggConfig is BucketAggType {
-  return (
-    typeof aggConfig === 'object' &&
-    aggConfig !== null &&
-    'type' in aggConfig &&
-    aggConfig.type === bucketType
-  );
+  if (typeof aggConfig !== 'object' || aggConfig === null) {
+    return false;
+  }
+  if (!('type' in aggConfig)) {
+    return false;
+  }
+  return aggConfig.type === bucketType;
 }

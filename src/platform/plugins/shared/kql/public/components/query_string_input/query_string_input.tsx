@@ -59,6 +59,20 @@ import { QuerySuggestionTypes } from '../../autocomplete';
 import { getCoreStart } from '../../services';
 import { StyledDiv } from './query_string_input.styles';
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value != null && typeof value === 'object';
+}
+
+function recentSearchEntryToText(recentSearch: unknown): string {
+  if (typeof recentSearch === 'string') {
+    return recentSearch;
+  }
+  if (isRecord(recentSearch)) {
+    return toUser(recentSearch);
+  }
+  return '';
+}
+
 export const strings = {
   getSearchInputPlaceholderForText: () =>
     i18n.translate('kql.query.queryBar.searchInputPlaceholderForText', {
@@ -320,22 +334,13 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     if (!this.persistedLog) {
       return [];
     }
-    const getRecentSearchText = (recentSearch: unknown): string => {
-      if (typeof recentSearch === 'string') {
-        return recentSearch;
-      }
-      if (recentSearch != null && typeof recentSearch === 'object') {
-        return toUser(recentSearch as { [key: string]: unknown });
-      }
-      return '';
-    };
     const recentSearches = this.persistedLog.get();
     const matchingRecentSearches = recentSearches.filter((recentQuery) => {
-      const recentQueryString = getRecentSearchText(recentQuery);
+      const recentQueryString = recentSearchEntryToText(recentQuery);
       return recentQueryString !== '' && recentQueryString.includes(query);
     });
     return matchingRecentSearches.map((recentSearch) => {
-      const text = getRecentSearchText(recentSearch);
+      const text = recentSearchEntryToText(recentSearch);
       const start = 0;
       const end = query.length;
       return { type: QuerySuggestionTypes.RecentSearch, text, start, end };

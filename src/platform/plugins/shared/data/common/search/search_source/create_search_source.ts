@@ -16,6 +16,11 @@ import { SearchSource } from './search_source';
 import type { SerializedSearchSourceFields } from '../..';
 import type { SearchSourceFields } from './types';
 
+type CreateSearchSourceDataViews = Pick<
+  DataViewsContract,
+  'get' | 'create' | 'getDataViewLazy' | 'createDataViewLazy'
+>;
+
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.
  * Use this method to re-create the search source serialized using `searchSource.serialize`.
@@ -34,7 +39,7 @@ import type { SearchSourceFields } from './types';
  *
  * @public */
 export const createSearchSource = (
-  indexPatterns: DataViewsContract,
+  indexPatterns: CreateSearchSourceDataViews,
   searchSourceDependencies: SearchSourceDependencies
 ) => {
   let dataViewLazy: DataViewLazy | undefined;
