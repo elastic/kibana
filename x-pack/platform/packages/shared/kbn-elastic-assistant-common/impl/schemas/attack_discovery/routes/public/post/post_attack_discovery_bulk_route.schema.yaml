@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
-  title: Attack discovery bulk API endpoint
+  title: Attack Discovery bulk API endpoint
   version: '2023-10-31'
 paths:
   /api/attack_discovery/_bulk:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -45,7 +45,7 @@ paths:
                   properties:
                     ids:
                       type: array
-                      description: Array of Attack discovery IDs to update
+                      description: Array of Attack Discovery IDs to update
                       items:
                         type: string
                       example: ["c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f", "5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7"]
@@ -72,11 +72,19 @@ paths:
                     enable_field_rendering:
                       type: boolean
                       default: false
-                      description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+                      description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
                       example: false
+            example:
+              update:
+                ids:
+                  - "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f"
+                  - "5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7"
+                kibana_alert_workflow_status: "acknowledged"
+                with_replacements: true
+                enable_field_rendering: false
       responses:
         200:
-          description: Successful response containing the updated Attack discovery alerts
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -86,12 +94,28 @@ paths:
                 properties:
                   data:
                     type: array
-                    description: Array of updated Attack discovery alert objects. Each item includes the applied modifications from the bulk update request.
+                    description: Array of updated Attack Discovery alert objects. Each item includes the applied modifications from the bulk update request.
                     items:
                       $ref: '../../../attack_discovery_api_alert.schema.yaml#/components/schemas/AttackDiscoveryApiAlert'
+              examples:
+                PostAttackDiscoveryBulkResponse200Example:
+                  summary: A successful bulk update response containing the modified Attack discoveries.
+                  value:
+                    data:
+                      - id: "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f"
+                        alert_ids:
+                          - "alert-abc-1"
+                        connector_id: "gen-ai-connector"
+                        connector_name: "OpenAI GPT-4"
+                        details_markdown: "- **Host** `workstation-01` showed credential access patterns consistent with mimikatz."
+                        generation_uuid: "550e8400-e29b-41d4-a716-446655440000"
+                        summary_markdown: "A user account was compromised using mimikatz to dump credentials."
+                        timestamp: "2024-01-15T10:00:00.000Z"
+                        title: "Credential theft via mimikatz"
+                        alert_workflow_status: "acknowledged"
 
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -108,8 +132,12 @@ paths:
                   message:
                     type: string
                     description: Human-readable error message describing what went wrong with the bulk update request
-                    example: "Invalid request parameters"
+                    example: "Invalid request parameters."
                 required:
                   - status_code
                   - error
                   - message
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters."
