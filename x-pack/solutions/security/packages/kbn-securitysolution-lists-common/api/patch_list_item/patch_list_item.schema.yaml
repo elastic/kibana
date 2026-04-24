@@ -35,9 +35,6 @@ paths:
                   description: Determines when changes made by the request are made visible to search.
               required:
                 - id
-              example:
-                id: pd1WRJQBs4HAK3VQeHFI
-                value: 255.255.255.255
             examples:
               changeValue:
                 value:

@@ -1441,9 +1441,6 @@ paths:
                   id: pd1WRJQBs4HAK3VQeHFI
                   value: 255.255.255.255
             schema:
-              example:
-                id: pd1WRJQBs4HAK3VQeHFI
-                value: 255.255.255.255
               type: object
               properties:
                 _version:
@@ -2297,7 +2294,7 @@ paths:
           content:
             application/json:
               examples:
-                notFound:
+                conflict:
                   value:
                     message: >-
                       List with the specified list_id does not exist, create the
