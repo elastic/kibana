@@ -234,10 +234,10 @@ async function fetchMemberSummaries(
         const keys = [...seen.keys()];
         const values = [...seen.values()];
         try {
-          const batches = chunk(values, COMPUTE_SUMMARIES_BATCH_SIZE);
-          const results = (
-            await Promise.all(batches.map((batch) => summaryClient.computeSummaries(batch)))
-          ).flat();
+          const results: SummaryResult[] = [];
+          for (const batch of chunk(values, COMPUTE_SUMMARIES_BATCH_SIZE)) {
+            results.push(...(await summaryClient.computeSummaries(batch)));
+          }
           summaryResultBySpace.set(spaceId, new Map(keys.map((k, i) => [k, results[i]])));
         } catch (err) {
           stats.spaceErrors++;
