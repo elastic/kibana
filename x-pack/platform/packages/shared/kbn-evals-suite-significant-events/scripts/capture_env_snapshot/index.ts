@@ -32,6 +32,7 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
       'es-url',
       'es-username',
       'es-password',
+      'kibana-url',
       'snapshot-name',
       'run-id',
       'logs-index',
@@ -51,6 +52,7 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
       --es-url                Elasticsearch URL (default: from kibana.dev.yml)
       --es-username           ES username (default: from kibana.dev.yml)
       --es-password           ES password (default: from kibana.dev.yml)
+      --kibana-url            Kibana base URL (default: from kibana.dev.yml)
     `,
   },
 });
