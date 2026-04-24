@@ -162,8 +162,8 @@ export const createRuleAttachmentDefinition = ({
   renderInlineContent: ({ attachment }) => {
     const { data, origin } = attachment;
     const isProposed = !origin;
-    const status = isProposed ? 'proposed' : data.enabled ? 'enabled' : 'disabled';
-    const statusColor = isProposed ? 'default' : data.enabled ? 'success' : 'warning';
+    const status = isProposed ? 'proposed' : (data.enabled ?? true) ? 'enabled' : 'disabled';
+    const statusColor = isProposed ? 'default' : (data.enabled ?? true) ? 'success' : 'warning';
 
     return (
       <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
