@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -27,6 +28,7 @@ import type { ApplicationStart, IBasePath, NotificationsStart } from '@kbn/core/
 import { Context } from '@kbn/core-di-browser';
 import type { Container } from 'inversify';
 import { RuleProvider } from '../../components/rule_details/rule_context';
+import { RuleHeaderDescription } from '../../components/rule_details/rule_header_description';
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
 import { paths } from '../../constants';
 import type { RuleApiResponse, RulesApi } from '../../services/rules_api';
@@ -156,6 +158,8 @@ const RuleCanvasContent = ({
     <Context.Provider value={container}>
       <RuleProvider rule={data as unknown as RuleApiResponse}>
         <EuiPanel paddingSize="l" hasShadow={false}>
+          <RuleHeaderDescription />
+          <EuiSpacer size="m" />
           <RuleSidebar />
         </EuiPanel>
       </RuleProvider>
