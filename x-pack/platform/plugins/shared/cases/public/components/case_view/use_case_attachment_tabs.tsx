@@ -24,6 +24,7 @@ import {
   isLegacyAttachmentRequest,
 } from '../../../common/utils/attachments';
 import { isUnifiedEventAttachment } from '../../../common/utils/attachments/v2_type_guards';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
 
 const FilesBadge = ({
   activeTab,
@@ -204,7 +205,7 @@ export const useCaseAttachmentTabs = ({
   activeTab: CASE_VIEW_PAGE_TABS;
   searchTerm?: string;
 }): UseCaseAttachmentTabsReturnValue => {
-  const { features } = useCasesContext();
+  const { features, unifiedAttachmentTypeRegistry } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { data: fileStatsData, isLoading: isLoadingFiles } = useGetCaseFileStats({
     caseId: caseData.id,
@@ -252,11 +253,39 @@ export const useCaseAttachmentTabs = ({
     );
   }, [searchTerm, features, caseData]);
 
-  const totalAttachments =
-    stats.totalAlerts +
-    stats.totalEvents +
-    Number(fileStatsData?.total ?? 0) +
-    (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
+  // Total for the top-level "Attachments" tab badge. Reflects what actually renders
+  // in the attachments view: one row per attachment whose registered type has a
+  // tab view, plus files and (license-permitting) observables.
+  const totalAttachments = useMemo(() => {
+    const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
+    const typesWithTabView = new Set(
+      unifiedAttachmentTypeRegistry
+        .list()
+        .filter((type) => type.getAttachmentTabViewObject?.()?.children != null)
+        .map((type) => type.id)
+    );
+
+    let registryTotal = 0;
+    for (const comment of caseData.comments) {
+      if (typesWithTabView.has(toUnifiedAttachmentType(comment.type, owner))) {
+        registryTotal += 1;
+      }
+    }
+
+    return (
+      registryTotal +
+      Number(fileStatsData?.total ?? 0) +
+      (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0)
+    );
+  }, [
+    caseData.owner,
+    caseData.comments,
+    unifiedAttachmentTypeRegistry,
+    fileStatsData?.total,
+    canShowObservableTabs,
+    isObservablesFeatureEnabled,
+    observables.length,
+  ]);
 
   const tabsConfig = useMemo(
     () => [

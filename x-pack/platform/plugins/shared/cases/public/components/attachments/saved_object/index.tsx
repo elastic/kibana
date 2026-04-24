@@ -22,6 +22,7 @@ import type {
   UnifiedReferenceAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import { useKibana } from '../../../common/lib/kibana';
+import { makeSavedObjectAttachmentsTab } from './saved_object_attachments_tab';
 import * as i18n from './translations';
 
 type SavedObjectKind = 'dashboard' | 'visualization' | 'search' | 'alert' | 'lens' | 'map';
@@ -122,18 +123,26 @@ const makeSchemaValidator = (expected: SavedObjectKind) => {
 
 const makeAttachmentType = (
   config: SavedObjectAttachmentConfig
-): UnifiedReferenceAttachmentType => ({
-  id: config.id,
-  icon: config.icon,
-  displayName: config.displayName,
-  getAttachmentViewObject: (props) => ({
-    event: <SavedObjectAttachmentView {...props} config={config} />,
-    timelineAvatar: config.icon,
-    hideDefaultActions: false,
-  }),
-  getAttachmentRemovalObject: () => ({ event: config.removedEventLabel }),
-  schemaValidator: makeSchemaValidator(config.savedObjectType),
-});
+): UnifiedReferenceAttachmentType => {
+  const TabView = makeSavedObjectAttachmentsTab({
+    attachmentTypeId: config.id,
+    savedObjectType: config.savedObjectType,
+    icon: config.icon,
+  });
+  return {
+    id: config.id,
+    icon: config.icon,
+    displayName: config.displayName,
+    getAttachmentViewObject: (props) => ({
+      event: <SavedObjectAttachmentView {...props} config={config} />,
+      timelineAvatar: config.icon,
+      hideDefaultActions: false,
+    }),
+    getAttachmentRemovalObject: () => ({ event: config.removedEventLabel }),
+    getAttachmentTabViewObject: () => ({ children: TabView }),
+    schemaValidator: makeSchemaValidator(config.savedObjectType),
+  };
+};
 
 export const getDashboardAttachmentType = (): UnifiedReferenceAttachmentType =>
   makeAttachmentType({

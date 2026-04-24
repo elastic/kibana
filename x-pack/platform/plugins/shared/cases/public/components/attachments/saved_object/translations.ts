@@ -66,3 +66,11 @@ export const REMOVED_LENS = i18n.translate('xpack.cases.attachment.savedObject.r
 export const REMOVED_MAP = i18n.translate('xpack.cases.attachment.savedObject.removedMap', {
   defaultMessage: 'removed map',
 });
+
+export const COLUMN_NAME = i18n.translate('xpack.cases.attachment.savedObject.tab.columnName', {
+  defaultMessage: 'Name',
+});
+
+export const NO_ITEMS = i18n.translate('xpack.cases.attachment.savedObject.tab.noItems', {
+  defaultMessage: 'No items attached.',
+});

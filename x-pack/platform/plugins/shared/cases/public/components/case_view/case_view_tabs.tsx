@@ -20,10 +20,7 @@ import {
 } from './use_case_attachment_tabs';
 import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import {
-  useAttachmentsSubTabClickedEBT,
-  useAttachmentsTabClickedEBT,
-} from '../../analytics/use_attachments_tab_ebt';
+import { useAttachmentsTabClickedEBT } from '../../analytics/use_attachments_tab_ebt';
 
 export interface CaseViewTabsProps {
   caseData: CaseUI;
@@ -52,11 +49,11 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   });
 
   const isAttachmentsTabActive = useMemo(
-    () => !!attachmentTabs.find((attachmentTab) => attachmentTab.id === activeTab),
+    () =>
+      activeTab === CASE_VIEW_PAGE_TABS.ATTACHMENTS ||
+      !!attachmentTabs.find((attachmentTab) => attachmentTab.id === activeTab),
     [activeTab, attachmentTabs]
   );
-
-  const defaultAttachmentsTabId = attachmentTabs[0].id;
 
   const tabs: CaseViewTab[] = useMemo(
     () => [
@@ -91,7 +88,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   );
 
   const trackAttachmentsTabClick = useAttachmentsTabClickedEBT();
-  const trackAttachmentsSubTabClick = useAttachmentsSubTabClickedEBT();
 
   const renderTabs = useCallback(() => {
     return tabs.map((tab, index) => (
@@ -101,13 +97,11 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         onClick={() => {
           if (tab.id === CASE_VIEW_PAGE_TABS.ATTACHMENTS) {
             trackAttachmentsTabClick();
-            // NOTE: counting default sub-tab click here as it is already picked when navigating to attachments tab
-            trackAttachmentsSubTabClick(defaultAttachmentsTabId);
           }
 
           navigateToCaseView({
             detailName: caseData.id,
-            tabId: tab.id === CASE_VIEW_PAGE_TABS.ATTACHMENTS ? CASE_VIEW_PAGE_TABS.ALERTS : tab.id,
+            tabId: tab.id,
           });
         }}
         isSelected={
@@ -126,8 +120,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     navigateToCaseView,
     caseData.id,
     trackAttachmentsTabClick,
-    trackAttachmentsSubTabClick,
-    defaultAttachmentsTabId,
   ]);
 
   return <EuiTabs data-test-subj="case-view-tabs">{renderTabs()}</EuiTabs>;
