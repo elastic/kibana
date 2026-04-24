@@ -94,7 +94,7 @@ dependsOn:
   - '@kbn/traced-es-client'
   - '@kbn/streamlang-yaml-editor'
   - '@kbn/tooling-log'
-  - '@kbn/core-chrome-navigation'
+  - '@kbn/ui-side-navigation'
   - '@kbn/classic-stream-flyout'
   - '@kbn/ebt-tools'
   - '@kbn/language-documentation'
