@@ -164,7 +164,12 @@ async function runFeaturesIdentification(
       featureTtlDays: tuningConfig.feature_ttl_days,
       runId,
     }).catch((err) => {
-      taskLogger.warn(`Computed features generation failed: ${parseError(err).message}`);
+      // Computed features generation is not expected to fail; surface it as
+      // an error so it's actionable, but swallow the rejection so it cannot
+      // become an unhandled rejection and crash Kibana.
+      taskLogger.error(`Computed features generation failed: ${parseError(err).message}`, {
+        error: err,
+      } as LogMeta);
       return [] as Awaited<ReturnType<typeof identifyComputedFeatures>>;
     });
 
