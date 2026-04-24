@@ -186,6 +186,7 @@ export const createMockToolContext = (): ToolHandlerContext => {
       list: jest.fn(),
       recordToolUse: jest.fn(),
       getToolIdMapping: jest.fn(),
+      getToolOrigin: jest.fn(),
       getDynamicToolIds: jest.fn(),
       getSummarizer: jest.fn(),
     } as ToolHandlerContext['toolManager'],
