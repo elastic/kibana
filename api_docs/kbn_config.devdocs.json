@@ -921,7 +921,7 @@
               "\nlevels:\n- warning: will not break deployment upon upgrade\n- critical: needs to be addressed before upgrade."
             ],
             "signature": [
-              "\"warning\" | \"critical\""
+              "\"critical\" | \"warning\""
             ],
             "path": "src/platform/packages/shared/kbn-config/src/deprecation/types.ts",
             "lineNumber": 32,
