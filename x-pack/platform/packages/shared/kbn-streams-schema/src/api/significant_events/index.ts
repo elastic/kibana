@@ -80,7 +80,7 @@ export const generatedSignificantEventQuerySchema = z.object({
   type: queryTypeSchema,
   title: z.string(),
   esql: esqlQuerySchema,
-  severity_score: z.number(),
+  severity_score: z.number().min(0).max(100),
   description: z.string(),
   evidence: z.array(z.string()).optional(),
   replaces: z.string().optional(),
