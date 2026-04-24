@@ -966,6 +966,8 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(field);
     // Using a click instead of keyboard navigation to avoid potential focus loss when page is still loading
     cy.contains(COMBO_BOX_OPTION, field).click();
+    // Wait for the field to be selected as a pill before closing the dropdown,
+    // otherwise {esc} can race with {enter} and cancel the selection
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX)
       .find('[data-test-subj="euiComboBoxPill"]')
       .should('contain.text', field);
