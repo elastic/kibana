@@ -210,28 +210,8 @@ describe('ruleActionsItem', () => {
     );
 
     expect(screen.getByTestId('ruleActionsItem')).toBeInTheDocument();
-    expect(screen.queryByText('ruleActionsSettings')).not.toBeInTheDocument();
-    expect(screen.getByText('ruleActionsMessage')).toBeInTheDocument();
-  });
-
-  test('should allow for toggling between setting and message', async () => {
-    render(
-      <RuleActionsItem
-        action={getAction('1', { actionTypeId: 'actionType-1' })}
-        index={0}
-        producerId="stackAlerts"
-      />
-    );
-
-    await userEvent.click(screen.getByText('Message'));
-
-    expect(screen.getByText('ruleActionsMessage')).toBeInTheDocument();
-    expect(screen.queryByText('ruleActionsSettings')).not.toBeInTheDocument();
-
-    await userEvent.click(screen.getByText('Settings'));
-
     expect(screen.getByText('ruleActionsSettings')).toBeInTheDocument();
-    expect(screen.queryByText('ruleActionsMessage')).not.toBeInTheDocument();
+    expect(screen.getByText('ruleActionsMessage')).toBeInTheDocument();
   });
 
   test('should allow notify when to be changed', async () => {
