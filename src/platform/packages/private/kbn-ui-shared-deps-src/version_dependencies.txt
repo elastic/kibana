@@ -14,7 +14,7 @@
 @types/estree@1.0.8
 @types/js-cookie@2.2.6
 @types/json-schema@7.0.11
-@types/node@22.19.1
+@types/node@24.10.13
 @types/trusted-types@2.0.7
 @webassemblyjs/ast@1.12.1
 @webassemblyjs/floating-point-hex-parser@1.11.6
@@ -145,7 +145,7 @@ toggle-selection@1.0.6
 ts-easing@0.2.0
 tslib@1.14.1
 tslib@2.8.1
-undici-types@6.21.0
+undici-types@7.16.0
 update-browserslist-db@1.2.3
 uri-js@4.2.2
 util-deprecate@1.0.2
