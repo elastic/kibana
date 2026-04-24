@@ -12,7 +12,6 @@ import {
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
   type EuiButtonColor,
@@ -59,6 +58,7 @@ import {
   trackSuggestionPopupState,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
+  isCodeActionMenuVisible,
 } from './helpers';
 import {
   useInitLatencyTracking,
@@ -357,7 +357,19 @@ const ESQLEditorInternal = function ESQLEditor({
         suppressSuggestionsRef.current = false;
         return;
       }
-      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
+
+      if (!editorRef.current) {
+        return;
+      }
+
+      // When the quick fix menu is displayed, it triggers onDidFocusEditorText,
+      // calling then this method that makes the popup to close right away.
+      // If the quick fix menu is visible, do not trigger suggestions to avoid this issue.
+      if (isCodeActionMenuVisible(editorRef.current)) {
+        return;
+      }
+
+      editorRef.current.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
     }, 0);
   }, []);
 
@@ -540,8 +552,8 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
   });
 
-  const { editorMessages, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } = useQueryValidation(
-    {
+  const { editorMessages, editorMessagesRef, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } =
+    useQueryValidation({
       code,
       codeWhenSubmitted,
       editorRef,
@@ -563,8 +575,7 @@ const ESQLEditorInternal = function ESQLEditor({
         trackValidationLatencyEnd,
         resetValidationTracking,
       },
-    }
-  );
+    });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
@@ -579,6 +590,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const {
     esqlDepsByModelUri,
     suggestionProvider,
+    codeActionsProvider,
     codeEditorHoverProvider,
     signatureProvider,
     inlineCompletionsProvider,
@@ -597,6 +609,7 @@ const ESQLEditorInternal = function ESQLEditor({
     measuredEditorWidth,
     setMeasuredEditorWidth,
     resetPendingTracking,
+    editorMessagesRef,
   });
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
@@ -620,24 +633,17 @@ const ESQLEditorInternal = function ESQLEditor({
           `}
         >
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={i18n.translate('esqlEditor.query.searchLabel', {
-                defaultMessage: 'Search',
-              })}
+            <EuiButton
+              color={queryRunButtonProperties.color as EuiButtonColor}
+              onClick={() => onQuerySubmit(QuerySource.MANUAL)}
+              size="s"
+              isLoading={isLoading && !allowQueryCancellation}
+              isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+              data-test-subj="ESQLEditor-run-query-button"
+              aria-label={queryRunButtonProperties.label}
             >
-              <EuiButton
-                color={queryRunButtonProperties.color as EuiButtonColor}
-                onClick={() => onQuerySubmit(QuerySource.MANUAL)}
-                size="s"
-                isLoading={isLoading && !allowQueryCancellation}
-                isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                data-test-subj="ESQLEditor-run-query-button"
-                aria-label={queryRunButtonProperties.label}
-              >
-                {queryRunButtonProperties.label}
-              </EuiButton>
-            </EuiToolTip>
+              {queryRunButtonProperties.label}
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ESQLMenu hideHistory={hideQueryHistory} />
@@ -678,6 +684,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
                 documentHighlightProvider={documentHighlightProvider}
+                codeActions={codeActionsProvider}
                 onChange={onQueryUpdate}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
@@ -691,6 +698,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     esqlDepsByModelUri.set(editorModelUriRef.current, {
                       ...esqlCallbacks,
                       telemetry: telemetryCallbacks,
+                      getEditorMessages: () => editorMessagesRef.current,
                     });
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {

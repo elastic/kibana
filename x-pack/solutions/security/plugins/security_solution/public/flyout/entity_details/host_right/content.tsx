@@ -88,6 +88,17 @@ export const HostPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
           <ResolutionSection
@@ -106,22 +117,12 @@ export const HostPanelContent = ({
         />
       )}
       <EntityInsight
+        entityRecord={entityRecord}
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
       />
-      {entityStoreEntityId && (
-        <>
-          <VisualizationsSection
-            entityId={entityStoreEntityId}
-            isPreviewMode={isPreviewMode}
-            scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
-          />
-          <EuiHorizontalRule margin="m" />
-        </>
-      )}
       <ObservedDataSection
         observedHost={observedHost}
         contextID={contextID}
