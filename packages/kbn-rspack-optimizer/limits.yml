@@ -3,7 +3,7 @@ pageLoadAssetSize:
   advancedSettings: 1981
   agentBuilder: 254
   agentBuilderPlatform: 4152
-  aiAssistantManagementSelection: 392
+  aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
   alertingVTwo: 7442
@@ -12,7 +12,7 @@ pageLoadAssetSize:
   automaticImport: 13257
   banners: 1157
   canvas: 6000
-  cases: 1938
+  cases: 2250
   charts: 1188
   cloud: 8477
   cloudConnect: 4998
@@ -30,29 +30,29 @@ pageLoadAssetSize:
   cps: 5080
   crossClusterReplication: 7691
   customIntegrations: 636
-  dashboard: 550
-  dashboardAgent: 952
+  dashboard: 452
+  dashboardAgent: 951
   dashboardMarkdown: 2058
   data: 11799
   dataQuality: 5836
-  datasetQuality: 41092
+  datasetQuality: 41081
   dataUsage: 4123
   dataViewEditor: 3312
   dataViewFieldEditor: 16263
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7461
-  developerToolbar: 1175
+  developerToolbar: 1457
   devTools: 4281
-  discover: 16306
+  discover: 18157
   discoverEnhanced: 1091
   discoverShared: 1070
-  elasticAssistant: 141896
+  elasticAssistant: 137486
   elasticAssistantSharedState: 3369
   elasticConsole: 850
   embeddable: 760
   embeddableAlertsTable: 1263
-  enterpriseSearch: 28809
+  enterpriseSearch: 28392
   entityStore: 1216
   esql: 308
   esqlDataGrid: 215
@@ -70,14 +70,14 @@ pageLoadAssetSize:
   expressionTagcloud: 6629
   expressionXY: 566
   features: 1218
-  feedback: 3124
+  feedback: 2246
   fieldFormats: 4195
   fieldsMetadata: 1568
   files: 3957
   filesManagement: 952
   fileUpload: 217
   fleet: 4772
-  genAiSettings: 1278
+  genAiSettings: 1542
   globalSearch: 5183
   globalSearchBar: 18715
   globalSearchProviders: 2586
@@ -105,7 +105,7 @@ pageLoadAssetSize:
   lens: 316
   licenseManagement: 3292
   licensing: 8329
-  links: 3900
+  links: 3857
   lists: 371
   logsDataAccess: 308
   logsShared: 1774
@@ -121,15 +121,15 @@ pageLoadAssetSize:
   navigation: 8671
   newsfeed: 9707
   noDataPage: 630
-  observability: 3674
-  observabilityAgentBuilder: 715
-  observabilityAIAssistant: 2094
+  observability: 3614
+  observabilityAgentBuilder: 679
+  observabilityAIAssistant: 1967
   observabilityAIAssistantApp: 6377
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
   observabilityOnboarding: 7767
   observabilityShared: 7496
-  osquery: 13047
+  osquery: 13046
   painlessLab: 2282
   presentationPanel: 442
   presentationUtil: 771
@@ -152,9 +152,9 @@ pageLoadAssetSize:
   screenshotMode: 979
   screenshotting: 1493
   searchAssistant: 1545
-  searchGettingStarted: 2340
-  searchHomepage: 3972
-  searchInferenceEndpoints: 4714
+  searchGettingStarted: 2339
+  searchHomepage: 3873
+  searchInferenceEndpoints: 4138
   searchNavigation: 5579
   searchNotebooks: 3490
   searchPlayground: 5566
@@ -172,17 +172,17 @@ pageLoadAssetSize:
   sessionView: 379
   share: 379
   shared-core: 354973
-  shared-misc: 39659
+  shared-misc: 39075
   shared-packages: 3141411
   shared-plugins: 10954901
-  shared-solution-packages: 282464
+  shared-solution-packages: 184340
   slo: 19696
   snapshotRestore: 16909
   spaces: 22966
   stackAlerts: 1717
-  stackConnectors: 67743
+  stackConnectors: 67445
   streams: 6521
-  streamsApp: 56887
+  streamsApp: 56877
   synthetics: 18443
   telemetry: 20586
   telemetryManagementSection: 1738
