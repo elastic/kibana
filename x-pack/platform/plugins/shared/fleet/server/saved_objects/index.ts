@@ -47,6 +47,7 @@ import {
   SettingsSchemaV8,
   PackagePolicySchemaV22,
   CloudConnectorSchemaV4,
+  PackagePolicySchemaV23,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -1158,6 +1159,13 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '23': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV23.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV23.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1309,6 +1317,13 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
             create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '9': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV23.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV23.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
