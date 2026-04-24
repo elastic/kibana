@@ -21,6 +21,7 @@ import {
 } from '../../../../lib/tasks/task_definitions/features_identification';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
+import type { FeatureBulkOperation } from '../../../../lib/streams/feature/feature_client';
 
 export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
 
@@ -284,13 +285,13 @@ export const bulkFeaturesRoute = createServerRoute({
   },
 });
 
-export const bulkDeleteFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/features/_bulk_delete',
+export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/features/_bulk',
   options: {
     access: 'internal',
-    summary: 'Bulk delete features across streams',
+    summary: 'Bulk feature operations across streams',
     description:
-      'Hard-deletes features across multiple streams in a single request. Each operation carries its own streamName; the server groups and delegates per-stream to featureClient.bulk.',
+      'Performs bulk delete / exclude / restore operations on features across multiple streams in a single request. Each operation carries its own streamName; the server groups and delegates per-stream to featureClient.bulk.',
   },
   security: {
     authz: {
@@ -301,10 +302,11 @@ export const bulkDeleteFeaturesRoute = createServerRoute({
     body: z.object({
       operations: z
         .array(
-          z.object({
-            streamName: z.string(),
-            id: z.string(),
-          })
+          z.union([
+            z.object({ streamName: z.string(), delete: z.object({ id: z.string() }) }),
+            z.object({ streamName: z.string(), exclude: z.object({ id: z.string() }) }),
+            z.object({ streamName: z.string(), restore: z.object({ id: z.string() }) }),
+          ])
         )
         .min(1),
     }),
@@ -322,39 +324,40 @@ export const bulkDeleteFeaturesRoute = createServerRoute({
 
     const featureClient = await getFeatureClient();
 
-    const byStream = params.body.operations.reduce<Record<string, string[]>>(
-      (acc, { streamName, id }) => {
+    // Group ops by stream, stripping streamName from each op so the per-stream
+    // payload matches the shape featureClient.bulk expects.
+    const byStream = params.body.operations.reduce<Record<string, FeatureBulkOperation[]>>(
+      (acc, op) => {
+        const { streamName, ...rest } = op;
         if (!acc[streamName]) {
           acc[streamName] = [];
         }
-        acc[streamName].push(id);
+        acc[streamName].push(rest as FeatureBulkOperation);
         return acc;
       },
       {}
     );
 
-    // featureClient.bulk silently drops ops for stale or mis-routed UUIDs. We
-    // surface that count as `skipped` so callers can distinguish "already gone"
+    // featureClient.bulk silently drops ops for stale or mis-routed UUIDs and
+    // exclude/restore ops targeting computed features. We surface those as
+    // `skipped` so callers can distinguish "already gone" / "not applicable"
     // (idempotent no-op) from "real failure". Only thrown batches count as failed.
     let succeeded = 0;
     let failed = 0;
     let skipped = 0;
 
-    for (const [streamName, ids] of Object.entries(byStream)) {
+    for (const [streamName, ops] of Object.entries(byStream)) {
       try {
-        const { applied, skipped: streamSkipped } = await featureClient.bulk(
-          streamName,
-          ids.map((id) => ({ delete: { id } }))
-        );
+        const { applied, skipped: streamSkipped } = await featureClient.bulk(streamName, ops);
         succeeded += applied;
         skipped += streamSkipped;
       } catch (error) {
         logger.error(
-          `Bulk feature delete failed for stream ${streamName}: ${
+          `Bulk feature operation failed for stream ${streamName}: ${
             error instanceof Error ? error.message : String(error)
           }`
         );
-        failed += ids.length;
+        failed += ops.length;
       }
     }
 
@@ -470,7 +473,7 @@ export const featureRoutes = {
   ...listFeaturesRoute,
   ...listAllFeaturesRoute,
   ...bulkFeaturesRoute,
-  ...bulkDeleteFeaturesRoute,
+  ...bulkFeaturesAcrossStreamsRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,
 };

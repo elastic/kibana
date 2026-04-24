@@ -180,7 +180,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('POST /internal/streams/features/_bulk_delete', () => {
+    describe('POST /internal/streams/features/_bulk', () => {
       it('deletes multiple features in one request and returns the right counts', async () => {
         const feature1: BaseFeature = { ...testFeature, id: 'bulk-delete-1' };
         const feature2: BaseFeature = { ...testFeature, id: 'bulk-delete-2' };
@@ -189,12 +189,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
 
         const response = await apiClient
-          .fetch('POST /internal/streams/features/_bulk_delete', {
+          .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
                 operations: [
-                  { streamName: STREAM_NAME, id: uuid1 },
-                  { streamName: STREAM_NAME, id: uuid2 },
+                  { streamName: STREAM_NAME, delete: { id: uuid1 } },
+                  { streamName: STREAM_NAME, delete: { id: uuid2 } },
                 ],
               },
             },
@@ -211,12 +211,60 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(features.find((f) => f.uuid === uuid2)).to.be(undefined);
       });
 
-      it('treats stale/unknown UUIDs as idempotent no-ops (succeeded=0, failed=0, skipped=1)', async () => {
-        const response = await apiClient
-          .fetch('POST /internal/streams/features/_bulk_delete', {
+      it('excludes and restores features across streams in one request', async () => {
+        const feature1: BaseFeature = { ...testFeature, id: 'bulk-exclude-1' };
+        const feature2: BaseFeature = { ...testFeature, id: 'bulk-exclude-2' };
+
+        const { uuid: uuid1 } = await upsertFeature(apiClient, STREAM_NAME, feature1);
+        const { uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
+
+        // Exclude both in one request
+        const excludeResponse = await apiClient
+          .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [{ streamName: STREAM_NAME, id: 'non-existent-uuid' }],
+                operations: [
+                  { streamName: STREAM_NAME, exclude: { id: uuid1 } },
+                  { streamName: STREAM_NAME, exclude: { id: uuid2 } },
+                ],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(excludeResponse).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
+
+        // Restore both in one request
+        const restoreResponse = await apiClient
+          .fetch('POST /internal/streams/features/_bulk', {
+            params: {
+              body: {
+                operations: [
+                  { streamName: STREAM_NAME, restore: { id: uuid1 } },
+                  { streamName: STREAM_NAME, restore: { id: uuid2 } },
+                ],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(restoreResponse).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
+
+        // Cleanup
+        await bulkFeatures(apiClient, STREAM_NAME, [
+          { delete: { id: uuid1 } },
+          { delete: { id: uuid2 } },
+        ]);
+      });
+
+      it('treats stale/unknown UUIDs as idempotent no-ops (succeeded=0, failed=0, skipped=1)', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/features/_bulk', {
+            params: {
+              body: {
+                operations: [{ streamName: STREAM_NAME, delete: { id: 'non-existent-uuid' } }],
               },
             },
           })
