@@ -7,17 +7,19 @@ paths:
     get:
       summary: Get a protection updates note
       operationId: GetProtectionUpdatesNote
+      description: Get the protection updates note for a package policy.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:
         - name: package_policy_id
           in: path
           required: true
+          description: The package policy ID to retrieve the protection updates note for.
           schema:
             type: string
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -25,6 +27,7 @@ paths:
     post:
       summary: Create or update a protection updates note
       operationId: CreateUpdateProtectionUpdatesNote
+      description: Create or update the protection updates note for a package policy.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       requestBody:
@@ -36,16 +39,18 @@ paths:
               properties:
                 note:
                   type: string
+                  description: The note content.
       parameters:
         - name: package_policy_id
           in: path
           required: true
+          description: The package policy ID to create or update the protection updates note for.
           schema:
             type: string
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
-               $ref: '../model/schema/common.schema.yaml#/components/schemas/ProtectionUpdatesNoteResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/ProtectionUpdatesNoteResponse'

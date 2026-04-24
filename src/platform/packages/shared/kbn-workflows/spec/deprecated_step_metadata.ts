@@ -12,6 +12,12 @@ export interface StepDeprecationInfo {
   message?: string;
 }
 
+export interface StepPrefixDeprecationInfo {
+  /** Prefix to match against step type (e.g., 'inference.' matches 'inference.completion') */
+  prefix: string;
+  deprecation: StepDeprecationInfo;
+}
+
 export const DEPRECATED_STEP_METADATA: Record<string, StepDeprecationInfo> = {
   'kibana.createCase': {
     replacementStepType: 'cases.createCase',
@@ -39,8 +45,33 @@ export const DEPRECATED_STEP_METADATA: Record<string, StepDeprecationInfo> = {
   },
 };
 
+/**
+ * Prefix-based deprecation for step types. Any step type starting with one of these
+ * prefixes is treated as deprecated. This avoids enumerating every sub-action when an
+ * entire connector family is superseded by a purpose-built step.
+ */
+export const DEPRECATED_STEP_PREFIX_METADATA: StepPrefixDeprecationInfo[] = [
+  { prefix: 'inference.', deprecation: { replacementStepType: 'ai.prompt' } },
+  { prefix: 'bedrock.', deprecation: { replacementStepType: 'ai.prompt' } },
+  { prefix: 'gen-ai.', deprecation: { replacementStepType: 'ai.prompt' } },
+  { prefix: 'gemini.', deprecation: { replacementStepType: 'ai.prompt' } },
+];
+
+export function getStepPrefixDeprecationInfo(stepType: string): StepDeprecationInfo | undefined {
+  for (const { prefix, deprecation } of DEPRECATED_STEP_PREFIX_METADATA) {
+    if (stepType.startsWith(prefix)) {
+      return deprecation;
+    }
+  }
+  return undefined;
+}
+
 export function getStepDeprecationInfo(stepType: string): StepDeprecationInfo | undefined {
-  return DEPRECATED_STEP_METADATA[stepType];
+  const exact = DEPRECATED_STEP_METADATA[stepType];
+  if (exact) {
+    return exact;
+  }
+  return getStepPrefixDeprecationInfo(stepType);
 }
 
 export function isDeprecatedStepType(stepType: string): boolean {

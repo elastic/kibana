@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonValue } from '@kbn/utility-types';
+import type { JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
@@ -260,11 +260,28 @@ export type EsWorkflowCreate = Omit<
 
 export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
 const MAX_BULK_CREATE_WORKFLOWS = 500;
-export const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$/;
+// IDs must start and end with a lowercase alphanumeric character, contain only lowercase
+// alphanumeric chars and hyphens in the middle. Length is enforced separately via
+// WORKFLOW_ID_MIN_LENGTH (3) and WORKFLOW_ID_MAX_LENGTH (255).
+// This supports semantic IDs ("security-alert-enrichment"), legacy workflow-{uuid} format,
+// plain UUIDs, while rejecting leading/trailing separators, snake case and
+// special characters like spaces, dots, or '@'.
+//
+// NOTE: The regex intentionally allows 1-2 char IDs (the inner group is optional).
+// The 3-char minimum is enforced by WORKFLOW_ID_MIN_LENGTH at the Zod schema
+// level so that the pattern and length constraints remain independently testable.
+export const WORKFLOW_ID_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+export const WORKFLOW_ID_MAX_LENGTH = 255;
+export const WORKFLOW_ID_MIN_LENGTH = 3;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
-  id: z.string().max(255).regex(WORKFLOW_ID_PATTERN).optional(),
+  id: z
+    .string()
+    .min(WORKFLOW_ID_MIN_LENGTH)
+    .max(WORKFLOW_ID_MAX_LENGTH)
+    .regex(WORKFLOW_ID_PATTERN)
+    .optional(),
 });
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
@@ -525,11 +542,17 @@ export interface StepPropertyHandler<
   connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
+type DependsOnValuePath = `config.${string}` | `input.${string}`;
 export interface PropertySelectionHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
   TInput extends Record<string, unknown> = Record<string, unknown>
 > {
+  /**
+   * Dot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`
+   * and included in the selection cache key. If omitted or empty, `context.values` is `{ config: {}, input: {} }`.
+   */
+  dependsOnValues?: DependsOnValuePath[];
   /**
    * Search for options matching the input query.
    * Used by autocomplete dropdowns when the user types.
@@ -596,9 +619,9 @@ export interface StepSelectionValues<
   TInput extends Record<string, unknown> = Record<string, unknown>
 > {
   /** Root-level step properties (everything outside the `with` block). */
-  config: TConfig;
+  config: RecursivePartial<TConfig>;
   /** Properties nested under the `with` block. */
-  input: TInput;
+  input: RecursivePartial<TInput>;
 }
 
 export interface SelectionContext<
@@ -611,7 +634,7 @@ export interface SelectionContext<
   scope: 'config' | 'input';
   /** The property key (e.g., "agent_id") */
   propertyKey: string;
-  /** Sibling values of the current step, keyed by scope. */
+  /** Sibling values of the current step, keyed by scope (only paths listed in `dependsOnValues` are populated). */
   values: StepSelectionValues<TConfig, TInput>;
 }
 
@@ -684,3 +707,13 @@ export interface ChildWorkflowExecutionItem {
   status: ExecutionStatus;
   stepExecutions: WorkflowStepExecutionDto[];
 }
+
+/**
+ * Per-item result of a bulk workflow schedule call. The array is order- and
+ * length-preserving with respect to the input items: `results[i]` corresponds
+ * to `items[i]`.
+ */
+export type BulkScheduleWorkflowResult = Array<
+  | { status: 'scheduled'; workflowExecutionId: string }
+  | { status: 'error'; error: { message: string } }
+>;

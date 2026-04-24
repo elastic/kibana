@@ -66,7 +66,6 @@ test.describe(
       await browserAuth.loginAsPrivilegedUser();
       await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: true });
       await inventoryPage.addDismissK8sTourInitScript();
-      await inventoryPage.addDismissK8sToastInitScript();
     });
 
     test.afterEach(async ({ apiServices: { inventoryViews } }) => {

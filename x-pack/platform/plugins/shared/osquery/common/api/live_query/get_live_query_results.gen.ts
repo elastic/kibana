@@ -14,26 +14,35 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The response for getting live query results.
  */
+export const GetLiveQueryResultsResponse = lazySchema(() =>
+  z.object({
+    data: z
+      .object({
+        /**
+         * The total number of result rows.
+         */
+        total: z.number().int().optional(),
+        /**
+         * The result rows from the query execution.
+         */
+        edges: z
+          .array(
+            z.object({
+              _id: z.string().optional(),
+              /**
+               * The Elasticsearch document source containing query results.
+               */
+              _source: z.object({}).optional(),
+            })
+          )
+          .optional(),
+      })
+      .optional(),
+  })
+);
 export type GetLiveQueryResultsResponse = z.infer<typeof GetLiveQueryResultsResponse>;
-export const GetLiveQueryResultsResponse = z.object({
-  /**
-   * The query results data wrapper.
-   */
-  data: z
-    .object({
-      /**
-       * The paginated list of query result rows.
-       */
-      edges: z.array(z.object({})).optional(),
-      /**
-       * The total number of result rows.
-       */
-      total: z.number().int().optional(),
-    })
-    .optional(),
-});

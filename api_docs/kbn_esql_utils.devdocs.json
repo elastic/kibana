@@ -1079,7 +1079,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-        "lineNumber": 40,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1092,7 +1092,7 @@
             "label": "{\n  dataViewsService,\n  query,\n  options,\n  http,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-            "lineNumber": 71,
+            "lineNumber": 61,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1114,7 +1114,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 73,
+                "lineNumber": 63,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1127,7 +1127,7 @@
                 "label": "query",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 75,
+                "lineNumber": 65,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1143,7 +1143,7 @@
                   "{ allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; id?: string | undefined; idPrefix?: string | undefined; } | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 76,
+                "lineNumber": 66,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1160,7 +1160,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 84,
+                "lineNumber": 74,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2529,7 +2529,23 @@
             "section": "def-common.ILicense",
             "text": "ILicense"
           },
-          " | undefined>) | undefined, signal?: AbortSignal | undefined, projectRouting?: string | undefined) => Promise<",
+          " | undefined>) | undefined, enrichSources?: ((sources: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLSourceResult",
+            "text": "ESQLSourceResult"
+          },
+          "[]) => Promise<",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLSourceResult",
+            "text": "ESQLSourceResult"
+          },
+          "[]>) | undefined, signal?: AbortSignal | undefined, projectRouting?: string | undefined) => Promise<",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -2540,7 +2556,7 @@
           "[]>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
-        "lineNumber": 111,
+        "lineNumber": 113,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2560,7 +2576,7 @@
               ", \"http\" | \"application\">"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
-            "lineNumber": 112,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2587,7 +2603,7 @@
               " | undefined>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
-            "lineNumber": 113,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2596,6 +2612,41 @@
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getESQLSources.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "enrichSources",
+            "description": [
+              "Optional function to enrich or transform the list of sources before"
+            ],
+            "signature": [
+              "((sources: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLSourceResult",
+                "text": "ESQLSourceResult"
+              },
+              "[]) => Promise<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLSourceResult",
+                "text": "ESQLSourceResult"
+              },
+              "[]>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLSources.$4",
             "type": "Object",
             "tags": [],
             "label": "signal",
@@ -2606,7 +2657,7 @@
               "AbortSignal | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
-            "lineNumber": 114,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2614,7 +2665,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.getESQLSources.$4",
+            "id": "def-common.getESQLSources.$5",
             "type": "string",
             "tags": [],
             "label": "projectRouting",
@@ -2625,7 +2676,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
-            "lineNumber": 115,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2678,6 +2729,75 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getESQLTimeFieldFromQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getESQLTimeFieldFromQuery",
+        "description": [
+          "\nResolves the default time field for an ES|QL query by calling the timefield API.\n\nWhen `http` is omitted, returns `undefined` (unless a prior successful request\nfor the same query left a value in the in-memory cache).\n\nConcurrent requests for the same query share one HTTP request via an LRU-backed promise cache."
+        ],
+        "signature": [
+          "({\n  query,\n  http,\n}: { query: string; http?: ",
+          "HttpSetup",
+          " | undefined; }) => Promise<string | undefined>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_time_field_from_query.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLTimeFieldFromQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  query,\n  http,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_time_field_from_query.ts",
+            "lineNumber": 30,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLTimeFieldFromQuery.$1.query",
+                "type": "string",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_time_field_from_query.ts",
+                "lineNumber": 31,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLTimeFieldFromQuery.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  "HttpSetup",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_time_field_from_query.ts",
+                "lineNumber": 32,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -2843,7 +2963,7 @@
           "; }) => Promise<string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-        "lineNumber": 133,
+        "lineNumber": 107,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2856,7 +2976,7 @@
             "label": "deps",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-            "lineNumber": 141,
+            "lineNumber": 115,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
@@ -2872,7 +2992,7 @@
                   "HttpSetup"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 141,
+                "lineNumber": 115,
                 "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2938,9 +3058,7 @@
         "signature": [
           "(this: void | { forceRefresh?: boolean | undefined; } | undefined, http: ",
           "HttpSetup",
-          ", taskType: ",
-          "InferenceTaskType",
-          ") => Promise<",
+          ", taskType: string) => Promise<",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -2951,7 +3069,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/inference.ts",
-        "lineNumber": 21,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

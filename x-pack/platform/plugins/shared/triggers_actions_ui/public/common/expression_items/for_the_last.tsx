@@ -70,6 +70,10 @@ export const ForLastExpression = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverAriaLabel',
+        { defaultMessage: 'For the last' }
+      )}
       button={
         <EuiExpression
           description={description}

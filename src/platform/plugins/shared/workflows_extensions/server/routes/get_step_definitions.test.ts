@@ -8,12 +8,14 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { registerGetStepDefinitionsRoute } from './get_step_definitions';
 import { ServerStepRegistry } from '../step_registry';
 
 describe('registerGetStepDefinitionsRoute', () => {
   const router = httpServiceMock.createRouter();
-  const registry = new ServerStepRegistry();
+  const logger = loggerMock.create();
+  const registry = new ServerStepRegistry(loggerMock.create());
 
   beforeEach(() => {
     router.get.mockClear();
@@ -31,7 +33,7 @@ describe('registerGetStepDefinitionsRoute', () => {
   });
 
   it('returns steps sorted alphabetically with handler hashes', async () => {
-    const stepRegistry = new ServerStepRegistry();
+    const stepRegistry = new ServerStepRegistry(logger);
     const sharedHandler = async () => ({ output: {} });
     stepRegistry.register({ id: 'z.step', handler: sharedHandler } as any);
     stepRegistry.register({ id: 'a.step', handler: sharedHandler } as any);
@@ -57,7 +59,7 @@ describe('registerGetStepDefinitionsRoute', () => {
   });
 
   it('returns empty steps array when registry is empty', async () => {
-    const emptyRegistry = new ServerStepRegistry();
+    const emptyRegistry = new ServerStepRegistry(logger);
     const testRouter = httpServiceMock.createRouter();
     registerGetStepDefinitionsRoute(testRouter, emptyRegistry);
 
@@ -70,7 +72,7 @@ describe('registerGetStepDefinitionsRoute', () => {
   });
 
   it('produces different hashes for different handler implementations', async () => {
-    const stepRegistry = new ServerStepRegistry();
+    const stepRegistry = new ServerStepRegistry(logger);
     stepRegistry.register({ id: 'a.step', handler: async () => ({ output: 'a' }) } as any);
     stepRegistry.register({ id: 'b.step', handler: async () => ({ output: 'b' }) } as any);
 

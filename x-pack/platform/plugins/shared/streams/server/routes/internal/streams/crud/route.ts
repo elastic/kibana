@@ -20,6 +20,9 @@ export interface ListStreamDetail {
   stream: Streams.all.Definition;
   effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
+  privileges: {
+    read_failure_store: boolean;
+  };
 }
 
 export const listStreamsRoute = createServerRoute({
@@ -33,10 +36,7 @@ export const listStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({
-    request,
-    getScopedClients,
-  }): Promise<{ streams: ListStreamDetail[]; canReadFailureStore: boolean }> => {
+  handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
     const { streamsClient, scopedClusterClient, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -57,38 +57,41 @@ export const listStreamsRoute = createServerRoute({
       .filter(({ exists }) => exists)
       .map(({ stream }) => stream.name);
 
-    let canReadFailureStore = true;
+    const streamPrivilegesMap = new Map<string, { read_failure_store: boolean }>();
 
     const dataStreams = await processAsyncInChunks(streamNames, async (streamNamesChunk) => {
       if (streamNamesChunk.length === 0) {
         return { data_streams: [] };
       }
-      const [{ read_failure_store: readFailureStore }, dataStreamsChunk] = await Promise.all([
-        streamsClient.getPrivileges(streamNamesChunk),
+      const [privilegesPerStream, dataStreamsChunk] = await Promise.all([
+        streamsClient.getPrivilegesPerStream(streamNamesChunk),
         scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk }),
       ]);
 
-      if (!readFailureStore) {
-        canReadFailureStore = false;
-      }
+      Object.entries(privilegesPerStream).forEach(([name, privs]) => {
+        streamPrivilegesMap.set(name, privs);
+      });
 
       return dataStreamsChunk;
     });
 
     const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
       if (Streams.QueryStream.Definition.is(stream)) {
-        return { stream };
+        return { stream, privileges: { read_failure_store: false } };
       }
 
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
+      const privileges = streamPrivilegesMap.get(stream.name);
+
       return {
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
         data_stream: match,
+        privileges: { read_failure_store: privileges?.read_failure_store ?? false },
       };
     });
 
-    return { streams: enrichedStreams, canReadFailureStore };
+    return { streams: enrichedStreams };
   },
 });
 

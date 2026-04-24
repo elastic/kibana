@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, resolve public channel IDs, send messages, create channels, and invite users to Slack channels using the Slack Web API.
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, resolve public channel IDs, send messages, create channels, and invite users to Slack channels using the Slack Web API. It authenticates using OAuth Authorization Code (Slack OAuth v2).
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -17,10 +17,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [slack-v2-connector-configuration]
 
-Slack (v2) connectors have the following configuration properties:
-
-Temporary Slack user token
-:   A Slack **user token** (for example, `xoxp-...`). This is a **temporary** MVP authentication method. Treat it as sensitive and rotate it if exposed.
+Slack (v2) connectors use OAuth Authorization Code authentication. When creating the connector, you will be prompted to authorize access to your Slack workspace. No additional configuration properties are required beyond the OAuth credentials.
 
 ## Test connectors [slack-v2-action-configuration]
 
@@ -78,12 +75,27 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [slack-v2-api-credentials]
 
-To use the Slack (v2) connector, you need a Slack app and a Slack **user token**.
+To use the Slack (v2) connector, you need a Slack app configured for OAuth.
 
-1. Create a Slack app and install it to your workspace.
-2. Add **User Token Scopes** for the actions you intend to use:
-   - **Resolve channel ID**: `channels:read`
-   - **Send message (public channels)**: `chat:write`
-   - **Create conversation / Invite to conversation**: `groups:write`
-   - **Search messages**: `search:read.public`, `search:read.private`, `search:read.im`, `search:read.mpim`, `search:read.files`
-3. Copy the **User OAuth Token** (for example, `xoxp-...`) and enter it in the **Temporary Slack user token** field when configuring the connector in {{kib}}.
+1. Go to [Slack API: Your Apps](https://api.slack.com/apps) and select **Create New App**.
+2. Choose **From scratch**, give it a name (for example, "Kibana Slack Connector"), and select your workspace.
+3. Under **OAuth & Permissions**, add the following **User Token Scopes**:
+   - `channels:read` — resolve public channel IDs
+   - `chat:write` — send messages
+   - `files:read` — access shared files
+   - `groups:read` — list private channels
+   - `im:read` — list direct messages
+   - `mpim:read` — list group direct messages
+   - `search:read.files` — search files
+   - `search:read.im` — search direct messages
+   - `search:read.mpim` — search group direct messages
+   - `search:read.private` — search private channels
+   - `search:read.public` — search public channels
+   - `users:read` — look up user information
+4. Set the **Redirect URL** to your Kibana OAuth redirect URI.
+5. Under **Basic Information**, copy the **Client ID** and **Client Secret**.
+6. In {{kib}}, enter the Client ID and Client Secret when creating the Slack (v2) connector. You will be redirected to Slack to authorize access to your workspace.
+
+::::{note}
+Additional scopes may be required for certain actions. For example, `groups:write` is needed to create private channels or invite users. Add scopes as needed under **User Token Scopes** in your Slack app configuration.
+::::

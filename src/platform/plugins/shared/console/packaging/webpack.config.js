@@ -196,7 +196,7 @@ module.exports = [
       extensions: ['.js', '.ts', '.tsx', '.scss', '.css'],
     },
     optimization: {
-      minimize: false,
+      minimize: true,
       noEmitOnErrors: true,
       splitChunks: false,
       runtimeChunk: false,

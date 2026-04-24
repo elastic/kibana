@@ -20,6 +20,7 @@ import type { StartPlugins } from '../../types';
 import { convertECSMappingToArray } from '../utils';
 import { createSavedQueryRequestSchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
+import { createSavedQueryResponseSchema } from './response_schemas';
 
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -41,6 +42,11 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               typeof createSavedQueryRequestSchema,
               CreateSavedQueryRequestSchemaDecoded
             >(createSavedQueryRequestSchema),
+          },
+          response: {
+            200: {
+              body: () => createSavedQueryResponseSchema,
+            },
           },
         },
       },

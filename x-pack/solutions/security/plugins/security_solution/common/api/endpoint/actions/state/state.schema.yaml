@@ -33,4 +33,5 @@ components:
               properties:
                 canEncrypt:
                   type: boolean
+                  description: Whether the Kibana instance has encryption enabled for response actions.
 

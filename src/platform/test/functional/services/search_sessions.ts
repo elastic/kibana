@@ -77,6 +77,34 @@ export class SearchSessionsService extends FtrService {
     );
   }
 
+  public async openCompletedSearchFromToast() {
+    await this.retry.try(async () => {
+      const link = await this.testSubjects.find('backgroundSearchCompletedToastLink');
+      if (!link) throw new Error('Background search completed toast link not found');
+      await link.click();
+    });
+    // After clicking the link, the toast is no longer needed
+    await this.dismissSuccessToast();
+  }
+
+  private async dismissSuccessToast() {
+    const successToast = await this.getSuccessToast();
+    if (!successToast) return;
+    const closeBtn = await successToast.findByTestSubject('toastCloseButton');
+    await closeBtn.click();
+  }
+
+  private async getSuccessToast() {
+    const toasts = await this.toasts.getAll();
+    for (const toast of toasts) {
+      const text = await toast.getVisibleText();
+      if (text.includes('Background search completed')) {
+        return toast;
+      }
+    }
+    return null;
+  }
+
   public async openFlyoutFromToast() {
     await this.expectSearchSavedToast();
     await this.testSubjects.click('backgroundSearchToastLink');

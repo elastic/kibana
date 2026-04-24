@@ -139,6 +139,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -214,6 +215,7 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
+          ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
       });
     });
@@ -284,6 +286,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -429,6 +432,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -574,6 +578,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -719,6 +724,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -878,6 +884,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -1023,6 +1030,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -1168,6 +1176,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -1346,6 +1355,7 @@ describe('Detections Usage and Metrics', () => {
             anomaly_threshold: 0,
             new_terms_fields: 0,
           },
+          ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
       });
     });
@@ -1404,6 +1414,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -1488,6 +1499,7 @@ describe('Detections Usage and Metrics', () => {
             anomaly_threshold: 0,
             new_terms_fields: 0,
           },
+          ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
       });
     });

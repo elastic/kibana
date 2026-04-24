@@ -105,6 +105,9 @@ const InContextMenuActions = (props: LayerActionsProps) => {
   return (
     <EuiOutsideClickDetector onOutsideClick={closePopover}>
       <EuiPopover
+        aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
+          defaultMessage: `Layer actions`,
+        })}
         id={splitButtonPopoverId}
         button={
           <EuiButtonIcon

@@ -58,11 +58,6 @@ export const getPromoteAllSuccessToast = (
   };
 };
 
-export const PROMOTE_ALL_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllErrorTitle',
-  { defaultMessage: 'Failed to promote queries' }
-);
-
 export const TITLE_COLUMN = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.titleColumn',
   {
@@ -74,13 +69,6 @@ export const STREAM_COLUMN = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.streamColumn',
   {
     defaultMessage: 'Stream',
-  }
-);
-
-export const BACKED_STATUS_COLUMN = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.backedStatusColumn',
-  {
-    defaultMessage: 'Status',
   }
 );
 
@@ -115,64 +103,10 @@ export const THRESHOLD_BREACHES_TOOLTIP_NAME = i18n.translate(
   { defaultMessage: 'Threshold breaches' }
 );
 
-export const PROMOTED_BADGE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.promotedBadgeLabel',
-  {
-    defaultMessage: 'Scanning',
-  }
-);
-
-export const NOT_PROMOTED_BADGE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.notPromotedBadgeLabel',
-  {
-    defaultMessage: 'Not scanning',
-  }
-);
-
-export const PROMOTED_TOOLTIP_CONTENT = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.promotedTooltipContent',
-  {
-    defaultMessage: 'This query is used to scan for significant events in the background',
-  }
-);
-
-export const NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.notPromotedTooltipContent',
-  {
-    defaultMessage: 'This query is not used to scan for significant events in the background',
-  }
-);
-
-export const STATS_DRAFT_BADGE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.statsDraftBadgeLabel',
-  {
-    defaultMessage: 'Draft',
-  }
-);
-
-export const STATS_NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.statsNotPromotedTooltipContent',
-  {
-    defaultMessage:
-      'STATS queries cannot be promoted to background scanning rules. Use the Open in Discover action to preview results.',
-  }
-);
-
 export const STATS_LAST_OCCURRED_PLACEHOLDER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.statsLastOccurredPlaceholder',
   { defaultMessage: 'Not monitored yet' }
 );
-
-export const CREATE_RULES_BUTTON = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.createRulesButton',
-  { defaultMessage: 'Create rules' }
-);
-
-export const getRuleCountLabel = (count: number) =>
-  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.ruleCountLabel', {
-    defaultMessage: '{count, plural, one {# new rule} other {# new rules}}',
-    values: { count },
-  });
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.searchPlaceholder',
@@ -243,24 +177,6 @@ export const OPEN_IN_DISCOVER_ACTION_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Open query in Discover' }
 );
 
-export const PROMOTE_QUERY_ACTION_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryActionTitle',
-  { defaultMessage: 'Promote' }
-);
-
-export const PROMOTE_QUERY_ACTION_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryActionDescription',
-  {
-    defaultMessage: 'Start scanning this query in the background for significant events',
-  }
-);
-
-export const getPromoteQuerySuccessToast = (queryTitle: string) =>
-  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteQuerySuccess', {
-    defaultMessage: 'Promoted "{queryTitle}". It moved to the Scanning section.',
-    values: { queryTitle },
-  });
-
 export const PROMOTE_QUERY_ALREADY_PROMOTED = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryAlreadyPromoted',
   { defaultMessage: 'Query is already promoted' }
@@ -271,12 +187,40 @@ export const STATS_PROMOTE_DISABLED_TOOLTIP = i18n.translate(
   { defaultMessage: 'STATS queries cannot be promoted to rules yet' }
 );
 
-export const SAVE_QUERY_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.saveQueryErrorToastTitle',
-  { defaultMessage: 'Failed to save query' }
-);
-
 export const DELETE_QUERY_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.deleteQueryErrorToastTitle',
   { defaultMessage: 'Failed to delete query' }
+);
+
+export const CLEAR_SELECTION_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.clearSelection',
+  { defaultMessage: 'Clear selection' }
+);
+
+export const DELETE_SELECTED_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.deleteSelected',
+  { defaultMessage: 'Delete selected' }
+);
+
+export const getSelectedCountLabel = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.selectedCount', {
+    defaultMessage: '{count} selected',
+    values: { count },
+  });
+
+export const DELETE_QUERIES_MODAL_TITLE = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.deleteModalTitle', {
+    defaultMessage:
+      'Are you sure you want to delete {count, plural, one {this rule} other {these rules}}?',
+    values: { count },
+  });
+
+export const BULK_DEMOTE_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.bulkDemoteSuccess',
+  { defaultMessage: 'Rules removed. Queries preserved on the Knowledge Indicators tab.' }
+);
+
+export const BULK_DEMOTE_ERROR_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.bulkDemoteError',
+  { defaultMessage: 'Failed to remove selected rules' }
 );

@@ -284,6 +284,18 @@
         },
         "type": "nested"
       },
+      "snoozedInstances": {
+        "properties": {
+          "instanceId": {
+            "type": "keyword"
+          },
+          "snoozeSnapshot": {
+            "dynamic": false,
+            "type": "object"
+          }
+        },
+        "type": "nested"
+      },
       "tags": {
         "type": "keyword"
       },
@@ -2843,6 +2855,9 @@
       "name": {
         "type": "keyword"
       },
+      "otel_disable_beatsauth": {
+        "type": "boolean"
+      },
       "otel_exporter_config_yaml": {
         "type": "text"
       },
@@ -3181,6 +3196,10 @@
     "properties": {}
   },
   "kql-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "lead-generation-config": {
     "dynamic": false,
     "properties": {}
   },
@@ -4742,6 +4761,9 @@
         "properties": {
           "apiKeyId": {
             "type": "keyword"
+          },
+          "uiamApiKeyId": {
+            "type": "keyword"
           }
         }
       }
@@ -4934,6 +4956,16 @@
       },
       "name": {
         "type": "text"
+      },
+      "range": {
+        "properties": {
+          "end": {
+            "type": "keyword"
+          },
+          "start": {
+            "type": "keyword"
+          }
+        }
       },
       "type": {
         "type": "keyword"

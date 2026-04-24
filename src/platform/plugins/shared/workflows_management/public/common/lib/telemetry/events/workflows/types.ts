@@ -37,6 +37,9 @@ import type {
   WorkflowLifecycleEventTypes,
 } from './lifecycle/types';
 import type {
+  ReportWorkflowAccessDeniedLicenseActionParams,
+  ReportWorkflowAccessDeniedPrivilegesActionParams,
+  ReportWorkflowAccessDeniedServerlessTierActionParams,
   ReportWorkflowCreateOpenedActionParams,
   ReportWorkflowDetailViewedActionParams,
   ReportWorkflowListViewedActionParams,
@@ -112,6 +115,9 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
   [WorkflowUIEventTypes.WorkflowCreateOpened]: ReportWorkflowCreateOpenedActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges]: ReportWorkflowAccessDeniedPrivilegesActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedLicense]: ReportWorkflowAccessDeniedLicenseActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier]: ReportWorkflowAccessDeniedServerlessTierActionParams;
   [WorkflowImportExportEventTypes.WorkflowExported]: ReportWorkflowExportedActionParams;
   [WorkflowImportExportEventTypes.WorkflowImported]: ReportWorkflowImportedActionParams;
   [WorkflowAiChatEventTypes.WorkflowAiChatOpened]: ReportWorkflowAiChatOpenedParams;

@@ -37,7 +37,13 @@ export function defineRoutes({
 }) {
   defineInferenceSettingsRoutes({ logger, router, featureRegistry, getConnectorById });
   defineInferenceFeaturesRoutes({ logger, router, featureRegistry });
-  defineInferenceConnectorsRoute({ logger, router, getForFeature, getConnectorList });
+  defineInferenceConnectorsRoute({
+    logger,
+    router,
+    getForFeature,
+    getConnectorList,
+    getConnectorById,
+  });
   router.get(
     {
       path: APIRoutes.GET_INFERENCE_ENDPOINTS,

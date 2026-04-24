@@ -242,15 +242,31 @@
         "description": [],
         "signature": [
           "ChromeGlobalHelpExtensionMenuLink",
-          " extends ",
-          "ChromeHelpExtensionMenuCustomLink"
+          " extends Omit<",
+          "ChromeHelpExtensionMenuCustomLink",
+          ", \"href\">"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 82,
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeGlobalHelpExtensionMenuLink.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [
+              "\nURL of the link (required for global help links)."
+            ],
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeGlobalHelpExtensionMenuLink.priority",
@@ -261,7 +277,7 @@
               "\nHighest priority items are listed at the top of the list of links."
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 84,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -277,7 +293,7 @@
         "label": "ChromeHelpExtension",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 19,
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -292,7 +308,7 @@
               "\nProvide your plugin's name to create a header for separation"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 21,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -311,50 +327,10 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 25,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeHelpExtension.content",
-            "type": "Function",
-            "tags": [],
-            "label": "content",
-            "description": [
-              "\nCustom content to render below the list of links. Receives menu actions and returns a ReactNode.\n"
-            ],
-            "signature": [
-              "((menuActions: ",
-              "ChromeHelpMenuActions",
-              ") => React.ReactNode) | undefined"
-            ],
-            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 29,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-public.ChromeHelpExtension.content.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "menuActions",
-                "description": [],
-                "signature": [
-                  "ChromeHelpMenuActions"
-                ],
-                "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-                "lineNumber": 40,
-                "columnNumber": 14,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -372,7 +348,7 @@
           "ChromeHelpExtensionLinkBase"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 62,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -390,7 +366,7 @@
               "\"custom\""
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 64,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -402,10 +378,13 @@
             "tags": [],
             "label": "href",
             "description": [
-              "\nURL of the link"
+              "\nURL of the link. Omit when using `onClick` only."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 68,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -413,17 +392,14 @@
           {
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeHelpExtensionMenuCustomLink.content",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "content",
             "description": [
-              "\nContent of the button (in lieu of `children`)"
-            ],
-            "signature": [
-              "React.ReactNode"
+              "\nLabel of the button (in lieu of `children`)"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 72,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -441,10 +417,30 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 76,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeHelpExtensionMenuCustomLink.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [
+              "\nClick handler. When provided without `href`, the link acts as a button."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -462,7 +458,7 @@
           "ChromeHelpExtensionLinkBase"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 49,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -480,7 +476,7 @@
               "\"documentation\""
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 51,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -495,44 +491,10 @@
               "\nURL to documentation page.\ni.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 55,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-public.ChromeHelpMenuActions",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChromeHelpMenuActions",
-        "description": [],
-        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 14,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeHelpMenuActions.hideHelpMenu",
-            "type": "Function",
-            "tags": [],
-            "label": "hideHelpMenu",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 16,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -599,6 +561,22 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeHelpMenuLink.iconType",
+            "type": "string",
+            "tags": [],
+            "label": "iconType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeHelpMenuLink.dataTestSubj",
             "type": "string",
             "tags": [],
@@ -608,7 +586,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -729,7 +707,7 @@
           "\n{@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -749,7 +727,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -765,7 +743,7 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 50,
+                "lineNumber": 51,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -789,7 +767,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -805,7 +783,7 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 53,
+                "lineNumber": 54,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -829,7 +807,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -845,7 +823,7 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 56,
+                "lineNumber": 57,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -871,7 +849,7 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -898,7 +876,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 62,
+                "lineNumber": 63,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1919,10 +1897,6 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/components/app/use_readonly_header.ts"
               },
               {
-                "plugin": "devTools",
-                "path": "src/platform/plugins/shared/dev_tools/public/application.tsx"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/public/render_app.tsx"
               },
@@ -1937,6 +1911,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/public/application.tsx"
+              },
+              {
+                "plugin": "devTools",
+                "path": "src/platform/plugins/shared/dev_tools/public/application.tsx"
               },
               {
                 "plugin": "graph",
@@ -2506,7 +2484,7 @@
             "tags": [],
             "label": "setHelpExtension",
             "description": [
-              "\nOverride the current set of custom help content.\nUse {@link ChromeHelpExtension.content} to render custom React content below the links."
+              "\nOverride the current set of custom help content."
             ],
             "signature": [
               "(helpExtension?: ",
@@ -2531,7 +2509,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 236,
+                "lineNumber": 235,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2553,7 +2531,7 @@
               "(url: string) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 238,
+            "lineNumber": 237,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2571,7 +2549,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 242,
+                "lineNumber": 241,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2595,7 +2573,7 @@
               "<string>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 244,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2617,7 +2595,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 249,
+            "lineNumber": 248,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2634,7 +2612,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 254,
+                "lineNumber": 253,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2658,7 +2636,7 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 256,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2678,7 +2656,7 @@
               "() => boolean"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 261,
+            "lineNumber": 260,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2700,7 +2678,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 266,
+            "lineNumber": 265,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2718,7 +2696,7 @@
                   "ChromeStyle"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 270,
+                "lineNumber": 269,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2744,7 +2722,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 272,
+            "lineNumber": 271,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2765,7 +2743,7 @@
               "ChromeStyle"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 277,
+            "lineNumber": 276,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2787,7 +2765,7 @@
               "<number>; getWidth(): number; }"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 282,
+            "lineNumber": 281,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2805,7 +2783,7 @@
               "SidebarStart"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 310,
+            "lineNumber": 309,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2825,7 +2803,7 @@
               "<\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 315,
+            "lineNumber": 314,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2845,7 +2823,7 @@
               "() => \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 320,
+            "lineNumber": 319,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2865,7 +2843,7 @@
               "(component: React.ReactNode) => React.ReactNode"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 325,
+            "lineNumber": 324,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2881,7 +2859,7 @@
                   "React.ReactNode"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 328,
+                "lineNumber": 327,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4193,7 +4171,7 @@
           " | undefined; target?: string | (string & {}) | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 43,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4212,7 +4190,7 @@
           "ChromeHelpExtensionMenuDocumentationLink"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 90,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

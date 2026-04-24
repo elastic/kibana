@@ -6,97 +6,109 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { EuiSuperSelectProps } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import type { RuleAction } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { DEFAULT_FREQUENCY } from '../constants';
 
 describe('ruleActionsNotifyWhen', () => {
-  async function setup(
+  const getThrottleProps = (frequency?: RuleAction['frequency']) => {
+    const throttle = frequency?.throttle;
+
+    if (!throttle) {
+      return {
+        throttle: null,
+        throttleUnit: 'm',
+      };
+    }
+
+    return {
+      throttle: parseInt(throttle, 10),
+      throttleUnit: throttle.replace(/^\d+/, ''),
+    };
+  };
+
+  function setup(
     frequency: RuleAction['frequency'] = DEFAULT_FREQUENCY,
     hasAlertsMappings: boolean = true
   ) {
-    const wrapper = mountWithIntl(
+    const { throttle, throttleUnit } = getThrottleProps(frequency);
+
+    return renderWithI18n(
       <RuleActionsNotifyWhen
         frequency={frequency}
-        throttle={frequency.throttle ? Number(frequency.throttle[0]) : null}
-        throttleUnit={frequency.throttle ? frequency.throttle[1] : 'm'}
+        throttle={throttle}
+        throttleUnit={throttleUnit}
         onChange={jest.fn()}
         onUseDefaultMessage={jest.fn()}
         hasAlertsMappings={hasAlertsMappings}
       />
     );
-
-    // Wait for active space to resolve before requesting the component to update
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    return wrapper;
   }
 
-  it('renders the passed-in frequency on load', async () => {
-    const wrapperDefault = await setup();
-    {
-      const summaryOrPerRuleSelect = wrapperDefault.find(
-        '[data-test-subj="summaryOrPerRuleSelect"]'
-      );
-      expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
+  const expectDefaultFrequency = () => {
+    const summaryOrPerRuleSelect = screen.getByTestId('summaryOrPerRuleSelect');
+    expect(summaryOrPerRuleSelect).toHaveTextContent('For each alert');
 
-      const notifyWhenSelect = wrapperDefault.find('[data-test-subj="notifyWhenSelect"]');
-      expect(notifyWhenSelect.exists()).toBeTruthy();
-      expect((notifyWhenSelect.first().props() as EuiSuperSelectProps<''>).valueOfSelected).toEqual(
-        RuleNotifyWhen.CHANGE
-      );
-    }
-    const wrapperForEach = await setup(DEFAULT_FREQUENCY);
-    {
-      const summaryOrPerRuleSelect = wrapperForEach.find(
-        '[data-test-subj="summaryOrPerRuleSelect"]'
-      );
-      expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
+    const notifyWhenSelect = screen.getByTestId('notifyWhenSelect');
+    expect(notifyWhenSelect).toHaveTextContent('On status changes');
+  };
 
-      const notifyWhenSelect = wrapperForEach.find('[data-test-subj="notifyWhenSelect"]');
-      expect(notifyWhenSelect.exists()).toBeTruthy();
-      expect((notifyWhenSelect.first().props() as EuiSuperSelectProps<''>).valueOfSelected).toEqual(
-        RuleNotifyWhen.CHANGE
-      );
-    }
-    const wrapperSummaryThrottle = await setup({
+  it('renders the passed-in frequency on load', () => {
+    // Default frequency: summary=false, notifyWhen=CHANGE
+    const { rerender } = setup();
+    expectDefaultFrequency();
+
+    // Re-render with DEFAULT_FREQUENCY again
+    const defaultThrottleProps = getThrottleProps(DEFAULT_FREQUENCY);
+    rerender(
+      <RuleActionsNotifyWhen
+        frequency={DEFAULT_FREQUENCY}
+        throttle={defaultThrottleProps.throttle}
+        throttleUnit={defaultThrottleProps.throttleUnit}
+        onChange={jest.fn()}
+        onUseDefaultMessage={jest.fn()}
+        hasAlertsMappings
+      />
+    );
+    expectDefaultFrequency();
+
+    // Render with throttle frequency
+    const throttleFrequency = {
       ...DEFAULT_FREQUENCY,
       throttle: '5h',
       notifyWhen: RuleNotifyWhen.THROTTLE,
-    });
-    {
-      const summaryOrPerRuleSelect = wrapperSummaryThrottle.find(
-        '[data-test-subj="summaryOrPerRuleSelect"]'
-      );
-      expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
+    };
+    const throttleProps = getThrottleProps(throttleFrequency);
 
-      const notifyWhenSelect = wrapperSummaryThrottle.find('[data-test-subj="notifyWhenSelect"]');
-      expect(notifyWhenSelect.exists()).toBeTruthy();
-      expect((notifyWhenSelect.first().props() as EuiSuperSelectProps<''>).valueOfSelected).toEqual(
-        RuleNotifyWhen.THROTTLE
-      );
+    rerender(
+      <RuleActionsNotifyWhen
+        frequency={throttleFrequency}
+        throttle={throttleProps.throttle}
+        throttleUnit={throttleProps.throttleUnit}
+        onChange={jest.fn()}
+        onUseDefaultMessage={jest.fn()}
+        hasAlertsMappings
+      />
+    );
+    {
+      const summaryOrPerRuleSelect = screen.getByTestId('summaryOrPerRuleSelect');
+      expect(summaryOrPerRuleSelect).toHaveTextContent('For each alert');
+
+      const notifyWhenSelect = screen.getByTestId('notifyWhenSelect');
+      expect(notifyWhenSelect).toHaveTextContent('On custom action intervals');
     }
-    expect(
-      wrapperSummaryThrottle.find('[data-test-subj="throttleInput"]').first().props().value
-    ).toEqual(5);
-    expect(
-      wrapperSummaryThrottle.find('[data-test-subj="throttleUnitInput"]').first().props().value
-    ).toEqual('h');
+
+    expect(screen.getByTestId('throttleInput')).toHaveValue(5);
+
+    const throttleUnitInput = screen.getByTestId('throttleUnitInput') as HTMLSelectElement;
+    expect(throttleUnitInput).toHaveValue('h');
   });
 
-  it('hides the summary selector when hasAlertsMappings is false', async () => {
-    const wrapper = await setup(DEFAULT_FREQUENCY, false);
-    const summaryOrPerRuleSelect = wrapper.find('[data-test-subj="summaryOrPerRuleSelect"]');
-    expect(summaryOrPerRuleSelect.exists()).toBeFalsy();
+  it('hides the summary selector when hasAlertsMappings is false', () => {
+    setup(DEFAULT_FREQUENCY, false);
+    expect(screen.queryByTestId('summaryOrPerRuleSelect')).not.toBeInTheDocument();
   });
 });

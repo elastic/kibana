@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import { startNavigation } from './navigation';
 import { createServices } from './common/services';
 import { registerUpsellings } from './upselling/register_upsellings';
@@ -27,11 +28,14 @@ export class SecuritySolutionEssPlugin
       SecuritySolutionEssPluginStartDeps
     >
 {
+  private experimentalFeatures?: ExperimentalFeatures;
+
   public setup(
     _core: CoreSetup,
     setupDeps: SecuritySolutionEssPluginSetupDeps
   ): SecuritySolutionEssPluginSetup {
     const { securitySolution } = setupDeps;
+    this.experimentalFeatures = securitySolution.experimentalFeatures;
 
     securitySolution.setProductFeatureKeys(DEFAULT_PRODUCT_FEATURES);
 
@@ -43,7 +47,7 @@ export class SecuritySolutionEssPlugin
     startDeps: SecuritySolutionEssPluginStartDeps
   ): SecuritySolutionEssPluginStart {
     const { securitySolution, licensing } = startDeps;
-    const services = createServices(core, startDeps);
+    const services = createServices(core, startDeps, this.experimentalFeatures);
 
     startNavigation(services);
     setOnboardingSettings(services);

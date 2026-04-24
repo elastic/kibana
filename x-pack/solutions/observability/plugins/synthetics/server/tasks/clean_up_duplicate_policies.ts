@@ -91,9 +91,15 @@ export async function cleanUpDuplicatedPackagePolicies(
     performCleanupSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
 
     debugLog(`Found ${packagePoliciesToDelete.length} duplicate package policies to delete.`);
+    if (packagePoliciesToDelete.length > 0) {
+      debugLog(`Policies to delete: [${packagePoliciesToDelete.join(', ')}]`);
+    }
     debugLog(
       `Found ${expectedPackagePolicies.size} expected package policies that were not found.`
     );
+    if (expectedPackagePolicies.size > 0) {
+      debugLog(`Missing expected policies: [${[...expectedPackagePolicies].join(', ')}]`);
+    }
 
     if (packagePoliciesToDelete.length > 0) {
       await deleteDuplicatePackagePolicies(
