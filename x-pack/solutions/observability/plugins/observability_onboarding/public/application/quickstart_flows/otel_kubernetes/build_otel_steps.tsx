@@ -34,22 +34,22 @@ import type { KubernetesFlowData } from '../kubernetes/use_kubernetes_flow';
 import type { FlowType } from '../../../hooks/use_wired_streams_status';
 
 export interface BuildOtelStepsParams {
-  data: KubernetesFlowData | undefined;
+  data?: KubernetesFlowData;
   isMonitoringStepActive: boolean;
   dataReceived: boolean;
   hasPreExistingDataEarly: boolean;
   isMetricsOnboardingEnabled: boolean;
   isManagedOtlpServiceAvailable: boolean;
   addRepoCommand: string;
-  installStackCommand: string | undefined;
-  otelKubeStackValuesFileUrl: string | undefined;
+  installStackCommand?: string;
+  otelKubeStackValuesFileUrl?: string;
   ingestionMode: IngestionMode;
   onIngestionModeChange: (mode: IngestionMode) => void;
   isWiredStreamsLoading: boolean;
   isWiredStreamsEnabled: boolean;
   isEnabling: boolean;
   enableWiredStreams: (flowType: FlowType) => Promise<boolean>;
-  streamsDocLink: string | undefined;
+  streamsDocLink?: string;
   useWiredStreams: boolean;
   idSelected: string;
   onLanguageChange: (optionId: string) => void;

@@ -78,14 +78,14 @@ export function ObservabilityOnboardingFlow() {
           </Route>
         )}
         {isIngestHubEnabled && (
-          <>
-            <Route path="/unified-kubernetes">
-              <UnifiedKubernetesPage />
-            </Route>
-            <Route path="/host/:platform(linux|mac|windows)">
-              <UnifiedHostPage />
-            </Route>
-          </>
+          <Route path="/unified-kubernetes">
+            <UnifiedKubernetesPage />
+          </Route>
+        )}
+        {isIngestHubEnabled && (
+          <Route path="/host/:platform(linux|mac|windows)">
+            <UnifiedHostPage />
+          </Route>
         )}
         <Route>
           <LandingPage />

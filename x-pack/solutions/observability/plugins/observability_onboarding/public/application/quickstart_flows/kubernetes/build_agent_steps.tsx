@@ -19,7 +19,7 @@ export const AGENT_CLUSTER_OVERVIEW_DASHBOARD_ID =
   'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c';
 
 export interface BuildAgentStepsParams {
-  data: KubernetesFlowData | undefined;
+  data?: KubernetesFlowData;
   status: FETCH_STATUS;
   isMonitoringStepActive: boolean;
   dataReceived: boolean;
