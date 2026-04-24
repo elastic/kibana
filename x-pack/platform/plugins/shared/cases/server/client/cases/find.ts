@@ -19,7 +19,6 @@ import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_typ
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions, constructSearch } from '../utils';
-import { enrichCasesWithFieldLabels } from './utils';
 import { Operations } from '../../authorization';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
@@ -37,7 +36,7 @@ export const find = async (
   casesClient: CasesClient
 ): Promise<CasesFindResponse> => {
   const {
-    services: { caseService, licensingService, templatesService },
+    services: { caseService, licensingService },
     authorization,
     logger,
     savedObjectsSerializer,
@@ -147,8 +146,6 @@ export const find = async (
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
     });
-
-    res.cases = await enrichCasesWithFieldLabels(res.cases, templatesService);
 
     return decodeOrThrow(CasesFindResponseRt)(res);
   } catch (error) {

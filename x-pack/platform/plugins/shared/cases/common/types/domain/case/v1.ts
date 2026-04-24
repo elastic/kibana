@@ -164,7 +164,6 @@ export const CaseAttributesRt = rt.intersection([
       time_to_resolve: rt.union([rt.number, rt.null]),
       template: rt.union([rt.null, CaseTemplate]),
       [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
-      [CASE_EXTENDED_FIELDS_LABELS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);
@@ -181,6 +180,9 @@ export const CaseRt = rt.intersection([
   rt.exact(
     rt.partial({
       comments: rt.array(AttachmentRtV2),
+      // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.
+      // Maps storage keys (e.g. `priority_as_keyword`) to user-facing labels (e.g. "Priority").
+      [CASE_EXTENDED_FIELDS_LABELS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);

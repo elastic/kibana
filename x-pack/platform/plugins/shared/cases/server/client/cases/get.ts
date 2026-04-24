@@ -54,7 +54,6 @@ import type {
 } from '../../common/types/case';
 import { CaseRt } from '../../../common/types/domain';
 import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
-import { enrichCasesWithFieldLabels } from './utils';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -203,7 +202,7 @@ export const get = async (
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
-    services: { caseService, attachmentService, templatesService },
+    services: { caseService, attachmentService },
     logger,
     authorization,
   } = clientArgs;
@@ -218,11 +217,32 @@ export const get = async (
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
-    if (!includeComments) {
-      const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
-        caseIds: [theCase.id],
-      });
-      const flatCase = flattenCaseSavedObject({
+    if (includeComments) {
+      const theComments = (await caseService.getAllCaseComments({
+        id,
+        options: {
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        },
+        mode,
+      })) as SavedObjectsFindResponse<AttachmentAttributes>;
+
+      return decodeOrThrow(CaseRt)(
+        flattenCaseSavedObject({
+          savedObject: theCase,
+          comments: theComments.saved_objects,
+          totalComment: countUserAttachments(theComments.saved_objects),
+          totalAlerts: countAlertsForID({ comments: theComments, id }),
+          totalEvents: countEventsForID({ comments: theComments }),
+        })
+      );
+    }
+
+    const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
+      caseIds: [theCase.id],
+    });
+    return decodeOrThrow(CaseRt)(
+      flattenCaseSavedObject({
         savedObject: theCase,
         ...(commentStats.has(theCase.id)
           ? {
@@ -231,30 +251,8 @@ export const get = async (
               totalEvents: commentStats.get(theCase.id)?.events,
             }
           : {}),
-      });
-      const [enriched] = await enrichCasesWithFieldLabels([flatCase], templatesService);
-      return decodeOrThrow(CaseRt)(enriched);
-    }
-
-    const theComments = (await caseService.getAllCaseComments({
-      id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-      mode,
-    })) as SavedObjectsFindResponse<AttachmentAttributes>;
-
-    const res = flattenCaseSavedObject({
-      savedObject: theCase,
-      comments: theComments.saved_objects,
-      totalComment: countUserAttachments(theComments.saved_objects),
-      totalAlerts: countAlertsForID({ comments: theComments, id }),
-      totalEvents: countEventsForID({ comments: theComments }),
-    });
-
-    const [enriched] = await enrichCasesWithFieldLabels([res], templatesService);
-    return decodeOrThrow(CaseRt)(enriched);
+      })
+    );
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
