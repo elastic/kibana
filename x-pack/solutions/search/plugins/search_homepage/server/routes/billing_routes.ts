@@ -90,17 +90,31 @@ export const registerBillingRoutes = (
         const from = monthStart.toISOString();
         const to = now.toISOString();
 
-        const usageData = await billingClient.getInstancesCosts(
-          storedKey.apiKey,
-          storedKey.organizationId!,
-          from,
-          to
-        );
+        const [usageData, budgets] = await Promise.all([
+          billingClient.getInstancesCosts(storedKey.apiKey, storedKey.organizationId!, from, to),
+          billingClient.getBudgets(storedKey.apiKey, storedKey.organizationId!),
+        ]);
+
+        const activeBudgets = budgets
+          .filter((b) => b.active)
+          .map((b) => ({
+            id: b.id,
+            name: b.name,
+            amount: b.amount,
+            scopeType: b.scope_type,
+            scopeValues: b.scope_values,
+            alerts: b.alerts.map((a) => ({
+              threshold: a.threshold,
+              thresholdType: a.threshold_type,
+              lastExceededAt: a.last_exceeded_at,
+            })),
+          }));
 
         return response.ok({
           body: {
             configured: true,
             totalEcu: usageData.total_ecu,
+            budgets: activeBudgets,
             instances: usageData.instances.map((inst) => ({
               id: inst.id,
               name: inst.name,

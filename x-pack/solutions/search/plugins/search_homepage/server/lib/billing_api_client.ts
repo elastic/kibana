@@ -19,6 +19,25 @@ export interface BillingUsageResponse {
   instances: BillingInstance[];
 }
 
+export interface BillingBudgetAlert {
+  id: number;
+  threshold: number;
+  threshold_type: string;
+  operator: string;
+  last_exceeded_at?: string;
+}
+
+export interface BillingBudget {
+  id: number;
+  name: string;
+  active: boolean;
+  amount: number;
+  period: string;
+  scope_type: string;
+  scope_values: string[];
+  alerts: BillingBudgetAlert[];
+}
+
 export class BillingApiClient {
   private readonly logger: Logger;
   private readonly baseUrl: string;
@@ -54,6 +73,32 @@ export class BillingApiClient {
     const data = (await response.json()) as BillingUsageResponse;
 
     this.logger.debug(`Billing costs fetched: ${data.total_ecu} ECU total`);
+
+    return data;
+  }
+
+  async getBudgets(apiKey: string, organizationId: string): Promise<BillingBudget[]> {
+    const url = `${this.baseUrl}/api/v1/billing/organization/${organizationId}/budgets`;
+
+    this.logger.debug(`Fetching budgets for org ${organizationId}`);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `ApiKey ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      this.logger.warn(`Budgets API returned ${response.status}: ${errorBody}`);
+      return [];
+    }
+
+    const data = (await response.json()) as BillingBudget[];
+
+    this.logger.debug(`Fetched ${data.length} budgets`);
 
     return data;
   }

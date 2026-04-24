@@ -16,9 +16,25 @@ export interface BillingInstance {
   totalEcu: number;
 }
 
+export interface BillingBudgetAlert {
+  threshold: number;
+  thresholdType: string;
+  lastExceededAt?: string;
+}
+
+export interface BillingBudget {
+  id: number;
+  name: string;
+  amount: number;
+  scopeType: string;
+  scopeValues: string[];
+  alerts: BillingBudgetAlert[];
+}
+
 export interface BillingUsageData {
   configured: boolean;
   totalEcu?: number;
+  budgets?: BillingBudget[];
   instances?: BillingInstance[];
 }
 
