@@ -14,6 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 // Mock the hooks
 const mockUseFetchAnonymizationFields = jest.fn();
 const mockUseAssistantContext = jest.fn();
+const mockUseMaybeAssistantContext = jest.fn();
 const mockUseLoadConnectors = jest.fn();
 const mockUseSpaceId = jest.fn();
 const mockUseStoredAssistantConnectorId = jest.fn();
@@ -24,6 +25,7 @@ const mockUseHasEntityHighlightsLicense = jest.fn();
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: () => mockUseAssistantContext(),
+  useMaybeAssistantContext: () => mockUseMaybeAssistantContext(),
   useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
   AssistantProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-test-subj="assistant-provider">{children}</div>
@@ -139,6 +141,7 @@ describe('EntityHighlights', () => {
     // Set up default mock implementations
     mockUseFetchAnonymizationFields.mockReturnValue(defaultAnonymizationFields);
     mockUseAssistantContext.mockReturnValue(defaultAssistantContext);
+    mockUseMaybeAssistantContext.mockReturnValue(defaultAssistantContext);
     mockUseLoadConnectors.mockReturnValue(defaultLoadConnectors);
     mockUseSpaceId.mockReturnValue(defaultSpaceId);
     mockUseStoredAssistantConnectorId.mockReturnValue(defaultStoredAssistantConnectorId);
@@ -159,6 +162,16 @@ describe('EntityHighlights', () => {
 
   it('returns null when user has insufficent license', () => {
     mockUseHasEntityHighlightsLicense.mockReturnValueOnce(false);
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
+  });
+
+  it('returns null when rendered outside AssistantProvider (no assistant context)', () => {
+    mockUseMaybeAssistantContext.mockReturnValueOnce(undefined);
 
     render(<EntityHighlightsAccordion {...defaultProps} />, {
       wrapper: TestProviders,
