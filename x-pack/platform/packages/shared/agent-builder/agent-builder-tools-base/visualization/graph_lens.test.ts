@@ -88,7 +88,7 @@ describe('createVisualizationGraph', () => {
   it('regenerates esql for edits and includes the existing query as context', async () => {
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)',
-    });
+    } as Awaited<ReturnType<typeof generateEsql>>);
 
     const graph = createVisualizationGraph(
       createMockModel() as never,
