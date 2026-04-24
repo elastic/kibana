@@ -9,9 +9,9 @@
 
 import { apm } from '@elastic/apm-rum';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import { REACT_FATAL_ERROR_EVENT_TYPE } from '@kbn/shared-ux-error-boundary';
 import { EsqlResponseError } from './esql_response_error';
 import { isSuppressedFetchError } from './is_suppressed_fetch_error';
+import { METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE } from '../telemetry/constants';
 
 /**
  * Identifies which metrics-grid code path produced a non-render error.
@@ -20,9 +20,9 @@ import { isSuppressedFetchError } from './is_suppressed_fetch_error';
 export type MetricsGridErrorSource = 'useFetchMetricsData' | 'useLensProps';
 
 /**
- * `component_name` value used for every non-render reportEvent emitted by
+ * `component_name` value used for every non-render APM capture emitted by
  * the metrics grid. Matches the identifier the ticket spec called out so
- * dashboards keyed on `component_name` can find these events alongside
+ * APM dashboards keyed on `component_name` can find these events alongside
  * React boundary captures.
  */
 export const METRICS_GRID_COMPONENT_NAME = 'MetricsExperienceGrid';
@@ -43,7 +43,11 @@ interface ReportMetricsGridErrorArgs {
 
 /**
  * Reports a non-render metrics-grid error to APM and, if analytics is
- * available, to EBT using the shared `fatal-error-react` schema.
+ * available, to EBT using the dedicated `metrics_grid_non_render_error`
+ * schema registered by this package. A dedicated schema (rather than
+ * reusing `fatal-error-react` from `@kbn/shared-ux-error-boundary`)
+ * avoids polluting render-boundary dashboards with placeholder values
+ * for fields that do not apply to non-render errors.
  *
  * Preserves the existing `AbortError` suppression semantics from
  * `isSuppressedFetchError` — user-driven cancellations are dropped
@@ -83,14 +87,23 @@ export const reportMetricsGridError = ({
   }
 
   try {
-    analytics.reportEvent(REACT_FATAL_ERROR_EVENT_TYPE, {
-      component_name: METRICS_GRID_COMPONENT_NAME,
-      component_stack: '',
-      component_render_min_duration_ms: 0,
-      has_transient_navigation: false,
+    const payload: Record<string, string> = {
+      source,
+      error_type: error.name,
       error_message: error.message,
-      error_stack: typeof error.stack === 'string' ? error.stack : '',
-    });
+    };
+    if (typeof error.stack === 'string') {
+      payload.error_stack = error.stack;
+    }
+    if (error instanceof EsqlResponseError) {
+      if (error.type) {
+        payload.esql_error_type = error.type;
+      }
+      if (error.status != null) {
+        payload.esql_status = String(error.status);
+      }
+    }
+    analytics.reportEvent(METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE, payload);
   } catch (reportErr) {
     // Mirror the swallowing pattern in shared-ux/error_boundary/src/services/error_service.ts
     // so a malformed analytics service cannot mask the original error.

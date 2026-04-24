@@ -8,13 +8,9 @@
  */
 
 import { apm } from '@elastic/apm-rum';
-import { REACT_FATAL_ERROR_EVENT_TYPE } from '@kbn/shared-ux-error-boundary';
 import { EsqlResponseError } from './esql_response_error';
-import {
-  METRICS_GRID_COMPONENT_NAME,
-  METRICS_GRID_ERROR_TYPE_LABEL,
-  reportMetricsGridError,
-} from './report_metrics_grid_error';
+import { METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE } from '../telemetry/constants';
+import { METRICS_GRID_ERROR_TYPE_LABEL, reportMetricsGridError } from './report_metrics_grid_error';
 
 jest.mock('@elastic/apm-rum', () => ({
   apm: {
@@ -92,13 +88,31 @@ describe('reportMetricsGridError', () => {
     });
 
     expect(reportEvent).toHaveBeenCalledTimes(1);
-    expect(reportEvent).toHaveBeenCalledWith(REACT_FATAL_ERROR_EVENT_TYPE, {
-      component_name: METRICS_GRID_COMPONENT_NAME,
-      component_stack: '',
-      component_render_min_duration_ms: 0,
-      has_transient_navigation: false,
+    expect(reportEvent).toHaveBeenCalledWith(METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE, {
+      source: 'useFetchMetricsData',
+      error_type: 'Error',
       error_message: 'network blew up',
-      error_stack: plainError.stack ?? '',
+      error_stack: plainError.stack,
+    });
+  });
+
+  it('omits error_stack when the Error has no stack', () => {
+    const plainError = new Error('no stack here');
+    // Simulate a platform where Error.stack is not populated (e.g. custom
+    // thrown value). We assert the payload does not include error_stack.
+    Object.defineProperty(plainError, 'stack', { value: undefined });
+
+    reportMetricsGridError({
+      error: plainError,
+      source: 'useFetchMetricsData',
+      analytics: { reportEvent },
+    });
+
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE, {
+      source: 'useFetchMetricsData',
+      error_type: 'Error',
+      error_message: 'no stack here',
     });
   });
 
@@ -129,13 +143,14 @@ describe('reportMetricsGridError', () => {
     });
 
     expect(reportEvent).toHaveBeenCalledTimes(1);
-    expect(reportEvent).toHaveBeenCalledWith(
-      REACT_FATAL_ERROR_EVENT_TYPE,
-      expect.objectContaining({
-        component_name: METRICS_GRID_COMPONENT_NAME,
-        error_message: esqlError.message,
-      })
-    );
+    expect(reportEvent).toHaveBeenCalledWith(METRICS_GRID_NON_RENDER_ERROR_EVENT_TYPE, {
+      source: 'useLensProps',
+      error_type: 'EsqlResponseError',
+      error_message: esqlError.message,
+      error_stack: esqlError.stack,
+      esql_error_type: 'verification_exception',
+      esql_status: '400',
+    });
   });
 
   it('omits esql labels when EsqlResponseError fields are absent', () => {

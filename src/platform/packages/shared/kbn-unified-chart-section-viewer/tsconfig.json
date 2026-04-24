@@ -37,6 +37,5 @@
     "@kbn/es-types",
     "@kbn/inspector-plugin",
     "@kbn/esql-language",
-    "@kbn/shared-ux-error-boundary",
   ]
 }
