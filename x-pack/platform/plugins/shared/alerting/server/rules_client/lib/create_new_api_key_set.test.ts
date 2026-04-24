@@ -114,7 +114,7 @@ describe('createNewAPIKeySet', () => {
     });
     expect(apiKey).toEqual({
       apiKey: 'MTIzOmFiYw==',
-      apiKeyCreatedByUser: undefined,
+      apiKeyCreatedByUser: false,
       apiKeyOwner: 'test',
     });
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledTimes(1);

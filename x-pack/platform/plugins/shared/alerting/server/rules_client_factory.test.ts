@@ -856,7 +856,10 @@ describe('RulesClientFactory', () => {
       encoded: 'encoded-value',
     });
 
-    const request = mockRouter.createKibanaRequest();
+    const apiKeyCredentials = Buffer.from('key-id:key-secret').toString('base64');
+    const request = mockRouter.createKibanaRequest({
+      headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+    });
     await factory.create(request, savedObjectsService, { cloneApiKeys: true });
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
@@ -878,7 +881,7 @@ describe('RulesClientFactory', () => {
     });
   });
 
-  test('cloneAPIKey falls back to key reuse when clone fails', async () => {
+  test('cloneAPIKey returns apiKeysEnabled:false when clone fails', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -901,13 +904,28 @@ describe('RulesClientFactory', () => {
 
     const result = await constructorCall.cloneAPIKey('test-rule-key');
 
-    expect(result).toEqual({
-      apiKeysEnabled: true,
-      result: {
-        name: 'test-rule-key-user-created',
-        id: 'key-id',
-        api_key: 'key-secret',
-      },
+    expect(result).toEqual({ apiKeysEnabled: false });
+  });
+
+  test('cloneAPIKey returns apiKeysEnabled:false when request uses non-ApiKey auth', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
     });
+
+    const request = mockRouter.createKibanaRequest({
+      headers: { authorization: 'Bearer some-bearer-token' },
+    });
+
+    await factory.create(request, savedObjectsService, { cloneApiKeys: true });
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const result = await constructorCall.cloneAPIKey('test-rule-key');
+
+    expect(result).toEqual({ apiKeysEnabled: false });
+    expect(securityService.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
   });
 });

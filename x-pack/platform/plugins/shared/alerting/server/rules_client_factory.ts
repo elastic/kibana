@@ -406,6 +406,14 @@ export class RulesClientFactory {
       },
       cloneAPIKey: options?.cloneApiKeys
         ? async (name: string) => {
+            const authHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+            if (!authHeader || authHeader.scheme.toLowerCase() !== 'apikey') {
+              const scheme = authHeader?.scheme ?? 'none';
+              factory.logger.warn(
+                `cloneApiKeys requested but request uses "${scheme}" auth, skipping clone for rule "${name}"`
+              );
+              return { apiKeysEnabled: false };
+            }
             try {
               const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
                 name,
@@ -419,21 +427,7 @@ export class RulesClientFactory {
                 result: cloneResult,
               };
             } catch (error) {
-              factory.logger.warn(
-                `Failed to clone API key, falling back to key reuse: ${error.message}`
-              );
-              const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-              if (authorizationHeader?.credentials) {
-                const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
-                  .toString()
-                  .split(':');
-                if (apiKeyId && apiKey) {
-                  return {
-                    apiKeysEnabled: true,
-                    result: { name: `${name}-user-created`, id: apiKeyId, api_key: apiKey },
-                  };
-                }
-              }
+              factory.logger.error(`Failed to clone API key for rule "${name}": ${error.message}`);
               return { apiKeysEnabled: false };
             }
           }

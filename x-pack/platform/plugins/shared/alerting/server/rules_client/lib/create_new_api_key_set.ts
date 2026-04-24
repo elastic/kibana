@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { RawRule } from '../../types';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
+import { generateAPIKeyName, apiKeyAsAlertAttributes, resolveRuleAPIKey } from '../common';
 import type { RulesClientContext } from '../types';
 
 export async function createNewAPIKeySet(
@@ -29,15 +29,10 @@ export async function createNewAPIKeySet(
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
     const name = generateAPIKeyName(id, ruleName);
-    createdAPIKey = shouldUpdateApiKey
-      ? context.cloneAPIKey
-        ? await context.cloneAPIKey(name)
-        : isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await context.createAPIKey(name)
-      : null;
+    const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey);
+    createdAPIKey = resolved.createdAPIKey;
+    isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
     const message = errorMessage ? errorMessage : 'Error creating API key for rule';
     throw Boom.badRequest(`${message} - ${error.message}`);
