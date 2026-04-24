@@ -36,7 +36,7 @@ import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_hel
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
-import { attachReplacementRanges } from './utils/prefix_range';
+import { attachReplacementRanges, attachRootQueryReplacementRanges } from './utils/prefix_range';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -176,17 +176,16 @@ export async function suggest(
         ...recommendedQueriesSuggestionsFromStaticTemplates
       );
 
-      const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
-
-      return orderingEngine.sort(
-        [
-          ...headerCommandsSuggestions,
-          ...sourceCommandsSuggestions,
-          ...recommendedQueriesSuggestions,
-        ],
-        { command: '' }
+      const rootLevelQuerySuggestions = attachRootQueryReplacementRanges(
+        [...suggestions.filter(isSourceCommandSuggestion), ...recommendedQueriesSuggestions],
+        fullText,
+        offset
       );
+
+      return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
+        command: '',
+      });
     }
 
     return suggestions.filter(

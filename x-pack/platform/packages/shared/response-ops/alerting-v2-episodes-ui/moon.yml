@@ -18,7 +18,9 @@ project:
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui
 dependsOn:
   - '@kbn/alerting-v2-schemas'
+  - '@kbn/core'
   - '@kbn/core-http-browser'
+  - '@kbn/core-user-profile-browser'
   - '@kbn/data-views-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/i18n'
@@ -35,7 +37,9 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/alerting-v2-constants'
   - '@kbn/es-types'
+  - '@kbn/kibana-react-plugin'
   - '@kbn/search-types'
+  - '@kbn/user-profile-components'
 tags:
   - shared-browser
   - package
