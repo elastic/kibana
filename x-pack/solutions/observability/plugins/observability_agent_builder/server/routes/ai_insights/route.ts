@@ -6,11 +6,14 @@
  */
 
 import * as t from 'io-ts';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import { throwError, type Observable } from 'rxjs';
+import type { ServerSentEvent } from '@kbn/sse-utils';
 import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import type { ServerSentEvent } from '@kbn/sse-utils';
 import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
 import { isIndexNotFoundError } from '@kbn/agent-builder-plugin/server/utils/is_index_not_found_error';
 import { isNoMatchingProjectError } from '@kbn/agent-builder-plugin/server/utils/is_no_matching_project_error';
@@ -24,6 +27,31 @@ import {
 } from './alert_ai_insights/generate_alert_ai_insight';
 import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../../common/constants';
 import { resolveConnectorForFeature } from '../../utils/resolve_connector_for_feature';
+
+function aiInsightSseErrorResponse({
+  response,
+  error,
+  isCloudEnabled,
+  logger,
+  request,
+}: {
+  response: KibanaResponseFactory;
+  error: unknown;
+  isCloudEnabled: boolean;
+  logger: Pick<Logger, 'debug' | 'error'>;
+  request: KibanaRequest;
+}) {
+  const err$ = throwError(() =>
+    error instanceof Error ? error : new Error(String(error))
+  ) as Observable<ServerSentEvent>;
+  return response.ok({
+    headers: getSSEResponseHeaders(isCloudEnabled),
+    body: observableIntoEventSourceStream(err$, {
+      logger,
+      signal: getRequestAbortedSignal(request),
+    }),
+  });
+}
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
@@ -43,40 +71,54 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
     }),
     handler: async ({ core, plugins, dataRegistry, logger, request, params, response }) => {
       const { alertId } = params.body;
-
+      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
       const [, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
 
-      const { connectorId, connector } = await resolveConnectorForFeature({
-        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
-        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
-        request,
-        logger,
-      });
-
-      const inferenceClient = inference.getClient({ request });
-
-      const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-      const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
-
-      const result = await getAlertAiInsight({
-        core,
-        plugins,
-        alertDoc,
-        inferenceClient,
-        connectorId,
-        connector,
-        dataRegistry,
-        request,
-        logger,
-      });
-
-      return response.ok({
-        body: observableIntoEventSourceStream(result.events$, {
+      try {
+        const { connectorId, connector } = await resolveConnectorForFeature({
+          searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+          featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+          request,
           logger,
-          signal: getRequestAbortedSignal(request),
-        }),
-      });
+        });
+
+        const inferenceClient = inference.getClient({ request });
+
+        const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
+        const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
+
+        const result = await getAlertAiInsight({
+          core,
+          plugins,
+          alertDoc,
+          inferenceClient,
+          connectorId,
+          connector,
+          dataRegistry,
+          request,
+          logger,
+        });
+
+        return response.ok({
+          body: observableIntoEventSourceStream(result.events$, {
+            logger,
+            signal: getRequestAbortedSignal(request),
+          }),
+        });
+      } catch (error) {
+        logger.error(error);
+        if (isIndexNotFoundError(error) || isNoMatchingProjectError(error)) {
+          return aiInsightSseErrorResponse({
+            response,
+            error,
+            isCloudEnabled,
+            logger,
+            request,
+          });
+        }
+        throw error;
+      }
     },
   });
 
@@ -101,40 +143,55 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
     }),
     handler: async ({ request, core, plugins, dataRegistry, params, response, logger }) => {
       const { errorId, serviceName, start, end, environment = '' } = params.body;
+      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
 
       const [, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const { connectorId, connector } = await resolveConnectorForFeature({
-        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
-        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
-        request,
-        logger,
-      });
-
-      const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
-
-      const result = await generateErrorAiInsight({
-        core,
-        plugins,
-        errorId,
-        serviceName,
-        start,
-        end,
-        environment,
-        connector,
-        dataRegistry,
-        request,
-        inferenceClient,
-        logger,
-      });
-
-      return response.ok({
-        body: observableIntoEventSourceStream(result.events$, {
+      try {
+        const { connectorId, connector } = await resolveConnectorForFeature({
+          searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+          featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+          request,
           logger,
-          signal: getRequestAbortedSignal(request),
-        }),
-      });
+        });
+
+        const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+
+        const result = await generateErrorAiInsight({
+          core,
+          plugins,
+          errorId,
+          serviceName,
+          start,
+          end,
+          environment,
+          connector,
+          dataRegistry,
+          request,
+          inferenceClient,
+          logger,
+        });
+
+        return response.ok({
+          body: observableIntoEventSourceStream(result.events$, {
+            logger,
+            signal: getRequestAbortedSignal(request),
+          }),
+        });
+      } catch (error) {
+        logger.error(error);
+        if (isIndexNotFoundError(error) || isNoMatchingProjectError(error)) {
+          return aiInsightSseErrorResponse({
+            response,
+            error,
+            isCloudEnabled,
+            logger,
+            request,
+          });
+        }
+        throw error;
+      }
     },
   });
 
@@ -207,13 +264,12 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       } catch (error) {
         logger.error(error);
         if (isIndexNotFoundError(error) || isNoMatchingProjectError(error)) {
-          const err$ = throwError(error) as Observable<ServerSentEvent>;
-          return response.ok({
-            headers: getSSEResponseHeaders(isCloudEnabled),
-            body: observableIntoEventSourceStream(err$, {
-              logger,
-              signal: getRequestAbortedSignal(request),
-            }),
+          return aiInsightSseErrorResponse({
+            response,
+            error,
+            isCloudEnabled,
+            logger,
+            request,
           });
         }
         throw error;
