@@ -91,7 +91,7 @@ const getFilters = (
   if (savedSearchFilter) {
     filters.push(...savedSearchFilter);
   }
-  const paramsFilter = normalizeFilter(locatorParams.filters);
+  const paramsFilter = normalizeFilter(locatorParams.filters ?? locatorParams.filter);
   if (paramsFilter) {
     filters.push(...paramsFilter);
   }
@@ -333,9 +333,20 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
 
       // Determine columns from locatorParams (unsaved) or use stored columns (saved search)
       const columns = locatorParams.columns ?? storedColumns;
+      const useFieldsFromSource =
+        !locatorParams.columns &&
+        Array.isArray(locatorParams.fieldsFromSource) &&
+        locatorParams.fieldsFromSource.length > 0;
+
       // Configure all aspects of the search source with individual error handling
-      const fields = configureSearchSourceFields(columns);
-      searchSource.setField('fields', fields);
+      if (useFieldsFromSource) {
+        searchSource.removeField('fields');
+        searchSource.setField('fieldsFromSource', [...locatorParams.fieldsFromSource!]);
+      } else {
+        const fields = configureSearchSourceFields(columns);
+        searchSource.removeField('fieldsFromSource');
+        searchSource.setField('fields', fields);
+      }
 
       const filters = configureSearchSourceFilters(
         searchSource,

@@ -218,3 +218,31 @@ test('with saved search containing ["_source"]', async () => {
     { field: '*', include_unmapped: true },
   ]);
 });
+
+test('with locator params using fieldsFromSource', async () => {
+  mockPayload = [
+    {
+      params: {
+        savedSearchId: mockSavedSearchId,
+        fieldsFromSource: ['response', 'clientip'],
+      },
+    },
+  ];
+
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  const searchSource = await provider(mockPayload[0].params);
+  expect(searchSource.getSerializedFields().fieldsFromSource).toEqual(['response', 'clientip']);
+  expect(searchSource.getSerializedFields().fields).toBeUndefined();
+});
+
+test('with locator params using singular filter', async () => {
+  const testFilter = {
+    meta: { index: 'logstash-*' },
+    query: { term: { host: 'elastic.co' } },
+  };
+  mockPayload = [{ params: { savedSearchId: mockSavedSearchId, filter: testFilter } }];
+
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  const searchSource = await provider(mockPayload[0].params);
+  expect(searchSource.getSerializedFields().filter).toEqual([testFilter]);
+});

@@ -52,6 +52,12 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   filters?: Filter[];
 
   /**
+   * Optionally apply a single filter or filter array.
+   * @deprecated Use `filters`.
+   */
+  filter?: Filter | Filter[];
+
+  /**
    * Optionally set a query.
    */
   query?: Query | AggregateQuery;
@@ -79,6 +85,12 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Columns displayed in the table
    */
   columns?: string[];
+
+  /**
+   * Fields requested directly from `_source`.
+   * @deprecated Use `columns`.
+   */
+  fieldsFromSource?: string[];
 
   /**
    * Data Grid related state

@@ -179,3 +179,18 @@ test('with saved search containing ["_source"]', async () => {
   const columns = await columnsFromLocator(mockPayload[0].params);
   expect(columns).not.toBeDefined(); // must erase the field since it can not be used for search query
 });
+
+test('with locator params using fieldsFromSource', async () => {
+  mockPayload = [
+    {
+      params: {
+        savedSearchId: mockSavedSearchId,
+        fieldsFromSource: ['response', 'clientip'],
+      },
+    },
+  ];
+
+  const { columnsFromLocator } = columnsFromLocatorFactory(mockServices);
+  const columns = await columnsFromLocator(mockPayload[0].params);
+  expect(columns).toEqual(['timestamp', 'response', 'url', 'clientip', 'machine.os', 'tags']);
+});

@@ -91,9 +91,11 @@ export function columnsFromLocatorFactory(services: LocatorServicesDeps) {
       throw new Error(`Can not determine data view from DiscoverAppLocatorParams!`);
     }
 
+    const columnsFromParams = params.columns;
+
     // If columns are specified in params, they take precedence over saved search columns
-    if (params.columns && params.columns.length > 0) {
-      let resultColumns = [...params.columns];
+    if (columnsFromParams && columnsFromParams.length > 0) {
+      let resultColumns = [...columnsFromParams];
 
       // Get time field directly from data view (no need to process saved search)
       const timeFieldName = await shouldIncludeTimeField(services, dataView);
