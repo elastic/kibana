@@ -703,6 +703,25 @@ describe('TemplatesService', () => {
 
       expect(result).toBeUndefined();
     });
+
+    it('returns undefined when version is not a valid number', async () => {
+      const service = createService();
+
+      // Should not call search at all for invalid version
+      const result = await service.getTemplate('template-1', 'abc');
+
+      expect(result).toBeUndefined();
+      expect(unsecuredSavedObjectsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined when version is an empty string', async () => {
+      const service = createService();
+
+      const result = await service.getTemplate('template-1', '');
+
+      expect(result).toBeUndefined();
+      expect(unsecuredSavedObjectsClient.search).not.toHaveBeenCalled();
+    });
   });
 
   describe('getTemplateVersionsForExtendedFieldSearch', () => {
@@ -809,6 +828,60 @@ describe('TemplatesService', () => {
       });
 
       expect(result).toEqual([]);
+    });
+
+    it('uses size: 10000 when templateVersionPairs is an empty array', async () => {
+      const service = createService();
+
+      const searchResponse = createMockSearchResponse([]);
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
+
+      await service.getTemplateVersionsForExtendedFieldSearch({
+        owner: ['securitySolution'],
+        isDeleted: false,
+        templateVersionPairs: [],
+      });
+
+      const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+      expect(searchCall.size).toBe(10000);
+    });
+  });
+
+  describe('searchTemplates with templateVersionPairs and search', () => {
+    it('includes search must clause when templateVersionPairs is provided', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+      // This simulates a scenario where we want to search within specific template versions
+      await service.getAllTemplates({
+        ...defaultFindParams,
+        search: 'test-search',
+      });
+
+      const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+      const query = searchCall?.query as {
+        bool: { must?: unknown[]; should?: unknown[]; filter?: unknown[] };
+      };
+
+      // Verify that the must clause (containing search logic) is present
+      expect(query.bool.must).toBeDefined();
+      expect(query.bool.must).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  wildcard: expect.objectContaining({
+                    [`${CASE_TEMPLATE_SAVED_OBJECT}.name`]: expect.objectContaining({
+                      value: '*test-search*',
+                    }),
+                  }),
+                }),
+              ]),
+            }),
+          }),
+        ])
+      );
     });
   });
 

@@ -133,7 +133,9 @@ export class TemplatesService {
   }): Promise<Array<SavedObject<Template>>> {
     const { templates } = await this.searchTemplates({
       page: 1,
-      perPage: params.templateVersionPairs ? params.templateVersionPairs.length * 10 : 10000,
+      perPage: params.templateVersionPairs?.length
+        ? params.templateVersionPairs.length * 10
+        : 10000,
       sortField: 'name',
       sortOrder: 'asc',
       isDeleted: params.isDeleted ?? false,
@@ -151,26 +153,34 @@ export class TemplatesService {
   ): Promise<SavedObject<Template> | undefined> {
     // If version is specified, fetch that specific version
     if (version !== undefined) {
+      const parsedVersion = parseInt(version, 10);
+      // Return undefined if version is not a valid number (e.g., "abc" -> NaN)
+      if (isNaN(parsedVersion)) {
+        return undefined;
+      }
       const { templates } = await this.searchTemplates({
         page: 1,
         perPage: 1,
         sortField: 'templateVersion',
         sortOrder: 'desc',
-        templateVersionPairs: [{ id: templateId, versions: [parseInt(version, 10)] }],
+        templateVersionPairs: [{ id: templateId, versions: [parsedVersion] }],
       });
       return templates[0];
     }
 
     // Otherwise, fetch the latest version by templateId
+    // Use templateId parameter to filter server-side, avoiding client-side filtering
+    // that would fail if there are >10000 latest templates
     const { templates } = await this.searchTemplates({
       page: 1,
-      perPage: 10000,
+      perPage: 1,
       sortField: 'templateVersion',
       sortOrder: 'desc',
       isLatest: true,
+      templateId,
     });
 
-    return templates.find((t) => t.attributes.templateId === templateId);
+    return templates[0];
   }
 
   /**
@@ -188,6 +198,7 @@ export class TemplatesService {
     author,
     owner,
     isEnabled,
+    templateId,
     templateVersionPairs,
   }: {
     page: number;
@@ -201,6 +212,7 @@ export class TemplatesService {
     author?: string[];
     owner?: string[];
     isEnabled?: boolean;
+    templateId?: string;
     templateVersionPairs?: Array<{ id: string; versions: number[] }>;
   }): Promise<{ templates: Array<SavedObject<Template>>; total: number }> {
     interface SearchResult {
@@ -235,6 +247,9 @@ export class TemplatesService {
         : []),
       ...(isLatest !== undefined
         ? [toElasticsearchQuery(fromKueryExpression(`${SO}.isLatest: ${isLatest}`))]
+        : []),
+      ...(templateId
+        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateId: "${templateId}"`))]
         : []),
       ...(tags && tags.length > 0
         ? [
@@ -324,14 +339,16 @@ export class TemplatesService {
 
     // If templateVersionPairs is provided, use OR logic for specific (id, version) combinations
     // Otherwise, use AND logic with filters
+    // In both cases, include the must clause if search is provided
     const query =
       templateVersionPairsFilter.length > 0
         ? {
             bool: {
               should: templateVersionPairsFilter,
               minimum_should_match: 1,
-              // Still apply other filters (isDeleted, owner, etc.)
+              // Still apply other filters (isDeleted, owner, etc.) and search
               filter: filters,
+              ...(must.length > 0 ? { must } : {}),
             },
           }
         : {

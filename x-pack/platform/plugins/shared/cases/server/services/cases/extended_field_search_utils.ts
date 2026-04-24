@@ -245,6 +245,8 @@ const buildSingleFilterClause = ({
   } else {
     const runtimeType = mapToRuntimeType(esType);
     const typedValue = runtimeType === 'long' || runtimeType === 'double' ? Number(value) : value;
+    // Skip filter if numeric conversion produced NaN (invalid input for numeric field)
+    if (typeof typedValue === 'number' && isNaN(typedValue)) return null;
     valueClause = { term: { [fieldName]: { value: typedValue } } };
   }
 

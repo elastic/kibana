@@ -943,6 +943,38 @@ describe('buildExtendedFieldFilterClauses', () => {
     expect(clauses).toHaveLength(0);
   });
 
+  it('drops numeric filter when value is not a valid number', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'story_points_as_long',
+          value: 'high',
+          esType: 'long',
+          control: 'INPUT_NUMBER',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(clauses).toHaveLength(0);
+  });
+
+  it('drops double filter when value is not a valid number', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'effort_estimate_as_double',
+          value: 'invalid',
+          esType: 'double',
+          control: 'INPUT_NUMBER',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(clauses).toHaveLength(0);
+  });
+
   it('builds term query for USER_PICKER (runtime field emits name values from {uid,name} objects)', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
