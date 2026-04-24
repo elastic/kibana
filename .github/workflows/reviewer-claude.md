@@ -1,6 +1,8 @@
 ---
 name: Claude Reviewer
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -19,11 +21,22 @@ engine:
   max-turns: 30
   env:
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-if: ${{ !github.event.repository.fork }}
+if: >-
+  ${{
+    !github.event.repository.fork &&
+    (
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.pull_request.user.type != 'Bot' &&
+        !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
+        contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
+      )
+    )
+  }}
 concurrency:
-  group: gh-aw-${{ github.workflow }}-${{ github.event.inputs.pr_number || github.run_id }}
+  group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
   cancel-in-progress: true
-  job-discriminator: ${{ github.event.inputs.pr_number || github.run_id }}
+  job-discriminator: ${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
 permissions: read-all
 tools:
   github:
@@ -37,32 +50,32 @@ jobs:
   prefetch_pr_context:
     uses: ./.github/workflows/prefetch-pr-context.yml
     with:
-      pr_number: ${{ github.event.inputs.pr_number }}
+      pr_number: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
       repo: ${{ github.repository }}
-      artifact_name: prefetched-pr-context-${{ github.event.inputs.pr_number }}
+      artifact_name: prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
     secrets:
       github_token: ${{ secrets.GITHUB_TOKEN }}
 steps:
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
-      name: prefetched-pr-context-${{ github.event.inputs.pr_number }}
+      name: prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
       path: /tmp/gh-aw/agent
 safe-outputs:
   create-pull-request-review-comment:
     max: 10
-    target: ${{ github.event.inputs.pr_number }}
+    target: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   submit-pull-request-review:
     max: 1
-    target: ${{ github.event.inputs.pr_number }}
+    target: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
     allowed-events: [COMMENT]
     footer: none
 ---
 
 # Claude PR Reviewer
 
-Review pull request #${{ github.event.inputs.pr_number }} in `${{ github.repository }}` using the imported reviewer instructions.
+Review pull request #${{ github.event.pull_request.number || github.event.inputs.pr_number }} in `${{ github.repository }}` using the imported reviewer instructions.
 
-This workflow is manual and test-only for now.
+This workflow runs automatically for eligible pull request events and can still be triggered manually for testing.
 
 Do not handle `@claude` comments, review replies, or follow-up conversational requests in this workflow.
