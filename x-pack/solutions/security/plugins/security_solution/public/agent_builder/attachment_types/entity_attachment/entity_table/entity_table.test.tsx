@@ -14,7 +14,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { EntityForAttachment } from '../use_entity_for_attachment';
 import { useEntityForAttachment } from '../use_entity_for_attachment';
-import { navigateToSecurityEntityInApp } from '../../entity_explore_navigation';
+import {
+  navigateToEntityAnalyticsHomePageInApp,
+  navigateToEntityAnalyticsWithFlyoutInApp,
+} from '../../entity_explore_navigation';
 import { EntityTable } from './entity_table';
 
 jest.mock('../use_entity_for_attachment', () => ({
@@ -29,13 +32,15 @@ jest.mock('../../entity_explore_navigation', () => {
   const actual = jest.requireActual('../../entity_explore_navigation');
   return {
     ...actual,
-    navigateToSecurityEntityInApp: jest.fn(),
+    navigateToEntityAnalyticsWithFlyoutInApp: jest.fn(),
+    navigateToEntityAnalyticsHomePageInApp: jest.fn(),
   };
 });
 
 const mockedUseEntityForAttachment = useEntityForAttachment as jest.Mock;
 const mockedUseKibana = useKibana as jest.Mock;
-const mockedNavigateToSecurityEntityInApp = navigateToSecurityEntityInApp as jest.Mock;
+const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock;
+const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as jest.Mock;
 
 const baseEntityData = (override: Partial<EntityForAttachment> = {}): EntityForAttachment => ({
   entityType: EntityType.host,
@@ -108,51 +113,115 @@ describe('EntityTable', () => {
       expect(buttons.length).toBeGreaterThan(0);
     });
 
-    it('invokes navigateToSecurityEntityInApp with the resolved entity id, name, and sources when clicked', () => {
+    it('opens the Entity Analytics flyout with the HostPanelKey payload for host rows', () => {
       mockedUseEntityForAttachment.mockReturnValue({
         data: baseEntityData({
-          entityId: 'resolved-entity-id',
+          entityId: 'host:macbook-01@default',
           displayName: 'Resolved Host',
-          sources: ['endpoint.events.process', 'aws.cloudtrail'],
         }),
         isLoading: false,
         error: null,
         refetch: jest.fn(),
       });
       const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
-      const agentBuilder = { toggleChat: jest.fn() } as unknown as NonNullable<
-        Parameters<typeof renderTable>[0]
-      >['agentBuilder'];
-      const chrome = { sidebar: { getCurrentAppId: () => 'other' } } as unknown as NonNullable<
-        Parameters<typeof renderTable>[0]
-      >['chrome'];
-      const openSidebarConversation = jest.fn();
 
       renderTable({
         entities: [{ identifierType: 'host', identifier: 'host-1' }],
         application,
-        agentBuilder,
-        chrome,
-        openSidebarConversation,
       });
 
       fireEvent.click(screen.getAllByTestId('entityAttachmentTableOpenEntity')[0]);
 
-      expect(mockedNavigateToSecurityEntityInApp).toHaveBeenCalledTimes(1);
-      const args = mockedNavigateToSecurityEntityInApp.mock.calls[0][0];
+      expect(mockedNavigateToFlyout).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToHome).not.toHaveBeenCalled();
+      const args = mockedNavigateToFlyout.mock.calls[0][0];
       expect(args.application).toBe(application);
-      expect(args.row).toEqual({
-        entity_type: 'host',
-        entity_id: 'resolved-entity-id',
-        entity_name: 'Resolved Host',
-        source: { entity: { source: ['endpoint.events.process', 'aws.cloudtrail'] } },
+      expect(args.flyout).toEqual({
+        preview: [],
+        right: {
+          id: 'host-panel',
+          params: {
+            contextID: 'agent-builder-entity-card',
+            scopeId: 'agent-builder-entity-card',
+            hostName: 'Resolved Host',
+            entityId: 'host:macbook-01@default',
+          },
+        },
       });
-      expect(args.agentBuilder).toBe(agentBuilder);
-      expect(args.chrome).toBe(chrome);
-      expect(args.openSidebarConversation).toBe(openSidebarConversation);
     });
 
-    it('forwards the searchSession prop to navigateToSecurityEntityInApp when clicked', () => {
+    it('opens the Entity Analytics flyout with the UserPanelKey payload for user rows', () => {
+      mockedUseEntityForAttachment.mockReturnValue({
+        data: baseEntityData({
+          entityType: EntityType.user,
+          entityId: 'user:bob@acme@default',
+          displayName: 'bob',
+        }),
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+
+      renderTable({
+        entities: [{ identifierType: 'user', identifier: 'bob' }],
+        application,
+      });
+
+      fireEvent.click(screen.getAllByTestId('entityAttachmentTableOpenEntity')[0]);
+
+      expect(mockedNavigateToFlyout).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToFlyout.mock.calls[0][0].flyout).toEqual({
+        preview: [],
+        right: {
+          id: 'user-panel',
+          params: {
+            contextID: 'agent-builder-entity-card',
+            scopeId: 'agent-builder-entity-card',
+            userName: 'bob',
+            identityFields: { 'user.name': 'bob' },
+            entityId: 'user:bob@acme@default',
+          },
+        },
+      });
+    });
+
+    it('opens the Entity Analytics flyout with the ServicePanelKey payload for service rows', () => {
+      mockedUseEntityForAttachment.mockReturnValue({
+        data: baseEntityData({
+          entityType: EntityType.service,
+          entityId: 'service:auth-svc@default',
+          displayName: 'auth-svc',
+        }),
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+
+      renderTable({
+        entities: [{ identifierType: 'service', identifier: 'auth-svc' }],
+        application,
+      });
+
+      fireEvent.click(screen.getAllByTestId('entityAttachmentTableOpenEntity')[0]);
+
+      expect(mockedNavigateToFlyout).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToFlyout.mock.calls[0][0].flyout).toEqual({
+        preview: [],
+        right: {
+          id: 'service-panel',
+          params: {
+            contextID: 'agent-builder-entity-card',
+            scopeId: 'agent-builder-entity-card',
+            serviceName: 'auth-svc',
+            entityId: 'service:auth-svc@default',
+          },
+        },
+      });
+    });
+
+    it('forwards the searchSession prop to navigateToEntityAnalyticsWithFlyoutInApp when clicked', () => {
       const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
       const searchSession = { clear: jest.fn() } as unknown as ISessionService;
 
@@ -164,13 +233,11 @@ describe('EntityTable', () => {
 
       fireEvent.click(screen.getAllByTestId('entityAttachmentTableOpenEntity')[0]);
 
-      expect(mockedNavigateToSecurityEntityInApp).toHaveBeenCalledTimes(1);
-      expect(mockedNavigateToSecurityEntityInApp.mock.calls[0][0].searchSession).toBe(
-        searchSession
-      );
+      expect(mockedNavigateToFlyout).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToFlyout.mock.calls[0][0].searchSession).toBe(searchSession);
     });
 
-    it('falls back to the raw identifier when useEntityForAttachment has not resolved yet', () => {
+    it('uses the attachment entityStoreId when useEntityForAttachment has not resolved yet', () => {
       mockedUseEntityForAttachment.mockReturnValue({
         data: null,
         isLoading: true,
@@ -186,13 +253,67 @@ describe('EntityTable', () => {
 
       fireEvent.click(screen.getAllByTestId('entityAttachmentTableOpenEntity')[0]);
 
-      const args = mockedNavigateToSecurityEntityInApp.mock.calls[0][0];
-      expect(args.row).toEqual({
-        entity_type: 'user',
-        entity_id: 'user:bob@local',
-        entity_name: 'bob',
-        source: undefined,
+      expect(mockedNavigateToFlyout).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToFlyout.mock.calls[0][0].flyout.right).toEqual({
+        id: 'user-panel',
+        params: {
+          contextID: 'agent-builder-entity-card',
+          scopeId: 'agent-builder-entity-card',
+          userName: 'bob',
+          identityFields: { 'user.name': 'bob' },
+          entityId: 'user:bob@local',
+        },
       });
+    });
+
+    it('falls back to the unfiltered Entity Analytics home when a flyout-capable row has no entityStoreId', () => {
+      mockedUseEntityForAttachment.mockReturnValue({
+        data: null,
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+
+      renderTable({
+        entities: [{ identifierType: 'host', identifier: 'orphan-host' }],
+        application,
+        searchSession,
+      });
+
+      fireEvent.click(screen.getAllByTestId('entityAttachmentTableOpenEntity')[0]);
+
+      expect(mockedNavigateToHome).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToFlyout).not.toHaveBeenCalled();
+      expect(mockedNavigateToHome.mock.calls[0][0].application).toBe(application);
+      expect(mockedNavigateToHome.mock.calls[0][0].searchSession).toBe(searchSession);
+    });
+
+    it('falls back to the unfiltered Entity Analytics home for generic entities (no dedicated flyout)', () => {
+      mockedUseEntityForAttachment.mockReturnValue({
+        data: null,
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+
+      renderTable({
+        entities: [
+          {
+            identifierType: 'generic',
+            identifier: 'some-id',
+            entityStoreId: 'generic:some-id@default',
+          },
+        ],
+        application,
+      });
+
+      fireEvent.click(screen.getAllByTestId('entityAttachmentTableOpenEntity')[0]);
+
+      expect(mockedNavigateToHome).toHaveBeenCalledTimes(1);
+      expect(mockedNavigateToFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -259,9 +380,9 @@ describe('EntityTable', () => {
       fireEvent.click(exploreButtons[0]);
       fireEvent.click(exploreButtons[1]);
 
-      expect(mockedNavigateToSecurityEntityInApp).toHaveBeenCalledTimes(2);
-      expect(mockedNavigateToSecurityEntityInApp.mock.calls[0][0].row.entity_id).toBe(storeIdA);
-      expect(mockedNavigateToSecurityEntityInApp.mock.calls[1][0].row.entity_id).toBe(storeIdB);
+      expect(mockedNavigateToFlyout).toHaveBeenCalledTimes(2);
+      expect(mockedNavigateToFlyout.mock.calls[0][0].flyout.right.params.entityId).toBe(storeIdA);
+      expect(mockedNavigateToFlyout.mock.calls[1][0].flyout.right.params.entityId).toBe(storeIdB);
     });
   });
 

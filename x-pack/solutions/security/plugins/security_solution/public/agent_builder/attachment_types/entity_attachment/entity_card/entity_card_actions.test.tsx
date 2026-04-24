@@ -17,10 +17,14 @@ import {
 } from '../../entity_explore_navigation';
 import { EntityCardActions } from './entity_card_actions';
 
-jest.mock('../../entity_explore_navigation', () => ({
-  navigateToEntityAnalyticsHomePageInApp: jest.fn(),
-  navigateToEntityAnalyticsWithFlyoutInApp: jest.fn(),
-}));
+jest.mock('../../entity_explore_navigation', () => {
+  const actual = jest.requireActual('../../entity_explore_navigation');
+  return {
+    ...actual,
+    navigateToEntityAnalyticsHomePageInApp: jest.fn(),
+    navigateToEntityAnalyticsWithFlyoutInApp: jest.fn(),
+  };
+});
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({

@@ -149,11 +149,9 @@ const EntityAnalyticsDashboardInlineContent: React.FC<
 const EntityAnalyticsDashboardCanvasContent: React.FC<
   AttachmentRenderProps<EntityAnalyticsDashboardAttachment> & {
     application: ApplicationStart;
-    agentBuilder?: AgentBuilderPluginStart;
-    chrome?: SecurityAgentBuilderChrome;
     searchSession?: ISessionService;
   }
-> = ({ attachment, application, agentBuilder, chrome, openSidebarConversation, searchSession }) => {
+> = ({ attachment, application, searchSession }) => {
   const data = attachment.data;
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const [isRiskPanelNarrow, setIsRiskPanelNarrow] = useState(false);
@@ -471,10 +469,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
             <EntityListTable
               entities={data.entities}
               application={application}
-              agentBuilder={agentBuilder}
-              chrome={chrome}
               searchSession={searchSession}
-              openSidebarConversation={openSidebarConversation}
             />
           ) : (
             <EuiText size="s" color="subdued">
@@ -539,8 +534,6 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
     <EntityAnalyticsDashboardCanvasContent
       {...props}
       application={application}
-      agentBuilder={agentBuilder}
-      chrome={chrome}
       searchSession={searchSession}
     />
   ),

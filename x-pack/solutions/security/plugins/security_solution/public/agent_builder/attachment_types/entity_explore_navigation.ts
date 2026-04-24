@@ -15,11 +15,14 @@ import {
   readLastAgentBuilderAgentIdForSecuritySession,
 } from '../../../common/agent_builder_navigation_gate';
 
-import { EntityType } from '../../../common/entity_analytics/types';
 import { SecurityPageName } from '../../../common/constants';
-import { getHostDetailsUrl } from '../../common/components/link_to/redirect_to_hosts';
-import { getTabsOnUsersDetailsUrl } from '../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../explore/users/store/model';
+import {
+  HostPanelKey,
+  ServicePanelKey,
+  UserPanelKey,
+} from '../../flyout/entity_details/shared/constants';
+import type { EntityAttachmentIdentifier } from './entity_attachment/types';
+import { isFlyoutCapableIdentifierType } from './entity_attachment/types';
 
 /** Some tool payloads mistakenly set `entity_name` to the ECS field label "name". */
 const INVALID_PLACEHOLDER_ENTITY_NAME = 'name';
@@ -40,6 +43,83 @@ export const isAgentBuilderSidebarOpen = (chrome?: SecurityAgentBuilderChrome): 
 /** Exported for unit tests — mirrors agent_builder `getLastAgentId` storage shape. */
 export const getAgentBuilderLastAgentIdForSecurityOpenChat =
   readLastAgentBuilderAgentIdForSecuritySession;
+
+/**
+ * Scope shared by the Agent Builder entity surfaces (inline card, canvas flyout
+ * overview, canvas action button, entity tables). Kept in sync so the Security
+ * expandable flyout provider resolves the same `contextID` / `scopeId`
+ * regardless of which surface opened it.
+ */
+export const AGENT_BUILDER_ENTITY_CARD_SCOPE = 'agent-builder-entity-card';
+
+/**
+ * Minimal expandable-flyout `right` panel shape accepted by the Entity Analytics
+ * home page. Kept intentionally narrow so consumers can't accidentally forward
+ * unrelated panel payloads.
+ */
+export type EntityFlyoutRightPanel =
+  | {
+      id: typeof HostPanelKey;
+      params: { contextID: string; scopeId: string; hostName: string; entityId: string };
+    }
+  | {
+      id: typeof UserPanelKey;
+      params: {
+        contextID: string;
+        scopeId: string;
+        userName: string;
+        identityFields: { 'user.name': string };
+        entityId: string;
+      };
+    }
+  | {
+      id: typeof ServicePanelKey;
+      params: { contextID: string; scopeId: string; serviceName: string; entityId: string };
+    };
+
+/**
+ * Builds the minimal `right`-panel payload consumed by the expandable flyout provider on the
+ * Entity Analytics home page. Returns `null` for generic entities (no dedicated flyout yet)
+ * and for legacy attachments that don't carry the canonical `entity.id` — callers fall back
+ * to an unfiltered `navigateToEntityAnalyticsHomePageInApp` in those cases.
+ */
+export const buildEntityRightPanel = (
+  identifier: EntityAttachmentIdentifier
+): EntityFlyoutRightPanel | null => {
+  const { identifierType, identifier: displayName, entityStoreId } = identifier;
+  if (!entityStoreId || !isFlyoutCapableIdentifierType(identifierType)) {
+    return null;
+  }
+
+  const contextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
+  const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
+
+  switch (identifierType) {
+    case 'host':
+      return {
+        id: HostPanelKey,
+        params: { contextID, scopeId, hostName: displayName, entityId: entityStoreId },
+      };
+    case 'user':
+      return {
+        id: UserPanelKey,
+        params: {
+          contextID,
+          scopeId,
+          userName: displayName,
+          identityFields: { 'user.name': displayName },
+          entityId: entityStoreId,
+        },
+      };
+    case 'service':
+      return {
+        id: ServicePanelKey,
+        params: { contextID, scopeId, serviceName: displayName, entityId: entityStoreId },
+      };
+    default:
+      return null;
+  }
+};
 
 const openSecurityAgentBuilderChatPreservingConversation = (
   agentBuilder: AgentBuilderPluginStart
@@ -153,76 +233,6 @@ export const getServiceNameForServiceDetailsUrl = (row: SecurityEntityExploreRow
   return row.entity_id;
 };
 
-/**
- * Path is relative to the Security hosts/users deep link (do not prefix with `/hosts` or `/users` —
- * `application.navigateToApp` already routes into those sections).
- */
-export const getSecurityEntityExploreNavigateTarget = (
-  row: SecurityEntityExploreRow
-): { deepLinkId: string; path?: string } => {
-  if (row.entity_type === EntityType.host) {
-    const displayName = getHostNameForHostDetailsUrl(row);
-    return {
-      deepLinkId: SecurityPageName.hosts,
-      path: getHostDetailsUrl(displayName, undefined, row.entity_id),
-    };
-  }
-  if (row.entity_type === EntityType.user) {
-    const displayName = getUserNameForUserDetailsUrl(row);
-    return {
-      deepLinkId: SecurityPageName.users,
-      path: getTabsOnUsersDetailsUrl(displayName, UsersTableType.events, undefined, row.entity_id),
-    };
-  }
-  // `navigateToApp` appends `path` to the deep link's registered path. The EA home deep link
-  // already uses `/entity_analytics_home_page`; passing it again produced a doubled segment,
-  // no matching route, catch-all redirect to `/get_started`, then onboarding could send users to
-  // SIEM migrations (e.g. `/get_started/siem_migrations` → `/siem_migrations/manage`).
-  return {
-    deepLinkId: SecurityPageName.entityAnalyticsHomePage,
-  };
-};
-
-/**
- * Navigates to the entity page in Security, then reopens Agent Builder so the sidebar embeddable
- * remounts and restores the persisted conversation (same sequence as Dashboard Canvas
- * "Edit in Dashboards": primary navigation, then restore the chat surface).
- */
-export const navigateToSecurityEntityInApp = ({
-  application,
-  appId,
-  row,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
-  searchSession,
-}: {
-  application: ApplicationStart;
-  appId: string;
-  row: SecurityEntityExploreRow;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  /** When rendering from Agent Builder canvas, pass this for the same restore path as "Edit in Dashboards". */
-  openSidebarConversation?: () => void;
-  /**
-   * Optional search session service. When provided, the active session is cleared before
-   * navigating. See `clearSearchSessionBeforeSecurityNavigation` below for the rationale.
-   */
-  searchSession?: ISessionService;
-}): void => {
-  markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
-  const { deepLinkId, path } = getSecurityEntityExploreNavigateTarget(row);
-  if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
-    agentBuilder.toggleChat();
-  }
-  clearSearchSessionBeforeSecurityNavigation(searchSession);
-  application.navigateToApp(appId, { deepLinkId, path, replace: true });
-  scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
-};
-
-/**
- * Opens the Entity Analytics home page (same deep link as the product dashboard), optionally scoped to a watchlist.
- */
 /**
  * Opens Entity Analytics home with a serialized expandable-flyout state (same URL shape as the
  * product Entity Analytics page). Used from Agent Builder canvas where the in-page flyout

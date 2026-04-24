@@ -12,11 +12,19 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EntityAttachment } from './types';
 import { createEntityAttachmentDefinition } from './entity_attachment_definition';
-import { navigateToSecurityEntityInApp } from '../entity_explore_navigation';
+import {
+  navigateToEntityAnalyticsHomePageInApp,
+  navigateToEntityAnalyticsWithFlyoutInApp,
+} from '../entity_explore_navigation';
 
-jest.mock('../entity_explore_navigation', () => ({
-  navigateToSecurityEntityInApp: jest.fn(),
-}));
+jest.mock('../entity_explore_navigation', () => {
+  const actual = jest.requireActual('../entity_explore_navigation');
+  return {
+    ...actual,
+    navigateToEntityAnalyticsWithFlyoutInApp: jest.fn(),
+    navigateToEntityAnalyticsHomePageInApp: jest.fn(),
+  };
+});
 
 const experimentalFeatures = {
   entityAnalyticsWatchlistEnabled: false,
@@ -106,8 +114,54 @@ describe('createEntityAttachmentDefinition', () => {
       expect(buttons).toEqual([]);
     });
 
-    it('returns an "Open in Security" action when rendered in Canvas (replaces Preview re-entry)', () => {
-      (navigateToSecurityEntityInApp as jest.Mock).mockClear();
+    it('returns an "Open in Entity Analytics" action when rendered in Canvas (replaces Preview re-entry)', () => {
+      (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mockClear();
+      (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
+      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const def = buildDefinition({ searchSession });
+      const buttons = def.getActionButtons!({
+        attachment: attachmentOf({
+          identifierType: 'host',
+          identifier: 'alpha',
+          entityStoreId: 'host:alpha@default',
+        }),
+        isSidebar: false,
+        isCanvas: true,
+        updateOrigin: jest.fn(),
+        openCanvas: jest.fn(),
+      });
+
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0].label).toBe('Open in Entity Analytics');
+      expect(buttons[0].icon).toBe('popout');
+      expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
+
+      buttons[0].handler!();
+
+      expect(navigateToEntityAnalyticsWithFlyoutInApp).toHaveBeenCalledTimes(1);
+      expect(navigateToEntityAnalyticsHomePageInApp).not.toHaveBeenCalled();
+      expect(navigateToEntityAnalyticsWithFlyoutInApp).toHaveBeenCalledWith(
+        expect.objectContaining({
+          searchSession,
+          flyout: {
+            preview: [],
+            right: {
+              id: 'host-panel',
+              params: {
+                contextID: 'agent-builder-entity-card',
+                scopeId: 'agent-builder-entity-card',
+                hostName: 'alpha',
+                entityId: 'host:alpha@default',
+              },
+            },
+          },
+        })
+      );
+    });
+
+    it('falls back to the unfiltered Entity Analytics home when the flyout-capable identifier has no entityStoreId', () => {
+      (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mockClear();
+      (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
       const searchSession = { clear: jest.fn() } as unknown as ISessionService;
       const def = buildDefinition({ searchSession });
       const buttons = def.getActionButtons!({
@@ -119,20 +173,12 @@ describe('createEntityAttachmentDefinition', () => {
       });
 
       expect(buttons).toHaveLength(1);
-      expect(buttons[0].icon).toBe('popout');
-      expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
-
       buttons[0].handler!();
 
-      expect(navigateToSecurityEntityInApp).toHaveBeenCalledTimes(1);
-      expect(navigateToSecurityEntityInApp).toHaveBeenCalledWith(
-        expect.objectContaining({
-          searchSession,
-          row: expect.objectContaining({
-            entity_type: 'host',
-            entity_name: 'alpha',
-          }),
-        })
+      expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledTimes(1);
+      expect(navigateToEntityAnalyticsWithFlyoutInApp).not.toHaveBeenCalled();
+      expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledWith(
+        expect.objectContaining({ searchSession })
       );
     });
 

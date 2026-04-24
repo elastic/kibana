@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { normaliseEntityAttachment } from './payload';
@@ -20,7 +19,6 @@ import type { EntityAttachment } from './types';
 import { EntityCard } from './entity_card/entity_card';
 import { EntityTable } from './entity_table/entity_table';
 import { entityAttachmentQueryClient } from './query_client';
-import type { SecurityAgentBuilderChrome } from '../entity_explore_navigation';
 
 export interface EntityAttachmentInlineContentProps
   extends AttachmentRenderProps<EntityAttachment> {
@@ -31,8 +29,6 @@ export interface EntityAttachmentInlineContentProps
    * `EntityListTable`). Without them the table renders without per-row navigation.
    */
   application?: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
   searchSession?: ISessionService;
 }
 
@@ -53,9 +49,6 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
   attachment,
   experimentalFeatures,
   application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
   searchSession,
 }) => {
   const parsed = normaliseEntityAttachment(attachment);
@@ -138,9 +131,6 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
             <EntityTable
               entities={parsed.entities}
               application={application}
-              agentBuilder={agentBuilder}
-              chrome={chrome}
-              openSidebarConversation={openSidebarConversation}
               searchSession={searchSession}
             />
           )}

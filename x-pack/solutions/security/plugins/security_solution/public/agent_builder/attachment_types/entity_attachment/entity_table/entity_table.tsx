@@ -23,7 +23,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { APP_UI_ID, ENTITY_ANALYTICS_PATH } from '../../../../../common/constants';
 import { EntityType } from '../../../../../common/entity_analytics/types';
@@ -37,8 +36,9 @@ import type { EntityForAttachment } from '../use_entity_for_attachment';
 import type { EntityAttachmentIdentifier } from '../types';
 import { formatEntitySource } from './entity_data_source_utils';
 import {
-  navigateToSecurityEntityInApp,
-  type SecurityAgentBuilderChrome,
+  buildEntityRightPanel,
+  navigateToEntityAnalyticsHomePageInApp,
+  navigateToEntityAnalyticsWithFlyoutInApp,
 } from '../../entity_explore_navigation';
 
 export interface EntityTableProps {
@@ -49,12 +49,10 @@ export interface EntityTableProps {
    * `EntityListTable`). Omit in tests or environments without Kibana routing.
    */
   application?: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  openSidebarConversation?: () => void;
   /**
-   * Optional search session service. Forwarded to `navigateToSecurityEntityInApp` so the active
-   * Agent Builder-tagged search session is cleared before the cross-app jump into Security.
+   * Optional search session service. Forwarded to the shared `navigateTo…InApp` helpers so the
+   * active Agent Builder-tagged search session is cleared before the cross-app jump into the
+   * Entity Analytics flyout.
    */
   searchSession?: ISessionService;
 }
@@ -159,9 +157,9 @@ const OPEN_ENTITY_ANALYTICS_LABEL = i18n.translate(
   { defaultMessage: 'Open Entity Analytics' }
 );
 
-const OPEN_ENTITY_IN_SECURITY_ARIA = i18n.translate(
-  'xpack.securitySolution.agentBuilder.entityAttachment.table.openEntityInSecurityAria',
-  { defaultMessage: 'Open entity in Security' }
+const OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA = i18n.translate(
+  'xpack.securitySolution.agentBuilder.entityAttachment.table.openEntityInEntityAnalyticsAria',
+  { defaultMessage: 'Open entity in Entity Analytics' }
 );
 
 const identifierTypeToEntityType = (
@@ -285,9 +283,6 @@ const EntityDataSourceBadges: React.FC<{
 export const EntityTable: React.FC<EntityTableProps> = ({
   entities,
   application,
-  agentBuilder,
-  chrome,
-  openSidebarConversation,
   searchSession,
 }) => {
   const { services } = useKibana<{ application: ApplicationStart }>();
@@ -352,26 +347,29 @@ export const EntityTable: React.FC<EntityTableProps> = ({
       if (!exploreApplication) {
         return;
       }
-      const entityId =
-        row.data?.entityId ?? row.identifier.entityStoreId ?? row.identifier.identifier;
-      const entityName = row.data?.displayName ?? row.identifier.identifier;
-      const sources = row.data?.sources ?? [];
-      navigateToSecurityEntityInApp({
+      const entityStoreId = row.data?.entityId ?? row.identifier.entityStoreId;
+      const displayName = row.data?.displayName ?? row.identifier.identifier;
+      const rightPanel = buildEntityRightPanel({
+        identifierType: row.identifier.identifierType,
+        identifier: displayName,
+        entityStoreId,
+      });
+      if (rightPanel) {
+        navigateToEntityAnalyticsWithFlyoutInApp({
+          application: exploreApplication,
+          appId: APP_UI_ID,
+          flyout: { preview: [], right: rightPanel },
+          searchSession,
+        });
+        return;
+      }
+      navigateToEntityAnalyticsHomePageInApp({
         application: exploreApplication,
         appId: APP_UI_ID,
-        row: {
-          entity_type: row.identifier.identifierType,
-          entity_id: entityId,
-          entity_name: entityName,
-          source: sources.length > 0 ? { entity: { source: sources } } : undefined,
-        },
-        agentBuilder,
-        chrome,
-        openSidebarConversation,
         searchSession,
       });
     },
-    [agentBuilder, chrome, exploreApplication, openSidebarConversation, searchSession]
+    [exploreApplication, searchSession]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<EntityRow>>>(
@@ -394,7 +392,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({
                     iconType={icon}
                     display="empty"
                     size="xs"
-                    aria-label={OPEN_ENTITY_IN_SECURITY_ARIA}
+                    aria-label={OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA}
                     data-test-subj="entityAttachmentTableOpenEntity"
                     onClick={() => handleOpenEntity(row)}
                   />

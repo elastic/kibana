@@ -54,7 +54,6 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery) => ({
   sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
 });
-
 export const useEntityURLState = ({
   defaultQuery = getDefaultQuery,
   paginationLocalStorageKey,
@@ -81,8 +80,20 @@ export const useEntityURLState = ({
   urlFiltersRef.current = urlQuery.filters || [];
 
   // URL state → filterManager: keeps filter pills visible in the filter bar.
+  // The deepEqual guard defends against reference churn from unrelated URL updates
+  // (like `flyout` params), preventing a redundant filterManager emission that would
+  // cascade into filter-bar re-renders.
+  const lastAppliedFiltersRef = useRef<Filter[] | null>(null);
   useEffect(() => {
-    filterManager.setAppFilters(urlQuery.filters || []);
+    const nextFilters = urlQuery.filters || [];
+    if (
+      lastAppliedFiltersRef.current !== null &&
+      deepEqual(lastAppliedFiltersRef.current, nextFilters)
+    ) {
+      return;
+    }
+    lastAppliedFiltersRef.current = nextFilters;
+    filterManager.setAppFilters(nextFilters);
   }, [filterManager, urlQuery.filters]);
 
   // filterManager → URL state: syncs removals made via the filter bar back to URL state.

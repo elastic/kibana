@@ -20,7 +20,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import type { CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import type { EntityType } from '../../../common/entity_analytics/types';
@@ -29,8 +28,9 @@ import { APP_UI_ID } from '../../../common/constants';
 import { FormattedRelativePreferenceDate } from '../../common/components/formatted_date';
 import { getEmptyTagValue } from '../../common/components/empty_value';
 import {
-  navigateToSecurityEntityInApp,
-  type SecurityAgentBuilderChrome,
+  buildEntityRightPanel,
+  navigateToEntityAnalyticsHomePageInApp,
+  navigateToEntityAnalyticsWithFlyoutInApp,
 } from './entity_explore_navigation';
 import { formatRiskScore } from '../../entity_analytics/common';
 import { CRITICALITY_LEVEL_TITLE } from '../../entity_analytics/components/asset_criticality/translations';
@@ -80,6 +80,11 @@ const MAX_VISIBLE_SOURCES = 3;
 
 const LAST_SEEN_TOOLTIP_FIELD_NAME = '@timestamp';
 const FIRST_SEEN_TOOLTIP_FIELD_NAME = 'entity.lifecycle.first_seen';
+
+const OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA = i18n.translate(
+  'xpack.securitySolution.agentBuilder.entityListAttachment.openEntityInEntityAnalyticsAria',
+  { defaultMessage: 'Open entity in Entity Analytics' }
+);
 
 /**
  * Coerce the `source` column value into the multi-value string array shape of
@@ -176,11 +181,8 @@ const tableScrollStyles = css`
 export const EntityListTable: React.FC<{
   entities: EntityListRow[];
   application: ApplicationStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  openSidebarConversation?: () => void;
   searchSession?: ISessionService;
-}> = ({ entities, application, agentBuilder, chrome, openSidebarConversation, searchSession }) => {
+}> = ({ entities, application, searchSession }) => {
   const { euiTheme } = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<EntityListRow>> = useMemo(
@@ -200,20 +202,26 @@ export const EntityListTable: React.FC<{
                 <EuiButtonIcon
                   iconType={icon}
                   display="empty"
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.agentBuilder.entityListAttachment.openEntityAria',
-                    {
-                      defaultMessage: 'Open entity in Security',
-                    }
-                  )}
+                  aria-label={OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA}
                   onClick={() => {
-                    navigateToSecurityEntityInApp({
+                    const displayName = row.entity_name ?? row.entity_id;
+                    const rightPanel = buildEntityRightPanel({
+                      identifierType: row.entity_type,
+                      identifier: displayName,
+                      entityStoreId: row.entity_id,
+                    });
+                    if (rightPanel) {
+                      navigateToEntityAnalyticsWithFlyoutInApp({
+                        application,
+                        appId: APP_UI_ID,
+                        flyout: { preview: [], right: rightPanel },
+                        searchSession,
+                      });
+                      return;
+                    }
+                    navigateToEntityAnalyticsHomePageInApp({
                       application,
                       appId: APP_UI_ID,
-                      row,
-                      agentBuilder,
-                      chrome,
-                      openSidebarConversation,
                       searchSession,
                     });
                   }}
@@ -388,14 +396,7 @@ export const EntityListTable: React.FC<{
         ),
       },
     ],
-    [
-      agentBuilder,
-      application,
-      chrome,
-      euiTheme.font.familyCode,
-      openSidebarConversation,
-      searchSession,
-    ]
+    [application, euiTheme.font.familyCode, searchSession]
   );
 
   return (

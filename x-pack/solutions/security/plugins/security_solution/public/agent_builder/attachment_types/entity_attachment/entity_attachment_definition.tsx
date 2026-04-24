@@ -23,7 +23,9 @@ import { isFlyoutCapableIdentifierType } from './types';
 import { normaliseEntityAttachment } from './payload';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import {
-  navigateToSecurityEntityInApp,
+  buildEntityRightPanel,
+  navigateToEntityAnalyticsHomePageInApp,
+  navigateToEntityAnalyticsWithFlyoutInApp,
   type SecurityAgentBuilderChrome,
 } from '../entity_explore_navigation';
 
@@ -43,9 +45,9 @@ const PREVIEW_LABEL = i18n.translate(
   { defaultMessage: 'Preview' }
 );
 
-const OPEN_IN_SECURITY_LABEL = i18n.translate(
-  'xpack.securitySolution.agentBuilder.attachments.entity.openInSecurity',
-  { defaultMessage: 'Open in Security' }
+const OPEN_IN_ENTITY_ANALYTICS_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.attachments.entity.openInEntityAnalytics',
+  { defaultMessage: 'Open in Entity Analytics' }
 );
 
 /**
@@ -120,8 +122,6 @@ export const createEntityAttachmentDefinition = ({
           {...props}
           experimentalFeatures={experimentalFeatures}
           application={application}
-          agentBuilder={agentBuilder}
-          chrome={chrome}
           searchSession={searchSession}
         />
       </React.Suspense>
@@ -171,18 +171,26 @@ export const createEntityAttachmentDefinition = ({
       if (isCanvas) {
         return [
           {
-            label: OPEN_IN_SECURITY_LABEL,
+            label: OPEN_IN_ENTITY_ANALYTICS_LABEL,
             icon: 'popout',
             type: ActionButtonType.SECONDARY,
             handler: () => {
-              navigateToSecurityEntityInApp({
+              const rightPanel = buildEntityRightPanel(identifier);
+              if (rightPanel) {
+                navigateToEntityAnalyticsWithFlyoutInApp({
+                  application: resolvedApplication,
+                  appId: APP_UI_ID,
+                  flyout: { preview: [], right: rightPanel },
+                  agentBuilder,
+                  chrome,
+                  openSidebarConversation,
+                  searchSession,
+                });
+                return;
+              }
+              navigateToEntityAnalyticsHomePageInApp({
                 application: resolvedApplication,
                 appId: APP_UI_ID,
-                row: {
-                  entity_type: identifier.identifierType,
-                  entity_id: identifier.entityStoreId ?? identifier.identifier,
-                  entity_name: identifier.identifier,
-                },
                 agentBuilder,
                 chrome,
                 openSidebarConversation,

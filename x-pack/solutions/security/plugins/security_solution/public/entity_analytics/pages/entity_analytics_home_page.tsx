@@ -107,23 +107,28 @@ export const EntityAnalyticsHomePage = () => {
     [newDataViewPickerEnabled, oldIsSourcererLoading, entityDataViewLoading]
   );
 
-  const location = useLocation();
+  // Only subscribe to `search` rather than the whole `location` object so this
+  // component doesn't re-render (and re-create callbacks) on unrelated URL
+  // updates like flyout params.
+  const { search } = useLocation();
   const history = useHistory();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
   const selectedWatchlistId = useMemo(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(search);
     return params.get('watchlistId') || undefined;
-  }, [location.search]);
+  }, [search]);
 
   const selectedWatchlistName = useMemo(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(search);
     return params.get('watchlistName') || undefined;
-  }, [location.search]);
+  }, [search]);
 
   const setSelectedWatchlist = useCallback(
     (id?: string, name?: string) => {
-      const params = new URLSearchParams(location.search);
+      // Read the latest search from `history.location` to keep this callback's
+      // reference stable across unrelated URL updates.
+      const params = new URLSearchParams(history.location.search);
       if (id) {
         params.set('watchlistId', id);
       } else {
@@ -134,9 +139,9 @@ export const EntityAnalyticsHomePage = () => {
       } else {
         params.delete('watchlistName');
       }
-      history.replace({ ...location, search: params.toString() });
+      history.replace({ ...history.location, search: params.toString() });
     },
-    [location, history]
+    [history]
   );
 
   const indicesExist = useMemo(

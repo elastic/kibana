@@ -191,32 +191,29 @@ export const EntitiesDataTable = ({
   } = useUserPrivileges();
   const { setQuery, deleteQuery } = useGlobalTime();
 
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-
   const openTableFlyout = useCallback(
     (doc?: DataTableRecord | undefined) => {
-      if (doc) {
-        setExpandedDoc(doc);
-        const { entityType, entityName, entityId } = getEntityFields(doc);
-        if (!entityType || !entityName) return;
-
-        const panelKey = EntityPanelKeyByType[entityType];
-        const panelParam = EntityPanelParamByType[entityType];
-        if (!panelKey || !panelParam) return;
-
-        openRightPanel({
-          id: panelKey,
-          params: {
-            [panelParam]: entityName,
-            entityId,
-            contextID: ENTITY_ANALYTICS_TABLE_ID,
-            scopeId: ENTITY_ANALYTICS_TABLE_ID,
-          },
-        });
-      } else {
+      if (!doc) {
         closeFlyout();
-        setExpandedDoc(undefined);
+        return;
       }
+
+      const { entityType, entityName, entityId } = getEntityFields(doc);
+      if (!entityType || !entityName) return;
+
+      const panelKey = EntityPanelKeyByType[entityType];
+      const panelParam = EntityPanelParamByType[entityType];
+      if (!panelKey || !panelParam) return;
+
+      openRightPanel({
+        id: panelKey,
+        params: {
+          [panelParam]: entityName,
+          entityId,
+          contextID: ENTITY_ANALYTICS_TABLE_ID,
+          scopeId: ENTITY_ANALYTICS_TABLE_ID,
+        },
+      });
     },
     [openRightPanel, closeFlyout]
   );
@@ -604,7 +601,6 @@ export const EntitiesDataTable = ({
             onSort={onSort}
             rows={rows}
             sampleSizeState={MAX_ENTITIES_TO_LOAD}
-            expandedDoc={expandedDoc}
             setExpandedDoc={openTableFlyout}
             renderDocumentView={EmptyComponent}
             sort={sort}

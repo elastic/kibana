@@ -8,24 +8,15 @@
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { SecurityPageName } from '../../../common/constants';
-import { parseEntityResolutionFromUrlState } from '../../common/components/link_to/entity_resolution_query_params';
 import {
   getAgentBuilderLastAgentIdForSecurityOpenChat,
   getHostNameForHostDetailsUrl,
-  getSecurityEntityExploreNavigateTarget,
   getServiceNameForServiceDetailsUrl,
   getUserNameForUserDetailsUrl,
   isAgentBuilderSidebarOpen,
   navigateToEntityAnalyticsHomePageInApp,
   navigateToEntityAnalyticsWithFlyoutInApp,
-  navigateToSecurityEntityInApp,
 } from './entity_explore_navigation';
-
-const queryFromPath = (pathWithQuery: string): string | undefined => {
-  const i = pathWithQuery.indexOf('?');
-  return i === -1 ? undefined : pathWithQuery.slice(i + 1);
-};
 
 describe('entity_explore_navigation', () => {
   describe('isAgentBuilderSidebarOpen', () => {
@@ -170,47 +161,6 @@ describe('entity_explore_navigation', () => {
     });
   });
 
-  describe('getSecurityEntityExploreNavigateTarget', () => {
-    it('returns host path without a /hosts prefix (deeplink already targets hosts)', () => {
-      const { deepLinkId, path } = getSecurityEntityExploreNavigateTarget({
-        entity_type: 'host',
-        entity_id: 'host:B377958D-B4A8-5FCA-B237-F2DE40404617',
-        entity_name: 'MacBookPro.localdomain',
-      });
-      expect(deepLinkId).toBe(SecurityPageName.hosts);
-      expect(path).toBeDefined();
-      expect(path!.startsWith('/name/MacBookPro.localdomain/events?')).toBe(true);
-      expect(parseEntityResolutionFromUrlState(queryFromPath(path!))).toEqual({
-        entityId: 'host:B377958D-B4A8-5FCA-B237-F2DE40404617',
-      });
-    });
-
-    it('returns users events path without a /users prefix', () => {
-      const entityId = 'user:yuliianaumenko@B377958D-B4A8-5FCA-B237-F2DE40404617@local';
-      const { deepLinkId, path } = getSecurityEntityExploreNavigateTarget({
-        entity_type: 'user',
-        entity_id: entityId,
-        entity_name: 'yuliianaumenko@MacBookPro.localdomain',
-      });
-      expect(deepLinkId).toBe(SecurityPageName.users);
-      expect(path).toBeDefined();
-      expect(path!.startsWith('/name/yuliianaumenko%40MacBookPro.localdomain/events?')).toBe(true);
-      expect(parseEntityResolutionFromUrlState(queryFromPath(path!))).toEqual({
-        entityId,
-      });
-    });
-
-    it('returns entity analytics home without a redundant path (deep link already defines the base URL)', () => {
-      const { deepLinkId, path } = getSecurityEntityExploreNavigateTarget({
-        entity_type: 'service',
-        entity_id: 'service:abc-123',
-        entity_name: 'api.example',
-      });
-      expect(deepLinkId).toBe(SecurityPageName.entityAnalyticsHomePage);
-      expect(path).toBeUndefined();
-    });
-  });
-
   describe('search session clearing on cross-app navigation', () => {
     const buildApplicationMock = (): jest.Mocked<ApplicationStart> =>
       ({
@@ -219,45 +169,6 @@ describe('entity_explore_navigation', () => {
 
     const buildSearchSessionMock = (): jest.Mocked<Pick<ISessionService, 'clear'>> => ({
       clear: jest.fn(),
-    });
-
-    const hostRow = {
-      entity_type: 'host',
-      entity_id: 'host:1',
-      entity_name: 'host-1',
-    };
-
-    describe('navigateToSecurityEntityInApp', () => {
-      it('clears the search session before navigateToApp is called', () => {
-        const application = buildApplicationMock();
-        const searchSession = buildSearchSessionMock();
-
-        navigateToSecurityEntityInApp({
-          application,
-          appId: 'securitySolutionUI',
-          row: hostRow,
-          searchSession: searchSession as unknown as ISessionService,
-        });
-
-        expect(searchSession.clear).toHaveBeenCalledTimes(1);
-        expect(application.navigateToApp).toHaveBeenCalledTimes(1);
-        const clearOrder = searchSession.clear.mock.invocationCallOrder[0];
-        const navigateOrder = application.navigateToApp.mock.invocationCallOrder[0];
-        expect(clearOrder).toBeLessThan(navigateOrder);
-      });
-
-      it('does not throw when searchSession is undefined (backward-compat)', () => {
-        const application = buildApplicationMock();
-
-        expect(() =>
-          navigateToSecurityEntityInApp({
-            application,
-            appId: 'securitySolutionUI',
-            row: hostRow,
-          })
-        ).not.toThrow();
-        expect(application.navigateToApp).toHaveBeenCalledTimes(1);
-      });
     });
 
     describe('navigateToEntityAnalyticsWithFlyoutInApp', () => {

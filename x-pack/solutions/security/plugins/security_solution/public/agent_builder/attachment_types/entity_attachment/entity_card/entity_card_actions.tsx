@@ -12,14 +12,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { APP_UI_ID } from '../../../../../common/constants';
-import {
-  HostPanelKey,
-  ServicePanelKey,
-  UserPanelKey,
-} from '../../../../flyout/entity_details/shared/constants';
 import type { EntityAttachmentIdentifier } from '../types';
-import { isFlyoutCapableIdentifierType } from '../types';
 import {
+  buildEntityRightPanel,
   navigateToEntityAnalyticsHomePageInApp,
   navigateToEntityAnalyticsWithFlyoutInApp,
 } from '../../entity_explore_navigation';
@@ -42,13 +37,6 @@ interface EntityCardActionsProps {
   searchSession?: ISessionService;
 }
 
-/**
- * Scope shared with the Canvas entity card (see `entity_card_flyout_overview_canvas.tsx`).
- * Kept in sync so the flyout provider resolves the same `contextID` / `scopeId` regardless
- * of whether the flyout is opened from the inline chat card or the Canvas preview.
- */
-const AGENT_BUILDER_ENTITY_CARD_SCOPE = 'agent-builder-entity-card';
-
 const OPEN_IN_ENTITY_ANALYTICS_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.entityAttachment.actions.openInEntityAnalytics',
   { defaultMessage: 'Open in Entity Analytics' }
@@ -58,70 +46,6 @@ const OPEN_ENTITY_ANALYTICS_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.entityAttachment.actions.openEntityAnalytics',
   { defaultMessage: 'Open Entity Analytics' }
 );
-
-type EntityFlyoutRightPanel =
-  | {
-      id: typeof HostPanelKey;
-      params: { contextID: string; scopeId: string; hostName: string; entityId: string };
-    }
-  | {
-      id: typeof UserPanelKey;
-      params: {
-        contextID: string;
-        scopeId: string;
-        userName: string;
-        identityFields: { 'user.name': string };
-        entityId: string;
-      };
-    }
-  | {
-      id: typeof ServicePanelKey;
-      params: { contextID: string; scopeId: string; serviceName: string; entityId: string };
-    };
-
-/**
- * Builds the minimal `right`-panel payload consumed by the expandable flyout provider on the
- * Entity Analytics home page. Returns `null` for generic entities (no dedicated flyout yet)
- * and for legacy attachments that don't carry the canonical `entity.id` — callers fall back
- * to an unfiltered navigation in those cases.
- */
-const buildEntityRightPanel = (
-  identifier: EntityAttachmentIdentifier
-): EntityFlyoutRightPanel | null => {
-  const { identifierType, identifier: displayName, entityStoreId } = identifier;
-  if (!entityStoreId || !isFlyoutCapableIdentifierType(identifierType)) {
-    return null;
-  }
-
-  const contextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
-  const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
-
-  switch (identifierType) {
-    case 'host':
-      return {
-        id: HostPanelKey,
-        params: { contextID, scopeId, hostName: displayName, entityId: entityStoreId },
-      };
-    case 'user':
-      return {
-        id: UserPanelKey,
-        params: {
-          contextID,
-          scopeId,
-          userName: displayName,
-          identityFields: { 'user.name': displayName },
-          entityId: entityStoreId,
-        },
-      };
-    case 'service':
-      return {
-        id: ServicePanelKey,
-        params: { contextID, scopeId, serviceName: displayName, entityId: entityStoreId },
-      };
-    default:
-      return null;
-  }
-};
 
 /**
  * Follow-up action row rendered at the bottom of the entity card. The only
