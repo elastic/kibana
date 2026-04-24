@@ -24,6 +24,7 @@ import {
   useBatchedPublishingSubjects,
   useFetchContext,
   type StateComparators,
+  type WithAllKeys,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -34,7 +35,10 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../common/environment_filter_values';
-import type { ServiceMapEmbeddableState } from '../../../server/lib/embeddables/service_map_embeddable_schema';
+import type {
+  ServiceMapCustomState,
+  ServiceMapEmbeddableState,
+} from '../../../server/lib/embeddables/service_map_embeddable_schema';
 
 import type { EmbeddableDeps } from '../types';
 import { ApmEmbeddableContext } from '../embeddable_context';
@@ -44,14 +48,7 @@ import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 
 const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
 
-interface ServiceMapCustomState {
-  environment: string;
-  kuery: string | undefined;
-  service_name: string | undefined;
-  service_group_id: string | undefined;
-}
-
-const defaultCustomState: ServiceMapCustomState = {
+const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   environment: ENVIRONMENT_ALL.value,
   kuery: undefined,
   service_name: undefined,
@@ -121,7 +118,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       finalizeApi,
       uuid,
       parentApi,
-      initializeDrilldownsManager,
+      initializeDrilldownsManager: _initializeDrilldownsManager,
     }) => {
       const { coreStart } = deps;
       const state = initialState;
@@ -141,7 +138,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         defaultCustomState
       );
 
-      const drilldownsManager = await initializeDrilldownsManager(uuid, state);
+      void _initializeDrilldownsManager;
 
       const query$ = new BehaviorSubject<Query | undefined>(buildQueryFromKuery(state.kuery));
       const filters$ = new BehaviorSubject<Filter[] | undefined>(
@@ -154,7 +151,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...customStateManager.getLatestState(),
-          ...drilldownsManager.getLatestState(),
         };
       }
 
@@ -165,14 +161,12 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
-          customStateManager.anyStateChange$,
-          drilldownsManager.anyStateChange$
+          customStateManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => ({
           ...titleComparators,
           ...timeRangeComparators,
           ...customStateComparators,
-          ...drilldownsManager.comparators,
         }),
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved);
@@ -182,7 +176,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
               : { time_range: DEFAULT_TIME_RANGE }
           );
           customStateManager.reinitializeState(lastSaved);
-          drilldownsManager.reinitializeState(lastSaved ?? {});
         },
       });
 
@@ -190,7 +183,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         ...titleManager.api,
         ...timeRangeManager.api,
         ...unsavedChangesApi,
-        ...drilldownsManager.api,
         serializeState,
         blockingError$,
         filters$,
@@ -249,7 +241,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             return () => {
               filtersSubscription.unsubscribe();
               querySubscription.unsubscribe();
-              drilldownsManager.cleanup();
             };
           }, []);
 

@@ -33,7 +33,7 @@ export function createAddServiceMapPanelAction(
       return deps.config.serviceMapEnabled && apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) {
+      if (!deps.config.serviceMapEnabled || !apiIsPresentationContainer(embeddable)) {
         throw new IncompatibleActionError();
       }
 

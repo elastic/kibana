@@ -115,9 +115,11 @@ export function ServiceMapEmbeddable({
   const isEmpty = data.nodes.length === 0;
   if (status === FETCH_STATUS.SUCCESS && isEmpty) {
     return (
-      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-        <EmptyPrompt />
-      </EuiPanel>
+      <div data-test-subj="apmServiceMapEmbeddable">
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+          <EmptyPrompt />
+        </EuiPanel>
+      </div>
     );
   }
 
@@ -129,32 +131,36 @@ export function ServiceMapEmbeddable({
     error.body?.message === SERVICE_MAP_TIMEOUT_ERROR
   ) {
     return (
-      <EuiPanel hasBorder paddingSize="l">
-        <TimeoutPrompt isGlobalServiceMap={!serviceName} />
-      </EuiPanel>
+      <div data-test-subj="apmServiceMapEmbeddable">
+        <EuiPanel hasBorder paddingSize="l">
+          <TimeoutPrompt isGlobalServiceMap={!serviceName} />
+        </EuiPanel>
+      </div>
     );
   }
 
   if (status === FETCH_STATUS.FAILURE) {
     return (
-      <EuiPanel hasBorder paddingSize="l">
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          iconType="warning"
-          title={i18n.translate('xpack.apm.serviceMapEmbeddable.errorTitle', {
-            defaultMessage: 'Unable to load service map',
-          })}
-          data-test-subj="apmServiceMapEmbeddableError"
-        >
-          <p>
-            {i18n.translate('xpack.apm.serviceMapEmbeddable.errorDescription', {
-              defaultMessage:
-                'There was a problem loading the service map. Try refreshing the view.',
+      <div data-test-subj="apmServiceMapEmbeddable">
+        <EuiPanel hasBorder paddingSize="l">
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="warning"
+            title={i18n.translate('xpack.apm.serviceMapEmbeddable.errorTitle', {
+              defaultMessage: 'Unable to load service map',
             })}
-          </p>
-        </EuiCallOut>
-      </EuiPanel>
+            data-test-subj="apmServiceMapEmbeddableError"
+          >
+            <p>
+              {i18n.translate('xpack.apm.serviceMapEmbeddable.errorDescription', {
+                defaultMessage:
+                  'There was a problem loading the service map. Try refreshing the view.',
+              })}
+            </p>
+          </EuiCallOut>
+        </EuiPanel>
+      </div>
     );
   }
 

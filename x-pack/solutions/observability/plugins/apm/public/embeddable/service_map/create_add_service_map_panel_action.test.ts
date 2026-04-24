@@ -105,6 +105,20 @@ describe('createAddServiceMapPanelAction', () => {
     );
   });
 
+  it('throws IncompatibleActionError when executing while serviceMapEnabled is false', async () => {
+    mockApiIsPresentationContainer.mockReturnValue(true);
+    const disabledDeps = {
+      ...mockDeps,
+      config: { serviceMapEnabled: false },
+    } as unknown as EmbeddableDeps;
+    const action = createAddServiceMapPanelAction(disabledDeps);
+
+    await expect(
+      action.execute({ embeddable: { addNewPanel: jest.fn() } } as never)
+    ).rejects.toBeInstanceOf(IncompatibleActionError);
+    expect(mockOpenLazyFlyout).not.toHaveBeenCalled();
+  });
+
   it('extracts time range from parent when apiPublishesTimeRange returns true', async () => {
     const mockTimeRange = { from: '2021-10-10T00:00:00.000Z', to: '2021-10-10T00:15:00.000Z' };
     const embeddable = {

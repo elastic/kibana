@@ -27,8 +27,6 @@ const mockUseBatchedPublishingSubjects = jest.fn();
 const mockUseFetchContext = jest.fn();
 const mockServiceMapEmbeddable = jest.fn();
 const mockApmEmbeddableContext = jest.fn();
-const mockInitializeDrilldownsManager = jest.fn();
-
 jest.mock('@kbn/presentation-publishing', () => ({
   initializeTitleManager: (...args: unknown[]) => mockInitializeTitleManager(...args),
   initializeTimeRangeManager: (...args: unknown[]) => mockInitializeTimeRangeManager(...args),
@@ -58,22 +56,12 @@ describe('getServiceMapEmbeddableFactory', () => {
   let titleAnyStateChange$: Subject<void>;
   let timeRangeAnyStateChange$: Subject<void>;
   let customStateAnyStateChange$: Subject<void>;
-  let drilldownsAnyStateChange$: Subject<void>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     titleAnyStateChange$ = new Subject<void>();
     timeRangeAnyStateChange$ = new Subject<void>();
     customStateAnyStateChange$ = new Subject<void>();
-    drilldownsAnyStateChange$ = new Subject<void>();
-    mockInitializeDrilldownsManager.mockImplementation(async () => ({
-      api: {},
-      getLatestState: jest.fn(() => ({})),
-      anyStateChange$: drilldownsAnyStateChange$,
-      reinitializeState: jest.fn(),
-      comparators: {},
-      cleanup: jest.fn(),
-    }));
     mockInitializeTitleManager.mockReturnValue({
       api: { titleApi: true },
       getLatestState: jest.fn(() => ({ title: 'Saved title' })),
@@ -132,7 +120,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      initializeDrilldownsManager: jest.fn(),
     } as never);
 
     expect(finalizeApi).toHaveBeenCalledWith(
@@ -167,7 +155,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      initializeDrilldownsManager: jest.fn(),
     } as never);
 
     expect(embeddable.api.blockingError$).toBeDefined();
@@ -185,7 +173,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      initializeDrilldownsManager: jest.fn(),
     } as never);
 
     expect(embeddable.api.isEditingEnabled()).toBe(true);
@@ -213,7 +201,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      initializeDrilldownsManager: jest.fn(),
     } as never);
 
     render(<embeddable.Component />);
@@ -292,7 +280,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-2',
       parentApi,
-      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      initializeDrilldownsManager: jest.fn(),
     } as never);
 
     const unsavedConfig = mockInitializeUnsavedChanges.mock.calls[0][0];
@@ -371,7 +359,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-3',
       parentApi,
-      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      initializeDrilldownsManager: jest.fn(),
     } as never);
 
     expect(embeddable.api.timeRange$.getValue()).toEqual({
@@ -408,7 +396,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-4',
       parentApi,
-      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      initializeDrilldownsManager: jest.fn(),
     } as never);
 
     // New panel defaults to custom time range
@@ -444,7 +432,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-5',
       parentApi,
-      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      initializeDrilldownsManager: jest.fn(),
     } as never);
 
     render(<embeddable.Component />);
@@ -470,7 +458,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         finalizeApi,
         uuid: 'panel-1',
         parentApi,
-        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initializeDrilldownsManager: jest.fn(),
       } as never);
 
       return embeddable.api as ServiceMapEmbeddableApi;
@@ -560,7 +548,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-cleanup',
       parentApi,
-      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      initializeDrilldownsManager: jest.fn(),
     } as never);
 
     const { unmount } = render(<embeddable.Component />);

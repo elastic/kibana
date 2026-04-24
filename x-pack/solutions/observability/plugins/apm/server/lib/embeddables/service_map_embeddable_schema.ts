@@ -12,10 +12,7 @@ import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
-import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-
-const SERVICE_MAP_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
 export const serviceMapCustomStateSchema = schema.object({
   environment: schema.string({ defaultValue: ENVIRONMENT_ALL.value }),
@@ -24,20 +21,14 @@ export const serviceMapCustomStateSchema = schema.object({
   service_group_id: schema.maybe(schema.string()),
 });
 
-export const getServiceMapEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.allOf(
-    [
-      serializedTitlesSchema,
-      serializedTimeRangeSchema,
-      getDrilldownsSchema(SERVICE_MAP_SUPPORTED_TRIGGERS),
-      serviceMapCustomStateSchema,
-    ],
-    {
-      meta: {
-        id: 'apm-service-map-embeddable',
-        description: 'APM service map embeddable schema',
-      },
-    }
-  );
+export type ServiceMapCustomState = TypeOf<typeof serviceMapCustomStateSchema>;
+
+export const getServiceMapEmbeddableSchema = (_getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  schema.allOf([serializedTitlesSchema, serializedTimeRangeSchema, serviceMapCustomStateSchema], {
+    meta: {
+      id: 'apm-service-map-embeddable',
+      description: 'APM service map embeddable schema',
+    },
+  });
 
 export type ServiceMapEmbeddableState = TypeOf<ReturnType<typeof getServiceMapEmbeddableSchema>>;

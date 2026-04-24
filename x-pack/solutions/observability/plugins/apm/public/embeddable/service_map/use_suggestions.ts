@@ -58,6 +58,7 @@ export function useSuggestions({
           version: '2023-10-31',
         });
         setTerms(response.terms);
+        setIsLoading(false);
       } catch (error) {
         if (error.name === 'AbortError') {
           setIsLoading(false);
@@ -66,9 +67,7 @@ export function useSuggestions({
         console.error('Error fetching suggestions:', error);
         setTerms([]);
         setIsLoading(false);
-        return;
       }
-      setIsLoading(false);
     },
     [core.http, fieldName, start, end, serviceName]
   );
