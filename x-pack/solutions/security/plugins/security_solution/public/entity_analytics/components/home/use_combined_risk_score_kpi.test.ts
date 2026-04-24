@@ -171,4 +171,28 @@ describe('useCombinedRiskScoreKpi', () => {
       })
     );
   });
+
+  it('uses timerangeOverride instead of the global date picker when provided', () => {
+    mockUseRiskScoreKpi.mockReturnValue({
+      severityCount: EMPTY_SEVERITY_COUNT,
+      loading: false,
+      error: undefined,
+      isModuleDisabled: false,
+      refetch: jest.fn(),
+    });
+
+    renderHook(
+      () =>
+        useCombinedRiskScoreKpi(false, {
+          timerangeOverride: { from: 'now-100y', to: 'now' },
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(mockUseRiskScoreKpi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timerange: { from: 'now-100y', to: 'now' },
+      })
+    );
+  });
 });

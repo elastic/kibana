@@ -122,10 +122,10 @@ describe('RiskLevelBreakdownTable', () => {
     expect(screen.getAllByTestId('riskLevelBreakdownTable-scoreRange')).toHaveLength(5);
   });
 
-  it('should format count numbers with toLocaleString', () => {
+  it('should format count numbers with getAbbreviatedNumber when they are >= 1000', () => {
     const severityCount: SeverityCount = {
       [RiskSeverity.Unknown]: 1000,
-      [RiskSeverity.Low]: 2000,
+      [RiskSeverity.Low]: 2500,
       [RiskSeverity.Moderate]: 3000,
       [RiskSeverity.High]: 4000,
       [RiskSeverity.Critical]: 5000,
@@ -138,6 +138,11 @@ describe('RiskLevelBreakdownTable', () => {
     );
 
     expect(screen.getByTestId('risk-level-breakdown-table')).toBeInTheDocument();
+    expect(screen.getByText('1.0k')).toBeInTheDocument();
+    expect(screen.getByText('2.5k')).toBeInTheDocument();
+    expect(screen.getByText('3.0k')).toBeInTheDocument();
+    expect(screen.getByText('4.0k')).toBeInTheDocument();
+    expect(screen.getByText('5.0k')).toBeInTheDocument();
   });
 
   it('should handle empty/zero counts correctly', () => {

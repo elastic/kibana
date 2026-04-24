@@ -13,6 +13,7 @@ import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/tri
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { CellActions } from '@kbn/cell-actions';
 import { CellActionsMode } from '@kbn/cell-actions/constants';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScoreLevel } from '../severity/common';
 import type { SeverityCount } from '../severity/types';
@@ -134,7 +135,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         'data-test-subj': 'riskLevelBreakdownTable-count',
         render: (count: number) => (
           <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.semiBold }}>
-            {count.toLocaleString()}
+            {getAbbreviatedNumber(count)}
           </EuiText>
         ),
       },

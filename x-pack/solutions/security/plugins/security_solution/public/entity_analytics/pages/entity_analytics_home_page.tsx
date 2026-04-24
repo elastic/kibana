@@ -192,6 +192,7 @@ export const EntityAnalyticsHomePage = () => {
           dataView={entityDataView}
           id={InputsModelId.global}
           sourcererDataViewSpec={oldSourcererDataViewSpec}
+          hideDatePicker
         />
       </FiltersGlobal>
 

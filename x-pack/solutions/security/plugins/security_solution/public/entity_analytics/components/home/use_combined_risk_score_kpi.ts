@@ -35,14 +35,32 @@ interface UseCombinedRiskScoreKpiResult {
   refetch: () => void;
 }
 
+interface UseCombinedRiskScoreKpiOptions {
+  /**
+   * Optional override for the time range used by the underlying KPI queries.
+   * When provided, the global date picker is ignored and the supplied range
+   * is used instead. Useful on pages where the global date picker is hidden
+   * or the chart should show all-time data.
+   */
+  timerangeOverride?: { from: string; to: string };
+}
+
 /**
  * Hook that aggregates risk score KPI data from all three entity types (user, host, service)
  * into a combined severity count for display in the entity analytics home page donut chart.
  */
-export const useCombinedRiskScoreKpi = (skip?: boolean): UseCombinedRiskScoreKpiResult => {
-  const { from, to } = useGlobalTime();
+export const useCombinedRiskScoreKpi = (
+  skip?: boolean,
+  options?: UseCombinedRiskScoreKpiOptions
+): UseCombinedRiskScoreKpiResult => {
+  const { from: globalFrom, to: globalTo } = useGlobalTime();
   const { filterQuery } = useGlobalFilterQuery();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
+
+  const overrideFrom = options?.timerangeOverride?.from;
+  const overrideTo = options?.timerangeOverride?.to;
+  const from = overrideFrom ?? globalFrom;
+  const to = overrideTo ?? globalTo;
 
   const timerange = useMemo(
     () => ({

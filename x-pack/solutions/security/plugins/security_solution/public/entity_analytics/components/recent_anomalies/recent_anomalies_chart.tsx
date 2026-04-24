@@ -21,6 +21,14 @@ import { RecentAnomaliesHeatmapNoResults } from './recent_anomalies_heatmap_no_r
 const RECENT_ANOMALIES_QUERY_ID = 'recent-anomalies-query';
 const RECENT_ANOMALIES_CONTEXT_ID = 'RecentAnomalies-table';
 
+/**
+ * The Entity Analytics home page hides the global date picker. The Recent
+ * Anomalies panel on that page is intentionally pinned to a fixed 30-day
+ * window so it always shows recent ML activity regardless of the hidden
+ * global time state.
+ */
+export const RECENT_ANOMALIES_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
+
 const VIEW_BY_OPTIONS = [
   { value: 'entity' as const, text: 'Entity' },
   { value: 'jobId' as const, text: 'Job ID' },
@@ -45,6 +53,7 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
     viewBy,
     watchlistId,
     spaceId,
+    timeRange: RECENT_ANOMALIES_TIME_RANGE,
   });
 
   useQueryInspector({
