@@ -19,6 +19,7 @@ engine:
   max-turns: 30
   env:
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
+if: ${{ !github.event.repository.fork }}
 concurrency:
   group: gh-aw-${{ github.workflow }}-${{ github.event.inputs.pr_number || github.run_id }}
   cancel-in-progress: true
