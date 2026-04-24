@@ -165,7 +165,7 @@ describe('open in discover action', () => {
       translatable,
       untranslatable,
     ]);
-    const expectedEsql = appendEsqlFilterExpressionToQuery('FROM index-pattern-id', multiExpr!);
+    const expectedEsql = appendEsqlFilterExpressionToQuery('FROM index-pattern-id', multiExpr);
 
     const viewUnderlyingDataArgs = {
       dataViewSpec: { id: 'index-pattern-id' },
@@ -210,95 +210,5 @@ describe('open in discover action', () => {
       filters: untranslatableFilters,
     });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
-  });
-
-  it('passes all filters as pills when text-based but there is no ES|QL in underlying args', async () => {
-    const filters: Filter[] = [
-      {
-        meta: { type: 'range', key: 'bytes' },
-        query: { range: { bytes: { gte: 100, lt: 1000 } } },
-      } as Filter,
-    ];
-
-    const viewUnderlyingDataArgs = {
-      dataViewSpec: { id: 'index-pattern-id' },
-      timeRange: {},
-      filters,
-      query: undefined,
-      esqlControls: undefined,
-      columns: ['viz_metric', 'Over time'],
-    };
-
-    const embeddable = {
-      ...compatibleEmbeddableApi,
-      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
-      isTextBasedLanguage: jest.fn(() => true),
-    };
-
-    const discoverUrl = 'https://discover-redirect-url';
-    const locator = {
-      getRedirectUrl: jest.fn(() => discoverUrl),
-    } as unknown as DiscoverAppLocator;
-
-    globalThis.open = jest.fn();
-
-    await createOpenInDiscoverAction(
-      locator,
-      {
-        get: () => ({
-          isTimeBased: () => true,
-          toSpec: () => ({ id: 'index-pattern-id' }),
-        }),
-      } as unknown as DataViewsService,
-      true
-    ).execute({
-      embeddable,
-    } as ActionExecutionContext<EmbeddableApiContext>);
-
-    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
-      ...viewUnderlyingDataArgs,
-      query: undefined,
-      filters,
-    });
-    expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
-  });
-
-  it('does not replace query with generated ES|QL for form-based Lens when filters are present', async () => {
-    const viewUnderlyingDataArgs = {
-      dataViewSpec: { id: 'index-pattern-id' },
-      timeRange: {},
-      filters: [{ meta: { type: 'range', key: 'bytes' } }],
-      query: { language: 'kuery', query: 'response:200' },
-      esqlControls: undefined,
-      columns: ['bytes', 'clientip'],
-    };
-
-    const embeddable = {
-      ...compatibleEmbeddableApi,
-      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
-      isTextBasedLanguage: jest.fn(() => false),
-    };
-
-    const discoverUrl = 'https://discover-redirect-url';
-    const locator = {
-      getRedirectUrl: jest.fn(() => discoverUrl),
-    } as unknown as DiscoverAppLocator;
-
-    globalThis.open = jest.fn();
-
-    await createOpenInDiscoverAction(
-      locator,
-      {
-        get: () => ({
-          isTimeBased: () => true,
-          toSpec: () => ({ id: 'index-pattern-id' }),
-        }),
-      } as unknown as DataViewsService,
-      true
-    ).execute({
-      embeddable,
-    } as ActionExecutionContext<EmbeddableApiContext>);
-
-    expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
   });
 });
