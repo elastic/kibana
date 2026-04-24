@@ -25,22 +25,6 @@ interface AttachmentActionsProps {
 
 export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [loadingLabel, setLoadingLabel] = useState<string | null>(null);
-
-  const makeClickHandler = useCallback(
-    (button: ActionButton) => async () => {
-      const result = button.handler();
-      if (result instanceof Promise) {
-        setLoadingLabel(button.label);
-        try {
-          await result;
-        } finally {
-          setLoadingLabel(null);
-        }
-      }
-    },
-    []
-  );
 
   const secondaryButtons = buttons.filter((b) => b.type === ActionButtonType.SECONDARY);
   const primaryButtons = buttons.filter((b) => b.type === ActionButtonType.PRIMARY);
@@ -76,9 +60,8 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
               color="text"
               size="s"
               iconType={button.icon}
-              onClick={makeClickHandler(button)}
-              isDisabled={button.disabled || loadingLabel !== null}
-              isLoading={loadingLabel === button.label}
+              onClick={button.handler}
+              isDisabled={button.disabled}
             >
               {button.label}
             </EuiButtonEmpty>
@@ -93,9 +76,8 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
               color="text"
               size="s"
               iconType={button.icon}
-              onClick={makeClickHandler(button)}
-              isDisabled={button.disabled || loadingLabel !== null}
-              isLoading={loadingLabel === button.label}
+              onClick={button.handler}
+              isDisabled={button.disabled}
             >
               {button.label}
             </EuiButton>
@@ -132,11 +114,11 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
                   items: overflowButtons.map((button) => ({
                     name: button.label,
                     icon: button.icon,
-                    disabled: button.disabled || loadingLabel !== null,
+                    disabled: button.disabled,
                     toolTipContent: button.disabled ? button.disabledReason : undefined,
                     onClick: () => {
                       closePopover();
-                      makeClickHandler(button)();
+                      button.handler();
                     },
                   })),
                 },
