@@ -52,7 +52,6 @@ export function getValueColumns(
   i: number,
   xAxisScale?: 'temporal' | 'ordinal' | 'linear'
 ) {
-  console.log('getValueColumns');
   if (!isAPIXYLayer(layer) || !isAPIesqlXYLayer(layer)) {
     return [];
   }

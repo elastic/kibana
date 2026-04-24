@@ -157,8 +157,7 @@ const createFilterFromRawColumnsESQL = async (
 
   // `column.name` can be a custom Lens label;
   // `column.id` matches the ES|QL column / field used for lookup and filters
-  const sourceField = column.meta?.sourceParams?.sourceField;
-  const fieldName = typeof sourceField === 'string' ? sourceField : '';
+  const fieldName = column.id;
 
   const field = dataView.getFieldByName(fieldName);
 

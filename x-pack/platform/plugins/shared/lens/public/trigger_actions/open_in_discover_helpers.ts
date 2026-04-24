@@ -92,13 +92,13 @@ async function getDiscoverLocationParams({
   timeFieldName,
 }: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
   if (!isLensApi(embeddable)) {
-    // Shouldn't be executed because of the isCompatible check
+    // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
   }
 
   const args = embeddable.getViewUnderlyingDataArgs();
   if (!args) {
-    // Shouldn't be executed because of the isCompatible check
+    // shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
   }
 
