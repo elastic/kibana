@@ -448,7 +448,7 @@ describe('OtelAppender.append() — attributes', () => {
   });
 
   describe('log.meta', () => {
-    it('with pattern layout (default): JSON-serialises meta and includes it as log.meta attribute', () => {
+    it('with pattern layout (default): flattens meta fields into kibana.log.meta.* attributes', () => {
       const appender = new OtelAppender(validConfig);
       const meta = { http: { method: 'GET' }, tags: ['api'] };
       appender.append(makeRecord({ meta }));

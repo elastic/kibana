@@ -63,17 +63,41 @@ jest.mock('@elastic/opentelemetry-node/sdk', () => ({
   },
 }));
 
-jest.mock('@opentelemetry/api', () => ({
-  ROOT_CONTEXT: 'root-context',
-  TraceFlags: { NONE: 0, SAMPLED: 1 },
-  trace: {
-    setSpanContext: jest.fn((_ctx, spanCtx) => ({ spanContext: spanCtx })),
-  },
-}));
+jest.mock('@opentelemetry/api', () => {
+  const actual = jest.requireActual('@opentelemetry/api');
+  // actual.trace is a class instance whose methods (getTracer, etc.) live on the prototype,
+  // not as own enumerable properties. A plain spread ({ ...actual.trace }) only copies own
+  // properties, silently stripping all prototype methods. We preserve the prototype chain
+  // with Object.create so that code in the import graph that calls trace.getTracer() at
+  // module-load time (e.g. kbn-inference-tracing) continues to work.
+  const mockTrace = Object.create(Object.getPrototypeOf(actual.trace));
+  Object.assign(mockTrace, actual.trace, {
+    // Override ROOT_CONTEXT with a stable string so tests can assert the exact value passed to setSpanContext.
+    setSpanContext: jest.fn((_ctx: unknown, spanCtx: unknown) => ({ spanContext: spanCtx })),
+  });
+  return {
+    ...actual,
+    ROOT_CONTEXT: 'root-context',
+    trace: mockTrace,
+  };
+});
 
 export const mockGetConfiguration = jest.fn();
 jest.mock('@kbn/apm-config-loader', () => ({
   getConfiguration: mockGetConfiguration,
+}));
+
+// @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and
+// @kbn/metrics. Those packages load heavy OTel SDK modules (tracers, exporters, etc.)
+// at require-time that are unrelated to what otel_appender.ts actually uses
+// (buildOtelResources). Mocking them here keeps those module graphs from loading.
+jest.mock('@kbn/tracing', () => ({
+  initTracing: jest.fn(),
+  LateBindingSpanProcessor: { get: jest.fn() },
+  OTLPSpanProcessor: jest.fn(),
+}));
+jest.mock('@kbn/metrics', () => ({
+  initMetrics: jest.fn(),
 }));
 
 export const mockLayoutFormat = jest.fn((record: { message: string }) => record.message);

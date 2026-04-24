@@ -152,7 +152,7 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
     // Extract the service object because we know that it always exists. Mapping it directly avoids calling the more expensive getFlattenedObject function for every log entry.
     const {
       service: { version, type, state, node: { roles } = {}, id, ...serviceRest } = {},
-      ...rest
+      ...metaRest
     } = record.meta;
     if (version !== undefined) attrs['service.version'] = version;
     if (type !== undefined) attrs['service.type'] = type;
@@ -164,9 +164,13 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
       attrs[key] = value;
     });
 
+    // Flatten non-service meta into individual OTel attributes prefixed with
+    // kibana.log.meta. so they are discoverable as flat fields in backends.
     // Only included for pattern layout: with JSON layout the meta is part of
     // the structured body and repeating it here would be redundant.
-    attrs['kibana.log.meta'] = rest as unknown as AttributeValue; // Force-casting because "objects" are actually allowed (and indexed as "flattened" types) in ES.
+    Object.entries(getFlattenedObject(metaRest)).forEach(([key, value]) => {
+      attrs[`kibana.log.meta.${key}`] = value as AttributeValue;
+    });
   }
 
   return attrs;
