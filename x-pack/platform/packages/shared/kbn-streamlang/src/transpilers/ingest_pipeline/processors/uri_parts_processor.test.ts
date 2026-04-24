@@ -53,6 +53,26 @@ describe('transpile uri_parts -> ingest pipeline', () => {
         },
       ]);
     });
+
+    it('accepts `to === from` (canonical ECS in-place shape)', async () => {
+      // Both `from` and the ingest-processor `target_field` default to "url";
+      // the ECS canonical shape parses the `url` scalar into `url.*` in place.
+      // The schema intentionally does not reject this — the processor is
+      // emitted with identical `field`/`target_field` and ES handles it.
+      const processors = await transpileSingle({
+        action: 'uri_parts',
+        from: 'url',
+        to: 'url',
+      });
+      expect(processors).toEqual([
+        {
+          uri_parts: {
+            field: 'url',
+            target_field: 'url',
+          },
+        },
+      ]);
+    });
   });
 
   describe('pass-through options', () => {

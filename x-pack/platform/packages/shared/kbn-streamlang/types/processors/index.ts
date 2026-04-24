@@ -180,7 +180,10 @@ export const uriPartsProcessorSchema = processorBaseWithWhereSchema
     to: z
       .optional(StreamlangTargetField)
       .describe(
-        'Target field / column prefix for the extracted URI components (defaults to "url")'
+        'Target field / column prefix for the extracted URI components (defaults to "url"). ' +
+          'May equal `from` — the canonical ECS shape parses the `url` field in place. ' +
+          'Note: combining `to === from` with `remove_if_successful: true` nulls the parsed ' +
+          'object after writing it.'
       ),
     keep_original: z
       .optional(z.boolean())

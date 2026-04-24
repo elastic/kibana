@@ -45,6 +45,22 @@ describe('convertUriPartsProcessorToESQL', () => {
         from: 'url',
         keep_original: false,
       };
+      // Also pins the canonical ECS in-place shape: `from === to === "url"`
+      // (via the default target) emits `URI_PARTS url = url`, which ES|QL
+      // accepts — the source column survives the command and sub-columns
+      // `url.scheme, url.domain, ...` are added alongside it.
+      expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toBe(
+        'WHERE NOT(url IS NULL) | URI_PARTS url = url'
+      );
+    });
+
+    it('accepts explicit `to === from` without collapsing or rewriting either column', () => {
+      const processor: UriPartsProcessor = {
+        action: 'uri_parts',
+        from: 'url',
+        to: 'url',
+        keep_original: false,
+      };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toBe(
         'WHERE NOT(url IS NULL) | URI_PARTS url = url'
       );
