@@ -37,14 +37,18 @@ export interface ScopedModel {
  */
 export interface ModelProvider {
   /**
-   * Returns the model used for LLM tasks in the current round.
+   * Returns the standard model used for LLM tasks in the current context.
    */
   getDefaultModel: () => Promise<ScopedModel>;
   /**
+   * Returns the fast model used for LLM tasks in the current context.
+   * If no fast model is available, returns the default model.
+   */
+  getFastModel: () => Promise<ScopedModel>;
+  /**
    * Returns a model using the given connectorId.
    *
-   * Will throw if connector doesn't exist, user has no access, or connector
-   * is not a GenAI connector.
+   * Will throw if connector doesn't exist, user has no access, or connector is not a GenAI connector.
    */
   getModel: (options: { connectorId: string }) => Promise<ScopedModel>;
   /**
