@@ -49,6 +49,10 @@ export class RuleEditorPage {
 
   async navigateToRuleEdit(ruleId: string): Promise<void> {
     await this.page.gotoApp(`security/rules/id/${ruleId}/edit`);
+    await this.page.testSubj.locator('edit-rule-define-tab').waitFor({
+      state: 'visible',
+      timeout: 120_000,
+    });
   }
 
   async navigateToRulesList(): Promise<void> {

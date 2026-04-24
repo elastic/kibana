@@ -18,7 +18,9 @@ import type { KibanaRole } from '@kbn/scout';
  *  - feature_osquery.all              — every spec
  *  - feature_fleet / fleetv2.all      — fleet_integration, custom_space (policy share + create)
  *  - feature_siemV5.all               — alert-path specs (rule editor, alerts view, Timeline)
- *  - feature_securitySolutionRulesV2  — alert-path specs (detection-rule CRUD)
+ *  - feature_securitySolutionRulesV2  — legacy rules feature id (kept for parity)
+ *  - feature_securitySolutionRulesV4  — detection-rule CRUD in UI (`RULES_FEATURE_LATEST`; required
+ *                                        on serverless where capabilities resolve to V4 only)
  *  - feature_securitySolutionTimeline — alert flyout → Timeline specs
  *  - feature_securitySolutionCases    — osquery_case_security + alert_case_creation
  *  - feature_observabilityCases       — osquery_case_observability (stateful-only)
@@ -66,6 +68,7 @@ export const osqueryPowerUserRole: KibanaRole = {
         fleetv2: ['all'],
         siemV5: ['all'],
         securitySolutionRulesV2: ['all'],
+        securitySolutionRulesV4: ['all'],
         securitySolutionTimeline: ['all'],
         securitySolutionCases: ['all'],
         securitySolutionNotes: ['all'],
