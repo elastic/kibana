@@ -34,7 +34,6 @@ describe('IndexInitializer', () => {
         _meta: { managed: true },
         phases: {
           hot: { actions: {} },
-          delete: { min_age: '90d', actions: { delete: {} } },
         },
       },
     },

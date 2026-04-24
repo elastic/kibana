@@ -16,6 +16,7 @@ import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_
 import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
+import { scheduleCleanupFindingsTask } from '../lib/tasks/cleanup_findings/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
 import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/experimental_features';
 
@@ -79,5 +80,16 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         },
       });
     });
+
+    if (experimentalFeaturesEnabled) {
+      scheduleCleanupFindingsTask({ logger, taskManager }).catch((error) => {
+        logger.error(error as Error, {
+          error: {
+            code: 'CLEANUP_FINDINGS_TASK_SCHEDULE_FAILURE',
+            type: 'CleanupFindingsTask',
+          },
+        });
+      });
+    }
   });
 }

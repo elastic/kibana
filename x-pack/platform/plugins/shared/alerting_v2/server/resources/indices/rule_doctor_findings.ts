@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { IndexResourceDefinition } from './types';
 
 export const RULE_DOCTOR_FINDINGS_INDEX = '.rule-doctor-findings';
-export const RULE_DOCTOR_FINDINGS_VERSION = 1;
+export const RULE_DOCTOR_FINDINGS_VERSION = 2;
 export const RULE_DOCTOR_FINDINGS_ILM_POLICY_NAME = '.rule-doctor-findings-ilm-policy';
 export const RULE_DOCTOR_FINDINGS_PIPELINE_NAME = '.rule-doctor-findings-pipeline';
 
@@ -20,12 +20,6 @@ export const RULE_DOCTOR_FINDINGS_ILM_POLICY: IlmPolicy = {
   phases: {
     hot: {
       actions: {},
-    },
-    delete: {
-      min_age: '90d',
-      actions: {
-        delete: {},
-      },
     },
   },
 };
