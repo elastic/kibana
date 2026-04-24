@@ -15,7 +15,6 @@ import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
-import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { useUnifiedWaterfallFetcher } from '../use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
@@ -56,12 +55,6 @@ export function TransactionDistribution({
 
   const history = useHistory();
 
-  const waterfallFetchResult = useWaterfallFetcher({
-    traceId,
-    transactionId,
-    start,
-    end,
-  });
   const { waterfallItemId, detailTab } = urlParams;
 
   const { serviceName } = useApmServiceContext();
@@ -73,9 +66,8 @@ export function TransactionDistribution({
     entryTransactionId: transactionId,
   });
 
-  const markerCurrentEvent = waterfallFetchResult.useUnified
-    ? unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us
-    : waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+  const markerCurrentEvent =
+    unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us;
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();
@@ -206,15 +198,12 @@ export function TransactionDistribution({
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
-          waterfallFetchResult={waterfallFetchResult.waterfall}
-          waterfallFetchStatus={waterfallFetchResult.status}
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
           traceSamples={traceSamplesFetchResult.data?.traceSamples}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
-          useUnified={waterfallFetchResult.useUnified}
           unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
           entryTransactionId={transactionId}
           rangeFrom={rangeFrom}

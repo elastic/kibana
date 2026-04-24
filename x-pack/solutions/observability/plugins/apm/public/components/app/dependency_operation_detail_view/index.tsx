@@ -18,7 +18,6 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_height_container';
 import { push, replace } from '../../shared/links/url_helpers';
-import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
 import { useUnifiedWaterfallFetcher } from '../transaction_details/use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import type { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
@@ -96,13 +95,6 @@ export function DependencyOperationDetailView() {
     return samples.find((sample) => sample.spanId === spanId);
   }, [samples, spanId]);
 
-  const waterfallFetch = useWaterfallFetcher({
-    traceId: selectedSample?.traceId,
-    transactionId: selectedSample?.transactionId,
-    start,
-    end,
-  });
-
   const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
     start,
     end,
@@ -110,9 +102,7 @@ export function DependencyOperationDetailView() {
     entryTransactionId: selectedSample?.transactionId,
   });
 
-  const serviceName = waterfallFetch.useUnified
-    ? unifiedWaterfallFetchResult.entryTransaction?.service.name
-    : waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service.name;
+  const serviceName = unifiedWaterfallFetchResult.entryTransaction?.service.name;
 
   const queryRef = useRef(query);
 
@@ -132,10 +122,8 @@ export function DependencyOperationDetailView() {
 
   const isWaterfallLoading =
     (isPending(spanFetch.status) && samples.length === 0) ||
-    (waterfallFetch.useUnified
-      ? isPending(unifiedWaterfallFetchResult.status) &&
-        !unifiedWaterfallFetchResult.entryTransaction
-      : isPending(waterfallFetch.status) && !waterfallFetch.waterfall.entryWaterfallTransaction);
+    (isPending(unifiedWaterfallFetchResult.status) &&
+      !unifiedWaterfallFetchResult.entryTransaction);
 
   const onSampleClick = useCallback(
     (sample: any) => {
@@ -195,8 +183,6 @@ export function DependencyOperationDetailView() {
           <ResettingHeightRetainer reset={!isWaterfallLoading}>
             <WaterfallWithSummary
               environment={environment}
-              waterfallFetchResult={waterfallFetch.waterfall}
-              waterfallFetchStatus={waterfallFetch.status}
               traceSamples={samples}
               traceSamplesFetchStatus={spanFetch.status}
               onSampleClick={onSampleClick}
@@ -207,7 +193,6 @@ export function DependencyOperationDetailView() {
               selectedSample={selectedSample || null}
               showCriticalPath={showCriticalPath}
               onShowCriticalPathChange={onShowCriticalPathChange}
-              useUnified={waterfallFetch.useUnified}
               unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
               entryTransactionId={selectedSample?.transactionId}
               rangeFrom={rangeFrom}
