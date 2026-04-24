@@ -80,10 +80,9 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({ http, uiActi
     <>
       <EuiCallOut
         title={i18n.translate('xpack.ml.cpsMigrationCallout.title', {
-          defaultMessage: 'Anomaly detection jobs and cross-project search',
+          defaultMessage: 'Migrate legacy jobs to use cross-project search',
         })}
         color="primary"
-        iconType="iInCircle"
         data-test-subj="mlCpsMigrationCallout"
       >
         <EuiText size="s" data-test-subj="mlCpsMigrationCalloutJobCount">
