@@ -33,6 +33,8 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/std'
   - '@kbn/core-http-common'
+  - '@kbn/logging-mocks'
+  - '@kbn/logging'
 tags:
   - plugin
   - prod

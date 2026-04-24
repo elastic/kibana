@@ -120,10 +120,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show warning and results', async () => {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
+        await timePicker.setDefaultAbsoluteRange();
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
-        await timePicker.setDefaultAbsoluteRange();
+        await testSubjects.click('querySubmitButton');
 
         // Wait for the async search to be established on ES so that cancellation can retrieve
         // partial results via the async search ID

@@ -6,6 +6,15 @@ paths:
   /api/security_ai_assistant/knowledge_base/entries:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"name":"How to reset a password","type":"document","kbResource":"user","source":"manual","text":"To reset your password, go to the settings page and click Reset Password."}'
       x-labels: [ess, serverless]
       operationId: CreateKnowledgeBaseEntry
       description: Create a Knowledge Base Entry
@@ -18,10 +27,14 @@ paths:
           application/json:
             schema:
               $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryCreateProps'
-            example:
-              title: "How to reset a password"
-              content: "To reset your password, go to the settings page and click 'Reset Password'."
-              tags: ["password", "reset", "help"]
+            examples:
+              CreateKnowledgeBaseEntryRequest:
+                value:
+                  name: "How to reset a password"
+                  type: "document"
+                  kbResource: "user"
+                  source: "manual"
+                  text: "To reset your password, go to the settings page and click 'Reset Password'."
       responses:
         200:
           description: Successful request returning Knowledge Base Entries
@@ -29,24 +42,43 @@ paths:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
-              example:
-                id: "12345"
-                title: "How to reset a password"
-                content: "To reset your password, go to the settings page and click 'Reset Password'."
-                tags: ["password", "reset", "help"]
+              examples:
+                CreateKnowledgeBaseEntryResponse200Example:
+                  value:
+                    id: "12345"
+                    name: "How to reset a password"
+                    type: "document"
+                    kbResource: "user"
+                    source: "manual"
+                    text: "To reset your password, go to the settings page and click 'Reset Password'."
+                    createdAt: "2024-01-15T10:00:00.000Z"
+                    createdBy: "user@example.com"
+                    updatedAt: "2024-01-15T10:00:00.000Z"
+                    updatedBy: "user@example.com"
+                    namespace: "default"
+                    global: false
         400:
-          description: A generic error occurred, such as invalid input or missing required fields.
+          description: Bad Request response.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
-              example:
-                error: "Invalid input"
-                message: "The 'title' field is required."
+              examples:
+                CreateKnowledgeBaseEntryResponse400Example:
+                  value:
+                    error: "Invalid input"
+                    message: "The 'name' field is required."
 
   /api/security_ai_assistant/knowledge_base/entries/{id}:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/12345' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: ReadKnowledgeBaseEntry
       description: Retrieve a Knowledge Base Entry by its unique `id`.
@@ -68,22 +100,43 @@ paths:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
-              example:
-                id: "12345"
-                title: "How to reset a password"
-                content: "To reset your password, go to the settings page and click 'Reset Password'."
-                tags: ["password", "reset", "help"]
+              examples:
+                ReadKnowledgeBaseEntryResponse200Example:
+                  value:
+                    id: "12345"
+                    name: "How to reset a password"
+                    type: "document"
+                    kbResource: "user"
+                    source: "manual"
+                    text: "To reset your password, go to the settings page and click 'Reset Password'."
+                    createdAt: "2024-01-15T10:00:00.000Z"
+                    createdBy: "user@example.com"
+                    updatedAt: "2024-01-15T10:00:00.000Z"
+                    updatedBy: "user@example.com"
+                    namespace: "default"
+                    global: false
         400:
-          description: A generic error occurred, such as an invalid `id` or the entry not being found.
+          description: Bad Request response.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
-              example:
-                error: "Not Found"
-                message: "No Knowledge Base Entry found with the provided `id`."
+              examples:
+                ReadKnowledgeBaseEntryResponse400Example:
+                  value:
+                    error: "Not Found"
+                    message: "No Knowledge Base Entry found with the provided `id`."
     put:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/12345' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"name":"How to reset a password (updated)","type":"document","kbResource":"user","source":"manual","text":"Updated: go to settings and click Reset Password, then follow the on-screen instructions."}'
       x-labels: [ess, serverless]
       operationId: UpdateKnowledgeBaseEntry
       description: Update an existing Knowledge Base Entry by its unique `id`.
@@ -104,10 +157,14 @@ paths:
           application/json:
             schema:
               $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryUpdateRouteProps'
-            example:
-              title: "How to reset a password (updated)"
-              content: "To reset your password, go to the settings page, click 'Reset Password', and follow the instructions."
-              tags: ["password", "reset", "help", "update"]
+            examples:
+              UpdateKnowledgeBaseEntryRequest:
+                value:
+                  name: "How to reset a password (updated)"
+                  type: "document"
+                  kbResource: "user"
+                  source: "manual"
+                  text: "Updated: go to settings and click Reset Password, then follow the on-screen instructions."
       responses:
         200:
           description: Successful request returning the updated Knowledge Base Entry.
@@ -115,22 +172,41 @@ paths:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
-              example:
-                id: "12345"
-                title: "How to reset a password (updated)"
-                content: "To reset your password, go to the settings page, click 'Reset Password', and follow the instructions."
-                tags: ["password", "reset", "help", "update"]
+              examples:
+                UpdateKnowledgeBaseEntryResponse200Example:
+                  value:
+                    id: "12345"
+                    name: "How to reset a password (updated)"
+                    type: "document"
+                    kbResource: "user"
+                    source: "manual"
+                    text: "Updated: go to settings and click Reset Password, then follow the on-screen instructions."
+                    createdAt: "2024-01-15T10:00:00.000Z"
+                    createdBy: "user@example.com"
+                    updatedAt: "2024-01-15T10:05:00.000Z"
+                    updatedBy: "user@example.com"
+                    namespace: "default"
+                    global: false
         400:
-          description: A generic error occurred, such as invalid input or the entry not being found.
+          description: Bad Request response.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
-              example:
-                error: "Invalid input"
-                message: "The 'content' field cannot be empty."
+              examples:
+                UpdateKnowledgeBaseEntryResponse400Example:
+                  value:
+                    error: "Invalid input"
+                    message: "The 'text' field cannot be empty."
     delete:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request DELETE 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/12345' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: DeleteKnowledgeBaseEntry
       description: Delete a Knowledge Base Entry by its unique `id`.
@@ -152,15 +228,19 @@ paths:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/DeleteResponseFields'
-              example:
-                id: "12345"
-                message: "Knowledge Base Entry successfully deleted."
+              examples:
+                DeleteKnowledgeBaseEntryResponse200Example:
+                  value:
+                    id: "12345"
+                    message: "Knowledge Base Entry successfully deleted."
         400:
-          description: A generic error occurred, such as an invalid `id` or the entry not being found.
+          description: Bad Request response.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
-              example:
-                error: "Not Found"
-                message: "No Knowledge Base Entry found with the provided `id`."
+              examples:
+                DeleteKnowledgeBaseEntryResponse400Example:
+                  value:
+                    error: "Not Found"
+                    message: "No Knowledge Base Entry found with the provided `id`."

@@ -27,7 +27,7 @@ export const RegisterEmbeddable = () => {
         <h2>Register a new embeddable type</h2>
         <p>
           This plugin registers several embeddable types with{' '}
-          <strong>registerReactEmbeddableFactory</strong>. The code example below shows Search
+          <strong>registerEmbeddablePublicDefinition</strong>. The code example below shows Search
           embeddable registration. The embeddable factory is imported asynchronously to limit
           initial page load size.
         </p>

@@ -17,7 +17,7 @@ jest.mock('@kbn/inference-tracing', () => ({
   ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
 }));
 
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/workflows', () => ({
+jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   getExecutionState: jest.fn().mockResolvedValue({ status: 'completed', output: {} }),
 }));
 

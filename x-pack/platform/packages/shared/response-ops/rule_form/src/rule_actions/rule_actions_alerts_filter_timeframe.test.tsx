@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { Moment } from 'moment';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { screen, within } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { RuleActionsAlertsFilterTimeframe } from './rule_actions_alerts_filter_timeframe';
 import type { AlertsFilterTimeframe } from '@kbn/alerting-types';
 import { getAction } from '../common/test_utils/actions_test_utils';
 
 describe('ruleActionsAlertsFilterTimeframe', () => {
-  async function setup(timeframe?: AlertsFilterTimeframe) {
-    const wrapper = mountWithIntl(
+  function setup(timeframe?: AlertsFilterTimeframe) {
+    return renderWithI18n(
       <RuleActionsAlertsFilterTimeframe
         action={getAction('1', { alertsFilter: { timeframe } })}
         settings={
@@ -29,119 +28,44 @@ describe('ruleActionsAlertsFilterTimeframe', () => {
         onChange={() => {}}
       />
     );
-
-    // Wait for active space to resolve before requesting the component to update
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    return wrapper;
   }
 
-  it('renders an unchecked switch when passed a null timeframe', async () => {
-    const wrapper = await setup();
+  it('renders an unchecked switch when passed a null timeframe', () => {
+    setup();
 
-    const alertsFilterTimeframeToggle = wrapper.find(
-      '[data-test-subj="alertsFilterTimeframeToggle"]'
-    );
-
-    expect(alertsFilterTimeframeToggle.first().props().checked).toBeFalsy();
+    const toggle = screen.getByTestId('alertsFilterTimeframeToggle');
+    expect(toggle).not.toBeChecked();
   });
 
-  it('renders the passed in timeframe', async () => {
-    const wrapper = await setup({
+  it('renders the passed in timeframe', () => {
+    setup({
       days: [6, 7],
       timezone: 'America/Chicago',
       hours: { start: '10:00', end: '20:00' },
     });
 
-    const alertsFilterTimeframeToggle = wrapper.find(
-      '[data-test-subj="alertsFilterTimeframeToggle"]'
-    );
+    const toggle = screen.getByTestId('alertsFilterTimeframeToggle');
+    expect(toggle).toBeChecked();
 
-    expect(alertsFilterTimeframeToggle.first().props().checked).toBeTruthy();
+    const weekdayButtons = screen.getByTestId('alertsFilterTimeframeWeekdayButtons');
 
-    const alertsFilterTimeframeWeekdayButtons = wrapper.find(
-      '[data-test-subj="alertsFilterTimeframeWeekdayButtons"]'
-    );
-    expect(alertsFilterTimeframeWeekdayButtons.exists()).toBeTruthy();
-    // Use Reflect.get to avoid typescript errors
-    expect(
-      Reflect.get(
-        alertsFilterTimeframeWeekdayButtons.find('[data-test-subj="1"]').first().props(),
-        'isSelected'
-      )
-    ).toBeFalsy();
-    expect(
-      Reflect.get(
-        alertsFilterTimeframeWeekdayButtons.find('[data-test-subj="2"]').first().props(),
-        'isSelected'
-      )
-    ).toBeFalsy();
-    expect(
-      Reflect.get(
-        alertsFilterTimeframeWeekdayButtons.find('[data-test-subj="3"]').first().props(),
-        'isSelected'
-      )
-    ).toBeFalsy();
-    expect(
-      Reflect.get(
-        alertsFilterTimeframeWeekdayButtons.find('[data-test-subj="4"]').first().props(),
-        'isSelected'
-      )
-    ).toBeFalsy();
-    expect(
-      Reflect.get(
-        alertsFilterTimeframeWeekdayButtons.find('[data-test-subj="5"]').first().props(),
-        'isSelected'
-      )
-    ).toBeFalsy();
-    expect(
-      Reflect.get(
-        alertsFilterTimeframeWeekdayButtons.find('[data-test-subj="6"]').first().props(),
-        'isSelected'
-      )
-    ).toBeTruthy();
-    expect(
-      Reflect.get(
-        alertsFilterTimeframeWeekdayButtons.find('[data-test-subj="6"]').first().props(),
-        'isSelected'
-      )
-    ).toBeTruthy();
+    expect(within(weekdayButtons).getByTestId('1')).toHaveAttribute('aria-pressed', 'false');
+    expect(within(weekdayButtons).getByTestId('2')).toHaveAttribute('aria-pressed', 'false');
+    expect(within(weekdayButtons).getByTestId('3')).toHaveAttribute('aria-pressed', 'false');
+    expect(within(weekdayButtons).getByTestId('4')).toHaveAttribute('aria-pressed', 'false');
+    expect(within(weekdayButtons).getByTestId('5')).toHaveAttribute('aria-pressed', 'false');
+    expect(within(weekdayButtons).getByTestId('6')).toHaveAttribute('aria-pressed', 'true');
+    expect(within(weekdayButtons).getByTestId('7')).toHaveAttribute('aria-pressed', 'true');
 
-    const alertsFilterTimeframeStart = wrapper.find(
-      '[data-test-subj="alertsFilterTimeframe-start-date"]'
-    );
-    expect(alertsFilterTimeframeStart.exists()).toBeTruthy();
-    {
-      // @ts-expect-error upgrade typescript v4.9.5
-      const selectedDate: Moment = Reflect.get(
-        alertsFilterTimeframeStart.first().props(),
-        'selected'
-      );
-      expect(selectedDate.format('HH:mm')).toEqual('10:00');
-    }
+    const dateRange = screen.getByTestId('alertsFilterTimeframe');
 
-    const alertsFilterTimeframeEnd = wrapper.find(
-      '[data-test-subj="alertsFilterTimeframe-end-date"]'
-    );
-    expect(alertsFilterTimeframeEnd.exists()).toBeTruthy();
-    {
-      // @ts-expect-error upgrade typescript v4.9.5
-      const selectedDate: Moment = Reflect.get(
-        alertsFilterTimeframeEnd.first().props(),
-        'selected'
-      );
-      expect(selectedDate.format('HH:mm')).toEqual('20:00');
-    }
+    const startInput = within(dateRange).getAllByRole('textbox')[0];
+    expect((startInput as HTMLInputElement).value).toMatch(/10:00/);
 
-    const alertsFilterTimeframeTimezone = wrapper.find(
-      '[data-test-subj="alertsFilterTimeframeTimezone"]'
-    );
-    expect(alertsFilterTimeframeTimezone.exists()).toBeTruthy();
-    expect(
-      Reflect.get(alertsFilterTimeframeTimezone.first().props(), 'selectedOptions')[0].label
-    ).toEqual('America/Chicago');
+    const endInput = within(dateRange).getAllByRole('textbox')[1];
+    expect((endInput as HTMLInputElement).value).toMatch(/20:00/);
+
+    const timezoneComboBox = screen.getByTestId('alertsFilterTimeframeTimezone');
+    expect(within(timezoneComboBox).getByRole('combobox')).toHaveValue('America/Chicago');
   });
 });
