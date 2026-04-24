@@ -10,7 +10,7 @@ import { apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { API_HEADERS, RULE_API_PATH } from '../fixtures';
 
-apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic }, () => {
+apiTest.describe('Search rules by name and description', { tag: tags.stateful.classic }, () => {
   const ruleIds: string[] = [];
   let adminCredentials: RoleApiCredentials;
 
@@ -86,97 +86,18 @@ apiTest.describe('Search rules across all fields', { tag: tags.stateful.classic 
     expect(response.body.items[0].metadata.name).toBe('rule-with-desc');
   });
 
-  apiTest('should find rules by tag prefix', async ({ apiClient }) => {
-    const taggedRes = await apiClient.post(RULE_API_PATH, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
-      body: {
-        kind: 'alert',
-        metadata: { name: 'tagged-rule', tags: ['production', 'critical'] },
-        time_field: '@timestamp',
-        schedule: { every: '5m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
-      },
-      responseType: 'json',
-    });
-    expect(taggedRes.statusCode).toBe(200);
-    ruleIds.push(taggedRes.body.id);
-
-    const untaggedRes = await apiClient.post(RULE_API_PATH, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
-      body: {
-        kind: 'alert',
-        metadata: { name: 'untagged-rule' },
-        time_field: '@timestamp',
-        schedule: { every: '5m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
-      },
-      responseType: 'json',
-    });
-    expect(untaggedRes.statusCode).toBe(200);
-    ruleIds.push(untaggedRes.body.id);
-
-    const response = await apiClient.get(`${RULE_API_PATH}?search=critical&perPage=100`, {
-      headers: { ...adminCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.items).toHaveLength(1);
-    expect(response.body.items[0].metadata.name).toBe('tagged-rule');
-  });
-
-  apiTest('should find rules by grouping field prefix', async ({ apiClient }) => {
-    const groupedRes = await apiClient.post(RULE_API_PATH, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
-      body: {
-        kind: 'alert',
-        metadata: { name: 'grouped-rule' },
-        time_field: '@timestamp',
-        schedule: { every: '5m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
-        grouping: { fields: ['host.name'] },
-      },
-      responseType: 'json',
-    });
-    expect(groupedRes.statusCode).toBe(200);
-    ruleIds.push(groupedRes.body.id);
-
-    const ungroupedRes = await apiClient.post(RULE_API_PATH, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
-      body: {
-        kind: 'alert',
-        metadata: { name: 'ungrouped-rule' },
-        time_field: '@timestamp',
-        schedule: { every: '5m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
-      },
-      responseType: 'json',
-    });
-    expect(ungroupedRes.statusCode).toBe(200);
-    ruleIds.push(ungroupedRes.body.id);
-
-    const response = await apiClient.get(`${RULE_API_PATH}?search=host&perPage=100`, {
-      headers: { ...adminCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.items).toHaveLength(1);
-    expect(response.body.items[0].metadata.name).toBe('grouped-rule');
-  });
-
   apiTest('should AND multiple search terms together', async ({ apiClient }) => {
     const rules = [
-      { name: 'prod-cpu-alert', tags: ['production'] },
-      { name: 'dev-cpu-alert', tags: ['development'] },
+      { name: 'prod-cpu-alert', description: 'Monitors production CPU usage' },
+      { name: 'dev-cpu-alert', description: 'Monitors development CPU usage' },
     ];
 
-    for (const { name, tags: ruleTags } of rules) {
+    for (const { name, description } of rules) {
       const res = await apiClient.post(RULE_API_PATH, {
         headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
         body: {
           kind: 'alert',
-          metadata: { name, tags: ruleTags },
+          metadata: { name, description },
           time_field: '@timestamp',
           schedule: { every: '5m' },
           evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
