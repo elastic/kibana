@@ -456,6 +456,7 @@ export class JobsListViewUI extends Component {
         <CpsMigrationCallout
           http={this.context.services.http}
           uiActions={this.context.services.uiActions}
+          onMigrateFlyoutClose={() => this.refreshJobSummaryList()}
         />
 
         <>

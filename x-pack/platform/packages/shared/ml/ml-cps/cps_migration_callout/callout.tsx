@@ -21,6 +21,8 @@ const BULK_UPDATE_PROJECT_ROUTING_PATH = '/internal/ml/jobs/bulk_update_project_
 export interface CpsMigrationCalloutProps {
   http: HttpStart;
   uiActions: UiActionsStart;
+  /** Called when the migrate flyout is closed (optional context on the trigger). */
+  onMigrateFlyoutClose?: () => void;
 }
 
 /**
@@ -35,7 +37,11 @@ export interface BulkUpdateProjectRoutingResult {
   >;
 }
 
-export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({ http, uiActions }) => {
+export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({
+  http,
+  uiActions,
+  onMigrateFlyoutClose,
+}) => {
   const [jobCount, setJobCount] = useState(0);
 
   useEffect(() => {
@@ -69,8 +75,10 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({ http, uiActi
   }, [http]);
 
   const onMigrate = useCallback(() => {
-    void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {});
-  }, [uiActions]);
+    void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {
+      onClose: onMigrateFlyoutClose,
+    });
+  }, [uiActions, onMigrateFlyoutClose]);
 
   if (jobCount === 0) {
     return null;

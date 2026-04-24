@@ -20,10 +20,16 @@ export async function showMigrateADJobsToCpsFlyout(
   share: SharePluginStart,
   data: DataPublicPluginStart,
   dashboardService: DashboardStart,
-  cps?: CPSPluginStart
+  cps?: CPSPluginStart,
+  onFlyoutClose?: () => void
 ): Promise<void> {
   const Comp: FC<FlyoutComponentProps> = ({ onClose }) => (
-    <MigrateADJobsToCpsFlyout onClose={onClose} />
+    <MigrateADJobsToCpsFlyout
+      onClose={() => {
+        onClose();
+        onFlyoutClose?.();
+      }}
+    />
   );
   return createFlyout(Comp, coreStart, share, data, dashboardService, undefined, cps);
 }

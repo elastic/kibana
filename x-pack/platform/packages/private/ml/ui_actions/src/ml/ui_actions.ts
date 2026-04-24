@@ -21,6 +21,11 @@ export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION = 'createMLADCategoriza
 /**
  * Context for the migrate AD jobs to CPS action; extend when a caller provides job selection.
  */
-export type MigrateADJobsToCpsContext = Record<string, never>;
+export interface MigrateADJobsToCpsContext {
+  /**
+   * Invoked after the migrate flyout is closed, when the trigger is executed with this in context.
+   */
+  onClose?: () => void;
+}
 
 export const MIGRATE_AD_JOBS_TO_CPS_ACTION = 'migrateADJobsToCpsAction';

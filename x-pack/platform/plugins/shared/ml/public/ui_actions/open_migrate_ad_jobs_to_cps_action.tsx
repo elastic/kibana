@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type {
+  ActionExecutionContext,
+  UiActionsActionDefinition,
+} from '@kbn/ui-actions-plugin/public';
 import { MIGRATE_AD_JOBS_TO_CPS_ACTION, type MigrateADJobsToCpsContext } from '@kbn/ml-ui-actions';
 import type { MlCoreSetup } from '../plugin';
 
@@ -23,7 +26,7 @@ export function migrateADJobsToCps(
       i18n.translate('xpack.ml.actions.migrateADJobsToCps', {
         defaultMessage: 'Migrate anomaly detection jobs to cross-project search',
       }),
-    async execute() {
+    async execute(context: ActionExecutionContext<MigrateADJobsToCpsContext>) {
       try {
         const [{ showMigrateADJobsToCpsFlyout }, [coreStart, { share, data, dashboard, cps }]] =
           await Promise.all([
@@ -31,7 +34,8 @@ export function migrateADJobsToCps(
             getStartServices(),
           ]);
 
-        await showMigrateADJobsToCpsFlyout(coreStart, share, data, dashboard, cps);
+        const { onClose } = context;
+        await showMigrateADJobsToCpsFlyout(coreStart, share, data, dashboard, cps, onClose);
       } catch (e) {
         return Promise.reject(e);
       }
