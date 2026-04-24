@@ -8,11 +8,10 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 
 import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { PanelLoader } from '@kbn/panel-loader';
 import type { PublishesHideBorder, PublishesTitle } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
@@ -157,14 +156,12 @@ export const PresentationPanelInternal = <
   hidePanelChrome,
   ...rest
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
-  const [dataLoading, blockingError, panelHideBorder, parentHideBorder] =
-    useBatchedPublishingSubjects(
-      componentApi.dataLoading$ ?? new BehaviorSubject(false),
-      componentApi.blockingError$ ?? new BehaviorSubject<Error | undefined>(undefined),
-      componentApi.hideBorder$ ?? new BehaviorSubject(false),
-      (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
-        new BehaviorSubject(false)
-    );
+  const [blockingError, panelHideBorder, parentHideBorder] = useBatchedPublishingSubjects(
+    componentApi.blockingError$ ?? new BehaviorSubject(undefined),
+    componentApi.hideBorder$ ?? new BehaviorSubject(false),
+    (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
+      new BehaviorSubject(false)
+  );
   const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
@@ -177,24 +174,14 @@ export const PresentationPanelInternal = <
     [setDragHandles]
   );
 
-  const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (!initialLoadComplete && (dataLoading === false || !componentApi.dataLoading$)) {
-    setInitialLoadComplete(true);
-  }
-
   const InnerPanel = useMemo(() => {
     return (
       <>
         {blockingError && (
           <PresentationPanelErrorInternal api={componentApi} error={blockingError} />
         )}
-        {!initialLoadComplete && <PanelLoader />}
         <div
-          className={
-            blockingError || !initialLoadComplete
-              ? 'embPanel__content--hidden'
-              : 'embPanel__content'
-          }
+          className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
           css={styles.embPanelContent}
         >
           <EuiErrorBoundary>
@@ -203,7 +190,7 @@ export const PresentationPanelInternal = <
         </div>
       </>
     );
-  }, [blockingError, componentApi, initialLoadComplete, Component, componentProps]);
+  }, [blockingError, componentApi, Component, componentProps]);
 
   return hidePanelChrome ? (
     InnerPanel

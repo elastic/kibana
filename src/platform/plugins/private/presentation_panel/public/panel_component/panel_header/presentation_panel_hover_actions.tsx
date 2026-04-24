@@ -118,8 +118,8 @@ export const PresentationPanelHoverActions = ({
     parentHideTitle,
     disabledActionIds,
   ] = useBatchedPublishingSubjects(
-    api.title$ ?? new BehaviorSubject<string | undefined>(undefined),
-    api.description$ ?? new BehaviorSubject<string | undefined>(undefined),
+    api.title$ ?? new BehaviorSubject(undefined),
+    api.description$ ?? new BehaviorSubject(undefined),
     api.hideTitle$ ?? new BehaviorSubject(false),
     api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
     (api.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
