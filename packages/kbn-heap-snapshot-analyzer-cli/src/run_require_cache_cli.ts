@@ -29,27 +29,49 @@ import { resolve } from 'path';
 
 interface ModuleEntry {
   id: string;
-  parent: string | null;
+  parents: string[];
 }
+
+// Names of flags that take a value, so `--name <value>` (space-separated form)
+// consumes the next arg instead of leaking it into positional patterns.
+const VALUE_FLAGS = new Set(['limit']);
 
 export function runRequireCacheAnalyzerCli(): void {
   const args = process.argv.slice(2);
-  const positional = args.filter((a) => !a.startsWith('--'));
+  const positional: string[] = [];
+  const flagValues = new Map<string, string>();
+  const flagBools = new Set<string>();
+
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (!a.startsWith('--')) {
+      positional.push(a);
+      continue;
+    }
+    const eq = a.indexOf('=');
+    if (eq !== -1) {
+      flagValues.set(a.slice(2, eq), a.slice(eq + 1));
+      continue;
+    }
+    const name = a.slice(2);
+    if (VALUE_FLAGS.has(name)) {
+      const next = args[i + 1];
+      if (next === undefined || next.startsWith('--')) {
+        process.stderr.write(`Error: --${name} requires a value\n`);
+        process.exit(1);
+      }
+      flagValues.set(name, next);
+      i++;
+      continue;
+    }
+    flagBools.add(name);
+  }
 
   function flagValue(name: string): string | undefined {
-    for (let i = 0; i < args.length; i++) {
-      const a = args[i];
-      if (a === `--${name}`) {
-        const next = args[i + 1];
-        if (next !== undefined && !next.startsWith('--')) return next;
-        return '';
-      }
-      if (a.startsWith(`--${name}=`)) return a.slice(name.length + 3);
-    }
-    return undefined;
+    return flagValues.get(name);
   }
   function flagBool(name: string): boolean {
-    return args.includes(`--${name}`);
+    return flagBools.has(name);
   }
 
   if (positional.length === 0) {
@@ -115,10 +137,11 @@ export function runRequireCacheAnalyzerCli(): void {
     if (matches.length === 0) continue;
 
     if (!chains) {
-      // Just list the matches and their immediate parents.
+      // List the matches and ALL their immediate parents (multi-parent graph).
       const shown = matches.slice(0, limit);
       for (const m of shown) {
-        process.stdout.write(`  ${fmt(m.id)}\n      ← ${fmt(m.parent)}\n`);
+        process.stdout.write(`  ${fmt(m.id)}\n`);
+        for (const p of m.parents) process.stdout.write(`      ← ${fmt(p)}\n`);
       }
       if (matches.length > shown.length) {
         process.stdout.write(`  ... ${matches.length - shown.length} more\n`);
@@ -126,32 +149,36 @@ export function runRequireCacheAnalyzerCli(): void {
       continue;
     }
 
-    // Print the unique set of full chains back to root, deduped by chain
-    // signature (so different leaves sharing a chain only render once at the
-    // shared portion).
-    const chainStrs = new Set<string>();
+    // BFS upward from each match through ALL parents, emitting each unique
+    // (child <- parent) edge once. The shared upper portions of chains
+    // collapse naturally because edges dedupe.
+    const seenEdge = new Set<string>();
     let printed = 0;
-    for (const m of matches) {
-      const chain: string[] = [];
-      let cur: string | null = m.id;
-      const seen = new Set<string>();
-      while (cur && !seen.has(cur)) {
-        seen.add(cur);
-        chain.push(cur);
-        const e = byId.get(cur);
-        cur = e ? e.parent : null;
+    const queue: string[] = matches.map((m) => m.id);
+    const visited = new Set<string>();
+    process.stdout.write(`\n  edges (child ← parent):\n`);
+    while (queue.length && printed < limit * 50) {
+      const cur = queue.shift()!;
+      if (visited.has(cur)) continue;
+      visited.add(cur);
+      const e = byId.get(cur);
+      const parents = e ? e.parents : [];
+      if (parents.length === 0) {
+        const k = `${cur}|<entry>`;
+        if (!seenEdge.has(k)) {
+          seenEdge.add(k);
+          process.stdout.write(`    ${fmt(cur)}\n      ← <entry>\n`);
+          printed++;
+        }
+        continue;
       }
-      const sig = chain.join('|');
-      if (chainStrs.has(sig)) continue;
-      chainStrs.add(sig);
-      if (printed >= limit) {
-        process.stdout.write(`  ... ${matches.length - printed} more\n`);
-        break;
-      }
-      printed++;
-      process.stdout.write(`\n  ${fmt(chain[0])}\n`);
-      for (let i = 1; i < chain.length; i++) {
-        process.stdout.write(`    ↑ ${fmt(chain[i])}\n`);
+      for (const p of parents) {
+        const k = `${cur}|${p}`;
+        if (seenEdge.has(k)) continue;
+        seenEdge.add(k);
+        process.stdout.write(`    ${fmt(cur)}\n      ← ${fmt(p)}\n`);
+        printed++;
+        queue.push(p);
       }
     }
   }
