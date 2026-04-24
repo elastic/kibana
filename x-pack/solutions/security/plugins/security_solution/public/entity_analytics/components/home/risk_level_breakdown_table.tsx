@@ -86,7 +86,11 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         ),
         align: 'right',
         render: (scoreRange: string) => (
-          <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.medium }}>
+          <EuiText
+            className="eui-textTruncate"
+            size="s"
+            style={{ fontWeight: euiTheme.font.weight.medium }}
+          >
             {scoreRange}
           </EuiText>
         ),
@@ -101,7 +105,11 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         ),
         align: 'right',
         render: (count: number) => (
-          <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.semiBold }}>
+          <EuiText
+            className="eui-textTruncate"
+            size="s"
+            style={{ fontWeight: euiTheme.font.weight.semiBold }}
+          >
             {count.toLocaleString()}
           </EuiText>
         ),

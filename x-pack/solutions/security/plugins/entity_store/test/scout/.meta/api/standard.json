@@ -1,5 +1,5 @@
 {
-  "sha1": "4271f06795302acb3e4135cea13b2a3e854761b1",
+  "sha1": "1a63ed85454c941c8642d749ee06356c929df4f6",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -1966,7 +1966,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 1035,
+        "line": 1034,
         "column": 10
       }
     },
@@ -1982,7 +1982,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 1071,
+        "line": 1070,
         "column": 10
       }
     },
