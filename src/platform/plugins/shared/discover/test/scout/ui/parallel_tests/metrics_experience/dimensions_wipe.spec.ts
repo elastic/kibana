@@ -38,6 +38,13 @@ spaceTest.describe(
         const { discover, metricsExperience } = pageObjects;
         const { ONLY_IN_A } = testData.METRICS_DIMENSION_FIELDS;
 
+        // TODO: Move to Discover PO (issue: https://github.com/elastic/kibana/issues/265472)
+        const submitEsqlQuery = async (query: string) => {
+          await discover.codeEditor.setCodeEditorValue(query);
+          await page.testSubj.click('querySubmitButton');
+          await discover.waitUntilSearchingHasFinished();
+        };
+
         await spaceTest.step('select a dimension on the first stream', async () => {
           await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
           await expect(metricsExperience.grid).toBeVisible();
@@ -46,14 +53,11 @@ spaceTest.describe(
           await expect(
             metricsExperience.breakdownSelector.getToggleWithSelection(ONLY_IN_A)
           ).toBeVisible();
-          await discover.waitUntilSearchingHasFinished();
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
         });
 
         await spaceTest.step('switch to a stream that does not emit it', async () => {
-          await discover.codeEditor.setCodeEditorValue(testData.ESQL_QUERIES.TS_OTHER);
-          await page.testSubj.click('querySubmitButton');
-          await discover.waitUntilSearchingHasFinished();
+          await submitEsqlQuery(testData.ESQL_QUERIES.TS_OTHER);
           await expect(metricsExperience.grid).toBeVisible();
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
           await expect(
@@ -61,16 +65,53 @@ spaceTest.describe(
           ).toBeHidden();
         });
 
-        await spaceTest.step('switch back to the first stream', async () => {
-          await discover.codeEditor.setCodeEditorValue(testData.ESQL_QUERIES.TS);
+        await spaceTest.step(
+          'switch back to first stream and confirm the dropped dimension is not auto-restored',
+          async () => {
+            await submitEsqlQuery(testData.ESQL_QUERIES.TS);
+            await expect(metricsExperience.grid).toBeVisible();
+            await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+            await expect(
+              metricsExperience.breakdownSelector.getToggleWithSelection(ONLY_IN_A)
+            ).toBeHidden();
+          }
+        );
+      }
+    );
+
+    spaceTest(
+      'preserves the breakdown when the dimension is shared across streams',
+      async ({ pageObjects, page }) => {
+        const { discover, metricsExperience } = pageObjects;
+        const { DEFAULT_BREAKDOWN } = testData.METRICS_DIMENSION_FIELDS;
+
+        const submitEsqlQuery = async (query: string) => {
+          await discover.codeEditor.setCodeEditorValue(query);
           await page.testSubj.click('querySubmitButton');
           await discover.waitUntilSearchingHasFinished();
+        };
+
+        await spaceTest.step('select a shared dimension on the first stream', async () => {
+          await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
           await expect(metricsExperience.grid).toBeVisible();
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+          await metricsExperience.breakdownSelector.selectDimension(DEFAULT_BREAKDOWN);
           await expect(
-            metricsExperience.breakdownSelector.getToggleWithSelection(ONLY_IN_A)
-          ).toBeHidden();
+            metricsExperience.breakdownSelector.getToggleWithSelection(DEFAULT_BREAKDOWN)
+          ).toBeVisible();
         });
+
+        await spaceTest.step(
+          'switch to a stream that still emits it and keep the selection',
+          async () => {
+            await submitEsqlQuery(testData.ESQL_QUERIES.TS_OTHER);
+            await expect(metricsExperience.grid).toBeVisible();
+            await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+            await expect(
+              metricsExperience.breakdownSelector.getToggleWithSelection(DEFAULT_BREAKDOWN)
+            ).toBeVisible();
+          }
+        );
       }
     );
   }
