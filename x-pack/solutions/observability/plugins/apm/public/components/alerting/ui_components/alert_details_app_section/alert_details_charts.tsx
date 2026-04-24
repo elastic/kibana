@@ -64,6 +64,7 @@ export function AlertDetailsCharts({
         comparisonEnabled={false}
         offset={''}
         threshold={isPrimary ? thresholdComponent : undefined}
+        ruleAggregationType={ruleAggregationType}
         ruleTypeId={alertRuleTypeId}
       />
     ),
