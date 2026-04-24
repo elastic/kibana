@@ -136,6 +136,10 @@ describe('current status route', () => {
       const routeContext: any = {
         request: { query: {} },
         syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
@@ -306,6 +310,10 @@ describe('current status route', () => {
       const routeContext: any = {
         request: { query: {} },
         syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
@@ -422,6 +430,10 @@ describe('current status route', () => {
       const routeContext: any = {
         request: { query: {} },
         syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
       };
 
       const overviewStatusService = new OverviewStatusService(routeContext);
@@ -706,6 +718,10 @@ describe('current status route', () => {
         monitorConfigRepository: {
           getAll,
         },
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
       } as any);
 
       const result = await overviewStatusService.getOverviewStatus();
@@ -778,6 +794,10 @@ describe('current status route', () => {
         syntheticsEsClient,
         monitorConfigRepository: {
           getAll,
+        },
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
         },
       } as any);
 
