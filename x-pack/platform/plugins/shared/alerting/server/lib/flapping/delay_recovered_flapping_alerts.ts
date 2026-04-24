@@ -29,6 +29,12 @@ export function delayRecoveredFlappingAlerts<
     alert.resetPendingRecoveredCount();
   }
 
+  // Tracks ids of recovered alerts that this function re-activates because they
+  // are still flapping. Consumed by determineDelayedAlerts to drop such alerts
+  // when they haven't met the alertDelay threshold, preventing blank-field
+  // alert documents produced by executor-unreported re-activations.
+  const reactivatedAlertIds = new Set<string>();
+
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
     const flapping = alert.getFlapping();
@@ -57,6 +63,8 @@ export function delayRecoveredFlappingAlerts<
         // remove from recovered alerts
         delete recoveredAlerts[id];
         delete trackedRecoveredAlerts[id];
+
+        reactivatedAlertIds.add(id);
       } else {
         alert.resetPendingRecoveredCount();
       }
@@ -69,5 +77,6 @@ export function delayRecoveredFlappingAlerts<
     trackedActiveAlerts,
     recoveredAlerts,
     trackedRecoveredAlerts,
+    reactivatedAlertIds,
   };
 }

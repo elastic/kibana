@@ -65,6 +65,12 @@ export class LegacyAlertsClient<
   // Alerts reported from the rule executor using the alert factory
   private reportedAlerts: Record<string, Alert<State, Context>> = {};
 
+  // IDs of recovered alerts that determineFlappingAlerts re-activated back into
+  // active for the current run. Forwarded to determineDelayedAlerts so those
+  // alerts can be dropped while still below the alertDelay threshold, which
+  // prevents blank-field alert documents from executor-unreported re-activations.
+  private flappingReactivatedAlertIds: Set<string> = new Set();
+
   private processedAlerts: {
     new: Record<string, Alert<State, Context, ActionGroupIds>>;
     active: Record<string, Alert<State, Context, ActionGroupIds>>;
@@ -265,6 +271,7 @@ export class LegacyAlertsClient<
       this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
       this.processedAlerts.recovered = alerts.recoveredAlerts;
       this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
+      this.flappingReactivatedAlertIds = alerts.reactivatedAlertIds;
     }
   }
 
@@ -279,6 +286,7 @@ export class LegacyAlertsClient<
       alertDelay: opts.alertDelay,
       startedAt: this.startedAtString,
       ruleRunMetricsStore: opts.ruleRunMetricsStore,
+      flappingReactivatedAlertIds: this.flappingReactivatedAlertIds,
     });
 
     this.processedAlerts.new = alerts.newAlerts;

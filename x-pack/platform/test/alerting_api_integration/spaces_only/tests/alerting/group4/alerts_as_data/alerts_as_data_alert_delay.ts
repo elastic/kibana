@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Alert } from '@kbn/alerts-as-data-utils';
@@ -46,6 +47,7 @@ import {
   ObjectRemover,
   resetRulesSettings,
 } from '../../../../../common/lib';
+import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 
 export default function createAlertsAsDataAlertDelayInstallResourcesTest({
   getService,
@@ -71,25 +73,34 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
     '.internal.alerts-observability.test.alerts.alerts-default-000001';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/250277
-  describe.skip('alerts as data delay', function () {
+  describe('alerts as data delay', function () {
     this.tags('skipFIPS');
     before(async () => {
       await esTestIndexTool.setup();
-      await es.deleteByQuery({
-        index: [alertsAsDataIndex, alwaysFiringAlertsAsDataIndex],
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        ignore_unavailable: true,
+      await warmUpPatternFiringAadIndex();
+      // Clean any AAD docs left over from prior runs of this ES cluster. Retry
+      // until shards are ready, mirroring the resilience added in afterEach.
+      await retry.try(async () => {
+        await es.deleteByQuery({
+          index: [alertsAsDataIndex, alwaysFiringAlertsAsDataIndex],
+          query: { match_all: {} },
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
       });
     });
     afterEach(async () => {
       await objectRemover.removeAll();
-      await es.deleteByQuery({
-        index: [alertsAsDataIndex, alwaysFiringAlertsAsDataIndex],
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        ignore_unavailable: true,
+      // The AAD backing index can transiently have unallocated shards right
+      // after first install, which makes deleteByQuery fail with
+      // `no_shard_available_action_exception`. Retry until shards are ready.
+      await retry.try(async () => {
+        await es.deleteByQuery({
+          index: [alertsAsDataIndex, alwaysFiringAlertsAsDataIndex],
+          query: { match_all: {} },
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
       });
       await resetRulesSettings(supertestWithoutAuth, Spaces.space1.id);
     });
@@ -168,9 +179,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      let state: any = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(0);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(1);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(0);
+      });
 
       // After the first run, we should have 0 alert docs for the 0 active alerts
       expect(alertDocsRun1.length).to.equal(0);
@@ -197,9 +209,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(2);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(1);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(2);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(1);
+      });
 
       // After the second run, we should have 0 alert docs for the 0 active alerts
       expect(alertDocsRun2.length).to.equal(0);
@@ -227,9 +240,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(3);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(2);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(3);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(2);
+      });
 
       // After the third run, we should have 1 alert docs for the 1 active alert
       expect(alertDocsRun3.length).to.equal(1);
@@ -287,9 +301,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(4);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(3);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(4);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(3);
+      });
 
       // After the fourth run, we should have 1 alert docs for the 1 active alert
       expect(alertDocsRun4.length).to.equal(1);
@@ -343,8 +358,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertRecoveredInstances.instance.meta.activeCount).to.equal(0);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertRecoveredInstances.instance.meta.activeCount).to.equal(0);
+      });
 
       // After the fourth run, we should have 1 alert docs for the 1 recovered alert
       expect(alertDocsRun5.length).to.equal(1);
@@ -403,9 +419,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(5);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(1);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(5);
+      });
 
       // After the sixth run, we should have 1 alert docs for the previously recovered alert
       expect(alertDocsRun6.length).to.equal(1);
@@ -482,9 +499,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      let state: any = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(0);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(1);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(0);
+      });
 
       // After the first run, we should have 0 alert docs for the 0 active alerts
       expect(alertDocsRun1.length).to.equal(0);
@@ -511,10 +529,11 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances).to.eql({});
-      expect(state.alertRecoveredInstances).to.eql({});
-      expect(state.alertTypeState.patternIndex).to.equal(2);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances).to.eql({});
+        expect(s.alertRecoveredInstances).to.eql({});
+        expect(s.alertTypeState.patternIndex).to.equal(2);
+      });
 
       // After the second run, we should have 0 alert docs for the 0 recovered alerts
       expect(alertDocsRun2.length).to.equal(0);
@@ -541,9 +560,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(2);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(1);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(2);
+      });
 
       // After the third run, we should have 0 alert docs for the 0 active alerts
       expect(alertDocsRun3.length).to.equal(0);
@@ -629,9 +649,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      let state: any = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(0);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(1);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(0);
+      });
 
       // After the first run, we should have 0 alert docs for the 0 active alerts
       expect(alertDocsRun1.length).to.equal(0);
@@ -658,9 +679,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(2);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(1);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(2);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(1);
+      });
 
       // After the second run, we should have 0 alert docs for the 0 active alerts
       expect(alertDocsRun2.length).to.equal(0);
@@ -688,9 +710,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(3);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(2);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(3);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(2);
+      });
 
       // After the third run, we should have 1 alert docs for the 1 active alert
       expect(alertDocsRun3.length).to.equal(1);
@@ -748,9 +771,10 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(4);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(3);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(4);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(3);
+      });
 
       // After the fourth run, we should have 1 alert docs for the 1 active alert
       expect(alertDocsRun4.length).to.equal(1);
@@ -860,12 +884,112 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
-      expect(state.alertInstances.instance.state.patternIndex).to.equal(5);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(1);
+        expect(s.alertInstances.instance.state.patternIndex).to.equal(5);
+      });
 
       // After the sixth run, we should have 1 alert docs for the previously recovered alert
       expect(alertDocsRun6.length).to.equal(1);
+    });
+
+    // Regression coverage for elastic/kibana#259886: when flapping re-activates
+    // a recovered alert that the rule executor did not report this run AND the
+    // alert has not yet met its alertDelay threshold, the framework must drop
+    // the alert rather than writing an AAD doc. Otherwise the doc would be
+    // persisted with blank rule-type payload fields (patternIndex/instancePattern)
+    // because the executor never called report()/setAlertData() for that run.
+    it('should not write active AAD docs for flapping re-activated alerts under alertDelay (regression #259886)', async () => {
+      // Lower flapping thresholds so we can trigger a re-activation with a
+      // small number of runs.
+      await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          enabled: true,
+          look_back_window: 4,
+          status_change_threshold: 2,
+        })
+        .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      // Alternate true/false so flappingHistory builds up to the threshold
+      // while keeping activeCount below alertDelay during a recovery run
+      // that flapping will re-activate.
+      const pattern = {
+        instance: [true, true, true, false, true, false, false],
+      };
+
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            notify_when: null,
+            params: { pattern },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+                frequency: {
+                  summary: false,
+                  throttle: null,
+                  notify_when: RuleNotifyWhen.CHANGE,
+                },
+              },
+            ],
+            alert_delay: { active: 3 },
+          })
+        );
+      expect(response.status).to.eql(200);
+      const ruleId = response.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      // Drive every run via _run_soon and wait for the event log to catch up,
+      // matching the style of the other tests in this file.
+      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+      for (let run = 2; run <= pattern.instance.length; run++) {
+        const runSoon = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(runSoon.status).to.eql(204);
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: run }]]));
+      }
+
+      // Safety invariant: every active AAD doc must have its rule-type payload
+      // populated, because `test.patternFiringAad` only sets patternIndex and
+      // instancePattern via alertsClient.report() during runs the executor
+      // genuinely fires. A blank-field active doc means an alert was written
+      // as active without the executor reporting it — the exact bug this
+      // regression guards against.
+      const alertDocs = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
+      for (const doc of alertDocs) {
+        const source = doc._source!;
+        if (source[ALERT_STATUS] === 'active') {
+          expect(source.patternIndex).to.be.a('number');
+          expect(source.patternIndex).to.be.greaterThan(-1);
+          expect(Array.isArray(source.instancePattern)).to.be(true);
+          expect(source.instancePattern.length).to.be.greaterThan(0);
+        }
+      }
     });
 
     it('should persist delayed alerts and create a new alert when limit is reached', async () => {
@@ -939,8 +1063,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      let state: any = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(1);
+      });
 
       // After the first run, we should have 1 alert doc for the 1 delayed alert
       expect(alertDocsRun1.length).to.equal(1);
@@ -970,8 +1095,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(2);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(2);
+      });
 
       // After the second run, we should have 1 alert doc for the 1 delayed alert
       expect(alertDocsRun2.length).to.equal(1);
@@ -1001,8 +1127,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
 
       // Get alert state from task document
-      state = await getTaskState(ruleId);
-      expect(state.alertInstances.instance.meta.activeCount).to.equal(3);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances.instance.meta.activeCount).to.equal(3);
+      });
 
       // After the third run, we should have 1 alert doc for the 1 active alert
       expect(alertDocsRun3.length).to.equal(1);
@@ -1076,6 +1203,18 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
     return JSON.parse(task._source!.task.state);
   }
 
+  // The `execute` event log entry is written BEFORE task manager persists the
+  // new task state, so reading the task doc right after waiting on the event
+  // log can observe the previous run's state. Retry until assertions pass so
+  // we are guaranteed to see the post-execution state (fixes #250277).
+  async function waitForTaskState(ruleId: string, assertState: (state: any) => void): Promise<any> {
+    return await retry.try(async () => {
+      const state = await getTaskState(ruleId);
+      assertState(state);
+      return state;
+    });
+  }
+
   async function waitForEventLogDocs(
     id: string,
     actions: Map<string, { gte: number } | { equal: number }>
@@ -1090,5 +1229,60 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
         actions,
       });
     });
+  }
+
+  // On a fresh ES cluster, the concrete write index for `test.patternFiringAad`
+  // AAD is installed lazily: the first rule of that type triggers its creation
+  // and there is a small window where the index exists but its shards are
+  // still initializing. A rule run during that window fails with
+  // `no_shard_available_action_exception` and the `execute` event log entry is
+  // written with `outcome: "failure"` and no metrics, breaking tests that
+  // assert on run-1 metrics (and making cleanup fail with 503 shard errors).
+  //
+  // We avoid the race by running a short-interval warm-up rule until a
+  // successful execute lands. Task manager retries failed task runs using the
+  // rule's schedule interval, so a 3s interval yields fast retries within the
+  // default `retry.try` timeout; subsequent tests then run with hot AAD
+  // resources and do not hit the race.
+  // Pre-install AAD resources for the test.patternFiringAad rule type so that the
+  // concrete write index and its shards are fully allocated before the tests run.
+  // Using a `[false]` pattern ensures the executor never reports an alert, so no
+  // AAD docs are left behind for subsequent tests to trip over, while still
+  // exercising the same `alertsClient` code paths that allocate the index.
+  async function warmUpPatternFiringAadIndex() {
+    const response = await supertestWithoutAuth
+      .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo')
+      .send(
+        getTestRuleData({
+          rule_type_id: 'test.patternFiringAad',
+          schedule: { interval: '3s' },
+          throttle: null,
+          notify_when: null,
+          params: { pattern: { instance: [false] } },
+        })
+      );
+    expect(response.status).to.eql(200);
+    const warmupRuleId: string = response.body.id;
+    try {
+      await retry.try(async () => {
+        const events = await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: warmupRuleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 1 }]]),
+        });
+        const successful = events.filter((event) => event?.event?.outcome === 'success');
+        if (successful.length === 0) {
+          throw new Error('AAD warm-up: no successful execute yet');
+        }
+      });
+    } finally {
+      await supertestWithoutAuth
+        .delete(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${warmupRuleId}`)
+        .set('kbn-xsrf', 'foo');
+    }
   }
 }

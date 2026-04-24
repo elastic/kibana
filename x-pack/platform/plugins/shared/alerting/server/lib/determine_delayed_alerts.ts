@@ -26,6 +26,7 @@ interface DetermineDelayedAlertsOpts<
   alertDelay: number;
   startedAt?: string | null;
   ruleRunMetricsStore: RuleRunMetricsStore;
+  flappingReactivatedAlertIds?: Set<string>;
 }
 
 export function determineDelayedAlerts<
@@ -43,11 +44,22 @@ export function determineDelayedAlerts<
   alertDelay,
   startedAt,
   ruleRunMetricsStore,
+  flappingReactivatedAlertIds,
 }: DetermineDelayedAlertsOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   let delayedAlertsCount = 0;
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
+    // Drop alerts that were re-activated by flapping (not reported by the rule
+    // executor this run) but have not yet met the alertDelay threshold. Without
+    // this, such alerts would be promoted as active/new with blank rule-type
+    // fields because the executor never reported them.
+    if (flappingReactivatedAlertIds?.has(id) && alert.getActiveCount() < alertDelay) {
+      delete newAlerts[id];
+      delete activeAlerts[id];
+      delete trackedActiveAlerts[id];
+      continue;
+    }
     alert.incrementActiveCount();
     // do not trigger an action notification if the number of consecutive
     // active alerts is less than the rule alertDelay threshold

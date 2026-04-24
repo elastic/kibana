@@ -45,14 +45,14 @@ export function determineFlappingAlerts<
     recoveredAlerts
   );
 
-  let alerts = setFlappingHistoryAndTrackedAlerts<
+  const alerts = setFlappingHistoryAndTrackedAlerts<
     State,
     Context,
     ActionGroupIds,
     RecoveryActionGroupId
   >(flappingSettings, newAlerts, activeAlerts, recoveredAlerts, previouslyRecoveredAlerts);
 
-  alerts = delayRecoveredFlappingAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+  return delayRecoveredFlappingAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>(
     flappingSettings,
     actionGroupId,
     alerts.newAlerts,
@@ -61,6 +61,4 @@ export function determineFlappingAlerts<
     alerts.recoveredAlerts,
     alerts.trackedRecoveredAlerts
   );
-
-  return alerts;
 }

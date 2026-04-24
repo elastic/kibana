@@ -558,6 +558,7 @@ describe('Legacy Alerts Client', () => {
       alertDelay: 5,
       startedAt: null,
       ruleRunMetricsStore,
+      flappingReactivatedAlertIds: new Set<string>(),
     });
 
     expect(alertsClient.getProcessedAlerts('active')).toEqual({

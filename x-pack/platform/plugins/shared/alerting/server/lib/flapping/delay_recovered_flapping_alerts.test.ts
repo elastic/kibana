@@ -117,6 +117,7 @@ describe('delayRecoveredFlappingAlerts', () => {
       trackedActiveAlerts,
       recoveredAlerts,
       trackedRecoveredAlerts,
+      reactivatedAlertIds,
     } = delayRecoveredFlappingAlerts(
       DEFAULT_FLAPPING_SETTINGS,
       'default',
@@ -136,6 +137,8 @@ describe('delayRecoveredFlappingAlerts', () => {
         '3': alert3,
       }
     );
+
+    expect(reactivatedAlertIds).toEqual(new Set(['3']));
 
     expect(alertsWithAnyUUID(newAlerts)).toMatchInlineSnapshot(`Object {}`);
     expect(alertsWithAnyUUID(trackedActiveAlerts)).toMatchInlineSnapshot(`

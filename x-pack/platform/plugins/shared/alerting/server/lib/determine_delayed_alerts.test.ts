@@ -268,6 +268,47 @@ describe('determineDelayedAlerts', () => {
     `);
   });
 
+  test('should drop alerts re-activated by flapping when still under alertDelay', () => {
+    // Simulates the state after determineFlappingAlerts re-activated a recovered
+    // alert that the rule executor did not report this run and that has not yet
+    // met the alertDelay threshold.
+    const reactivatedAlert = new Alert('flap-1', {
+      meta: { activeCount: 1, uuid: 'uuid-flap-1' },
+    });
+    const reportedAlert = new Alert('reported-1', {
+      meta: { activeCount: 1, uuid: 'uuid-reported-1' },
+    });
+
+    const { newAlerts, activeAlerts, trackedActiveAlerts, delayedAlerts } = determineDelayedAlerts({
+      newAlerts: {},
+      activeAlerts: {
+        'flap-1': reactivatedAlert,
+        'reported-1': reportedAlert,
+      },
+      trackedActiveAlerts: {
+        'flap-1': reactivatedAlert,
+        'reported-1': reportedAlert,
+      },
+      recoveredAlerts: {},
+      trackedRecoveredAlerts: {},
+      delayedAlerts: {},
+      alertDelay: 5,
+      startedAt: null,
+      ruleRunMetricsStore,
+      flappingReactivatedAlertIds: new Set(['flap-1']),
+    });
+
+    expect(newAlerts).toEqual({});
+    expect(activeAlerts['flap-1']).toBeUndefined();
+    expect(trackedActiveAlerts['flap-1']).toBeUndefined();
+    expect(delayedAlerts['flap-1']).toBeUndefined();
+    expect(reactivatedAlert.getActiveCount()).toBe(1);
+
+    expect(delayedAlerts['reported-1']).toBe(reportedAlert);
+    expect(trackedActiveAlerts['reported-1']).toBe(reportedAlert);
+    expect(reportedAlert.getActiveCount()).toBe(2);
+  });
+
   test('should update active alert to look like a new alert if the activeCount is equal to the rule alertDelay', () => {
     const alert2 = new Alert('2', { meta: { uuid: 'uuid-2' } });
 
