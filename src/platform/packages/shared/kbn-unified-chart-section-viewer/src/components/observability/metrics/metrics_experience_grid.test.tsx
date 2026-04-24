@@ -323,4 +323,86 @@ describe('MetricsExperienceGrid', () => {
 
     expect(onToggleFullscreen).toHaveBeenCalled();
   });
+
+  describe('wipe orphan dimensions on stream switch (#264957)', () => {
+    // Smoke tests only: these assert the grid wires `useDimensionsWipe`
+    // correctly (selection + breakdown callbacks reach Discover). The full
+    // matrix of wipe scenarios lives in `use_dimensions_wipe.test.ts`.
+    const hostName: Dimension = { name: 'host.name' };
+    const environment: Dimension = { name: 'environment' };
+
+    it('prunes selectedDimensions and proposes a default breakdown via onBreakdownFieldChange', () => {
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [hostName, environment],
+        onDimensionsChange,
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        profileId: 'test-profile-id',
+      });
+
+      // Stream's universe only has `host.name`; `environment` is mapped but
+      // not emitted by this stream, so it must be wiped.
+      useFetchMetricsDataMock.mockReturnValue({
+        metricItems,
+        allDimensions: [hostName],
+        activeDimensions: [hostName],
+        loading: false,
+        error: null,
+      });
+
+      render(
+        <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
+        { wrapper: IntlProvider }
+      );
+
+      expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
+      // Discover had no breakdown yet, so the wipe proposes the first
+      // surviving dimension.
+      expect(onBreakdownFieldChange).toHaveBeenCalledWith('host.name');
+    });
+
+    it('does not touch the breakdown when the current breakdownField survives the prune', () => {
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [hostName, environment],
+        onDimensionsChange,
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        profileId: 'test-profile-id',
+      });
+
+      useFetchMetricsDataMock.mockReturnValue({
+        metricItems,
+        allDimensions: [hostName],
+        activeDimensions: [hostName],
+        loading: false,
+        error: null,
+      });
+
+      // Discover already breaks down by `host.name`, which survives the
+      // prune; the wipe must leave it untouched.
+      useDiscoverFieldForBreakdownMock.mockReturnValue('host.name');
+
+      render(
+        <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
+        { wrapper: IntlProvider }
+      );
+
+      expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
+      expect(onBreakdownFieldChange).not.toHaveBeenCalled();
+    });
+  });
 });
