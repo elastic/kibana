@@ -14,63 +14,67 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
+export const FindEndpointListItemsFilter = lazySchema(() => NonEmptyString);
 export type FindEndpointListItemsFilter = z.infer<typeof FindEndpointListItemsFilter>;
-export const FindEndpointListItemsFilter = NonEmptyString;
 
-export type FindEndpointListItemsRequestQuery = z.infer<typeof FindEndpointListItemsRequestQuery>;
-export const FindEndpointListItemsRequestQuery = z.object({
-  /**
+export const FindEndpointListItemsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
       * Filters the returned results according to the value of the specified field,
 using the `<field name>:<field value>` syntax.
 
       */
-  filter: FindEndpointListItemsFilter.optional(),
-  /**
-   * The page number to return
-   */
-  page: z.coerce.number().int().min(0).optional(),
-  /**
-   * The number of exception list items to return per page
-   */
-  per_page: z.coerce.number().int().min(0).optional(),
-  /**
-   * Determines which field is used to sort the results
-   */
-  sort_field: NonEmptyString.optional(),
-  /**
-   * Determines the sort order, which can be `desc` or `asc`
-   */
-  sort_order: z.enum(['desc', 'asc']).optional(),
-});
+    filter: FindEndpointListItemsFilter.optional(),
+    /**
+     * The page number to return
+     */
+    page: z.coerce.number().int().min(0).optional(),
+    /**
+     * The number of exception list items to return per page
+     */
+    per_page: z.coerce.number().int().min(0).optional(),
+    /**
+     * Determines which field is used to sort the results
+     */
+    sort_field: NonEmptyString.optional(),
+    /**
+     * Determines the sort order, which can be `desc` or `asc`
+     */
+    sort_order: z.enum(['desc', 'asc']).optional(),
+  })
+);
+export type FindEndpointListItemsRequestQuery = z.infer<typeof FindEndpointListItemsRequestQuery>;
 export type FindEndpointListItemsRequestQueryInput = z.input<
   typeof FindEndpointListItemsRequestQuery
 >;
 
+export const FindEndpointListItemsResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The list of endpoint exception list items.
+     */
+    data: z.array(EndpointListItem),
+    /**
+     * The current page number.
+     */
+    page: z.number().int().min(0),
+    /**
+     * The number of items per page.
+     */
+    per_page: z.number().int().min(0),
+    /**
+     * The total number of endpoint exception list items.
+     */
+    total: z.number().int().min(0),
+    /**
+     * The point-in-time ID for pagination.
+     */
+    pit: z.string().optional(),
+  })
+);
 export type FindEndpointListItemsResponse = z.infer<typeof FindEndpointListItemsResponse>;
-export const FindEndpointListItemsResponse = z.object({
-  /**
-   * The list of endpoint exception list items.
-   */
-  data: z.array(EndpointListItem),
-  /**
-   * The current page number.
-   */
-  page: z.number().int().min(0),
-  /**
-   * The number of items per page.
-   */
-  per_page: z.number().int().min(0),
-  /**
-   * The total number of endpoint exception list items.
-   */
-  total: z.number().int().min(0),
-  /**
-   * The point-in-time ID for pagination.
-   */
-  pit: z.string().optional(),
-});
