@@ -546,7 +546,7 @@
           "any[]"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 158,
+        "lineNumber": 161,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -563,7 +563,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 149,
+        "lineNumber": 152,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -614,7 +614,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 80,
+        "lineNumber": 83,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -631,7 +631,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 108,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -645,10 +645,10 @@
         "label": "CreateAlertActionBody",
         "description": [],
         "signature": [
-          "{ action_type: any; episode_id: string; } | { action_type: any; episode_id: string; } | { action_type: any; episode_id: string; assignee_uid: string; } | { action_type: any; tags: string[]; } | { action_type: any; expiry?: string | undefined; } | { action_type: any; } | { action_type: any; reason: string; } | { action_type: any; reason: string; }"
+          "{ action_type: any; episode_id: string; } | { action_type: any; episode_id: string; } | { action_type: any; episode_id: string; assignee_uid: any; } | { action_type: any; tags: string[]; } | { action_type: any; expiry?: string | undefined; } | { action_type: any; } | { action_type: any; reason: string; } | { action_type: any; reason: string; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 132,
+        "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -665,7 +665,7 @@
           "{ group_hash: string; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 140,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -682,7 +682,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 90,
+        "lineNumber": 93,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -699,7 +699,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 115,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -750,7 +750,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 98,
+        "lineNumber": 101,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -767,7 +767,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 93,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -784,7 +784,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 85,
+        "lineNumber": 88,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -801,7 +801,7 @@
           "{ [x: string]: never; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 103,
+        "lineNumber": 106,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1379,8 +1379,10 @@
           "<{ action_type: any; episode_id: ",
           "ZodString",
           "; assignee_uid: ",
+          "ZodNullable",
+          "<",
           "ZodString",
-          "; }, ",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "ZodObject",
@@ -1423,7 +1425,7 @@
           "$strip>>>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 151,
+        "lineNumber": 154,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1457,8 +1459,10 @@
           "<{ action_type: any; episode_id: ",
           "ZodString",
           "; assignee_uid: ",
+          "ZodNullable",
+          "<",
           "ZodString",
-          "; }, ",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "ZodObject",
@@ -1501,7 +1505,7 @@
           "$strip>>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 142,
+        "lineNumber": 145,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1605,7 +1609,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 79,
+        "lineNumber": 82,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1625,7 +1629,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 105,
+        "lineNumber": 108,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1657,8 +1661,10 @@
           "<{ action_type: any; episode_id: ",
           "ZodString",
           "; assignee_uid: ",
+          "ZodNullable",
+          "<",
           "ZodString",
-          "; }, ",
+          ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>, ",
           "ZodObject",
@@ -1695,7 +1701,7 @@
           "$strip>], \"action_type\">"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 117,
+        "lineNumber": 120,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1717,7 +1723,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 134,
+        "lineNumber": 137,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1737,7 +1743,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 87,
+        "lineNumber": 90,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1757,7 +1763,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 110,
+        "lineNumber": 113,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1977,7 +1983,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 95,
+        "lineNumber": 98,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1997,7 +2003,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 92,
+        "lineNumber": 95,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2017,7 +2023,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 82,
+        "lineNumber": 85,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2037,7 +2043,7 @@
           "$strict>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
-        "lineNumber": 100,
+        "lineNumber": 103,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
