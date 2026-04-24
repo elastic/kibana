@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiBadge, EuiSpacer } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_TYPE_ID, EVENT_KIND } from '@kbn/rule-data-utils';
 import {
@@ -86,7 +86,7 @@ export const RemoteDocumentBadge: FC<RemoteDocumentBadgeProps> = ({ hit }) => {
     [hit, isAlert]
   );
 
-  if (!isCCSRemoteIndexName(index)) {
+  if (!isNonLocalIndexName(index)) {
     return null;
   }
 

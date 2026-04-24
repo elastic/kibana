@@ -251,7 +251,7 @@ describe('<EntitiesOverview />', () => {
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
-  it('should render no data message when entity store v2 is enabled and no entity record exists', () => {
+  it('should render user and host overviews from document fields when entity store v2 is enabled and no entity record exists', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityFromStore.mockReturnValue({
       entityRecord: null,
@@ -262,9 +262,9 @@ describe('<EntitiesOverview />', () => {
       error: null,
       refetch: jest.fn(),
     });
-    const { getByText, queryByTestId } = renderEntitiesOverview(mockContextValue);
-    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
-    expect(queryByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).not.toBeInTheDocument();
+    const { queryByText, getByTestId } = renderEntitiesOverview(mockContextValue);
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
+    expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).toBeInTheDocument();
   });
 });

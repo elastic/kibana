@@ -45,7 +45,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 41,
+        "lineNumber": 68,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -61,7 +61,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 42,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -78,7 +78,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 43,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -102,11 +102,85 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 44,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-annotation-common",
+        "id": "def-common.getDefaultAnnotationColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultAnnotationColor",
+        "description": [],
+        "signature": [
+          "(isDarkMode?: boolean) => \"#2B394F\" | \"#FFFFFF\""
+        ],
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-annotation-common",
+            "id": "def-common.getDefaultAnnotationColor.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDarkMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 25,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-annotation-common",
+        "id": "def-common.getDefaultAnnotationRangeColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultAnnotationRangeColor",
+        "description": [],
+        "signature": [
+          "(isDarkMode?: boolean) => \"#2B394F1A\" | \"#FFFFFF1A\""
+        ],
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-annotation-common",
+            "id": "def-common.getDefaultAnnotationRangeColor.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDarkMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 28,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -130,7 +204,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 69,
+        "lineNumber": 96,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -146,7 +220,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 70,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -163,7 +237,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 71,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -191,7 +265,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 83,
+        "lineNumber": 111,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -207,7 +281,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 84,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -224,7 +298,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 85,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -241,11 +315,168 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 86,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-annotation-common",
+        "id": "def-common.getPersistedAnnotationColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getPersistedAnnotationColor",
+        "description": [],
+        "signature": [
+          "(color?: string | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-annotation-common",
+            "id": "def-common.getPersistedAnnotationColor.$1",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 48,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-annotation-common",
+        "id": "def-common.getResolvedAnnotationColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getResolvedAnnotationColor",
+        "description": [],
+        "signature": [
+          "({ color, isDarkMode, isRange, }: { color?: string | undefined; isDarkMode?: boolean | undefined; isRange?: boolean | undefined; }) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-annotation-common",
+            "id": "def-common.getResolvedAnnotationColor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  color,\n  isDarkMode = false,\n  isRange = false,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 37,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/event-annotation-common",
+                "id": "def-common.getResolvedAnnotationColor.$1.color",
+                "type": "string",
+                "tags": [],
+                "label": "color",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+                "lineNumber": 38,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/event-annotation-common",
+                "id": "def-common.getResolvedAnnotationColor.$1.isDarkMode",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isDarkMode",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+                "lineNumber": 39,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/event-annotation-common",
+                "id": "def-common.getResolvedAnnotationColor.$1.isRange",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isRange",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+                "lineNumber": 40,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-annotation-common",
+        "id": "def-common.isAutoAnnotationColor",
+        "type": "Function",
+        "tags": [],
+        "label": "isAutoAnnotationColor",
+        "description": [],
+        "signature": [
+          "(color?: string | undefined) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-annotation-common",
+            "id": "def-common.isAutoAnnotationColor.$1",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 31,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -277,7 +508,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 29,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -300,7 +531,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 30,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -336,7 +567,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 35,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -359,7 +590,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 36,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -395,7 +626,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 23,
+        "lineNumber": 50,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -418,7 +649,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-            "lineNumber": 24,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -565,6 +796,23 @@
     "misc": [
       {
         "parentPluginId": "@kbn/event-annotation-common",
+        "id": "def-common.AUTO_ANNOTATION_COLOR",
+        "type": "string",
+        "tags": [],
+        "label": "AUTO_ANNOTATION_COLOR",
+        "description": [],
+        "signature": [
+          "\"auto\""
+        ],
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-annotation-common",
         "id": "def-common.AvailableAnnotationIcon",
         "type": "Type",
         "tags": [],
@@ -587,6 +835,9 @@
         "tags": [],
         "label": "defaultAnnotationColor",
         "description": [],
+        "signature": [
+          "\"#2B394F\""
+        ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "lineNumber": 19,
         "columnNumber": 14,
@@ -602,7 +853,7 @@
         "label": "defaultAnnotationLabel",
         "description": [],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 55,
+        "lineNumber": 82,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -616,10 +867,10 @@
         "label": "defaultAnnotationRangeColor",
         "description": [],
         "signature": [
-          "\"#F04E981A\""
+          "\"#2B394F1A\""
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -633,7 +884,7 @@
         "label": "defaultRangeAnnotationLabel",
         "description": [],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
-        "lineNumber": 62,
+        "lineNumber": 89,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

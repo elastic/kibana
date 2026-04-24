@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { buildDataTableRecord, getFieldValue, type EsHitRecord } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { flyoutHeaderBlockStyles } from '../../../flyout_v2/document/constants/styles';
@@ -45,7 +45,7 @@ export const HeaderTitle = memo(() => {
   const openNotesTab = useNavigateToAttackDetailsLeftPanel({ tab: 'notes' });
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const isRemoteDocument = useMemo(
-    () => isCCSRemoteIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+    () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
     [hit]
   );
 
