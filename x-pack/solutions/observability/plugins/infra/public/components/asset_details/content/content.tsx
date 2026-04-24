@@ -21,18 +21,9 @@ import {
   Processes,
   Profiling,
 } from '../tabs';
+import { DATE_PICKER_VISIBLE_TABS } from '../constants';
 import { ContentTabIds } from '../types';
 import { Callouts } from './callouts';
-
-const DATE_PICKER_VISIBLE_TABS = [
-  ContentTabIds.OVERVIEW,
-  ContentTabIds.LOGS,
-  ContentTabIds.METADATA,
-  ContentTabIds.METRICS,
-  ContentTabIds.PROCESSES,
-  ContentTabIds.ANOMALIES,
-  ContentTabIds.DASHBOARDS,
-];
 
 export const Content = ({
   showDatePicker = true,

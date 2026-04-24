@@ -13,7 +13,7 @@ import { capitalize } from 'lodash';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
+import { ASSET_DETAILS_PAGE_COMPONENT_NAME, DATE_PICKER_VISIBLE_TABS } from '../constants';
 import { Content } from '../content/content';
 import { DatePicker } from '../date_picker/date_picker';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
@@ -29,16 +29,6 @@ import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { HostHeaderTitle } from '../header/host_header_title';
-
-const DATE_PICKER_VISIBLE_TABS = [
-  ContentTabIds.OVERVIEW,
-  ContentTabIds.LOGS,
-  ContentTabIds.METADATA,
-  ContentTabIds.METRICS,
-  ContentTabIds.PROCESSES,
-  ContentTabIds.ANOMALIES,
-  ContentTabIds.DASHBOARDS,
-];
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
