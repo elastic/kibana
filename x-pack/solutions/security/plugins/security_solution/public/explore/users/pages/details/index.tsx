@@ -224,7 +224,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const userStoreIdentityFields = useMemo(() => {
     if (entityId) {

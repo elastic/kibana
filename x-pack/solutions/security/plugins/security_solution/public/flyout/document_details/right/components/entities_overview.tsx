@@ -44,7 +44,7 @@ export const EntitiesOverview: React.FC = () => {
   ) as IdentityFields;
   const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const userEntityFromStore = useEntityFromStore({
     entityId: userEntityId,

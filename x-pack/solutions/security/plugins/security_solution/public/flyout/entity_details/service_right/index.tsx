@@ -67,7 +67,7 @@ export const ServicePanel = ({
   isPreviewMode = false,
 }: ServicePanelProps) => {
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const serviceStoreIdentityFields = useMemo(
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
     [entityId, serviceName]

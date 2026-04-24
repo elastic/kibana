@@ -170,7 +170,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   runtimeMappings,
 }) => {
   const dispatch = useDispatch();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const identityFieldsStable =
     identityFields != null && Object.keys(identityFields).length > 0
       ? identityFields

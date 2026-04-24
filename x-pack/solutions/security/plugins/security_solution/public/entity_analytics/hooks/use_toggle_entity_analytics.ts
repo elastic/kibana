@@ -77,7 +77,7 @@ export const useToggleEntityAnalytics = ({
   const { uiSettings } = useKibana().services;
   const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
-  const isEntityStoreV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const isEntityStoreV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const riskEngineStatusQuery = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,

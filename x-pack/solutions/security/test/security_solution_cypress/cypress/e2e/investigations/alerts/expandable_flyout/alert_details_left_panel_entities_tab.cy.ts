@@ -43,7 +43,19 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout left panel entities',
-  { tags: ['@ess', '@serverless'] },
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+          ])}`,
+        ],
+      },
+    },
+  },
   () => {
     beforeEach(() => {
       deleteAlertsAndRules();
