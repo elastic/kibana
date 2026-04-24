@@ -46,7 +46,7 @@ import { createCallApmApi } from '../../../../services/rest/create_call_apm_api'
 import { FailedTransactionChart } from './failed_transaction_chart';
 import {
   formatAnomalySeverityThreshold,
-  formatAnomalySeverityValue,
+  formatSeverityLabel,
   getAggsTypeFromRule,
   isAnomalyRuleType,
 } from './helpers';
@@ -90,7 +90,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
         <AnomalyThreshold
           chartProps={chartThemes}
           id={`${chartLayout.primary}-anomaly-threshold`}
-          severity={formatAnomalySeverityValue(alertSeverity, detectorType)}
+          severity={formatSeverityLabel(alertSeverity)}
           severityThreshold={formatAnomalySeverityThreshold(alertEvaluationThreshold)}
         />
       );
@@ -113,7 +113,6 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
     );
   }, [
     isAnomaly,
-    detectorType,
     alertSeverity,
     alertEvaluationValue,
     alertEvaluationThreshold,

@@ -15,7 +15,7 @@ describe('AnomalyThreshold', () => {
   const defaultProps: AnomalyThresholdProps = {
     chartProps: { baseTheme: LIGHT_THEME },
     id: 'test-anomaly',
-    severity: 'Critical Latency anomaly',
+    severity: 'Critical',
     severityThreshold: 'Alert when critical or above',
   };
 
