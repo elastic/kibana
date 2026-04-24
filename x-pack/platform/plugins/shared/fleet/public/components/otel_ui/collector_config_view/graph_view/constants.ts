@@ -6,6 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const NODE_WIDTH = 200;
 export const NODE_HEIGHT = 60;
@@ -33,8 +34,16 @@ export const COMPONENT_TYPE_VIS_COLORS: Record<
 };
 
 export const COMPONENT_TYPE_LABELS: Record<OTelComponentType, string> = {
-  receiver: 'Receiver',
-  processor: 'Processor',
-  connector: 'Connector',
-  exporter: 'Exporter',
+  receiver: i18n.translate('xpack.fleet.otelUi.componentType.receiver', {
+    defaultMessage: 'Receiver',
+  }),
+  processor: i18n.translate('xpack.fleet.otelUi.componentType.processor', {
+    defaultMessage: 'Processor',
+  }),
+  connector: i18n.translate('xpack.fleet.otelUi.componentType.connector', {
+    defaultMessage: 'Connector',
+  }),
+  exporter: i18n.translate('xpack.fleet.otelUi.componentType.exporter', {
+    defaultMessage: 'Exporter',
+  }),
 };

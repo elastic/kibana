@@ -21,7 +21,7 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import type { OTelCollectorConfig } from '../../../../../common/types';
@@ -113,27 +113,21 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
     [euiTheme]
   );
 
-  const graphContainerStyles = css`
-    width: 100%;
-    height: 500px;
-    border: 1px solid ${euiTheme.colors.borderBasePlain};
-    border-radius: ${euiTheme.border.radius.medium};
-  `;
-
-  const flexContainerStyles = css`
-    display: flex;
-    gap: ${euiTheme.size.m};
-  `;
-
   return (
-    <div css={flexContainerStyles}>
-      <div
+    <EuiFlexGroup gutterSize="m" responsive={false}>
+      <EuiFlexItem
         css={css`
-          flex: 1 1 0%;
           min-width: 0;
         `}
       >
-        <div css={graphContainerStyles}>
+        <EuiPanel
+          hasBorder
+          paddingSize="none"
+          css={css`
+            width: 100%;
+            height: 500px;
+          `}
+        >
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -152,17 +146,19 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
             <Background />
             <Controls showInteractive={false} />
           </ReactFlow>
-        </div>
-      </div>
+        </EuiPanel>
+      </EuiFlexItem>
       {selectedNode && (
-        <OTelComponentDetail
-          componentId={selectedNode.data.label}
-          componentType={selectedNode.data.componentType}
-          config={config}
-          onClose={handleClose}
-        />
+        <EuiFlexItem grow={false}>
+          <OTelComponentDetail
+            componentId={selectedNode.data.label}
+            componentType={selectedNode.data.componentType}
+            config={config}
+            onClose={handleClose}
+          />
+        </EuiFlexItem>
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };
 
