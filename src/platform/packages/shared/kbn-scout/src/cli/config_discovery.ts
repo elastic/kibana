@@ -183,7 +183,11 @@ const splitStreamsTestsByServerRunFlags = (
 ): ModuleDiscoveryInfo[] => {
   return modules.flatMap((module) => {
     // It is a temp workaround. Only split modules that include 'streams_app', 'dashboard'  in their name
-    if (!module.name.includes('streams_app') && !module.name.includes('dashboard')) {
+    if (
+      !module.name.includes('streams_app') &&
+      !module.name.includes('dashboard') &&
+      !module.name.includes('osquery')
+    ) {
       return [module];
     }
 
