@@ -35,7 +35,9 @@ export const AttackDetailsRedirect = () => {
   const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
   const fromTime = timestamp ?? globalTimerange.from;
-  const toTime = moment(timestamp ?? globalTimerange.to).add('5', 'minutes');
+  const toTime = moment(timestamp ?? globalTimerange.to)
+    .add('5', 'minutes')
+    .toISOString();
 
   const timerange = encode({
     global: {
