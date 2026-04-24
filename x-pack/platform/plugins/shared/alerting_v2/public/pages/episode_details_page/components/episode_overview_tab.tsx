@@ -154,6 +154,9 @@ export const EpisodeOverviewTab = ({ episodeId, eventRows, rule }: EpisodeOvervi
             <EuiFlexGroup direction="column" gutterSize="s">
               {relatedEpisodeRows.map((row) => {
                 const relatedId = row['episode.id'];
+                if (!relatedId) {
+                  return null;
+                }
                 const relatedGroupHash = row.group_hash;
                 return (
                   <RelatedAlertEpisode
