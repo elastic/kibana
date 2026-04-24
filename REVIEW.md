@@ -62,8 +62,6 @@ behavioral risk, not personal preference.
   and `PR_NUMBER` values from the prompt:
   `gh pr review <PR_NUMBER> --repo <REPO> --comment --body-file /tmp/review.md`
 - If there are no issues, the review body must be exactly: `No issues found.`
-- If there are issues, keep the review body compact and use exactly:
-  `Found <N> issue(s). See inline comments for details.`
 - Do not post any separate top-level PR comments beyond that single final review
   summary.
 
