@@ -130,12 +130,15 @@ export class TriggerEventHandler {
 
     let scheduleStats: TriggerEventScheduleStats;
     if (this.config.enabled && workflows.length > 0) {
-      scheduleStats = await this.scheduleMatchingWorkflows(
-        workflows,
+      const eventParams: ScheduleEventParams = {
+        payload,
+        timestamp,
         spaceId,
-        { payload, timestamp, spaceId, eventId, eventChainContext, triggerId },
-        request
-      );
+        eventId,
+        eventChainContext,
+        triggerId,
+      };
+      scheduleStats = await this.scheduleMatchingWorkflows(workflows, request, eventParams);
       this.logger.trace(
         `Workflows trigger schedule outcomes: triggerId=${triggerId} ${JSON.stringify(
           scheduleStats
@@ -249,9 +252,8 @@ export class TriggerEventHandler {
 
   private async scheduleMatchingWorkflows(
     workflows: WorkflowDetailDto[],
-    spaceId: string,
-    eventParams: ScheduleEventParams,
-    request: KibanaRequest
+    request: KibanaRequest,
+    eventParams: ScheduleEventParams
   ): Promise<TriggerEventScheduleStats> {
     if (workflows.length === 0) {
       return createEmptyTriggerScheduleStats();
@@ -278,7 +280,7 @@ export class TriggerEventHandler {
           };
           const context: Record<string, unknown> = {
             event: eventContext,
-            spaceId,
+            spaceId: eventParams.spaceId,
             inputs: {},
             triggeredBy: eventParams.triggerId,
             metadata: {
