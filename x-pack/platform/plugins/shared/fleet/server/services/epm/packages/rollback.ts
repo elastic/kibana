@@ -198,12 +198,11 @@ export async function rollbackAvailableCheck(
           continue;
         }
         const depSO = depSORes.saved_objects[0];
+        const otherDependants = (depSO.attributes.is_dependency_of ?? []).filter(
+          (d) => d.name !== pkgName
+        );
 
         if (depPreviousVersion === null) {
-          // Dep was freshly installed: cannot remove if another composable package still needs it
-          const otherDependants = (depSO.attributes.is_dependency_of ?? []).filter(
-            (d) => d.name !== pkgName
-          );
           if (otherDependants.length > 0) {
             return {
               isAvailable: false,
@@ -213,14 +212,12 @@ export async function rollbackAvailableCheck(
             };
           }
         } else {
-          // Dep was upgraded: block if its TTL has expired
           if (isIntegrationRollbackTTLExpired(depSO.attributes.install_started_at)) {
             return {
               isAvailable: false,
               reason: `Rollback not available: TTL expired for dependency ${depName}`,
             };
           }
-          // Block if the previous version is no longer available in the registry
           try {
             await fetchInfo(depName, depPreviousVersion);
           } catch {
@@ -229,12 +226,8 @@ export async function rollbackAvailableCheck(
               reason: `Rollback not available: dependency ${depName}@${depPreviousVersion} is no longer available in the registry`,
             };
           }
-          // Block if rolling back the dep would violate another installed package's version constraint.
-          // (verifyPackageDependencies in step_resolve_dependencies is skipped when force=true, so
-          // we must check here before the rollback begins.)
-          const otherDependants = (depSO.attributes.is_dependency_of ?? []).filter(
-            (d) => d.name !== pkgName
-          );
+          // verifyPackageDependencies in step_resolve_dependencies is skipped when force=true,
+          // so semver constraints must be checked here before any rollback state changes begin.
           for (const { name: dependantName } of otherDependants) {
             const dependantSORes = await getPackageSavedObjects(savedObjectsClient, {
               searchFields: ['name'],
@@ -402,7 +395,10 @@ export async function rollbackInstallation(options: {
     );
 
     // Clear the snapshot so a subsequent rollback attempt does not act on stale data.
-    if (previousDependencyVersions?.length) {
+    if (
+      appContextService.getExperimentalFeatures().enableResolveDependencies &&
+      previousDependencyVersions?.length
+    ) {
       await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
         previous_dependency_versions: null,
       });
@@ -446,59 +442,61 @@ async function _rollbackDependencies({
 }): Promise<string[]> {
   const failedDeps: string[] = [];
 
-  for (const { name: depName, previousVersion } of previousDependencyVersions) {
-    try {
-      if (previousVersion === null) {
-        // Dep was freshly installed during the upgrade: remove it if no other package still needs it.
-        const depSORes = await getPackageSavedObjects(savedObjectsClient, {
-          searchFields: ['name'],
-          search: depName,
-          fields: ['is_dependency_of'],
-        });
-        if (depSORes.saved_objects.length === 0) {
-          logger.info(`_rollbackDependencies: ${depName} is already removed, skipping`);
-          continue;
-        }
-        const remainingDependants = (
-          depSORes.saved_objects[0].attributes.is_dependency_of ?? []
-        ).filter((d) => d.name !== pkgName);
-        if (remainingDependants.length > 0) {
+  await pMap(
+    previousDependencyVersions,
+    async ({ name: depName, previousVersion }) => {
+      try {
+        if (previousVersion === null) {
+          const depSORes = await getPackageSavedObjects(savedObjectsClient, {
+            searchFields: ['name'],
+            search: depName,
+            fields: ['is_dependency_of'],
+          });
+          if (depSORes.saved_objects.length === 0) {
+            logger.info(`_rollbackDependencies: ${depName} is already removed, skipping`);
+            return;
+          }
+          const remainingDependants = (
+            depSORes.saved_objects[0].attributes.is_dependency_of ?? []
+          ).filter((d) => d.name !== pkgName);
+          if (remainingDependants.length > 0) {
+            logger.info(
+              `_rollbackDependencies: keeping ${depName} — still required by ${remainingDependants
+                .map((d) => d.name)
+                .join(', ')}`
+            );
+            return;
+          }
+          await removeInstallation({
+            savedObjectsClient,
+            pkgName: depName,
+            esClient,
+            force: true,
+            installSource: 'registry',
+          });
+          logger.info(`_rollbackDependencies: removed freshly-installed dependency ${depName}`);
+        } else {
+          await installPackage({
+            installSource: 'registry',
+            savedObjectsClient,
+            esClient,
+            pkgkey: `${depName}-${previousVersion}`,
+            spaceId,
+            force: true,
+          });
           logger.info(
-            `_rollbackDependencies: keeping ${depName} — still required by ${remainingDependants
-              .map((d) => d.name)
-              .join(', ')}`
+            `_rollbackDependencies: rolled back dependency ${depName} to ${previousVersion}`
           );
-          continue;
         }
-        await removeInstallation({
-          savedObjectsClient,
-          pkgName: depName,
-          esClient,
-          force: true,
-          installSource: 'registry',
-        });
-        logger.info(`_rollbackDependencies: removed freshly-installed dependency ${depName}`);
-      } else {
-        // Dep was upgraded during the upgrade: re-install at the recorded previous version.
-        await installPackage({
-          installSource: 'registry',
-          savedObjectsClient,
-          esClient,
-          pkgkey: `${depName}-${previousVersion}`,
-          spaceId,
-          force: true,
-        });
-        logger.info(
-          `_rollbackDependencies: rolled back dependency ${depName} to ${previousVersion}`
+      } catch (err) {
+        logger.warn(
+          `_rollbackDependencies: failed to roll back dependency ${depName}: ${err.message}`
         );
+        failedDeps.push(depName);
       }
-    } catch (err) {
-      logger.warn(
-        `_rollbackDependencies: failed to roll back dependency ${depName}: ${err.message}`
-      );
-      failedDeps.push(depName);
-    }
-  }
+    },
+    { concurrency: 5 }
+  );
 
   return failedDeps;
 }

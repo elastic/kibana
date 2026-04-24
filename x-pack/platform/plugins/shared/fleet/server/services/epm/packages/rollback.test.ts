@@ -863,6 +863,62 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
   });
 });
 
+describe('rollbackInstallation - feature flag disabled with existing snapshot', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('does not roll back dependencies or clear snapshot when enableResolveDependencies is false', async () => {
+    const depName = 'dep-pkg';
+    const savedObjectsClient = {
+      find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+        if (search === pkgName) {
+          return Promise.resolve({
+            saved_objects: [
+              {
+                id: pkgName,
+                type: PACKAGES_SAVED_OBJECT_TYPE,
+                attributes: {
+                  install_source: 'registry',
+                  previous_version: oldPkgVersion,
+                  version: newPkgVersion,
+                  previous_dependency_versions: [{ name: depName, previousVersion: '1.0.0' }],
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ saved_objects: [] });
+      }),
+      update: jest.fn().mockResolvedValue({}),
+    } as any;
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      savedObjectsClient
+    );
+    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+      enableResolveDependencies: false,
+    });
+    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+      saved_objects: [],
+    } as any);
+
+    await rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId });
+
+    // No dep rollback should have been attempted.
+    expect(installPackage).toHaveBeenCalledTimes(1);
+    expect(installPackage).toHaveBeenCalledWith(
+      expect.objectContaining({ pkgkey: `${pkgName}-${oldPkgVersion}` })
+    );
+    // Snapshot must be preserved so it can be used when the flag is re-enabled.
+    expect(savedObjectsClient.update).not.toHaveBeenCalledWith(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      { previous_dependency_versions: null }
+    );
+  });
+});
+
 describe('isIntegrationRollbackTTLExpired', () => {
   it('should return true if integration rollback TTL is expired', () => {
     const installStartedAt = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(); // 8 days ago
