@@ -73,14 +73,15 @@ export const HubSpotConnector: ConnectorSpec = {
           meta: {
             authorizationUrl: { hidden: true },
             tokenUrl: { hidden: true },
-            scope: { hidden: true },
+            scope: { disabled: true },
           },
         },
         defaults: {
           authorizationUrl: 'https://app.hubspot.com/oauth/authorize',
           tokenUrl: 'https://api.hubapi.com/oauth/v1/token',
           scope:
-            'crm.objects.contacts.read crm.objects.companies.read crm.objects.deals.read crm.objects.tickets.read crm.objects.owners.read',
+            'crm.objects.contacts.read crm.objects.companies.read crm.objects.deals.read tickets crm.objects.owners.read',
+          useBasicAuth: false,
         },
       },
     ],

@@ -76,7 +76,7 @@ Service Keys are managed under **Development** in HubSpot and can call the same 
    - `crm.objects.contacts.read`
    - `crm.objects.companies.read`
    - `crm.objects.deals.read`
-   - `crm.objects.tickets.read`
+   - `tickets`
    - `crm.objects.owners.read`
 5. If you use **List Pipelines**, also add (if available):
    - `crm.schemas.companies.read`
@@ -98,7 +98,7 @@ Creating a Private App (app integration) is the **legacy** way to obtain a token
    - `crm.objects.contacts.read`
    - `crm.objects.companies.read`
    - `crm.objects.deals.read`
-   - `crm.objects.tickets.read`
+   - `tickets`
    - `crm.objects.owners.read`
    For engagement types in **Search CRM Objects**, also add scopes such as `sales-email-read` (emails) and any engagement read scopes your account offers for notes, calls, and meetings.
 7. Select **Create app** and confirm by selecting **Continue Creating**.
