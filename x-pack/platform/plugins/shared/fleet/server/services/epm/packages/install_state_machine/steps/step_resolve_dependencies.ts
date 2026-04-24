@@ -62,6 +62,22 @@ export async function stepResolveDependencies(context: InstallContext) {
         { prerelease: isPrerelease }
       );
 
+      // Record which dependencies will change so rollback can undo them.
+      // Saved before installing so the record exists even on partial failure.
+      const dependencyDelta = resolvedDependencies
+        .filter((d) => d.status === 'to_install' || d.status === 'to_update')
+        .map((d) => ({
+          name: d.name,
+          previousVersion: d.status === 'to_update' ? d.previousVersion! : null,
+        }));
+      if (dependencyDelta.length > 0) {
+        await context.savedObjectsClient.update(
+          PACKAGES_SAVED_OBJECT_TYPE,
+          context.packageInstallContext.packageInfo.name,
+          { previous_dependency_versions: dependencyDelta }
+        );
+      }
+
       const completed: Array<{
         dependency: ResolvedDependency;
       }> = [];
