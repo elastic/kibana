@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../../model/sorting.gen';
@@ -22,30 +22,32 @@ import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
+export const FindRulesSortField = lazySchema(() =>
+  z.enum([
+    'created_at',
+    'createdAt',
+    'enabled',
+    'execution_summary.last_execution.date',
+    'execution_summary.last_execution.metrics.execution_gap_duration_s',
+    'execution_summary.last_execution.metrics.total_indexing_duration_ms',
+    'execution_summary.last_execution.metrics.total_search_duration_ms',
+    'execution_summary.last_execution.status',
+    'name',
+    'risk_score',
+    'riskScore',
+    'severity',
+    'updated_at',
+    'updatedAt',
+  ])
+);
 export type FindRulesSortField = z.infer<typeof FindRulesSortField>;
-export const FindRulesSortField = z.enum([
-  'created_at',
-  'createdAt',
-  'enabled',
-  'execution_summary.last_execution.date',
-  'execution_summary.last_execution.metrics.execution_gap_duration_s',
-  'execution_summary.last_execution.metrics.total_indexing_duration_ms',
-  'execution_summary.last_execution.metrics.total_search_duration_ms',
-  'execution_summary.last_execution.status',
-  'name',
-  'risk_score',
-  'riskScore',
-  'severity',
-  'updated_at',
-  'updatedAt',
-]);
 export type FindRulesSortFieldEnum = typeof FindRulesSortField.enum;
 export const FindRulesSortFieldEnum = FindRulesSortField.enum;
 
-export type FindRulesRequestQuery = z.infer<typeof FindRulesRequestQuery>;
-export const FindRulesRequestQuery = z.object({
-  fields: ArrayFromString(z.string()).optional(),
-  /**
+export const FindRulesRequestQuery = lazySchema(() =>
+  z.object({
+    fields: ArrayFromString(z.string()).optional(),
+    /**
       * Search query
 
 Filters the returned results according to the value of the specified field, using the alert.attributes.<field name>:<field value> syntax, where <field name> can be:
@@ -59,47 +61,51 @@ Filters the returned results according to the value of the specified field, usin
 > Even though the JSON rule object uses created_by and updated_by fields, you must use createdBy and updatedBy fields in the filter.
 
       */
-  filter: z.string().optional(),
-  /**
-   * Field to sort by
-   */
-  sort_field: FindRulesSortField.optional(),
-  /**
-   * Sort order
-   */
-  sort_order: SortOrder.optional(),
-  /**
-   * Page number
-   */
-  page: z.coerce.number().int().min(1).optional().default(1),
-  /**
-   * Rules per page
-   */
-  per_page: z.coerce.number().int().min(0).optional().default(20),
-  /**
-   * Gaps range start
-   */
-  gaps_range_start: z.string().optional(),
-  /**
-   * Gaps range end
-   */
-  gaps_range_end: z.string().optional(),
-  /**
-   * Gap fill statuses
-   */
-  gap_fill_statuses: ArrayFromString(GapFillStatus).optional(),
-  /**
-   * Gap auto fill scheduler ID used to determine gap fill status for rules
-   */
-  gap_auto_fill_scheduler_id: z.string().optional(),
-});
+    filter: z.string().optional(),
+    /**
+     * Field to sort by
+     */
+    sort_field: FindRulesSortField.optional(),
+    /**
+     * Sort order
+     */
+    sort_order: SortOrder.optional(),
+    /**
+     * Page number
+     */
+    page: z.coerce.number().int().min(1).optional().default(1),
+    /**
+     * Rules per page
+     */
+    per_page: z.coerce.number().int().min(0).optional().default(20),
+    /**
+     * Gaps range start
+     */
+    gaps_range_start: z.string().optional(),
+    /**
+     * Gaps range end
+     */
+    gaps_range_end: z.string().optional(),
+    /**
+     * Gap fill statuses
+     */
+    gap_fill_statuses: ArrayFromString(GapFillStatus).optional(),
+    /**
+     * Gap auto fill scheduler ID used to determine gap fill status for rules
+     */
+    gap_auto_fill_scheduler_id: z.string().optional(),
+  })
+);
+export type FindRulesRequestQuery = z.infer<typeof FindRulesRequestQuery>;
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 
+export const FindRulesResponse = lazySchema(() =>
+  z.object({
+    page: z.number().int(),
+    perPage: z.number().int(),
+    total: z.number().int(),
+    data: z.array(RuleResponse),
+    warnings: z.array(WarningSchema).optional(),
+  })
+);
 export type FindRulesResponse = z.infer<typeof FindRulesResponse>;
-export const FindRulesResponse = z.object({
-  page: z.number().int(),
-  perPage: z.number().int(),
-  total: z.number().int(),
-  data: z.array(RuleResponse),
-  warnings: z.array(WarningSchema).optional(),
-});

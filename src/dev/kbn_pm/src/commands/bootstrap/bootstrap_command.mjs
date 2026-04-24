@@ -64,6 +64,9 @@ export const command = {
   },
   async run({ args, log, time }) {
     const offline = args.getBooleanValue('offline') ?? false;
+    if (offline) {
+      process.env.CI_STATS_DISABLED = 'true';
+    }
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
     const vscodeConfig =

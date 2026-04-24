@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListHumanId,
@@ -22,18 +22,20 @@ import {
   ExceptionList,
 } from '../model/exception_list_common.gen';
 
+export const DuplicateExceptionListRequestQuery = lazySchema(() =>
+  z.object({
+    list_id: ExceptionListHumanId,
+    namespace_type: ExceptionNamespaceType,
+    /**
+     * Determines whether to include expired exceptions in the duplicated list. Expiration date defined by `expire_time`.
+     */
+    include_expired_exceptions: z.enum(['true', 'false']).default('true'),
+  })
+);
 export type DuplicateExceptionListRequestQuery = z.infer<typeof DuplicateExceptionListRequestQuery>;
-export const DuplicateExceptionListRequestQuery = z.object({
-  list_id: ExceptionListHumanId,
-  namespace_type: ExceptionNamespaceType,
-  /**
-   * Determines whether to include expired exceptions in the duplicated list. Expiration date defined by `expire_time`.
-   */
-  include_expired_exceptions: z.enum(['true', 'false']).default('true'),
-});
 export type DuplicateExceptionListRequestQueryInput = z.input<
   typeof DuplicateExceptionListRequestQuery
 >;
 
+export const DuplicateExceptionListResponse = lazySchema(() => ExceptionList);
 export type DuplicateExceptionListResponse = z.infer<typeof DuplicateExceptionListResponse>;
-export const DuplicateExceptionListResponse = ExceptionList;

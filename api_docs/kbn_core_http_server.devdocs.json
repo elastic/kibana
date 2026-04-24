@@ -4011,6 +4011,10 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/executions.ts"
+              },
+              {
                 "plugin": "productDocBase",
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
@@ -6636,6 +6640,10 @@
               },
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts"
               },
               {
@@ -7688,10 +7696,6 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/hidden_saved_object_routes.ts"
               },
               {
@@ -8237,6 +8241,10 @@
               {
                 "plugin": "ftrApis",
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/clean.ts"
+              },
+              {
+                "plugin": "ftrApis",
+                "path": "src/platform/plugins/private/ftr_apis/server/routes/task_manager/run_soon.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -14519,7 +14527,7 @@
               "\nlevels:\n- warning: will not break deployment upon upgrade.\n- critical: needs to be addressed before upgrade."
             ],
             "signature": [
-              "\"warning\" | \"critical\""
+              "\"critical\" | \"warning\""
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
             "lineNumber": 138,

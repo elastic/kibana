@@ -79,23 +79,27 @@ export const HostPanelHeader = ({
             alignItems="flexStart"
           >
             <EuiFlexItem grow={false}>
-              <SecuritySolutionLinkAnchor
-                deepLinkId={SecurityPageName.hosts}
-                path={getHostDetailsUrl(
-                  hostName,
-                  undefined,
-                  entityId,
-                  identityFields && Object.keys(identityFields).length > 0
-                    ? identityFields
-                    : undefined
-                )}
-                target={'_blank'}
-                external={false}
-                css={linkTitleCSS}
-                override={urlParamOverride}
-              >
-                <FlyoutTitle title={hostName} iconType={'storage'} isLink />
-              </SecuritySolutionLinkAnchor>
+              {isEntityInStore ? (
+                <FlyoutTitle title={hostName} iconType={'storage'} />
+              ) : (
+                <SecuritySolutionLinkAnchor
+                  deepLinkId={SecurityPageName.hosts}
+                  path={getHostDetailsUrl(
+                    hostName,
+                    undefined,
+                    entityId,
+                    identityFields && Object.keys(identityFields).length > 0
+                      ? identityFields
+                      : undefined
+                  )}
+                  target={'_blank'}
+                  external={false}
+                  css={linkTitleCSS}
+                  override={urlParamOverride}
+                >
+                  <FlyoutTitle title={hostName} iconType={'storage'} isLink />
+                </SecuritySolutionLinkAnchor>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

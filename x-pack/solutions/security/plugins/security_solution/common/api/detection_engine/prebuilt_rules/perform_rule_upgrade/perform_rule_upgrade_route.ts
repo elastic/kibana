@@ -7,9 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { mapValues } from 'lodash';
-import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { AggregatedPrebuiltRuleError, DiffableAllFields, ThreeWayDiffConflict } from '../model';
-import { RuleSignatureId, RuleVersion } from '../../model';
+import { RuleObjectId, RuleSignatureId, RuleVersion } from '../../model';
 import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';
 
 export type Mode = z.infer<typeof Mode>;
@@ -159,6 +158,13 @@ export const SkippedRuleUpgrade = z.discriminatedUnion('reason', [
   UpgradeConflictSkipReason,
 ]);
 
+export type UpgradedRuleBasicInfo = z.infer<typeof UpgradedRuleBasicInfo>;
+export const UpgradedRuleBasicInfo = z.object({
+  id: RuleObjectId,
+  rule_id: RuleSignatureId,
+  version: RuleVersion,
+});
+
 export type PerformRuleUpgradeResponseBody = z.infer<typeof PerformRuleUpgradeResponseBody>;
 export const PerformRuleUpgradeResponseBody = z.object({
   summary: z.object({
@@ -168,7 +174,7 @@ export const PerformRuleUpgradeResponseBody = z.object({
     failed: z.number(),
   }),
   results: z.object({
-    updated: z.array(RuleResponse),
+    updated: z.array(UpgradedRuleBasicInfo),
     skipped: z.array(SkippedRuleUpgrade),
   }),
   errors: z.array(AggregatedPrebuiltRuleError),

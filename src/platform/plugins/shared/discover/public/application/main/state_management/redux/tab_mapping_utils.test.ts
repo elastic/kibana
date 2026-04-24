@@ -8,8 +8,10 @@
  */
 
 import { omit } from 'lodash';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { getTabStateMock, getPersistedTabMock } from './__mocks__/internal_state.mocks';
 import {
   fromSavedObjectTabToSearchSource,
@@ -249,6 +251,37 @@ describe('tab mapping utils', () => {
           "uiState": Object {},
         }
       `);
+    });
+
+    it('should normalize legacy controlGroupJson when loading saved object tabs', () => {
+      const legacyControlsTab = getTabStateMock({
+        id: 'legacy-controls-tab',
+        label: 'Legacy controls tab',
+        initialInternalState: {
+          serializedSearchSource: { index: 'test-data-view-legacy' },
+        },
+        attributes: {
+          controlGroupState: mockControlState,
+          visContext: undefined,
+        },
+      });
+
+      const tabState = fromSavedObjectTabToTabState({
+        tab: fromTabStateToSavedObjectTab({
+          tab: legacyControlsTab,
+          services,
+          currentDataView: undefined,
+        }),
+        existingTab: tab1,
+      });
+
+      expect(tabState.attributes.controlGroupState).toEqual({
+        ...mockControlState,
+        panel1: {
+          ...mockControlState.panel1,
+          type: ESQL_CONTROL,
+        },
+      });
     });
   });
 

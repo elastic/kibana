@@ -24,7 +24,7 @@ import { of } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart';
-import { unifiedHistogramServicesMock } from '../../__mocks__/services';
+import { lensSaveModalComponentMock, unifiedHistogramServicesMock } from '../../__mocks__/services';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('./hooks/use_edit_visualization', () => ({
@@ -370,5 +370,25 @@ describe('Chart', () => {
 
     expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
     expect(screen.queryByText('Save visualization to dashboard')).not.toBeInTheDocument();
+  });
+
+  it('opens save modal with an empty title', async () => {
+    const user = userEvent.setup();
+    lensSaveModalComponentMock.mockClear();
+
+    await mountComponent({
+      isPlainRecord: true,
+      isTransformationalESQL: true,
+      dataView: dataViewMock,
+    });
+
+    await user.click(screen.getByText('Save visualization to dashboard'));
+
+    expect(lensSaveModalComponentMock).toHaveBeenCalled();
+    const firstCall = lensSaveModalComponentMock.mock.calls[0] as unknown as
+      | [{ initialInput: { attributes: { title: string } } }]
+      | undefined;
+    expect(firstCall).toBeDefined();
+    expect(firstCall![0].initialInput.attributes.title).toBe('');
   });
 });
