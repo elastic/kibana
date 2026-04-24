@@ -11,9 +11,7 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
   PublishesBlockingError,
-  PublishesFilters,
-  PublishesTimeRange,
-  PublishingSubject,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import {
   initializeStateManager,
@@ -27,7 +25,7 @@ import {
   type WithAllKeys,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
@@ -65,10 +63,8 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
   HasEditCapabilities &
   PublishesBlockingError &
-  PublishesFilters &
-  PublishesTimeRange & {
+  PublishesUnifiedSearch & {
     setTimeRange: (timeRange: TimeRange | undefined) => void;
-    query$: PublishingSubject<Query | undefined>;
     canEditUnifiedSearch: () => boolean;
   };
 
@@ -113,13 +109,7 @@ function buildQueryFromKuery(kuery: string | undefined): Query | undefined {
 export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: EmbeddableFactory<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
     type: APM_SERVICE_MAP_EMBEDDABLE,
-    buildEmbeddable: async ({
-      initialState,
-      finalizeApi,
-      uuid,
-      parentApi,
-      initializeDrilldownsManager: _initializeDrilldownsManager,
-    }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const { coreStart } = deps;
       const state = initialState;
 
@@ -138,9 +128,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         defaultCustomState
       );
 
-      void _initializeDrilldownsManager;
-
-      const query$ = new BehaviorSubject<Query | undefined>(buildQueryFromKuery(state.kuery));
+      const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
+        buildQueryFromKuery(state.kuery)
+      );
       const filters$ = new BehaviorSubject<Filter[] | undefined>(
         buildFiltersFromState(state.service_name, state.environment)
       );
