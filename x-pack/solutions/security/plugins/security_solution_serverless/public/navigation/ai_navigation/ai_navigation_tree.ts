@@ -76,6 +76,10 @@ export const createAiNavigationTree = (
       breadcrumbStatus: 'hidden',
       children: [
         {
+          link: 'inbox' as AppDeepLinkId,
+          icon: 'email',
+        },
+        {
           link: 'discover' as AppDeepLinkId,
           icon: 'productDiscover',
         },

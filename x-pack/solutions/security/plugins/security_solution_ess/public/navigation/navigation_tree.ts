@@ -32,6 +32,10 @@ export const createNavigationTree = (
         title: SOLUTION_NAME,
       },
       {
+        link: 'inbox' as AppDeepLinkId,
+        icon: 'email',
+      },
+      {
         link: 'discover',
         icon: 'productDiscover',
       },
