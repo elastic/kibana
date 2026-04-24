@@ -963,13 +963,8 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
       cy.get(COMBO_BOX_OPTION).should('contain.text', field);
     }
 
-    // Type only — do not use {downArrow}{enter}. On slow environments (MKI) the
-    // option list can rebuild mid-type when the index fetch resolves, which
-    // resets the active highlight and turns {enter} into a no-op.
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(field);
-    // Use the contains(selector, text) overload so the yielded element is the
-    // option button, not the inner <mark> highlight — the mark is
-    // pointer-events: none and breaks cy.click().
+    // Using a click instead of keyboard navigation to avoid potential focus loss when page is still loading
     cy.contains(COMBO_BOX_OPTION, field).click();
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX)
       .find('[data-test-subj="euiComboBoxPill"]')
