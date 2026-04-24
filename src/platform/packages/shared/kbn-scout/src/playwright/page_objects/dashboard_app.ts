@@ -36,7 +36,6 @@ export class DashboardApp {
   // Add panel flow
   private readonly addTopNavButton;
   private readonly panelSelectionFlyout;
-  private readonly panelSelectionList;
   private readonly panelSelectionSearchInput;
 
   // Save flows
@@ -84,7 +83,6 @@ export class DashboardApp {
     // Add panel flow
     this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
     this.panelSelectionFlyout = this.page.testSubj.locator('dashboardPanelSelectionFlyout');
-    this.panelSelectionList = this.page.testSubj.locator('dashboardPanelSelectionList');
     this.panelSelectionSearchInput = this.page.testSubj.locator(
       'dashboardPanelSelectionFlyout__searchInput'
     );
@@ -480,7 +478,7 @@ export class DashboardApp {
   }
 
   async getPanelGroupOrder(): Promise<string[]> {
-    const panelGroups = await this.panelSelectionList
+    const panelGroups = await this.panelSelectionFlyout
       .locator('[data-test-subj*="dashboardEditorMenu-"]')
       .all();
 
@@ -504,7 +502,7 @@ export class DashboardApp {
   }
 
   async getPanelTypeCount(): Promise<number> {
-    return this.panelSelectionList.locator('li').count();
+    return this.panelSelectionFlyout.locator('[data-test-subj*="create-action-"]').count();
   }
 
   /**

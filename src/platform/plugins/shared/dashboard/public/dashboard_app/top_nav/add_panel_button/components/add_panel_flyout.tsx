@@ -150,7 +150,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
             </EuiFormRow>
           </EuiForm>
         </EuiFlexItem>
-        {featuredItems.length && (
+        {featuredItems.length > 0 && (
           <EuiFlexItem
             grow={false}
             css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}

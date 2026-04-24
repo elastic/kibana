@@ -246,7 +246,7 @@ export class TimePickerPageObject extends FtrService {
       // Tooltips can sometimes hide the picker, so move mouse directly to it instead of direct click
       const picker = await this.testSubjects.find('dateRangePickerControlButton');
       await picker.moveMouseTo();
-      picker.click();
+      await picker.click();
       await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 });
       await this.inputValue('dateRangePickerInput', rangeText);
       // Pressing Enter in inputValue applies the range and closes the popover.
