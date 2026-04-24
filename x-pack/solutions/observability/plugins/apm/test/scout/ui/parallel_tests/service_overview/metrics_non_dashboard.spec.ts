@@ -22,7 +22,7 @@ test.describe(
       pageObjects: { serviceDetailsPage },
     }) => {
       await serviceDetailsPage.metricsTab.goToTab({
-        serviceName: testData.SERVICE_METRICS_RUBY_JRUBY,
+        serviceName: testData.APM_METRICS_SERVICE_NAMES.RUBY_JRUBY,
         rangeFrom: testData.START_DATE,
         rangeTo: testData.END_DATE,
       });

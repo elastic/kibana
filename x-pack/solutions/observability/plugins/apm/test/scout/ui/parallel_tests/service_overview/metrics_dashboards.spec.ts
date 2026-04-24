@@ -9,39 +9,47 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
+const { APM_METRICS_SERVICE_NAMES } = testData;
+
 const dashboardScenarios = [
-  { title: 'classic_apm-apm-java', serviceName: testData.SERVICE_METRICS_JAVA_APM },
-  { title: 'classic_apm-apm-nodejs', serviceName: testData.SERVICE_METRICS_NODEJS_APM },
-  { title: 'classic_apm-edot-java', serviceName: testData.SERVICE_METRICS_EDOT_JAVA },
-  { title: 'classic_apm-edot-nodejs', serviceName: testData.SERVICE_METRICS_EDOT_NODEJS },
-  { title: 'classic_apm-edot-dotnet (v9)', serviceName: testData.SERVICE_METRICS_EDOT_DOTNET_V9 },
-  { title: 'classic_apm-edot-dotnet-lte-v8', serviceName: testData.SERVICE_METRICS_EDOT_DOTNET_V8 },
-  { title: 'classic_apm-otel_other-java', serviceName: testData.SERVICE_METRICS_OTEL_JAVA },
-  { title: 'classic_apm-otel_other-nodejs', serviceName: testData.SERVICE_METRICS_OTEL_NODEJS },
-  { title: 'classic_apm-otel_other-dotnet', serviceName: testData.SERVICE_METRICS_OTEL_DOTNET },
-  { title: 'classic_apm-otel_other-go', serviceName: testData.SERVICE_METRICS_OTEL_GO },
-  // { title: 'otel_native-edot-java', serviceName: testData.SERVICE_METRICS_OTEL_NATIVE_EDOT_JAVA },
+  { title: 'classic_apm-apm-java', serviceName: APM_METRICS_SERVICE_NAMES.JAVA_APM },
+  { title: 'classic_apm-apm-nodejs', serviceName: APM_METRICS_SERVICE_NAMES.NODEJS_APM },
+  { title: 'classic_apm-edot-java', serviceName: APM_METRICS_SERVICE_NAMES.EDOT_JAVA },
+  { title: 'classic_apm-edot-nodejs', serviceName: APM_METRICS_SERVICE_NAMES.EDOT_NODEJS },
+  { title: 'classic_apm-edot-dotnet (v9)', serviceName: APM_METRICS_SERVICE_NAMES.EDOT_DOTNET_V9 },
+  {
+    title: 'classic_apm-edot-dotnet-lte-v8',
+    serviceName: APM_METRICS_SERVICE_NAMES.EDOT_DOTNET_V8,
+  },
+  { title: 'classic_apm-otel_other-java', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_JAVA },
+  { title: 'classic_apm-otel_other-nodejs', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NODEJS },
+  { title: 'classic_apm-otel_other-dotnet', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_DOTNET },
+  { title: 'classic_apm-otel_other-go', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_GO },
+  // { title: 'otel_native-edot-java', serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_EDOT_JAVA },
   {
     title: 'otel_native-edot-nodejs',
-    serviceName: testData.SERVICE_METRICS_OTEL_NATIVE_EDOT_NODEJS,
+    serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_EDOT_NODEJS,
   },
   {
     title: 'otel_native-edot-python',
-    serviceName: testData.SERVICE_METRICS_OTEL_NATIVE_EDOT_PYTHON,
+    serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_EDOT_PYTHON,
   },
   // {
   //   title: 'otel_native-otel_other-java',
-  //   serviceName: testData.SERVICE_METRICS_OTEL_NATIVE_OTEL_JAVA,
+  //   serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_OTEL_JAVA,
   // },
   {
     title: 'otel_native-otel_other-nodejs',
-    serviceName: testData.SERVICE_METRICS_OTEL_NATIVE_OTEL_NODEJS,
+    serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_OTEL_NODEJS,
   },
   {
     title: 'otel_native-otel_other-python',
-    serviceName: testData.SERVICE_METRICS_OTEL_NATIVE_OTEL_PYTHON,
+    serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_OTEL_PYTHON,
   },
-  { title: 'otel_native-otel_other-go', serviceName: testData.SERVICE_METRICS_OTEL_NATIVE_OTEL_GO },
+  {
+    title: 'otel_native-otel_other-go',
+    serviceName: APM_METRICS_SERVICE_NAMES.OTEL_NATIVE_OTEL_GO,
+  },
 ];
 
 test.describe(
