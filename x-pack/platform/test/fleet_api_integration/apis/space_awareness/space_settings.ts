@@ -41,25 +41,20 @@ export default function (providerContext: FtrProviderContext) {
         const settings = await apiClient.getSpaceSettings();
         expect(settings.item).to.eql({
           allowed_namespace_prefixes: [],
-          namespace_index_templates_enabled_for: [],
         });
         // Update settings
         await apiClient.putSpaceSettings({
           allowed_namespace_prefixes: ['test1', 'test2'],
-          namespace_index_templates_enabled_for: [],
         });
         expect((await apiClient.getSpaceSettings()).item).to.eql({
           allowed_namespace_prefixes: ['test1', 'test2'],
-          namespace_index_templates_enabled_for: [],
         });
         // Clear settings
         await apiClient.putSpaceSettings({
           allowed_namespace_prefixes: [],
-          namespace_index_templates_enabled_for: [],
         });
         expect((await apiClient.getSpaceSettings()).item).to.eql({
           allowed_namespace_prefixes: [],
-          namespace_index_templates_enabled_for: [],
         });
       });
     });
@@ -69,7 +64,6 @@ export default function (providerContext: FtrProviderContext) {
         const settings = await apiClient.getSpaceSettings(TEST_SPACE_1);
         expect(settings.item).to.eql({
           allowed_namespace_prefixes: [],
-          namespace_index_templates_enabled_for: [],
         });
         // Update settings
         await apiClient.putSpaceSettings(
@@ -80,7 +74,6 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect((await apiClient.getSpaceSettings(TEST_SPACE_1)).item).to.eql({
           allowed_namespace_prefixes: ['test1', 'test2'],
-          namespace_index_templates_enabled_for: [],
         });
         // Clear settings
         await apiClient.putSpaceSettings(
@@ -91,7 +84,6 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect((await apiClient.getSpaceSettings(TEST_SPACE_1)).item).to.eql({
           allowed_namespace_prefixes: [],
-          namespace_index_templates_enabled_for: [],
         });
       });
 

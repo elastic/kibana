@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
 import { type HttpResponseOptions } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { omit, pick } from 'lodash';
 
@@ -103,6 +104,7 @@ import {
   rollbackInstallation,
 } from '../../services/epm/packages/rollback';
 import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
+import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
   ReauthorizeTransformRequestSchema,
@@ -316,9 +318,26 @@ export const updatePackageHandler: FleetRequestHandler<
   const savedObjectsClient = (await context.fleet).internalSoClient;
   const { pkgName } = request.params;
 
-  const res = await updatePackage({ savedObjectsClient, pkgName, ...request.body });
+  const { packageInfo, namespaceCustomizationDiff } = await updatePackage({
+    savedObjectsClient,
+    pkgName,
+    ...request.body,
+  });
+
+  if (
+    namespaceCustomizationDiff.addedNamespaces.length > 0 ||
+    namespaceCustomizationDiff.removedNamespaces.length > 0
+  ) {
+    await scheduleSyncNamespaceTemplatesTask(appContextService.getTaskManagerStart()!, {
+      spaceId: savedObjectsClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+      packageName: pkgName,
+      addedNamespaces: namespaceCustomizationDiff.addedNamespaces,
+      removedNamespaces: namespaceCustomizationDiff.removedNamespaces,
+    });
+  }
+
   const body: UpdatePackageResponse = {
-    item: res,
+    item: packageInfo,
   };
 
   return response.ok({ body });
@@ -745,6 +764,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
       pending_upgrade_review: attributes.pending_upgrade_review,
       keep_policies_up_to_date: attributes.keep_policies_up_to_date,
+      namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
     };
 
     return {

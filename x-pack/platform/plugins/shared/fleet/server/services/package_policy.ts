@@ -176,9 +176,6 @@ import { sendTelemetryEvents } from './upgrade_sender';
 import {
   canDeployCustomPackageAsAgentlessOrThrow,
   handleExperimentalDatastreamFeatureOptIn,
-  handleNamespaceTemplateDelete,
-  handleNamespaceTemplateUpdate,
-  handleOldNamespaceTemplateCleanup,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './package_policies';
@@ -617,17 +614,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       soClient,
       esClient,
       packagePolicy: enrichedPackagePolicy,
-    });
-
-    // Handle namespace-scoped index template creation for opted-in namespaces.
-    // NOTE: This runs before the SO is persisted, consistent with
-    // handleExperimentalDatastreamFeatureOptIn above. If the SO save fails the
-    // namespace template remains in ES but is harmless (higher-priority duplicate).
-    await handleNamespaceTemplateUpdate({
-      soClient,
-      esClient,
-      packagePolicy: enrichedPackagePolicy,
-      spaceId: soClient.getCurrentNamespace(),
     });
 
     const pkgInfo =
@@ -1678,17 +1664,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: restOfPackagePolicy,
     });
 
-    // Create namespace-scoped index template for the new namespace (if opted in).
-    // Deletion of the old namespace template is deferred to handleOldNamespaceTemplateCleanup
-    // which runs after the SO save, so a failed save never permanently removes the old template.
-    await handleNamespaceTemplateUpdate({
-      soClient,
-      esClient,
-      packagePolicy: restOfPackagePolicy,
-      oldPackagePolicy,
-      spaceId: soClient.getCurrentNamespace(),
-    });
-
     // If the package version has increased, save the previous package policy revision.
     if (
       appContextService.getExperimentalFeatures().enablePackageRollback &&
@@ -1757,20 +1732,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       )
       .catch(catchAndSetErrorStackTrace.withMessage(`update of package policy [${id}] failed`));
-
-    // SO is now committed. Safe to remove the old namespace template if namespace changed.
-    if (
-      restOfPackagePolicy.package?.name &&
-      (restOfPackagePolicy.namespace || 'default') !== (oldPackagePolicy.namespace || 'default')
-    ) {
-      await handleOldNamespaceTemplateCleanup({
-        soClient,
-        esClient,
-        packageName: restOfPackagePolicy.package.name,
-        oldNamespace: oldPackagePolicy.namespace || 'default',
-        spaceId: soClient.getCurrentNamespace(),
-      });
-    }
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
 
@@ -2119,14 +2080,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (!options?.fromBulkUpgrade) {
           // Handle component template/mappings updates for experimental features, e.g. synthetic source
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
-          // Handle namespace-scoped index template creation for opted-in namespaces
-          await handleNamespaceTemplateUpdate({
-            soClient,
-            esClient,
-            packagePolicy,
-            oldPackagePolicy,
-            spaceId: soClient.getCurrentNamespace(),
-          });
         }
 
         policiesToUpdate.push({
@@ -2455,18 +2408,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       }
     });
-
-    // Handle namespace-scoped index template cleanup before SOs are deleted so the
-    // "is namespace still in use?" query can correctly exclude the being-deleted IDs.
-    if (idsToDelete.length > 0) {
-      const policiesToDelete = packagePolicies.filter((p) => idsToDelete.includes(p.id));
-      await handleNamespaceTemplateDelete({
-        soClient,
-        esClient,
-        packagePolicies: policiesToDelete,
-        spaceId: soClient.getCurrentNamespace(),
-      });
-    }
 
     const secretsToDelete: string[] = [];
     if (idsToDelete.length > 0) {

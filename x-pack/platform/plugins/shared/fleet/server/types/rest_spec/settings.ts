@@ -164,7 +164,6 @@ export const SpaceSettingsResponseSchema = schema.object({
   item: schema.object({
     managed_by: schema.maybe(schema.string()),
     allowed_namespace_prefixes: schema.arrayOf(schema.string(), { maxSize: 100 }),
-    namespace_index_templates_enabled_for: schema.arrayOf(schema.string(), { maxSize: 100 }),
   }),
 });
 
@@ -228,26 +227,6 @@ export const PutSpaceSettingsRequestSchema = {
           },
         }),
         { maxSize: 10 }
-      )
-    ),
-    namespace_index_templates_enabled_for: schema.maybe(
-      schema.arrayOf(
-        schema.string({
-          validate: (v) => {
-            if (!v.length) {
-              return 'Must not be empty';
-            }
-            if (!/^[a-z0-9_]+$/.test(v)) {
-              return 'Must only contain lowercase letters, numbers, and underscores';
-            }
-          },
-        }),
-        {
-          maxSize: 100,
-          meta: {
-            description: 'Namespaces for which to create namespace-level index templates.',
-          },
-        }
       )
     ),
   }),

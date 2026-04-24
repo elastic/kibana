@@ -59,13 +59,11 @@ export interface GetEnrollmentSettingsResponse {
 export interface PutSpaceSettingsRequest {
   body: {
     allowed_namespace_prefixes?: string[];
-    namespace_index_templates_enabled_for?: string[];
   };
 }
 
 export interface GetSpaceSettingsResponse {
   item: {
     allowed_namespace_prefixes?: string[];
-    namespace_index_templates_enabled_for?: string[];
   };
 }

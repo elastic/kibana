@@ -16,7 +16,6 @@ import { getSettingsHandler, getSpaceSettingsHandler } from './settings_handler'
 jest.mock('../../services/spaces/space_settings', () => ({
   getSpaceSettings: jest.fn().mockResolvedValue({
     allowed_namespace_prefixes: [],
-    namespace_index_templates_enabled_for: [],
     managed_by: 'kibana',
   }),
   saveSpaceSettings: jest.fn(),
@@ -62,7 +61,6 @@ describe('SettingsHandler', () => {
     const expectedResponse = {
       item: {
         allowed_namespace_prefixes: [],
-        namespace_index_templates_enabled_for: [],
         managed_by: 'kibana',
       },
     };

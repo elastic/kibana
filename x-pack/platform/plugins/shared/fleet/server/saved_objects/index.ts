@@ -41,6 +41,7 @@ import {
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   EpmPackagesSchemaV8,
+  EpmPackagesSchemaV9,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1394,6 +1395,7 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          namespace_customization_enabled_for: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1498,6 +1500,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: EpmPackagesSchemaV8.extends({}, { unknowns: 'ignore' }),
             create: EpmPackagesSchemaV8,
+          },
+        },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                namespace_customization_enabled_for: { type: 'keyword' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV9.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV9,
           },
         },
       },

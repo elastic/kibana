@@ -16,7 +16,6 @@ import type {
 import { appContextService, settingsService } from '../../services';
 import { getSpaceSettings, saveSpaceSettings } from '../../services/spaces/space_settings';
 import { scheduleReindexIntegrationKnowledgeTask } from '../../tasks/reindex_integration_knowledge_task';
-import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
 
 export const getSpaceSettingsHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
@@ -35,30 +34,12 @@ export const putSpaceSettingsHandler: FleetRequestHandler<
   const soClient = (await context.fleet).internalSoClient;
   const spaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
 
-  // Fetch old settings before saving to compute the diff
-  const oldSettings = await getSpaceSettings(spaceId);
-  const oldList = oldSettings.namespace_index_templates_enabled_for;
-  // Use request body directly rather than re-fetching after save to avoid a redundant DB read.
-  // When the field is absent the list is unchanged, so the diff will be empty.
-  const newList = request.body.namespace_index_templates_enabled_for ?? oldList;
-  const addedNamespaces = newList.filter((ns) => !oldList.includes(ns));
-  const removedNamespaces = oldList.filter((ns) => !newList.includes(ns));
-
   await saveSpaceSettings({
     settings: {
       allowed_namespace_prefixes: request.body.allowed_namespace_prefixes,
-      namespace_index_templates_enabled_for: request.body.namespace_index_templates_enabled_for,
     },
     spaceId,
   });
-
-  if (addedNamespaces.length > 0 || removedNamespaces.length > 0) {
-    await scheduleSyncNamespaceTemplatesTask(appContextService.getTaskManagerStart()!, {
-      addedNamespaces,
-      removedNamespaces,
-      spaceId,
-    });
-  }
 
   const settings = await getSpaceSettings(spaceId);
 

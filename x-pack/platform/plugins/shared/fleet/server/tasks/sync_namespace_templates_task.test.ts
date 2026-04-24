@@ -40,7 +40,12 @@ describe('syncNamespaceTemplatesTask', () => {
       mockSoClient
     );
     (appContextService.getInternalUserESClient as jest.Mock).mockReturnValue(mockEsClient);
-    mockedSyncNamespaceTemplates.mockResolvedValue({ created: {}, removed: {} });
+    mockedSyncNamespaceTemplates.mockResolvedValue({
+      packageName: 'nginx',
+      created: [],
+      removed: [],
+      skipped: false,
+    });
   });
 
   describe('registerSyncNamespaceTemplatesTask', () => {
@@ -63,18 +68,20 @@ describe('syncNamespaceTemplatesTask', () => {
     it('should schedule the task with correct parameters', async () => {
       const taskManager = taskManagerMock.createStart();
       await scheduleSyncNamespaceTemplatesTask(taskManager, {
+        spaceId: 'default',
+        packageName: 'nginx',
         addedNamespaces: ['production'],
         removedNamespaces: [],
-        spaceId: 'default',
       });
       expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: 'fleet:sync_namespace_templates',
           scope: ['fleet'],
           params: {
+            spaceId: 'default',
+            packageName: 'nginx',
             addedNamespaces: ['production'],
             removedNamespaces: [],
-            spaceId: 'default',
           },
           state: {},
         })
@@ -84,9 +91,10 @@ describe('syncNamespaceTemplatesTask', () => {
     it('should not schedule when there are no namespace changes', async () => {
       const taskManager = taskManagerMock.createStart();
       await scheduleSyncNamespaceTemplatesTask(taskManager, {
+        spaceId: 'default',
+        packageName: 'nginx',
         addedNamespaces: [],
         removedNamespaces: [],
-        spaceId: 'default',
       });
       expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
     });
@@ -108,9 +116,10 @@ describe('syncNamespaceTemplatesTask', () => {
 
     it('should call syncNamespaceTemplates with correct parameters', async () => {
       const { runner, abortController } = createTaskRunner({
+        spaceId: 'my_space',
+        packageName: 'nginx',
         addedNamespaces: ['production'],
         removedNamespaces: ['staging'],
-        spaceId: 'my_space',
       });
 
       await runner.run();
@@ -120,6 +129,7 @@ describe('syncNamespaceTemplatesTask', () => {
       expect(mockedSyncNamespaceTemplates).toHaveBeenCalledWith({
         soClient: mockSoClient,
         esClient: mockEsClient,
+        packageName: 'nginx',
         addedNamespaces: ['production'],
         removedNamespaces: ['staging'],
         abortController,
@@ -128,9 +138,10 @@ describe('syncNamespaceTemplatesTask', () => {
 
     it('should be a no-op when there are no namespace changes', async () => {
       const { runner } = createTaskRunner({
+        spaceId: 'default',
+        packageName: 'nginx',
         addedNamespaces: [],
         removedNamespaces: [],
-        spaceId: 'default',
       });
 
       await runner.run();
@@ -140,9 +151,10 @@ describe('syncNamespaceTemplatesTask', () => {
 
     it('should pass an aborted signal to syncNamespaceTemplates when the task is cancelled', async () => {
       const { runner, abortController } = createTaskRunner({
+        spaceId: 'default',
+        packageName: 'nginx',
         addedNamespaces: ['production'],
         removedNamespaces: [],
-        spaceId: 'default',
       });
 
       abortController.abort();

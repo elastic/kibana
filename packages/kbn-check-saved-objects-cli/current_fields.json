@@ -507,6 +507,7 @@
     "latest_executed_state",
     "latest_install_failed_attempts",
     "name",
+    "namespace_customization_enabled_for",
     "package_assets",
     "pending_upgrade_review",
     "previous_version",
@@ -960,11 +961,7 @@
   ],
   "inventory-view": [],
   "kql-telemetry": [],
-  "lead-generation-config": [
-    "connectorId",
-    "lastError",
-    "lastExecutionUuid"
-  ],
+  "lead-generation-config": [],
   "legacy-url-alias": [
     "disabled",
     "resolveCounter",

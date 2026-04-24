@@ -613,7 +613,28 @@ export const GetBulkAssetsRequestSchema = {
 export const UpdatePackageRequestSchema = {
   params: PackageVersionRequestParamsSchema,
   body: schema.object({
-    keepPoliciesUpToDate: schema.boolean(),
+    keepPoliciesUpToDate: schema.maybe(schema.boolean()),
+    namespace_customization_enabled_for: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (!v.length) {
+              return 'Must not be empty';
+            }
+            if (!/^[a-z0-9_]+$/.test(v)) {
+              return 'Must only contain lowercase letters, numbers, and underscores';
+            }
+          },
+        }),
+        {
+          maxSize: 100,
+          meta: {
+            description:
+              'Namespaces for which namespace-level customization is enabled on this package.',
+          },
+        }
+      )
+    ),
   }),
 };
 
@@ -621,6 +642,65 @@ export const UpdatePackageWithoutVersionRequestSchema = {
   params: PackageRequestParamsSchema,
   body: UpdatePackageRequestSchema.body,
 };
+
+export const BulkNamespaceCustomizationRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(schema.string(), {
+      minSize: 1,
+      maxSize: 1000,
+      meta: {
+        description: 'Package names to apply the customization changes to.',
+      },
+    }),
+    enable: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (!v.length) {
+              return 'Must not be empty';
+            }
+            if (!/^[a-z0-9_]+$/.test(v)) {
+              return 'Must only contain lowercase letters, numbers, and underscores';
+            }
+          },
+        }),
+        {
+          maxSize: 100,
+          meta: {
+            description: 'Namespaces to enable namespace-level customization for on each package.',
+          },
+        }
+      )
+    ),
+    disable: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        maxSize: 100,
+        meta: {
+          description: 'Namespaces to disable namespace-level customization for on each package.',
+        },
+      })
+    ),
+  }),
+};
+
+export const BulkNamespaceCustomizationResponseSchema = schema.object({
+  items: schema.arrayOf(
+    schema.object({
+      name: schema.string(),
+      success: schema.boolean(),
+      namespace_customization_enabled_for: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          meta: {
+            description:
+              'The resulting opt-in list on the package after the enable/disable deltas were applied. Present when `success` is true.',
+          },
+        })
+      ),
+      error: schema.maybe(schema.string()),
+    }),
+    { maxSize: 1000 }
+  ),
+});
 
 export const ReviewUpgradeRequestSchema = {
   params: schema.object({

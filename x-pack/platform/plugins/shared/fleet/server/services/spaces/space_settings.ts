@@ -36,22 +36,8 @@ export async function getSpaceSettings(spaceId?: string) {
 
   return {
     allowed_namespace_prefixes: settings?.attributes?.allowed_namespace_prefixes ?? [],
-    namespace_index_templates_enabled_for:
-      settings?.attributes?.namespace_index_templates_enabled_for ?? [],
     managed_by: settings?.attributes?.managed_by ?? undefined,
   };
-}
-
-/**
- * Returns true if namespace-scoped index templates are enabled for the given namespace
- * in the current space.
- */
-export async function isNamespaceIndexTemplateEnabled(
-  namespace: string,
-  spaceId?: string
-): Promise<boolean> {
-  const settings = await getSpaceSettings(spaceId);
-  return settings.namespace_index_templates_enabled_for.includes(namespace);
 }
 
 export async function saveSpaceSettings({

@@ -130,7 +130,6 @@ describe('getSpaceSettings', () => {
 
     expect(res).toEqual({
       allowed_namespace_prefixes: ['test'],
-      namespace_index_templates_enabled_for: [],
       managed_by: undefined,
     });
   });

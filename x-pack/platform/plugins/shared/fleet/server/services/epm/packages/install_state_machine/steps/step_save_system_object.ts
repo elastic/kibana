@@ -66,8 +66,8 @@ export async function stepSaveSystemObject(context: InstallContext) {
     pkgName
   );
   logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
-  // Re-inject namespace@custom refs that were cleared when the index templates were
-  // rebuilt during this install. On first install this is a no-op (no existing policies).
+  // Recreate namespace-scoped index templates for every namespace opted in on this
+  // package's Installation SO. On first install this is a no-op (opt-in list is empty).
   if (packageInfo.type === 'integration') {
     try {
       await handleNamespaceTemplateRestoreAfterPackageInstall({
@@ -75,11 +75,10 @@ export async function stepSaveSystemObject(context: InstallContext) {
         esClient,
         packageName: pkgName,
         dataStreams: packageInfo.data_streams ?? [],
-        spaceId: savedObjectsClient.getCurrentNamespace(),
       });
     } catch (err: any) {
       logger.warn(
-        `[stepSaveSystemObject] Failed to restore namespace@custom refs for ${pkgName}: ${err.message}`
+        `[stepSaveSystemObject] Failed to restore namespace templates for ${pkgName}: ${err.message}`
       );
     }
   }

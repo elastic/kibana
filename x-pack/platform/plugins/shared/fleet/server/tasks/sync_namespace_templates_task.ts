@@ -17,6 +17,13 @@ import { syncNamespaceTemplates } from '../services/package_policies';
 
 const TASK_TYPE = 'fleet:sync_namespace_templates';
 
+export interface SyncNamespaceTemplatesTaskParams {
+  spaceId: string;
+  packageName: string;
+  addedNamespaces: string[];
+  removedNamespaces: string[];
+}
+
 export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManagerSetupContract) {
   taskManagerSetup.registerTaskDefinitions({
     [TASK_TYPE]: {
@@ -30,11 +37,8 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
         taskInstance: ConcreteTaskInstance;
         abortController: AbortController;
       }) => {
-        const { addedNamespaces, removedNamespaces, spaceId } = taskInstance.params as {
-          addedNamespaces: string[];
-          removedNamespaces: string[];
-          spaceId: string;
-        };
+        const { spaceId, packageName, addedNamespaces, removedNamespaces } =
+          taskInstance.params as SyncNamespaceTemplatesTaskParams;
         return {
           async run() {
             if (addedNamespaces.length === 0 && removedNamespaces.length === 0) {
@@ -43,7 +47,7 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
 
             const logger = appContextService.getLogger();
             logger.debug(
-              `[syncNamespaceTemplatesTask] Running: adding [${addedNamespaces}], removing [${removedNamespaces}] in space ${spaceId}`
+              `[syncNamespaceTemplatesTask] Running for package ${packageName} in space ${spaceId}: adding [${addedNamespaces}], removing [${removedNamespaces}]`
             );
 
             const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
@@ -52,6 +56,7 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
             await syncNamespaceTemplates({
               soClient,
               esClient,
+              packageName,
               addedNamespaces,
               removedNamespaces,
               abortController,
@@ -65,11 +70,7 @@ export function registerSyncNamespaceTemplatesTask(taskManagerSetup: TaskManager
 
 export async function scheduleSyncNamespaceTemplatesTask(
   taskManagerStart: TaskManagerStartContract,
-  params: {
-    addedNamespaces: string[];
-    removedNamespaces: string[];
-    spaceId: string;
-  }
+  params: SyncNamespaceTemplatesTaskParams
 ) {
   if (params.addedNamespaces.length === 0 && params.removedNamespaces.length === 0) {
     return;

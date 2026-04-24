@@ -84,6 +84,8 @@ import {
   GetKnowledgeBaseResponseSchema,
   BulkRollbackPackagesRequestSchema,
   BulkRollbackPackagesResponseSchema,
+  BulkNamespaceCustomizationRequestSchema,
+  BulkNamespaceCustomizationResponseSchema,
   InstallRuleAssetsRequestSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
@@ -127,6 +129,7 @@ import {
   postBulkUninstallPackagesHandler,
   getOneBulkOperationPackagesHandler,
   postBulkRollbackPackagesHandler,
+  postBulkNamespaceCustomizationHandler,
 } from './bulk_handler';
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
 
@@ -1099,6 +1102,36 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         getOneBulkOperationPackagesHandler
       );
   }
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.BULK_NAMESPACE_CUSTOMIZATION_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Bulk enable/disable namespace-level customization for packages`,
+      description: `Enable or disable namespace-level index template customization for a list of packages in one call. Use this for IaC-style declarative flows.`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: BulkNamespaceCustomizationRequestSchema,
+          response: {
+            200: {
+              body: () => BulkNamespaceCustomizationResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      postBulkNamespaceCustomizationHandler
+    );
 
   router.versioned
     .get({
