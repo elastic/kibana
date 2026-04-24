@@ -94,6 +94,7 @@ describe('created by column builder', () => {
       field: 'createdBy',
       name: 'Created by',
       sortable: false,
+      align: 'center',
       'data-test-subj': 'content-list-table-column-createdBy',
     });
   });

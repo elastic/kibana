@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ContentListItem } from '@kbn/content-list-provider';
-import type { ParsedPart } from '@kbn/content-list-assembly';
+import type { ParsedPart, SkeletonOutput } from '@kbn/content-list-assembly';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
 import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
@@ -142,12 +144,16 @@ export const buildActionsColumn = (
     return undefined;
   }
 
-  // Each `EuiButtonIcon` (xs) is `euiTheme.size.l` (24px) wide with a 4px
-  // inline gap — matching `euiButtonSizeMap`'s `xs.height`. `euiButtonSizeMap`
-  // requires a live EUI theme context so we derive the constant here instead.
-  // Add 8px for cell padding so adjacent columns with long content do not
-  // squeeze the actions column.
-  const defaultWidth = `${actions.length * 28 + 8}px`;
+  // EUI renders row actions as `EuiButtonIcon` `size="s"`, which `euiButtonSizeMap`
+  // sets to `euiTheme.size.xl` (32px) with an `euiTheme.size.xs` (4px) gap between
+  // icons. The cell content adds `euiTheme.size.s` (8px) of padding on each side.
+  // The cell also has `flex-wrap: wrap` applied (see EUI's `_table_cell_content.styles`),
+  // so any width shortfall causes icons to stack vertically. The formula below
+  // sizes the column to fit `N` icons inline plus padding:
+  // `32 * N + 4 * (N - 1) + 16 = 36N + 12`.
+  // We derive the constant statically because `euiButtonSizeMap` requires a live
+  // EUI theme context.
+  const defaultWidth = `${actions.length * 36 + 12}px`;
 
   return {
     name: columnTitle ?? DEFAULT_ACTIONS_COLUMN_TITLE,
@@ -192,7 +198,56 @@ export const buildActionsColumn = (
  * </ContentListTable>
  * ```
  */
+/** Fixed icon-button dimensions for the actions-column skeleton. Matches
+ *  the rough visual footprint of an `EuiButtonIcon` in an EUI table row. */
+const SKELETON_ICON_SIZE = 20;
+
+/**
+ * Build the skeleton for `Column.Actions` — a right-aligned row of small
+ * rectangles, one per configured action.
+ *
+ * Mirrors the real actions column's visual layout so there's no jump when
+ * the real row icons fade in. The action count is determined the same way
+ * the resolver would determine it (explicit `Action.*` children → their
+ * count; otherwise the provider-derived defaults from `itemConfig`).
+ *
+ * Returned as a `{ node }` escape-hatch because a "row of N shapes" isn't a
+ * single `SkeletonDescriptor` variant.
+ */
+const buildActionsColumnSkeleton = (
+  attributes: ActionsColumnProps,
+  context: ColumnBuilderContext
+): SkeletonOutput => {
+  const { children } = attributes;
+  const actionParts = children !== undefined ? action.parseChildren(children) : [];
+
+  // Fallback to a sensible default count when no explicit children were
+  // provided. Two actions (e.g. edit + delete) is the most common shape; the
+  // real resolver may ultimately produce 0 (none configured) or 3 (edit,
+  // delete, inspect) — either way the skeleton is close enough that the
+  // swap is not jarring.
+  const count = actionParts.length > 0 ? actionParts.length : 2;
+
+  return {
+    node: (
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center" responsive={false}>
+        {Array.from({ length: count }, (_unused, idx) => (
+          <EuiFlexItem key={idx} grow={false}>
+            <EuiSkeletonRectangle
+              isLoading
+              width={SKELETON_ICON_SIZE}
+              height={SKELETON_ICON_SIZE}
+              borderRadius="s"
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ),
+  };
+};
+
 export const ActionsColumn = column.createPreset({
   name: 'actions',
   resolve: buildActionsColumn,
+  skeleton: buildActionsColumnSkeleton,
 });

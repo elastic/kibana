@@ -89,7 +89,16 @@ export const buildStarredColumn = (
  * </ContentListTable>
  * ```
  */
+/** Star glyph is square-ish and small; a narrow centered rectangle reads
+ *  as an icon placeholder without pretending to be a perfect circle. */
+const STARRED_SKELETON_SIZE = 16;
+
 export const StarredColumn = column.createPreset({
   name: 'starred',
   resolve: buildStarredColumn,
+  skeleton: () => ({
+    shape: 'rectangle',
+    width: STARRED_SKELETON_SIZE,
+    height: STARRED_SKELETON_SIZE,
+  }),
 });
