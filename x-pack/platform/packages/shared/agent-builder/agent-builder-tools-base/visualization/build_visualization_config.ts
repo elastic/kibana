@@ -14,7 +14,7 @@ import { guessChartType } from './guess_chart_type';
 import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
 
-interface BuildVisualizationConfigParams {
+export interface BuildVisualizationConfigParams {
   nlQuery: string;
   index?: string;
   chartType?: SupportedChartType;
