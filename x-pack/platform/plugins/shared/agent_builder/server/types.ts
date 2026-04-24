@@ -14,7 +14,10 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { UsageApiSetup, UsageApiStart } from '@kbn/usage-api-plugin/server';
-import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -32,13 +35,13 @@ import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AgentRegistry } from './services/agents';
 import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
 import type { SkillRegistry } from './services/skills/skill_registry';
-import type { AgentExecutionService } from './services/execution';
-import type { ModelProviderFactoryFn } from './services/runner/model_provider';
+import type { ModelProviderFactoryFn } from './services/execution/runner/model_provider';
 import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './services/sml';
 import type { PluginsServiceSetup, PluginRegistry } from './services/plugins';
 import type { ConversationListOptions } from './services/conversation/client/types';
@@ -55,7 +58,7 @@ export interface AgentBuilderSetupDependencies {
   taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -67,6 +70,7 @@ export interface AgentBuilderStartDependencies {
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 export interface AttachmentsSetup {

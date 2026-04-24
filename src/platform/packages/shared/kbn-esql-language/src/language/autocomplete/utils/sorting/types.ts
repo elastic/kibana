@@ -32,6 +32,7 @@ export enum SuggestionCategory {
   RECOMMENDED_QUERY = 'recommended_query',
 
   VALUE = 'value', // METADATA, settings, special keywords
+  SUBQUERY = 'subquery', // (FROM ...) subquery
   PIPE = 'pipe',
   COMMA = 'comma',
   UNKNOWN = 'unknown',

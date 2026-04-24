@@ -9,7 +9,6 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
-  ActionsCommentResponseProperties,
   AlertCommentResponseProperties,
   EventCommentResponseProperties,
   UserCommentResponseProperties,
@@ -20,8 +19,9 @@ import { CasesStepCaseIdSchema } from './shared';
 
 export const GetAllAttachmentsStepTypeId = 'cases.getAllAttachments';
 
+// The workflow step parses this schema with a safeParse fallback
+// so unsupported variants flow through untouched instead of throwing.
 const AttachmentSchema = z.discriminatedUnion('type', [
-  ActionsCommentResponseProperties,
   AlertCommentResponseProperties,
   EventCommentResponseProperties,
   UserCommentResponseProperties,
@@ -43,7 +43,7 @@ export const getAllAttachmentsStepCommonDefinition: CommonStepDefinition<
   GetAllAttachmentsStepOutputSchema
 > = {
   id: GetAllAttachmentsStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.GET_ALL_ATTACHMENTS_STEP_LABEL,
   description: i18n.GET_ALL_ATTACHMENTS_STEP_DESCRIPTION,
   documentation: {

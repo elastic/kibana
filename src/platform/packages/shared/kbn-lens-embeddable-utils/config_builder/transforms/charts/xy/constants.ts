@@ -22,7 +22,7 @@ export const XY_DATA_LAYER_TYPES = [
   'line',
 ] as const;
 
-export const XY_REFERENCE_LAYER_TYPES = ['referenceLines'] as const;
+export const XY_REFERENCE_LAYER_TYPES = ['reference_lines'] as const;
 
 export const XY_ANNOTATION_LAYER_TYPES = ['annotations', 'annotation_group'] as const;
 

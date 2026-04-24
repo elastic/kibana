@@ -125,10 +125,10 @@
             "section": "def-public.TableListViewTableProps",
             "text": "TableListViewTableProps"
           },
-          "<T>) => React.JSX.Element | null"
+          "<T>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-        "lineNumber": 1227,
+        "lineNumber": 1219,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -152,7 +152,7 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 317,
+            "lineNumber": 314,
             "columnNumber": 68,
             "deprecated": false,
             "trackAdoption": false
@@ -438,7 +438,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-        "lineNumber": 74,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -451,7 +451,7 @@
             "label": "entityName",
             "description": [],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 77,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -464,7 +464,7 @@
             "label": "entityNamePlural",
             "description": [],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 78,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -480,7 +480,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 79,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -493,7 +493,7 @@
             "label": "initialPageSize",
             "description": [],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 80,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -509,7 +509,7 @@
               "JSX.Element | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 81,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -528,7 +528,7 @@
               "<T> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 82,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -551,7 +551,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 84,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -567,7 +567,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 85,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -583,7 +583,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 86,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -601,7 +601,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 87,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -619,7 +619,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 92,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -645,7 +645,7 @@
               " | undefined) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 94,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -661,7 +661,7 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "lineNumber": 98,
+                "lineNumber": 95,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -685,7 +685,7 @@
               "[] | undefined; tabId?: string | undefined; } | undefined) => Promise<{ total: number; hits: T[]; }>"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 99,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -701,7 +701,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "lineNumber": 100,
+                "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -715,7 +715,7 @@
                 "label": "refs",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "lineNumber": 101,
+                "lineNumber": 98,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -732,7 +732,7 @@
                       "[] | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                    "lineNumber": 102,
+                    "lineNumber": 99,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -749,7 +749,7 @@
                       "[] | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                    "lineNumber": 103,
+                    "lineNumber": 100,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -765,7 +765,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                    "lineNumber": 104,
+                    "lineNumber": 101,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -788,7 +788,7 @@
               "((entity: T) => string | undefined) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 107,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -804,7 +804,7 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "lineNumber": 108,
+                "lineNumber": 105,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -826,7 +826,7 @@
               "((item: T) => (() => void) | undefined) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 109,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -842,7 +842,7 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "lineNumber": 110,
+                "lineNumber": 107,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -862,7 +862,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 111,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -880,7 +880,7 @@
               "((items: T[]) => Promise<void>) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 112,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -896,7 +896,7 @@
                   "T[]"
                 ],
                 "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "lineNumber": 112,
+                "lineNumber": 109,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -918,7 +918,7 @@
               "((item: T) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 113,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -934,7 +934,7 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "lineNumber": 116,
+                "lineNumber": 113,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -956,7 +956,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 118,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -977,7 +977,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 123,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -1007,7 +1007,7 @@
               "ContentEditorConfig | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 129,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1031,7 +1031,7 @@
               ", \"get\"> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 130,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1044,7 +1044,7 @@
             "label": "tableCaption",
             "description": [],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 132,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1062,7 +1062,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 133,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1078,7 +1078,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 135,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1096,7 +1096,7 @@
               "(subject: string) => void"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "lineNumber": 136,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1112,7 +1112,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-                "lineNumber": 136,
+                "lineNumber": 133,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,

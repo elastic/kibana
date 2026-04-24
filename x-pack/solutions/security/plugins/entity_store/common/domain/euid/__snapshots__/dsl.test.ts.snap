@@ -6,277 +6,23 @@ Object {
     "must": Array [
       Object {
         "bool": Object {
-          "must": Array [
+          "should": Array [
             Object {
               "bool": Object {
-                "should": Array [
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "exists": Object {
-                          "field": "event.outcome",
-                        },
-                      },
-                    },
+                "must_not": Object {
+                  "exists": Object {
+                    "field": "event.outcome",
                   },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "match": Object {
-                          "event.outcome": "failure",
-                        },
-                      },
-                    },
-                  },
-                ],
+                },
               },
             },
             Object {
               "bool": Object {
-                "should": Array [
-                  Object {
-                    "bool": Object {
-                      "must": Array [
-                        Object {
-                          "bool": Object {
-                            "should": Array [
-                              Object {
-                                "bool": Object {
-                                  "must_not": Object {
-                                    "exists": Object {
-                                      "field": "event.kind",
-                                    },
-                                  },
-                                },
-                              },
-                              Object {
-                                "bool": Object {
-                                  "must_not": Object {
-                                    "match": Object {
-                                      "event.kind": "enrichment",
-                                    },
-                                  },
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "should": Array [
-                              Object {
-                                "bool": Object {
-                                  "must": Array [
-                                    Object {
-                                      "exists": Object {
-                                        "field": "user.email",
-                                      },
-                                    },
-                                    Object {
-                                      "bool": Object {
-                                        "must_not": Object {
-                                          "match": Object {
-                                            "user.email": "",
-                                          },
-                                        },
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                              Object {
-                                "bool": Object {
-                                  "must": Array [
-                                    Object {
-                                      "exists": Object {
-                                        "field": "user.id",
-                                      },
-                                    },
-                                    Object {
-                                      "bool": Object {
-                                        "must_not": Object {
-                                          "match": Object {
-                                            "user.id": "",
-                                          },
-                                        },
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                              Object {
-                                "bool": Object {
-                                  "must": Array [
-                                    Object {
-                                      "exists": Object {
-                                        "field": "user.name",
-                                      },
-                                    },
-                                    Object {
-                                      "bool": Object {
-                                        "must_not": Object {
-                                          "match": Object {
-                                            "user.name": "",
-                                          },
-                                        },
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
-                    },
+                "must_not": Object {
+                  "match": Object {
+                    "event.outcome": "failure",
                   },
-                  Object {
-                    "bool": Object {
-                      "must": Array [
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "user.name",
-                                },
-                              },
-                              Object {
-                                "bool": Object {
-                                  "must_not": Object {
-                                    "match": Object {
-                                      "user.name": "",
-                                    },
-                                  },
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "host.id",
-                                },
-                              },
-                              Object {
-                                "bool": Object {
-                                  "must_not": Object {
-                                    "match": Object {
-                                      "host.id": "",
-                                    },
-                                  },
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Object {
-                              "bool": Object {
-                                "should": Array [
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "root",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "bin",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "daemon",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "sys",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "nobody",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "jenkins",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "ansible",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "deploy",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "terraform",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "gitlab-runner",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "postgres",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "mysql",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "redis",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "elasticsearch",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "kafka",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "admin",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "operator",
-                                    },
-                                  },
-                                  Object {
-                                    "match": Object {
-                                      "user.name": "service",
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
+                },
               },
             },
           ],
@@ -286,65 +32,20 @@ Object {
         "bool": Object {
           "should": Array [
             Object {
-              "exists": Object {
-                "field": "entity.id",
-              },
-            },
-            Object {
               "bool": Object {
-                "should": Array [
+                "must": Array [
                   Object {
-                    "terms": Object {
-                      "event.kind": Array [
-                        "asset",
-                      ],
+                    "exists": Object {
+                      "field": "user.email",
                     },
                   },
                   Object {
                     "bool": Object {
-                      "must": Array [
-                        Object {
-                          "terms": Object {
-                            "event.category": Array [
-                              "iam",
-                            ],
-                          },
+                      "must_not": Object {
+                        "match": Object {
+                          "user.email": "",
                         },
-                        Object {
-                          "bool": Object {
-                            "should": Array [
-                              Object {
-                                "terms": Object {
-                                  "event.type": Array [
-                                    "user",
-                                  ],
-                                },
-                              },
-                              Object {
-                                "terms": Object {
-                                  "event.type": Array [
-                                    "creation",
-                                  ],
-                                },
-                              },
-                              Object {
-                                "terms": Object {
-                                  "event.type": Array [
-                                    "deletion",
-                                  ],
-                                },
-                              },
-                              Object {
-                                "terms": Object {
-                                  "event.type": Array [
-                                    "group",
-                                  ],
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+                      },
                     },
                   },
                 ],
@@ -354,141 +55,35 @@ Object {
               "bool": Object {
                 "must": Array [
                   Object {
-                    "bool": Object {
-                      "must": Array [
-                        Object {
-                          "exists": Object {
-                            "field": "user.name",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Object {
-                              "match": Object {
-                                "user.name": "",
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "must": Array [
-                        Object {
-                          "exists": Object {
-                            "field": "host.id",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Object {
-                              "match": Object {
-                                "host.id": "",
-                              },
-                            },
-                          },
-                        },
-                      ],
+                    "exists": Object {
+                      "field": "user.id",
                     },
                   },
                   Object {
                     "bool": Object {
                       "must_not": Object {
-                        "bool": Object {
-                          "should": Array [
-                            Object {
-                              "match": Object {
-                                "user.name": "root",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "bin",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "daemon",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "sys",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "nobody",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "jenkins",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "ansible",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "deploy",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "terraform",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "gitlab-runner",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "postgres",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "mysql",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "redis",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "elasticsearch",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "kafka",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "admin",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "operator",
-                              },
-                            },
-                            Object {
-                              "match": Object {
-                                "user.name": "service",
-                              },
-                            },
-                          ],
+                        "match": Object {
+                          "user.id": "",
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.name",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "match": Object {
+                          "user.name": "",
                         },
                       },
                     },
@@ -497,6 +92,25 @@ Object {
               },
             },
           ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`getEuidDslFilterBasedOnDocument user evaluates correctly for real non-IDP document 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "user.name": "tyrese.goldner",
+        },
+      },
+      Object {
+        "term": Object {
+          "host.id": "4a7a8b68-1814-487f-9e56-5e7bed425edc",
         },
       },
     ],

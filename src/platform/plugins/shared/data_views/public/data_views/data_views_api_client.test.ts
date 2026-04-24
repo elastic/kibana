@@ -107,6 +107,29 @@ describe('IndexPatternsApiClient', () => {
     );
   });
 
+  test('projectRouting: undefined in options does not clobber global projectRouting', async function () {
+    const getGlobalProjectRouting = jest.fn().mockReturnValue(projectRoutingMock);
+    const clientWithGlobalRouting = new DataViewsApiClient(
+      http as HttpSetup,
+      () => Promise.resolve(undefined),
+      getGlobalProjectRouting
+    );
+
+    await clientWithGlobalRouting.getFieldsForWildcard({
+      pattern: 'test-*',
+      allowHidden: false,
+      projectRouting: undefined,
+    });
+
+    expect(getGlobalProjectRouting).toHaveBeenCalled();
+    expect(postSpy).toHaveBeenCalledWith(
+      FIELDS_FOR_WILDCARD_PATH,
+      expect.objectContaining({
+        body: JSON.stringify({ project_routing: projectRoutingMock }),
+      })
+    );
+  });
+
   test('uses internal path when projectRouting is present', async function () {
     const getGlobalProjectRouting = jest.fn().mockReturnValue(projectRoutingMock);
     const clientWithGlobalRouting = new DataViewsApiClient(

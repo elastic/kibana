@@ -15,9 +15,52 @@ import moment from 'moment';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
-import { ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD } from './query_builder_commons';
+import {
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  TIMESTAMP_FIELD,
+} from './query_builder_commons';
+import { LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD } from './log_pagination_probe_query_builder';
+
+const LOG_PAGINATION_CURSOR_PROBE_COLUMNS: ESQLSearchResponse['columns'] = [
+  { name: TIMESTAMP_FIELD, type: 'date' },
+  { name: '_id', type: 'keyword' },
+  { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
+];
+
+/** Default total_logs > maxLogsPerPage so interpret marks a non-final slice (matches default config cap). */
+function mockLogPaginationCursorProbeRow(
+  timestamp: string,
+  id: string,
+  totalLogsInSlice: number = LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT + 1
+): ESQLSearchResponse {
+  return {
+    columns: LOG_PAGINATION_CURSOR_PROBE_COLUMNS,
+    values: [[timestamp, id, totalLogsInSlice]],
+  };
+}
+
+function mockLogPaginationCursorProbeEmpty(): ESQLSearchResponse {
+  return {
+    columns: LOG_PAGINATION_CURSOR_PROBE_COLUMNS,
+    values: [],
+  };
+}
+
+/** First slice + extraction + terminal empty log pagination cursor probe (end of window). */
+function mockExtractSuccessSequence(mainExtractionResponse: ESQLSearchResponse): void {
+  mockExecuteEsqlQuery
+    .mockResolvedValueOnce(
+      mockLogPaginationCursorProbeRow(
+        String(mainExtractionResponse.values.at(-1)?.[0] ?? '2024-01-02T12:00:00.000Z'),
+        'log-slice-end-id'
+      )
+    )
+    .mockResolvedValueOnce(mainExtractionResponse)
+    .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty());
+}
 import {
   LogExtractionConfig,
+  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
   type EngineDescriptorClient,
   type EntityStoreGlobalState,
   type EntityStoreGlobalStateClient,
@@ -41,12 +84,26 @@ const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEn
 
 function createMockEngineDescriptor(
   type: EntityType = 'user',
-  overrides?: Partial<{ lookbackPeriod: string; delay: string; paginationTimestamp: string }>
+  overrides?: Partial<{
+    lookbackPeriod: string;
+    delay: string;
+    paginationTimestamp: string;
+    paginationId: string;
+    lastExecutionTimestamp: string;
+    logsPageCursorStartTimestamp: string;
+    logsPageCursorStartId: string;
+    logsPageCursorEndTimestamp: string;
+    logsPageCursorEndId: string;
+  }>
 ) {
   const logExtractionState = {
     paginationTimestamp: overrides?.paginationTimestamp,
-    paginationId: undefined,
-    lastExecutionTimestamp: undefined,
+    paginationId: overrides?.paginationId,
+    lastExecutionTimestamp: overrides?.lastExecutionTimestamp,
+    logsPageCursorStartTimestamp: overrides?.logsPageCursorStartTimestamp,
+    logsPageCursorStartId: overrides?.logsPageCursorStartId,
+    logsPageCursorEndTimestamp: overrides?.logsPageCursorEndTimestamp,
+    logsPageCursorEndId: overrides?.logsPageCursorEndId,
   };
   return {
     type,
@@ -79,7 +136,7 @@ describe('LogsExtractionClient', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockDataViewsService: jest.Mocked<DataViewsService>;
   let mockEngineDescriptorClient: jest.Mocked<
-    Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
+    Pick<EngineDescriptorClient, 'findOrThrow' | 'update' | 'updateWith'>
   >;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
   let mockCcsLogsExtractionClient: ReturnType<typeof createMockCcsLogsExtractionClient>;
@@ -95,6 +152,7 @@ describe('LogsExtractionClient', () => {
     mockEngineDescriptorClient = {
       findOrThrow: jest.fn(),
       update: jest.fn().mockResolvedValue({}),
+      updateWith: jest.fn().mockResolvedValue({}),
     };
     mockGlobalStateClient = createMockGlobalStateClient();
     mockCcsLogsExtractionClient = createMockCcsLogsExtractionClient();
@@ -111,6 +169,17 @@ describe('LogsExtractionClient', () => {
   });
 
   describe('extractLogs', () => {
+    function applyLastUpdater(
+      entityType: EntityType = 'user',
+      descriptorOverrides?: Partial<Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>>
+    ) {
+      const [[, updater]] = mockEngineDescriptorClient.updateWith.mock.calls;
+      return updater({
+        ...createMockEngineDescriptor(entityType),
+        ...descriptorOverrides,
+      } as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>);
+    }
+
     it('should successfully extract logs and ingest entities', async () => {
       const lastTimestamp = '2024-01-02T12:00:00.000Z';
       const mockEsqlResponse: ESQLSearchResponse = {
@@ -138,7 +207,7 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExtractSuccessSequence(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user');
@@ -155,7 +224,7 @@ describe('LogsExtractionClient', () => {
       );
 
       expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('user');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
         query: expect.any(String),
@@ -172,28 +241,25 @@ describe('LogsExtractionClient', () => {
         abortController: undefined,
       });
 
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
         'user',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-        })
+        expect.any(Function)
       );
+      expect(applyLastUpdater()).toMatchObject({
+        logExtractionState: expect.objectContaining({
+          paginationTimestamp: undefined,
+          paginationId: undefined,
+          logsPageCursorStartTimestamp: undefined,
+          logsPageCursorStartId: undefined,
+          logsPageCursorEndTimestamp: undefined,
+          logsPageCursorEndId: undefined,
+          lastExecutionTimestamp: expect.any(String),
+        }),
+        error: undefined,
+      });
     });
 
     it('should handle empty results from ESQL query', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID_FIELD, type: 'keyword' },
-          { name: 'user.name', type: 'keyword' },
-        ],
-        values: [],
-      };
-
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
@@ -204,7 +270,7 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user');
@@ -213,30 +279,28 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.count).toBe(0);
 
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
-      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+      expect(mockIngestEntities).toHaveBeenCalledTimes(0);
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
         'user',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-        })
+        expect.any(Function)
       );
+      expect(applyLastUpdater()).toMatchObject({
+        logExtractionState: expect.objectContaining({
+          paginationTimestamp: undefined,
+          paginationId: undefined,
+          logsPageCursorStartTimestamp: undefined,
+          logsPageCursorStartId: undefined,
+          logsPageCursorEndTimestamp: undefined,
+          logsPageCursorEndId: undefined,
+          lastExecutionTimestamp: expect.any(String),
+        }),
+        error: undefined,
+      });
     });
 
     it('should compute extraction window from lookbackPeriod and delay when no custom range', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
-
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID_FIELD, type: 'keyword' },
-        ],
-        values: [],
-      };
 
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
@@ -253,7 +317,7 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
       mockIngestEntities.mockResolvedValue(undefined);
 
       await client.extractLogs('user');
@@ -273,18 +337,82 @@ describe('LogsExtractionClient', () => {
       jest.useRealTimers();
     });
 
+    it('on first log slice in a new extractLogs, boundary probe does not use persisted log-slice start (time window from lookback)', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+
+      const logPageCursorStart = '2025-01-15T06:00:00.000Z';
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      const globalStateWithDelay5s = {
+        logsExtraction: LogExtractionConfig.parse({ lookbackPeriod: '3h', delay: '5s' }),
+      } as EntityStoreGlobalState;
+      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
+      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          logsPageCursorStartTimestamp: logPageCursorStart,
+          logsPageCursorStartId: 'cursor-doc',
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      await client.extractLogs('user');
+
+      const lookbackFrom = moment.utc(fixedNow).subtract(3, 'hours').toISOString();
+      const firstEsql = mockExecuteEsqlQuery.mock.calls[0][0].query;
+      expect(firstEsql).toContain(lookbackFrom);
+      expect(firstEsql).not.toContain(logPageCursorStart);
+
+      jest.useRealTimers();
+    });
+
+    it('uses delayed lastExecution for extraction window from when set (first boundary probe, no persisted log-slice start)', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+
+      const logPageCursorStart = '2025-01-15T06:00:00.000Z';
+      const lastExecutionTimestamp = '2025-01-15T11:00:00.000Z';
+      const delayedLastExecution = moment.utc(fixedNow).subtract(5, 'seconds').toISOString();
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      const globalStateWithDelay5s = {
+        logsExtraction: LogExtractionConfig.parse({ lookbackPeriod: '3h', delay: '5s' }),
+      } as EntityStoreGlobalState;
+      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
+      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          logsPageCursorStartTimestamp: logPageCursorStart,
+          logsPageCursorStartId: 'cursor-doc',
+          lastExecutionTimestamp,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      await client.extractLogs('user');
+
+      const firstEsql = mockExecuteEsqlQuery.mock.calls[0][0].query;
+      expect(firstEsql).toContain(delayedLastExecution);
+      expect(firstEsql).not.toContain(logPageCursorStart);
+
+      jest.useRealTimers();
+    });
+
     it('should use paginationTimestamp as from and subtract delay for to', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
 
       const paginationTimestamp = '2025-01-15T10:30:00.000Z';
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID_FIELD, type: 'keyword' },
-        ],
-        values: [],
-      };
 
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
@@ -298,7 +426,7 @@ describe('LogsExtractionClient', () => {
         }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
       mockIngestEntities.mockResolvedValue(undefined);
 
       await client.extractLogs('user');
@@ -314,6 +442,85 @@ describe('LogsExtractionClient', () => {
         query: expect.stringContaining(expectedTo),
       });
 
+      jest.useRealTimers();
+    });
+
+    it('should preserve inclusive lower bound on first bounded extraction when recovering from paginationId', async () => {
+      const fromDateISO = '2025-01-15T10:00:00.000Z';
+      const toDateISO = '2025-01-15T11:00:00.000Z';
+      const recoveryId = 'recover-entity-id';
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          paginationId: recoveryId,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(
+          mockLogPaginationCursorProbeRow(fromDateISO, 'probe-slice-end-id', 1 /* isLastLogsPage */)
+        )
+        .mockResolvedValueOnce({ columns: [], values: [] });
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const result = await client.extractLogs('user', {
+        specificWindow: { fromDateISO, toDateISO },
+      });
+
+      expect(result.success).toBe(true);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+
+      const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
+      const boundedQuery = mockExecuteEsqlQuery.mock.calls[1][0].query;
+      expect(probeQuery).toContain(`@timestamp >= TO_DATETIME("${fromDateISO}")`);
+      expect(boundedQuery).toContain(`@timestamp >= TO_DATETIME("${fromDateISO}")`);
+    });
+
+    it('on recovery, first boundary probe uses time window at paginationTimestamp (ignores persisted log-slice for first slice)', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+      const paginationTimestamp = '2025-01-15T10:00:00.000Z';
+      const sliceStartTs = '2025-01-15T10:20:00.000Z';
+      const sliceStartId = 'log-slice-lower';
+      const sliceEndTs = '2025-01-15T10:45:00.000Z';
+      const sliceEndId = 'log-slice-upper';
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      const mainExtractionResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+        ],
+        values: [],
+      };
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          lookbackPeriod: '3h',
+          delay: '1m',
+          paginationTimestamp,
+          paginationId: 'entity-cursor',
+          lastExecutionTimestamp: '2025-01-15T10:00:00.000Z',
+          logsPageCursorStartTimestamp: sliceStartTs,
+          logsPageCursorStartId: sliceStartId,
+          logsPageCursorEndTimestamp: sliceEndTs,
+          logsPageCursorEndId: sliceEndId,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExtractSuccessSequence(mainExtractionResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+      const firstProbeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
+      expect(firstProbeQuery).toContain(paginationTimestamp);
+      expect(firstProbeQuery).not.toContain(sliceStartTs);
       jest.useRealTimers();
     });
 
@@ -383,14 +590,6 @@ describe('LogsExtractionClient', () => {
     });
 
     it('should use custom date range when provided', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID_FIELD, type: 'keyword' },
-        ],
-        values: [],
-      };
-
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
@@ -401,7 +600,7 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
       mockIngestEntities.mockResolvedValue(undefined);
 
       const fromDate = '2024-01-01T00:00:00.000Z';
@@ -419,7 +618,7 @@ describe('LogsExtractionClient', () => {
         esClient: mockEsClient,
         query: expect.stringContaining(toDate),
       });
-      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.updateWith).not.toHaveBeenCalled();
     });
 
     it('should not update engine descriptor when specificWindow is provided', async () => {
@@ -444,7 +643,7 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExtractSuccessSequence(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user', {
@@ -456,9 +655,9 @@ describe('LogsExtractionClient', () => {
 
       expect(result.success).toBe(true);
       expect(result.success && result.count).toBe(2);
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
-      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.updateWith).not.toHaveBeenCalled();
     });
 
     it('should handle errors from executeEsqlQuery', async () => {
@@ -504,7 +703,9 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2024-01-02T10:00:00.000Z', 'e'))
+        .mockResolvedValueOnce(mockEsqlResponse);
       const testError = new Error('Ingestion failed');
       mockIngestEntities.mockRejectedValue(testError);
 
@@ -539,7 +740,7 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExtractSuccessSequence(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user');
@@ -550,8 +751,7 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.scannedIndices).toContain('metrics-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
       expect(result.success && result.scannedIndices).toContain('other:filebeat-*');
-      // Main query runs once; injected CCS client is invoked for remote patterns
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
       expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
       expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -582,7 +782,7 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExtractSuccessSequence(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
       mockCcsLogsExtractionClient.extractToUpdates.mockResolvedValue({
         count: 0,
@@ -592,35 +792,35 @@ describe('LogsExtractionClient', () => {
 
       const result = await client.extractLogs('user');
 
-      // Main execution is unchanged: success, count from main query, ESQL and ingest called once
       expect(result.success).toBe(true);
       expect(result.success && result.count).toBe(1);
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
 
       // CCS error is stored in the saved object
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
         'user',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-          error: { message: ccsError.message, action: 'extractLogs' },
-        })
+        expect.any(Function)
       );
+      expect(applyLastUpdater()).toMatchObject({
+        logExtractionState: expect.objectContaining({
+          paginationTimestamp: undefined,
+          paginationId: undefined,
+          logsPageCursorStartTimestamp: undefined,
+          logsPageCursorStartId: undefined,
+          logsPageCursorEndTimestamp: undefined,
+          logsPageCursorEndId: undefined,
+          lastExecutionTimestamp: expect.any(String),
+        }),
+        error: { message: ccsError.message, action: 'extractLogs' },
+      });
     });
 
-    it('should fallback to logs-* when data view is not found', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID_FIELD, type: 'keyword' },
-        ],
-        values: [],
+    it('should clear a previous error after a successful extraction', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -628,9 +828,31 @@ describe('LogsExtractionClient', () => {
           ReturnType<EngineDescriptorClient['findOrThrow']>
         >
       );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      await client.extractLogs('user');
+
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
+        'user',
+        expect.any(Function)
+      );
+      expect(
+        applyLastUpdater('user', { error: { message: 'previous error', action: 'extractLogs' } })
+          .error
+      ).toBeUndefined();
+    });
+
+    it('should fallback to logs-* when data view is not found', async () => {
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
       const error = new Error('Data view not found');
       mockDataViewsService.get.mockRejectedValue(error);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
       mockIngestEntities.mockResolvedValue(undefined);
 
       const result = await client.extractLogs('user');
@@ -660,28 +882,33 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockExtractSuccessSequence(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
       await client.extractLogs('host');
 
       expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('host');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
       expect(mockIngestEntities).toHaveBeenCalledWith(
         expect.objectContaining({
           targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         })
       );
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
         'host',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-        })
+        expect.any(Function)
       );
+      expect(applyLastUpdater('host')).toMatchObject({
+        logExtractionState: expect.objectContaining({
+          paginationTimestamp: undefined,
+          paginationId: undefined,
+          logsPageCursorStartTimestamp: undefined,
+          logsPageCursorStartId: undefined,
+          logsPageCursorEndTimestamp: undefined,
+          logsPageCursorEndId: undefined,
+          lastExecutionTimestamp: expect.any(String),
+        }),
+      });
     });
 
     it('should return success false when engine is not started', async () => {
@@ -972,6 +1199,44 @@ describe('LogsExtractionClient', () => {
         esClient: mockEsClient,
         query: expect.stringMatching(/@timestamp\s*>=\s*TO_DATETIME/),
       });
+    });
+
+    it('should pass persisted log-slice start into remaining-count ESQL when present on engine', async () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [{ name: 'document_count', type: 'long' }],
+        values: [[3]],
+      };
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+      const paginationTimestamp = '2025-01-15T10:00:00.000Z';
+      const sliceStartId = 'slice-start';
+      const sliceStartTs = '2025-01-15T10:20:00.000Z';
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          lookbackPeriod: '3h',
+          delay: '1m',
+          paginationTimestamp,
+          logsPageCursorStartTimestamp: sliceStartTs,
+          logsPageCursorStartId: sliceStartId,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+
+      const result = await client.getRemainingLogsCount('user');
+      expect(result).toBe(3);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(paginationTimestamp),
+      });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
+        esClient: mockEsClient,
+        query: expect.stringContaining(sliceStartId),
+      });
+      jest.useRealTimers();
     });
 
     it('should convert document_count to number via Number()', async () => {

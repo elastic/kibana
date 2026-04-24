@@ -99,7 +99,7 @@ export const AgentsList: React.FC = () => {
         const canEdit = canEditAgent(agent);
         const showCheckingTooltip = !canEdit && isCurrentUserLoading;
         const nameContent = !canEdit ? (
-          <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
+          <EuiText data-test-subj="agentBuilderAgentsListName" size="m">
             {name}
           </EuiText>
         ) : (
@@ -107,7 +107,7 @@ export const AgentsList: React.FC = () => {
             data-test-subj="agentBuilderAgentsListName"
             href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
           >
-            {name}
+            <EuiText size="m">{name}</EuiText>
           </EuiLink>
         );
         return (
@@ -122,7 +122,9 @@ export const AgentsList: React.FC = () => {
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s">{agent.description}</EuiText>
+              <EuiText color="subdued" size="s">
+                {agent.description}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
@@ -131,6 +133,7 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentLabels: EuiTableFieldDataColumnType<AgentDefinition> = {
+      width: '25%',
       field: 'labels',
       name: columnNames.labels,
       render: (labels?: string[]) => {
@@ -144,12 +147,14 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentVisibility: EuiTableComputedColumnType<AgentDefinition> = {
+      width: '135px',
       name: columnNames.visibility,
       render: (agent) => <AgentVisibilityBadge agent={agent} />,
       'data-test-subj': 'agentBuilderAgentsListVisibility',
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
+      width: '120px',
       actions: [
         {
           type: 'icon',

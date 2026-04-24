@@ -22,10 +22,12 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [servicenow-search-connector-configuration]
 
-ServiceNow connectors have the following configuration properties:
+ServiceNow connectors support **OAuth 2.0 Client Credentials** and **OAuth 2.0 Authorization Code** authentication. Select the authentication type when you create or edit the connector.
 
 Instance URL
 :   The URL of your ServiceNow instance (for example, `https://your-instance.service-now.com`).
+
+#### OAuth 2.0 Client Credentials
 
 Token URL
 :   The OAuth 2.0 token endpoint URL for your ServiceNow instance (for example, `https://your-instance.service-now.com/oauth_token.do`).
@@ -35,6 +37,16 @@ Client ID
 
 Client Secret
 :   The OAuth client secret for your ServiceNow application.
+
+#### OAuth 2.0 Authorization Code
+
+Client ID
+:   The OAuth client ID from your ServiceNow application registry. Refer to [OAuth Authorization Code setup](#servicenow-search-oauth-auth-code).
+
+Client Secret
+:   The OAuth client secret for your ServiceNow application.
+
+The connector automatically uses the correct ServiceNow OAuth endpoints for your instance (`https://<your-instance>.service-now.com/oauth_auth.do` for authorization and `https://<your-instance>.service-now.com/oauth_token.do` for token exchange). Scopes are handled automatically.
 
 ## Test connectors [servicenow-search-action-configuration]
 
@@ -95,18 +107,41 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [servicenow-search-api-credentials]
 
-To use the ServiceNow connector, create an OAuth application in ServiceNow:
+### OAuth 2.0 Client Credentials
 
-1. Go to **System OAuth** > **Application Registry**.
+1. Select **System OAuth > Application Registry**.
 2. Select **New**, then select **Create an OAuth API endpoint for external clients**.
 3. Enter a name for your application.
-4. Set the **Client Secret** (or let ServiceNow generate one).
+4. Enter a **Client Secret** value, or let ServiceNow generate one.
 5. Select **Submit**.
 6. Copy the following values from the OAuth application:
    - **Client ID**: The auto-generated client ID.
    - **Client Secret**: The secret you configured.
 7. Verify that the OAuth client is associated with a user account that has read access to the tables you want to search. Common required roles: `itil` for incidents, `knowledge` for knowledge articles.
-8. Enter the following values when configuring the connector in {{kib}}:
+8. Enter the following values when you configure the connector in {{kib}}:
    - **Instance URL**: Your ServiceNow instance URL (for example, `https://your-instance.service-now.com`).
    - **Token URL**: `https://your-instance.service-now.com/oauth_token.do`.
    - **Client ID** and **Client Secret**: From step 6.
+
+### OAuth 2.0 Authorization Code (recommended for per-user access) [servicenow-search-oauth-auth-code]
+
+Use this method to let individual users sign in to ServiceNow through {{kib}}. {{kib}} stores refreshable tokens on user's behalf.
+
+1. Select **System OAuth** > **Application Registry**.
+2. Select **New**, then select **Create an OAuth API endpoint for external clients**.
+3. Configure the application as follows:
+   - **Name**: Enter a name for the application (for example, `Elastic Kibana`).
+   - **Redirect URL**: Enter {{kib}}'s connector OAuth callback URL. Copy the following pattern and replace your public {{kib}} hostname:
+
+     ```text
+     https://<your-kibana-host>/api/actions/connector/_oauth_callback
+     ```
+
+   - **Client Secret**: Enter a value, or let ServiceNow generate one.
+4. Select **Submit**.
+5. Copy the **Client ID** and **Client Secret** from the application.
+6. In {{kib}}, create a ServiceNow connector and select **OAuth 2.0 Authorization Code** as the authentication method. Enter the **Client ID** and **Client Secret**, then authorize with your ServiceNow account.
+
+::::{tip}
+The connector automatically configures the correct ServiceNow OAuth endpoints for your instance. You do not need to enter the authorization or token URLs manually.
+::::

@@ -61,15 +61,7 @@
             "section": "def-common.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; passThroughContext?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          " | undefined; }>>"
+          " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; }>>"
         ],
         "path": "src/platform/plugins/shared/dashboard/common/locator/locator.ts",
         "lineNumber": 55,
@@ -185,15 +177,7 @@
                 "section": "def-common.ViewMode",
                 "text": "ViewMode"
               },
-              " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; passThroughContext?: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined; }>) => Promise<{ app: string; path: string; state: Record<string, unknown> & ",
+              " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; }>) => Promise<{ app: string; path: string; state: Record<string, unknown> & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -259,15 +243,7 @@
                     "section": "def-common.ViewMode",
                     "text": "ViewMode"
                   },
-                  " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; passThroughContext?: ",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "common",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-common.SerializableRecord",
-                    "text": "SerializableRecord"
-                  },
-                  " | undefined; }>"
+                  " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; }>"
                 ],
                 "path": "src/platform/plugins/shared/dashboard/common/locator/locator.ts",
                 "lineNumber": 76,
@@ -372,45 +348,6 @@
         "returnComment": [
           "A React element containing the dashboard listing table."
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-public.DashboardNavigationOptionsEditor",
-        "type": "Function",
-        "tags": [],
-        "label": "DashboardNavigationOptionsEditor",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "Props",
-          ") => React.JSX.Element"
-        ],
-        "path": "src/platform/plugins/shared/dashboard/public/dashboard_navigation/index.tsx",
-        "lineNumber": 22,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardNavigationOptionsEditor.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "Props"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_navigation/index.tsx",
-            "lineNumber": 22,
-            "columnNumber": 50,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -527,7 +464,7 @@
           "\nOptions for creating a dashboard.\nThese options control how the dashboard is initialized and integrates with various Kibana features."
         ],
         "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-        "lineNumber": 83,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -577,38 +514,12 @@
               " | undefined; }>) | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardCreationOptions.getPassThroughContext",
-            "type": "Function",
-            "tags": [],
-            "label": "getPassThroughContext",
-            "description": [
-              "Returns context to pass through to child embeddables."
-            ],
-            "signature": [
-              "(() => ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 95,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           },
           {
             "parentPluginId": "dashboard",
@@ -631,7 +542,7 @@
               "<object>[] | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 98,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -651,7 +562,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 101,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -703,7 +614,7 @@
               ">; } | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 103,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -721,7 +632,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -739,7 +650,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 118,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -765,7 +676,7 @@
               "; } | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 120,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -783,7 +694,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 123,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -803,7 +714,7 @@
               ") => \"valid\" | \"invalid\" | \"redirected\") | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 126,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -821,7 +732,7 @@
                   "ReadBodyWithResolve"
                 ],
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-                "lineNumber": 132,
+                "lineNumber": 128,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -845,7 +756,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 134,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -863,7 +774,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 136,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -889,7 +800,7 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 139,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -907,7 +818,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-                "lineNumber": 145,
+                "lineNumber": 141,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -929,7 +840,7 @@
         "label": "DashboardInternalApi",
         "description": [],
         "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-        "lineNumber": 240,
+        "lineNumber": 237,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -954,7 +865,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 241,
+            "lineNumber": 238,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -986,7 +897,7 @@
               ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>)[] | undefined; tags?: string[] | undefined; description?: string | undefined; query?: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined; project_routing?: string | undefined; refresh_interval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; access_control?: Readonly<{ access_mode?: \"default\" | \"write_restricted\" | undefined; } & {}> | undefined; } & { options: Readonly<{} & { auto_apply_filters: boolean; hide_panel_titles: boolean; hide_panel_borders: boolean; use_margins: boolean; sync_colors: boolean; sync_tooltips: boolean; sync_cursor: boolean; }>; title: string; pinned_panels: (Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]; panels: (Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; collapsed: boolean; }>)[]; }>>, \"pinned_panels\" | \"panels\">"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 242,
+            "lineNumber": 239,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1004,7 +915,7 @@
               "(sectionId?: string | undefined) => boolean"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 243,
+            "lineNumber": 240,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1020,7 +931,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-                "lineNumber": 243,
+                "lineNumber": 240,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1041,7 +952,7 @@
               "<HTMLElement | null>"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 244,
+            "lineNumber": 241,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1057,7 +968,7 @@
               "(ref: HTMLElement | null) => void"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 245,
+            "lineNumber": 242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1073,7 +984,7 @@
                   "HTMLElement | null"
                 ],
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-                "lineNumber": 245,
+                "lineNumber": 242,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1443,7 +1354,7 @@
               "[] | undefined>; }; }"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 246,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1809,7 +1720,7 @@
               "[] | undefined>; }; }"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 247,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1825,7 +1736,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 248,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1844,7 +1755,7 @@
               "<(a: string, b: string) => boolean>"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 249,
+            "lineNumber": 246,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1925,15 +1836,7 @@
                 "section": "def-common.ViewMode",
                 "text": "ViewMode"
               },
-              " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; passThroughContext?: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined; }>>, \"navigate\" | \"getRedirectUrl\"> | undefined"
+              " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; }>>, \"navigate\" | \"getRedirectUrl\"> | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_renderer/dashboard_renderer.tsx",
             "lineNumber": 45,
@@ -2144,7 +2047,7 @@
           "\nInterface for APIs that publish save events."
         ],
         "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-        "lineNumber": 63,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2160,7 +2063,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2176,7 +2079,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2200,7 +2103,7 @@
               ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>)[] | undefined; tags?: string[] | undefined; description?: string | undefined; query?: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined; project_routing?: string | undefined; refresh_interval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; access_control?: Readonly<{ access_mode?: \"default\" | \"write_restricted\" | undefined; } & {}> | undefined; options: Readonly<{} & { auto_apply_filters: boolean; hide_panel_titles: boolean; hide_panel_borders: boolean; use_margins: boolean; sync_colors: boolean; sync_tooltips: boolean; sync_cursor: boolean; }>; title: string; pinned_panels: (Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]; panels: (Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; collapsed: boolean; }>)[]; }"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2224,7 +2127,7 @@
           "\"dashboard\""
         ],
         "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-        "lineNumber": 61,
+        "lineNumber": 60,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2348,14 +2251,6 @@
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.HasUniqueId",
             "text": "HasUniqueId"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PassThroughContext",
-            "text": "PassThroughContext"
           },
           " & ",
           {
@@ -2569,7 +2464,7 @@
             "section": "def-common.AsCodeGroupFilterRecursive",
             "text": "AsCodeGroupFilterRecursive"
           },
-          ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>)[] | undefined; tags?: string[] | undefined; description?: string | undefined; query?: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined; project_routing?: string | undefined; refresh_interval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; access_control?: Readonly<{ access_mode?: \"default\" | \"write_restricted\" | undefined; } & {}> | undefined; } & { options: Readonly<{} & { auto_apply_filters: boolean; hide_panel_titles: boolean; hide_panel_borders: boolean; use_margins: boolean; sync_colors: boolean; sync_tooltips: boolean; sync_cursor: boolean; }>; title: string; pinned_panels: (Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]; panels: (Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; collapsed: boolean; }>)[]; }>>; }; getDashboardPanelFromId: (id: string) => { type: string; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; serializedState: object; }; hasOverlays$: ",
+          ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>)[] | undefined; tags?: string[] | undefined; description?: string | undefined; query?: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined; project_routing?: string | undefined; refresh_interval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; access_control?: Readonly<{ access_mode?: \"default\" | \"write_restricted\" | undefined; } & {}> | undefined; } & { options: Readonly<{} & { auto_apply_filters: boolean; hide_panel_titles: boolean; hide_panel_borders: boolean; use_margins: boolean; sync_colors: boolean; sync_tooltips: boolean; sync_cursor: boolean; }>; title: string; pinned_panels: (Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]; panels: (Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; collapsed: boolean; }>)[]; }>>; }; getDashboardPanelFromId: (id: string) => { type: string; grid?: Readonly<{} & { y: number; w: number; h: number; x: number; }> | undefined; serializedState: object; }; hasOverlays$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -2641,15 +2536,7 @@
             "section": "def-common.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; passThroughContext?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          " | undefined; }>>, \"navigate\" | \"getRedirectUrl\"> | undefined; runInteractiveSave: () => Promise<",
+          " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; }>>, \"navigate\" | \"getRedirectUrl\"> | undefined; runInteractiveSave: () => Promise<",
           "SaveDashboardReturn",
           " | undefined>; runQuickSave: () => Promise<void>; scrollToPanel: (panelRef: HTMLDivElement) => void; scrollToPanelId$: ",
           {
@@ -2799,10 +2686,18 @@
           "SavedObjectAccessControl",
           ">>; changeAccessMode: (accessMode: \"default\" | \"write_restricted\") => Promise<void>; createdBy?: string | undefined; user?: ",
           "DashboardUser",
-          " | undefined; isAccessControlEnabled?: boolean | undefined; }"
+          " | undefined; isAccessControlEnabled?: boolean | undefined; addIncomingEmbeddables: (embeddables?: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddablePackageState",
+            "text": "EmbeddablePackageState"
+          },
+          "<object>[] | undefined) => void; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-        "lineNumber": 148,
+        "lineNumber": 144,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2843,7 +2738,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts",
-        "lineNumber": 79,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2940,63 +2835,7 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-public.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS",
-        "type": "Object",
-        "tags": [],
-        "label": "DEFAULT_DASHBOARD_NAVIGATION_OPTIONS",
-        "description": [],
-        "path": "src/platform/plugins/shared/dashboard/common/page_bundle_constants.ts",
-        "lineNumber": 19,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.open_in_new_tab",
-            "type": "boolean",
-            "tags": [],
-            "label": "open_in_new_tab",
-            "description": [],
-            "path": "src/platform/plugins/shared/dashboard/common/page_bundle_constants.ts",
-            "lineNumber": 20,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_time_range",
-            "type": "boolean",
-            "tags": [],
-            "label": "use_time_range",
-            "description": [],
-            "path": "src/platform/plugins/shared/dashboard/common/page_bundle_constants.ts",
-            "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_filters",
-            "type": "boolean",
-            "tags": [],
-            "label": "use_filters",
-            "description": [],
-            "path": "src/platform/plugins/shared/dashboard/common/page_bundle_constants.ts",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "start": {
       "parentPluginId": "dashboard",
       "id": "def-public.DashboardStart",
@@ -3689,50 +3528,6 @@
       },
       {
         "parentPluginId": "dashboard",
-        "id": "def-server.DashboardFilter",
-        "type": "Type",
-        "tags": [],
-        "label": "DashboardFilter",
-        "description": [
-          "A filter stored in a dashboard."
-        ],
-        "signature": [
-          "{ readonly query?: Record<string, any> | undefined; readonly $state?: Readonly<{} & { store: ",
-          {
-            "pluginId": "@kbn/es-query-constants",
-            "scope": "common",
-            "docId": "kibKbnEsQueryConstantsPluginApi",
-            "section": "def-common.FilterStateStore",
-            "text": "FilterStateStore"
-          },
-          "; }> | undefined; readonly meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }"
-        ],
-        "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 25,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-server.DashboardNavigationOptions",
-        "type": "Type",
-        "tags": [],
-        "label": "DashboardNavigationOptions",
-        "description": [],
-        "signature": [
-          "{ readonly use_filters: boolean; readonly use_time_range: boolean; readonly open_in_new_tab: boolean; }"
-        ],
-        "path": "src/platform/plugins/shared/dashboard/server/dashboard_navigation/types.ts",
-        "lineNumber": 13,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
         "id": "def-server.DashboardOptions",
         "type": "Type",
         "tags": [],
@@ -3744,7 +3539,7 @@
           "{ readonly auto_apply_filters: boolean; readonly hide_panel_titles: boolean; readonly hide_panel_borders: boolean; readonly use_margins: boolean; readonly sync_colors: boolean; readonly sync_tooltips: boolean; readonly sync_cursor: boolean; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 29,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3763,7 +3558,7 @@
           "Readonly<{ id?: string | undefined; version?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 33,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3780,7 +3575,7 @@
           "Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 40,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3797,26 +3592,7 @@
           "(Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 39,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-server.DashboardQuery",
-        "type": "Type",
-        "tags": [],
-        "label": "DashboardQuery",
-        "description": [
-          "A query in the dashboard API state."
-        ],
-        "signature": [
-          "{ readonly language: \"kql\" | \"lucene\"; readonly expression: string; }"
-        ],
-        "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 27,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3927,7 +3703,7 @@
           "{ readonly id?: string | undefined; readonly title: string; readonly grid: Readonly<{} & { y: number; }>; readonly panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; readonly collapsed: boolean; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 35,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3954,7 +3730,24 @@
           ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>)[] | undefined; tags?: string[] | undefined; description?: string | undefined; query?: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined; project_routing?: string | undefined; refresh_interval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; access_control?: Readonly<{ access_mode?: \"default\" | \"write_restricted\" | undefined; } & {}> | undefined; options: Readonly<{} & { auto_apply_filters: boolean; hide_panel_titles: boolean; hide_panel_borders: boolean; use_margins: boolean; sync_colors: boolean; sync_tooltips: boolean; sync_cursor: boolean; }>; title: string; pinned_panels: (Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]; panels: (Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; collapsed: boolean; }>)[]; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 37,
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-server.DashboardUpdateRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardUpdateRequestBody",
+        "description": [],
+        "signature": [
+          "{ readonly [x: string]: any; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/server/api/update/types.ts",
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4000,7 +3793,7 @@
           "{ readonly y: number; readonly w: number; readonly h: number; readonly x: number; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 31,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4064,54 +3857,6 @@
         ],
         "path": "src/platform/plugins/shared/dashboard/server/index.ts",
         "lineNumber": 15,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-server.dashboardNavigationOptionsSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "dashboardNavigationOptionsSchema",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<{ use_filters: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean>; use_time_range: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean>; open_in_new_tab: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean>; }>"
-        ],
-        "path": "src/platform/plugins/shared/dashboard/server/dashboard_navigation/schemas.ts",
-        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4646,7 +4391,7 @@
           "\nCapabilities object for the Dashboard application.\nDefines the permissions available for dashboard operations."
         ],
         "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-        "lineNumber": 17,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4661,7 +4406,7 @@
               "Whether the user can see write controls (edit, save, etc.)."
             ],
             "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "lineNumber": 22,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4676,7 +4421,7 @@
               "Whether the user can create new dashboards."
             ],
             "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4691,7 +4436,7 @@
               "Whether the user can view dashboards."
             ],
             "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4709,7 +4454,7 @@
               "[key: string]:  boolean"
             ],
             "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4754,18 +4499,10 @@
             "section": "def-common.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; passThroughContext?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          " | undefined; }"
+          " | undefined; dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-        "lineNumber": 32,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4782,7 +4519,7 @@
           "Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 40,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4799,7 +4536,7 @@
           "(Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 39,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4826,7 +4563,7 @@
           ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>)[] | undefined; tags?: string[] | undefined; description?: string | undefined; query?: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined; project_routing?: string | undefined; refresh_interval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; access_control?: Readonly<{ access_mode?: \"default\" | \"write_restricted\" | undefined; } & {}> | undefined; options: Readonly<{} & { auto_apply_filters: boolean; hide_panel_titles: boolean; hide_panel_borders: boolean; use_margins: boolean; sync_colors: boolean; sync_tooltips: boolean; sync_cursor: boolean; }>; title: string; pinned_panels: (Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]; panels: (Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; collapsed: boolean; }>)[]; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
-        "lineNumber": 37,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -12,7 +12,8 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
   getHistorySnapshotIndexPattern,
-  getLatestEntitiesIndexName,
+  getEntitiesAlias,
+  ENTITY_LATEST,
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -333,7 +334,7 @@ export const getEntityTool = (
 
             // Tool is only available if the latest entity store index exists for this space
             const indexExists = await esClient.indices.exists({
-              index: getLatestEntitiesIndexName(spaceId),
+              index: getEntitiesAlias(ENTITY_LATEST, spaceId),
             });
 
             if (!indexExists) {
@@ -369,7 +370,7 @@ export const getEntityTool = (
 
         const client = esClient.asCurrentUser;
         const normalizedEntityId = normalizeEntityId(entityId, entityType);
-        const entityIndex = getLatestEntitiesIndexName(spaceId);
+        const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
 
         const { query, columns, values } = await findEntityById({
           entityIndex,
@@ -391,15 +392,31 @@ export const getEntityTool = (
           };
         }
 
-        const enrichedResults = await Promise.all(
-          values.map((row) =>
-            enrichEntityResult({ row, columns, query, date, interval, spaceId, esClient: client })
-          )
-        );
-
-        success = true;
-        entitiesReturned = enrichedResults.length;
-        return { results: enrichedResults };
+        try {
+          const enrichedResults = await Promise.all(
+            values.map((row) =>
+              enrichEntityResult({ row, columns, query, date, interval, spaceId, esClient: client })
+            )
+          );
+          success = true;
+          entitiesReturned = enrichedResults.length;
+          return { results: enrichedResults };
+        } catch (error) {
+          logger.debug(
+            `Error enriching entity results: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }, returning profile without enrichment`
+          );
+          success = true;
+          entitiesReturned = values.length;
+          return {
+            results: values.map((row) => ({
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.esqlResults,
+              data: { query, columns, values: [row] },
+            })),
+          };
+        }
       } catch (error) {
         errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {

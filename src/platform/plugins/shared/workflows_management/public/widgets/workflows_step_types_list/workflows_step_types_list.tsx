@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Step } from '@kbn/workflows';
 import { collectAllSteps, getBuiltInStepDefinition } from '@kbn/workflows';
 import { getBaseConnectorType } from '../../shared/ui/step_icons/get_base_connector_type';
-import { getStepIconType } from '../../shared/ui/step_icons/get_step_icon_type';
+import { StepIcon } from '../../shared/ui/step_icons/step_icon';
 import { PopoverItems } from '../worflows_triggers_list/popover_items';
 
 interface WorkflowsStepTypesListProps {
@@ -130,7 +130,12 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
       >
         {visibleItems.map((baseType) => (
           <EuiFlexItem grow={false} key={baseType}>
-            <EuiIcon type={getStepIconType(baseType)} size="m" title={getStepTypeLabel(baseType)} />
+            <StepIcon
+              stepType={baseType}
+              executionStatus={undefined}
+              size="m"
+              title={getStepTypeLabel(baseType)}
+            />
           </EuiFlexItem>
         ))}
         {hasOverflow && (
@@ -154,7 +159,7 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
                   responsive={false}
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={getStepIconType(baseType)} size="s" aria-hidden={true} />
+                    <StepIcon stepType={baseType} executionStatus={undefined} size="s" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">{getStepTypeLabel(baseType)}</EuiText>

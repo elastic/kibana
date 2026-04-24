@@ -93,6 +93,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
   }
 
+  /** ES APIs do not guarantee stable ordering; normalize before deep equality checks. */
+  function sortResourceLists(r: Resources): Resources {
+    return {
+      indices: [...r.indices].sort((a, b) => a.localeCompare(b)),
+      componentTemplates: [...r.componentTemplates].sort((a, b) => a.localeCompare(b)),
+      indexTemplates: [...r.indexTemplates].sort((a, b) => a.localeCompare(b)),
+    };
+  }
+
   describe('Basic functionality', () => {
     async function getWiredStatus() {
       const response = await viewerApiClient.fetch('GET /api/streams/_status').expect(200);
@@ -154,6 +163,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
+      it(`does not materialize backing data streams for wired root streams`, async () => {
+        for (const streamName of ['logs.ecs', 'logs.otel']) {
+          await esClient.indices.getDataStream({ name: streamName }).then(
+            () => {
+              throw new Error(`Expected ${streamName} data stream to not exist`);
+            },
+            (err) => {
+              expect(err.meta?.body?.error?.type).to.eql('index_not_found_exception');
+            }
+          );
+        }
+      });
+
       describe('after enabling', () => {
         before(async () => {
           // need to disable and enable streams to ensure the views setting is picked up
@@ -180,6 +202,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(wiredStatus.logs).to.eql(false);
           expect(wiredStatus['logs.otel']).to.eql(true);
           expect(wiredStatus['logs.ecs']).to.eql(true);
+        });
+
+        it(`materializes backing data streams for wired root streams`, async () => {
+          for (const streamName of ['logs.ecs', 'logs.otel']) {
+            const response = await esClient.indices.getDataStream({ name: streamName });
+            expect(response.data_streams).to.have.length(1);
+            expect(response.data_streams[0].name).to.be(streamName);
+          }
         });
 
         it('includes create_snapshot_repository in stream privileges', async () => {
@@ -270,8 +300,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             const afterDisable = await getResources();
             // Wired roots are on by default, so the initial snapshot includes their index and
             // component templates; disableStreams removes them. Everything else should match.
-            expect(resourcesExcludingWiredRootAssets(afterDisable)).to.eql(
-              resourcesExcludingWiredRootAssets(resources)
+            expect(sortResourceLists(resourcesExcludingWiredRootAssets(afterDisable))).to.eql(
+              sortResourceLists(resourcesExcludingWiredRootAssets(resources))
             );
             const templateNames = [
               ...afterDisable.componentTemplates,
@@ -1383,7 +1413,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('fails to create a wired stream with angle brackets in the name', async () => {
           const response = await putStream(apiClient, 'logs.with<brackets>', validStreamBody, 400);
           expect((response as unknown as { message: string }).message).to.contain(
-            'Stream name cannot contain "<".'
+            'Stream name cannot contain "<", ">".'
           );
         });
 

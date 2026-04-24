@@ -23,12 +23,17 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
 import type { IdentityFields } from '../../document_details/shared/utils';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import { EntitySourceBadge } from '../shared/components/entity_source_badge';
+import { RiskLevelBadge } from '../shared/components/risk_level_badge';
 
 interface HostPanelHeaderProps {
   hostName: string;
   lastSeen: FirstLastSeenData;
   entityId?: string;
   identityFields?: IdentityFields;
+  isEntityInStore?: boolean;
+  riskLevel?: RiskSeverity;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
@@ -40,6 +45,8 @@ export const HostPanelHeader = ({
   lastSeen,
   entityId,
   identityFields,
+  isEntityInStore,
+  riskLevel,
 }: HostPanelHeaderProps) => {
   const lastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
@@ -72,31 +79,28 @@ export const HostPanelHeader = ({
             alignItems="flexStart"
           >
             <EuiFlexItem grow={false}>
-              <SecuritySolutionLinkAnchor
-                deepLinkId={SecurityPageName.hosts}
-                path={getHostDetailsUrl(
-                  hostName,
-                  undefined,
-                  entityId,
-                  identityFields && Object.keys(identityFields).length > 0
-                    ? identityFields
-                    : undefined
-                )}
-                target={'_blank'}
-                external={false}
-                css={linkTitleCSS}
-                override={urlParamOverride}
-              >
-                <FlyoutTitle title={hostName} iconType={'storage'} isLink />
-              </SecuritySolutionLinkAnchor>
+              {isEntityInStore ? (
+                <FlyoutTitle title={hostName} iconType={'storage'} />
+              ) : (
+                <SecuritySolutionLinkAnchor
+                  deepLinkId={SecurityPageName.hosts}
+                  path={getHostDetailsUrl(
+                    hostName,
+                    undefined,
+                    entityId,
+                    identityFields && Object.keys(identityFields).length > 0
+                      ? identityFields
+                      : undefined
+                  )}
+                  target={'_blank'}
+                  external={false}
+                  css={linkTitleCSS}
+                  override={urlParamOverride}
+                >
+                  <FlyoutTitle title={hostName} iconType={'storage'} isLink />
+                </SecuritySolutionLinkAnchor>
+              )}
             </EuiFlexItem>
-            {entityId ? (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" data-test-subj="host-panel-header-entity-id">
-                  {entityId}
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
         {isLoading ? (
@@ -111,15 +115,25 @@ export const HostPanelHeader = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                {lastSeenDateFormatted && (
-                  <EuiBadge data-test-subj="host-panel-header-observed-badge" color="hollow">
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.host.observedBadge"
-                      defaultMessage="Observed"
-                    />
-                  </EuiBadge>
-                )}
+                <EuiBadge data-test-subj="host-panel-header-entity-type-badge" color="hollow">
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.host.entityTypeBadge"
+                    defaultMessage="Host"
+                  />
+                </EuiBadge>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EntitySourceBadge
+                  isEntityInStore={!!isEntityInStore}
+                  hasLastSeenDate={!!lastSeenDateFormatted}
+                  data-test-subj="host-panel-header-observed-badge"
+                />
+              </EuiFlexItem>
+              {isEntityInStore && riskLevel && (
+                <EuiFlexItem grow={false}>
+                  <RiskLevelBadge riskLevel={riskLevel} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         )}

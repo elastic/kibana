@@ -422,6 +422,12 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     );
   },
 
+  // Optional: preferred width of the canvas flyout in full-screen context.
+  // Accepts any valid CSS width value (e.g. '600px', '40vw').
+  // Defaults to '50vw' when not specified. Has no effect in sidebar context
+  // or on narrow viewports (where the canvas always fills available width).
+  canvasWidth: '600px',
+
   // Expanded view rendered in the canvas flyout
   renderCanvasContent: ({ attachment }) => (
     <EuiCodeBlock fontSize="m" lineNumbers isCopyable>
@@ -490,6 +496,21 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
 - **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
+
+#### Canvas flyout width
+
+By default the canvas flyout opens at `50vw` in full-screen context. You can override this per attachment type using the optional `canvasWidth` property on `AttachmentUIDefinition`:
+
+```ts
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  // ...
+  canvasWidth: '600px', // any valid CSS width value
+};
+```
+
+- Accepts any valid CSS width string: `'600px'`, `'40vw'`, `'80%'`, etc.
+- Has no effect in sidebar context — the canvas always fills available width there.
+- Has no effect on narrow viewports (below the `l` EUI breakpoint, ~992px) — the canvas switches to overlay mode and fills available width regardless of this setting.
 
 #### Opening the sidebar from attachments
 
@@ -1133,6 +1154,12 @@ handles saved object aliasing (e.g. after a space migration).
 Return `undefined` if the item can no longer be resolved. The `sml_attach`
 tool will report a per-item error to the AI agent without failing the entire
 call.
+
+You may include an optional `description` string on the object returned from
+`toAttachment`. It is stored on the conversation
+attachment and shown in the Agent Builder UI (for example, the “Attachment
+added: …” line). If you omit it, a default label is derived from the SML
+document’s type and title.
 
 ##### `fetchFrequency` — Choose an appropriate interval
 

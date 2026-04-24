@@ -15,7 +15,7 @@
       "label": "WorkflowsPublicPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 35,
+      "lineNumber": 40,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,11 +31,66 @@
       "label": "WorkflowsPublicPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 74,
+      "lineNumber": 78,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "workflowsManagement",
+          "id": "def-public.WorkflowsPublicPluginStart.setUnavailableInServerlessTier",
+          "type": "Function",
+          "tags": [],
+          "label": "setUnavailableInServerlessTier",
+          "description": [
+            "\nSets Workflows availability status to unavailable. Should only be called in serverless mode.\n\nThe `requiredProducts` parameter is used to render the upselling message,\nso the user is aware of which products to upgrade to in order to have Workflows available."
+          ],
+          "signature": [
+            "(options: { requiredProducts: ",
+            "ServerlessTierRequiredProducts",
+            "; }) => void"
+          ],
+          "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
+          "lineNumber": 79,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "workflowsManagement",
+              "id": "def-public.WorkflowsPublicPluginStart.setUnavailableInServerlessTier.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
+              "lineNumber": 85,
+              "columnNumber": 45,
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "workflowsManagement",
+                  "id": "def-public.WorkflowsPublicPluginStart.setUnavailableInServerlessTier.$1.requiredProducts",
+                  "type": "Array",
+                  "tags": [],
+                  "label": "requiredProducts",
+                  "description": [],
+                  "signature": [
+                    "string[]"
+                  ],
+                  "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
+                  "lineNumber": 86,
+                  "columnNumber": 5,
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -55,7 +110,7 @@
       "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 43,
+      "lineNumber": 44,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -71,7 +126,7 @@
             "WorkflowsManagementApi"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-          "lineNumber": 44,
+          "lineNumber": 45,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -91,7 +146,7 @@
         "{ [x: string]: never; }"
       ],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 47,
+      "lineNumber": 48,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
