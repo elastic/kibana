@@ -6,56 +6,49 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { BlastRadiusSummaryPanel } from './blast_radius_summary_panel';
-import type { EntityRowConfig, SignificantEvent, StreamMetricConfig, RemediationStep } from '.';
+import { StatusHeader } from './status_header';
+import { MainSignificantEvent } from './main_significant_event';
+import type { ImpactedService } from './main_significant_event';
+import { ImpactedCard } from './impacted_card';
+import type { ImpactedCardProps } from './impacted_card';
 
 export type SigEventSeverity = 'critical' | 'high' | 'medium' | 'low';
+
+export interface ImpactedCardItem extends ImpactedCardProps {
+  id: string;
+}
+
+const DEFAULT_IMPACTED_CARDS: ImpactedCardItem[] = [
+  { id: 'payment', label: 'Service', value: 'payment', iconType: 'package' },
+  { id: 'checkout', label: 'Service', value: 'checkout', iconType: 'package' },
+];
 
 export interface SigeventsOverviewProps {
   state?: 'critical' | 'warning' | 'healthy';
   blastRadiusScore?: number;
-  criticalCount?: number;
-  highCount?: number;
-  significantEventsCount?: number;
-  entities?: EntityRowConfig[];
-  significantEvents?: SignificantEvent[];
-  metrics?: StreamMetricConfig[];
-  remediationSteps?: RemediationStep[];
+  title?: string;
+  description?: string;
+  mainEventTitle?: string;
+  impactedServices?: ImpactedService[];
+  impactedCards?: ImpactedCardItem[];
   onRemediate?: () => void;
-  onRunInBackground?: () => void;
-  onAttachEntity?: (entity: EntityRowConfig) => void;
-  onAttachEvent?: (event: SignificantEvent) => void;
-  onOpenConversation?: () => void;
+  onViewDetails?: () => void;
 }
 
-export function SigeventsOverview({
+export const SigeventsOverview = ({
   state = 'critical',
   blastRadiusScore,
-  criticalCount,
-  highCount,
-  significantEventsCount,
-  entities,
-  significantEvents,
-  metrics,
-  remediationSteps,
+  title,
+  description,
+  mainEventTitle,
+  impactedServices,
+  impactedCards = DEFAULT_IMPACTED_CARDS,
   onRemediate,
-  onRunInBackground,
-  onAttachEntity,
-  onAttachEvent,
-  onOpenConversation,
-}: SigeventsOverviewProps) {
+  onViewDetails,
+}: SigeventsOverviewProps) => {
   const { euiTheme } = useEuiTheme();
 
   if (state !== 'critical') {
@@ -71,76 +64,46 @@ export function SigeventsOverview({
         padding: ${euiTheme.size.l};
       `}
     >
-      <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiBadge iconType="moon" color="hollow">
-            {i18n.translate('xpack.observability.sigeventsOverview.modeBadge', {
-              defaultMessage: 'SIGNIFICANT EVENTS',
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
-        <EuiSpacer size="s" />
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            gutterSize="m"
-            justifyContent="center"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="radar" size="l" color="danger" aria-hidden />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="m">
-                <h2
-                  css={css`
-                    color: ${euiTheme.colors.dangerText};
-                  `}
-                >
-                  {i18n.translate('xpack.observability.sigeventsOverview.mainHeading', {
-                    defaultMessage: 'Your system requires attention',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            color="subdued"
-            textAlign="center"
-            css={css`
-              max-width: 640px;
-            `}
-          >
-            <p>
-              {i18n.translate('xpack.observability.sigeventsOverview.introDescription', {
-                defaultMessage:
-                  'Our system is detecting more unusual behaviour than normal, review your Blast radius summary and initiate actions.',
-              })}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <StatusHeader title={title} description={description} />
 
       <EuiSpacer size="l" />
 
-      <BlastRadiusSummaryPanel
+      {impactedCards.length > 0 && (
+        <>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="xs"
+            data-test-subj="sigeventsOverviewImpactedCards"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.observability.sigeventsOverview.impactedSectionLabel', {
+                  defaultMessage: 'Impacted',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+                {impactedCards.map(({ id, ...card }) => (
+                  <EuiFlexItem key={id}>
+                    <ImpactedCard {...card} />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      <MainSignificantEvent
         blastRadiusScore={blastRadiusScore}
-        criticalCount={criticalCount}
-        highCount={highCount}
-        significantEventsCount={significantEventsCount}
-        entities={entities}
-        significantEvents={significantEvents}
-        metrics={metrics}
-        remediationSteps={remediationSteps}
+        title={mainEventTitle}
+        impactedServices={impactedServices}
         onRemediate={onRemediate}
-        onRunInBackground={onRunInBackground}
-        onAttachEntity={onAttachEntity}
-        onAttachEvent={onAttachEvent}
-        onOpenConversation={onOpenConversation}
+        onViewDetails={onViewDetails}
       />
     </div>
   );
-}
+};

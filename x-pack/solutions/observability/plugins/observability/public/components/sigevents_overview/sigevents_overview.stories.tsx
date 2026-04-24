@@ -20,15 +20,6 @@ const meta: Meta<typeof SigeventsOverview> = {
     blastRadiusScore: {
       control: { type: 'range', min: 0, max: 100 },
     },
-    criticalCount: {
-      control: { type: 'number', min: 0 },
-    },
-    highCount: {
-      control: { type: 'number', min: 0 },
-    },
-    significantEventsCount: {
-      control: { type: 'number', min: 0 },
-    },
   },
 };
 
@@ -38,15 +29,9 @@ type Story = StoryObj<typeof SigeventsOverview>;
 export const Critical: Story = {
   args: {
     state: 'critical',
-    blastRadiusScore: 85,
-    criticalCount: 6,
-    highCount: 7,
-    significantEventsCount: 24,
+    blastRadiusScore: 90,
     onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onAttachEntity: action('onAttachEntity'),
-    onAttachEvent: action('onAttachEvent'),
-    onOpenConversation: action('onOpenConversation'),
+    onViewDetails: action('onViewDetails'),
   },
 };
 
@@ -54,9 +39,6 @@ export const HighScore: Story = {
   args: {
     ...Critical.args,
     blastRadiusScore: 95,
-    criticalCount: 12,
-    highCount: 15,
-    significantEventsCount: 48,
   },
 };
 
@@ -64,109 +46,43 @@ export const ModerateScore: Story = {
   args: {
     ...Critical.args,
     blastRadiusScore: 65,
-    criticalCount: 2,
-    highCount: 4,
-    significantEventsCount: 8,
   },
 };
 
-export const CustomEntities: Story = {
+export const CustomImpactedServices: Story = {
   args: {
     ...Critical.args,
-    entities: [
-      {
-        id: 'critical',
-        title: 'Production database servers',
-        iconType: 'errorFilled',
-        iconColor: 'danger',
-        badgeLabel: '3/12',
-        badgeColor: 'danger',
-      },
-      {
-        id: 'high',
-        title: 'API gateway instances',
-        iconType: 'alert',
-        iconColor: 'warning',
-        badgeLabel: '5/20',
-        badgeColor: 'warning',
-      },
-      {
-        id: 'sig',
-        title: 'Active alerts',
-        iconType: 'errorFilled',
-        iconColor: 'danger',
-        badgeLabel: '15',
-        badgeColor: 'danger',
-      },
+    mainEventTitle: 'Database connection pool exhausted on checkout and payment',
+    impactedServices: [
+      { id: 'postgres', label: 'postgres', iconType: 'package' },
+      { id: 'checkout', label: 'checkout', iconType: 'package' },
+      { id: 'payment', label: 'payment', iconType: 'package' },
     ],
   },
 };
 
-export const CustomSignificantEvents: Story = {
+export const CustomImpactedCards: Story = {
   args: {
     ...Critical.args,
-    significantEvents: [
-      {
-        id: '1',
-        label: 'Database Connection Pool Exhaustion',
-        subtitle: 'logs · postgres-primary',
-        severityLabel: 'Critical',
-        severityColor: 'danger',
-      },
-      {
-        id: '2',
-        label: 'Memory Usage Spike on Worker Nodes',
-        subtitle: 'metrics · kubernetes-workers',
-        severityLabel: 'High',
-        severityColor: 'warning',
-      },
-      {
-        id: '3',
-        label: 'Increased Error Rate on Payment Service',
-        subtitle: 'logs · payment-gateway',
-        severityLabel: 'Critical',
-        severityColor: 'danger',
-      },
-      {
-        id: '4',
-        label: 'Network Latency Between Data Centers',
-        subtitle: 'metrics · network',
-        severityLabel: 'High',
-        severityColor: 'warning',
-      },
+    impactedCards: [
+      { id: 'service-auth', label: 'Service', value: 'auth', iconType: 'package' },
+      { id: 'service-payment', label: 'Service', value: 'payment', iconType: 'package' },
+      { id: 'service-checkout', label: 'Service', value: 'checkout', iconType: 'package' },
+      { id: 'dropped', label: 'Dropped events', value: '1.2M', iconType: 'warning' },
     ],
   },
 };
 
-export const CustomMetrics: Story = {
+export const NoImpactedCards: Story = {
   args: {
     ...Critical.args,
-    metrics: [
-      {
-        subtitle: 'logs.postgres.error',
-        value: 45200,
-        domainMax: 100000,
-        extra: { value: '+45%' },
-      },
-      {
-        subtitle: 'metrics.cpu.usage',
-        value: 78,
-        domainMax: 100,
-        extra: { value: '+12%' },
-      },
-    ],
+    impactedCards: [],
   },
 };
 
-export const CustomRemediationSteps: Story = {
+export const Healthy: Story = {
   args: {
     ...Critical.args,
-    remediationSteps: [
-      { id: '1', label: 'Scale up database connection pool' },
-      { id: '2', label: 'Restart affected worker nodes' },
-      { id: '3', label: 'Clear cache on API gateway' },
-      { id: '4', label: 'Update incident status in PagerDuty' },
-      { id: '5', label: 'Create post-mortem document' },
-    ],
+    state: 'healthy',
   },
 };
