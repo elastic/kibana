@@ -66,6 +66,7 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   filters,
   pageFilters: [],
   sort: [['@timestamp', 'desc']],
+  pageIndex: 0,
 });
 
 const riskPanelFlexItemStyle = css`

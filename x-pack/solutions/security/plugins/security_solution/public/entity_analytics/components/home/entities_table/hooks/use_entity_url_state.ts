@@ -29,6 +29,9 @@ export type URLQuery = EntitiesBaseURLQuery & Record<string, unknown>;
 
 type SortOrder = [string, string];
 
+const getPageIndexOrDefault = (pageIndex: unknown): number =>
+  typeof pageIndex === 'number' && Number.isFinite(pageIndex) ? pageIndex : 0;
+
 export interface EntityURLStateResult {
   setUrlQuery: (query: Record<string, unknown>) => void;
   sort: SortOrder[];
@@ -218,7 +221,7 @@ export const useEntityURLState = ({
           },
         },
     queryError,
-    pageIndex: urlQuery.pageIndex as number,
+    pageIndex: getPageIndexOrDefault(urlQuery.pageIndex),
     urlQuery,
     setTableOptions,
     handleUpdateQuery,
