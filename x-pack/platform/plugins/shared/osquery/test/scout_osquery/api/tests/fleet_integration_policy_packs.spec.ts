@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { RoleSessionCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
@@ -22,10 +22,10 @@ apiTest.describe(
   'Fleet integration — pack surfacing in Fleet wrapper',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    let credentials: RoleApiCredentials;
+    let adminCredentials: RoleSessionCredentials;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      credentials = await requestAuth.getApiKeyForPrivilegedUser();
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      adminCredentials = await samlAuth.asInteractiveUser('admin');
     });
 
     apiTest(
@@ -35,9 +35,11 @@ apiTest.describe(
         const integrationName = `${policyName}-integration`;
         const packName = `scout-fleet-pack-${Date.now()}`;
 
-        // 1. Create an agent policy via Fleet API.
+        const adminHeaders = { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader };
+
+        // Fleet writes require admin (or Fleet-all); privileged API keys are not enough on serverless Security.
         const policyResponse = await apiClient.post(testData.API_PATHS.FLEET_AGENT_POLICIES, {
-          headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+          headers: adminHeaders,
           body: {
             name: policyName,
             namespace: 'default',
@@ -49,9 +51,8 @@ apiTest.describe(
         expect(policyResponse).toHaveStatusCode(200);
         const testPolicyId = policyResponse.body.item.id as string;
 
-        // 2. Attach the osquery_manager integration.
         const pkgResponse = await apiClient.post(testData.API_PATHS.FLEET_PACKAGE_POLICIES, {
-          headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+          headers: adminHeaders,
           body: {
             name: integrationName,
             namespace: 'default',

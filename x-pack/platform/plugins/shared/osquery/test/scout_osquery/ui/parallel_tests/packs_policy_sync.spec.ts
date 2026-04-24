@@ -18,7 +18,6 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
   const transientPackIds: string[] = [];
 
   test.beforeAll(async ({ apiServices }) => {
-
     const body = getMinimalSavedQuery({
       id: `scout-policy-sq-${Date.now()}`,
       query: 'select * from uptime;',

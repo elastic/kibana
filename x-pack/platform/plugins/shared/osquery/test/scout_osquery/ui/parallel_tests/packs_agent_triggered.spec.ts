@@ -84,6 +84,7 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
           matched = data.data?.find((row) => row.packName === packName);
           if (matched) break;
         } catch {
+          // History may 404 or be empty until the agent run lands; retry until deadline.
         }
 
         await new Promise((r) => setTimeout(r, 5_000));

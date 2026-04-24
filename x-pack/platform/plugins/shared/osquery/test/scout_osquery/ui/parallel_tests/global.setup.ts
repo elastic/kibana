@@ -531,6 +531,7 @@ globalSetupHook(
           break;
         }
       } catch {
+        // Fleet status probe may fail while the service is still starting; retry.
       }
 
       await new Promise((r) => setTimeout(r, 2_000));
