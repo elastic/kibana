@@ -6,6 +6,7 @@
  */
 
 import { hostname as osHostname } from 'os';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -55,6 +56,36 @@ import type {
   EvaluationSpecificWorkerFixtures,
   Example,
 } from './types';
+
+export interface ExportAndReportOptions {
+  documents: import('./utils/score_repository').EvaluationScoreDocument[];
+  scoreRepository: EvaluationScoreRepository;
+  evaluationsEsClient: EsClient;
+  reportModelScore: import('./utils/reporting/evaluation_reporter').EvaluationReporter;
+  runId: string;
+  log: import('@kbn/some-dev-log').SomeDevLog;
+  taskModelId: string;
+  suiteId?: string;
+}
+
+export async function exportRefreshAndReport({
+  documents,
+  scoreRepository,
+  evaluationsEsClient,
+  reportModelScore,
+  runId,
+  log,
+  taskModelId,
+  suiteId,
+}: ExportAndReportOptions): Promise<void> {
+  await exportEvaluations(documents, scoreRepository, log);
+
+  // Ensure all score documents (including those written incrementally via
+  // indexSingleScore with refresh:false) are visible before querying stats.
+  await evaluationsEsClient.indices.refresh({ index: 'kibana-evaluations' }).catch(() => {});
+
+  await reportModelScore(scoreRepository, runId, log, { taskModelId, suiteId });
+}
 
 function isElasticCloudEsUrl(esUrl: string): boolean {
   try {
@@ -373,21 +404,25 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       });
 
       try {
-        await exportEvaluations(documents, scoreRepository, log);
+        await exportRefreshAndReport({
+          documents,
+          scoreRepository,
+          evaluationsEsClient,
+          reportModelScore,
+          runId: currentRunId,
+          log,
+          taskModelId: model.id,
+          suiteId: process.env.EVAL_SUITE_ID,
+        });
       } catch (error) {
         log.error(
           new Error(
-            `Failed to export evaluation results to Elasticsearch for run ID: ${currentRunId}.`,
+            `Failed to export/report evaluation results for run ID: ${currentRunId}.`,
             { cause: error }
           )
         );
         throw error;
       }
-
-      await reportModelScore(scoreRepository, currentRunId, log, {
-        taskModelId: model.id,
-        suiteId: process.env.EVAL_SUITE_ID,
-      });
     },
     {
       scope: 'worker',
