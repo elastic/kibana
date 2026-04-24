@@ -16,10 +16,15 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [hubspot-connector-configuration]
 
-HubSpot connectors have the following configuration properties:
+HubSpot connectors support two authentication methods:
 
-**Private App Access Token**
-:   The HubSpot access token used for authentication. Use a **Service Key** (recommended) from HubSpot Development, or a **Private App** access token (starts with `pat-`) from the legacy app integration flow. See [Get API credentials](#hubspot-api-credentials) for both options.
+**Access token (bearer)**
+:   Authenticates using a static token. Use a **Service Key** (recommended) from HubSpot Development, or a **Private App** access token (starts with `pat-`). See [Get API credentials](#hubspot-api-credentials) for both options.
+
+    - **Private App Access Token**: The HubSpot access token.
+
+**OAuth**
+:   Authenticates via the OAuth 2.0 authorization code flow using a HubSpot Public App. Requires a **Client ID** and **Client Secret** from a HubSpot Public App. The authorization and token URLs are pre-filled; adjust the **Scopes** field if you need access beyond the defaults. See [OAuth (Public App)](#hubspot-oauth-public-app) for setup instructions.
 
 ## Test connectors [hubspot-action-configuration]
 
@@ -68,7 +73,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [hubspot-api-credentials]
 
-You can authenticate the connector with either a **Service Key** (recommended) or a **Private App** access token. Use a Service Key when possible; creating a Private App is the legacy method and might not be available in all HubSpot accounts.
+The connector supports three credential types: a Service Key (recommended for token auth), a Private App access token (legacy token auth), or OAuth via a Public App. Use a Service Key or OAuth when possible.
 
 ### Service Key (recommended) [hubspot-service-key]
 
@@ -109,6 +114,24 @@ Creating a Private App (app integration) is the **legacy** way to obtain a token
 7. Select **Create app** and confirm by selecting **Continue Creating**.
 8. On the confirmation dialog, copy the **Access Token** (starts with `pat-`).
 9. Use this token as the **Private App Access Token** when configuring the connector in {{kib}}.
+
+### OAuth (Public App) [hubspot-oauth-public-app]
+
+OAuth uses the authorization code flow with a HubSpot Public App. Unlike Private Apps, Public Apps are registered in a HubSpot developer account and support OAuth on behalf of any HubSpot portal.
+
+1. Log in to your [HubSpot developer account](https://developers.hubspot.com/).
+2. Select **Apps** in the top navigation, then select **Create app** (or open an existing app).
+3. On the **App Info** tab, give your app a name (for example, "Elastic Workplace AI").
+4. On the **Auth** tab, under **Redirect URLs**, add your {{kib}} OAuth callback URL:
+   `https://<your-kibana-host>/api/actions/connector/_oauth_callback`
+5. Under **Scopes**, add at least:
+   - `crm.objects.contacts.read`
+   - `crm.objects.companies.read`
+   - `crm.objects.deals.read`
+   - `tickets`
+   - `crm.objects.owners.read`
+6. Save the app. On the **Auth** tab, copy the **Client ID** and **Client Secret**.
+7. In {{kib}}, create a HubSpot connector and select **OAuth** as the authentication type. Enter the **Client ID** and **Client Secret**. Adjust the **Scopes** field if needed, then complete the OAuth authorization flow.
 
 :::{note}
 Keep your access token secure. Anyone with this token can access your HubSpot CRM data.
