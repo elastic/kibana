@@ -53,7 +53,7 @@ import {
 import { LatencyChart } from './latency_chart';
 import { ThroughputChart } from './throughput_chart';
 import type { AlertDetailsAppSectionProps, ChartId } from './types';
-import { DEFAULT_LAYOUT, getAnomalyChartLayout, RULE_TYPE_CHART_LAYOUTS } from './types';
+import { CHART_LAYOUTS, DEFAULT_LAYOUT } from './types';
 
 export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAppSectionProps) {
   const { services } = useKibana();
@@ -69,11 +69,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
   const detectorType = alert.fields[ANOMALY_DETECTOR_TYPE] as AnomalyDetectorType | undefined;
 
   const isAnomaly = isAnomalyRuleType(alertRuleTypeId);
-
-  const chartLayout = useMemo(() => {
-    if (isAnomaly) return getAnomalyChartLayout(detectorType);
-    return RULE_TYPE_CHART_LAYOUTS[alertRuleTypeId] ?? DEFAULT_LAYOUT;
-  }, [isAnomaly, detectorType, alertRuleTypeId]);
+  const chartLayout = CHART_LAYOUTS[detectorType ?? alertRuleTypeId] ?? DEFAULT_LAYOUT;
 
   const environment = alert.fields[SERVICE_ENVIRONMENT];
   const serviceName = String(alert.fields[SERVICE_NAME]);

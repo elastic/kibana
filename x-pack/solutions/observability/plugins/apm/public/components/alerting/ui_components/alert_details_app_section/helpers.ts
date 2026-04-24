@@ -108,13 +108,8 @@ export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType
   return LatencyAggregationType.avg;
 };
 
-export const isLatencyThresholdRuleType = (ruleTypeId: ApmRuleType) =>
-  ruleTypeId === ApmRuleType.TransactionDuration;
-
-export const isFailedTransactionRateRuleType = (ruleTypeId: ApmRuleType) =>
-  ruleTypeId === ApmRuleType.TransactionErrorRate;
-
-export const isAnomalyRuleType = (ruleTypeId: ApmRuleType) => ruleTypeId === ApmRuleType.Anomaly;
+export const isAnomalyRuleType = (ruleTypeId: ApmRuleType): boolean =>
+  ruleTypeId === ApmRuleType.Anomaly;
 
 export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);

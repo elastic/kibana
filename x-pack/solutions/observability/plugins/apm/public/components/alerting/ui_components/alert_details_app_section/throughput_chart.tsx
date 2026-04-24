@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -24,7 +25,6 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
-import { isAnomalyRuleType } from './helpers';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 
 const INITIAL_STATE = {
@@ -69,7 +69,7 @@ export function ThroughputChart({
   filters?: BoolQuery;
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
-  ruleTypeId?: string;
+  ruleTypeId?: ApmRuleType;
 }) {
   const {
     services: { uiSettings },
@@ -129,8 +129,8 @@ export function ThroughputChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     dateFormat,
+    showAnnotations: !!threshold,
     customAlertEvaluationThreshold,
-    isMatchingRuleType: (id) => !!threshold && isAnomalyRuleType(id),
     normalizeThreshold: (value) => value / 100,
   });
 

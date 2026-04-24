@@ -16,13 +16,14 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { Theme } from '@elastic/charts';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import { isAnomalyRuleType, isFailedTransactionRateRuleType, yLabelFormat } from './helpers';
+import { yLabelFormat } from './helpers';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
@@ -80,7 +81,7 @@ export function FailedTransactionChart({
   filters?: BoolQuery;
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
-  ruleTypeId?: string;
+  ruleTypeId?: ApmRuleType;
 }) {
   const {
     services: { uiSettings },
@@ -145,9 +146,8 @@ export function FailedTransactionChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     dateFormat,
+    showAnnotations: !!threshold,
     customAlertEvaluationThreshold,
-    isMatchingRuleType: (id) =>
-      isFailedTransactionRateRuleType(id) || (!!threshold && isAnomalyRuleType(id)),
     normalizeThreshold: (value) => value / 100,
   });
 
