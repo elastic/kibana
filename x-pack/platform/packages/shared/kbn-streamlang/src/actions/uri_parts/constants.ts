@@ -51,32 +51,35 @@ export const URI_PARTS_NUMBER_SUBFIELDS = ['port'] as const;
 /**
  * Sub-fields whose non-null value indicates a successful parse.
  *
- * Per the ES|QL URI_PARTS csv-spec tests (elasticsearch PR #140004):
- *  - `testInvalidUri`: a non-parseable input (e.g. `"not a valid uri"`) emits
- *    a warning and nulls every output column.
- *  - `testNoSchemeUri`: a relative URI such as `/app/login?session=expired`
- *    parses successfully — `path` and `query` are populated even though
- *    `scheme` and `domain` are null and no warning is emitted.
+ * Rationale for OR-ing over every output column (not just a subset):
  *
- * The only documented failure mode that produces null everywhere is the
- * invalid-URI case. Therefore the correct "parse succeeded" signal is
- * "at least one sub-field is non-null", which must OR across all of them
- * because relative URIs can legitimately leave scheme/domain null.
+ *  - Per the ES|QL URI_PARTS csv-spec tests (elasticsearch PR #140004):
+ *    - `testInvalidUri`: an unparseable input (e.g. `"not a valid uri"`)
+ *      emits a warning and nulls every output column.
+ *    - `testNoSchemeUri`: a relative URI such as
+ *      `/app/login?session=expired` parses successfully — `path` and
+ *      `query` are populated even though `scheme` and `domain` are null
+ *      and no warning is emitted.
+ *  - The only documented failure mode that produces null everywhere is
+ *    the invalid-URI case. Therefore the correct "parse succeeded"
+ *    signal is "at least one output column is non-null".
+ *  - Derived sub-fields (`username`/`password` extracted from
+ *    `user_info`; `extension` extracted from `path`) are logically
+ *    redundant under current parser semantics — if the parent is null,
+ *    the derived field must also be null — but OR-ing over every output
+ *    column keeps the signal equivalent to "at least one output column
+ *    is non-null" without relying on that unstated parser invariant,
+ *    and makes the constant robust to any future change in how the
+ *    parser populates derived fields.
  *
- * This list is consumed by `remove_if_successful` to build that OR
- * predicate. Derived sub-fields (`username`/`password` are extracted from
- * `user_info`; `extension` from `path`) are excluded since checking the
- * root they derive from is equivalent and keeps the predicate shorter.
+ * This list is consumed by `remove_if_successful` and by `keep_original`
+ * in the ES|QL transpiler to build the success OR predicate.
  *
  * @see https://www.elastic.co/docs/reference/query-languages/esql/commands/uri-parts
+ * @see https://www.elastic.co/docs/reference/enrich-processor/uri-parts-processor
  * @see https://github.com/elastic/elasticsearch/pull/140004
  */
 export const URI_PARTS_SUCCESS_SUBFIELDS = [
-  'scheme',
-  'domain',
-  'path',
-  'query',
-  'fragment',
-  'user_info',
-  'port',
+  ...URI_PARTS_STRING_SUBFIELDS,
+  ...URI_PARTS_NUMBER_SUBFIELDS,
 ] as const;

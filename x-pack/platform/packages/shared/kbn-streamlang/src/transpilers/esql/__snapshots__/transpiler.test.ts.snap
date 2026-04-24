@@ -50,11 +50,11 @@ exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of proc
   | DISSECT \`body.log\` \\"%{attributes.client} %{attributes.method} %{attributes.path}\\"
   | WHERE NOT(\`attributes.request_url\` IS NULL)
   | URI_PARTS url = \`attributes.request_url\`
-  | EVAL \`url.original\` = CASE(NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL), \`attributes.request_url\`, NULL)
+  | EVAL \`url.original\` = CASE(NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.username\` IS NULL) OR NOT(\`url.password\` IS NULL) OR NOT(\`url.extension\` IS NULL) OR NOT(\`url.port\` IS NULL), \`attributes.request_url\`, NULL)
   | EVAL \`__temp_uri_parts_where_attributes.href__\` = CASE(NOT(\`attributes.href\` IS NULL) AND \`attributes.href\` != \\"\\", \`attributes.href\`, \\"\\")
   | URI_PARTS \`attributes.parsed\` = \`__temp_uri_parts_where_attributes.href__\`
   | DROP \`__temp_uri_parts_where_attributes.href__\`
-  | EVAL \`attributes.href\` = CASE(NOT(\`attributes.parsed.scheme\` IS NULL) OR NOT(\`attributes.parsed.domain\` IS NULL) OR NOT(\`attributes.parsed.path\` IS NULL) OR NOT(\`attributes.parsed.query\` IS NULL) OR NOT(\`attributes.parsed.fragment\` IS NULL) OR NOT(\`attributes.parsed.user_info\` IS NULL) OR NOT(\`attributes.parsed.port\` IS NULL), NULL, \`attributes.href\`)
+  | EVAL \`attributes.href\` = CASE(NOT(\`attributes.parsed.scheme\` IS NULL) OR NOT(\`attributes.parsed.domain\` IS NULL) OR NOT(\`attributes.parsed.fragment\` IS NULL) OR NOT(\`attributes.parsed.path\` IS NULL) OR NOT(\`attributes.parsed.query\` IS NULL) OR NOT(\`attributes.parsed.user_info\` IS NULL) OR NOT(\`attributes.parsed.username\` IS NULL) OR NOT(\`attributes.parsed.password\` IS NULL) OR NOT(\`attributes.parsed.extension\` IS NULL) OR NOT(\`attributes.parsed.port\` IS NULL), NULL, \`attributes.href\`)
   | EVAL \`attributes.tags\` = CASE(\`attributes.tags\` IS NULL, [\\"new_tag\\"], MV_APPEND(\`attributes.tags\`, [\\"new_tag\\"]))
   | EVAL \`attributes.flag\` = CASE(\`attributes.status\` == \\"active\\", \\"yes\\", \`attributes.flag\`)
   | EVAL \`attributes.prod_flag\` = CASE(\`attributes.env\` == \\"prod\\", \\"prod-env\\", \`attributes.prod_flag\`)

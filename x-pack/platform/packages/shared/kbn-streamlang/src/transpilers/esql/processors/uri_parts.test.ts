@@ -22,7 +22,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         from: 'attributes.request_url',
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toBe(
-        'WHERE NOT(`attributes.request_url` IS NULL) | URI_PARTS url = `attributes.request_url` | EVAL `url.original` = CASE(NOT(`url.scheme` IS NULL) OR NOT(`url.domain` IS NULL) OR NOT(`url.path` IS NULL) OR NOT(`url.query` IS NULL) OR NOT(`url.fragment` IS NULL) OR NOT(`url.user_info` IS NULL) OR NOT(`url.port` IS NULL), `attributes.request_url`, NULL)'
+        'WHERE NOT(`attributes.request_url` IS NULL) | URI_PARTS url = `attributes.request_url` | EVAL `url.original` = CASE(NOT(`url.scheme` IS NULL) OR NOT(`url.domain` IS NULL) OR NOT(`url.fragment` IS NULL) OR NOT(`url.path` IS NULL) OR NOT(`url.query` IS NULL) OR NOT(`url.user_info` IS NULL) OR NOT(`url.username` IS NULL) OR NOT(`url.password` IS NULL) OR NOT(`url.extension` IS NULL) OR NOT(`url.port` IS NULL), `attributes.request_url`, NULL)'
       );
     });
 
@@ -33,7 +33,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         to: 'attributes.parsed',
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toBe(
-        'WHERE NOT(`attributes.href` IS NULL) | URI_PARTS `attributes.parsed` = `attributes.href` | EVAL `attributes.parsed.original` = CASE(NOT(`attributes.parsed.scheme` IS NULL) OR NOT(`attributes.parsed.domain` IS NULL) OR NOT(`attributes.parsed.path` IS NULL) OR NOT(`attributes.parsed.query` IS NULL) OR NOT(`attributes.parsed.fragment` IS NULL) OR NOT(`attributes.parsed.user_info` IS NULL) OR NOT(`attributes.parsed.port` IS NULL), `attributes.href`, NULL)'
+        'WHERE NOT(`attributes.href` IS NULL) | URI_PARTS `attributes.parsed` = `attributes.href` | EVAL `attributes.parsed.original` = CASE(NOT(`attributes.parsed.scheme` IS NULL) OR NOT(`attributes.parsed.domain` IS NULL) OR NOT(`attributes.parsed.fragment` IS NULL) OR NOT(`attributes.parsed.path` IS NULL) OR NOT(`attributes.parsed.query` IS NULL) OR NOT(`attributes.parsed.user_info` IS NULL) OR NOT(`attributes.parsed.username` IS NULL) OR NOT(`attributes.parsed.password` IS NULL) OR NOT(`attributes.parsed.extension` IS NULL) OR NOT(`attributes.parsed.port` IS NULL), `attributes.href`, NULL)'
       );
     });
   });
@@ -58,7 +58,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         keep_original: true,
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toBe(
-        'WHERE NOT(url IS NULL) | URI_PARTS parts = url | EVAL `parts.original` = CASE(NOT(`parts.scheme` IS NULL) OR NOT(`parts.domain` IS NULL) OR NOT(`parts.path` IS NULL) OR NOT(`parts.query` IS NULL) OR NOT(`parts.fragment` IS NULL) OR NOT(`parts.user_info` IS NULL) OR NOT(`parts.port` IS NULL), url, NULL)'
+        'WHERE NOT(url IS NULL) | URI_PARTS parts = url | EVAL `parts.original` = CASE(NOT(`parts.scheme` IS NULL) OR NOT(`parts.domain` IS NULL) OR NOT(`parts.fragment` IS NULL) OR NOT(`parts.path` IS NULL) OR NOT(`parts.query` IS NULL) OR NOT(`parts.user_info` IS NULL) OR NOT(`parts.username` IS NULL) OR NOT(`parts.password` IS NULL) OR NOT(`parts.extension` IS NULL) OR NOT(`parts.port` IS NULL), url, NULL)'
       );
     });
 
@@ -76,7 +76,7 @@ describe('convertUriPartsProcessorToESQL', () => {
       };
       const query = commandsToString(convertUriPartsProcessorToESQL(processor));
       expect(query).toContain(
-        'EVAL `url.original` = CASE(NOT(`url.scheme` IS NULL) OR NOT(`url.domain` IS NULL) OR NOT(`url.path` IS NULL) OR NOT(`url.query` IS NULL) OR NOT(`url.fragment` IS NULL) OR NOT(`url.user_info` IS NULL) OR NOT(`url.port` IS NULL), `attributes.href`, NULL)'
+        'EVAL `url.original` = CASE(NOT(`url.scheme` IS NULL) OR NOT(`url.domain` IS NULL) OR NOT(`url.fragment` IS NULL) OR NOT(`url.path` IS NULL) OR NOT(`url.query` IS NULL) OR NOT(`url.user_info` IS NULL) OR NOT(`url.username` IS NULL) OR NOT(`url.password` IS NULL) OR NOT(`url.extension` IS NULL) OR NOT(`url.port` IS NULL), `attributes.href`, NULL)'
       );
     });
   });
@@ -89,7 +89,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         ignore_missing: true,
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toMatchInlineSnapshot(
-        `"EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(NOT(\`attributes.url\` IS NULL), \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(NOT(\`attributes.url\` IS NULL) AND (NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL)), \`attributes.url\`, NULL)"`
+        `"EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(NOT(\`attributes.url\` IS NULL), \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(NOT(\`attributes.url\` IS NULL) AND (NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.username\` IS NULL) OR NOT(\`url.password\` IS NULL) OR NOT(\`url.extension\` IS NULL) OR NOT(\`url.port\` IS NULL)), \`attributes.url\`, NULL)"`
       );
     });
   });
@@ -102,7 +102,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         where: { field: 'attributes.enabled', eq: true },
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toMatchInlineSnapshot(
-        `"WHERE NOT(\`attributes.url\` IS NULL) | EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(\`attributes.enabled\` == TRUE, \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(\`attributes.enabled\` == TRUE AND (NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL)), \`attributes.url\`, NULL)"`
+        `"WHERE NOT(\`attributes.url\` IS NULL) | EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(\`attributes.enabled\` == TRUE, \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(\`attributes.enabled\` == TRUE AND (NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.username\` IS NULL) OR NOT(\`url.password\` IS NULL) OR NOT(\`url.extension\` IS NULL) OR NOT(\`url.port\` IS NULL)), \`attributes.url\`, NULL)"`
       );
     });
 
@@ -128,7 +128,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         where: { field: 'attributes.enabled', eq: true },
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toMatchInlineSnapshot(
-        `"EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(NOT(\`attributes.url\` IS NULL) AND \`attributes.enabled\` == TRUE, \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(NOT(\`attributes.url\` IS NULL) AND \`attributes.enabled\` == TRUE AND (NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL)), \`attributes.url\`, NULL)"`
+        `"EVAL \`__temp_uri_parts_where_attributes.url__\` = CASE(NOT(\`attributes.url\` IS NULL) AND \`attributes.enabled\` == TRUE, \`attributes.url\`, \\"\\") | URI_PARTS url = \`__temp_uri_parts_where_attributes.url__\` | DROP \`__temp_uri_parts_where_attributes.url__\` | EVAL \`url.original\` = CASE(NOT(\`attributes.url\` IS NULL) AND \`attributes.enabled\` == TRUE AND (NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.username\` IS NULL) OR NOT(\`url.password\` IS NULL) OR NOT(\`url.extension\` IS NULL) OR NOT(\`url.port\` IS NULL)), \`attributes.url\`, NULL)"`
       );
     });
   });
@@ -141,7 +141,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         remove_if_successful: true,
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toMatchInlineSnapshot(
-        `"WHERE NOT(\`attributes.url\` IS NULL) | URI_PARTS url = \`attributes.url\` | EVAL \`url.original\` = CASE(NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL), \`attributes.url\`, NULL) | EVAL \`attributes.url\` = CASE(NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.port\` IS NULL), NULL, \`attributes.url\`)"`
+        `"WHERE NOT(\`attributes.url\` IS NULL) | URI_PARTS url = \`attributes.url\` | EVAL \`url.original\` = CASE(NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.username\` IS NULL) OR NOT(\`url.password\` IS NULL) OR NOT(\`url.extension\` IS NULL) OR NOT(\`url.port\` IS NULL), \`attributes.url\`, NULL) | EVAL \`attributes.url\` = CASE(NOT(\`url.scheme\` IS NULL) OR NOT(\`url.domain\` IS NULL) OR NOT(\`url.fragment\` IS NULL) OR NOT(\`url.path\` IS NULL) OR NOT(\`url.query\` IS NULL) OR NOT(\`url.user_info\` IS NULL) OR NOT(\`url.username\` IS NULL) OR NOT(\`url.password\` IS NULL) OR NOT(\`url.extension\` IS NULL) OR NOT(\`url.port\` IS NULL), NULL, \`attributes.url\`)"`
       );
     });
 
@@ -154,7 +154,18 @@ describe('convertUriPartsProcessorToESQL', () => {
         remove_if_successful: true,
       };
       const query = commandsToString(convertUriPartsProcessorToESQL(processor));
-      for (const sub of ['scheme', 'domain', 'path', 'query', 'fragment', 'user_info', 'port']) {
+      for (const sub of [
+        'scheme',
+        'domain',
+        'path',
+        'query',
+        'fragment',
+        'user_info',
+        'username',
+        'password',
+        'extension',
+        'port',
+      ]) {
         expect(query).toContain(`NOT(\`url.${sub}\` IS NULL)`);
       }
     });
@@ -169,7 +180,7 @@ describe('convertUriPartsProcessorToESQL', () => {
         ignore_missing: true,
       };
       expect(commandsToString(convertUriPartsProcessorToESQL(processor))).toMatchInlineSnapshot(
-        `"EVAL \`__temp_uri_parts_where_attributes.href__\` = CASE(NOT(\`attributes.href\` IS NULL), \`attributes.href\`, \\"\\") | URI_PARTS \`attributes.parsed\` = \`__temp_uri_parts_where_attributes.href__\` | DROP \`__temp_uri_parts_where_attributes.href__\` | EVAL \`attributes.href\` = CASE(NOT(\`attributes.parsed.scheme\` IS NULL) OR NOT(\`attributes.parsed.domain\` IS NULL) OR NOT(\`attributes.parsed.path\` IS NULL) OR NOT(\`attributes.parsed.query\` IS NULL) OR NOT(\`attributes.parsed.fragment\` IS NULL) OR NOT(\`attributes.parsed.user_info\` IS NULL) OR NOT(\`attributes.parsed.port\` IS NULL), NULL, \`attributes.href\`)"`
+        `"EVAL \`__temp_uri_parts_where_attributes.href__\` = CASE(NOT(\`attributes.href\` IS NULL), \`attributes.href\`, \\"\\") | URI_PARTS \`attributes.parsed\` = \`__temp_uri_parts_where_attributes.href__\` | DROP \`__temp_uri_parts_where_attributes.href__\` | EVAL \`attributes.href\` = CASE(NOT(\`attributes.parsed.scheme\` IS NULL) OR NOT(\`attributes.parsed.domain\` IS NULL) OR NOT(\`attributes.parsed.fragment\` IS NULL) OR NOT(\`attributes.parsed.path\` IS NULL) OR NOT(\`attributes.parsed.query\` IS NULL) OR NOT(\`attributes.parsed.user_info\` IS NULL) OR NOT(\`attributes.parsed.username\` IS NULL) OR NOT(\`attributes.parsed.password\` IS NULL) OR NOT(\`attributes.parsed.extension\` IS NULL) OR NOT(\`attributes.parsed.port\` IS NULL), NULL, \`attributes.href\`)"`
       );
     });
   });
