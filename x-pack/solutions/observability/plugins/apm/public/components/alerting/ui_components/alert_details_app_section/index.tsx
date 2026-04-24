@@ -136,7 +136,12 @@ export function AlertDetailsAppSection({
           defaultMessage: 'error.grouping_key',
         }),
         value: (
-          <EuiLink data-test-subj="apmAlertDetailsErrorGroupKeyLink" href={errorDetailsHref}>
+          <EuiLink
+            data-test-subj="apmAlertDetailsErrorGroupKeyLink"
+            data-source={`alertDetails-${alertRuleTypeId}`}
+            data-action="navigateTo-error.grouping_key"
+            href={errorDetailsHref}
+          >
             {errorGroupingKey}
           </EuiLink>
         ),
