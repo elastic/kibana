@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultPresentationPanelApi } from './panel_component';
 import type {
   CanLockHoverActions,
   HasSerializableState,
@@ -15,6 +14,7 @@ import type {
   PublishesPhaseEvents,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
+import type { DefaultPresentationPanelApi } from './panel_component';
 import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 import type { SerializedDrilldowns } from '../../server';
 

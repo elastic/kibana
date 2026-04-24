@@ -11,9 +11,10 @@ import { createContext } from 'react';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 export const EmbeddableRendererContext = createContext<
-  {
-    quickActions?: QuickActions 
-  } | undefined
+  | {
+      quickActions?: QuickActions;
+    }
+  | undefined
 >(undefined);
 
 export type QuickActionIds = [

@@ -43,7 +43,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
     registerActions(uiActions);
-    
+
     return {
       registerDrilldown,
       registerEmbeddablePublicDefinition,

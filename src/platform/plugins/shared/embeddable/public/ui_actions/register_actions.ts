@@ -8,6 +8,7 @@
  */
 
 import { ON_OPEN_PANEL_MENU, PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ACTION_EDIT_PANEL } from './edit_panel_action/constants';
 import { ACTION_INSPECT_PANEL } from './inspect_panel_action/constants';
 import { ACTION_REMOVE_PANEL } from './remove_panel_action/constants';
@@ -18,7 +19,6 @@ import {
 } from './customize_panel_action/constants';
 import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
 import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN } from './constants';
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 
 export const registerActions = (uiActions: UiActionsSetup) => {
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {
