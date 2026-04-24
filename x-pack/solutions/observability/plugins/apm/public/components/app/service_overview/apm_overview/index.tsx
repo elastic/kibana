@@ -134,7 +134,7 @@ export function ApmOverview() {
           <EuiFlexItem grow={3}>
             <ServiceOverviewThroughputChart height={nonLatencyChartHeight} kuery={kuery} />
           </EuiFlexItem>
-          <EuiFlexItem grow={7}>
+          <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
             <EuiPanel hasBorder={true}>
               <TransactionsTable
                 kuery={kuery}
@@ -162,7 +162,7 @@ export function ApmOverview() {
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={7}>
+          <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
             <EuiPanel hasBorder={true}>
               <ServiceOverviewErrorsTable
                 serviceName={serviceName}
@@ -194,7 +194,7 @@ export function ApmOverview() {
             )
           )}
           {!isRumAgent && (
-            <EuiFlexItem grow={7}>
+            <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
               <EuiPanel hasBorder={true}>
                 <ServiceOverviewDependenciesTable
                   onLoadTable={onDependenciesTableLoad}

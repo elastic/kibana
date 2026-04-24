@@ -8,11 +8,12 @@
 import React from 'react';
 import { render, act, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import type { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { DashboardCanvasAttachment } from './dashboard_canvas_attachment';
 import * as dashboardAgentCommon from '@kbn/dashboard-agent-common';
@@ -90,6 +91,34 @@ describe('DashboardCanvasAttachment', () => {
     };
   };
 
+  const createMockTimefilter = () => {
+    let currentTime: TimeRange = { from: 'now-15m', to: 'now' };
+    const timeUpdate$ = new Subject<void>();
+
+    return {
+      getTime: jest.fn(() => currentTime),
+      getTimeUpdate$: jest.fn(() => timeUpdate$.asObservable()),
+      setTime: jest.fn((nextTime: TimeRange) => {
+        currentTime = nextTime;
+        timeUpdate$.next();
+      }),
+      emitTime: (nextTime: TimeRange) => {
+        currentTime = nextTime;
+        timeUpdate$.next();
+      },
+    };
+  };
+
+  const createMockData = (
+    filterManager: ReturnType<typeof createMockFilterManager>,
+    timefilter: ReturnType<typeof createMockTimefilter>
+  ) => {
+    const data = dataPluginMock.createStartContract();
+    Object.assign(data.query.filterManager, filterManager);
+    Object.assign(data.query.timefilter.timefilter, timefilter);
+    return data;
+  };
+
   const mockAttachment: DashboardAttachment = {
     type: DASHBOARD_ATTACHMENT_TYPE,
     id: 'test-dashboard-id',
@@ -149,12 +178,14 @@ describe('DashboardCanvasAttachment', () => {
       DashboardCanvasAttachmentProps['checkSavedDashboardExist']
     > = jest.fn().mockResolvedValue(false);
     const mockFilterManager = createMockFilterManager();
+    const mockTimefilter = createMockTimefilter();
+    const mockData = createMockData(mockFilterManager, mockTimefilter);
     const mockApi = createMockDashboardApi(mockApiOverrides);
     const openSidebarConversation = jest.fn();
 
     const props: DashboardCanvasAttachmentProps = {
       ...defaultProps,
-      filterManager: mockFilterManager as any,
+      data: mockData,
       registerActionButtons,
       updateOrigin,
       closeCanvas,
@@ -178,6 +209,7 @@ describe('DashboardCanvasAttachment', () => {
       props,
       mockApi,
       mockFilterManager,
+      mockTimefilter,
       registerActionButtons,
       updateOrigin,
       closeCanvas,
@@ -365,7 +397,7 @@ describe('DashboardCanvasAttachment', () => {
         showFilterBar: true,
         showDatePicker: true,
         showQueryMenu: false,
-        useDefaultBehaviors: true,
+        useDefaultBehaviors: false,
       })
     );
   });
@@ -398,7 +430,7 @@ describe('DashboardCanvasAttachment', () => {
       });
     });
 
-    expect(mockApi.setQuery).toHaveBeenCalledWith(undefined);
+    expect(mockApi.setQuery).toHaveBeenCalledWith({ query: '', language: 'kuery' });
     expect(mockApi.forceRefresh).toHaveBeenCalled();
   });
 
@@ -421,7 +453,7 @@ describe('DashboardCanvasAttachment', () => {
   });
 
   it('updates dashboard filters from the preview filter bar', async () => {
-    const { mockApi, props } = await renderDashboardCanvasAttachment();
+    const { mockApi, mockFilterManager } = await renderDashboardCanvasAttachment();
     const nextFilters = [{ meta: { key: 'host.name' } }] as Filter[];
 
     (mockApi.setFilters as jest.MockedFunction<typeof mockApi.setFilters>).mockClear();
@@ -429,7 +461,7 @@ describe('DashboardCanvasAttachment', () => {
       getLatestSearchBarProps()?.onFiltersUpdated(nextFilters);
     });
 
-    expect(props.filterManager.setFilters).toHaveBeenCalledWith(nextFilters);
+    expect(mockFilterManager.setFilters).toHaveBeenCalledWith(nextFilters);
     expect(mockApi.setFilters).toHaveBeenCalledWith(nextFilters);
     expect(mockApi.setFilters).toHaveBeenCalledTimes(1);
   });
@@ -470,6 +502,25 @@ describe('DashboardCanvasAttachment', () => {
     expect(getLatestSearchBarProps()).toEqual(
       expect.objectContaining({
         filters: nextFilters,
+      })
+    );
+  });
+
+  it('updates the preview time range when timefilter emits (e.g. chart brush)', async () => {
+    const { mockApi, mockTimefilter } = await renderDashboardCanvasAttachment();
+    const nextTimeRange = { from: '2026-04-01T00:00:00Z', to: '2026-04-02T00:00:00Z' };
+    const setTimeRangeMock = mockApi.setTimeRange as jest.Mock;
+
+    setTimeRangeMock.mockClear();
+    act(() => {
+      mockTimefilter.emitTime(nextTimeRange);
+    });
+
+    expect(mockApi.setTimeRange).toHaveBeenCalledWith(nextTimeRange);
+    expect(getLatestSearchBarProps()).toEqual(
+      expect.objectContaining({
+        dateRangeFrom: nextTimeRange.from,
+        dateRangeTo: nextTimeRange.to,
       })
     );
   });
@@ -796,11 +847,13 @@ describe('DashboardCanvasAttachment', () => {
       const closeCanvas = jest.fn();
       const checkSavedDashboardExist = jest.fn().mockResolvedValue(false);
       const filterManager = createMockFilterManager();
+      const timefilter = createMockTimefilter();
+      const data = createMockData(filterManager, timefilter);
 
       const { container } = renderWithKibanaRenderContext(
         <DashboardCanvasAttachment
           {...defaultProps}
-          filterManager={filterManager as any}
+          data={data}
           registerActionButtons={registerActionButtons}
           updateOrigin={updateOrigin}
           closeCanvas={closeCanvas}
@@ -830,11 +883,13 @@ describe('DashboardCanvasAttachment', () => {
       const closeCanvas = jest.fn();
       const checkSavedDashboardExist = jest.fn().mockResolvedValue(false);
       const filterManager = createMockFilterManager();
+      const timefilter = createMockTimefilter();
+      const data = createMockData(filterManager, timefilter);
 
       const { container } = renderWithKibanaRenderContext(
         <DashboardCanvasAttachment
           {...defaultProps}
-          filterManager={filterManager as any}
+          data={data}
           registerActionButtons={registerActionButtons}
           updateOrigin={updateOrigin}
           closeCanvas={closeCanvas}
