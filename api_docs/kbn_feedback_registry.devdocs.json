@@ -27,7 +27,7 @@
         "label": "getFeedbackQuestionsForApp",
         "description": [],
         "signature": [
-          "(appId?: string | undefined) => ",
+          "(appId?: string | undefined) => Promise<",
           {
             "pluginId": "@kbn/feedback-components",
             "scope": "public",
@@ -35,10 +35,10 @@
             "section": "def-public.FeedbackRegistryEntry",
             "text": "FeedbackRegistryEntry"
           },
-          "[]"
+          "[]>"
         ],
         "path": "x-pack/platform/packages/private/feedback-registry/src/registry.ts",
-        "lineNumber": 54,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -54,8 +54,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/feedback-registry/src/registry.ts",
-            "lineNumber": 54,
-            "columnNumber": 44,
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -126,10 +126,10 @@
         "tags": [],
         "label": "FeedbackRegistry",
         "description": [
-          "\nList of feedback plugin questions for a given application."
+          "\nList of feedback plugin questions for a given application.\nEach entry is a lazy loader that returns the questions for a specific app,\nensuring only the relevant questions are loaded at runtime."
         ],
         "signature": [
-          "Map<string, ",
+          "Map<string, () => Promise<",
           {
             "pluginId": "@kbn/feedback-components",
             "scope": "public",
@@ -137,7 +137,7 @@
             "section": "def-public.FeedbackRegistryEntry",
             "text": "FeedbackRegistryEntry"
           },
-          "[]>"
+          "[]>>"
         ],
         "path": "x-pack/platform/packages/private/feedback-registry/src/types.ts",
         "lineNumber": 16,
