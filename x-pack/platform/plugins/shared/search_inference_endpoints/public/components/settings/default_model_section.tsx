@@ -224,8 +224,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
                 : i18n.translate(
                     'xpack.searchInferenceEndpoints.settings.defaultModel.allowOtherModels.description',
                     {
-                      defaultMessage:
-                        'Users can choose between multiple models for each feature.',
+                      defaultMessage: 'Users can choose between multiple models for each feature.',
                     }
                   )}
             </EuiText>
