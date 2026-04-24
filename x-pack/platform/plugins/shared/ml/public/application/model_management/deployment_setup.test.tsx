@@ -11,7 +11,12 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import type { CloudInfo } from '../services/ml_server_info';
 import type { DeploymentParamsMapper } from './deployment_params_mapper';
-import { DeploymentSetup, type DeploymentParamsUI } from './deployment_setup';
+import {
+  DeploymentSetup,
+  RERANK_WARNING_DESCRIPTION,
+  RERANK_WARNING_SERVERLESS_DESCRIPTION,
+  type DeploymentParamsUI,
+} from './deployment_setup';
 
 const cloudInfo: CloudInfo = {
   cloudId: null,
@@ -36,6 +41,7 @@ const baseConfig: DeploymentParamsUI = {
 
 function renderDeploymentSetup(props: {
   isRerank?: boolean;
+  showNodeInfo?: boolean;
   config?: DeploymentParamsUI;
   onConfigChange?: (c: DeploymentParamsUI) => void;
 }) {
@@ -49,7 +55,7 @@ function renderDeploymentSetup(props: {
         onConfigChange={onConfigChange}
         errors={{}}
         cloudInfo={cloudInfo}
-        showNodeInfo
+        showNodeInfo={props.showNodeInfo ?? true}
         deploymentParamsMapper={deploymentParamsMapper}
         isRerank={props.isRerank}
       />
@@ -85,11 +91,15 @@ describe('DeploymentSetup', () => {
       screen.queryByTestId('mlModelsStartDeploymentModalOptimized_optimizedForIngest')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('mlModelsStartDeploymentModalRerankWarning')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Rerank models are resource intensive and require a minimum of 8 GB of memory on the ML node.'
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(RERANK_WARNING_DESCRIPTION)).toBeInTheDocument();
+  });
+
+  it('shows serverless rerank warning when isRerank and showNodeInfo is false', () => {
+    renderDeploymentSetup({ isRerank: true, showNodeInfo: false });
+
+    expect(screen.getByTestId('mlModelsStartDeploymentModalRerankWarning')).toBeInTheDocument();
+    expect(screen.getByText(RERANK_WARNING_SERVERLESS_DESCRIPTION)).toBeInTheDocument();
+    expect(screen.queryByText(RERANK_WARNING_DESCRIPTION)).not.toBeInTheDocument();
   });
 
   it('keeps vCPU slider available when isRerank', () => {

@@ -111,6 +111,22 @@ export interface DeploymentParamsUI {
 
 const sliderPalette = euiPaletteCool(3);
 
+export const RERANK_WARNING_DESCRIPTION = i18n.translate(
+  'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningDescription',
+  {
+    defaultMessage:
+      'Rerank models are memory intensive and can require at least 8 GB of memory on the ML node, especially when running alongside other hosted models.',
+  }
+);
+
+export const RERANK_WARNING_SERVERLESS_DESCRIPTION = i18n.translate(
+  'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningServerlessDescription',
+  {
+    defaultMessage:
+      'Rerank models are resource intensive and increase ML processing usage, especially when running alongside other hosted models.',
+  }
+);
+
 /**
  * Dict for vCPU levels.
  */
@@ -567,17 +583,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
             data-test-subj="mlModelsStartDeploymentModalRerankWarning"
           >
             <p>
-              {showNodeInfo ? (
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningDescription"
-                  defaultMessage="Rerank models are memory intensive and can require at least 8 GB of memory on the ML node, especially when running alongside other hosted models."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningServerlessDescription"
-                  defaultMessage="Rerank models are resource intensive and increase ML processing usage, especially when running alongside other hosted models."
-                />
-              )}
+              {showNodeInfo ? RERANK_WARNING_DESCRIPTION : RERANK_WARNING_SERVERLESS_DESCRIPTION}
             </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
