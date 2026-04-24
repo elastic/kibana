@@ -13,6 +13,7 @@ import { Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import type { StreamSummary } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
@@ -183,12 +184,6 @@ export const resolveIndexRoute = createServerRoute({
 
 const BULK_GET_SUMMARIES_MAX_NAMES = 10_000;
 
-export interface StreamSummary {
-  name: string;
-  type: string;
-  description: string;
-}
-
 export const bulkGetStreamSummariesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/_bulk_get_summaries',
   options: {
@@ -204,10 +199,14 @@ export const bulkGetStreamSummariesRoute = createServerRoute({
       names: z.array(z.string()).max(BULK_GET_SUMMARIES_MAX_NAMES),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<{ streams: StreamSummary[] }> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<{ summaries: StreamSummary[] }> => {
     const { streamsClient } = await getScopedClients({ request });
-    const streams = await streamsClient.getStreamSummaries(params.body.names);
-    return { streams };
+    const summaries = await streamsClient.getStreamSummaries(params.body.names);
+    return { summaries };
   },
 });
 

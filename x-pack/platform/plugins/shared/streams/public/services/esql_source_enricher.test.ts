@@ -8,14 +8,9 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
+import type { StreamSummary } from '../../common';
 import type { StreamsRepositoryClient } from '../api';
 import { createStreamsSourceEnricher, STREAMS_CACHE_TTL_MS } from './esql_source_enricher';
-
-interface StreamSummary {
-  name: string;
-  type: string;
-  description: string;
-}
 
 const makeSource = (name: string, extra: Partial<ESQLSourceResult> = {}): ESQLSourceResult => ({
   name,
@@ -23,9 +18,9 @@ const makeSource = (name: string, extra: Partial<ESQLSourceResult> = {}): ESQLSo
   ...extra,
 });
 
-const makeRepositoryClient = (streams: StreamSummary[]): jest.Mocked<StreamsRepositoryClient> =>
+const makeRepositoryClient = (summaries: StreamSummary[]): jest.Mocked<StreamsRepositoryClient> =>
   ({
-    fetch: jest.fn().mockResolvedValue({ streams }),
+    fetch: jest.fn().mockResolvedValue({ summaries }),
   } as unknown as jest.Mocked<StreamsRepositoryClient>);
 
 const makeApplication = (
@@ -253,7 +248,7 @@ describe('createStreamsSourceEnricher', () => {
       expect(firstResult.description).toBe('All logs');
 
       client.fetch.mockResolvedValue({
-        streams: [{ name: 'logs', type: 'wired', description: 'Updated description' }],
+        summaries: [{ name: 'logs', type: 'wired', description: 'Updated description' }],
       });
 
       perf.tick(STREAMS_CACHE_TTL_MS + 1);
@@ -336,13 +331,13 @@ describe('createStreamsSourceEnricher', () => {
         fetch: jest
           .fn()
           .mockResolvedValueOnce({
-            streams: [
+            summaries: [
               { name: 'logs', type: 'wired', description: '' },
               { name: 'metrics', type: 'classic', description: '' },
             ],
           })
           .mockResolvedValueOnce({
-            streams: [{ name: 'traces', type: 'wired', description: '' }],
+            summaries: [{ name: 'traces', type: 'wired', description: '' }],
           }),
       } as unknown as jest.Mocked<StreamsRepositoryClient>;
       const enricher = createStreamsSourceEnricher(client, makeApplication());

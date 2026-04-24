@@ -41,3 +41,5 @@ export {
 
 export type { SigEventsTuningConfig } from './sig_events_tuning_config';
 export { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from './sig_events_tuning_config';
+
+export type { StreamSummary } from './stream_summary';

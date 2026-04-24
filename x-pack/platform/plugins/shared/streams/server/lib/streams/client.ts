@@ -29,6 +29,7 @@ import {
   LOGS_ECS_STREAM_NAME,
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
+import type { StreamSummary } from '../../../common';
 import type { QueryClient } from './assets/query/query_client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
@@ -881,9 +882,7 @@ export class StreamsClient {
    * Fetches a summary (name, type, description) for each requested stream name.
    * Stream names for which no managed stream exists are ignored.
    */
-  async getStreamSummaries(
-    names: string[]
-  ): Promise<Array<{ name: string; type: string; description: string }>> {
+  async getStreamSummaries(names: string[]): Promise<StreamSummary[]> {
     if (names.length === 0) {
       return [];
     }

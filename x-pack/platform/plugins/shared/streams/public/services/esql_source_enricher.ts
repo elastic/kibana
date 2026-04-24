@@ -10,16 +10,11 @@ import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { LRUCache } from 'lru-cache';
+import type { StreamSummary } from '../../common';
 import type { StreamsRepositoryClient } from '../api';
 
 const STREAMS_CACHE_MAX = 10_000;
 export const STREAMS_CACHE_TTL_MS = 60_000;
-
-interface StreamSummary {
-  name: string;
-  type: string;
-  description: string;
-}
 
 interface PendingBatch {
   names: string[];
@@ -76,11 +71,11 @@ export function createStreamsSourceEnricher(
           // fresh batch instead of appending to a stale one whose `names`
           // have already been sent.
           pendingBatch = null;
-          const { streams } = await repositoryClient.fetch(
+          const { summaries } = await repositoryClient.fetch(
             'POST /internal/streams/_bulk_get_summaries',
             { params: { body: { names } }, signal: null }
           );
-          return streams as StreamSummary[];
+          return summaries;
         });
         pendingBatch = { names, promise };
       }
