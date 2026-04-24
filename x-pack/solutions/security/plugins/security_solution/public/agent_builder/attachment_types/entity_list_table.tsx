@@ -7,13 +7,11 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -36,6 +34,7 @@ import { formatRiskScore } from '../../entity_analytics/common';
 import { CRITICALITY_LEVEL_TITLE } from '../../entity_analytics/components/asset_criticality/translations';
 import { RiskScoreLevel } from '../../entity_analytics/components/severity/common';
 import { EntityIconByType } from '../../entity_analytics/components/entity_store/helpers';
+import { TruncatedBadgeList } from '../../flyout/entity_details/shared/components/entity_source_value';
 import { formatEntitySource } from './entity_attachment/entity_table/entity_data_source_utils';
 
 export interface EntityListRow {
@@ -69,16 +68,12 @@ const criticalityLabel = (raw?: string): string | undefined => {
   return CRITICALITY_LEVEL_TITLE[raw as CriticalityLevelWithUnassigned] ?? raw;
 };
 
-/**
- * Maximum number of `entity.source` badges rendered inline in the Source
- * column before the remainder collapses into a single `+N more` badge with a
- * tooltip. Matches the sibling EntityTable attachment (MAX_VISIBLE_SOURCES)
- * so the two tables feel like the same component when they render side by
- * side in the same conversation.
- */
-const MAX_VISIBLE_SOURCES = 3;
-
 const LAST_SEEN_TOOLTIP_FIELD_NAME = '@timestamp';
+
+const SOURCE_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.entityListAttachment.col.sourceOverflowTitle',
+  { defaultMessage: 'Additional data sources' }
+);
 const FIRST_SEEN_TOOLTIP_FIELD_NAME = 'entity.lifecycle.first_seen';
 
 const OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA = i18n.translate(
@@ -262,55 +257,19 @@ export const EntityListTable: React.FC<{
             defaultMessage: 'Source',
           }
         ),
-        width: '200px',
+        width: '140px',
         render: (source: unknown) => {
           const list = normalizeEntitySources(source);
           if (list.length === 0) {
             return getEmptyTagValue();
           }
-          const visible = list.slice(0, MAX_VISIBLE_SOURCES);
-          const hidden = list.slice(MAX_VISIBLE_SOURCES);
           return (
-            <EuiFlexGroup
-              gutterSize="xs"
-              alignItems="center"
-              wrap
-              responsive={false}
+            <TruncatedBadgeList
+              values={list}
+              formatValue={formatEntitySource}
+              overflowTooltipTitle={SOURCE_OVERFLOW_TOOLTIP_TITLE}
               data-test-subj="entityListAttachmentTableSources"
-            >
-              {visible.map((s) => (
-                <EuiFlexItem grow={false} key={s}>
-                  <EuiBadge color="hollow" data-test-subj="entityListAttachmentTableSource">
-                    {formatEntitySource(s)}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-              {hidden.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    position="top"
-                    title={i18n.translate(
-                      'xpack.securitySolution.agentBuilder.entityListAttachment.col.sourceOverflowTitle',
-                      { defaultMessage: 'Additional data sources' }
-                    )}
-                    content={hidden.map(formatEntitySource).join(', ')}
-                  >
-                    <EuiBadge
-                      color="hollow"
-                      data-test-subj="entityListAttachmentTableSourcesOverflow"
-                    >
-                      {i18n.translate(
-                        'xpack.securitySolution.agentBuilder.entityListAttachment.col.sourceOverflow',
-                        {
-                          defaultMessage: '+{count} more',
-                          values: { count: hidden.length },
-                        }
-                      )}
-                    </EuiBadge>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            />
           );
         },
       },

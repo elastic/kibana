@@ -82,8 +82,8 @@ describe('EntitySummaryGrid', () => {
     expect(queryByText('logs-endpoint')).not.toBeInTheDocument();
   });
 
-  it('displays first data source with a "+N More" affordance when entity.source is an array', () => {
-    const { getByText, queryByText } = render(
+  it('displays first data source inline and a "+N" overflow badge when entity.source is an array', () => {
+    const { getByText, queryByText, getByTestId } = render(
       <TestProviders>
         <EntitySummaryGrid entityRecord={entityWithMultipleSources} />
       </TestProviders>
@@ -92,7 +92,7 @@ describe('EntitySummaryGrid', () => {
     expect(getByText('Okta')).toBeInTheDocument();
     expect(queryByText('okta')).not.toBeInTheDocument();
     expect(queryByText('entityanalytics_okta')).not.toBeInTheDocument();
-    expect(getByText(/\+1.*More/)).toBeInTheDocument();
+    expect(getByTestId('entitySourceValue-more')).toHaveTextContent('+1');
   });
 
   it('renders asset criticality badge', () => {
@@ -155,13 +155,13 @@ describe('EntitySummaryGrid', () => {
     expect(getByText('First Watchlist')).toBeInTheDocument();
   });
 
-  it('displays +N More for additional watchlists', () => {
-    const { getByText } = render(
+  it('displays a +N overflow badge for additional watchlists', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <EntitySummaryGrid entityRecord={entityWithWatchlists} />
       </TestProviders>
     );
 
-    expect(getByText(/\+1.*More/)).toBeInTheDocument();
+    expect(getByTestId('entityWatchlistsCell-more')).toHaveTextContent('+1');
   });
 });

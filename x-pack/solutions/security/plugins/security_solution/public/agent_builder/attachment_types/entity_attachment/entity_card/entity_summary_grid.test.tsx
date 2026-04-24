@@ -82,7 +82,7 @@ describe('EntitySummaryGridMini', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('resolves watchlist ids to names and shows a +N more indicator', async () => {
+  it('resolves watchlist ids to names and shows a +N overflow badge', async () => {
     mockFetch.mockResolvedValue([
       { id: 'w-1', name: 'VIP users' },
       { id: 'w-2', name: 'Contractors' },
@@ -94,7 +94,7 @@ describe('EntitySummaryGridMini', () => {
     await waitFor(() => {
       expect(screen.getByText('VIP users')).toBeInTheDocument();
     });
-    expect(screen.getByText('+2 more')).toBeInTheDocument();
+    expect(screen.getByTestId('entityAttachmentGridWatchlists-more')).toHaveTextContent('+2');
   });
 
   it('falls back to the raw id when a watchlist cannot be resolved', async () => {

@@ -277,18 +277,18 @@ describe('EntitiesDataTable', () => {
       expect(container.textContent).toContain('—');
     });
 
-    it('renders a single source formatted (capitalized) without the "+N More" affordance', () => {
-      const { getByText, queryByText } = renderCell('entityanalytics_okta');
+    it('renders a single source formatted (capitalized) without the "+N" overflow badge', () => {
+      const { getByText, queryByText, queryByTestId } = renderCell('entityanalytics_okta');
       expect(getByText('Entityanalytics Okta')).toBeInTheDocument();
       expect(queryByText('entityanalytics_okta')).not.toBeInTheDocument();
-      expect(queryByText(/\+.*More/)).not.toBeInTheDocument();
+      expect(queryByTestId('entitySourceValue-more')).not.toBeInTheDocument();
     });
 
-    it('renders the first formatted source and a "+N More" affordance for array values', () => {
-      const { getByText, queryByText } = renderCell(['okta', 'entityanalytics_okta']);
+    it('renders the first formatted source and a "+N" overflow badge for array values', () => {
+      const { getByText, queryByText, getByTestId } = renderCell(['okta', 'entityanalytics_okta']);
       expect(getByText('Okta')).toBeInTheDocument();
       expect(queryByText('okta')).not.toBeInTheDocument();
-      expect(getByText(/\+1.*More/)).toBeInTheDocument();
+      expect(getByTestId('entitySourceValue-more')).toHaveTextContent('+1');
     });
   });
 });

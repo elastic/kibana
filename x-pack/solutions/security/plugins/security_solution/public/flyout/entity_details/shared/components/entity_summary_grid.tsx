@@ -29,9 +29,14 @@ import { getWatchlistName } from '../../../../../common/entity_analytics/watchli
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import {
   EntitySourceValue,
-  TruncatedListWithTooltip,
+  TruncatedBadgeList,
   toEntitySourceArray,
 } from './entity_source_value';
+
+const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.watchlistsOverflowTitle',
+  { defaultMessage: 'Additional watchlists' }
+);
 
 interface EntitySummaryGridProps {
   entityRecord: Entity;
@@ -217,10 +222,9 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
   }, [watchlistIds, watchlistNamesById]);
 
   return (
-    <TruncatedListWithTooltip
+    <TruncatedBadgeList
       values={resolvedNames}
-      moreLabelId="xpack.securitySolution.flyout.entityDetails.grid.watchlistsMore"
-      moreLabelDefaultMessage="More"
+      overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
       data-test-subj="entityWatchlistsCell"
     />
   );

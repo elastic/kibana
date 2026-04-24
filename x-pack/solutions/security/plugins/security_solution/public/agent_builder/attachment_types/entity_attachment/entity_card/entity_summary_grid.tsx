@@ -24,6 +24,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { API_VERSIONS, WATCHLISTS_URL } from '../../../../../common/entity_analytics/constants';
+import { TruncatedBadgeList } from '../../../../flyout/entity_details/shared/components/entity_source_value';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 
 interface EntitySummaryGridProps {
@@ -63,11 +64,10 @@ const LABELS = {
   empty: i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.grid.empty', {
     defaultMessage: '—',
   }),
-  moreWatchlists: (count: number) =>
-    i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.grid.moreWatchlists', {
-      defaultMessage: '+{count} more',
-      values: { count },
-    }),
+  watchlistsOverflowTooltipTitle: i18n.translate(
+    'xpack.securitySolution.agentBuilder.entityAttachment.grid.watchlistsOverflowTitle',
+    { defaultMessage: 'Additional watchlists' }
+  ),
 };
 
 const WATCHLISTS_QUERY_KEY = 'AGENT_BUILDER_ENTITY_ATTACHMENT_WATCHLISTS';
@@ -166,22 +166,12 @@ const WatchlistsCell: React.FC<{
     return <EuiText size="s">{LABELS.empty}</EuiText>;
   }
 
-  const first = names[0];
-  const moreCount = names.length - 1;
-
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">{first}</EuiText>
-      </EuiFlexItem>
-      {moreCount > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {LABELS.moreWatchlists(moreCount)}
-          </EuiText>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <TruncatedBadgeList
+      values={names}
+      overflowTooltipTitle={LABELS.watchlistsOverflowTooltipTitle}
+      data-test-subj="entityAttachmentGridWatchlists"
+    />
   );
 };
 

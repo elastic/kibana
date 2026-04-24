@@ -10,7 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import {
   EntitySourceValue,
-  TruncatedListWithTooltip,
+  TruncatedBadgeList,
   formatEntitySource,
   toEntitySourceArray,
 } from './entity_source_value';
@@ -70,7 +70,7 @@ describe('EntitySourceValue', () => {
     expect(container.textContent).toContain('—');
   });
 
-  it('renders a single value formatted (capitalized, underscores replaced) without a "+N More" button', () => {
+  it('renders a single formatted value as plain text without an overflow affordance', () => {
     render(
       <TestProviders>
         <EntitySourceValue values={['entityanalytics_okta']} />
@@ -79,10 +79,10 @@ describe('EntitySourceValue', () => {
 
     expect(screen.getByText('Entityanalytics Okta')).toBeInTheDocument();
     expect(screen.queryByText('entityanalytics_okta')).not.toBeInTheDocument();
-    expect(screen.queryByText(/\+.*More/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entitySourceValue-more')).not.toBeInTheDocument();
   });
 
-  it('renders the first formatted value and a "+N More" button when there are multiple values', () => {
+  it('renders only the first formatted value inline and collapses the rest into a +N overflow badge', () => {
     render(
       <TestProviders>
         <EntitySourceValue values={['okta', 'entra_id', 'active_directory']} />
@@ -90,11 +90,11 @@ describe('EntitySourceValue', () => {
     );
 
     expect(screen.getByText('Okta')).toBeInTheDocument();
-    expect(screen.getByText(/\+2/)).toBeInTheDocument();
-    expect(screen.getByText(/More/)).toBeInTheDocument();
+    expect(screen.getByTestId('entitySourceValue-more')).toHaveTextContent('+2');
+    expect(screen.getByTestId('entitySourceValue-more')).not.toHaveTextContent('more');
   });
 
-  it('exposes the remaining formatted values via the tooltip', async () => {
+  it('exposes the remaining formatted values via the overflow tooltip', async () => {
     render(
       <TestProviders>
         <EntitySourceValue values={['okta', 'entra_id', 'active_directory']} />
@@ -109,22 +109,65 @@ describe('EntitySourceValue', () => {
   });
 });
 
-describe('TruncatedListWithTooltip', () => {
-  it('uses the provided "More" label id', () => {
+describe('TruncatedBadgeList', () => {
+  it('renders the empty placeholder when values is empty', () => {
+    const { container } = render(
+      <TestProviders>
+        <TruncatedBadgeList values={[]} data-test-subj="custom" />
+      </TestProviders>
+    );
+
+    expect(container.textContent).toContain('—');
+  });
+
+  it('renders the first value as plain text and a +N overflow badge', () => {
     render(
       <TestProviders>
-        <TruncatedListWithTooltip
-          values={['a', 'b']}
-          moreLabelId="xpack.securitySolution.test.customMore"
-          moreLabelDefaultMessage="More things"
+        <TruncatedBadgeList values={['a', 'b', 'c']} data-test-subj="custom" />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('a')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-more')).toHaveTextContent('+2');
+  });
+
+  it('honors a custom maxVisible to render more inline values before collapsing', () => {
+    render(
+      <TestProviders>
+        <TruncatedBadgeList values={['a', 'b', 'c']} maxVisible={2} data-test-subj="custom" />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('a')).toBeInTheDocument();
+    expect(screen.getByText('b')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-more')).toHaveTextContent('+1');
+  });
+
+  it('applies formatValue to both the inline value and the overflow tooltip list', async () => {
+    render(
+      <TestProviders>
+        <TruncatedBadgeList
+          values={['okta', 'entra_id']}
+          formatValue={formatEntitySource}
           data-test-subj="custom"
         />
       </TestProviders>
     );
 
-    expect(screen.getByText('a')).toBeInTheDocument();
-    expect(screen.getByText(/\+1/)).toBeInTheDocument();
-    expect(screen.getByText(/More things/)).toBeInTheDocument();
-    expect(screen.getByTestId('custom-more')).toBeInTheDocument();
+    expect(screen.getByText('Okta')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByTestId('custom-more'));
+    await waitFor(() => {
+      expect(screen.getByText('Entra Id')).toBeInTheDocument();
+    });
+  });
+
+  it('exposes the hidden count on the overflow badge via aria-label for screen readers', () => {
+    render(
+      <TestProviders>
+        <TruncatedBadgeList values={['a', 'b', 'c']} data-test-subj="custom" />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('custom-more')).toHaveAttribute('aria-label', '2 more');
   });
 });

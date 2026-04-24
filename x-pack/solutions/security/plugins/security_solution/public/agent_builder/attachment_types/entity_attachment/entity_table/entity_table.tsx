@@ -29,6 +29,7 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import { RiskScoreCell } from '../../../../entity_analytics/components/home/entities_table/risk_score_cell';
 import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
+import { TruncatedBadgeList } from '../../../../flyout/entity_details/shared/components/entity_source_value';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { EntityIconByType } from '../../../../entity_analytics/components/entity_store/helpers';
 import { useEntityForAttachment } from '../use_entity_for_attachment';
@@ -64,7 +65,6 @@ interface EntityRow {
 }
 
 const PAGE_SIZE = 10;
-const MAX_VISIBLE_SOURCES = 3;
 
 /**
  * Horizontal scroll wrapper for the table. The agent chat panel can be
@@ -216,11 +216,15 @@ const EntityRowLoader: React.FC<{
 };
 
 /**
- * Renders the resolved data sources for an entity row. Shows up to
- * `MAX_VISIBLE_SOURCES` formatted badges and collapses any overflow into a
- * single `+N more` badge whose tooltip lists the remaining sources. When no
- * sources are available we fall back to the legacy `EntitySourceBadge` so the
- * column still surfaces an "Entity Store" / "Observed" hint for older records.
+ * Renders the resolved data sources for an entity row. Shows the first
+ * formatted source as a hollow badge and collapses any overflow into a single
+ * `+N more` badge whose tooltip lists the remaining sources. When no sources
+ * are available we fall back to the legacy `EntitySourceBadge` so the column
+ * still surfaces an "Entity Store" / "Observed" hint for older records.
+ *
+ * The inline value count matches the Entity Analytics flyout + entities table
+ * (`TruncatedBadgeList` default) so the same `entity.source` renders
+ * identically everywhere it appears in the Security Solution.
  */
 const EntityDataSourceBadges: React.FC<{
   sources: string[] | undefined;
@@ -239,44 +243,13 @@ const EntityDataSourceBadges: React.FC<{
     );
   }
 
-  const visible = list.slice(0, MAX_VISIBLE_SOURCES);
-  const hidden = list.slice(MAX_VISIBLE_SOURCES);
-
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      alignItems="center"
-      wrap
-      responsive={false}
+    <TruncatedBadgeList
+      values={list}
+      formatValue={formatEntitySource}
+      overflowTooltipTitle={SOURCES_OVERFLOW_TOOLTIP_TITLE}
       data-test-subj="entityAttachmentTableSources"
-    >
-      {visible.map((source) => (
-        <EuiFlexItem grow={false} key={source}>
-          <EuiBadge color="hollow" data-test-subj="entityAttachmentTableSource">
-            {formatEntitySource(source)}
-          </EuiBadge>
-        </EuiFlexItem>
-      ))}
-      {hidden.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            title={SOURCES_OVERFLOW_TOOLTIP_TITLE}
-            content={hidden.map(formatEntitySource).join(', ')}
-          >
-            <EuiBadge color="hollow" data-test-subj="entityAttachmentTableSourcesOverflow">
-              {i18n.translate(
-                'xpack.securitySolution.agentBuilder.entityAttachment.table.dataSourceOverflow',
-                {
-                  defaultMessage: '+{count} more',
-                  values: { count: hidden.length },
-                }
-              )}
-            </EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    />
   );
 };
 
@@ -420,7 +393,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({
             hasLastSeenDate={Boolean(row.data?.lastSeen)}
           />
         ),
-        width: '180px',
+        width: '140px',
       },
       {
         field: 'identifier.identifierType',

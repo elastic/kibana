@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
+import dateMath from '@kbn/datemath';
+import { useQuery } from '@kbn/react-query';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import type { EntityType } from '../../../../common/entity_analytics/types';
@@ -24,8 +26,10 @@ import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { fetchQueryAlerts } from '../../../detections/containers/detection_engine/alerts/api';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { useTrackHttpRequest } from '../../../common/lib/apm/use_track_http_request';
 import { URL_PARAM_KEY } from '../../../common/hooks/constants';
 import {
   OPEN_IN_ALERTS_TITLE_STATUS,
@@ -38,6 +42,16 @@ import {
   parseAlertsData,
 } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { getFormattedAlertStats } from '../../../flyout/document_details/shared/components/alert_count_insight';
+
+const QUERY_KEY_ENTITY_ALERTS_BY_STATUS = 'entity-analytics-alerts-by-status';
+
+// The Entity Analytics home page hides the global date picker (see `hideDatePicker`
+// in entity_analytics_home_page.tsx), so we can't rely on the global time range — it
+// carries whatever the user last set on another page. Pin the alerts column to a
+// fixed "last 30 days" window instead. ES resolves the date-math expressions at
+// query time, so clicking the global refresh button always returns up-to-date counts.
+const ALERTS_CELL_FROM_STR = 'now-30d';
+const ALERTS_CELL_TO_STR = 'now';
 
 const ENTITY_FILTER_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.alertsColumn.entityFilterTitle',
@@ -60,30 +74,61 @@ export const EntityAlertsCell: React.FC<{
   entityType: EntityType;
 }> = ({ entityName, entityType }) => {
   const { signalIndexName } = useSignalIndex();
-  const { from, to } = useGlobalTime();
+  const { setQuery, deleteQuery } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
+  const { startTracking } = useTrackHttpRequest();
 
   const filterField = EntityTypeToIdentifierField[entityType] || 'entity.id';
 
-  const { data, setQuery: setAlertsQuery } = useQueryAlerts<{}, AlertsByStatusAgg>({
-    query: getAlertsByStatusQuery({
-      from,
-      to,
-      identityFields: { [filterField]: entityName },
-    }),
-    indexName: signalIndexName,
-    queryName: ALERTS_QUERY_NAMES.BY_STATUS,
+  const { data, isFetching, refetch: refetchQuery } = useQuery({
+    queryKey: [
+      QUERY_KEY_ENTITY_ALERTS_BY_STATUS,
+      {
+        entityType,
+        entityName,
+        filterField,
+        fromStr: ALERTS_CELL_FROM_STR,
+        toStr: ALERTS_CELL_TO_STR,
+        signalIndexName,
+      },
+    ],
+    queryFn: async ({ signal }) => {
+      const { endTracking } = startTracking({ name: ALERTS_QUERY_NAMES.BY_STATUS });
+      try {
+        const response = await fetchQueryAlerts<{}, AlertsByStatusAgg>({
+          query: getAlertsByStatusQuery({
+            from: ALERTS_CELL_FROM_STR,
+            to: ALERTS_CELL_TO_STR,
+            identityFields: { [filterField]: entityName },
+          }),
+          signal,
+        });
+        endTracking('success');
+        return response;
+      } catch (err) {
+        endTracking(signal?.aborted ? 'aborted' : 'error');
+        throw err;
+      }
+    },
+    enabled: Boolean(signalIndexName && entityName && entityType),
+    staleTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 
-  useEffect(() => {
-    setAlertsQuery(
-      getAlertsByStatusQuery({
-        from,
-        to,
-        identityFields: { [filterField]: entityName },
-      })
-    );
-  }, [setAlertsQuery, from, to, entityName, filterField]);
+  const refetch = useCallback(() => {
+    void refetchQuery();
+  }, [refetchQuery]);
+
+  useQueryInspector({
+    queryId: `entity-analytics-alerts-${entityType}-${entityName}`,
+    setQuery,
+    deleteQuery,
+    refetch,
+    loading: isFetching,
+    inspect: null,
+  });
 
   const { navigateTo } = useNavigation();
 
@@ -92,16 +137,6 @@ export const EntityAlertsCell: React.FC<{
   const alertsData = parseAlertsData(data);
   const alertStats = getFormattedAlertStats(alertsData, euiTheme);
   const alertCount = (alertsData?.open?.total ?? 0) + (alertsData?.acknowledged?.total ?? 0);
-
-  const timerange = encode({
-    global: {
-      [URL_PARAM_KEY.timerange]: {
-        kind: 'absolute',
-        from,
-        to,
-      },
-    },
-  });
 
   const filters = [
     {
@@ -117,9 +152,25 @@ export const EntityAlertsCell: React.FC<{
   ];
 
   const urlFilterParams = encode(formatPageFilterSearchParam(filters));
-  const timerangePath = timerange ? `&timerange=${timerange}` : '';
 
   const openAlertsPage = () => {
+    // Resolve the date-math strings at click time so the alerts page opens with a
+    // snapshot of the last 30 days aligned with what the user just saw in the cell.
+    const from = dateMath.parse(ALERTS_CELL_FROM_STR)?.toISOString() ?? '';
+    const to = dateMath.parse(ALERTS_CELL_TO_STR, { roundUp: true })?.toISOString() ?? '';
+    const timerange = encode({
+      global: {
+        [URL_PARAM_KEY.timerange]: {
+          kind: 'relative',
+          fromStr: ALERTS_CELL_FROM_STR,
+          toStr: ALERTS_CELL_TO_STR,
+          from,
+          to,
+        },
+      },
+    });
+    const timerangePath = timerange ? `&timerange=${timerange}` : '';
+
     navigateTo({
       deepLinkId: SecurityPageName.alerts,
       path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${timerangePath}`,
