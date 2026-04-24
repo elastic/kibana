@@ -11,7 +11,6 @@ import type { ExperimentalFeatures } from '../../../../common';
 import { ReferenceDataClient } from './reference_data_client';
 import { REF_DATA_KEYS } from './constants';
 import type { OptInStatusMetadata } from './types';
-import { stringify } from '../../utils/stringify';
 
 /**
  * Reads the Endpoint Exceptions per-policy opt-in status from Reference Data.
@@ -47,15 +46,19 @@ export const getIsEndpointExceptionsPerPolicyEnabled = async (
 export const initializeEndpointExceptionsPerPolicyOptInStatus = async (
   soClient: SavedObjectsClientContract,
   experimentalFeatures: ExperimentalFeatures,
-  logger: Logger
+  _logger: Logger
 ): Promise<void> => {
+  const logger = _logger.get('initEndpointExceptionsPerPolicyOptIn');
+
   const referenceDataClient = new ReferenceDataClient(soClient, experimentalFeatures, logger);
 
   const result = await referenceDataClient.get<OptInStatusMetadata>(
     REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
   );
 
-  logger.debug(
-    `Initialized Endpoint Exceptions per-policy opt-in status to: ${stringify(result.metadata)}`
+  logger.info(
+    `Endpoint Exceptions per-policy opt-in status is '${result.metadata.status}'${
+      result.metadata.reason ? ` (reason: '${result.metadata.reason}').` : '.'
+    }`
   );
 };
