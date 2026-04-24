@@ -7,44 +7,40 @@
 
 import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
 
-const Q1_PLACEHOLDER = 'Share your use case';
-const Q2_PLACEHOLDER = 'Share what would help';
-const Q2_LABEL = "What's one thing that would make this more useful for you?";
-
 export const anomalyExplorerQuestions: FeedbackRegistryEntry[] = [
   {
     id: 'ml_ad_anomaly_explorer_use_case',
     order: 1,
     placeholder: {
       i18nId: 'xpack.feedbackRegistry.ml.anomalyExplorer.q1Placeholder',
-      defaultMessage: Q1_PLACEHOLDER,
+      defaultMessage: 'Share your use case',
     },
     label: {
       i18nId: 'xpack.feedbackRegistry.ml.anomalyExplorer.q1Label',
-      defaultMessage: 'What were you trying to detect or investigate just now?',
+      defaultMessage: 'What were you trying to investigate or explain just now?',
     },
     ariaLabel: {
       i18nId: 'xpack.feedbackRegistry.ml.anomalyExplorer.q1AriaLabel',
-      defaultMessage: 'What were you trying to detect or investigate just now?',
+      defaultMessage: 'What were you trying to investigate or explain just now?',
     },
-    question: 'What were you trying to detect or investigate just now?',
+    question: 'What were you trying to investigate or explain just now?',
   },
   {
     id: 'ml_ad_anomaly_explorer_improvements',
     order: 2,
     placeholder: {
       i18nId: 'xpack.feedbackRegistry.ml.anomalyExplorer.q2Placeholder',
-      defaultMessage: Q2_PLACEHOLDER,
+      defaultMessage: 'Share what would help',
     },
     label: {
       i18nId: 'xpack.feedbackRegistry.ml.anomalyExplorer.q2Label',
-      defaultMessage: Q2_LABEL,
+      defaultMessage: "What's one thing that would make this more useful for you?",
     },
     ariaLabel: {
       i18nId: 'xpack.feedbackRegistry.ml.anomalyExplorer.q2AriaLabel',
-      defaultMessage: Q2_LABEL,
+      defaultMessage: "What's one thing that would make this more useful for you?",
     },
-    question: Q2_LABEL,
+    question: "What's one thing that would make this more useful for you?",
   },
 ];
 
@@ -54,34 +50,34 @@ export const resultExplorerQuestions: FeedbackRegistryEntry[] = [
     order: 1,
     placeholder: {
       i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q1Placeholder',
-      defaultMessage: Q1_PLACEHOLDER,
+      defaultMessage: 'Share your use case',
     },
     label: {
       i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q1Label',
-      defaultMessage: 'What were you trying to discover or analyze just now?',
+      defaultMessage: 'What were you trying to evaluate or inspect just now?',
     },
     ariaLabel: {
       i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q1AriaLabel',
-      defaultMessage: 'What were you trying to discover or analyze just now?',
+      defaultMessage: 'What were you trying to evaluate or inspect just now?',
     },
-    question: 'What were you trying to discover or analyze just now?',
+    question: 'What were you trying to evaluate or inspect just now?',
   },
   {
     id: 'ml_dfa_result_explorer_improvements',
     order: 2,
     placeholder: {
       i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q2Placeholder',
-      defaultMessage: Q2_PLACEHOLDER,
+      defaultMessage: 'Share what would help',
     },
     label: {
       i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q2Label',
-      defaultMessage: Q2_LABEL,
+      defaultMessage: "What's one thing that would make this more useful for you?",
     },
     ariaLabel: {
       i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q2AriaLabel',
-      defaultMessage: Q2_LABEL,
+      defaultMessage: "What's one thing that would make this more useful for you?",
     },
-    question: Q2_LABEL,
+    question: "What's one thing that would make this more useful for you?",
   },
 ];
 
@@ -91,34 +87,34 @@ export const analyticsMapQuestions: FeedbackRegistryEntry[] = [
     order: 1,
     placeholder: {
       i18nId: 'xpack.feedbackRegistry.ml.analyticsMap.q1Placeholder',
-      defaultMessage: Q1_PLACEHOLDER,
+      defaultMessage: 'Share your use case',
     },
     label: {
       i18nId: 'xpack.feedbackRegistry.ml.analyticsMap.q1Label',
-      defaultMessage: 'What were you trying to explore or understand just now?',
+      defaultMessage: 'What were you trying to trace or map out just now?',
     },
     ariaLabel: {
       i18nId: 'xpack.feedbackRegistry.ml.analyticsMap.q1AriaLabel',
-      defaultMessage: 'What were you trying to explore or understand just now?',
+      defaultMessage: 'What were you trying to trace or map out just now?',
     },
-    question: 'What were you trying to explore or understand just now?',
+    question: 'What were you trying to trace or map out just now?',
   },
   {
     id: 'ml_analytics_map_improvements',
     order: 2,
     placeholder: {
       i18nId: 'xpack.feedbackRegistry.ml.analyticsMap.q2Placeholder',
-      defaultMessage: Q2_PLACEHOLDER,
+      defaultMessage: 'Share what would help',
     },
     label: {
       i18nId: 'xpack.feedbackRegistry.ml.analyticsMap.q2Label',
-      defaultMessage: Q2_LABEL,
+      defaultMessage: "What's one thing that would make this more useful for you?",
     },
     ariaLabel: {
       i18nId: 'xpack.feedbackRegistry.ml.analyticsMap.q2AriaLabel',
-      defaultMessage: Q2_LABEL,
+      defaultMessage: "What's one thing that would make this more useful for you?",
     },
-    question: Q2_LABEL,
+    question: "What's one thing that would make this more useful for you?",
   },
 ];
 
@@ -128,33 +124,33 @@ export const singleMetricViewerQuestions: FeedbackRegistryEntry[] = [
     order: 1,
     placeholder: {
       i18nId: 'xpack.feedbackRegistry.ml.singleMetricViewer.q1Placeholder',
-      defaultMessage: Q1_PLACEHOLDER,
+      defaultMessage: 'Share your use case',
     },
     label: {
       i18nId: 'xpack.feedbackRegistry.ml.singleMetricViewer.q1Label',
-      defaultMessage: 'What were you trying to detect or investigate just now?',
+      defaultMessage: 'What were you trying to investigate or explain just now?',
     },
     ariaLabel: {
       i18nId: 'xpack.feedbackRegistry.ml.singleMetricViewer.q1AriaLabel',
-      defaultMessage: 'What were you trying to detect or investigate just now?',
+      defaultMessage: 'What were you trying to investigate or explain just now?',
     },
-    question: 'What were you trying to detect or investigate just now?',
+    question: 'What were you trying to investigate or explain just now?',
   },
   {
     id: 'ml_smv_improvements',
     order: 2,
     placeholder: {
       i18nId: 'xpack.feedbackRegistry.ml.singleMetricViewer.q2Placeholder',
-      defaultMessage: Q2_PLACEHOLDER,
+      defaultMessage: 'Share what would help',
     },
     label: {
       i18nId: 'xpack.feedbackRegistry.ml.singleMetricViewer.q2Label',
-      defaultMessage: Q2_LABEL,
+      defaultMessage: "What's one thing that would make this more useful for you?",
     },
     ariaLabel: {
       i18nId: 'xpack.feedbackRegistry.ml.singleMetricViewer.q2AriaLabel',
-      defaultMessage: Q2_LABEL,
+      defaultMessage: "What's one thing that would make this more useful for you?",
     },
-    question: Q2_LABEL,
+    question: "What's one thing that would make this more useful for you?",
   },
 ];
