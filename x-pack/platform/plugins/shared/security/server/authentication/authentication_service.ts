@@ -37,7 +37,7 @@ import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
-import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
+import { KIBANA_AUTH_FULL_HEADER, NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -333,10 +333,12 @@ export class AuthenticationService {
         // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
         // headers returned during authentication stage. We should remove these headers before re-authentication to not
         // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
+        // Additionally, we explicitly include KIBANA_AUTH_FULL_HEADER header to skip any authentication optimizations
+        // and make sure re-authentication is performed in full scope.
         (request.headers as Record<string, unknown>) = Object.fromEntries(
-          Object.entries(originalHeaders).filter(
-            ([headerName]) => headerName.toLowerCase() !== 'authorization'
-          )
+          Object.entries(originalHeaders)
+            .filter(([headerName]) => headerName.toLowerCase() !== 'authorization')
+            .concat([[KIBANA_AUTH_FULL_HEADER, 'true']])
         );
         authenticationResult = await this.authenticator.reauthenticate(request);
       } catch (err) {

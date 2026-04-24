@@ -13,6 +13,7 @@ import {
   ensureMetadata,
   getSourcesForStream,
   getStatsQueryHints,
+  normalizeEsqlSafe,
   replaceFromSources,
 } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -40,6 +41,17 @@ import {
   type SignificantEventsToolUsage,
 } from './tools/tool_usage';
 
+export const DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
+
+export interface ExistingQuerySummary {
+  id: string;
+  title: string;
+  type: string;
+  severity_score?: number;
+  description: string;
+  esql: string;
+}
+
 /**
  * Intermediate representation of a query as produced by the LLM tool output.
  * Uses a flat `esql` string (vs the wrapped `EsqlQuery` in the wire type)
@@ -53,6 +65,7 @@ interface ParsedToolQuery {
   category: SignificantEventType;
   severity_score: number;
   evidence?: string[];
+  replaces?: string;
 }
 
 function getErrorMessage(error: unknown): string {
@@ -73,6 +86,8 @@ export async function generateSignificantEvents({
   logger,
   additionalTools,
   additionalToolCallbacks,
+  existingQueries,
+  maxExistingQueriesForContext = DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
@@ -87,6 +102,8 @@ export async function generateSignificantEvents({
   systemPrompt: string;
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
+  existingQueries?: ExistingQuerySummary[];
+  maxExistingQueriesForContext?: number;
 }): Promise<{
   queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
@@ -99,6 +116,20 @@ export async function generateSignificantEvents({
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt, additionalTools });
   const targetSources = getSourcesForStream(stream);
 
+  const existingQueriesList = existingQueries ?? [];
+
+  const normalizedStoredEsqls = new Set(existingQueriesList.map((q) => normalizeEsqlSafe(q.esql)));
+
+  const contextLimit = Math.max(0, Math.floor(maxExistingQueriesForContext));
+
+  const existingQueriesContext = existingQueriesList.length
+    ? JSON.stringify(
+        [...existingQueriesList]
+          .sort((a, b) => (b.severity_score ?? 0) - (a.severity_score ?? 0))
+          .slice(0, contextLimit)
+      )
+    : '';
+
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
@@ -107,6 +138,7 @@ export async function generateSignificantEvents({
         description: stream.description,
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
+        existing_queries: existingQueriesContext,
       },
       maxSteps: additionalToolCallbacks ? 6 : 4,
       prompt,
@@ -185,6 +217,16 @@ export async function generateSignificantEvents({
                     ? sourceRewritten
                     : ensureMetadata(sourceRewritten);
 
+                if (normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))) {
+                  return {
+                    query: { ...query, type: derivedType, esql: rewritten },
+                    valid: false,
+                    status: 'Duplicate',
+                    error: 'This query already exists for this stream.',
+                    hints: undefined,
+                  };
+                }
+
                 const hints = getStatsQueryHints(rewritten);
 
                 await esClient.esql.query({
@@ -249,15 +291,7 @@ export async function generateSignificantEvents({
 
   return {
     queries,
-    tokensUsed: sumTokens(
-      {
-        prompt: 0,
-        completion: 0,
-        total: 0,
-        cached: 0,
-      },
-      response.tokens
-    ),
+    tokensUsed: sumTokens({ added: response.tokens }),
     toolUsage,
   };
 }

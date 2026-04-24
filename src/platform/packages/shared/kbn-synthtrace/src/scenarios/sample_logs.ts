@@ -13,6 +13,7 @@
 
 import type { LogDocument } from '@kbn/synthtrace-client';
 import { Serializable } from '@kbn/synthtrace-client';
+import type { LoghubTimestampLayout } from '@kbn/sample-log-parser';
 import { SampleParserClient } from '@kbn/sample-log-parser';
 import type { WiredIngestUpsertRequest } from '@kbn/streams-schema';
 import { castArray } from 'lodash';
@@ -23,13 +24,15 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
   const client = new SampleParserClient({ logger });
 
-  const { rpm, streamType, systems, isLogsEnabled, skipFork } = (runOptions.scenarioOpts ?? {}) as {
-    rpm?: number;
-    systems?: string | string[];
-    streamType?: 'classic' | 'wired';
-    skipFork?: boolean;
-    isLogsEnabled?: boolean;
-  };
+  const { rpm, streamType, systems, isLogsEnabled, skipFork, loghubTimestampLayout } =
+    (runOptions.scenarioOpts ?? {}) as {
+      rpm?: number;
+      systems?: string | string[];
+      streamType?: 'classic' | 'wired';
+      skipFork?: boolean;
+      isLogsEnabled?: boolean;
+      loghubTimestampLayout?: LoghubTimestampLayout;
+    };
 
   const generators = await client.getLogGenerators({
     rpm,
@@ -37,6 +40,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     systems: {
       loghub: castArray(systems ?? []).flatMap((item) => item.split(',')),
     },
+    loghubTimestampLayout,
   });
 
   return {
@@ -171,7 +175,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         logger.info('Setting up logs.ecs and child streams');
         await setupChildStreams('logs.ecs');
       } catch (error) {
-        logger.error(new Error(`Error occurred while forking streams`, { cause: error }));
+        const wrapped = new Error('Error occurred while forking streams', { cause: error });
+        logger.error(wrapped);
+        throw wrapped;
       }
     },
     generate: ({ range, clients: { streamsClient } }) => {

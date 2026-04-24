@@ -20,7 +20,7 @@ const querySchemaBasic = {
 export const dataVisualizerFieldHistogramsSchema = schema.object({
   ...querySchemaBasic,
   /** The fields to return histogram data. */
-  fields: schema.arrayOf(schema.any()),
+  fields: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
   samplerShardSize: schema.number(),
   /** Optional search time runtime fields */
@@ -32,7 +32,7 @@ export const dataVisualizerFieldHistogramsSchema = schema.object({
 export const dataVisualizerFieldStatsSchema = schema.object({
   /** Query to match documents in the index. */
   query: schema.any(),
-  fields: schema.arrayOf(schema.any()),
+  fields: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
   samplerShardSize: schema.number(),
   /** Name of the time field in the index (optional). */
@@ -53,9 +53,9 @@ export const dataVisualizerOverallStatsSchema = schema.object({
   /** Query to match documents in the index. */
   query: schema.any(),
   /** Names of aggregatable fields for which to return stats. */
-  aggregatableFields: schema.arrayOf(schema.string()),
+  aggregatableFields: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   /** Names of non-aggregatable fields for which to return stats. */
-  nonAggregatableFields: schema.arrayOf(schema.string()),
+  nonAggregatableFields: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
   samplerShardSize: schema.number(),
   /** Name of the time field in the index (optional). */

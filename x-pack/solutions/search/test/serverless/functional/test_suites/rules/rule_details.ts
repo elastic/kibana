@@ -39,7 +39,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await svlSearchNavigation.navigateToLandingPage();
 
     await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
-    await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActions');
+    await svlCommonNavigation.sidenav.clickPanelLink('rules');
   };
 
   const navigateToConnectors = async () => {
@@ -536,7 +536,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await find.clickByButtonText('Settings');
         const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
         expect(await notifyWhenSelect.getVisibleText()).toEqual('On custom action intervals');
         const throttleInput = await testSubjects.find('throttleInput');

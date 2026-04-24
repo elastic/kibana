@@ -15,6 +15,7 @@ import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
+import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
@@ -25,6 +26,7 @@ export interface SecurityPageObjects extends PageObjects {
   timelinePage: TimelinePage;
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
+  attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
 }
 
 export function extendPageObjects(
@@ -46,5 +48,6 @@ export function extendPageObjects(
       config
     ),
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),
+    attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
   };
 }

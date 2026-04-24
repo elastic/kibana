@@ -238,7 +238,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     uiSettings: uiSettingsMock,
     http: {
       basePath: '/',
-      get: jest.fn((path: string) => {
+      post: jest.fn((path: string) => {
         // Mock ES|QL timefield endpoint so an ES|QL data view can be created
         if (path.startsWith('/internal/esql/get_timefield')) {
           return Promise.resolve({ timeField: '@timestamp' });
@@ -319,7 +319,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       isEmbeddedEditor: jest.fn(() => false),
       canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
-      getByValueInput: jest.fn(),
+      getByValueTab: jest.fn(),
       clearEditorState: jest.fn(),
     },
     alertingVTwo: {

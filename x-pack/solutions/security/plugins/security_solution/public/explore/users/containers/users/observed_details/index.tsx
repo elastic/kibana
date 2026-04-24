@@ -6,6 +6,8 @@
  */
 
 import { useEffect, useMemo } from 'react';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { isEmpty } from 'lodash';
 import type { inputsModel } from '../../../../../common/store';
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../../types';
@@ -13,6 +15,7 @@ import { UsersQueries } from '../../../../../../common/search_strategy/security_
 import type { UserItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import { useUiSetting } from '../../../../../common/lib/kibana';
 
 export const OBSERVED_USER_QUERY_ID = 'observedUsersDetailsQuery';
 
@@ -28,6 +31,7 @@ export interface UserDetailsArgs {
 interface UseUserDetails {
   endDate: string;
   userName: string;
+  entityId?: string;
   id?: string;
   indexNames: string[];
   skip?: boolean;
@@ -37,11 +41,39 @@ interface UseUserDetails {
 export const useObservedUserDetails = ({
   endDate,
   userName,
+  entityId,
   indexNames,
   id = OBSERVED_USER_QUERY_ID,
   skip = false,
   startDate,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const euidApi = useEntityStoreEuidApi();
+
+  const shouldSkip =
+    skip ||
+    (!entityStoreV2Enabled && isEmpty(userName)) ||
+    (entityStoreV2Enabled && (!euidApi?.euid || (isEmpty(entityId) && isEmpty(userName))));
+
+  const euidFilter = useMemo(() => {
+    if (shouldSkip) {
+      return undefined;
+    }
+
+    if (!entityStoreV2Enabled) {
+      // For legacy entity store, query by user.name
+      return { term: { 'user.name': userName } };
+    } else {
+      // For entity store v2, query by entity_id (runtime field)
+      if (entityId) {
+        return { term: { entity_id: entityId } };
+      } else if (userName) {
+        // If entityId is not available, fall back to user.name for querying
+        return { term: { 'user.name': userName } };
+      }
+    }
+  }, [entityStoreV2Enabled, shouldSkip, userName, entityId]);
+
   const {
     loading,
     result: response,
@@ -54,7 +86,7 @@ export const useObservedUserDetails = ({
       userDetails: {},
     },
     errorMessage: i18n.FAIL_USER_DETAILS,
-    abort: skip,
+    abort: shouldSkip,
   });
 
   const userDetailsResponse = useMemo(
@@ -69,26 +101,33 @@ export const useObservedUserDetails = ({
     [endDate, id, inspect, refetch, response.userDetails, startDate]
   );
 
-  const userDetailsRequest = useMemo(
-    () => ({
+  const userDetailsRequest = useMemo(() => {
+    if (!euidFilter) {
+      return null;
+    }
+    return {
       defaultIndex: indexNames,
       factoryQueryType: UsersQueries.observedDetails,
       userName,
+      filterQuery: JSON.stringify(
+        euidFilter
+          ? { bool: { must: [euidFilter, NOT_EVENT_KIND_ASSET_FILTER] } }
+          : NOT_EVENT_KIND_ASSET_FILTER
+      ),
+      entityStoreV2: entityStoreV2Enabled || false,
       timerange: {
         interval: '12h',
         from: startDate,
         to: endDate,
       },
-      filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    }),
-    [endDate, indexNames, startDate, userName]
-  );
+    };
+  }, [endDate, entityStoreV2Enabled, euidFilter, indexNames, startDate, userName]);
 
   useEffect(() => {
-    if (!skip) {
+    if (!shouldSkip && userDetailsRequest != null) {
       search(userDetailsRequest);
     }
-  }, [userDetailsRequest, search, skip]);
+  }, [userDetailsRequest, search, shouldSkip]);
 
   return [loading, userDetailsResponse];
 };

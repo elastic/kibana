@@ -12,7 +12,7 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
-import { getEsqlControls } from './get_esql_controls';
+import { getAllEsqlControls, getEsqlControls } from './get_esql_controls';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 const createPresentationContainer = (children: unknown[]) =>
@@ -44,6 +44,34 @@ const createControlApi = (
   applySerializedState: () => undefined,
 });
 
+describe('getAllEsqlControls', () => {
+  it('returns all valid ES|QL controls', () => {
+    const matchingState = createControlState('status');
+    const otherState = createControlState('host');
+    const noVariableState = createControlState('');
+    const presentationContainer = createPresentationContainer([
+      createControlApi('matching-control', matchingState),
+      createControlApi('other-control', otherState),
+      createControlApi('empty-variable-control', noVariableState),
+      createControlApi('wrong-type-control', matchingState, 'RANGE_SLIDER_CONTROL'),
+      { uuid: 'no-serialize', type: ESQL_CONTROL },
+      { type: ESQL_CONTROL, serializeState: () => matchingState },
+      null,
+    ]);
+
+    expect(getAllEsqlControls(presentationContainer)).toStrictEqual({
+      'matching-control': {
+        type: ESQL_CONTROL,
+        ...matchingState,
+      },
+      'other-control': {
+        type: ESQL_CONTROL,
+        ...otherState,
+      },
+    });
+  });
+});
+
 describe('getEsqlControls', () => {
   it('returns undefined when query is not an ES|QL query', () => {
     const presentationContainer = createPresentationContainer([]);
@@ -56,7 +84,7 @@ describe('getEsqlControls', () => {
     expect(getEsqlControls(presentationContainer, kqlQuery)).toBeUndefined();
   });
 
-  it('returns only matching ES|QL controls with valid APIs', () => {
+  it('returns only matching ES|QL controls used by the query', () => {
     const matchingState = createControlState('status');
     const nonMatchingState = createControlState('host');
     const noVariableState = createControlState('');
