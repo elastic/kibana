@@ -1,0 +1,14 @@
+steps:
+  - command: .buildkite/scripts/steps/kbn_ui_publish.sh
+    label: kbn-ui publish
+    timeout_in_minutes: 20
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    # Intentionally no `branches:` filter here — the intent is that this
+    # pipeline is wired in Buildkite's UI to trigger only on merges to
+    # `main` (and manual runs). If that configuration isn't in place when
+    # this lands, add `branches: main` as a safety net.
