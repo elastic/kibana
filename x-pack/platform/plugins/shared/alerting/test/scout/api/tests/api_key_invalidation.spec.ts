@@ -33,7 +33,8 @@ const getAlertAttrs = async (
   return (_source as Record<string, unknown>)?.alert as Record<string, unknown>;
 };
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/264184
+apiTest.describe.skip(
   'API key invalidation on rule operations',
   { tag: tags.serverless.observability.complete },
   () => {

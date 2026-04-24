@@ -13,12 +13,14 @@ export {
 } from './base/namespaces';
 export {
   ToolType,
+  ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
   platformStreamsSigEventsTools,
   attachmentTools,
   filestoreTools,
+  internalTools,
   defaultAgentToolIds,
   editableToolTypes,
   isReservedToolId,
@@ -120,6 +122,10 @@ export {
   type AgentAnswerStepConfiguration,
   type AgentResearchStepConfiguration,
   agentIdRegexp,
+  AgentExecutionMode,
+  SubagentExecutionMode,
+  ExecutionStatus,
+  type SerializedExecutionError,
 } from './agents';
 export {
   type RoundInput,
@@ -144,6 +150,8 @@ export {
   isToolCallStep,
   isReasoningStep,
   isCompactionStep,
+  isBackgroundAgentCompleteStep,
+  type BackgroundAgentCompleteStep,
   ChatEventType,
   ConversationRoundStatus,
   type ChatEventBase,
@@ -196,6 +204,9 @@ export {
   type CompactionCompletedEventData,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
+  type BackgroundAgentCompleteEvent,
+  type BackgroundAgentCompleteEventData,
+  isBackgroundAgentCompleteEvent,
 } from './chat';
 export {
   type PublicSkillDefinition,
