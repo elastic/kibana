@@ -90,7 +90,7 @@ export async function pickTestGroupRunOrder() {
 
   const JEST_INTEGRATION_MAX_MINUTES = process.env.JEST_INTEGRATION_MAX_MINUTES
     ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
-    : 25;
+    : 30;
   if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
     throw new Error(
       `invalid JEST_INTEGRATION_MAX_MINUTES: ${process.env.JEST_INTEGRATION_MAX_MINUTES}`
