@@ -14,7 +14,7 @@ import { useCallback, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { THROTTLE_INTERVAL_PATTERN } from './constants';
 import { DEFAULT_FORM_STATE } from './constants';
-import { toCreatePayload, toFormState, toUpdatePayload } from './form_utils';
+import { needsInterval, toCreatePayload, toFormState, toUpdatePayload } from './form_utils';
 import type { NotificationPolicyFormState } from './types';
 
 interface UseNotificationPolicyFormParams {
@@ -40,19 +40,27 @@ export const useNotificationPolicyForm = ({
     defaultValues,
   });
 
-  const [name, destinations, frequency] = useWatch({
+  const [name, destinations, groupingMode, groupBy, throttleStrategy, throttleInterval] = useWatch({
     control: methods.control,
-    name: ['name', 'destinations', 'frequency'],
+    name: [
+      'name',
+      'destinations',
+      'groupingMode',
+      'groupBy',
+      'throttleStrategy',
+      'throttleInterval',
+    ],
   });
 
   const isSubmitEnabled = useMemo(() => {
     const hasName = name.trim().length > 0;
     const hasDestinations = destinations.length > 0;
-    const hasValidThrottleInterval =
-      frequency.type !== 'throttle' || THROTTLE_INTERVAL_PATTERN.test(frequency.interval);
+    const hasValidGroupBy = groupingMode === 'per_field' ? groupBy.length > 0 : true;
+    const hasValidInterval =
+      !needsInterval(throttleStrategy) || THROTTLE_INTERVAL_PATTERN.test(throttleInterval);
 
-    return hasName && hasDestinations && hasValidThrottleInterval;
-  }, [destinations.length, frequency, name]);
+    return hasName && hasDestinations && hasValidGroupBy && hasValidInterval;
+  }, [destinations.length, groupBy.length, groupingMode, name, throttleStrategy, throttleInterval]);
 
   const onSubmitValid = useCallback(
     (values: NotificationPolicyFormState) => {

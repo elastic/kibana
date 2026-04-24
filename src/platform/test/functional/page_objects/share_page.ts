@@ -14,6 +14,7 @@ export class SharePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   /**
    * @description attempt to close the share modal, if it's open
@@ -42,7 +43,7 @@ export class SharePageObject extends FtrService {
   }
 
   async clickShareTopNavButton() {
-    return this.testSubjects.click('shareTopNavButton');
+    return this.appMenu.clickMenuItem('shareTopNavButton');
   }
 
   async openShareModalItem(itemTitle: 'link' | 'embed') {

@@ -5,12 +5,14 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { optionalExcludedGapReasonsSchema } from '../../../../../schemas';
 
 export const getGapsSummaryByRuleIdsBodySchema = schema.object(
   {
     end: schema.string(),
     start: schema.string(),
     rule_ids: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    excluded_reasons: optionalExcludedGapReasonsSchema,
     gap_auto_fill_scheduler_id: schema.maybe(schema.string()),
   },
   {

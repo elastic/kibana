@@ -22,6 +22,14 @@ export const WATCHLIST_RISK_SCORE_WEIGHTING_LABEL = i18n.translate(
   { defaultMessage: 'Risk Score Weighting' }
 );
 
+export const WATCHLIST_RISK_SCORE_WEIGHTING_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.riskScoreWeightingInvalid',
+  {
+    defaultMessage:
+      'Enter a number between 0 and 2 in steps of 0.5 (for example 0, 0.5, 1, 1.5, or 2).',
+  }
+);
+
 export const WATCHLIST_FILTER_QUERY_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlists.flyout.filterQueryLabel',
   { defaultMessage: 'Watchlist filter' }
@@ -50,4 +58,19 @@ export const WATCHLIST_INDEX_PATTERN_LABEL = i18n.translate(
 export const WATCHLIST_INDEX_PATTERN_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlists.flyout.indexPatternPlaceholder',
   { defaultMessage: 'Search for an index pattern' }
+);
+
+export const WATCHLIST_LOOKBACK_PERIOD_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.lookbackPeriodLabel',
+  { defaultMessage: 'Lookback period' }
+);
+
+export const WATCHLIST_CSV_DATA_SOURCE_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceTitle',
+  { defaultMessage: 'CSV Data Source' }
+);
+
+export const WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceDescription',
+  { defaultMessage: 'Add entities to this watchlist by uploading a CSV file.' }
 );

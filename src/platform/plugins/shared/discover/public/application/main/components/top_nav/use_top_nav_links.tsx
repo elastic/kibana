@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
-import {
-  AppMenuActionId,
-  AppMenuRegistry,
-  dismissFlyouts,
-  DiscoverFlyouts,
-} from '@kbn/discover-utils';
+import { AppMenuRegistry, dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
@@ -43,19 +38,19 @@ import {
 import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
+  selectTabSavedSearchByValueAttributes,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateGetState,
+  useInternalStateSubscribe,
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
-import { onSaveDiscoverSession } from './save_discover_session';
 import { useDataState } from '../../hooks/use_data_state';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
-import { getCreateRuleMenuItem } from './app_menu_actions/get_create_rule';
 
 /**
  * Helper function to build the top nav links
@@ -69,6 +64,8 @@ export const useTopNavLinks = ({
   adHocDataViews,
   hasShareIntegration,
   persistedDiscoverSession,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -78,10 +75,13 @@ export const useTopNavLinks = ({
   adHocDataViews: DataView[];
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
 }): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
+  const subscribe = useInternalStateSubscribe();
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -101,6 +101,19 @@ export const useTopNavLinks = ({
         Object.values(ruleType.authorizedConsumers).some((consumer) => consumer.all)
       )
       .map((ruleType) => ruleType.id);
+
+  const transferBackToEditor = useCallback(async () => {
+    const byValueState = await selectTabSavedSearchByValueAttributes({
+      tabId: currentTab.id,
+      getState,
+      runtimeStateManager,
+      services,
+    });
+
+    services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
+      state: byValueState,
+    });
+  }, [getState, currentTab.id, runtimeStateManager, services]);
 
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({
@@ -129,22 +142,14 @@ export const useTopNavLinks = ({
       items.push(inspectAppMenuItem);
     }
 
-    if (showCreateRuleV2) {
-      const createRuleV2 = getCreateRuleMenuItem({
-        discoverParams,
-        services,
-        tabId: currentTab.id,
-        getState,
-      });
-      items.push(createRuleV2);
-    }
-
     if (services.triggersActionsUi && discoverParams.authorizedRuleTypeIds.length) {
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
         tabId: currentTab.id,
         getState,
+        subscribe,
+        showCreateRuleV2,
       });
       items.push(alertsAppMenuItem);
     }
@@ -221,6 +226,7 @@ export const useTopNavLinks = ({
     appId,
     dispatch,
     getState,
+    subscribe,
     isEsqlMode,
     currentDataView,
     currentTab,
@@ -247,13 +253,13 @@ export const useTopNavLinks = ({
     // Only show the ES|QL button in classic mode (not in ES|QL mode)
     // The "Switch to Classic" option is now in the tab menu when in ES|QL mode
     if (services.uiSettings.get(ENABLE_ESQL) && !isEsqlMode) {
-      newAppMenuRegistry.setSecondaryActionItem({
+      newAppMenuRegistry.registerItem({
         id: 'esql',
+        order: 2,
         label: i18n.translate('discover.localMenu.tryESQLTitle', {
           defaultMessage: 'ES|QL',
         }),
         iconType: 'code',
-        color: 'success',
         tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
           defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
         }),
@@ -272,13 +278,7 @@ export const useTopNavLinks = ({
 
       const savedAsButton = {
         run: async () => {
-          await onSaveDiscoverSession({
-            initialCopyOnSave: true,
-            services,
-            dispatch,
-            getState,
-            runtimeStateManager,
-          });
+          onOpenSaveAsModal();
         },
         id: 'saveAs',
         order: 1,
@@ -301,21 +301,11 @@ export const useTopNavLinks = ({
         testId: 'discoverSaveButton',
         iconType: isEmbeddedEditor ? 'checkCircleFill' : 'save',
         run: async () => {
-          await onSaveDiscoverSession({
-            services,
-            dispatch,
-            getState,
-            runtimeStateManager,
-            onSaveCb: isEmbeddedEditor
-              ? (saveState) => {
-                  const action = saveState
-                    ? TransferAction.SaveSession
-                    : TransferAction.SaveByValue;
-
-                  services.embeddableEditor.transferBackToEditor(action, saveState);
-                }
-              : undefined,
-          });
+          if (isEmbeddedEditor && services.embeddableEditor.isByValueEditor()) {
+            await transferBackToEditor();
+          } else {
+            onOpenSaveModal();
+          }
         },
         popoverWidth: 150,
         popoverTestId: 'discoverSaveButtonPopover',
@@ -386,18 +376,6 @@ export const useTopNavLinks = ({
 
     const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
 
-    // When v2 rules are enabled, profile extensions have registered their rule types
-    // into the alerts menu as usual. Move those items into the v2 createRule menu's
-    // legacy-rules submenu, then remove the alerts menu since v2 replaces it.
-    if (showCreateRuleV2) {
-      registry.mergePopoverItems(
-        AppMenuActionId.createRule,
-        'legacy-rules',
-        AppMenuActionId.alerts
-      );
-      registry.deleteItem(AppMenuActionId.alerts);
-    }
-
     return registry;
   }, [
     getAppMenuAccessor,
@@ -408,11 +386,12 @@ export const useTopNavLinks = ({
     dataView,
     dispatch,
     getState,
-    runtimeStateManager,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
-    showCreateRuleV2,
+    transferBackToEditor,
     persistedDiscoverSession,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
   ]);
 
   return useMemo((): AppMenuConfig => {
@@ -428,12 +407,6 @@ export const useTopNavLinks = ({
       primaryActionItem: config.primaryActionItem
         ? enhanceAppMenuItemWithRunAction({
             appMenuItem: config.primaryActionItem,
-            services,
-          })
-        : undefined,
-      secondaryActionItem: config.secondaryActionItem
-        ? enhanceAppMenuItemWithRunAction({
-            appMenuItem: config.secondaryActionItem,
             services,
           })
         : undefined,

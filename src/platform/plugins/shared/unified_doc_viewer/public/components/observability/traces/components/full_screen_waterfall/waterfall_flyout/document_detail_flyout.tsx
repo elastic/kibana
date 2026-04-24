@@ -66,6 +66,7 @@ export interface DocumentDetailFlyoutProps {
   traceId: string;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
+  hasAnimation?: boolean;
   onCloseFlyout: EuiFlyoutProps['onClose'];
   activeSection?: TraceOverviewSections;
   skipNextEventReport?: boolean;
@@ -78,6 +79,7 @@ export function DocumentDetailFlyout({
   traceId,
   dataView,
   dataTestSubj,
+  hasAnimation,
   onCloseFlyout,
   activeSection,
   skipNextEventReport,
@@ -94,6 +96,7 @@ export function DocumentDetailFlyout({
       loading={data.loading}
       title={data.title}
       dataTestSubj={dataTestSubj}
+      hasAnimation={hasAnimation}
       flyoutContentId={flyoutConfig.contentId}
       skipNextEventReport={skipNextEventReport}
     >

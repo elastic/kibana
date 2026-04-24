@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/dev-utils'
   - '@kbn/moon'
+  - '@kbn/dev-cli-runner'
 tags:
   - shared-common
   - package

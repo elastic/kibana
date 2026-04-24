@@ -19,6 +19,9 @@ export {
   STREAMS_TIERED_AI_FEATURE,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
   ATTACHMENT_SUGGESTIONS_LIMIT,
+  DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  MIN_EXTRACTION_INTERVAL_HOURS,
+  FAILURE_STORE_SELECTOR,
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';
@@ -35,3 +38,6 @@ export {
   getDefaultTextField,
   extractMessagesFromField,
 } from './pattern_extraction_helpers';
+
+export type { SigEventsTuningConfig } from './sig_events_tuning_config';
+export { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from './sig_events_tuning_config';

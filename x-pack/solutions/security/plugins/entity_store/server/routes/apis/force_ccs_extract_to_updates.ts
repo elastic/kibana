@@ -8,7 +8,7 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { API_VERSIONS } from '../../../common';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
@@ -25,14 +25,17 @@ const bodySchema = z.object({
   indexPatterns: z.array(z.string()).min(1),
   fromDateISO: z.string().datetime(),
   toDateISO: z.string().datetime(),
-  docsLimit: z.number().int().positive().optional(),
+  docsLimit: z.number().int().min(1).optional(),
 });
 
 export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: '/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates',
+      path: ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES,
       access: 'internal',
+      summary: 'Force cross-cluster search extraction',
+      description:
+        'Trigger an immediate cross-cluster search extraction for the specified entity type, index patterns, and date range.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

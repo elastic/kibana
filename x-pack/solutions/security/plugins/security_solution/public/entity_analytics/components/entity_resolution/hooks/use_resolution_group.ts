@@ -7,9 +7,11 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
+import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
+import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
-export const RESOLUTION_GROUP_ROUTE = '/internal/security/entity_store/resolution/group';
+export const RESOLUTION_GROUP_ROUTE = ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP;
 export const RESOLUTION_GROUP_QUERY_KEY = 'resolution-group';
 
 export interface ResolutionGroup {
@@ -29,7 +31,7 @@ export const useResolutionGroup = (entityId: string, options?: UseResolutionGrou
     queryKey: [RESOLUTION_GROUP_QUERY_KEY, entityId],
     queryFn: () =>
       http.fetch<ResolutionGroup>(RESOLUTION_GROUP_ROUTE, {
-        version: '2',
+        version: API_VERSIONS.public.v1,
         method: 'GET',
         query: { entity_id: entityId },
       }),

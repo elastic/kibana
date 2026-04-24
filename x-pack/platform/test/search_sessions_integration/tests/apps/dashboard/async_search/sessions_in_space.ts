@@ -11,22 +11,18 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const securityService = getService('security');
-  const { common, header, dashboard, security, searchSessionsManagement } = getPageObjects([
+  const { common, header, dashboard, security } = getPageObjects([
     'common',
     'header',
     'dashboard',
     'security',
-    'searchSessionsManagement',
   ]);
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
   const dashboardExpect = getService('dashboardExpect');
 
-  // Failing: See https://github.com/elastic/kibana/issues/260533
-  describe.skip('dashboard in space', () => {
+  describe('dashboard in space', () => {
     afterEach(async () => await clean());
     describe('Storing search sessions in space', () => {
       before(async () => await load(['minimal_read', 'store_search_session']));
@@ -38,25 +34,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         await searchSessions.save({ withRefresh: true, isSubmitButton: true });
-        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-          'A Pie in another space '
-        );
+        // Dismiss the "Background search created" toast
+        await toasts.dismissAll();
+        await searchSessions.openCompletedSearchFromToast();
 
-        // purge client side search cache
-        // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
-        await browser.refresh();
-
-        await searchSessions.openFlyout();
-        const searchSessionList = await searchSessionsManagement.getList();
-        const searchSessionItem = searchSessionList.find(
-          (session) => session.id === savedSessionId
-        );
-
-        if (!searchSessionItem) throw new Error(`Can\'t find session with id = ${savedSessionId}`);
-
-        // navigate to discover
-        await searchSessionItem.view();
-
+        // Wait for the dashboard to load
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 

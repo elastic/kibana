@@ -41,11 +41,13 @@ const createMockTriggersActionsUi = () => ({
 });
 
 const createMockWorkflowsExtensions = () => ({
-  getStepDefinition: (stepType: string) => {
-    // Return undefined for all step types in Storybook
-    // This allows the component to fall back to default icons
-    return undefined;
-  },
+  getStepDefinition: () => undefined,
+  getAllStepDefinitions: () => [],
+  hasStepDefinition: () => false,
+  getTriggerDefinition: () => undefined,
+  getAllTriggerDefinitions: () => [],
+  hasTriggerDefinition: () => false,
+  isReady: () => true,
 });
 
 /**

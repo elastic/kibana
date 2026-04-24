@@ -350,7 +350,7 @@
               },
               ">) => React.ReactNode) | undefined; width?: string | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
               "EuiTableDataType",
-              " | undefined; render?: ((value: any, item: ",
+              " | undefined; height?: string | number | undefined; render?: ((value: any, item: ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -360,7 +360,7 @@
               },
               ") => React.ReactNode) | undefined; align?: ",
               "HorizontalAlignment",
-              " | undefined; height?: string | number | undefined; minWidth?: string | undefined; maxWidth?: string | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; nameTooltip?: ",
+              " | undefined; minWidth?: string | undefined; maxWidth?: string | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; nameTooltip?: ",
               "EuiTableColumnNameTooltipProps",
               " | undefined; textOnly?: boolean | undefined; truncateText?: boolean | { lines: number; } | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",

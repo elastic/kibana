@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getWatchlistName } from '../../../../common/entity_analytics/watchlists/constants';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
@@ -19,9 +18,13 @@ import { useRiskLevelsEsqlQuery } from '../watchlists/components/hooks/use_risk_
 
 interface DynamicRiskLevelPanelProps {
   watchlistId?: string;
+  watchlistName?: string;
 }
 
-export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({ watchlistId }) => {
+export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
+  watchlistId,
+  watchlistName,
+}) => {
   const spaceId = useSpaceId();
   const hasWatchlist = !!watchlistId;
   const { uiSettings } = useKibana().services;
@@ -68,7 +71,7 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({ wa
                   id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.watchlistTitle"
                   defaultMessage="{watchlistName} risk levels"
                   values={{
-                    watchlistName: getWatchlistName(watchlistId),
+                    watchlistName: watchlistName ?? watchlistId,
                   }}
                 />
               ) : (

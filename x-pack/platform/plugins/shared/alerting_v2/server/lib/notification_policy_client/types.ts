@@ -54,6 +54,7 @@ export interface FindNotificationPoliciesParams {
   destinationType?: string;
   createdBy?: string;
   enabled?: boolean;
+  tags?: string[];
   sortField?: FindNotificationPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }

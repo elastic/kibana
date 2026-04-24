@@ -10,13 +10,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiTitle } fro
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useCurrentUser } from '../../../common/lib/kibana/hooks';
-import { OnboardingHeaderTopicSelector } from './onboarding_header_topic_selector';
 import { useOnboardingHeaderStyles } from './onboarding_header.styles';
 import rocketImage from './images/header_rocket.png';
 import rocketDarkImage from './images/header_rocket_dark.png';
-import { TeammatesCard } from './cards/teammates_card';
-import { VideoCard } from './cards/video_card';
-import { DemoCard } from './cards/demo_card';
 import { defaultHeaderConfig, headerConfig } from './onboarding_header_configs';
 import { hasCapabilities } from '../../../common/lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -66,21 +62,9 @@ export const OnboardingHeader = React.memo(() => {
             <span>{filteredHeaderConfig.description}</span>
           </EuiText>
           <EuiSpacer size="m" />
-          <OnboardingHeaderTopicSelector />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xxl" />
-      <EuiFlexGroup justifyContent="center" alignItems="center" wrap>
-        <EuiFlexItem>
-          <VideoCard isDarkMode={isDarkMode} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <TeammatesCard isDarkMode={isDarkMode} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <DemoCard isDarkMode={isDarkMode} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </>
   );
 });

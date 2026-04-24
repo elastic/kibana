@@ -17,6 +17,8 @@ import {
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
 
+import { isDeprecatedStepType } from '../../../../../common/schema';
+
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
   getSuggestions: jest.fn(() => []),
@@ -29,6 +31,10 @@ jest.mock('./context/build_autocomplete_context', () => ({
     linePrefix: '  - type:',
     lineSuffix: '',
   })),
+}));
+
+jest.mock('../../../../../common/schema', () => ({
+  isDeprecatedStepType: jest.fn(() => false),
 }));
 
 describe('getCompletionItemProvider', () => {
@@ -58,6 +64,7 @@ describe('getCompletionItemProvider', () => {
     } as monaco.languages.CompletionContext;
 
     getState = jest.fn(() => ({} as any));
+    (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -134,6 +141,52 @@ describe('getCompletionItemProvider', () => {
       expect(result?.suggestions?.map((s) => s.label)).toEqual(
         expect.arrayContaining(['alert', 'scheduled'])
       );
+    });
+
+    it('should filter deprecated step types from workflow and YAML suggestions', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([
+        {
+          label: 'kibana.createCase',
+          insertText: 'kibana.createCase',
+          filterText: 'kibana.createCase',
+        },
+      ]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'kibana.createCaseDefaultSpace',
+              insertText: 'kibana.createCaseDefaultSpace',
+              filterText: 'kibana.createCaseDefaultSpace',
+            },
+            {
+              label: 'scheduled',
+              insertText: 'scheduled',
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      const deprecatedStepTypes = new Set(['kibana.createCase', 'kibana.createCaseDefaultSpace']);
+      (isDeprecatedStepType as jest.Mock).mockImplementation((stepType: string) =>
+        deprecatedStepTypes.has(stepType)
+      );
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions).toHaveLength(1);
+      expect(result?.suggestions?.[0].label).toBe('scheduled');
     });
 
     it('should deduplicate duplicate keys across YAML providers, preferring snippets', async () => {
@@ -400,6 +453,86 @@ describe('getCompletionItemProvider', () => {
 
       expect(result?.suggestions).toEqual([]);
       expect(result?.incomplete).toBe(false);
+    });
+
+    it('should call YAML providers on empty lines outside liquid blocks', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
+      buildAutocompleteContext.mockReturnValueOnce({
+        path: [],
+        line: '',
+        lineUpToCursor: '',
+        lineParseResult: { matchType: 'liquid-block-keyword', fullKey: '', match: null },
+        isInLiquidBlock: false,
+        focusedStepInfo: null,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            { label: 'consts', insertText: 'consts' },
+            { label: 'description', insertText: 'description' },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(yamlProvider.provideCompletionItems).toHaveBeenCalled();
+      expect(result?.suggestions).toHaveLength(2);
+      expect(result?.suggestions?.map((s) => s.label)).toEqual(
+        expect.arrayContaining(['consts', 'description'])
+      );
+    });
+
+    it('should skip YAML providers for liquid-block-keyword when inside a liquid block', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
+      buildAutocompleteContext.mockReturnValueOnce({
+        path: ['steps', 0, 'with', 'message'],
+        line: '  assign',
+        lineUpToCursor: '  assign',
+        lineParseResult: { matchType: 'liquid-block-keyword', fullKey: 'assign', match: null },
+        isInLiquidBlock: true,
+        focusedStepInfo: null,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [{ label: 'should-not-appear', insertText: 'nope' }],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(yamlProvider.provideCompletionItems).not.toHaveBeenCalled();
+      expect(result?.suggestions).toHaveLength(0);
     });
 
     it('should handle providers that return null or undefined', async () => {

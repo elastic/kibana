@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
 const MAX_PER_PAGE = 10000;
 
@@ -46,7 +46,7 @@ export const searchResponseBodySchema = schema.object({
         description: schema.maybe(schema.string()),
         title: schema.string(),
       }),
-      meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
+      meta: asCodeMetaSchema,
     }),
     { minSize: 0, maxSize: MAX_PER_PAGE }
   ),

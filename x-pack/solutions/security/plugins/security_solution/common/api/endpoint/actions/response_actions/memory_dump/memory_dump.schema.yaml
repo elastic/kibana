@@ -29,7 +29,7 @@ paths:
                   comment: 'Generating memory dump for investigation'
       responses:
         '200':
-          description: Action request was successfully created
+          description: Indicates a successful call.
           content:
             application/json:
               schema:

@@ -279,8 +279,8 @@ export default function (program) {
         'Collect more complete stack traces. See src/cli/dev.js for explanation.'
       )
       .option(
-        '--uiam',
-        'Configure Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
+        '--no-uiam',
+        'Prevents configuring Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
       );
   }
 
@@ -323,7 +323,7 @@ export default function (program) {
       cache: !!opts.cache,
       dist: !!opts.dist,
       serverless: isServerlessMode,
-      uiam: isServerlessSamlSupported && !!opts.uiam,
+      uiam: isServerlessSamlSupported && opts.uiam !== false,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
@@ -442,7 +442,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     });
   }
 
-  if (opts.uiam && DEV_UTILS_SUPPORTED) {
+  if (opts.uiam !== false && DEV_UTILS_SUPPORTED) {
     // Ensure the key/cert pair is loaded dynamically to exclude it from the production build.
     // eslint-disable-next-line import/no-dynamic-require
     const { KBN_CERT_PATH, KBN_KEY_PATH } = require(DEV_UTILS_PATH);

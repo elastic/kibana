@@ -35,9 +35,26 @@ interface RetryServiceLike {
   waitForWithTimeout: (
     label: string,
     timeout: number,
-    predicate: () => Promise<boolean> | boolean
+    predicate: () => Promise<boolean>
   ) => Promise<void>;
 }
+
+const isMaintainerStarted = (maintainer?: {
+  taskStatus?: string;
+  runs?: number;
+}): maintainer is { taskStatus: string; runs: number } =>
+  maintainer != null &&
+  maintainer.taskStatus != null &&
+  maintainer.taskStatus.toLowerCase() === 'started';
+
+const isMaintainerAlreadyRunningError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return message.includes('currently running') || message.includes('failed to run task');
+};
 
 export const entityMaintainerRouteHelpersFactory = (
   supertest: SuperTest.Agent,
@@ -45,7 +62,7 @@ export const entityMaintainerRouteHelpersFactory = (
 ) => {
   const getMaintainers = async (expectStatusCode: number = 200, ids?: string[]) => {
     let req = supertest.get(
-      routeWithNamespace(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_GET, namespace)
+      routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET, namespace)
     );
     if (ids && ids.length > 0) {
       req = req.query({ ids });
@@ -59,11 +76,19 @@ export const entityMaintainerRouteHelpersFactory = (
   return {
     getMaintainers,
 
-    initMaintainers: async (expectStatusCode: number = 200) => {
+    initMaintainers: async ({
+      expectStatusCode = 200,
+      autoStart,
+    }: {
+      expectStatusCode?: number;
+      autoStart?: boolean;
+    } = {}) => {
       const response = await withHeaders(
-        supertest.post(routeWithNamespace(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, namespace))
+        supertest.post(
+          routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, namespace)
+        )
       )
-        .send()
+        .send(autoStart === undefined ? {} : { autoStart })
         .expect((res) => {
           if (res.status !== expectStatusCode) {
             throw new Error(
@@ -75,15 +100,26 @@ export const entityMaintainerRouteHelpersFactory = (
     },
 
     runMaintainer: async (id: string, expectStatusCode: number = 200) => {
-      const route = ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN.replace('{id}', id);
+      const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace('{id}', id);
       const response = await withHeaders(supertest.post(routeWithNamespace(route, namespace)))
         .send()
         .expect(expectStatusCode);
       return response;
     },
 
+    runMaintainerSync: async (id: string, expectStatusCode: number = 200) => {
+      const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace('{id}', id);
+      const response = await withHeaders(
+        supertest.post(routeWithNamespace(route, namespace)).query({ sync: 'true' })
+      )
+        .timeout(10 * 60 * 1000)
+        .send()
+        .expect(expectStatusCode);
+      return response;
+    },
+
     startMaintainer: async (id: string, expectStatusCode: number = 200) => {
-      const route = ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START.replace('{id}', id);
+      const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START.replace('{id}', id);
       const response = await withHeaders(supertest.put(routeWithNamespace(route, namespace)))
         .send()
         .expect(expectStatusCode);
@@ -91,7 +127,7 @@ export const entityMaintainerRouteHelpersFactory = (
     },
 
     stopMaintainer: async (id: string, expectStatusCode: number = 200) => {
-      const route = ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP.replace('{id}', id);
+      const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP.replace('{id}', id);
       const response = await withHeaders(supertest.put(routeWithNamespace(route, namespace)))
         .send()
         .expect(expectStatusCode);
@@ -112,6 +148,7 @@ export const waitForMaintainerRun = async ({
   minRuns = 1,
   maintainerId = 'risk-score',
   timeoutMs = 60_000,
+  triggerRun = true,
 }: {
   retry: RetryServiceLike;
   routes: Pick<
@@ -121,7 +158,33 @@ export const waitForMaintainerRun = async ({
   minRuns?: number;
   maintainerId?: string;
   timeoutMs?: number;
+  triggerRun?: boolean;
 }): Promise<void> => {
+  // Wait until the maintainer task exists, is started, and its runs count has
+  // stabilised across two consecutive polls before we capture the baseline and
+  // trigger a new run. This prevents a race where `start` has not yet fully
+  // enabled the task or `runSoon` overlaps with an in-flight execution.
+  let lastSeenRuns = -1;
+  await retry.waitForWithTimeout(
+    `Entity maintainer "${maintainerId}" to start and settle before run`,
+    30_000,
+    async () => {
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; runs: number; taskStatus: string }) => m.id === maintainerId
+      );
+      if (!isMaintainerStarted(maintainer)) {
+        // `start` is async from the test's perspective, so don't trigger yet.
+        lastSeenRuns = -1;
+        return false;
+      }
+      const runs = maintainer.runs;
+      if (runs === lastSeenRuns) return true;
+      lastSeenRuns = runs;
+      return false;
+    }
+  );
+
   // Capture current runs count so we wait for an actual NEW run,
   // not a stale count from a previous test.
   let baselineRuns = 0;
@@ -135,22 +198,61 @@ export const waitForMaintainerRun = async ({
     // Maintainer may not exist yet
   }
 
-  // Trigger a manual run so we don't have to wait for the scheduled interval
-  try {
-    await routes.runMaintainer(maintainerId);
-  } catch {
-    // May fail if maintainer isn't ready yet; the scheduled run will cover it
-  }
+  let requiredNewRuns = minRuns;
+  let manualRunTriggered = !triggerRun;
+  let alreadyRunningHandled = false;
 
   await retry.waitForWithTimeout(
-    `Entity maintainer "${maintainerId}" to complete at least ${minRuns} new run(s) (baseline: ${baselineRuns})`,
+    `Entity maintainer "${maintainerId}" to complete at least ${requiredNewRuns} new run(s) (baseline: ${baselineRuns})`,
     timeoutMs,
+    async () => {
+      // Keep trying to trigger a manual run until the task accepts it.
+      // After stop/start a previous run may still be in-flight; when we
+      // see "already running" we need one extra completion but must keep
+      // retrying so we can trigger the additional run once the current
+      // one finishes.
+      if (!manualRunTriggered) {
+        try {
+          await routes.runMaintainer(maintainerId);
+          manualRunTriggered = true;
+        } catch (error) {
+          if (isMaintainerAlreadyRunningError(error)) {
+            if (!alreadyRunningHandled) {
+              requiredNewRuns += 1;
+              alreadyRunningHandled = true;
+            }
+          }
+        }
+      }
+
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; runs: number }) => m.id === maintainerId
+      );
+
+      return maintainer !== undefined && maintainer.runs >= baselineRuns + requiredNewRuns;
+    }
+  );
+
+  // runSoon (called above via runMaintainer) can cause the task manager to
+  // schedule an immediate follow-up run once the current one finishes.  If
+  // the caller stops the maintainer while that follow-up is still saving its
+  // state, a version_conflict_engine_exception wedges the task permanently.
+  // Wait for the runs count to stabilise across two consecutive polls so the
+  // task is idle before we hand control back.
+  lastSeenRuns = -1;
+  await retry.waitForWithTimeout(
+    `Entity maintainer "${maintainerId}" to settle after run`,
+    30_000,
     async () => {
       const response = await routes.getMaintainers(200, [maintainerId]);
       const maintainer = response.body.maintainers.find(
         (m: { id: string; runs: number }) => m.id === maintainerId
       );
-      return maintainer !== undefined && maintainer.runs >= baselineRuns + minRuns;
+      const runs = maintainer?.runs ?? 0;
+      if (runs === lastSeenRuns) return true;
+      lastSeenRuns = runs;
+      return false;
     }
   );
 };

@@ -31,9 +31,6 @@ import {
 import type { ChildVirtualizerController } from '../../../lib/core/virtualizer/child_virtualizer_controller';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 
-const NOOP_SUBSCRIBE = () => () => {};
-const ALWAYS_ACTIVE = () => true;
-
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
   children,
   getVirtualizer,
@@ -68,16 +65,16 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     return leafNodes.get(leafCacheKey) ?? null;
   }, [leafCacheKey, leafNodes]);
 
-  const childController: ChildVirtualizerController | null = useMemo(
-    () => getVirtualizer().childController ?? null,
+  const childController: ChildVirtualizerController = useMemo(
+    () => getVirtualizer().childController,
     [getVirtualizer]
   );
 
   // Subscribe to the controller's activation state.
   // This is the coordination signal — the stagger decides when heavy content should mount.
   const isActivated = useSyncExternalStore(
-    childController ? childController.subscribe : NOOP_SUBSCRIBE,
-    childController ? () => childController.shouldActivate(row.index) : ALWAYS_ACTIVE,
+    childController.subscribe,
+    () => childController.shouldActivate(row.index),
     () => false
   );
 
@@ -159,7 +156,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       cellId: leafCacheKey,
       key: leafCacheKey,
       nodePath,
-      virtualizerController: childController!,
+      virtualizerController: childController,
       rowIndex: row.index,
     });
   }, [children, leafData, leafCacheKey, nodePath, childController, row.index]);

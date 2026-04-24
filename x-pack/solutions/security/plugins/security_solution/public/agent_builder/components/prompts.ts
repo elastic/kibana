@@ -80,12 +80,17 @@ Formatting Requirements:
 
 export const ENTITY_PROMPT = `Explain how inputs contributed to the risk score, including any risk modifiers such as asset criticality or privileged user monitoring status. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration both the risk score inputs and any modifiers that adjusted the final score.`;
 
+export const LEAD_ATTACHMENT_PROMPT = `Analyze this hunting lead using the evidence already gathered by the lead generation engine. The attached lead contains entity risk scores, alert severity counts, observation details, and investigation recommendations that have already been collected. Summarize the threat, present the key findings per entity, assess overall severity, and recommend concrete next steps for investigation. Do not re-query for data that is already provided in the lead.`;
+
 export const RULE_EXPLORATION_ATTACHMENT_PROMPT = `
 Analyze the attached Security detection rule and provide actionable insights.
 
 Important:
 - Always read the rule from the attachment data (attachment type: security.rule)
 - If the attachment data is not found, use the dedicated attachment read tool (attachment type: security.rule)
+- Always use latest version of the rule attachment. Discard older versions.
+- Always render inline the latest version of the rule attachment(attachment type: security.rule). Do not render older versions.
+- To ensure you are using the latest version, always use the attachment read tool (attachment type: security.rule) before analyzing the rule.
 
 Analysis Framework:
 1. Detection Intent & Strategy

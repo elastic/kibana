@@ -19,6 +19,7 @@ import {
   EuiCallOut,
   EuiButton,
   EuiLink,
+  EuiScreenReaderLive,
 } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 
@@ -75,8 +76,24 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   }, []);
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
+  const [includeStatsAnnouncement, setIncludeStatsAnnouncement] = useState('');
+
+  const handleIncludeStatsChange = (nextChecked: boolean) => {
+    setIsIncludeStatsChecked(nextChecked);
+    setIncludeStatsAnnouncement(
+      nextChecked
+        ? i18n.translate('xpack.idxMgmt.dataStreamListControls.includeStatsSwitchOn', {
+            defaultMessage: 'Include stats on',
+          })
+        : i18n.translate('xpack.idxMgmt.dataStreamListControls.includeStatsSwitchOff', {
+            defaultMessage: 'Include stats off',
+          })
+    );
+  };
+
   const {
     error,
+    isInitialRequest,
     isLoading,
     data: dataStreams,
     resendRequest: reload,
@@ -172,7 +189,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   let content;
 
-  if (isLoading) {
+  if (isLoading && isInitialRequest) {
     content = (
       <PageLoading>
         <FormattedMessage
@@ -306,12 +323,13 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               : ''
           }
           dataStreams={filteredDataStreams}
+          isLoading={isLoading}
           reload={reload}
           viewFilters={filters}
           onViewFilterChange={setFilters}
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
-          setIncludeStats={setIsIncludeStatsChecked}
+          setIncludeStats={handleIncludeStatsChange}
         />
       </EuiPageSection>
     );
@@ -319,6 +337,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   return (
     <div className={APP_WRAPPER_CLASS}>
+      <EuiScreenReaderLive>{includeStatsAnnouncement}</EuiScreenReaderLive>
       {content}
 
       {/*

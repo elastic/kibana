@@ -8,12 +8,18 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Feature } from '@kbn/streams-schema';
+import {
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+} from '@kbn/streams-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import {
   KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS,
   KI_FEATURE_EXTRACTION_TIMEOUT_MS,
   DEFAULT_LOGS_INDEX,
+  QUERIES_INDEX,
 } from './constants';
 import {
   getSigeventsSnapshotKIFeaturesIndex,
@@ -52,22 +58,35 @@ export async function configureModelSelectionSettings(
   log: ToolingLog,
   connectorId: string
 ): Promise<void> {
-  log.info(`Configuring model selection (connector: ${connectorId})...`);
+  log.info(`Configuring model override via inference settings (connector: ${connectorId})...`);
   const { status, data } = await kibanaRequest(
     config,
     'PUT',
-    '/internal/streams/_significant_events/settings',
-    { connectorIdKnowledgeIndicatorExtraction: connectorId }
+    '/internal/search_inference_endpoints/settings',
+    {
+      features: [
+        {
+          feature_id: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+          endpoints: [{ id: connectorId }],
+        },
+        {
+          feature_id: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+          endpoints: [{ id: connectorId }],
+        },
+        {
+          feature_id: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+          endpoints: [{ id: connectorId }],
+        },
+      ],
+    }
   );
 
   if (status >= 200 && status < 300) {
-    log.info('Model selection settings configured');
+    log.info('Model selection settings configured via inference settings');
     return;
   }
 
-  throw new Error(
-    `Failed to configure model selection settings: ${status} ${JSON.stringify(data)}`
-  );
+  throw new Error(`Failed to configure inference settings: ${status} ${JSON.stringify(data)}`);
 }
 export async function triggerSigEventsKIFeatureExtraction(
   config: ConnectionConfig,
@@ -259,4 +278,29 @@ export async function enableLogsNativeStream(
     }
     throw err;
   }
+}
+
+export async function promoteQueries(config: ConnectionConfig): Promise<void> {
+  const { status, data } = await kibanaRequest(
+    config,
+    'POST',
+    '/internal/streams/queries/_promote'
+  );
+  if (status < 200 || status >= 300) {
+    throw new Error(`Failed to promote queries: ${status} ${JSON.stringify(data)}`);
+  }
+}
+
+export async function resetQueriesPromotion({ esClient }: { esClient: Client }): Promise<void> {
+  await esClient.updateByQuery({
+    index: QUERIES_INDEX,
+    conflicts: 'proceed',
+    refresh: true,
+    query: { match_all: {} },
+    script: {
+      lang: 'painless',
+      source: `ctx._source['rule_backed'] = params.rb`,
+      params: { rb: false },
+    },
+  });
 }

@@ -117,7 +117,7 @@
           "TerraformImpactResult"
         ],
         "path": "packages/kbn-api-contracts/src/terraform/check_terraform_impact.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -140,7 +140,7 @@
               "[]"
             ],
             "path": "packages/kbn-api-contracts/src/terraform/check_terraform_impact.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -157,7 +157,7 @@
               "string | undefined"
             ],
             "path": "packages/kbn-api-contracts/src/terraform/check_terraform_impact.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -188,7 +188,7 @@
           " | undefined) => string"
         ],
         "path": "packages/kbn-api-contracts/src/report/format_failure.ts",
-        "lineNumber": 66,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -211,7 +211,7 @@
               "[]"
             ],
             "path": "packages/kbn-api-contracts/src/report/format_failure.ts",
-            "lineNumber": 67,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -229,7 +229,7 @@
               " | undefined"
             ],
             "path": "packages/kbn-api-contracts/src/report/format_failure.ts",
-            "lineNumber": 68,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

@@ -56,7 +56,7 @@ describe('pinned panels', () => {
 
   const transformedPinnedPanels = [
     {
-      uid: 'control1',
+      id: 'control1',
       type: OPTIONS_LIST_CONTROL,
       width: DEFAULT_PINNED_CONTROL_STATE.width,
       config: {
@@ -64,7 +64,7 @@ describe('pinned panels', () => {
       },
     },
     {
-      uid: 'control2',
+      id: 'control2',
       type: RANGE_SLIDER_CONTROL,
       width: 'small',
       config: {
@@ -72,7 +72,7 @@ describe('pinned panels', () => {
       },
     },
     {
-      uid: 'control3',
+      id: 'control3',
       type: ESQL_CONTROL,
       grow: true,
       config: {
@@ -83,7 +83,7 @@ describe('pinned panels', () => {
 
   it('should transform pinned panels object to array with all transformations applied', () => {
     const result = transformPinnedPanelsOut(undefined, { panels: mockPinnedPanels }, []);
-    expect(result).toEqual(transformedPinnedPanels);
+    expect(result.panels).toEqual(transformedPinnedPanels);
   });
 
   it('should transform pinned panels object to array', () => {
@@ -114,7 +114,7 @@ describe('pinned panels', () => {
     it('should transform serialized control state to array with all transformations applied', () => {
       const serializedControlState = { panelsJSON: JSON.stringify(mockPinnedPanels) };
       const result = transformPinnedPanelsOut(serializedControlState, undefined, []);
-      expect(result).toEqual(transformedPinnedPanels);
+      expect(result.panels).toEqual(transformedPinnedPanels);
     });
   });
 });

@@ -7,11 +7,14 @@ value:
     "cases": [
       {
         "id": "abed3a70-71bd-11ea-a0b2-c51ea50a58e2",
+        "incremental_id": 1,
         "version": "WzExMCwxXQ==",
         "comments": [],
+        "observables": [],
         "totalComment": 1,
         "totalAlerts": 0,
         "totalEvents": 0,
+        "total_observables": 0,
         "title": "Case title",
         "tags": [ "tag-1" ],
         "description": "Case description",

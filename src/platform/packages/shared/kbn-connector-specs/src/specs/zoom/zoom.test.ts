@@ -38,6 +38,31 @@ describe('Zoom', () => {
     jest.clearAllMocks();
   });
 
+  describe('auth', () => {
+    it('supports bearer auth', () => {
+      const types = (Zoom.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toContain('bearer');
+    });
+
+    it('supports oauth_authorization_code with correct Zoom defaults', () => {
+      const oauthType = (
+        Zoom.auth?.types as Array<string | { type: string; defaults?: Record<string, unknown> }>
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://zoom.us/oauth/authorize',
+          tokenUrl: 'https://zoom.us/oauth/token',
+          scope:
+            'user:read:user meeting:read:meeting meeting:read:list_meetings meeting:read:past_meeting meeting:read:list_past_participants meeting:read:list_registrants cloud_recording:read:list_recording_files cloud_recording:read:list_user_recordings',
+        },
+      });
+    });
+  });
+
   describe('listMeetings action', () => {
     it('should list upcoming meetings with default params', async () => {
       const mockResponse = {

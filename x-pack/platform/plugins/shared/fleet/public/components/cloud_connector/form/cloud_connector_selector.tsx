@@ -44,6 +44,8 @@ interface CloudConnectorSelectorProps {
   credentials: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
   accountType?: AccountType;
+  packageName?: string;
+  policyTemplate?: string;
 }
 
 export const CloudConnectorSelector = ({
@@ -52,10 +54,14 @@ export const CloudConnectorSelector = ({
   credentials,
   setCredentials,
   accountType,
+  packageName,
+  policyTemplate,
 }: CloudConnectorSelectorProps) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors({
     cloudProvider: provider,
     accountType,
+    packageName,
+    policyTemplate,
   });
   const [flyoutConnectorId, setFlyoutConnectorId] = useState<string | null>(null);
   const [selectKey, setSelectKey] = useState(0);
@@ -63,7 +69,7 @@ export const CloudConnectorSelector = ({
   const label = (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.selector.label"
-      defaultMessage="Cloud Connector Name"
+      defaultMessage="Federated Identity Name"
     />
   );
 
@@ -110,7 +116,7 @@ export const CloudConnectorSelector = ({
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate('xpack.fleet.cloudConnector.selector.editTooltip', {
-                  defaultMessage: 'View and edit connector details',
+                  defaultMessage: 'View and edit identity details',
                 })}
               >
                 <EuiButtonIcon
@@ -231,7 +237,7 @@ export const CloudConnectorSelector = ({
           onChange={handleChange}
           fullWidth
           placeholder={i18n.translate('xpack.fleet.cloudConnector.selector.placeholder', {
-            defaultMessage: 'Select a cloud connector',
+            defaultMessage: 'Select a Federated Identity',
           })}
           hasDividers
           data-test-subj={testSubj}

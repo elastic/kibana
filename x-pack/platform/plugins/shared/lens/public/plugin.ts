@@ -41,16 +41,17 @@ import type {
 import { i18n } from '@kbn/i18n';
 import type { ChartType } from '@kbn/visualization-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import type {
-  VisualizationType,
-  LensAppLocator,
-  DatasourceMap,
-  VisualizationMap,
-  LensTopNavMenuEntryGenerator,
-  VisualizeEditorContext,
-  EditorFrameSetup,
-  LensDocument,
-  LensByRefSerializedState,
+import {
+  type VisualizationType,
+  type LensAppLocator,
+  type DatasourceMap,
+  type VisualizationMap,
+  type LensTopNavMenuEntryGenerator,
+  type VisualizeEditorContext,
+  type EditorFrameSetup,
+  type LensDocument,
+  type LensByRefSerializedState,
+  LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -114,7 +115,6 @@ import {
   APP_ID,
   DISCOVER_DRILLDOWN_TYPE,
   getEditPath,
-  LENS_EMBEDDABLE_TYPE,
   LENS_ICON,
   NOT_INTERNATIONALIZED_PRODUCT_NAME,
 } from '../common/constants';
@@ -385,7 +385,7 @@ export class LensPlugin {
 
     if (embeddable) {
       // Let Kibana know about the Lens embeddable
-      embeddable.registerReactEmbeddableFactory(LENS_EMBEDDABLE_TYPE, async () => {
+      embeddable.registerEmbeddablePublicDefinition(LENS_EMBEDDABLE_TYPE, async () => {
         const [deps, { createLensEmbeddableFactory }] = await Promise.all([
           getStartServicesForEmbeddable(),
           import('./async_services'),

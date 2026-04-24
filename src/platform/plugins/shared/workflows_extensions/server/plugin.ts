@@ -21,6 +21,7 @@ import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definit
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
+import { registerInternalTriggerDefinitions } from './triggers';
 import type {
   EmitEventParams,
   TriggerEventHandler,
@@ -52,7 +53,7 @@ export class WorkflowsExtensionsServerPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.stepRegistry = new ServerStepRegistry();
+    this.stepRegistry = new ServerStepRegistry(this.logger);
     this.triggerRegistry = new TriggerRegistry();
   }
 
@@ -67,6 +68,7 @@ export class WorkflowsExtensionsServerPlugin
     // Register HTTP route to expose trigger definitions for testing
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
     registerInternalStepDefinitions(core, this.stepRegistry);
+    registerInternalTriggerDefinitions(this.triggerRegistry);
 
     core.http.registerRouteHandlerContext<WorkflowsExtensionsRequestHandlerContext, 'workflows'>(
       'workflows',
@@ -125,6 +127,9 @@ export class WorkflowsExtensionsServerPlugin
       },
       getAllStepDefinitions: () => {
         return this.stepRegistry.getAll();
+      },
+      isReady: async () => {
+        await this.stepRegistry.whenReady();
       },
       getAllTriggerDefinitions: () => {
         return this.triggerRegistry.list();

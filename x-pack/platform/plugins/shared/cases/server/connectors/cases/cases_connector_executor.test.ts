@@ -10,7 +10,7 @@ import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
   CASE_RULES_SAVED_OBJECT,
-  MAX_OPEN_CASES,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -1431,7 +1431,10 @@ describe('CasesConnectorExecutor', () => {
           });
 
           casesClientMock.cases.bulkUpdate.mockResolvedValue([
-            { ...cases[0], status: CaseStatuses.open },
+            {
+              ...cases[0],
+              status: CaseStatuses.open,
+            },
           ]);
 
           await connectorExecutor.execute({
@@ -2809,20 +2812,21 @@ describe('CasesConnectorExecutor', () => {
       });
     });
 
-    describe('hard limits', () => {
-      const allAlerts = Array.from({ length: MAX_OPEN_CASES + 1 }).map((_, index) => ({
-        _id: `alert-id-${index}`,
-        _index: `alert-index-${index}`,
-        'host.name': `host-${index}`,
-      }));
+    describe('effective maximum', () => {
+      const allAlerts = Array.from({ length: MAX_OPEN_CASES_DEFAULT_MAXIMUM + 1 }).map(
+        (_, index) => ({
+          _id: `alert-id-${index}`,
+          _index: `alert-index-${index}`,
+          'host.name': `host-${index}`,
+        })
+      );
 
-      it('generates the oracle keys correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+      it('generates the oracle keys correctly when the total cases to be open is more than the effective maximum', async () => {
         await connectorExecutor.execute({
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 30,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
@@ -2834,13 +2838,12 @@ describe('CasesConnectorExecutor', () => {
         });
       });
 
-      it('generates the case ids correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+      it('generates the case ids correctly when the total cases to be open is more than the effective maximum', async () => {
         await connectorExecutor.execute({
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 30,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
@@ -2853,13 +2856,12 @@ describe('CasesConnectorExecutor', () => {
         });
       });
 
-      it('attach all alerts to the same case when the grouping generates more than MAX_OPEN_CASES', async () => {
+      it('attach all alerts to the same case when the grouping generates more than the effective maximum', async () => {
         await connectorExecutor.execute({
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 30,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
@@ -2885,8 +2887,7 @@ describe('CasesConnectorExecutor', () => {
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 30,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -3535,7 +3536,10 @@ describe('CasesConnectorExecutor', () => {
           });
 
           casesClientMock.cases.bulkUpdate.mockResolvedValue([
-            { ...cases[0], status: CaseStatuses.open },
+            {
+              ...cases[0],
+              status: CaseStatuses.open,
+            },
           ]);
 
           await connectorExecutor.execute({

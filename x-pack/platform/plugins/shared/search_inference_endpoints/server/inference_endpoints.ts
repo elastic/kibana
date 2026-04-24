@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { ISavedObjectsRepository, IUiSettingsClient, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
 import type { ResolvedInferenceEndpoints } from './types';
+
+const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 /**
  * Returns the resolved inference endpoints for a feature.
@@ -45,6 +51,83 @@ export const getForFeature = async (
     endpoints: result.endpoints,
     warnings: [...resolveWarnings, ...result.warnings],
     soEntryFound,
+  };
+};
+
+/**
+ * Resolves endpoints for a feature and layers on the global default AI connector
+ * configured via advanced settings (`GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR` and
+ * `GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY`).
+ *
+ * - When `defaultOnly` is set, only the default connector is returned (or an empty list).
+ * - When the feature has no admin-configured SO override, the default connector is
+ *   prepended to the resolved endpoints.
+ * - When an SO override exists for the feature, the default is ignored.
+ *
+ * Kept in sync with the HTTP route at `GET /internal/search_inference_endpoints/connectors`.
+ */
+export const getForFeatureWithDefault = async ({
+  registry,
+  soClient,
+  uiSettingsClient,
+  getConnectorById,
+  featureId,
+  logger,
+}: {
+  registry: InferenceFeatureRegistry;
+  soClient: ISavedObjectsRepository;
+  uiSettingsClient: IUiSettingsClient;
+  getConnectorById: (id: string) => Promise<InferenceConnector>;
+  featureId: string;
+  logger: Logger;
+}): Promise<ResolvedInferenceEndpoints> => {
+  const [defaultConnectorId, defaultConnectorOnly] = await Promise.all([
+    uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR),
+    uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY),
+  ]);
+
+  const hasDefault =
+    typeof defaultConnectorId === 'string' &&
+    defaultConnectorId.length > 0 &&
+    defaultConnectorId !== NO_DEFAULT_CONNECTOR;
+
+  const fetchDefault = async (): Promise<InferenceConnector | undefined> => {
+    if (!hasDefault) return undefined;
+    try {
+      return await getConnectorById(defaultConnectorId);
+    } catch (e) {
+      logger.warn(`Failed to load default connector "${defaultConnectorId}": ${e.message}`);
+      return undefined;
+    }
+  };
+
+  if (defaultConnectorOnly) {
+    const defaultConnector = await fetchDefault();
+    return {
+      endpoints: defaultConnector ? [defaultConnector] : [],
+      warnings: [],
+      soEntryFound: false,
+    };
+  }
+
+  const result = await getForFeature(registry, soClient, getConnectorById, featureId, logger);
+
+  if (result.soEntryFound || !hasDefault) {
+    return result;
+  }
+
+  const defaultConnector = await fetchDefault();
+  if (!defaultConnector) {
+    return result;
+  }
+
+  return {
+    endpoints: [
+      defaultConnector,
+      ...result.endpoints.filter((c) => c.connectorId !== defaultConnector.connectorId),
+    ],
+    warnings: result.warnings,
+    soEntryFound: false,
   };
 };
 
@@ -83,12 +166,23 @@ interface ResolvedEndpointIds {
   soEntryFound: boolean;
 }
 
-const resolveEndpointIds = async (
+/**
+ * Pure resolution logic that walks the fallback chain for a feature using
+ * pre-fetched data. Exported so the settings route can reuse it without
+ * re-reading the saved object.
+ *
+ * Fallback order:
+ * 1. Admin-configured SO override for the feature itself
+ * 2. Walk parentFeatureId chain, checking SO overrides at each level
+ * 3. First non-empty recommendedEndpoints found in the chain
+ * 4. Kibana default chat-completion endpoint
+ */
+export const resolveFeatureEndpointIds = (
   registry: InferenceFeatureRegistry,
-  soClient: ISavedObjectsRepository,
+  soFeaturesMap: Map<string, InferenceSettingsAttributes['features'][number]>,
   featureId: string,
   logger: Logger
-): Promise<ResolvedEndpointIds> => {
+): ResolvedEndpointIds => {
   let current = registry.get(featureId);
   if (!current) {
     logger.warn(
@@ -102,8 +196,6 @@ const resolveEndpointIds = async (
   let recEntry = current.recommendedEndpoints?.length
     ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
     : undefined;
-  const soFeatures = await readSettingsFeatures(soClient, logger);
-  const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
 
   // Walk the fallback chain for the feature:
   // 1. Check for an admin-configured SO override for the current feature
@@ -183,6 +275,17 @@ const resolveEndpointIds = async (
     warnings: [],
     soEntryFound: false,
   };
+};
+
+const resolveEndpointIds = async (
+  registry: InferenceFeatureRegistry,
+  soClient: ISavedObjectsRepository,
+  featureId: string,
+  logger: Logger
+): Promise<ResolvedEndpointIds> => {
+  const soFeatures = await readSettingsFeatures(soClient, logger);
+  const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
+  return resolveFeatureEndpointIds(registry, soFeaturesMap, featureId, logger);
 };
 
 const readSettingsFeatures = async (

@@ -29,7 +29,6 @@ export {
   screenContextAttachmentDataSchema,
   visualizationAttachmentDataSchema,
   connectorAttachmentDataSchema,
-  connectorAttachmentToolSchema,
   CONNECTOR_TAG_PREFIX,
   type TextAttachmentData,
   type ScreenContextAttachmentData,

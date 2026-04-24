@@ -17,8 +17,8 @@ import type { InitializationFlowId } from '../../../../common/api/initialization
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
   INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
-  INITIALIZATION_FLOW_STATUS_ERROR,
   INITIALIZATION_FLOW_STATUS_READY,
+  INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../../common/api/initialization';
 
 jest.mock('./api');
@@ -29,6 +29,14 @@ const mockInitializeSecuritySolution = initializeSecuritySolution as jest.Mock;
 
 const flowA = INITIALIZATION_FLOW_CREATE_LIST_INDICES;
 const flowB = INITIALIZATION_FLOW_SECURITY_DATA_VIEWS;
+
+/** A minimal valid payload matching the SecurityDataViewsReadyResult schema. */
+const mockSecurityDataviewsPayload = {
+  defaultDataView: { id: 'dv-1', title: 'default-*', patternList: ['default-*'] },
+  alertDataView: { id: 'dv-2', title: '.alerts-*', patternList: ['.alerts-*'] },
+  kibanaDataViews: [],
+  signalIndexName: '.siem-signals-default',
+};
 
 const wrapper: FC<PropsWithChildren> = ({ children }) => (
   <InitializationProvider>{children}</InitializationProvider>
@@ -58,7 +66,10 @@ describe('InitializationProvider - happy path', () => {
   it('sets loading=false, result={status:ready, payload} when a single flow succeeds', async () => {
     mockInitializeSecuritySolution.mockResolvedValueOnce({
       flows: {
-        [flowB]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { index: 'my-index' } },
+        [flowB]: {
+          status: INITIALIZATION_FLOW_STATUS_READY,
+          payload: mockSecurityDataviewsPayload,
+        },
       },
     });
 
@@ -70,7 +81,7 @@ describe('InitializationProvider - happy path', () => {
 
     expect(result.current.state[flowB]).toEqual({
       loading: false,
-      result: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { index: 'my-index' } },
+      result: { status: INITIALIZATION_FLOW_STATUS_READY, payload: mockSecurityDataviewsPayload },
     });
     expect(mockInitializeSecuritySolution).toHaveBeenCalledTimes(1);
   });
@@ -97,7 +108,10 @@ describe('InitializationProvider - happy path', () => {
     mockInitializeSecuritySolution.mockResolvedValueOnce({
       flows: {
         [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY },
-        [flowB]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { count: 42 } },
+        [flowB]: {
+          status: INITIALIZATION_FLOW_STATUS_READY,
+          payload: mockSecurityDataviewsPayload,
+        },
       },
     });
 
@@ -114,7 +128,7 @@ describe('InitializationProvider - happy path', () => {
     });
     expect(result.current.state[flowB]).toEqual({
       loading: false,
-      result: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { count: 42 } },
+      result: { status: INITIALIZATION_FLOW_STATUS_READY, payload: mockSecurityDataviewsPayload },
     });
     expect(mockInitializeSecuritySolution).toHaveBeenCalledTimes(1);
     expect(mockInitializeSecuritySolution).toHaveBeenCalledWith({
@@ -400,7 +414,10 @@ describe('InitializationProvider - per-flow schema validation', () => {
         // flowA: invalid status triggers validation failure
         [flowA]: { status: 'invalid-status' },
         // flowB: valid result
-        [flowB]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { good: true } },
+        [flowB]: {
+          status: INITIALIZATION_FLOW_STATUS_READY,
+          payload: mockSecurityDataviewsPayload,
+        },
       },
     });
 
@@ -416,7 +433,7 @@ describe('InitializationProvider - per-flow schema validation', () => {
     });
     expect(result.current.state[flowB]?.result).toMatchObject({
       status: INITIALIZATION_FLOW_STATUS_READY,
-      payload: { good: true },
+      payload: mockSecurityDataviewsPayload,
     });
   });
 

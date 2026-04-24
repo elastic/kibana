@@ -15,18 +15,20 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import { type Streams, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { useKnowledgeIndicatorsBulkDelete } from '../hooks/use_knowledge_indicators_bulk_delete';
+import { useStreamKnowledgeIndicatorsBulkDelete } from '../hooks/use_stream_knowledge_indicators_bulk_delete';
 import { KnowledgeIndicatorActionsCell } from '../knowledge_indicator_actions_cell';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { SparkPlot } from '../../../spark_plot';
 import { TableTitle } from '../../stream_detail_systems/table_title';
+import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
 
 interface KnowledgeIndicatorsTableProps {
   definition: Streams.all.Definition;
@@ -35,16 +37,9 @@ interface KnowledgeIndicatorsTableProps {
   searchTerm: string;
   selectedTypes: string[];
   statusFilter: 'active' | 'excluded';
+  selectedKnowledgeIndicatorId?: string;
   onViewDetails: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
-
-const getKnowledgeIndicatorItemId = (knowledgeIndicator: KnowledgeIndicator) => {
-  if (knowledgeIndicator.kind === 'feature') {
-    return `feature:${knowledgeIndicator.feature.uuid}`;
-  }
-
-  return `query:${knowledgeIndicator.query.id}`;
-};
 
 export function KnowledgeIndicatorsTable({
   definition,
@@ -53,6 +48,7 @@ export function KnowledgeIndicatorsTable({
   searchTerm,
   selectedTypes,
   statusFilter,
+  selectedKnowledgeIndicatorId,
   onViewDetails,
 }: KnowledgeIndicatorsTableProps) {
   const [selectedKnowledgeIndicators, setSelectedKnowledgeIndicators] = useState<
@@ -62,8 +58,8 @@ export function KnowledgeIndicatorsTable({
   const [knowledgeIndicatorsToDelete, setKnowledgeIndicatorsToDelete] = useState<
     KnowledgeIndicator[]
   >([]);
-  const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
-    definition,
+  const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useStreamKnowledgeIndicatorsBulkDelete({
+    streamName: definition.name,
     onSuccess: () => {
       setSelectedKnowledgeIndicators([]);
       setKnowledgeIndicatorsToDelete([]);
@@ -71,8 +67,6 @@ export function KnowledgeIndicatorsTable({
   });
 
   const filteredKnowledgeIndicators = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
     return knowledgeIndicators.filter((knowledgeIndicator) => {
       const matchesStatusFilter =
         statusFilter === 'active'
@@ -92,17 +86,15 @@ export function KnowledgeIndicatorsTable({
         return false;
       }
 
-      if (!normalizedSearchTerm) {
+      if (!searchTerm) {
         return true;
       }
 
       if (knowledgeIndicator.kind === 'feature') {
-        return (knowledgeIndicator.feature.title ?? '')
-          .toLowerCase()
-          .includes(normalizedSearchTerm);
+        return (knowledgeIndicator.feature.title ?? '').toLowerCase().includes(searchTerm);
       }
 
-      return (knowledgeIndicator.query.title ?? '').toLowerCase().includes(normalizedSearchTerm);
+      return (knowledgeIndicator.query.title ?? '').toLowerCase().includes(searchTerm);
     });
   }, [knowledgeIndicators, searchTerm, selectedTypes, statusFilter]);
 
@@ -142,34 +134,20 @@ export function KnowledgeIndicatorsTable({
               ? knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id
               : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
 
-          if (knowledgeIndicator.kind === 'feature') {
-            return (
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="expand"
-                    aria-label={VIEW_DETAILS_ARIA_LABEL}
-                    onClick={() => onViewDetails(knowledgeIndicator)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <span>{title}</span>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          }
+          const isExpanded =
+            selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(knowledgeIndicator);
 
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  iconType="expand"
-                  aria-label={VIEW_DETAILS_ARIA_LABEL}
+                  iconType={isExpanded ? 'minimize' : 'expand'}
+                  aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
                   onClick={() => onViewDetails(knowledgeIndicator)}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <span>{title}</span>
+                <EuiLink onClick={() => onViewDetails(knowledgeIndicator)}>{title}</EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -220,7 +198,13 @@ export function KnowledgeIndicatorsTable({
             );
           }
 
-          return <EuiBadge color="hollow">{SIGNIFICANT_EVENTS_TABLE_QUERY_TYPE_LABEL}</EuiBadge>;
+          return (
+            <EuiBadge color="hollow">
+              {knowledgeIndicator.query.type === QUERY_TYPE_STATS
+                ? SIGNIFICANT_EVENTS_TABLE_STATS_QUERY_TYPE_LABEL
+                : SIGNIFICANT_EVENTS_TABLE_MATCH_QUERY_TYPE_LABEL}
+            </EuiBadge>
+          );
         },
       },
       {
@@ -229,14 +213,14 @@ export function KnowledgeIndicatorsTable({
         align: 'right',
         render: (knowledgeIndicator: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
-            definition={definition}
+            streamName={definition.name}
             knowledgeIndicator={knowledgeIndicator}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
           />
         ),
       },
     ],
-    [definition, occurrencesByQueryId, onViewDetails]
+    [definition, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicatorId]
   );
 
   return (
@@ -324,10 +308,17 @@ const SIGNIFICANT_EVENTS_TABLE_TYPE_COLUMN_LABEL = i18n.translate(
   }
 );
 
-const SIGNIFICANT_EVENTS_TABLE_QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.columns.queryTypeLabel',
+const SIGNIFICANT_EVENTS_TABLE_MATCH_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.columns.matchQueryTypeLabel',
   {
-    defaultMessage: 'Query',
+    defaultMessage: 'Match query',
+  }
+);
+
+const SIGNIFICANT_EVENTS_TABLE_STATS_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.columns.statsQueryTypeLabel',
+  {
+    defaultMessage: 'Stats query',
   }
 );
 
@@ -384,6 +375,13 @@ const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicatorsTable.viewDetailsAriaLabel',
   {
     defaultMessage: 'View details',
+  }
+);
+
+const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorsTable.minimizeDetailsAriaLabel',
+  {
+    defaultMessage: 'Collapse details',
   }
 );
 

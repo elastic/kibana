@@ -372,7 +372,3 @@ export interface CasesCapabilities {
   [ASSIGN_CASE_CAPABILITY]: boolean;
   [MANAGE_TEMPLATES_CAPABILITY]: boolean;
 }
-
-export interface CaseViewEventsTableProps {
-  events: { eventId: string | string[]; index: string | string[] }[];
-}

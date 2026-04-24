@@ -190,6 +190,22 @@ export const ESQLDataCascadeLeafCell = React.memo(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
 
+    const { getDataGridUiStateMap, setDataGridUiState } = useCascadedDocumentsContext();
+
+    const initialGridState = useMemo(
+      () => getDataGridUiStateMap()?.[cellId],
+      [cellId, getDataGridUiStateMap]
+    );
+
+    const onInitialStateChange = useCallback<
+      NonNullable<UnifiedDataTableProps['onInitialStateChange']>
+    >(
+      (newInitialGridState) => {
+        setDataGridUiState(cellId, newInitialGridState);
+      },
+      [cellId, setDataGridUiState]
+    );
+
     // TODO: Implement column selection logic,
     // probably requires a new selection component that will be used within the row
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -233,7 +249,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         footerRow,
       }) => (
         <CustomCascadeGridBodyMemoized
-          key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
+          key={cellId}
           Cell={Cell}
           data={cellData}
           visibleColumns={visibleColumns}
@@ -256,13 +272,12 @@ export const ESQLDataCascadeLeafCell = React.memo(
         isPlainRecord
         dataView={dataView}
         showTimeCol={showTimeCol}
-        showKeyboardShortcuts={showKeyboardShortcuts}
         services={services}
         sort={EMPTY_SORT}
         isSortEnabled={false}
-        enableInTableSearch
+        enableInTableSearch={false}
+        showKeyboardShortcuts={false}
         ariaLabelledBy="data-cascade-leaf-cell"
-        consumer={`discover_esql_cascade_row_leaf_${cellId}`}
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}
@@ -279,6 +294,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
         externalCustomRenderers={externalCustomRenderers}
         paginationMode="infinite"
         sampleSizeState={cellData.length}
+        initialState={initialGridState}
+        onInitialStateChange={onInitialStateChange}
       />
     );
   }

@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { withSpan } from '@kbn/apm-utils';
+import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
 import type {
   ExecutionContextStart,
@@ -68,12 +68,14 @@ import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
+import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
+import { millisToNanos } from '../lib/millis_to_nanos';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -136,6 +138,7 @@ type Opts = {
   allowReadingInvalidState: boolean;
   strategy: string;
   getPollInterval: () => number;
+  apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
@@ -191,6 +194,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
+  private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
 
@@ -220,6 +224,7 @@ export class TaskManagerRunner implements TaskRunner {
     allowReadingInvalidState,
     strategy,
     getPollInterval,
+    apiKeyStrategy,
     eventLogger,
   }: Opts) {
     this.basePathService = basePathService;
@@ -242,6 +247,7 @@ export class TaskManagerRunner implements TaskRunner {
     });
     this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
+    this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
   }
 
@@ -382,6 +388,8 @@ export class TaskManagerRunner implements TaskRunner {
           'transaction.type': TASK_MANAGER_RUN_TRANSACTION_TYPE,
           'kibana.task.type': this.taskType,
         },
+        // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+        root: true,
       },
       async () => {
         const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
@@ -424,9 +432,16 @@ export class TaskManagerRunner implements TaskRunner {
         const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
 
         try {
-          const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
+          const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
+            'apiKey',
+            'uiamApiKey',
+            'userScope',
+          ]);
+          const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
+            modifiedContext.taskInstance
+          );
           const fakeRequest = this.getFakeKibanaRequest(
-            modifiedContext.taskInstance.apiKey,
+            apiKeyForRequest,
             modifiedContext.taskInstance.userScope?.spaceId
           );
 
@@ -558,13 +573,17 @@ export class TaskManagerRunner implements TaskRunner {
 
     return withActiveSpan(
       'mark-task-as-running',
-      { attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE } },
+      {
+        attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE },
+        // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+        root: true,
+      },
       async () => {
         const apmTrans = apm.startTransaction(
           TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
           TASK_MANAGER_TRANSACTION_TYPE
         );
-        apmTrans.addLabels({ entityId: this.taskType });
+        addSpanLabels({ entityId: this.taskType });
 
         const now = new Date();
         try {
@@ -1092,10 +1111,10 @@ export class TaskManagerRunner implements TaskRunner {
     message: string,
     error?: Error | DecoratedError
   ): void {
-    const runDurationMs = taskTiming.stop - taskTiming.start;
-    const scheduleDelayMs =
+    const runDurationNs = millisToNanos(taskTiming.stop - taskTiming.start);
+    const scheduleDelayNs =
       task.startedAt && task.scheduledAt
-        ? task.startedAt.getTime() - task.scheduledAt.getTime()
+        ? millisToNanos(task.startedAt.getTime() - task.scheduledAt.getTime())
         : undefined;
     const errorDetails = error
       ? {
@@ -1107,7 +1126,7 @@ export class TaskManagerRunner implements TaskRunner {
       event: {
         action: EVENT_LOG_ACTIONS.taskRun,
         outcome,
-        duration: runDurationMs,
+        duration: runDurationNs,
         start: new Date(taskTiming.start).toISOString(),
         end: new Date(taskTiming.stop).toISOString(),
         ...(error && this.isCancelled ? { reason: `Task "${this.id}" was cancelled.` } : {}),
@@ -1117,7 +1136,7 @@ export class TaskManagerRunner implements TaskRunner {
           id: this.id,
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
-          ...(scheduleDelayMs != null ? { schedule_delay: scheduleDelayMs } : {}),
+          ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
         },
       },
       message,
@@ -1126,11 +1145,11 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private logTaskCancelEvent(task: ConcreteTaskInstance, taskTiming: TaskTiming): void {
-    const runDurationMs = taskTiming.stop - taskTiming.start;
+    const runDurationNs = millisToNanos(taskTiming.stop - taskTiming.start);
     this.eventLogger.logEvent({
       event: {
         action: EVENT_LOG_ACTIONS.taskCancel,
-        duration: runDurationMs,
+        duration: runDurationNs,
         start: new Date(taskTiming.start).toISOString(),
         end: new Date(taskTiming.stop).toISOString(),
       },

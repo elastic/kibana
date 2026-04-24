@@ -70,6 +70,7 @@ export const MessageList = ({
 
   return (
     <EuiPopover
+      aria-label={buttonLabel}
       panelPaddingSize="none"
       button={
         <EuiToolTip content={buttonLabel}>
@@ -90,7 +91,7 @@ export const MessageList = ({
             {warningCount > 0 && (
               <>
                 <EuiIcon
-                  type="alert"
+                  type="warning"
                   css={css`
                     margin-left: 4px;
                   `}
@@ -124,7 +125,7 @@ export const MessageList = ({
                     {message.severity === 'error' ? (
                       <EuiIcon type="error" color="danger" />
                     ) : (
-                      <EuiIcon type="alert" color="warning" />
+                      <EuiIcon type="warning" color="warning" />
                     )}
                   </EuiFlexItem>
                 )}

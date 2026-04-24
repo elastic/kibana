@@ -11,7 +11,7 @@ import type { Entity } from '../../../../common/api/entity_analytics/entity_stor
  * Entity representation flowing through the lead generation pipeline.
  *
  * Entity Store V2 records already embed risk scores (`entity.risk`), attributes
- * (`entity.attributes.privileged`, etc.), and behaviors, so we carry the full
+ * (`entity.attributes.watchlists`, etc.), and behaviors, so we carry the full
  * entity record through the pipeline rather than fetching data separately.
  */
 export interface LeadEntity {
@@ -53,6 +53,8 @@ export interface ObservationModuleConfig {
   readonly name: string;
   /** Execution order (higher = earlier) */
   readonly priority: number;
+  /** Optional weight for the weighted scoring engine (defaults in engine if omitted) */
+  readonly weight?: number;
 }
 
 /** The contract every pluggable observation module must satisfy. */

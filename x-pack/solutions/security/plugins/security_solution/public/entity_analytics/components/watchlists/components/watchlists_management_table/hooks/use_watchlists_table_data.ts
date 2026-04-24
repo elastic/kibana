@@ -88,7 +88,7 @@ export const useWatchlistsTableData = (
     },
   });
 
-  const isLoading = isWatchlistsLoading || isEnriching;
+  const isLoading = isWatchlistsLoading || (Boolean(watchlists?.length) && isEnriching);
   const visibleRecords: WatchlistTableItemType[] =
     enrichedRecords ?? (Array.isArray(watchlists) ? watchlists : []);
 

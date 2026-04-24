@@ -36,6 +36,7 @@ import type {
   GetEpmDataStreamsResponse,
   GetOneBulkOperationPackagesResponse,
   GetStatsResponse,
+  GetDependenciesResponse,
   BulkUninstallPackagesRequest,
   DeletePackageDatastreamAssetsRequest,
   DeletePackageDatastreamAssetsResponse,
@@ -217,6 +218,23 @@ export const useGetPackageStats = (pkgName: string) => {
     method: 'get',
     version: API_VERSIONS.public.v1,
   });
+};
+
+export const useGetPackageDependencies = (
+  pkgName: string,
+  pkgVersion: string,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
+  return useQuery<GetDependenciesResponse, RequestError>(
+    ['package-dependencies', pkgName, pkgVersion],
+    () =>
+      sendRequestForRq<GetDependenciesResponse>({
+        path: epmRouteService.getDependenciesPath(pkgName, pkgVersion),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      }),
+    { enabled, refetchOnWindowFocus: false }
+  );
 };
 
 export const useGetPackageVerificationKeyId = () => {

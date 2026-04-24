@@ -32,7 +32,6 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
-  sortText: 'C',
   category: SuggestionCategory.VALUE,
 });
 

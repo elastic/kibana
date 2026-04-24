@@ -95,6 +95,7 @@ const PackagePolicyStreamsSchema = {
 
 export const PackagePolicyInputsSchema = {
   id: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
   type: schema.string(),
   policy_template: schema.maybe(schema.string()),
   enabled: schema.boolean(),
@@ -102,7 +103,7 @@ export const PackagePolicyInputsSchema = {
   vars: schema.maybe(ConfigRecordSchema),
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
-  streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
+  streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 }),
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
@@ -274,9 +275,9 @@ export const NewPackagePolicySchema = schema.object({
 
 /**
  * Snapshot of the package policy SO schema as of model version 10.22.0.
- * Permissive on enabled, inputs, and package so the SO layer can store internal
- * shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema gains
- * new fields, create PackagePolicySchemaV{next} that extends this one.
+ * Permissive on enabled, inputs, and package so the SO layer can store
+ * internal shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema
+ * gains new fields, create PackagePolicySchemaV{next} that extends this one.
  */
 export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
   {
@@ -295,7 +296,7 @@ const CreatePackagePolicyProps = {
     schema.object({
       ...PackagePolicyInputsSchema,
       streams: schema.maybe(
-        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 })
+        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
       ),
     }),
     { maxSize: 1000 }
@@ -531,10 +532,10 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object({
       schema.object({
         ...PackagePolicyInputsSchema,
         streams: schema.maybe(
-          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 })
+          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
         ),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     )
   ),
   version: schema.maybe(schema.string()),
@@ -594,7 +595,7 @@ export const PackagePolicySchema = schema.object({
       schema.object({
         id: schema.string(),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     )
   ),
 });

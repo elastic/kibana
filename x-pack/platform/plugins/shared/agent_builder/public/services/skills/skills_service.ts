@@ -43,8 +43,10 @@ export class SkillsService {
     return await this.http.get<GetSkillResponse>(`${publicApiPath}/skills/${skillId}`, {});
   }
 
-  async delete({ skillId }: { skillId: string }) {
-    return await this.http.delete<DeleteSkillResponse>(`${publicApiPath}/skills/${skillId}`, {});
+  async delete({ skillId, force }: { skillId: string; force?: boolean }) {
+    return await this.http.delete<DeleteSkillResponse>(`${publicApiPath}/skills/${skillId}`, {
+      query: { force: force ?? false },
+    });
   }
 
   async create(skill: CreateSkillPayload) {

@@ -8,7 +8,11 @@
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
 import { type DispatcherServiceContract } from './dispatcher';
-import { DispatcherServiceInternalToken } from './tokens';
+import {
+  DispatcherEnabledProviderToken,
+  DispatcherServiceInternalToken,
+  type DispatcherEnabledProvider,
+} from './tokens';
 import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
@@ -21,15 +25,31 @@ type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 export class DispatcherTaskRunner {
   constructor(
     @inject(DispatcherServiceInternalToken)
-    private readonly dispatcherService: DispatcherServiceContract
+    private readonly dispatcherService: DispatcherServiceContract,
+    @inject(DispatcherEnabledProviderToken)
+    private readonly dispatcherEnabledProvider: DispatcherEnabledProvider
   ) {}
 
   public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
+    const isEnabled = await this.safeIsEnabled();
+
+    if (!isEnabled) {
+      return { state: taskInstance.state };
+    }
+
     const params = this.createDispatcherParams(taskInstance, abortController);
 
     const result = await this.dispatcherService.run(params);
 
     return this.buildRunResult(result);
+  }
+
+  private async safeIsEnabled(): Promise<boolean> {
+    try {
+      return await this.dispatcherEnabledProvider();
+    } catch {
+      return true;
+    }
   }
 
   private createDispatcherParams(

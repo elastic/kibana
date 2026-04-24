@@ -51,7 +51,7 @@ describe('LandingLinksImageCard', () => {
       />
     );
 
-    expect(getByTestId('LandingImageCard-image')).toHaveStyle({
+    expect(getByTestId(`LandingImageCard-image-${DEFAULT_NAV_ITEM.id}`)).toHaveStyle({
       backgroundImage: `url(${landingImage})`,
     });
   });

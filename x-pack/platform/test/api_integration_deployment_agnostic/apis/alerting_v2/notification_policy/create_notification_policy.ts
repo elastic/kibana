@@ -52,6 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'my-workflow-id' }]);
       expect(response.body.matcher).to.be("env == 'production' && region == 'us-east-1'");
       expect(response.body.groupBy).to.eql(['service.name', 'environment']);
+      expect(response.body.groupingMode).to.be(null);
       expect(response.body.throttle).to.eql({ interval: '1m' });
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
@@ -191,7 +192,96 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.snoozedUntil).to.be(null);
       expect(response.body.matcher).to.be(null);
       expect(response.body.groupBy).to.be(null);
+      expect(response.body.groupingMode).to.be(null);
       expect(response.body.throttle).to.be(null);
+    });
+
+    it('should create a policy with groupingMode and throttle strategy', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'per-field-policy',
+          description: 'Groups by host with time interval',
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+          groupBy: ['host.name'],
+          groupingMode: 'per_field',
+          throttle: { strategy: 'time_interval', interval: '5m' },
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.groupingMode).to.be('per_field');
+      expect(response.body.groupBy).to.eql(['host.name']);
+      expect(response.body.throttle).to.eql({ strategy: 'time_interval', interval: '5m' });
+    });
+
+    it('should create a policy with per_episode grouping and on_status_change strategy', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'per-episode-policy',
+          description: 'Notifies on status change',
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+          groupingMode: 'per_episode',
+          throttle: { strategy: 'on_status_change' },
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.groupingMode).to.be('per_episode');
+      expect(response.body.throttle).to.eql({ strategy: 'on_status_change' });
+    });
+
+    it('should create a policy with all grouping mode and every_time strategy', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'all-mode-policy',
+          description: 'Digest of all episodes every time',
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+          groupingMode: 'all',
+          throttle: { strategy: 'every_time' },
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.groupingMode).to.be('all');
+      expect(response.body.throttle).to.eql({ strategy: 'every_time' });
+    });
+
+    it('should return 400 for invalid groupingMode/strategy combination', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'invalid-combo',
+          description: 'on_status_change is not valid for all mode',
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+          groupingMode: 'all',
+          throttle: { strategy: 'on_status_change' },
+        });
+
+      expect(response.status).to.be(400);
+    });
+
+    it('should return 400 when time_interval strategy is missing interval', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'missing-interval',
+          description: 'time_interval requires interval',
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+          groupingMode: 'all',
+          throttle: { strategy: 'time_interval' },
+        });
+
+      expect(response.status).to.be(400);
     });
 
     it('should return 400 when destinations is an empty array', async () => {

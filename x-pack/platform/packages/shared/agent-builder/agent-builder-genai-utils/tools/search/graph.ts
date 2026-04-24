@@ -24,6 +24,7 @@ import {
   naturalLanguageSearchToolName,
   NO_MATCHING_RESOURCE_ERROR,
 } from './inner_tools';
+import type { TopSnippetsConfig } from '../steps/extract_snippets';
 import { getSearchDispatcherPrompt } from './prompts';
 import { isIndexPattern } from './target_patterns';
 import { progressMessages } from './i18n';
@@ -65,14 +66,22 @@ export const createSearchToolGraph = ({
   esClient,
   logger,
   events,
+  topSnippetsConfig,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
+  topSnippetsConfig?: TopSnippetsConfig;
 }) => {
   const getTools = (state: StateType) => {
-    const relevanceTool = createRelevanceSearchTool({ model, esClient, events, logger });
+    const relevanceTool = createRelevanceSearchTool({
+      model,
+      esClient,
+      events,
+      logger,
+      topSnippetsConfig,
+    });
     const nlSearchTool = createNaturalLanguageSearchTool({
       model,
       esClient,
