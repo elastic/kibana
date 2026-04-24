@@ -3024,6 +3024,7 @@ describe('create()', () => {
         legacyId: null,
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyCreatedByUser: false,
         apiKeyOwner: 'elastic',
         artifacts: {
           dashboards: [],

@@ -1403,7 +1403,7 @@ describe('update()', () => {
         ],
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
-        "apiKeyCreatedByUser": undefined,
+        "apiKeyCreatedByUser": false,
         "apiKeyOwner": "elastic",
         "artifacts": Object {
           "dashboards": Array [],

@@ -419,6 +419,7 @@ describe('updateRuleApiKey()', () => {
         consumer: 'myApp',
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
+        apiKeyCreatedByUser: false,
         apiKeyOwner: 'elastic',
         revision: 0,
         updatedAt: '2019-02-12T21:01:22.479Z',

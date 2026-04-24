@@ -326,6 +326,7 @@ describe('enable()', () => {
         updatedBy: 'elastic',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: false,
         scheduledTaskId: 'task-123',
         actions: [
           {
