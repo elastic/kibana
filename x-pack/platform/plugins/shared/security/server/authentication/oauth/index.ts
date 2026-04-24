@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export const COMMON_HEADERS = {
-  'x-elastic-internal-origin': 'kibana',
-  'Content-Type': 'application/json;charset=UTF-8',
-};
-
-export const COMMON_UNSAFE_HEADERS = {
-  ...COMMON_HEADERS,
-  'kbn-xsrf': 'some-xsrf-token',
-};
+export { UiamOAuth } from './uiam_oauth';
