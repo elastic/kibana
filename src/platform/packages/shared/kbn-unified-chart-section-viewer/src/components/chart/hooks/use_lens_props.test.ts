@@ -384,6 +384,63 @@ describe('useLensProps', () => {
       expect((LensConfigBuilder.prototype.build as jest.Mock).mock.calls.length).toBeGreaterThan(1);
     });
 
+    it('clears a latched builder error after a successful rebuild', async () => {
+      const chartRef = createMockChartRef();
+      const builderError = new Error('transient build failure');
+
+      // First call fails, subsequent calls resolve normally (from beforeEach).
+      LensConfigBuilderMock.prototype.build.mockImplementationOnce(() =>
+        Promise.reject(builderError)
+      );
+
+      const { result, rerender } = renderHook(
+        ({ query }: { query: string }) =>
+          useLensProps({
+            chartId: 'testChartId',
+            title: 'Test Chart',
+            query,
+            services: servicesMock as UnifiedHistogramServices,
+            fetchParams,
+            discoverFetch$,
+            chartRef,
+            chartLayers: mockChartLayers,
+            profileId: 'testProfileId',
+          }),
+        { initialProps: { query: 'FROM metrics-*' } }
+      );
+
+      // First pass: build rejects, error is reported, effectiveError latches.
+      await waitFor(() => {
+        expect(mockReportMetricsGridError).toHaveBeenCalled();
+      });
+
+      // Resolve the error-branch rebuild that setBuildError triggers so the
+      // hook lands in a stable state before we assert recovery.
+      await waitFor(() => {
+        expect(result.current).toBeDefined();
+      });
+
+      // Record the attributes produced while buildError was latched so we can
+      // assert that the successful rebuild below produces a fresh set.
+      const latchedAttributes = result.current?.attributes;
+
+      // Trigger a successful rebuild by changing an input the effect depends
+      // on. buildAttributesFn returns a non-null value this time, the new
+      // tap() should fire setBuildError(undefined), and the hook should
+      // settle on fresh attributes from the non-error branch.
+      rerender({ query: 'FROM other-metrics-*' });
+
+      await act(async () => {
+        discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+      });
+
+      await waitFor(() => {
+        expect(result.current?.attributes).not.toBe(latchedAttributes);
+      });
+
+      expect(result.current).toBeDefined();
+    });
+
     it('does not terminate the subscription — subsequent fetches continue to build', async () => {
       const chartRef = createMockChartRef();
       const builderError = new Error('first build fails');

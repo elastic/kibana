@@ -33,6 +33,7 @@ import {
   map,
   catchError,
   of,
+  tap,
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
@@ -174,6 +175,15 @@ export const useLensProps = ({
       // restarts cleanly.
       switchMap(() =>
         from(buildAttributesFn.current()).pipe(
+          // A successful build clears any previously latched builder error so
+          // the chart can recover from transient failures. Without this,
+          // `effectiveError = error ?? buildError` stays truthy for the rest
+          // of the component's lifetime once any build throws.
+          tap((attributes) => {
+            if (attributes !== null) {
+              setBuildError(undefined);
+            }
+          }),
           catchError((buildErr: unknown) => {
             reportMetricsGridError({
               error: buildErr,
