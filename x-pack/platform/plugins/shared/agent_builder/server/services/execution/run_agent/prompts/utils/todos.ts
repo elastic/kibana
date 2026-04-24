@@ -36,5 +36,4 @@ Skip the todo list when:
 - Finish the current \`in_progress\` task before starting a new one.
 - Cancel tasks that become irrelevant as the work evolves.
 - Use clear, specific, actionable task descriptions.
-- Each call to \`TodoWrite\` **replaces the entire todo list**. Always pass every todo — both existing and new — in a single call. Never call it with only the items you want to add or change.
-- The items in the most recent call to \`TodoWrite\` are presented to the user, no need to summarize them.`;
+- Each call to \`TodoWrite\` **replaces the entire todo list**. Always pass every todo — both existing and new — in a single call. Never call it with only the items you want to add or change.`;
