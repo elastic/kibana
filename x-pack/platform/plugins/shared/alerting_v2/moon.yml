@@ -100,6 +100,8 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod
