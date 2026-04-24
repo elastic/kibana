@@ -129,7 +129,7 @@ export async function getRemoteMonitorsList({
       const remoteInfo = getRemoteMonitorInfo(String(indexName));
       if (!remoteInfo) return;
 
-      const configId = metrics['config_id'] ? String(metrics['config_id']) : monitorId;
+      const configId = metrics.config_id ? String(metrics.config_id) : monitorId;
 
       if (localConfigIds.has(configId)) return;
 
@@ -139,7 +139,7 @@ export async function getRemoteMonitorsList({
           existing.locations.push(locationId);
         }
       } else {
-        const tags = metrics['tags'];
+        const tags = metrics.tags;
         remoteMonitorMap.set(configId, {
           configId,
           name: metrics['monitor.name'] ? String(metrics['monitor.name']) : monitorId,
@@ -147,7 +147,7 @@ export async function getRemoteMonitorsList({
           tags: tags ? (Array.isArray(tags) ? tags.map(String) : [String(tags)]) : [],
           locations: [locationId],
           index: String(indexName),
-          kibanaUrl: metrics['kibanaUrl'] ? String(metrics['kibanaUrl']) : undefined,
+          kibanaUrl: metrics.kibanaUrl ? String(metrics.kibanaUrl) : undefined,
           urls: metrics['url.full.keyword'] ? String(metrics['url.full.keyword']) : undefined,
         });
       }
