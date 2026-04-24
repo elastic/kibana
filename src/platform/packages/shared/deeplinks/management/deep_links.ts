@@ -76,7 +76,6 @@ export type ManagementId =
   | 'transform'
   | 'notification_policies'
   | 'rules'
-  | 'triggersActions'
   | 'triggersActionsAlerts'
   | 'triggersActionsConnectors'
   | 'upgrade_assistant'

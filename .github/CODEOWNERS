@@ -1051,6 +1051,7 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/response-ops/alert-snooze @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form @elastic/rna-project-team
@@ -2294,8 +2295,13 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-telemetry
-/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-telemetry
+## Remove the ownership of the telemetry schemas to avoid the need of a human PR review every time the schemas are updated.
+/src/platform/plugins/shared/telemetry/schema/*.json
+/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/*.json
+## But keep the ownership of the snapshots for the tests: they are updated when human review is needed (refer to the tests in src/platform/plugins/shared/telemetry/schema/schema_checks.test.ts)
+/src/platform/plugins/shared/telemetry/schema/__snapshots__/ @elastic/kibana-telemetry
+## The test is co-owned by the telemetry team and the core team.
+/src/platform/plugins/shared/telemetry/schema/schema_checks.test.ts @elastic/kibana-telemetry @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
