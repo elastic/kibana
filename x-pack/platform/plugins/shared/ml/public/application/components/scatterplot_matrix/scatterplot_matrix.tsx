@@ -491,6 +491,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 <EuiSwitch
                   data-test-subj="mlScatterplotMatrixRandomizeQuerySwitch"
                   name="mlScatterplotMatrixRandomizeQuery"
+                  label=""
                   showLabel={false}
                   checked={randomizeQuery}
                   onChange={randomizeQueryOnChange}
@@ -517,9 +518,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 >
                   <EuiSwitch
                     name="mlScatterplotMatrixDynamicSize"
-                    label={i18n.translate('xpack.ml.splom.dynamicSizeLabel', {
-                      defaultMessage: 'Dynamic size',
-                    })}
+                    label=""
                     showLabel={false}
                     checked={dynamicSize}
                     onChange={dynamicSizeOnChange}
