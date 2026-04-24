@@ -211,7 +211,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
 
   return (
     <>
-      <EuiHorizontalRule margin="none" />
+      <EuiHorizontalRule margin="m" />
       {contextWindowLengthSettings}
       {temperatureSettings && contextWindowLengthSettings && <EuiSpacer size="m" />}
       {temperatureSettings}

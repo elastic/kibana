@@ -662,6 +662,20 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       </UseField>
       {config?.provider ? (
         <>
+          {/* AUTHENTICATION */}
+          {authenticationFormFields.length > 0 && (
+            <>
+              <EuiHorizontalRule margin="m" />
+              <AuthenticationFormItems
+                isLoading={false}
+                items={authenticationFormFields}
+                setConfigEntry={onSetProviderConfigEntry}
+                isEdit={isEdit}
+                isPreconfigured={isPreconfigured}
+                reenterSecretsOnEdit={reenterSecretsOnEdit}
+              />
+            </>
+          )}
           <EuiHorizontalRule margin="m" />
           {/* SETTINGS */}
           <EuiTitle size="xxs" data-test-subj="settings-label">
@@ -697,20 +711,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               onSetProviderConfigEntry={onSetProviderConfigEntry}
               isEdit={isEdit}
             />
-          )}
-          {/* AUTHENTICATION */}
-          {authenticationFormFields.length > 0 && (
-            <>
-              <EuiHorizontalRule margin="m" />
-              <AuthenticationFormItems
-                isLoading={false}
-                items={authenticationFormFields}
-                setConfigEntry={onSetProviderConfigEntry}
-                isEdit={isEdit}
-                isPreconfigured={isPreconfigured}
-                reenterSecretsOnEdit={reenterSecretsOnEdit}
-              />
-            </>
           )}
           {/* ADDITIONAL OPTIONS */}
           <AdditionalOptionsFields
