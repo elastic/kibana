@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +20,8 @@ import dateMath from '@kbn/datemath';
 import { useQuery } from '@kbn/react-query';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
@@ -72,15 +74,38 @@ const getFilterTitle = (entityType: EntityType): string => {
 export const EntityAlertsCell: React.FC<{
   entityName: string;
   entityType: EntityType;
-}> = ({ entityName, entityType }) => {
+  entityRecord?: EntityStoreRecord | null;
+}> = ({ entityName, entityType, entityRecord }) => {
   const { signalIndexName } = useSignalIndex();
   const { setQuery, deleteQuery } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
   const { startTracking } = useTrackHttpRequest();
+  const euidApi = useEntityStoreEuidApi();
 
   const filterField = EntityTypeToIdentifierField[entityType] || 'entity.id';
 
-  const { data, isFetching, refetch: refetchQuery } = useQuery({
+  const entityFilters = useMemo(() => {
+    if (euidApi?.euid && entityRecord) {
+      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(entityType, entityRecord);
+      if (filter != null) {
+        return [filter];
+      }
+    }
+    return [{ term: { [filterField]: entityName } }];
+  }, [euidApi?.euid, filterField, entityName, entityType, entityRecord]);
+
+  const euidKqlEntityFilter = useMemo(() => {
+    if (euidApi?.euid && entityRecord) {
+      return euidApi.euid.kql.getEuidFilterBasedOnDocument(entityType, entityRecord);
+    }
+    return undefined;
+  }, [euidApi?.euid, entityType, entityRecord]);
+
+  const {
+    data,
+    isFetching,
+    refetch: refetchQuery,
+  } = useQuery({
     queryKey: [
       QUERY_KEY_ENTITY_ALERTS_BY_STATUS,
       {
@@ -90,6 +115,7 @@ export const EntityAlertsCell: React.FC<{
         fromStr: ALERTS_CELL_FROM_STR,
         toStr: ALERTS_CELL_TO_STR,
         signalIndexName,
+        entityFilters,
       },
     ],
     queryFn: async ({ signal }) => {
@@ -99,7 +125,7 @@ export const EntityAlertsCell: React.FC<{
           query: getAlertsByStatusQuery({
             from: ALERTS_CELL_FROM_STR,
             to: ALERTS_CELL_TO_STR,
-            identityFields: { [filterField]: entityName },
+            entityFilters,
           }),
           signal,
         });
@@ -138,20 +164,27 @@ export const EntityAlertsCell: React.FC<{
   const alertStats = getFormattedAlertStats(alertsData, euiTheme);
   const alertCount = (alertsData?.open?.total ?? 0) + (alertsData?.acknowledged?.total ?? 0);
 
-  const filters = [
-    {
-      title: getFilterTitle(entityType),
-      selected_options: [entityName],
-      field_name: filterField,
-    },
-    {
-      title: OPEN_IN_ALERTS_TITLE_STATUS,
-      selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-      field_name: 'kibana.alert.workflow_status',
-    },
-  ];
+  const statusPageFilter = {
+    title: OPEN_IN_ALERTS_TITLE_STATUS,
+    selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+    field_name: 'kibana.alert.workflow_status',
+  };
 
-  const urlFilterParams = encode(formatPageFilterSearchParam(filters));
+  const pageFilters = euidKqlEntityFilter
+    ? [statusPageFilter]
+    : [
+        {
+          title: getFilterTitle(entityType),
+          selected_options: [entityName],
+          field_name: filterField,
+        },
+        statusPageFilter,
+      ];
+
+  const urlFilterParams = encode(formatPageFilterSearchParam(pageFilters));
+  const appQueryPath = euidKqlEntityFilter
+    ? `&${URL_PARAM_KEY.appQuery}=${encode({ language: 'kuery', query: euidKqlEntityFilter })}`
+    : '';
 
   const openAlertsPage = () => {
     // Resolve the date-math strings at click time so the alerts page opens with a
@@ -173,7 +206,7 @@ export const EntityAlertsCell: React.FC<{
 
     navigateTo({
       deepLinkId: SecurityPageName.alerts,
-      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${timerangePath}`,
+      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${appQueryPath}${timerangePath}`,
       openInNewTab: true,
     });
   };
