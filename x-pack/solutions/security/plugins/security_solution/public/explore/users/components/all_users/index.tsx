@@ -6,9 +6,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { SyntheticEvent } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiLink, EuiText } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
@@ -42,6 +44,7 @@ import { VIEW_USERS_BY_SEVERITY } from '../../../../entity_analytics/components/
 import { SecurityPageName } from '../../../../app/types';
 import { UsersTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana';
+import { UserPanelKey } from '../../../../flyout/entity_details/shared/constants';
 
 const tableType = usersModel.UsersTableType.allUsers;
 
@@ -79,7 +82,8 @@ const rowItems: ItemsPerRow[] = [
 
 const getUsersColumns = (
   showRiskColumn: boolean,
-  dispatchSeverityUpdate: (s: RiskSeverity) => void
+  dispatchSeverityUpdate: (s: RiskSeverity) => void,
+  openUserFlyout: (userName: string, entityId: string) => void
 ): UsersTableColumns => {
   const columns: UsersTableColumns = [
     {
@@ -88,8 +92,16 @@ const getUsersColumns = (
       truncateText: false,
       sortable: true,
       mobileOptions: { show: true },
-      render: (name, user: User) =>
-        name != null && name.length > 0 ? (
+      render: (name, user: User) => {
+        if (name == null || name.length === 0) return getOrEmptyTagFromValue(name);
+        const { entityId } = user;
+        const onClick = entityId
+          ? (e: SyntheticEvent) => {
+              e.preventDefault();
+              openUserFlyout(name, entityId);
+            }
+          : undefined;
+        return (
           <SecurityCellActions
             mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
@@ -104,11 +116,11 @@ const getUsersColumns = (
               userName={name}
               entityId={user.entityId}
               identityFields={user.identityFields}
+              onClick={onClick}
             />
           </SecurityCellActions>
-        ) : (
-          getOrEmptyTagFromValue(name)
-        ),
+        );
+      },
     },
     {
       field: 'lastSeen',
@@ -197,6 +209,23 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const { activePage, limit } = useDeepEqualSelector((state) => getUsersSelector(state));
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const { navigateTo } = useNavigateTo();
+  const { openRightPanel } = useExpandableFlyoutApi();
+
+  const openUserFlyout = useCallback(
+    (userName: string, entityId: string) => {
+      openRightPanel({
+        id: UserPanelKey,
+        params: {
+          userName,
+          entityId,
+          contextID: tableType,
+          scopeId: tableType,
+          isPreviewMode: false,
+        },
+      });
+    },
+    [openRightPanel]
+  );
 
   const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) => {
@@ -257,8 +286,8 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   );
 
   const columns = useMemo(
-    () => getUsersColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate),
-    [isPlatinumOrTrialLicense, dispatchSeverityUpdate]
+    () => getUsersColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate, openUserFlyout),
+    [isPlatinumOrTrialLicense, dispatchSeverityUpdate, openUserFlyout]
   );
 
   return (
