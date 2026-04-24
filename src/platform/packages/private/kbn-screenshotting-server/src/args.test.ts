@@ -33,7 +33,7 @@ describe('headless webgl arm mac workaround', () => {
       userDataDir: '/',
       proxy: { enabled: false },
     });
-    expect(flags.includes(`--use-angle=vulkan`)).toBe(true);
+    expect(flags.includes(`--use-gl=angle`)).toBe(true);
   });
 
   test("doesn't disable gpu when on an arm mac, adds --enable-gpu", () => {
