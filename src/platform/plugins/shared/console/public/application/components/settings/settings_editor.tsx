@@ -246,6 +246,7 @@ export const SettingsEditor = (props: Props) => {
       >
         <EuiSwitch
           checked={isHistoryEnabled}
+          label=""
           showLabel={false}
           aria-labelledby="saveRequestsToHistory-label"
           onChange={(e) => toggleSavingToHistory(e.target.checked)}
@@ -259,6 +260,7 @@ export const SettingsEditor = (props: Props) => {
       >
         <EuiSwitch
           data-test-subj="enableKeyboardShortcuts"
+          label=""
           showLabel={false}
           aria-labelledby="keyboardShortcuts-label"
           checked={isKeyboardShortcutsEnabled}
@@ -273,6 +275,7 @@ export const SettingsEditor = (props: Props) => {
       >
         <EuiSwitch
           data-test-subj="enableA11yOverlay"
+          label=""
           showLabel={false}
           aria-labelledby="accessibilityOverlay-label"
           checked={isAccessibilityOverlayEnabled}
@@ -335,6 +338,7 @@ export const SettingsEditor = (props: Props) => {
       >
         <EuiSwitch
           data-test-subj="settingsWrapLines"
+          label=""
           showLabel={false}
           aria-labelledby="wrapLongLines-label"
           checked={wrapMode}
@@ -350,6 +354,7 @@ export const SettingsEditor = (props: Props) => {
       >
         <EuiSwitch
           data-test-subj="tripleQuotes"
+          label=""
           showLabel={false}
           aria-labelledby="tripleQuotes-label"
           checked={tripleQuotes}
@@ -367,6 +372,7 @@ export const SettingsEditor = (props: Props) => {
       {autoCompleteCheckboxes.map((opts) => (
         <SettingsFormRow key={opts.id} id={`autocomplete-${opts.id}-label`} label={opts.label}>
           <EuiSwitch
+            label=""
             data-test-subj={`autocomplete-settings-${opts.id}`}
             showLabel={false}
             aria-labelledby={`autocomplete-${opts.id}-label`}
