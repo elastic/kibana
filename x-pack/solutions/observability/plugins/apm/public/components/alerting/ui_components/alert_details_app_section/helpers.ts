@@ -54,7 +54,7 @@ export function formatAnomalySeverityThreshold(alertEvaluationThreshold: number)
       other {Alert when {severity} or above}
     }`,
     values: {
-      severity: severityMatch?.label ?? String(alertEvaluationThreshold),
+      severity: severityMatch?.type ?? String(alertEvaluationThreshold),
     },
   });
 }
