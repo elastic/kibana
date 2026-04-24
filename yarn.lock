@@ -5419,10 +5419,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-navigation@link:src/core/packages/chrome/navigation":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-chrome-sidebar-components@link:src/core/packages/chrome/sidebar/sidebar-components":
   version "0.0.0"
   uid ""
@@ -9584,6 +9580,10 @@
   uid ""
 
 "@kbn/ui-shared-deps-src@link:src/platform/packages/private/kbn-ui-shared-deps-src":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-side-navigation@link:src/platform/kbn-ui/side-navigation":
   version "0.0.0"
   uid ""
 

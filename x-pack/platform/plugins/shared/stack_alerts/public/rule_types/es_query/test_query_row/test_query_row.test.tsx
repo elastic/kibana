@@ -6,9 +6,11 @@
  */
 
 import { copyToClipboard } from '@elastic/eui';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 import { TestQueryRow } from './test_query_row';
 
 jest.mock('@elastic/eui', () => {
@@ -34,53 +36,46 @@ const onCopyQuery = () => COPIED_QUERY;
 
 describe('TestQueryRow', () => {
   it('should render the copy query button if copyQuery is provided', () => {
-    const component = mountWithIntl(
+    renderWithI18n(
       <TestQueryRow fetch={onFetch} copyQuery={onCopyQuery} hasValidationErrors={false} />
     );
-    expect(findTestSubject(component, 'copyQuery').exists()).toBe(true);
+    expect(screen.getByTestId('copyQuery')).toBeInTheDocument();
   });
 
   it('should not render the copy query button if copyQuery is not provided', () => {
-    const component = mountWithIntl(<TestQueryRow fetch={onFetch} hasValidationErrors={false} />);
-    expect(findTestSubject(component, 'copyQuery').exists()).toBe(false);
+    renderWithI18n(<TestQueryRow fetch={onFetch} hasValidationErrors={false} />);
+    expect(screen.queryByTestId('copyQuery')).not.toBeInTheDocument();
   });
 
   it('should disable the test query and copy query buttons if hasValidationErrors is true', () => {
-    const component = mountWithIntl(
+    renderWithI18n(
       <TestQueryRow fetch={onFetch} copyQuery={onCopyQuery} hasValidationErrors={true} />
     );
-    expect(findTestSubject(component, 'testQuery').prop('disabled')).toBe(true);
-    expect(findTestSubject(component, 'copyQuery').prop('disabled')).toBe(true);
+    expect(screen.getByTestId('testQuery')).toBeDisabled();
+    expect(screen.getByTestId('copyQuery')).toBeDisabled();
   });
 
   it('should not disable the test query and copy query buttons if hasValidationErrors is false', () => {
-    const component = mountWithIntl(
+    renderWithI18n(
       <TestQueryRow fetch={onFetch} copyQuery={onCopyQuery} hasValidationErrors={false} />
     );
-    expect(findTestSubject(component, 'testQuery').prop('disabled')).toBe(false);
-    expect(findTestSubject(component, 'copyQuery').prop('disabled')).toBe(false);
+    expect(screen.getByTestId('testQuery')).not.toBeDisabled();
+    expect(screen.getByTestId('copyQuery')).not.toBeDisabled();
   });
 
   it('should call the fetch callback when the test query button is clicked', async () => {
     const localOnFetch = jest.fn(onFetch);
-    const component = mountWithIntl(
-      <TestQueryRow fetch={localOnFetch} hasValidationErrors={false} />
-    );
-    await act(async () => {
-      findTestSubject(component, 'testQuery').simulate('click');
-    });
+    renderWithI18n(<TestQueryRow fetch={localOnFetch} hasValidationErrors={false} />);
+    await userEvent.click(screen.getByTestId('testQuery'));
     expect(localOnFetch).toHaveBeenCalled();
   });
 
   it('should call the copyQuery callback and pass the returned value to copyToClipboard when the copy query button is clicked', async () => {
     const localOnCopyQuery = jest.fn(onCopyQuery);
-    const component = mountWithIntl(
+    renderWithI18n(
       <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
     );
-    await act(async () => {
-      findTestSubject(component, 'copyQuery').simulate('click');
-    });
-    component.update();
+    await userEvent.click(screen.getByTestId('copyQuery'));
     expect(localOnCopyQuery).toHaveBeenCalled();
     expect(copyToClipboard).toHaveBeenCalledWith(COPIED_QUERY);
   });
@@ -90,16 +85,13 @@ describe('TestQueryRow', () => {
     const localOnCopyQuery = jest.fn(() => {
       throw new Error(errorMessage);
     });
-    const component = mountWithIntl(
+    renderWithI18n(
       <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
     );
-    await act(async () => {
-      findTestSubject(component, 'copyQuery').simulate('click');
-    });
-    component.update();
+    await userEvent.click(screen.getByTestId('copyQuery'));
     expect(localOnCopyQuery).toHaveBeenCalled();
-    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(true);
-    expect(findTestSubject(component, 'copyQueryError').text()).toContain(errorMessage);
+    expect(screen.getByTestId('copyQueryError')).toBeInTheDocument();
+    expect(screen.getByTestId('copyQueryError')).toHaveTextContent(errorMessage);
   });
 
   it('should clear copyQuery error when clicking copy query again', async () => {
@@ -111,22 +103,16 @@ describe('TestQueryRow', () => {
       }
       return COPIED_QUERY;
     });
-    const component = mountWithIntl(
+    renderWithI18n(
       <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
     );
 
-    await act(async () => {
-      findTestSubject(component, 'copyQuery').simulate('click');
-    });
-    component.update();
-    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(true);
+    await userEvent.click(screen.getByTestId('copyQuery'));
+    expect(screen.getByTestId('copyQueryError')).toBeInTheDocument();
 
     shouldThrow = false;
-    await act(async () => {
-      findTestSubject(component, 'copyQuery').simulate('click');
-    });
-    component.update();
-    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(false);
+    await userEvent.click(screen.getByTestId('copyQuery'));
+    expect(screen.queryByTestId('copyQueryError')).not.toBeInTheDocument();
   });
 
   it('should clear copyQuery error when clicking test query', async () => {
@@ -134,40 +120,28 @@ describe('TestQueryRow', () => {
     const localOnCopyQuery = jest.fn(() => {
       throw new Error(errorMessage);
     });
-    const component = mountWithIntl(
+    renderWithI18n(
       <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
     );
 
-    await act(async () => {
-      findTestSubject(component, 'copyQuery').simulate('click');
-    });
-    component.update();
-    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(true);
+    await userEvent.click(screen.getByTestId('copyQuery'));
+    expect(screen.getByTestId('copyQueryError')).toBeInTheDocument();
 
-    await act(async () => {
-      findTestSubject(component, 'testQuery').simulate('click');
-    });
-    component.update();
-    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(false);
+    await userEvent.click(screen.getByTestId('testQuery'));
+    expect(screen.queryByTestId('copyQueryError')).not.toBeInTheDocument();
   });
 
   it('should clear testQuery error when clicking copy query', async () => {
     const localOnFetch = jest.fn(() => Promise.reject(new Error('Test query failed')));
-    const component = mountWithIntl(
+    renderWithI18n(
       <TestQueryRow fetch={localOnFetch} copyQuery={onCopyQuery} hasValidationErrors={false} />
     );
 
-    await act(async () => {
-      findTestSubject(component, 'testQuery').simulate('click');
-    });
-    component.update();
-    expect(findTestSubject(component, 'testQueryError').exists()).toBe(true);
+    await userEvent.click(screen.getByTestId('testQuery'));
+    await screen.findByTestId('testQueryError');
 
-    await act(async () => {
-      findTestSubject(component, 'copyQuery').simulate('click');
-    });
-    component.update();
-    expect(findTestSubject(component, 'testQueryError').exists()).toBe(false);
+    await userEvent.click(screen.getByTestId('copyQuery'));
+    expect(screen.queryByTestId('testQueryError')).not.toBeInTheDocument();
   });
 
   it('should clear copyQuery error when fetch prop changes', async () => {
@@ -175,15 +149,12 @@ describe('TestQueryRow', () => {
     const localOnCopyQuery = jest.fn(() => {
       throw new Error(errorMessage);
     });
-    const component = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
     );
 
-    await act(async () => {
-      findTestSubject(component, 'copyQuery').simulate('click');
-    });
-    component.update();
-    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(true);
+    await userEvent.click(screen.getByTestId('copyQuery'));
+    expect(screen.getByTestId('copyQueryError')).toBeInTheDocument();
 
     const newFetch = () =>
       Promise.resolve({
@@ -195,8 +166,11 @@ describe('TestQueryRow', () => {
         timeWindow: '10m',
       });
 
-    component.setProps({ fetch: newFetch });
-    component.update();
-    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(false);
+    rerender(
+      <I18nProvider>
+        <TestQueryRow fetch={newFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
+      </I18nProvider>
+    );
+    expect(screen.queryByTestId('copyQueryError')).not.toBeInTheDocument();
   });
 });
