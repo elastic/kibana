@@ -15,28 +15,47 @@ const renderWithIntl = (ui: React.ReactElement) => {
 };
 
 describe('StatusHeader', () => {
-  it('renders the default mode badge, title and description', () => {
-    renderWithIntl(<StatusHeader />);
+  describe('critical variant (default)', () => {
+    it('renders the default title and description', () => {
+      renderWithIntl(<StatusHeader />);
 
-    expect(screen.getByText('SIGNIFICANT EVENTS')).toBeInTheDocument();
-    expect(screen.getByText('Your system requires attention')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'We are detecting more unusual behaviour than normal, review the impact and details and start remediation or further actions.'
-      )
-    ).toBeInTheDocument();
+      expect(screen.getByText('Your system requires attention')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'We are detecting more unusual behaviour than normal, review the impact and details and start remediation or further actions.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('renders custom title and description when provided', () => {
+      renderWithIntl(
+        <StatusHeader
+          title="Custom system title"
+          description="Custom description for the system status"
+        />
+      );
+
+      expect(screen.getByText('Custom system title')).toBeInTheDocument();
+      expect(screen.getByText('Custom description for the system status')).toBeInTheDocument();
+    });
   });
 
-  it('renders custom title and description when provided', () => {
-    renderWithIntl(
-      <StatusHeader
-        title="Custom system title"
-        description="Custom description for the system status"
-      />
-    );
+  describe('noCriticalEvents variant', () => {
+    it('renders the no-critical default title and description', () => {
+      renderWithIntl(<StatusHeader variant="noCriticalEvents" />);
 
-    expect(screen.getByText('Custom system title')).toBeInTheDocument();
-    expect(screen.getByText('Custom description for the system status')).toBeInTheDocument();
+      expect(screen.getByText('You have no critical significant events')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Here are some low and medium severity suggestions of significant events we recommend reviewing.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('never renders a mode badge', () => {
+    renderWithIntl(<StatusHeader />);
+    expect(screen.queryByText('SIGNIFICANT EVENTS')).not.toBeInTheDocument();
   });
 
   it('has the correct test subject', () => {

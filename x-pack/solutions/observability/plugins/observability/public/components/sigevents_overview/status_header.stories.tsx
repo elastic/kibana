@@ -11,18 +11,28 @@ import { StatusHeader } from './status_header';
 const meta: Meta<typeof StatusHeader> = {
   title: 'app/SigeventsOverview/StatusHeader',
   component: StatusHeader,
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['critical', 'noCriticalEvents'],
+    },
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof StatusHeader>;
 
-export const Default: Story = {
-  args: {},
+export const Critical: Story = {
+  args: { variant: 'critical' },
+};
+
+export const NoCriticalEvents: Story = {
+  args: { variant: 'noCriticalEvents' },
 };
 
 export const CustomContent: Story = {
   args: {
-    modeLabel: 'MONITORING',
+    variant: 'critical',
     title: 'A critical event has been detected',
     description:
       'Review the affected services, escalate if needed, and start investigating from the significant event below.',
@@ -31,8 +41,8 @@ export const CustomContent: Story = {
 
 export const CustomIcon: Story = {
   args: {
-    iconType: 'alert',
-    iconColor: 'warning',
+    variant: 'critical',
+    iconType: 'warning',
     title: 'Warning: unusual patterns detected',
   },
 };
