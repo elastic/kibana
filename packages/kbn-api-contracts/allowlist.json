@@ -168,6 +168,42 @@
       "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
       "approvedBy": "@elastic/fleet",
       "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/security/role/{name}",
+      "method": "get",
+      "reason": "Added meta:{id} to security role schemas so OAS generator emits named $ref components instead of inline objects. Data shape is identical.",
+      "approvedBy": "@elastic/kibana-security"
+    },
+    {
+      "path": "/api/security/role",
+      "method": "get",
+      "reason": "Added meta:{id} to security role schemas so OAS generator emits named $ref components instead of inline objects. Data shape is identical.",
+      "approvedBy": "@elastic/kibana-security"
+    },
+    {
+      "path": "/api/security/role/{name}",
+      "method": "put",
+      "reason": "Added meta:{id} to security role schemas so OAS generator emits named $ref components instead of inline objects. Data shape is identical.",
+      "approvedBy": "@elastic/kibana-security"
+    },
+    {
+      "path": "/api/security/role/{name}",
+      "method": "delete",
+      "reason": "Added meta:{id} to security role schemas so OAS generator emits named $ref components instead of inline objects. Data shape is identical.",
+      "approvedBy": "@elastic/kibana-security"
+    },
+    {
+      "path": "/api/security/roles",
+      "method": "post",
+      "reason": "Added meta:{id} to security role schemas so OAS generator emits named $ref components instead of inline objects. Data shape is identical.",
+      "approvedBy": "@elastic/kibana-security"
+    },
+    {
+      "path": "/api/security/role/_query",
+      "method": "post",
+      "reason": "Added meta:{id} to security role schemas so OAS generator emits named $ref components instead of inline objects. Data shape is identical.",
+      "approvedBy": "@elastic/kibana-security"
     }
   ]
 }
