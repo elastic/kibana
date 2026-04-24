@@ -23,35 +23,10 @@ const localTags = [...tags.stateful.classic, ...tags.serverless.security.complet
 test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
   let ruleId: string;
   let ruleName: string;
-  let packId: string;
-  let packName: string;
   let embeddedRuleBody: ReturnType<typeof buildOsqueryAlertTestRule>;
   const transientCaseIds: string[] = [];
 
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
-    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
-      .items[0]?.policy_ids?.[0];
-    if (!firstPolicyId) {
-      throw new Error(
-        'alert_case_creation: no Fleet policy id from listFleetWrapperPackagePolicies'
-      );
-    }
-
-    const pack = await apiServices.osquery.packs.create({
-      name: `scout-alert-case-pack-${Date.now()}`,
-      enabled: true,
-      description: 'scout',
-      shards: {},
-      policy_ids: [firstPolicyId],
-      queries: {
-        q1: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
-      },
-    });
-    packId = (pack.data as { data: { saved_object_id: string; name: string } }).data
-      .saved_object_id;
-    packName = (pack.data as { data: { saved_object_id: string; name: string } }).data.name;
-
+  test.beforeAll(async ({ kbnClient }) => {
     embeddedRuleBody = buildOsqueryAlertTestRule({
       includeResponseActions: true,
       nameSuffix: `scout-case-${Date.now()}`,
@@ -69,14 +44,13 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     }
   });
 
-  test.afterAll(async ({ esClient, apiServices, log }) => {
+  test.afterAll(async ({ esClient, log }) => {
     await deleteSeededAlerts(esClient, ruleId).catch((err: Error) =>
       log.debug(`deleteSeededAlerts failed: ${err.message}`)
     );
-    await apiServices.osquery.packs.delete(packId);
   });
 
-  // One submit, two Add to Case clicks: existing case (select) then new case (create).
+  // One single-query submit, two Add to Case clicks: existing case (select) then new case (create).
   test('runs osquery from an alert and attaches results to an existing + a new case', async ({
     browserAuth,
     esClient,
@@ -85,7 +59,7 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
-    // 7 min: pack submit + two case attachments on cold stacks.
+    // Cold stacks: agent results + two case attachments.
     test.setTimeout(420_000);
 
     // API-seeded case drives "Select case"; same results later drive "Create case".
@@ -114,16 +88,14 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
 
     await browserAuth.loginAsOsqueryPowerUser();
 
-    await test.step('submit osquery in pack mode from the alert flyout', async () => {
+    await test.step('submit a single live query from the alert flyout', async () => {
       await pageObjects.osqueryRuleEditor.openSeededAlertFlyout(seed);
       await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
       await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
       await pageObjects.osqueryAlertFlyout.waitForFlyoutEditorReady();
-      await pageObjects.osqueryAlertFlyout.switchFlyoutToPackMode();
-      await pageObjects.osqueryAlertFlyout.selectFlyoutPack(packName);
+      await pageObjects.osqueryAlertFlyout.inputFlyoutQuery('select * from uptime;');
       await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-      // Pack flyout: use pack results waiter (panel vs aggregate table).
-      await pageObjects.osqueryLiveQueryForm.waitForPackResults();
+      await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
     });
 
     await test.step('attach results to the pre-seeded existing case', async () => {
