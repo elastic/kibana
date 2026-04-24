@@ -9,4 +9,3 @@
 
 export * from './workflows_context';
 export * from './types';
-export { useGetPropertyHandler } from '../../features/validate_workflow_yaml/lib/property_handlers/use_get_property_handler';
