@@ -16,11 +16,7 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseView.attach.se
 });
 
 export const FILTER_TYPE_LABEL = i18n.translate('xpack.cases.caseView.attach.filterTypeLabel', {
-  defaultMessage: 'Filter by type',
-});
-
-export const FILTER_ALL = i18n.translate('xpack.cases.caseView.attach.filterAll', {
-  defaultMessage: 'All types',
+  defaultMessage: 'Type',
 });
 
 export const COLUMN_TITLE = i18n.translate('xpack.cases.caseView.attach.columnTitle', {

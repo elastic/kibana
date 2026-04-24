@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { AttachmentTypeFilter } from './attachment_type_filter';
 import { FilterActivity } from './filter_activity';
 import { SortActivity } from './sort_activity';
 import type { UserActivityFilter, UserActivitySortOrder, UserActivityParams } from './types';
@@ -18,10 +19,19 @@ interface UserActionsActivityProps {
   params: UserActivityParams;
   userActionsStats?: CaseUserActionsStats;
   onUserActionsActivityChanged: (params: UserActivityParams) => void;
+  selectedAttachmentTypes: string[];
+  onAttachmentTypesChange: (selectedAttachmentTypes: string[]) => void;
 }
 
 export const UserActionsActivityBar = React.memo<UserActionsActivityProps>(
-  ({ params, onUserActionsActivityChanged, userActionsStats, isLoading }) => {
+  ({
+    params,
+    onUserActionsActivityChanged,
+    userActionsStats,
+    isLoading,
+    selectedAttachmentTypes,
+    onAttachmentTypesChange,
+  }) => {
     const handleFilterChange = (type: UserActivityFilter) => {
       onUserActionsActivityChanged({ ...params, type });
     };
@@ -46,11 +56,22 @@ export const UserActionsActivityBar = React.memo<UserActionsActivityProps>(
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SortActivity
-            sortOrder={params.sortOrder}
-            onOrderChange={handleOrderChange}
-            isLoading={isLoading}
-          />
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap={true} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <AttachmentTypeFilter
+                selectedAttachmentTypes={selectedAttachmentTypes}
+                onAttachmentTypesChange={onAttachmentTypesChange}
+                isLoading={isLoading}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SortActivity
+                sortOrder={params.sortOrder}
+                onOrderChange={handleOrderChange}
+                isLoading={isLoading}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

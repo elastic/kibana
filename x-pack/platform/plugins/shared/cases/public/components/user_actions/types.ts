@@ -42,6 +42,7 @@ export interface UserActionTreeProps {
   useFetchAlertData: UseFetchAlertData;
   userActivityQueryParams: UserActivityParams;
   userActionsStats: CaseUserActionsStats;
+  selectedAttachmentTypes?: string[];
 }
 
 type UnsupportedUserActionTypes = (typeof UNSUPPORTED_ACTION_TYPES)[number];

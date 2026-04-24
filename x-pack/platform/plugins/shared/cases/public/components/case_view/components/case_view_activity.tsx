@@ -88,6 +88,8 @@ export const CaseViewActivity = ({
     perPage: 10,
   });
 
+  const [selectedAttachmentTypes, setSelectedAttachmentTypes] = useState<string[]>([]);
+
   const { permissions } = useCasesContext();
 
   const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
@@ -251,6 +253,8 @@ export const CaseViewActivity = ({
             params={userActivityQueryParams}
             userActionsStats={userActionsStats}
             isLoading={isLoadingUserActionsStats}
+            selectedAttachmentTypes={selectedAttachmentTypes}
+            onAttachmentTypesChange={setSelectedAttachmentTypes}
           />
         </EuiFlexItem>
         <EuiSpacer size="l" />
@@ -292,6 +296,7 @@ export const CaseViewActivity = ({
                 useFetchAlertData={useFetchAlertData}
                 userActivityQueryParams={userActivityQueryParams}
                 userActionsStats={userActionsStats}
+                selectedAttachmentTypes={selectedAttachmentTypes}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

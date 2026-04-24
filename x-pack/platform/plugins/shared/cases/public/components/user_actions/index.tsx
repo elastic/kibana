@@ -25,6 +25,7 @@ import { useLastPageUserActions } from './use_user_actions_last_page';
 import { ShowMoreButton } from './show_more_button';
 import { useLastPage } from './use_last_page';
 import { useUserPermissions } from './use_user_permissions';
+import type { UserActionUI } from '../../containers/types';
 
 const getIconsCss = (hasNextPage: boolean | undefined, euiTheme: EuiThemeComputed<{}>): string => {
   const customSize = hasNextPage
@@ -76,6 +77,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     useFetchAlertData,
     userActivityQueryParams,
     userActionsStats,
+    selectedAttachmentTypes,
   } = props;
   const { detailName: caseId } = useCaseViewParams();
 
@@ -103,6 +105,37 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       caseId: caseData.id,
       lastPage,
     });
+
+  const filterByAttachmentType = useCallback(
+    (userActions: UserActionUI[] | undefined): UserActionUI[] => {
+      if (!userActions) {
+        return [];
+      }
+      if (!selectedAttachmentTypes || selectedAttachmentTypes.length === 0) {
+        return userActions;
+      }
+      const selected = new Set(selectedAttachmentTypes);
+      return userActions.filter((userAction) => {
+        if (userAction.type !== 'comment') {
+          return false;
+        }
+        const comment = (userAction.payload as { comment?: { type?: string } } | undefined)
+          ?.comment;
+        return comment?.type != null && selected.has(comment.type);
+      });
+    },
+    [selectedAttachmentTypes]
+  );
+
+  const filteredInfiniteCaseUserActions = useMemo(
+    () => filterByAttachmentType(infiniteCaseUserActions),
+    [filterByAttachmentType, infiniteCaseUserActions]
+  );
+
+  const filteredLastPageUserActions = useMemo(
+    () => filterByAttachmentType(lastPageUserActions),
+    [filterByAttachmentType, lastPageUserActions]
+  );
 
   const alertIdsWithoutRuleInfo = useMemo(
     () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -190,7 +223,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       >
         <UserActionsList
           {...props}
-          caseUserActions={infiniteCaseUserActions}
+          caseUserActions={filteredInfiniteCaseUserActions}
           attachments={infiniteLatestAttachments}
           loadingAlertData={loadingAlertData}
           manualAlertsData={manualAlertsData}
@@ -214,7 +247,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           >
             <UserActionsList
               {...props}
-              caseUserActions={lastPageUserActions}
+              caseUserActions={filteredLastPageUserActions}
               attachments={lastPageAttachments}
               loadingAlertData={loadingAlertData}
               manualAlertsData={manualAlertsData}

@@ -10,6 +10,7 @@ import {
   EuiBasicTable,
   EuiButtonEmpty,
   EuiFieldSearch,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,12 +20,13 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelect,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import type { MultiSelectFilterOption } from '../../all_cases/multi_select_filter';
+import { MultiSelectFilter } from '../../all_cases/multi_select_filter';
 import {
   SO_DASHBOARD_ATTACHMENT_TYPE,
   SO_DISCOVER_SESSION_ATTACHMENT_TYPE,
@@ -114,19 +116,17 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
     [unifiedAttachmentTypeRegistry]
   );
 
-  const typeOptions = useMemo<Array<{ value: SupportedType | 'all'; text: string }>>(
-    () => [
-      { value: 'all', text: i18n.FILTER_ALL },
-      ...SUPPORTED_TYPES.map((soType) => ({
-        value: soType,
-        text: getDisplayName(soType),
+  const typeOptions = useMemo<Array<MultiSelectFilterOption<string, SupportedType>>>(
+    () =>
+      SUPPORTED_TYPES.map((soType) => ({
+        key: soType,
+        label: getDisplayName(soType),
       })),
-    ],
     [getDisplayName]
   );
 
   const [query, setQuery] = useState<string>('');
-  const [selectedType, setSelectedType] = useState<SupportedType | 'all'>('all');
+  const [selectedTypes, setSelectedTypes] = useState<SupportedType[]>([]);
   const [page, setPage] = useState<number>(0);
   const [perPage, setPerPage] = useState<number>(DEFAULT_PAGE_SIZE);
   const [items, setItems] = useState<FoundSavedObject[]>([]);
@@ -135,8 +135,16 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
   const [attachingId, setAttachingId] = useState<string | null>(null);
 
   const searchTypes = useMemo<SupportedType[]>(
-    () => (selectedType === 'all' ? [...SUPPORTED_TYPES] : [selectedType]),
-    [selectedType]
+    () => (selectedTypes.length === 0 ? [...SUPPORTED_TYPES] : selectedTypes),
+    [selectedTypes]
+  );
+
+  const onTypesChange = useCallback(
+    ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
+      setSelectedTypes(selectedOptionKeys as SupportedType[]);
+      setPage(0);
+    },
+    []
   );
 
   const fetchObjects = useCallback(async () => {
@@ -303,16 +311,16 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSelect
-              options={typeOptions}
-              value={selectedType}
-              onChange={(e) => {
-                setSelectedType(e.target.value as SupportedType | 'all');
-                setPage(0);
-              }}
-              data-test-subj="cases-attach-so-type-select"
-              aria-label={i18n.FILTER_TYPE_LABEL}
-            />
+            <EuiFilterGroup data-test-subj="cases-attach-so-type-filter-group">
+              <MultiSelectFilter<string, SupportedType>
+                id="attachSavedObjectType"
+                buttonLabel={i18n.FILTER_TYPE_LABEL}
+                onChange={onTypesChange}
+                options={typeOptions}
+                selectedOptionKeys={selectedTypes}
+                isLoading={isLoading}
+              />
+            </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />

@@ -37,3 +37,7 @@ export const SORTED_BY_ARIA_LABEL = i18n.translate(
     defaultMessage: '"Sort by" list',
   }
 );
+
+export const TYPE = i18n.translate('xpack.cases.userActionsActivity.filter.type', {
+  defaultMessage: 'Type',
+});
