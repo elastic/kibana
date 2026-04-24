@@ -15,7 +15,7 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { parseKbnImportReq } from '@kbn/repo-packages';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { discoverPlugins } from '../utils/plugin_discovery';
-import { findTargetEntry } from './create_single_compile_config';
+import { findTargetEntry } from '../utils/entry_generation';
 import { loadDllManifest } from './dll_manifest';
 import { getExternals } from './externals';
 import {
