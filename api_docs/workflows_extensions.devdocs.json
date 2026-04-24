@@ -619,8 +619,7 @@
         "$ZodLooseShape, ",
         "node_modules/zod/v4/core/schemas",
         "$strip>>> & ",
-        "TriggerRegistryStartContract",
-        " & { isReady(): Promise<void>; }"
+        "TriggerRegistryStartContract"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
       "lineNumber": 69,
@@ -2257,13 +2256,7 @@
           ],
           "signature": [
             "(definition: ",
-            {
-              "pluginId": "workflowsExtensions",
-              "scope": "server",
-              "docId": "kibWorkflowsExtensionsPluginApi",
-              "section": "def-server.ServerStepDefinition",
-              "text": "ServerStepDefinition"
-            },
+            "ServerStepDefinitionOrLoader",
             "<",
             "ZodType",
             "<unknown, unknown, ",
@@ -2289,20 +2282,14 @@
             {
               "parentPluginId": "workflowsExtensions",
               "id": "def-server.WorkflowsExtensionsServerPluginSetup.registerStepDefinition.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "definition",
               "description": [
                 "- The step server-side definition"
               ],
               "signature": [
-                {
-                  "pluginId": "workflowsExtensions",
-                  "scope": "server",
-                  "docId": "kibWorkflowsExtensionsPluginApi",
-                  "section": "def-server.ServerStepDefinition",
-                  "text": "ServerStepDefinition"
-                },
+                "ServerStepDefinitionOrLoader",
                 "<",
                 "ZodType",
                 "<unknown, unknown, ",

@@ -45,6 +45,16 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
             entries[fieldName] =
               context.getSecuritySolutionCellRenderer?.(fieldName) ?? entries[fieldName];
           });
+
+          for (const field of params.dataView.fields.getByType('ip')) {
+            if (!entries[field.name]) {
+              const renderer = context.getSecuritySolutionCellRenderer?.(field.name);
+              if (renderer) {
+                entries[field.name] = renderer;
+              }
+            }
+          }
+
           return entries;
         },
       getRowIndicatorProvider: () => () => getAlertEventRowIndicator,
