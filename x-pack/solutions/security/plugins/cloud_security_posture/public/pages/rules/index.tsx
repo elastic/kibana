@@ -18,7 +18,7 @@ import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useSecuritySolutionContext } from '../../application/security_solution_context';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import { getBenchmarkCisName } from '../../../common/utils/helpers';
+import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const benchmarksInfo = useCspBenchmarkIntegrationsV2();
@@ -44,7 +44,11 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false} css={{ marginBottom: 6 }}>
-                  <CISBenchmarkIcon type={params.benchmarkId} size={'l'} />
+                  <CISBenchmarkIcon
+                    type={params.benchmarkId}
+                    name={getBenchmarkApplicableTo(params.benchmarkId)}
+                    size={'l'}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <CloudPosturePageTitle
