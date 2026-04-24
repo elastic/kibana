@@ -95,8 +95,7 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     page,
     pageObjects,
   }) => {
-    // 5 min: rule-edit flow involves two save round trips plus re-enter
-    // edit mode + pack selection. Slower than the API-layer equivalent.
+    // 5 min: two save round-trips + re-enter edit to verify persisted packs.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -112,13 +111,10 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
     ]);
     await pageObjects.osqueryRuleEditor.clickSaveRule();
 
-    // Observable outcome: "rule was saved" toast.
     await expect(page.getByText(`${ruleName} was saved`)).toBeVisible({ timeout: 60_000 });
     await pageObjects.osqueryRuleEditor.dismissAllToasts();
 
-    // Re-enter edit mode and confirm the pack selection persisted. This is
-    // the user-visible proof that the first save took effect — payload-shape
-    // assertions on the outgoing PUT body live in the API spec instead.
+    // Re-open edit: combobox shows saved pack (PUT shape covered in API tests).
     await pageObjects.osqueryRuleEditor.enterRuleEditMode();
     await pageObjects.osqueryRuleEditor.goToActionsTab();
     await pageObjects.osqueryRuleEditor
@@ -129,14 +125,11 @@ test.describe('Pack-based Osquery response actions in the rule editor', { tag: l
       pageObjects.osqueryRuleEditor.responseActionItem(0).getByTestId('comboBoxSearchInput')
     ).toHaveValue(singleQueryPackName);
 
-    // Switch to the multi-query pack and save again; same observable
-    // outcome assertion.
     await pageObjects.osqueryRuleEditor.selectPackInComboBox(0, multiQueryPackName, multiKeys);
     await pageObjects.osqueryRuleEditor.clickSaveChanges();
     await expect(page.getByText(`${ruleName} was saved`)).toBeVisible({ timeout: 60_000 });
     await pageObjects.osqueryRuleEditor.dismissAllToasts();
 
-    // Re-enter to confirm the second save persisted the new pack.
     await pageObjects.osqueryRuleEditor.enterRuleEditMode();
     await pageObjects.osqueryRuleEditor.goToActionsTab();
     await pageObjects.osqueryRuleEditor

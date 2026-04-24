@@ -7,16 +7,7 @@
 
 import type { OsqueryApiService } from '../../common/services/osquery_api_service';
 
-/**
- * Defensive pre-cleanup helpers. A previous test run that crashed between
- * creating a named resource and running `afterAll` can leave packs / saved
- * queries behind. These helpers are invoked once per environment by the
- * `globalSetupHook` in `parallel_tests/global.setup.ts` — spec-local
- * `beforeAll` SHOULD NOT re-invoke them.
- *
- * Everything here is idempotent — the osquery API service already ignores 404
- * on delete via `ignoreErrors: [404]`, so no extra catch is needed.
- */
+/** Delete scout-prefixed packs/queries (idempotent); called from global setup only. */
 
 interface PackListItem {
   saved_object_id: string;
@@ -28,12 +19,7 @@ interface SavedQueryListItem {
   id?: string;
 }
 
-/**
- * Delete every osquery pack whose name starts with one of the given prefixes.
- * Typical prefixes used by Scout tests: `scout-`, `scout-ra-`, `scout-fast-`,
- * `scout-pack-`, `scout-policy-`, `scout-alert-case-`, `scout-custom-space-`.
- * Pass just the unambiguous test-specific prefix to avoid over-matching.
- */
+/** Delete packs whose `name` starts with any of the prefixes. */
 export async function cleanOsqueryPacksByPrefix(
   osqueryApi: OsqueryApiService,
   prefixes: string[]
@@ -47,16 +33,11 @@ export async function cleanOsqueryPacksByPrefix(
       await osqueryApi.packs.delete(p.saved_object_id);
     }
   } catch {
-    // List call failed (role not yet set up, network error); the ensuing test
-    // will either surface the real failure or succeed on a cold state.
+    // List can fail early; tests will surface real errors if needed.
   }
 }
 
-/**
- * Delete every osquery saved query whose user-facing `id` starts with one of
- * the given prefixes. Prebuilt saved queries (e.g. `users_elastic`) don't match
- * any `scout-` prefix so they are left in place.
- */
+/** Delete saved queries whose `id` starts with any prefix (prebuilts untouched). */
 export async function cleanOsquerySavedQueriesByPrefix(
   osqueryApi: OsqueryApiService,
   prefixes: string[]
@@ -70,13 +51,11 @@ export async function cleanOsquerySavedQueriesByPrefix(
       await osqueryApi.savedQueries.delete(q.saved_object_id);
     }
   } catch {
-    // Same rationale as `cleanOsqueryPacksByPrefix`.
+    // ignore list failures
   }
 }
 
-/** All `scout-*` pack-name prefixes used across the Scout UI suite. Used by the
- *  defensive-cleanup globalSetupHook; if you add a new prefix in a spec, add it
- *  here so the global sweep catches orphans from crashed runs. */
+/** Pack name prefixes swept by global setup (add new scout prefixes here). */
 export const ALL_SCOUT_PACK_PREFIXES = [
   'scout-pack-',
   'scout-pack-edit-',
@@ -93,7 +72,7 @@ export const ALL_SCOUT_PACK_PREFIXES = [
   'scout-upgrade-',
 ] as const;
 
-/** All `scout-*` saved-query-id prefixes used across the Scout UI suite. */
+/** Saved-query id prefixes swept by global setup. */
 export const ALL_SCOUT_SAVED_QUERY_PREFIXES = [
   'scout-pack-sq-',
   'scout-pack-sq-extra-',

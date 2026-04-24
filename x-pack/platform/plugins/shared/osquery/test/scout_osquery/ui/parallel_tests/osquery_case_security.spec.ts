@@ -19,7 +19,7 @@ test.describe('Osquery results attached to Security cases', { tag: localTags }, 
     apiServices,
     kbnClient,
   }) => {
-    // 4 min: agent-dependent live query + case create via API + UI attach flow.
+    // 4 min: live query + case attach.
     test.setTimeout(240_000);
 
     const caseId = await runAddLiveQueryResultToCase({

@@ -99,7 +99,7 @@ export async function waitForAtLeastOneAlert(
       }
 
       if (status === 404) {
-        // index_not_found_exception before the first alert lands — poll again.
+        // 404: index not ready — poll again.
         consecutive5xx = 0;
       } else if (status !== undefined && status >= 500) {
         consecutive5xx += 1;
@@ -109,7 +109,7 @@ export async function waitForAtLeastOneAlert(
           );
         }
       }
-      // Network / unknown error class: let the poll interval handle backoff.
+      // Other errors: backoff via poll interval.
     }
 
     await new Promise((r) => setTimeout(r, pollIntervalMs));

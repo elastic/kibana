@@ -33,13 +33,7 @@ export class FleetIntegrationPage {
     this.integrationPolicyUpgradeBtn = this.page.testSubj.locator('integrationPolicyUpgradeBtn');
   }
 
-  /**
-   * Click the Fleet tour's "Got it" button. Callers MUST know the tour is
-   * visible — this method does not no-op when the button is absent. Playwright
-   * creates a fresh browser context per test, so the tour is present on the
-   * first Fleet navigation within a test (or not at all, on subsequent
-   * navigations within the same test).
-   */
+  /** Clicks Fleet "Got it" tour; caller must ensure the button is visible. */
   async dismissFleetTour(): Promise<void> {
     await this.gotItButton.click();
   }
@@ -60,12 +54,7 @@ export class FleetIntegrationPage {
     await this.page.gotoApp(`integrations/detail/osquery_manager-${version}/overview`);
   }
 
-  /**
-   * Create a new agent policy via the Fleet UI. Callers SHOULD dismiss the
-   * Fleet first-visit tour (`dismissFleetTour`) in a spec-level `beforeEach`
-   * before invoking this method, or its first click will be intercepted by
-   * the tour overlay.
-   */
+  /** Create policy; dismiss Fleet tour first if it can appear. */
   async createAgentPolicy(policyName: string): Promise<void> {
     const headerCreate = this.createAgentPolicyButton;
     const emptyStateCreate = this.page.testSubj.locator('emptyPromptCreateAgentPolicyButton');
@@ -84,10 +73,7 @@ export class FleetIntegrationPage {
     await this.createAgentPolicyFlyoutBtn.click();
   }
 
-  /**
-   * Open an existing agent policy by name. Callers are responsible for any
-   * tour dismissal (see `dismissFleetTour`).
-   */
+  /** Open policy row by name. */
   async openAgentPolicy(policyName: string): Promise<void> {
     await this.agentPolicyNameLink.filter({ hasText: policyName }).click();
   }
@@ -96,18 +82,16 @@ export class FleetIntegrationPage {
     await this.addPackagePolicyButton.click();
     await this.addIntegrationFlyout.waitFor({ state: 'visible' });
 
-    // Inner `comboBoxSearchInput` — the wrapper `comboBoxInput` is not fillable.
+    // Fill inner combobox search input (wrapper is not fillable).
     const integrationSearchInput = this.addIntegrationFlyout.locator(
       '[data-test-subj="comboBoxSearchInput"]'
     );
     await integrationSearchInput.fill('osquery manager');
 
-    // EUI portals the combobox listbox into a separate overlay dialog, not a
-    // descendant of `addIntegrationFlyout`. Cypress selects via
-    // `cy.get('[role="option"]').first()` on `body` for the same reason.
+    // Options render in a portaled overlay — match on body, first option.
     await this.page
       .getByRole('option', { name: /Osquery Manager/i })
-      // eslint-disable-next-line playwright/no-nth-methods -- listbox is portaled; multiple matches possible across overlays
+      // eslint-disable-next-line playwright/no-nth-methods -- portaled listbox
       .first()
       .click();
 

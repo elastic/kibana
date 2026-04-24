@@ -94,12 +94,7 @@ export class PackFormPage {
     await this.osqueryEditor.click();
     await this.osqueryEditor.pressSequentially(query, { delay: 5 });
 
-    // Monaco's React wrapper syncs typed text into RHF via a 500ms debounce on
-    // the onChange callback. If the next action (e.g. Save) lands before the
-    // debounce fires, RHF still sees an empty `query` field and rejects the
-    // save silently — the flyout never closes. Blur the hidden textarea AND
-    // wait for the Monaco model to carry the text before returning, mirroring
-    // the same guard used by `alert_flyout.ts::inputFlyoutQuery`.
+    // Blur + wait for Monaco model (500ms debounce) before Save.
     await this.osqueryEditor.evaluate((el: HTMLElement) => {
       el.querySelector<HTMLTextAreaElement>('textarea')?.blur();
     });
@@ -119,20 +114,11 @@ export class PackFormPage {
 
   async saveQueryFlyout(): Promise<void> {
     await this.queryFlyoutSaveButton.click();
-    // Wait for the flyout's title heading to disappear — a more reliable signal
-    // than the save button (which can stay visible if validation fails). The
-    // flyout uses `aria-labelledby="flyoutTitle"` with either "Edit query" or
-    // "Attach next query" as the title (source: `public/packs/queries/query_flyout.tsx:103-122`).
-    // Detached flyout means the portal's pointer-event capture is gone, so the
-    // outer pack form's Update button is clickable again.
+    // Flyout title hidden = flyout closed (save button alone is ambiguous on validation failure).
     await this.flyoutTitle.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
-  /**
-   * Picks a saved query in the "Attach next query" flyout. Uses the same
-   * `selectSingleAsPlainTextOption` path as live-query / pack flyouts: `fill` +
-   * ArrowDown/Enter races async option loading and often leaves Monaco empty.
-   */
+  /** Attach saved query via plain-text combobox helper (avoids keyboard race with async options). */
   async attachSavedQuery(savedQueryLabel: string): Promise<void> {
     await selectSingleAsPlainTextOption(this.page, {
       wrapper: { locator: this.savedQuerySelect },
@@ -142,11 +128,7 @@ export class PackFormPage {
     await waitForMonacoNonEmpty(this.page, { timeoutMs: 30_000 });
   }
 
-  /**
-   * Save a newly-created pack. When Fleet reports agents on the selected
-   * policies, the form opens a deploy confirmation modal first — otherwise it
-   * saves immediately (see `confirmPolicyChangeModalIfPresent`).
-   */
+  /** Save new pack; confirm deploy modal if Fleet shows agents on policies. */
   async saveNewPack(): Promise<void> {
     await this.savePackButton.click();
     await this.confirmPolicyChangeModalIfPresent();
@@ -157,28 +139,17 @@ export class PackFormPage {
     await this.confirmPolicyChangeModalIfPresent();
   }
 
-  /**
-   * Clicks the Fleet "Save and deploy changes" confirmation when the pack form
-   * shows it (`agentCount > 0` in `public/packs/form/index.tsx`). When Fleet
-   * reports **zero** agents for the selected policies (common on cold
-   * serverless stacks before agent counts hydrate), the form submits directly
-   * and **no** modal appears — waiting on `confirmModalConfirmButton` would
-   * time out forever (`packs_crud` create flow).
-   */
+  /** Confirm deploy modal when present; no-op when zero agents (no modal). */
   async confirmPolicyChangeModalIfPresent(): Promise<void> {
     try {
       await this.confirmModalButton.waitFor({ state: 'visible', timeout: 15_000 });
       await this.confirmModalButton.click();
     } catch {
-      // No confirmation step — save already proceeded without Fleet agent impact.
+      // No modal when no agents affected.
     }
   }
 
-  /**
-   * @deprecated Prefer {@link confirmPolicyChangeModalIfPresent}; kept for
-   * call sites that must assert the modal (e.g. list toggle flows that always
-   * open Fleet confirmation). Same implementation: optional wait + click.
-   */
+  /** @deprecated Use {@link confirmPolicyChangeModalIfPresent} (same behavior). */
   async confirmPolicyChangeModal(): Promise<void> {
     await this.confirmPolicyChangeModalIfPresent();
   }

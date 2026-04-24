@@ -15,20 +15,12 @@ const localTags = [...tags.stateful.classic, ...tags.serverless.security.complet
 test.describe('Pack CRUD from UI', { tag: localTags }, () => {
   let savedQueryId: string;
   let savedQueryLabel: string;
-  // Second saved query reserved for the edit test's `attachSavedQuery` step —
-  // the primary `savedQueryLabel` is already baked into the pack created by
-  // that test, so attaching it again would collide on the query-id uniqueness
-  // check inside the flyout (`idSet`).
+  // Extra saved query for edit attach (primary id already in pack — avoids flyout id collision).
   let extraSavedQueryId: string;
   let extraSavedQueryLabel: string;
-  // Tracks per-test pack seeds so `afterEach` can clean them — avoids
-  // try/finally inside test bodies.
   const transientPackIds: string[] = [];
 
   test.beforeAll(async ({ apiServices }) => {
-    // Orphan `scout-pack-*` cleanup is handled once per environment by the
-    // defensive-cleanup globalSetupHook in `parallel_tests/global.setup.ts`;
-    // this beforeAll only seeds fixtures.
 
     const body = getMinimalSavedQuery({
       id: `scout-pack-sq-${Date.now()}`,
@@ -70,8 +62,7 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
-    // 5 min: pack create via UI + attach saved query flyout + Fleet policy
-    // sync read-after-write + Lens-popup step + UI delete.
+    // 5 min: create pack + Fleet verify + Lens popup + delete.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -115,15 +106,7 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     await test.step('captures the Lens locator params for pack results', async () => {
       const viewInLensButton = page.getByLabel('View in Lens');
       await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
-      // Register the popup listener BEFORE triggering the click so no event is
-      // missed under CI load (serverless security_complete previously flaked
-      // here). Assert on the Unified Search filter badge rather than the URL —
-      // Lens stores its `_a` app state in browser session storage, so the URL
-      // is only `/app/lens#/edit_by_value?_g=...` with no pack-name fragment.
-      // The pack's `action_id` lands in the filter bar as a filter badge
-      // (`action_id: pack_default--${packName}_${savedQueryLabel}`), and that
-      // badge is the reliable cross-arch signal. `[data-test-subj^="filter-badge"]`
-      // comes from Unified Search's `filter_view/index.tsx`.
+      // waitForEvent(popup) before click. Assert filter badge (Lens URL lacks app state in querystring).
       const popupPromise = page.waitForEvent('popup', { timeout: 30_000 });
       await viewInLensButton.click();
       const popup = await popupPromise;
@@ -147,8 +130,7 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
-    // 5 min: pack seed via API + UI edit flow (open, attach saved query,
-    // save flyout, update pack) + Fleet policy sync.
+    // 5 min: API seed + UI attach second query + update.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -181,18 +163,9 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     await pageObjects.osqueryPackForm.openEditPack();
     await pageObjects.osqueryPackForm.openAddQueryFlyout();
 
-    // Attach the SECOND saved query (the primary one is already baked into the
-    // pack above, so reusing it would trip the flyout's query-id uniqueness
-    // check). Attaching a saved query populates ID, query body, interval,
-    // timeout, platform, and ECS mapping in one go — bypassing the manual-fill
-    // path whose Monaco + ECS-mapping validation interactions were flaking
-    // on save. Mirrors the Cypress `saved_queries.cy.ts` edit-pack flow.
+    // Use extraSavedQueryLabel — primary is already in pack (unique id constraint).
     await pageObjects.osqueryPackForm.attachSavedQuery(extraSavedQueryLabel);
-    // Wait for RHF to reflect the attached saved query by gating on the
-    // flyout's ID input carrying the saved-query's label. This replaces an
-    // earlier `waitForTimeout(1000)` defensive sleep that existed to cover
-    // the ECS editor's 500 ms debounce — the ID-populated signal is
-    // deterministic (fires on the same RHF update the debounce drives).
+    // ID field populated = RHF caught attach (deterministic vs fixed sleep over debounce).
     await expect(pageObjects.osqueryPackForm.queryIdInput).toHaveValue(extraSavedQueryLabel, {
       timeout: 15_000,
     });
@@ -207,13 +180,11 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
-    // 5 min: pack seed via API + UI delete flow + list re-render assertion
-    // (list view has multiple render states depending on prior test state).
+    // 5 min: API seed + UI delete + list assertion.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
-    // Seed via API so the test focuses on the UI delete flow rather than the
-    // create flow that is already covered by the first test in this file.
+    // API seed — create path covered by first test.
     const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
     const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
       .items[0]?.policy_ids?.[0];
@@ -235,26 +206,17 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
       },
     });
     const packId = (created.data as { data: { saved_object_id: string } }).data.saved_object_id;
-    // Track even though the UI delete should remove it — afterEach's delete
-    // is idempotent (`ignoreErrors: [404]`) and catches partial-UI-flow cases.
+    // afterEach delete is idempotent if UI delete partially fails.
     transientPackIds.push(packId);
 
-    // Navigate directly to the pack's edit URL instead of routing through
-    // the list + pagination. After the preceding tests' deletes run the
-    // packs list can briefly render the "Load Elastic prebuilt packs"
-    // empty-state (the pagination popover doesn't mount at all in that
-    // state, which makes the previous `setPagination50Rows` flow time out).
-    // The edit URL is stable and doesn't depend on list-render state.
+    // Deep-link to edit (list can be empty-state after prior deletes — pagination missing).
     await page.gotoApp(`osquery/packs/${packId}/edit`);
     await page.getByRole('button', { name: /^Delete pack$/ }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
 
     await expect(page.getByText(/Successfully deleted/)).toBeVisible({ timeout: 30_000 });
 
-    // After deletion the edit URL 404s; navigate to the list to confirm the
-    // pack no longer appears. Scope to the page (list may be empty-state
-    // again, in which case the pack-name link simply doesn't exist — that's
-    // exactly the contract we want to assert).
+    // List should not link to deleted pack (may be empty-state — link hidden is enough).
     await pageObjects.osqueryPackForm.navigateToPacksList();
     await expect(page.getByRole('link', { name: packName })).toBeHidden();
   });

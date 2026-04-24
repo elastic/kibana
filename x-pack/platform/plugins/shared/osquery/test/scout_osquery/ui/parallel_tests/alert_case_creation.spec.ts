@@ -26,8 +26,6 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
   let packId: string;
   let packName: string;
   let embeddedRuleBody: ReturnType<typeof buildOsqueryAlertTestRule>;
-  // Tracks case ids this test's test body created so `afterEach` can clean up
-  // without a try/finally inside the test body.
   const transientCaseIds: string[] = [];
 
   test.beforeAll(async ({ kbnClient, apiServices }) => {
@@ -78,12 +76,7 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     await apiServices.osquery.packs.delete(packId);
   });
 
-  // Single osquery-from-alert submission covers both add-to-case code paths.
-  // The Cypress suite exercised each in its own test, but the osquery results
-  // panel allows clicking "Add to Case" multiple times against the same
-  // response — so we attach to a pre-seeded existing case first, then to a
-  // freshly-created case from the same results. This cuts agent cold-start
-  // cost in half without losing either coverage branch.
+  // One submit, two Add to Case clicks: existing case (select) then new case (create).
   test('runs osquery from an alert and attaches results to an existing + a new case', async ({
     browserAuth,
     esClient,
@@ -92,13 +85,10 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
-    // Pack-mode submit + 2× add-to-case can legitimately take 5-6 minutes on
-    // a cold stack; budget 7 minutes to stay below default global timeout.
+    // 7 min: pack submit + two case attachments on cold stacks.
     test.setTimeout(420_000);
 
-    // Seed an existing case via API so the UI only has to exercise the
-    // "Select case" variant of the add-to-case modal; the "Create case" path
-    // is exercised later in the same test against the same submitted result.
+    // API-seeded case drives "Select case"; same results later drive "Create case".
     const existingCaseTitle = `scout-existing-case-${Date.now()}`;
     const existingCase = await apiServices.cases.create({
       title: existingCaseTitle,
@@ -132,8 +122,7 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
       await pageObjects.osqueryAlertFlyout.switchFlyoutToPackMode();
       await pageObjects.osqueryAlertFlyout.selectFlyoutPack(packName);
       await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-      // Pack mode renders results inside `osqueryResultsPanel` (no aggregate
-      // `osqueryResultsTable`), so use the pack-specific waiter.
+      // Pack flyout: use pack results waiter (panel vs aggregate table).
       await pageObjects.osqueryLiveQueryForm.waitForPackResults();
     });
 
@@ -154,8 +143,7 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
       await pageObjects.osqueryCasesPage.fillNewCaseTitle(newCaseTitle);
       await pageObjects.osqueryCasesPage.fillNewCaseDescription('scout');
 
-      // Scope to the create-case flyout only. The osquery flyout's own
-      // `[class*="euiCardSelect"]` gaps are covered by `alert_flyout_take_action.spec.ts`.
+      // a11y: create-case flyout only; exclude card-select noise (covered elsewhere).
       const { violations } = await page.checkA11y({
         include: ['[data-test-subj="create-case-flyout"]'],
         exclude: ['[class*="euiCardSelect"]'],

@@ -9,60 +9,21 @@ import { randomUUID } from 'crypto';
 import type { EsClient, KbnClient } from '@kbn/scout';
 
 /**
- * Direct-write detection-engine alerts into `.alerts-security.alerts-{spaceId}`
- * so UI specs can exercise the Alert Flyout + Osquery "Take Action" flow without
- * waiting on task-manager rule execution.
- *
- * Why: serverless task-manager latency between rule creation and the first
- * alert landing is unbounded in practice (observed 0–240 s). The poll helper
- * at `./poll_alerts.ts` masks that race but doesn't eliminate it. Seeding an
- * alert document directly removes task-manager as a failure dimension while
- * preserving the UI contract these specs actually exercise: "given an alert
- * for a rule, the flyout's Take Action menu surfaces Run Osquery and the
- * submitted live query attaches to the alert".
- *
- * Contract sources:
- *   - Required fields: @kbn/alerts-as-data-utils/src/schemas/generated/security_schema.ts
- *     (SecurityAlertRequired, lines 72–120).
- *   - Osquery menu gating: the Take Action dropdown reads `agent.id` via
- *     `dataFormattedForFieldBrowser`
- *     (security_solution/public/flyout/document_details/shared/components/take_action_dropdown.tsx:278–300).
- *     `agent.id` MUST be present and reference a Fleet-enrolled Osquery agent;
- *     the rule's own `response_actions` only gates the *automatic* post-alert
- *     execution, not the manual Take Action flow.
- *   - Optional embedded rule (`embeddedDetectionRuleBody`): when no detection
- *     rule saved object exists, `useRuleWithFallback` loads rule fields from
- *     the alert hit (`transformRuleFromAlertHit`); dotted `kibana.alert.rule.*`
- *     fields must mirror what that path expects.
- *   - Write target: `DEFAULT_ALERTS_INDEX = '.alerts-security.alerts'` is the
- *     alias (security_solution/common/constants.ts:57); we write to the
- *     concrete per-space data stream backing it.
+ * Index a minimal detection alert directly (bypasses task-manager latency).
+ * Needs `agent.id` + nested `host.os.name` for Take Action → Osquery; optional
+ * `embeddedDetectionRuleBody` mirrors rule fields when no rule SO exists.
  */
 
 const DETECTION_ENGINE_INDEX_URL = '/api/detection_engine/index';
 
-/** ALWAYS use the concrete per-space data stream name so we can scope delete-by-query too. */
+/** Concrete per-space alerts data stream (not the alias). */
 export const alertsIndexForSpace = (spaceId: string = 'default'): string =>
   `.alerts-security.alerts-${spaceId}`;
 
-/**
- * Osquery `replaceParamsQuery` uses lodash `get(alert, 'host.os.name')`, so the
- * alert `_source` must carry nested `host.os.name`, not a flat `'host.os.name'` key.
- * The value must equal `os_version.name` on enrolled agents — pass `hostOsName`
- * from Fleet `local_metadata.os.name` (see `fleet_agents.ts::getFirstOnlineAgent`);
- * this constant is only used when Fleet has not reported `os.name` yet.
- */
+/** Fallback when Fleet has not reported `os.name`; must match agent `os_version.name`. */
 export const SCOUT_ALERT_HOST_OS_NAME_FALLBACK = 'Ubuntu';
 
-/**
- * Bootstrap the `.alerts-security.alerts-{spaceId}` data stream and its
- * component/index templates. Idempotent — safe to invoke once per spec.
- *
- * Uses `POST /api/detection_engine/index`, which installs the rule_registry
- * templates without requiring any rule to have run. Returns 200 the first time
- * and on subsequent calls (security_solution handles the "already installed"
- * case).
- */
+/** Idempotent: `POST /api/detection_engine/index` installs alerts templates for the space. */
 export async function bootstrapSecurityAlertsIndex(
   kbnClient: KbnClient,
   spaceId?: string
@@ -80,36 +41,22 @@ export interface SeedAlertInput {
   ruleName: string;
   agentId: string;
   hostName?: string;
-  /**
-   * Must match `os_version.name` on agents that run the substituted query.
-   * Prefer `hostOsName` from `getFirstOnlineAgent` (Fleet `local_metadata.os.name`).
-   */
+  /** Prefer Fleet `local_metadata.os.name` from `getFirstOnlineAgent`. */
   hostOsName?: string;
   spaceId?: string;
-  /** Overrides `@timestamp` / `kibana.alert.original_time`; defaults to now. */
+  /** Optional fixed timestamp (defaults to now). */
   timestampIso?: string;
-  /**
-   * When set, merges fields from a detection-rule create body (e.g. from
-   * `buildOsqueryAlertTestRule`) onto the alert so `useRuleWithFallback` can
-   * resolve the rule from the alert without a `POST /api/detection_engine/rules`
-   * saved object.
-   */
+  /** Optional rule create payload merged into `kibana.alert.rule.*` when no rule SO. */
   embeddedDetectionRuleBody?: Record<string, unknown>;
 }
 
 export interface SeedAlertResult {
-  /** ES document `_id` / `kibana.alert.uuid` */
   alertId: string;
-  /** Same `@timestamp` indexed on the alert (for `security/alerts/redirect` URL). */
   timestampIso: string;
-  /** Concrete alerts data stream written to (for redirect `index` query param). */
   indexName: string;
 }
 
-/**
- * Maps a subset of the detection-engine rule create payload onto dotted
- * `kibana.alert.rule.*` fields for alert-as-data documents.
- */
+/** Maps detection rule create fields onto `kibana.alert.rule.*`. */
 function embeddedRuleFieldsFromDetectionBody(
   ruleId: string,
   ruleName: string,
@@ -180,15 +127,7 @@ function embeddedRuleFieldsFromDetectionBody(
   return fields;
 }
 
-/**
- * Direct-indexes a single detection-engine alert document keyed to the given
- * rule and agent. Returns alert id, timestamp, and index for deep-link navigation.
- *
- * The document carries the minimum set of fields from `SecurityAlertRequired`
- * plus nested `agent` / `host` (including `host.os.name`) / `event.kind: 'signal'`, which is what the
- * alerts table + flyout read from. Uses `refresh: 'wait_for'` so the doc is
- * query-visible immediately on return.
- */
+/** Index one alert with SecurityAlertRequired-shaped fields; `refresh: 'wait_for'`. */
 export async function seedAlertForRule(
   esClient: EsClient,
   {
@@ -234,8 +173,7 @@ export async function seedAlertForRule(
       'event.action': 'scout-seeded-alert',
       'ecs.version': '8.11.0',
 
-      // SecurityAlertRequired — keep parity with the schema; missing any of
-      // these produces "strict_dynamic_mapping_exception" on index.
+      // SecurityAlertRequired (schema parity — avoid strict_dynamic_mapping_exception)
       'kibana.alert.ancestors': [
         {
           depth: 0,
@@ -291,10 +229,7 @@ export async function seedAlertForRule(
   return { alertId: alertUuid, timestampIso: timestamp, indexName };
 }
 
-/**
- * Delete-by-query cleanup for alerts this helper created. Safe to call in
- * `afterAll` even if no alerts were seeded — returns 0-match silently.
- */
+/** Delete alerts for `ruleId` in the space index (no-op if none). */
 export async function deleteSeededAlerts(
   esClient: EsClient,
   ruleId: string,

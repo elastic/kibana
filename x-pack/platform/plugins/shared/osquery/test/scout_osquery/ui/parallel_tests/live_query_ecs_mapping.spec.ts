@@ -21,23 +21,16 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
     await pageObjects.osqueryLiveQueryForm.selectAllAgents();
   });
 
-  // One submission covers both mapping variants end-to-end. A dynamic pairing
-  // (ECS field ← osquery column) and a static mapping (ECS field = literal) are
-  // both in effect on the same submit, so both columns appear in the single
-  // response — cutting the agent-submit budget for this file in half without
-  // losing either assertion.
+  // One submit: dynamic column map + static literal map (both columns in one response).
   test('submits a query with dynamic + static ECS mappings and surfaces both columns in results', async ({
     kbnClient,
     page,
     pageObjects,
   }) => {
-    // 6 min: combobox-heavy ECS mapping setup + agent-dependent submit +
-    // results-grid header rendering.
+    // 6 min: ECS comboboxes + agent submit + grid headers.
     test.setTimeout(360_000);
 
-    // `select * from uptime;` is the canonical osquery sample because every
-    // platform supports it AND it exposes the `days` column we use for the
-    // dynamic pairing below. The static pairing is column-agnostic.
+    // uptime exposes `days` for dynamic map; static map is column-agnostic.
     await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select * from uptime;');
     await pageObjects.osqueryLiveQueryForm.clickAdvanced();
 
@@ -48,9 +41,7 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
 
     await test.step('add static ECS value (tags = "scout-static-tag") on a second row', async () => {
       await pageObjects.osqueryEcsMappingEditor.typeEcsField('tags{downArrow}{enter}', 1);
-      // Static values take a free-form string on the second combo of the row;
-      // Enter commits the pill, matching the Cypress `{enter}` behavior.
-      // eslint-disable-next-line playwright/no-nth-methods -- second row's static-value input, paired with the second typeEcsField above
+      // eslint-disable-next-line playwright/no-nth-methods -- row 1 static value combo
       const staticInput = page.testSubj.locator('osqueryColumnValueSelect').nth(1);
       await staticInput.getByTestId('comboBoxSearchInput').click();
       await staticInput.getByTestId('comboBoxSearchInput').fill('scout-static-tag');
@@ -59,16 +50,12 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
 
     await test.step('submit and assert both mapped columns render', async () => {
       const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
-      // Gate UI assertions on agent-side completion rather than racing the
-      // aggregator. See helpers/poll_live_query_history.ts for rationale.
       if (actionId) {
         await waitForLiveQueryComplete(kbnClient, actionId);
       }
 
       await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
-      // `message` appears only when the server persisted the dynamic pairing
-      // AND the agent's `days` column resolved to a value. `tags` appears only
-      // when the static mapping is honored in the result pipeline.
+      // Headers prove dynamic (message) + static (tags) mappings landed in results.
       await expect(page.testSubj.locator('dataGridHeaderCell-message')).toBeVisible({
         timeout: 180_000,
       });
@@ -87,21 +74,18 @@ test.describe('Live query ECS mapping', { tag: localTags }, () => {
     await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select * from uptime;');
     await pageObjects.osqueryLiveQueryForm.clickAdvanced();
 
-    // Start with one pairing row, then add a second. EcsMappingEditor auto-adds
-    // an empty row after the first is completed, so after pairing row 0 we
-    // assert that >= 2 rows exist, then remove row 0.
+    // Editor adds trailing empty row after first complete row — delete first row, expect one left.
     await pageObjects.osqueryEcsMappingEditor.typeEcsField('message{downArrow}{enter}');
     await pageObjects.osqueryEcsMappingEditor.typeColumnValue('days{downArrow}{enter}');
 
     const rows = pageObjects.osqueryEcsMappingEditor.mappingForm;
     await expect(rows).toHaveCount(2, { timeout: 10_000 });
 
-    // eslint-disable-next-line playwright/no-nth-methods -- the form always renders a trailing empty row; removing the first (populated) row validates the delete action returns the form to a single-row state
+    // eslint-disable-next-line playwright/no-nth-methods -- delete first populated row
     await page.getByLabel('Delete ECS mapping row').first().click();
     await expect(rows).toHaveCount(1, { timeout: 10_000 });
 
-    // Removing the only pairing row should not leave the form in an invalid
-    // state — submit should still be enabled, proving mapping is optional.
+    // Submit stays enabled with no mappings (optional).
     await expect(pageObjects.osqueryLiveQueryForm.submitButton).toBeEnabled();
   });
 });

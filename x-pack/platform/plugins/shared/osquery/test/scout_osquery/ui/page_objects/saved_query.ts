@@ -23,11 +23,7 @@ export class SavedQueryPage {
   constructor(private readonly page: ScoutPage) {
     this.savedQueriesTable = this.page.testSubj.locator('savedQueriesTable');
     this.createQueryButton = this.page.testSubj.locator('savedQueriesCreateQueryButton');
-    // The row-actions menu renders inside an EuiPopover with `role="dialog"` (not
-    // a `menu` role), and each action is a plain `<button>` — NOT an EUI context
-    // menu's `menuitem`. Source: `public/routes/saved_queries/list/saved_query_row_actions.tsx`.
-    // Scope to the popover dialog so we match the right button when multiple rows
-    // render the same label elsewhere on the page.
+    // Row actions live in a dialog popover (role=dialog), not a menuitem list — scope to dialog.
     this.rowActionsDialog = this.page.getByRole('dialog');
     this.editQueryButton = this.rowActionsDialog.getByRole('button', { name: 'Edit query' });
     this.duplicateQueryButton = this.rowActionsDialog.getByRole('button', {

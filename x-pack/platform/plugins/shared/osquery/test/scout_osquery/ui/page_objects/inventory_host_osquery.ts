@@ -9,10 +9,7 @@ import rison from '@kbn/rison';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { submitLiveQuery } from '../../common/submit_live_query';
 
-/**
- * Infra / Metrics host asset details surface that embeds OsqueryAction (`formType='simple'`).
- * Owned by osquery Scout UI per OpenSpec decision 14 (design.md).
- */
+/** Infra host asset details — embedded Osquery live query form. */
 export class InventoryHostOsqueryPage {
   public readonly overviewTab: Locator;
   public readonly osqueryTab: Locator;
@@ -25,11 +22,7 @@ export class InventoryHostOsqueryPage {
   }
 
   async gotoHostOsqueryTab(spaceId: string, hostname: string): Promise<void> {
-    // The Osquery tab is only rendered when the host uses the ECS schema
-    // (see `useConditionalTabs` in infra/public/components/asset_details/hooks/use_page_header.tsx:
-    // `[ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled) && schema === 'ecs'`).
-    // Requesting `preferredSchema: 'semconv'` hides the tab even when all other
-    // prerequisites (enrollment, osquery_manager integration) are met.
+    // Osquery tab requires ECS schema in asset details (not semconv).
     const assetDetails = rison.encode({
       name: hostname,
       preferredSchema: 'ecs',
@@ -45,18 +38,13 @@ export class InventoryHostOsqueryPage {
   }
 
   async submitSimpleEmbeddedQuery(query: string): Promise<void> {
-    // Embedded OsqueryAction (`formType='simple'`) renders the shared OsqueryEditor;
-    // target the osquery-owned wrapper (added in public/editor/index.tsx) rather than
-    // the generic `.kibanaCodeEditor` class which also appears in other CodeEditor
-    // instances on the page.
+    // Use osqueryEditor test-subj (other CodeEditors share kibanaCodeEditor).
     const editor = this.liveQueryForm.getByTestId('osqueryEditor');
     await editor.waitFor({ state: 'visible', timeout: 60_000 });
     await editor.click();
     await editor.pressSequentially(query, { delay: 5 });
 
-    // Submit via the shared helper: network-verified with retries to beat the
-    // 500 ms Monaco onChange debounce that otherwise leaves the RHF `query`
-    // field empty on the first click. See `common/submit_live_query.ts`.
+    // submitLiveQuery beats Monaco debounce / empty RHF query on first click.
     await submitLiveQuery(
       this.page,
       this.liveQueryForm.locator('[data-test-subj="liveQuerySubmitButton"]')

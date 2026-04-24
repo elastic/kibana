@@ -41,14 +41,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     );
   });
 
-  // NOTE: the originally-planned "double-click IG query → osquery editor
-  // opens with substituted params" flow isn't a real UI path — the current
-  // security_solution build only exposes IG queries as read-only text
-  // (`[data-test-subj="osquery-investigation-guide-text"]`, per the Cypress
-  // reference at `alert_response_actions.cy.ts:71`). The substitution contract
-  // is exercised end-to-end by the two tests below which go through the
-  // "Take action" menu and use `{{host.os.name}}` in the submitted query — the
-  // same flow `cypress/tasks/live_query.ts::takeOsqueryActionWithParams` tests.
+  // IG query text is read-only; substitution is covered via Take action + `{{host.os.name}}`.
 
   test('runs a take-action query against all enrolled agents with substituted parameters', async ({
     browserAuth,
@@ -57,7 +50,6 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     page,
     pageObjects,
   }) => {
-    // 5 min: alert seed + flyout open + 2-agent wait + substituted-query submit.
     test.setTimeout(300_000);
 
     const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
@@ -70,12 +62,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
       embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
     });
 
-    // The assertion below requires two response rows (one per enrolled Docker
-    // agent). `global.setup.ts` provisions two agents but on serverless CI the
-    // second one can still be mid-enrollment when `getFirstOnlineAgent`
-    // returns. Without this gate the "All agents" selection below runs against
-    // a single-agent target and we get only one row. 180 s matches the Docker
-    // agent cold-start budget observed in `global.setup.ts:waitForAgents`.
+    // Need both Docker agents online before "All agents" (second can lag on serverless).
     await waitForAtLeastOneAgentOnline(kbnClient, { expectedCount: 2, timeoutMs: 180_000 });
 
     await browserAuth.loginAsOsqueryPowerUser();
@@ -89,10 +76,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     );
     await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
 
-    // Multiple `flyout-body-osquery` roots can exist (alert + timeline). `.last()`
-    // alone picked a hidden serverless portal instance with no results grid.
-    // Match Cypress `alert_response_actions.cy.ts`: at least header + one data row.
-    // eslint-disable-next-line playwright/no-nth-methods -- when multiple portals match, the active Osquery flyout is the most recently mounted visible root
+    // eslint-disable-next-line playwright/no-nth-methods -- last visible flyout root (multi-portal)
     const flyoutOsquery = page.getByTestId('flyout-body-osquery').filter({ visible: true }).last();
     await expect
       .poll(async () => flyoutOsquery.locator('[data-grid-row-index]').count(), {
@@ -111,7 +95,6 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     page,
     pageObjects,
   }) => {
-    // 5 min: alert seed + timeline-open flow + flyout + substituted-query submit.
     test.setTimeout(300_000);
 
     const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
@@ -142,7 +125,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     const flyoutOsqueryTimeline = page
       .getByTestId('flyout-body-osquery')
       .filter({ visible: true })
-      // eslint-disable-next-line playwright/no-nth-methods -- timeline stacks on alert UI; the live Osquery flyout is the last visible portal root
+      // eslint-disable-next-line playwright/no-nth-methods -- last visible flyout (timeline stack)
       .last();
     await expect
       .poll(async () => flyoutOsqueryTimeline.locator('[data-grid-row-index]').count(), {

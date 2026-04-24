@@ -77,23 +77,15 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
   let packId: string | undefined;
   let restoreOsqueryPolicies: (() => Promise<void>) | undefined;
 
-  // `global.setup.ts` installs `osquery_manager` only in the `default` space,
-  // so without this share step the osquery app in `scoutSpace` renders its
-  // "Add Osquery Manager" empty state and `liveQuerySubmitButton` / the packs
-  // list never appear. Sharing attaches the same enrolled Docker agents to the
-  // new space too, which is what these tests need.
+  // Share default-space osquery policies into scoutSpace (setup only wires default space).
   test.beforeAll(async ({ kbnClient, scoutSpace }) => {
     restoreOsqueryPolicies = await shareOsqueryPoliciesWithSpace(kbnClient, scoutSpace.id);
-    // PATCH returns before the policy reconciles into the target space on
-    // serverless. Block until the read-path confirms `space_ids` includes
-    // the Scout space — otherwise the first UI navigation into the space can
-    // render the "Add Osquery Manager" empty state and the test fails early.
+    // Wait until policy lists scoutSpace in space_ids (PATCH can return before reconcile on serverless).
     await waitForPolicySpaceShareVisible(kbnClient, scoutSpace.id);
   });
 
   test.afterAll(async ({ apiServices, scoutSpace, log }) => {
     if (packId) {
-      // osquery packs.delete already handles 404 via `ignoreErrors: [404]`.
       await apiServices.osquery.packs.delete(packId);
     }
 
@@ -103,10 +95,7 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
       );
     }
 
-    // Skill-mandated catch-all for spaceTest-based specs: removes any
-    // standard-list SOs the test harness tracked inside the Scout space.
-    // Runs AFTER the domain-specific cleanup so a failure there still lets the
-    // generic sweep fire.
+    // Harness SO cleanup in scout space (after domain cleanup).
     await scoutSpace.savedObjects
       .cleanStandardList()
       .catch((err: Error) => log.debug(`cleanStandardList failed: ${err.message}`));
@@ -120,8 +109,7 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     scoutSpace,
     pageObjects,
   }) => {
-    // 6 min: space-create + policy-share + space-scoped UI navigation (which
-    // can re-mount on first render) + agent-dependent submit + Discover popup.
+    // 6 min: policy share + space UI + submit + Discover.
     test.setTimeout(360_000);
 
     await waitForAtLeastOneAgentOnline(kbnClient);
@@ -165,7 +153,7 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     apiServices,
     pageObjects,
   }) => {
-    // 6 min: pack seed + space-scoped UI pack-run + agent-dependent results.
+    // 6 min: pack in custom space + run + results.
     test.setTimeout(360_000);
 
     await waitForAtLeastOneAgentOnline(kbnClient);

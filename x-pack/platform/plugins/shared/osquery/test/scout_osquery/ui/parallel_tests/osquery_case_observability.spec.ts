@@ -9,11 +9,7 @@ import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { runAddLiveQueryResultToCase } from '../helpers/case_flows';
 
-// Observability-owner Cases are not available in serverless security projects —
-// `feature_observabilityCases` is not wired into the security project type, so a
-// POST /api/cases with `owner: 'observability'` returns 403 there. Keep this spec
-// stateful-classic-only; the serverless-security counterpart lives in
-// `osquery_case_security.spec.ts` (securitySolution owner).
+// Observability cases owner 403 on serverless security — stateful only (see osquery_case_security).
 const statefulOnlyTags = tags.stateful.classic;
 
 test.describe('Osquery results attached to Observability cases', { tag: statefulOnlyTags }, () => {
@@ -24,7 +20,7 @@ test.describe('Osquery results attached to Observability cases', { tag: stateful
     apiServices,
     kbnClient,
   }) => {
-    // 4 min: agent-dependent live query + case create via API + UI attach flow.
+    // 4 min: live query + case attach.
     test.setTimeout(240_000);
 
     const caseId = await runAddLiveQueryResultToCase({

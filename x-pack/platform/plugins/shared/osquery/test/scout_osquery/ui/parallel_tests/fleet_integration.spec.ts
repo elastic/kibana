@@ -11,12 +11,7 @@ import { uiTest as test } from '../fixtures';
 
 const mkiTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
-/**
- * UI-only coverage of `add_integration.cy.ts`. The API-only "pack surfaces in
- * Fleet wrapper" scenario has moved to
- * `api/tests/fleet_integration_policy_packs.spec.ts` per the
- * `osquery-scout-ui-post-review-hardening` change (Workstream A).
- */
+/** UI Fleet add flow; API pack-in-policy checks live under Scout API tests. */
 test.describe('Fleet integration', { tag: mkiTags }, () => {
   let agentPolicyId: string | undefined;
   let packagePolicyId: string | undefined;
@@ -40,17 +35,13 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     uiCreatedIntegrationNames.length = 0;
   });
 
-  // Replacement UI test for the Cypress `add_integration.cy.ts` scenario —
-  // exercises the add-osquery-manager-via-Fleet-UI flow end-to-end (previously
-  // covered only by the API body that moved to the Scout API tree).
   test('adds osquery_manager integration to a policy via the Fleet integrations flyout', async ({
     browserAuth,
     page,
     kbnClient,
     pageObjects,
   }) => {
-    // 3 min: Fleet tour dismiss + policy create flyout + integration add
-    // flyout + policy detail navigation.
+    // 3 min budget: Fleet UI + policy + integration flyouts.
     test.setTimeout(180_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -59,12 +50,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
 
     await pageObjects.osqueryFleetIntegration.gotoFleetAgentPolicies();
 
-    // Fleet's first-visit tour ("Got it" button) shows on a fresh Kibana user
-    // profile but is persisted-dismissed by Kibana once clicked. With
-    // `workers: 1` every test shares the same Kibana, so whichever test is
-    // first to reach Fleet dismisses the tour for the rest of the run —
-    // subsequent tests must not assert it is visible. We treat dismissal as
-    // opportunistic pre-interaction housekeeping with a short probe.
+    // Tour is per-Kibana session; dismiss if present (do not assert always visible).
     const gotItButton = page.getByRole('button', { name: 'Got it' });
     if (await gotItButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await pageObjects.osqueryFleetIntegration.dismissFleetTour();
@@ -72,14 +58,11 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
 
     await pageObjects.osqueryFleetIntegration.createAgentPolicy(policyName);
 
-    // The create-policy flyout closes and routes to the policy detail page;
-    // from there we open the integration flyout and add osquery_manager.
     await pageObjects.osqueryFleetIntegration.openAgentPolicy(policyName);
     await pageObjects.osqueryFleetIntegration.addOsqueryManagerIntegrationToPolicy(integrationName);
     uiCreatedIntegrationNames.push(integrationName);
 
-    // Look up the created IDs via kbnClient for afterEach cleanup. The Fleet
-    // list includes the UI-created policy + integration under our unique names.
+    // Resolve IDs for afterEach cleanup.
     const policiesResponse = await kbnClient.request<{ items: Array<{ id: string }> }>({
       method: 'GET',
       path: '/api/fleet/agent_policies',

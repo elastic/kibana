@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-/**
- * OpenSpec decision 14: Infra → Host → Osquery tab positive path lives in the osquery plugin
- * (component-under-test is OsqueryAction), not Infra’s Scout suite.
- */
+/** Infra host asset Osquery tab (embedded OsqueryAction) — owned in osquery Scout UI. */
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
@@ -24,8 +21,7 @@ test.describe('Inventory host Osquery tab', { tag: statefulLocalOnly }, () => {
     pageObjects,
     kbnClient,
   }) => {
-    // 5 min: Infra host detail page's Osquery tab mount is heavy (Infra plugin
-    // data fetches + osquery embedded form), plus agent-dependent submit.
+    // 5 min: Infra host page + embedded osquery submit.
     test.setTimeout(300_000);
     await waitForAtLeastOneAgentOnline(kbnClient);
     await browserAuth.loginAsOsqueryPowerUser();

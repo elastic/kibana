@@ -42,16 +42,13 @@ test.describe('Live query saved-query dropdown', { tag: localTags }, () => {
     }
   });
 
-  // Single submission covers the entire dropdown → Monaco populate → submit
-  // happy path. Per design decision 7 the spec deliberately asserts nothing
-  // about the known Monaco-overwrite quirk cited in `live_query_history.spec.ts`
-  // — the dropdown test stays stable across the bug's lifecycle.
+  // One flow: dropdown → Monaco → submit (does not assert Monaco overwrite edge case).
   test('populates the editor from the saved-query dropdown and submits against agents', async ({
     browserAuth,
     kbnClient,
     pageObjects,
   }) => {
-    // 5 min: dropdown populate + agent-dependent submit + results grid render.
+    // 5 min: dropdown + submit + results.
     test.setTimeout(300_000);
 
     await browserAuth.loginAsOsqueryPowerUser();

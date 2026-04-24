@@ -13,14 +13,7 @@ import { getMinimalSavedQuery } from '../../api/fixtures/constants';
 const mkiTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
-  // Track user-visible saved-query IDs created during each test so `afterEach`
-  // can resolve them back to saved-object ids via the list endpoint and remove
-  // them. UI-driven creates don't expose the SO id, so the list lookup is the
-  // only cleanup path that works for every creation flow in this suite.
   const createdSavedQueryLabels: string[] = [];
-
-  // Orphan `scout-sq-*` cleanup is handled once per environment by the
-  // defensive-cleanup globalSetupHook; no spec-local beforeAll needed.
 
   test.afterEach(async ({ apiServices }) => {
     const labels = createdSavedQueryLabels.splice(0);
@@ -43,7 +36,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     page,
     pageObjects,
   }) => {
-    // 3 min: UI-driven create with Monaco + ECS mapping combobox interactions.
+    // 3 min: create form + ECS mapping combobox.
     test.setTimeout(180_000);
 
     await browserAuth.loginAsOsqueryPowerUser();
@@ -57,23 +50,16 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
       'select name, version from os_version;'
     );
 
-    // NOTE: the dedicated create page (`/app/osquery/saved_queries/new`) does
-    // NOT render the "Advanced" accordion the live-query form uses — timeout,
-    // ECS mapping, and pack-config sections are always expanded. Do not call
-    // `clickAdvanced()` here.
+    // Saved query /new page has sections expanded — no clickAdvanced().
     await pageObjects.osqueryEcsMappingEditor.typeEcsField('host.name{downArrow}{enter}');
     await pageObjects.osqueryEcsMappingEditor.typeColumnValue('name{downArrow}{enter}');
 
-    // The create page renders the save button in an `EuiBottomBar` with only a
-    // visible "Save query" label; there is no `data-test-subj` on it. Target
-    // via role + name, scoped into the form's bottom bar.
-    // (source: `public/routes/saved_queries/new/form.tsx:72-85`)
+    // Bottom bar "Save query" has no test-subj — role + name.
     await page.getByRole('button', { name: 'Save query' }).click();
     await expect(page.getByText(/Successfully saved/)).toBeVisible({ timeout: 30_000 });
 
     createdSavedQueryLabels.push(savedQueryId);
 
-    // Confirm the saved query landed in the list view.
     await pageObjects.osquerySavedQuery.navigateToList();
     await expect(page.getByText(savedQueryId)).toBeVisible({ timeout: 30_000 });
   });
@@ -84,7 +70,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     pageObjects,
     apiServices,
   }) => {
-    // 3 min: seed + list + row-actions + edit form + update round-trip.
+    // 3 min: edit flow.
     test.setTimeout(180_000);
 
     const created = await apiServices.osquery.savedQueries.create(
@@ -112,26 +98,19 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     pageObjects,
     apiServices,
   }) => {
-    // 3 min: list pagination to page 2 of prebuilt queries + edit page nav +
-    // custom-query delete flow + list re-check.
+    // 3 min: prebuilt vs custom delete contract.
     test.setTimeout(180_000);
 
     const created = await apiServices.osquery.savedQueries.create(
       getMinimalSavedQuery({ id: `scout-sq-delete-${Date.now()}` })
     );
     const inner = (created.data as { data: { saved_object_id: string; id: string } }).data;
-    // UI test deletes this one via the form; list-based cleanup in afterEach
-    // handles it idempotently if the UI delete races with teardown.
     createdSavedQueryLabels.push(inner.id);
 
     await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osquerySavedQuery.navigateToList();
 
-    // osquery_manager ships ~80 prebuilt saved queries. With page size 50, the
-    // alphabetically-late `users_elastic` lives on page 2. The Cypress version
-    // navigated directly via the pagination button — same approach here. The
-    // search box is unreliable as a filter (typing into it doesn't always
-    // narrow the EUI table on the first run), so we page-through instead.
+    // users_elastic is on page 2 at size 50; page instead of flaky search filter.
     await page.testSubj.locator('tablePaginationPopoverButton').click();
     await page.testSubj.locator('tablePagination-50-rows').click();
     await page.testSubj.locator('pagination-button-1').click();
@@ -141,13 +120,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
 
     await pageObjects.osquerySavedQuery.openRowActionsMenu('users_elastic');
     await pageObjects.osquerySavedQuery.chooseEditQuery();
-    // Prebuilt queries hide "Delete query" — the fact that the button is absent
-    // is the contract we're asserting. The edit view is a dedicated route
-    // (`/app/osquery/saved_queries/{id}/edit`), not a flyout with Cancel — so
-    // we navigate directly to the custom query's edit page instead of hunting
-    // for a Cancel button. This matches the Cypress reference which does
-    // `navigateTo('/app/osquery/saved_queries/{savedObjectId}')` at the same
-    // point in the flow.
+    // Prebuilt edit view: Delete hidden. Navigate by SO id to custom query for delete.
     await expect(page.getByRole('button', { name: 'Delete query' })).toBeHidden();
 
     await page.gotoApp(`osquery/saved_queries/${inner.saved_object_id}`);
@@ -170,9 +143,7 @@ test.describe('Saved queries CRUD from UI', { tag: mkiTags }, () => {
     await page.testSubj.locator('tablePaginationPopoverButton').click();
     await page.testSubj.locator('tablePagination-50-rows').click();
 
-    // Assert both (a) the page-size control reflects the selection AND (b) the
-    // underlying table rendered at the chosen size. osquery_manager ships ~80
-    // prebuilt saved queries, so page 1 at size 50 MUST show exactly 50 rows.
+    // ~80 prebuilts: at page size 50, first page shows exactly 50 rows.
     await expect(page.testSubj.locator('tablePaginationPopoverButton')).toContainText('50');
     await expect(pageObjects.osquerySavedQuery.savedQueriesTable.locator('tbody tr')).toHaveCount(
       50,

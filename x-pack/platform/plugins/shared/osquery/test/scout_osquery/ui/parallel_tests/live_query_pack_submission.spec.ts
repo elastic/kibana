@@ -23,10 +23,7 @@ test.describe('Live query pack submission', { tag: localTags }, () => {
   test.beforeAll(async ({ kbnClient, apiServices }) => {
     await waitForAtLeastOneAgentOnline(kbnClient);
 
-    // Seed a two-query pack via API so the spec focuses on the live-query
-    // page's pack-mode UI, not pack CREATION (that path is covered by
-    // `packs_crud.spec.ts`). Timestamp suffix prevents collisions if a
-    // previous run crashed mid-test and left the pack behind.
+    // API two-query pack — this spec targets live-query pack mode UI only.
     const created = await apiServices.osquery.packs.create({
       name: `scout-live-pack-${Date.now()}`,
       enabled: true,
@@ -58,19 +55,14 @@ test.describe('Live query pack submission', { tag: localTags }, () => {
     }
   });
 
-  // Single submission exercises the entire live-query-page pack-mode flow:
-  // mode switch → pack combobox → submit → per-query expansion → Status-tab
-  // data-grid headers. Splitting into multiple tests would multiply agent
-  // cold-start cost for assertions that all read from the same submit
-  // response (same reasoning as `live_query_submission_with_agent.spec.ts`).
+  // One submit covers pack mode + expansion + status tab (same response — avoids extra agent cold-starts).
   test('submits a live pack, expands per-query results, and renders status-tab headers', async ({
     browserAuth,
     kbnClient,
     page,
     pageObjects,
   }) => {
-    // 6 min: pack-mode submit + agent execution + per-query grid render can
-    // take 3-5 min on a cold stack; 6 leaves slack for CI variance.
+    // 6 min: pack submit + per-query grid on cold CI.
     test.setTimeout(360_000);
 
     await browserAuth.loginAsOsqueryPowerUser();
@@ -83,9 +75,7 @@ test.describe('Live query pack submission', { tag: localTags }, () => {
 
     await test.step('selects the seeded pack', async () => {
       await pageObjects.osqueryLiveQueryForm.selectLivePack(packName);
-      // Both query keys render in the pack preview once the combobox
-      // selection commits — confirms the pack's queries were resolved
-      // before moving on to submission.
+      // Pack preview shows both query keys after combobox commit.
       await expect(page.getByText(MEMORY_QUERY_KEY)).toBeVisible({ timeout: 30_000 });
       await expect(page.getByText(SYSTEM_INFO_QUERY_KEY)).toBeVisible({ timeout: 30_000 });
     });
@@ -100,15 +90,10 @@ test.describe('Live query pack submission', { tag: localTags }, () => {
 
     await test.step('expands per-query results', async () => {
       await pageObjects.osqueryLiveQueryForm.togglePackQuery(MEMORY_QUERY_KEY);
-      // Any populated result cell within the osquery results panel confirms
-      // the expansion mounted the per-query grid. Same pattern as
-      // `live_query_submission_with_agent.spec.ts`: first-match on
-      // `dataGridRowCell` under the osquery panel is enough — we don't
-      // scope to a specific column because the pack result schema is the
-      // aggregate grid, not a fixed set of columns.
+      // First data cell in osquery panel = expanded pack grid has rows.
       const gridCells =
         pageObjects.osqueryLiveQueryForm.resultsPanel.getByTestId('dataGridRowCell');
-      // eslint-disable-next-line playwright/no-nth-methods -- any populated cell in the osquery panel indicates the expanded per-query grid rendered rows
+      // eslint-disable-next-line playwright/no-nth-methods -- first result cell in panel
       await expect(gridCells.first()).toBeVisible({ timeout: 180_000 });
     });
 

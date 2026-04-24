@@ -29,7 +29,7 @@ const AGENT_CONTAINER_PREFIX = 'scout-osquery-agent';
 const EXPECTED_AGENT_COUNT = 2;
 const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
 
-// Track container IDs for cleanup on process exit
+// Fleet + agent container IDs (teardown on signals only).
 const containerIds: string[] = [];
 
 function registerCleanup(log: { info: (msg: string) => void; error: (msg: string) => void }) {
@@ -44,9 +44,7 @@ function registerCleanup(log: { info: (msg: string) => void; error: (msg: string
     }
   };
 
-  // NOTE: Do NOT register on 'exit' — the global setup runs in a Playwright worker
-  // process that exits after setup completes. Registering on 'exit' would kill the
-  // Docker containers before the actual tests start running.
+  // Do not use 'exit': setup worker exits before tests and would remove containers early.
   process.on('SIGINT', () => {
     cleanup();
     process.exit(130);
@@ -75,9 +73,7 @@ async function getOnlineAgentCount(kbnClient: KbnClient): Promise<number> {
       query: { perPage: 100 },
     });
 
-    // Accept both 'online' and 'degraded' — the latter means the agent is running
-    // but some non-critical components (e.g. monitoring exporters) have cert issues.
-    // The osquery input is still functional in degraded state.
+    // Count online + degraded (osquery still works in degraded).
     return data.items.filter(
       (agent: { status: string }) => agent.status === 'online' || agent.status === 'degraded'
     ).length;
@@ -104,7 +100,6 @@ async function findOrCreateAgentPolicy(
     return data.item.id;
   } catch (e: any) {
     if (e?.response?.status === 409) {
-      // Policy already exists — find it by name
       const { data: listData } = await kbnClient.request<{
         items: Array<{ id: string; name: string }>;
       }>({
@@ -168,7 +163,6 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
 
   while (Date.now() - start < timeoutMs) {
     try {
-      // Submit a simple live query
       const { data: queryResponse } = await kbnClient.request<any>({
         method: 'POST',
         path: '/api/osquery/live_queries',
@@ -187,7 +181,6 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
 
       log.info(`[osquery-warmup] Submitted query, action_id=${actionId}`);
 
-      // Poll using the details endpoint to check query status
       for (let i = 0; i < 12; i++) {
         await new Promise((r) => setTimeout(r, 5_000));
         try {
@@ -233,16 +226,7 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
   log.info('[osquery-warmup] WARNING: Timed out waiting for osquery to respond. Tests may fail.');
 }
 
-// ── Fleet Server Docker arg builders ──────────────────────────────────────────
-
-/**
- * Build Docker args for Fleet Server in managed mode (stateful / ESS).
- * Uses a Kibana-issued service token and a Fleet Server agent policy.
- *
- * `FLEET_SERVER_SERVICE_TOKEN` is passed as a name-only `--env` entry; the value
- * is supplied via execa's `env` option at call time so the token is not visible
- * to `ps`, `docker inspect`, or included in stringified execa error messages.
- */
+/** Managed Fleet Server docker args; token value passed via execa `env` only (not in argv). */
 function getManagedFleetServerArgs({
   esHost,
   policyId,
@@ -276,22 +260,9 @@ function getManagedFleetServerArgs({
   ];
 }
 
-/**
- * Build Docker args for Fleet Server in standalone mode (serverless).
- * Uses the dev service account token, cert/key mounts, and a custom config file.
- * The ES hostname is rewritten to the first serverless Docker node (es01)
- * so that traffic stays inside the `elastic` Docker network.
- *
- * `ELASTICSEARCH_SERVICE_TOKEN` is passed as a name-only `--env` entry; the
- * value is supplied via execa's `env` option at call time so the token is not
- * visible to `ps`, `docker inspect`, or included in stringified execa error
- * messages. Even though this is a static dev credential, keeping the pattern
- * consistent with managed mode avoids drift.
- */
+/** Standalone Fleet Server args for serverless; ES host → es01; token via execa `env` only. */
 function getStandaloneFleetServerArgs({ esUrl }: { esUrl: string }): string[] {
-  // Rewrite hostname to the first serverless ES node so Fleet Server connects
-  // via the Docker network rather than host.docker.internal (which is unreachable
-  // because serverless ES only binds to 127.0.0.1 on the host).
+  // Point Fleet Server at es01 on the docker network (host.docker.internal ES is unreachable).
   const dockerEsUrl = new URL(esUrl);
   dockerEsUrl.hostname = 'es01';
 
@@ -327,13 +298,10 @@ function getStandaloneFleetServerArgs({ esUrl }: { esUrl: string }): string[] {
     `${FLEET_SERVER_CUSTOM_CONFIG}:/etc/fleet-server.yml:ro`,
     '--publish',
     '8220:8220',
-    // The standalone Fleet Server image uses `latest` tag (unlike elastic-agent which
-    // requires a specific version). This mirrors the behavior in @kbn/security-solution-plugin.
+    // Standalone fleet-server image tracks `latest` (unversioned).
     `docker.elastic.co/observability-ci/fleet-server:latest`,
   ];
 }
-
-// ── Global setup hook ─────────────────────────────────────────────────────────
 
 globalSetupHook(
   'Set up Fleet Server and Elastic Agents for Osquery tests',
@@ -343,9 +311,7 @@ globalSetupHook(
   async ({ kbnClient, log, config }) => {
     const isServerless = config.serverless;
 
-    // ── 0. Check if Docker is available ────────────────────────────────
-    // Essentials tier tests only check PLI permissions and don't need agents.
-    // Their CI script skips Docker entirely, so we detect this and skip provisioning.
+    // Skip agent provisioning when Docker is unavailable (e.g. essentials CI).
     try {
       await verifyDockerInstalled(log);
     } catch {
@@ -357,10 +323,8 @@ globalSetupHook(
       return;
     }
 
-    // Register container cleanup handler early
     registerCleanup(log);
 
-    // ── 0. Check if infrastructure is already running ───────────────────
     const fleetServerRunning = await isContainerRunning(FLEET_SERVER_CONTAINER);
     const agent0Running = await isContainerRunning(`${AGENT_CONTAINER_PREFIX}-0`);
     const agent1Running = await isContainerRunning(`${AGENT_CONTAINER_PREFIX}-1`);
@@ -382,7 +346,6 @@ globalSetupHook(
         '[osquery-setup] Fleet Server and agents are already running and enrolled. Skipping provisioning.'
       );
 
-      // Still verify osquery is responsive before proceeding
       log.info('[osquery-setup] Verifying osquery is responsive on existing agents...');
       await waitForOsqueryReady(kbnClient, log);
       log.info('[osquery-setup] Osquery warm-up complete. Agents are responsive.');
@@ -392,7 +355,6 @@ globalSetupHook(
 
     log.info('[osquery-setup] Infrastructure not fully running — provisioning from scratch.');
 
-    // ── 1. Verify Docker is available ──────────────────────────────────
     const agentVersion = await getAgentVersion(kbnClient);
     const agentArtifact = `docker.elastic.co/elastic-agent/elastic-agent:${agentVersion}`;
     const esUrl = new URL(config.hosts.elasticsearch);
@@ -405,23 +367,19 @@ globalSetupHook(
 
     await maybeCreateDockerNetwork(log);
 
-    // ── 2. Clean up any stale containers ────────────────────────────────
     log.info('[osquery-setup] Cleaning up stale containers...');
     await execa('docker', ['rm', '-f', FLEET_SERVER_CONTAINER]).catch(() => {});
     for (let i = 0; i < EXPECTED_AGENT_COUNT; i++) {
       await execa('docker', ['rm', '-f', `${AGENT_CONTAINER_PREFIX}-${i}`]).catch(() => {});
     }
 
-    // ── 3. Fleet setup ─────────────────────────────────────────────────
     log.info('[osquery-setup] Calling Fleet setup...');
     await kbnClient.request<any>({ method: 'POST', path: '/api/fleet/setup' });
     log.info('[osquery-setup] Fleet setup complete');
 
-    // ── 3b. Configure Fleet default output to point to ES on the Docker-accessible host
     const dockerEsHost = `http://${host}:${esPort}`;
     log.info(`[osquery-setup] Configuring Fleet default output to ${dockerEsHost}...`);
     try {
-      // List existing outputs and find the default one
       const { data: outputsResponse } = await kbnClient.request<{
         items: Array<{
           id: string;
@@ -475,19 +433,16 @@ globalSetupHook(
       log.info(`[osquery-setup] Fleet output configuration: ${e?.message?.slice(0, 200) || e}`);
     }
 
-    // ── 4–6. Start Fleet Server ────────────────────────────────────────
     let serviceToken = '';
     let fleetServerPolicyId = '';
 
     if (isServerless) {
-      // ── Serverless: standalone Fleet Server ──────────────────────────
       log.info('[osquery-setup] Starting Fleet Server in standalone mode (serverless)...');
 
       const fleetServerArgs = getStandaloneFleetServerArgs({
         esUrl: config.hosts.elasticsearch,
       });
 
-      // Supply the service token via execa `env` (see `getStandaloneFleetServerArgs` docstring).
       const fleetServerContainer = await execa('docker', fleetServerArgs, {
         env: {
           ...process.env,
@@ -499,7 +454,6 @@ globalSetupHook(
         `[osquery-setup] Fleet Server (standalone) started: ${fleetServerContainer.stdout.trim()}`
       );
     } else {
-      // ── Stateful: managed Fleet Server ───────────────────────────────
       log.info('[osquery-setup] Generating Fleet service token...');
       const { data: tokenResponse } = await kbnClient.request<any>({
         method: 'POST',
@@ -526,7 +480,6 @@ globalSetupHook(
         artifact: agentArtifact,
       });
 
-      // Supply the service token via execa `env` (see `getManagedFleetServerArgs` docstring).
       const fleetServerContainer = await execa('docker', fleetServerArgs, {
         env: { ...process.env, FLEET_SERVER_SERVICE_TOKEN: serviceToken },
       });
@@ -536,7 +489,6 @@ globalSetupHook(
       );
     }
 
-    // Wait for Fleet Server to become healthy (poll instead of fixed sleep)
     log.info('[osquery-setup] Waiting for Fleet Server to become healthy...');
     const fleetServerHealthStart = Date.now();
     const fleetServerHealthTimeout = 60_000;
@@ -579,7 +531,6 @@ globalSetupHook(
           break;
         }
       } catch {
-        // Container might not be ready yet
       }
 
       await new Promise((r) => setTimeout(r, 2_000));
@@ -591,10 +542,7 @@ globalSetupHook(
       );
     }
 
-    // ── 7. Update Fleet Server host URL in Fleet settings ──────────────
-    // Both stateful and serverless agents run inside Docker containers where
-    // `localhost` refers to the container itself. Register the host URL using
-    // `host.docker.internal` so that agents can reach Fleet Server on the host.
+    // Agents in Docker need host.docker.internal to reach Fleet on the host.
     log.info('[osquery-setup] Registering Fleet Server host in Fleet settings...');
     try {
       await kbnClient.request<any>({
@@ -608,7 +556,6 @@ globalSetupHook(
       });
       log.info('[osquery-setup] Fleet Server host registered');
     } catch (e: any) {
-      // May already exist — try updating the default host instead
       log.info(`[osquery-setup] Fleet Server host registration: ${e.message?.slice(0, 100)}`);
       try {
         const { data: hostsResponse } = await kbnClient.request<{
@@ -637,10 +584,8 @@ globalSetupHook(
       }
     }
 
-    // ── 8. Get osquery_manager version (pre-installed by server config) ─
     log.info('[osquery-setup] Fetching osquery_manager version...');
     let osqueryVersion: string;
-    // Retry because the pre-install may still be in progress
     for (let attempt = 0; attempt < 30; attempt++) {
       try {
         const { data: pkgResponse } = await kbnClient.request<{
@@ -658,7 +603,6 @@ globalSetupHook(
       }
     }
 
-    // ── 9. Create agent policies with osquery integration ──────────────
     const policyNames = ['Default policy', 'Osquery policy'];
     const enrollmentKeys: string[] = [];
 
@@ -673,7 +617,6 @@ globalSetupHook(
       });
       log.info(`[osquery-setup] Created "${policyName}" policy: ${policyId}`);
 
-      // Add osquery_manager integration (ignore 409 if already added)
       try {
         await kbnClient.request<any>({
           method: 'POST',
@@ -698,7 +641,6 @@ globalSetupHook(
         }
       }
 
-      // Get enrollment key
       const { data: keysResponse } = await kbnClient.request<{
         items: Array<{ api_key: string; policy_id: string }>;
       }>({
@@ -713,7 +655,6 @@ globalSetupHook(
       log.info(`[osquery-setup] Enrollment key obtained for "${policyName}"`);
     }
 
-    // ── 10. Start Elastic Agent containers ─────────────────────────────
     for (let i = 0; i < enrollmentKeys.length; i++) {
       const containerName = `${AGENT_CONTAINER_PREFIX}-${i}`;
       log.info(`[osquery-setup] Starting agent container: ${containerName}...`);
@@ -746,13 +687,11 @@ globalSetupHook(
       log.info(`[osquery-setup] Agent container started: ${agentContainer.stdout.trim()}`);
     }
 
-    // ── 11. Wait for all agents to come online ─────────────────────────
     log.info('[osquery-setup] Waiting for agents to come online...');
     await waitForAgents(kbnClient, log, enrollmentKeys.length);
 
     log.info('[osquery-setup] Fleet setup complete. All agents online.');
 
-    // ── 12. Wait for osquery to be responsive on agents ────────────────
     log.info('[osquery-setup] Warming up osquery on agents (submitting test query)...');
     await waitForOsqueryReady(kbnClient, log);
 
@@ -760,13 +699,7 @@ globalSetupHook(
   }
 );
 
-// ── Defensive cleanup for orphaned scout-* resources ──────────────────────────
-//
-// A previously-crashed run can leave osquery packs or saved queries behind
-// with `scout-*` prefixes. Running this sweep once per environment here
-// removes them before any spec starts, so spec-local `beforeAll` hooks can
-// assume a clean slate. Per-spec `afterAll` deletion still handles the
-// normal-exit case (global-setup has no corresponding teardown).
+// One-time sweep of orphaned scout-* packs/queries from crashed runs.
 globalSetupHook(
   'Sweep orphaned scout-* osquery packs and saved queries',
   {

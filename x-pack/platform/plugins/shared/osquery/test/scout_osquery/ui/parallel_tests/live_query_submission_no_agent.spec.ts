@@ -17,19 +17,9 @@ test.describe('Live query submission without enrolled agents', { tag: noAgentTag
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
   });
 
-  // Dedicated a11y test. Axe is expensive (~5-10s) — running it once here
-  // instead of in `beforeEach` for every behaviour test in the file keeps
-  // the wall-clock predictable and matches the ui-best-practices guidance
-  // ("Add checks at high-value points in your UI tests, not on every
-  // interaction").
+  // Single dedicated a11y test (axe is slow — not in beforeEach).
   test('live query form has no accessibility violations', async ({ page }) => {
-    // EuiCard's `selectable` prop renders a footer `<button>` whose class is an
-    // emotion-compiled string ending in `-euiCardSelect` (e.g.
-    // `css-1ti8sfo-euiButtonDisplay-...-euiCardSelect`). The button has no
-    // discernible text — axe flags it as a critical `button-name` violation on
-    // the "Single query" / "Pack" mode-selector cards. EUI library gap, not
-    // an osquery bug. `.euiCardSelect` doesn't match the compiled class string,
-    // so we use the attribute-substring selector `[class*="euiCardSelect"]`.
+    // Exclude EuiCard selectable footers (no accessible name — known EUI/axe gap).
     const { violations } = await page.checkA11y({
       include: ['[data-test-subj="liveQueryForm"]'],
       exclude: ['[class*="euiCardSelect"]'],
@@ -53,13 +43,12 @@ test.describe('Live query submission without enrolled agents', { tag: noAgentTag
     await pageObjects.osqueryLiveQueryForm.queryEditor.click();
     await pageObjects.osqueryLiveQueryForm.inputQuery('select 1');
     const heightBefore = await pageObjects.osqueryLiveQueryForm.getQueryEditorHeight();
-    // Precondition guards against the trivially-passing `0 >= 0` case if `getQueryEditorHeight` cannot measure the editor.
+    // Height must be measurable (avoids vacuous 0 >= 0).
     expect(heightBefore).toBeGreaterThan(0);
     await pageObjects.osqueryLiveQueryForm.pressShiftEnterInEditor();
     await pageObjects.osqueryLiveQueryForm.inputQuery('select 2;');
     const heightAfter = await pageObjects.osqueryLiveQueryForm.getQueryEditorHeight();
-    // Monaco may keep a fixed minimum editor height (bounding box unchanged) while
-    // still inserting a newline — `heightBefore > 0` avoids the vacuous `0 >= 0` case.
+    // Height may be unchanged with newline; newline still asserted on model text.
     expect(heightAfter).toBeGreaterThanOrEqual(heightBefore);
     const editorText = await pageObjects.osqueryLiveQueryForm.getMonacoEditorText();
     expect(editorText).toContain('select 1');
@@ -84,11 +73,8 @@ test.describe('Live query submission without enrolled agents', { tag: noAgentTag
     await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select 1;');
     await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('');
     await pageObjects.osqueryLiveQueryForm.clickSubmit();
-    // RHF validation renders the "Query is a required field" error in two
-    // places (the inline `aria-live` region under the label plus a mirror in
-    // the form's summary area). Playwright strict-mode rejects the ambiguous
-    // selector, so match the first one — any occurrence proves validation fired.
-    // eslint-disable-next-line playwright/no-nth-methods -- two identical error nodes render; first-match is sufficient proof the validation fired
+    // Duplicate error nodes (inline + summary) — .first() for strict mode.
+    // eslint-disable-next-line playwright/no-nth-methods -- duplicate validation text
     await expect(page.getByText('Query is a required field').first()).toBeVisible();
   });
 });

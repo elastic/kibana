@@ -15,13 +15,9 @@ const localTags = [...tags.stateful.classic, ...tags.serverless.security.complet
 test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
   let savedQueryId: string;
   let savedQueryLabel: string;
-  // Per-test packs get tracked here so `afterEach` can clean them without
-  // requiring try/finally inside test bodies.
   const transientPackIds: string[] = [];
 
   test.beforeAll(async ({ apiServices }) => {
-    // Orphan `scout-policy-*` / `scout-dup-*` cleanup is handled once per
-    // environment by the defensive-cleanup globalSetupHook.
 
     const body = getMinimalSavedQuery({
       id: `scout-policy-sq-${Date.now()}`,
@@ -55,8 +51,7 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
-    // 5 min: pack seed + UI toggle + confirmation modal + Fleet policy PUT
-    // read-after-write + toggle back.
+    // 5 min: toggle pack + Fleet policy round-trip.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -82,9 +77,7 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     await pageObjects.osqueryPackForm.navigateToPacksList();
     await pageObjects.osqueryPackForm.setPagination50Rows();
     await pageObjects.osqueryPackForm.togglePackActiveFromList(packName);
-    // Toggling pack state re-writes the Fleet package policy; Fleet
-    // surfaces a confirmation modal that must be confirmed before the next
-    // action can proceed.
+    // Fleet confirms policy rewrite after toggle.
     await pageObjects.osqueryPackForm.confirmPolicyChangeModal();
 
     const packKey = `default--${packName}`;
@@ -115,7 +108,7 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
 
           return Object.prototype.hasOwnProperty.call(packsAfterEnable, packKey);
         },
-        // Re-enable + Fleet PUT can lag disable on cold serverless stacks.
+        // Re-enable can lag on cold serverless.
         { timeout: 180_000 }
       )
       .toBe(true);
@@ -127,8 +120,7 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     pageObjects,
     apiServices,
   }) => {
-    // 5 min: pack seed + UI kebab menu + duplicate server flow + edit-page
-    // load + list lookup for cleanup tracking.
+    // 5 min: duplicate pack via UI + API poll for `_copy` row.
     test.setTimeout(300_000);
     await browserAuth.loginAsOsqueryPowerUser();
 
@@ -156,16 +148,11 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     await pageObjects.osqueryPackForm.clickPackRowKebab(packName);
     await pageObjects.osqueryPackForm.chooseContextMenuItem(/Duplicate/);
 
-    // Duplicate opens the pack-edit page pre-filled with `${packName}_copy`; assert
-    // via the pack-name input so we're not depending on text anywhere on the page
-    // (the list no longer shows the copy until after save). The suffix is an
-    // underscore, not a dash — see `server/routes/utils/generate_copy_name.ts` and
-    // the OpenAPI contract docs.
+    // Copy uses `_copy` suffix (underscore); assert on name field — list may not show copy yet.
     const nameInput = page.locator('input[name="name"]');
     await expect(nameInput).toHaveValue(`${packName}_copy`, { timeout: 30_000 });
 
-    // `POST /api/osquery/packs/{id}/copy` persists the `_copy` pack server-side and
-    // navigates here in edit mode — there is no `save-pack-button` (create-only).
+    // Copy API persists pack and opens edit route (no create-only save button).
     const copyPackName = `${packName}_copy`;
     await expect
       .poll(

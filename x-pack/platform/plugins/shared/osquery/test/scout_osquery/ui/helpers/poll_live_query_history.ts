@@ -113,7 +113,7 @@ export async function waitForLiveQueryComplete(
       }
 
       if (status === 404) {
-        // Action not yet visible — poll again.
+        // 404: action row not visible yet — keep polling.
         consecutive5xx = 0;
       } else if (status !== undefined && status >= 500) {
         consecutive5xx += 1;

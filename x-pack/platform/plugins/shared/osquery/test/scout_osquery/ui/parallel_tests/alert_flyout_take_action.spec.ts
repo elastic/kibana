@@ -171,12 +171,8 @@ test.describe(
         include: ['[data-test-subj="flyout-body-osquery"]'],
         exclude: [
           '[class*="euiCardSelect"]',
-          // Results table is EuiDataGrid; axe flags the virtualized scroll region
-          // (`scrollable-region-focusable`) — EUI/datagrid limitation, not osquery flyout.
+          // Exclude DataGrid virtualized scroll (known axe noise; unstable ancestor id).
           '[class*="euiDataGrid__virtualized"]',
-          // Axe sometimes attributes the violation to the scrollable ancestor id
-          // (`#:rN:`) rather than the `.euiDataGrid__virtualized` child — exclude the
-          // whole results subtree so the scan stays stable across EUI versions.
           '[data-test-subj="osqueryResultsTable"]',
         ],
         timeoutMs: 25_000,

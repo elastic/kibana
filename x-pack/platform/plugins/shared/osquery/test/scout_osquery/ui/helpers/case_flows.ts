@@ -16,13 +16,7 @@ import { waitForAtLeastOneAgentOnline } from './fleet_agents';
 import { waitForLiveQueryComplete } from './poll_live_query_history';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
 
-/**
- * Parameterised owner for the "attach live query result to a case" flow.
- * Security Solution and Observability cases use different owner strings and
- * run on different deployment targets — the flow body is identical otherwise,
- * so the two spec files stay distinct for tag-set reasons but both call
- * `runAddLiveQueryResultToCase` with their owner.
- */
+/** Case API owner for attach flow (`securitySolution` vs `observability`). */
 export type CaseOwner = 'securitySolution' | 'observability';
 
 export interface RunAddLiveQueryResultToCaseParams {
@@ -32,20 +26,13 @@ export interface RunAddLiveQueryResultToCaseParams {
   page: ScoutPage;
   pageObjects: OsqueryUiTestFixtures['pageObjects'];
   caseOwner: CaseOwner;
-  /** Prefix for the generated case title. Used for cleanup traceability. */
+  /** Case title prefix (cleanup / debugging). */
   caseTitlePrefix: string;
 }
 
 /**
- * Shared flow: submit a live query via API → poll unified-history for
- * completion → create a case with the specified owner → attach the query
- * result via the UI history page → assert the attachment surfaces in the
- * case body. Returns the created case id so callers can clean up in their
- * `afterAll`.
- *
- * The UI half of the flow is identical across owners — only the
- * `apiServices.cases.create(...)` body differs. Centralising here keeps the
- * two spec files down to fixture + tag + owner wiring.
+ * API live query → wait complete → create case → UI attach from history → assert body.
+ * Returns case id for caller cleanup.
  */
 export async function runAddLiveQueryResultToCase({
   apiServices,
@@ -65,8 +52,7 @@ export async function runAddLiveQueryResultToCase({
     })
   );
   const actionId = (live.data as { data: { action_id: string } }).data.action_id;
-  // Gate on agent-side completion so the history row has a populated result
-  // set by the time the UI asserts on it.
+  // Wait for completion so history row has results before UI steps.
   await waitForLiveQueryComplete(kbnClient, actionId);
 
   const caseTitle = `${caseTitlePrefix}-${Date.now()}`;
@@ -85,8 +71,7 @@ export async function runAddLiveQueryResultToCase({
   await browserAuth.loginAsOsqueryPowerUser();
   await pageObjects.osqueryCasesPage.navigateToHistory();
   await pageObjects.osqueryCasesPage.openLiveQueryRowDetails(actionId);
-  // Single-query submission: aggregate "Add to Case" renders in the results
-  // header (no per-row kebab). Use `addToCaseFromRowKebab` for pack results.
+  // Single-query results: Add to Case in header (pack flows use row kebab helper).
   await pageObjects.osqueryCasesPage.addToCaseFromHeader(caseId);
 
   await expect(page.getByText(new RegExp(`Case ${caseTitle} updated`))).toBeVisible();
