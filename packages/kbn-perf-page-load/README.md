@@ -6,7 +6,6 @@ Lighthouse performance benchmarking CLI for Kibana. Measures page-load performan
 
 ```bash
 yarn kbn bootstrap
-npx playwright install chromium
 ```
 
 ## Commands
