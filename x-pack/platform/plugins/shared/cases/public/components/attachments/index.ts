@@ -10,6 +10,14 @@ import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_fram
 import { getCommentAttachmentType } from './comment';
 import { getFileType } from './file/file_type';
 import { getVisualizationAttachmentType } from './lens';
+import {
+  getDashboardAttachmentType,
+  getDiscoverSessionAttachmentType,
+  getLensSOAttachmentType,
+  getMapAttachmentType,
+  getRuleAttachmentType,
+  getVisualizationSOAttachmentType,
+} from './saved_object';
 
 export const registerInternalAttachments = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
@@ -18,4 +26,10 @@ export const registerInternalAttachments = (
   externalRefRegistry.register(getFileType());
   unifiedRegistry.register(getVisualizationAttachmentType());
   unifiedRegistry.register(getCommentAttachmentType());
+  unifiedRegistry.register(getDashboardAttachmentType());
+  unifiedRegistry.register(getVisualizationSOAttachmentType());
+  unifiedRegistry.register(getDiscoverSessionAttachmentType());
+  unifiedRegistry.register(getRuleAttachmentType());
+  unifiedRegistry.register(getLensSOAttachmentType());
+  unifiedRegistry.register(getMapAttachmentType());
 };

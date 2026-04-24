@@ -38,6 +38,7 @@ export interface UserActionTreeProps {
   onShowAlertDetails?: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
+  attachActionButton?: JSX.Element | null;
   useFetchAlertData: UseFetchAlertData;
   userActivityQueryParams: UserActivityParams;
   userActionsStats: CaseUserActionsStats;

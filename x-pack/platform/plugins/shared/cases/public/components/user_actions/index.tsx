@@ -72,6 +72,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     currentUserProfile,
     data: caseData,
     statusActionButton,
+    attachActionButton,
     useFetchAlertData,
     userActivityQueryParams,
     userActionsStats,
@@ -133,9 +134,17 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
         showLoading={false}
         statusActionButton={statusActionButton}
+        attachActionButton={attachActionButton}
       />
     ),
-    [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
+    [
+      caseId,
+      handleUpdate,
+      handleManageMarkdownEditId,
+      statusActionButton,
+      attachActionButton,
+      commentRefs,
+    ]
   );
 
   const bottomActions = shouldShowCommentEditor

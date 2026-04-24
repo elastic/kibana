@@ -35,7 +35,11 @@ export const postCommentRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
       const comment = request.body as attachmentApiV1.AttachmentRequest;
-      const res: caseDomainV1.Case = await casesClient.attachments.add({ caseId, comment });
+      const res: caseDomainV1.Case = await casesClient.attachments.add({
+        caseId,
+        comment,
+        mode: 'unified',
+      });
 
       return response.ok({
         body: res,

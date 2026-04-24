@@ -36,6 +36,7 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
       const res: caseDomainV1.Case = await casesClient.attachments.bulkCreate({
         caseId,
         attachments,
+        mode: 'unified',
       });
 
       return response.ok({
