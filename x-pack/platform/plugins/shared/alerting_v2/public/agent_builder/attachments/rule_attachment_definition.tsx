@@ -113,9 +113,27 @@ const RuleCanvasContent = ({
 
     registerActionButtons([
       {
+        label: 'Update Rule',
+        icon: 'save',
+        type: ActionButtonType.PRIMARY,
+        handler: async () => {
+          await rulesApi.updateRule(ruleId, {
+            metadata: data.metadata,
+            schedule: data.schedule,
+            evaluation: { query: data.evaluation?.query },
+            state_transition: data.state_transition ?? null,
+            ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
+            ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
+            ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
+            ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
+          });
+          notifications.toasts.addSuccess(`Rule "${data.metadata.name}" updated`);
+        },
+      },
+      {
         label: 'View in Rules',
         icon: 'popout',
-        type: ActionButtonType.PRIMARY,
+        type: ActionButtonType.OVERFLOW,
         handler: () => {
           application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));
         },
