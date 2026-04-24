@@ -10,6 +10,7 @@ export type {
   SigeventsOverviewProps,
   SigEventSeverity,
   ImpactedCardItem,
+  HealthyMetricCardItem,
 } from './sigevents_overview';
 
 export { StatusHeader } from './status_header';

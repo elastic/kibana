@@ -34,14 +34,56 @@ describe('SigeventsOverview', () => {
     expect(screen.getByTestId('sigeventsOverview')).toBeInTheDocument();
   });
 
-  it('does not render when state is healthy', () => {
-    const { container } = renderWithIntl(<SigeventsOverview {...defaultProps} state="healthy" />);
-    expect(container.querySelector('[data-test-subj="sigeventsOverview"]')).not.toBeInTheDocument();
-  });
-
   it('does not render when state is warning', () => {
     const { container } = renderWithIntl(<SigeventsOverview {...defaultProps} state="warning" />);
     expect(container.querySelector('[data-test-subj="sigeventsOverview"]')).not.toBeInTheDocument();
+  });
+
+  describe('healthy variant', () => {
+    it('renders the StatusHeader (no-critical variant) and the 5 default healthy metric cards', () => {
+      renderWithIntl(<SigeventsOverview {...defaultProps} state="healthy" />);
+
+      expect(screen.getByTestId('sigeventsOverview')).toBeInTheDocument();
+      expect(screen.getByTestId('sigeventsOverviewStatusHeader')).toBeInTheDocument();
+      expect(screen.getByText('You have no critical significant events')).toBeInTheDocument();
+
+      expect(screen.getByTestId('sigeventsOverviewHealthyMetrics')).toBeInTheDocument();
+      expect(screen.getAllByTestId('sigeventsOverviewMetadataIconCard')).toHaveLength(5);
+
+      ['Services', 'Dependencies', 'Technologies', 'Critical risk', 'Medium risk'].forEach(
+        (label) => {
+          expect(screen.getByText(label)).toBeInTheDocument();
+        }
+      );
+
+      expect(screen.getByText('48')).toBeInTheDocument();
+      expect(screen.getByText('4')).toBeInTheDocument();
+      expect(screen.getByText('8')).toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument();
+      expect(screen.getByText('1')).toBeInTheDocument();
+    });
+
+    it('does not render the critical state main event in the healthy state', () => {
+      renderWithIntl(<SigeventsOverview {...defaultProps} state="healthy" />);
+      expect(screen.queryByTestId('sigeventsOverviewMainSignificantEvent')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sigeventsOverviewImpactedCards')).not.toBeInTheDocument();
+    });
+
+    it('renders custom healthy metric cards when provided', () => {
+      renderWithIntl(
+        <SigeventsOverview
+          {...defaultProps}
+          state="healthy"
+          healthyMetrics={[
+            { id: 'a', label: 'Hosts', value: '12' },
+            { id: 'b', label: 'Clusters', value: '3' },
+          ]}
+        />
+      );
+      expect(screen.getAllByTestId('sigeventsOverviewMetadataIconCard')).toHaveLength(2);
+      expect(screen.getByText('Hosts')).toBeInTheDocument();
+      expect(screen.getByText('Clusters')).toBeInTheDocument();
+    });
   });
 
   it('renders the StatusHeader', () => {
