@@ -129,6 +129,8 @@ export const buildEsqlFetchSubscribe = ({
       }
     }
 
+    const wasInitialFetch = prevEsqlData.initialFetch;
+
     if (prevEsqlData.initialFetch) {
       prevEsqlData.initialFetch = false;
       prevEsqlData.query = nextQuery.esql;
@@ -147,8 +149,26 @@ export const buildEsqlFetchSubscribe = ({
 
     const allColumnsChanged = !isEqual(nextAllColumns, prevEsqlData.allColumns);
 
+    let ghostColumnFilter: string[] | undefined;
+    if (
+      !wasInitialFetch &&
+      nextDefaultColumns.length === 0 &&
+      allColumnsChanged &&
+      !indexPatternChanged
+    ) {
+      const currentAppStateColumns = getCurrentTab().appState.columns;
+      if (currentAppStateColumns?.length) {
+        const filtered = currentAppStateColumns.filter((col) => nextAllColumns.includes(col));
+        if (filtered.length < currentAppStateColumns.length) {
+          ghostColumnFilter = filtered;
+        }
+      }
+    }
+
     const changeDefaultColumns =
-      indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
+      indexPatternChanged ||
+      !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns) ||
+      ghostColumnFilter !== undefined;
 
     const { viewMode } = getCurrentTab().appState;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
@@ -173,7 +193,7 @@ export const buildEsqlFetchSubscribe = ({
       // just change URL state if necessary
       if (changeDefaultColumns || changeViewMode) {
         const nextState = {
-          ...(changeDefaultColumns && { columns: nextDefaultColumns }),
+          ...(changeDefaultColumns && { columns: ghostColumnFilter ?? nextDefaultColumns }),
           ...(changeViewMode && { viewMode: undefined }),
         };
 
