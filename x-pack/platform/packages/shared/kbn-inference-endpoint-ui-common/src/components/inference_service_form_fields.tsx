@@ -636,7 +636,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           {/* AUTHENTICATION */}
           {authenticationFormFields.length > 0 && (
             <>
-              <EuiHorizontalRule margin="m" />
+              <EuiHorizontalRule margin="l" />
               <AuthenticationFormItems
                 isLoading={false}
                 items={authenticationFormFields}
@@ -647,7 +647,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               />
             </>
           )}
-          <EuiHorizontalRule margin="m" />
+          <EuiHorizontalRule margin="l" />
           {/* SETTINGS */}
           <EuiTitle size="xxs" data-test-subj="settings-label">
             <h4>

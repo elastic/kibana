@@ -93,11 +93,12 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             }}
           >
             {(field) => {
-              const { isInvalid } = getFieldValidityAndErrorMessage(field);
+              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
               return (
                 <EuiFormControlLayout
                   fullWidth
                   isInvalid={isInvalid}
+                  error={errorMessage}
                   clear={{
                     onClick: () => {
                       setFieldValue('config.contextWindowLength', '');
@@ -175,10 +176,12 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             }}
           >
             {(field) => {
-              const { isInvalid } = getFieldValidityAndErrorMessage(field);
+              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
               return (
                 <EuiFormControlLayout
                   fullWidth
+                  isInvalid={isInvalid}
+                  error={errorMessage}
                   clear={{
                     onClick: () => {
                       setFieldValue('config.temperature', undefined);
@@ -211,7 +214,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
 
   return (
     <>
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="l" />
       {contextWindowLengthSettings}
       {temperatureSettings && contextWindowLengthSettings && <EuiSpacer size="m" />}
       {temperatureSettings}

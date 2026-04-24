@@ -57,7 +57,16 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
 
   return (
     <>
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="l" />
+      <EuiTitle size="xxs">
+        <h4>
+          <FormattedMessage
+            id="xpack.inferenceEndpointUICommon.components.inferenceEndpointHeading"
+            defaultMessage="Inference endpoint"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <UseField path="config.inferenceId" config={inferenceIdConfig}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
