@@ -150,9 +150,7 @@ export function AlertDetailsAppSection({
   }, [alertRuleTypeId, environment, errorGroupingKey, serviceName, services.http?.basePath]);
 
   useLayoutEffect(() => {
-    if (errorSources) {
-      setSources(errorSources);
-    }
+    if (errorSources) setSources(errorSources);
   }, [errorSources, setSources]);
 
   const { from, to } = timeRange;
