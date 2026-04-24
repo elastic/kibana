@@ -495,6 +495,8 @@ apiTest.describe(
           'ingest-uri-parts-ignore-missing'
         );
         expect(ingestResult).toHaveLength(2);
+        const presentIngest = ingestResult.find((d) => d.case === 'present')!;
+        const missingIngest = ingestResult.find((d) => d.case === 'missing')!;
 
         const mappingDoc = {
           attributes: { href: '' },
@@ -518,7 +520,19 @@ apiTest.describe(
         const presentEsql = esqlResult.documentsWithoutKeywords.find((d) => d.case === 'present');
         const missingEsql = esqlResult.documentsWithoutKeywords.find((d) => d.case === 'missing');
 
+        // Present row: both transpilers extract the domain.
+        expect(presentIngest['url.domain']).toBe('example.com');
         expect(presentEsql?.['url.domain']).toBe('example.com');
+
+        // Missing row: documented omitted-vs-null divergence. Ingest keeps the
+        // doc and writes nothing under `url.*` (row-based `_source` model, so
+        // dashboards must filter with `exists(url.domain)`). ES|QL keeps the
+        // doc and surfaces every declared column as `null` (column-based
+        // model, so dashboards must filter with `url.domain IS NOT NULL`).
+        // This cannot be normalized in the transpiler; see the
+        // `uriParts.tips.nullVsOmitted` action metadata note surfaced in the
+        // Streams UI processor catalog.
+        expect(missingIngest['url.domain']).toBeUndefined();
         expect(missingEsql?.['url.domain']).toBeNull();
       }
     );

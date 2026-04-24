@@ -40,13 +40,13 @@ import { buildIgnoreMissingFilter, buildWhereCondition, combineAnd, combineOr } 
  *  - `remove_if_successful` (default false): emit
  *    `EVAL <from> = CASE(<success>, NULL, <from>)`.
  *  - `<success>` is `<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL
- *    OR <to>.path IS NOT NULL OR ...` across every primary sub-field. The
- *    csv-spec (elasticsearch#140004) shows ES|QL URI_PARTS accepts relative
- *    URIs — `/app/login?session=expired` parses to null scheme + null
- *    domain + populated path/query — so the success signal must OR across
- *    all primary sub-fields. Only an unparseable input nulls every column.
+ *    OR <to>.path IS NOT NULL OR ...` across every primary sub-field.
+ *    ES|QL `URI_PARTS` accepts relative URIs — `/app/login?session=expired`
+ *    parses to null scheme + null domain + populated path/query — so the
+ *    success signal must OR across all primary sub-fields. Only an
+ *    unparseable input nulls every column.
  *    Both options are less idiomatic in ES|QL but are included for
- *    transpiler parity (see streams-program#554).
+ *    transpiler parity.
  *
  * @example
  *   ```typescript
