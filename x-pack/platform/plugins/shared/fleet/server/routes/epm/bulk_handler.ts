@@ -208,7 +208,7 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
     );
   }
 
-  const taskManagerStart = appContextService.getTaskManagerStart();
+  const taskManagerStart = getTaskManagerStart();
 
   const items = await pMap(
     packages,
@@ -237,9 +237,8 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
         });
 
         if (
-          taskManagerStart &&
-          (namespaceCustomizationDiff.addedNamespaces.length > 0 ||
-            namespaceCustomizationDiff.removedNamespaces.length > 0)
+          namespaceCustomizationDiff.addedNamespaces.length > 0 ||
+          namespaceCustomizationDiff.removedNamespaces.length > 0
         ) {
           await scheduleSyncNamespaceTemplatesTask(taskManagerStart, {
             spaceId,

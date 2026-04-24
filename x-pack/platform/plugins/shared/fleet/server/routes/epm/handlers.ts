@@ -309,6 +309,14 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
+function getTaskManagerStart() {
+  const taskManagerStart = appContextService.getTaskManagerStart();
+  if (!taskManagerStart) {
+    throw new Error('Task manager not defined');
+  }
+  return taskManagerStart;
+}
+
 export const updatePackageHandler: FleetRequestHandler<
   | TypeOf<typeof UpdatePackageRequestSchema.params>
   | TypeOf<typeof UpdatePackageWithoutVersionRequestSchema.params>,
@@ -328,7 +336,7 @@ export const updatePackageHandler: FleetRequestHandler<
     namespaceCustomizationDiff.addedNamespaces.length > 0 ||
     namespaceCustomizationDiff.removedNamespaces.length > 0
   ) {
-    await scheduleSyncNamespaceTemplatesTask(appContextService.getTaskManagerStart()!, {
+    await scheduleSyncNamespaceTemplatesTask(getTaskManagerStart(), {
       spaceId: savedObjectsClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
       packageName: pkgName,
       addedNamespaces: namespaceCustomizationDiff.addedNamespaces,
