@@ -15,7 +15,7 @@ secrets:
   ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
 engine:
   id: claude
-  model: llm-gateway/claude-opus-4-5
+  model: llm-gateway/claude-opus-4-7
   max-turns: 5
   env:
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
