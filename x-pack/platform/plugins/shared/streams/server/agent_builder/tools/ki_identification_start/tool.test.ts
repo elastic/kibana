@@ -46,7 +46,6 @@ describe('createKiIdentificationStartTool', () => {
         params: expect.objectContaining({
           streamName: 'logs.nginx',
           steps: ['features_identification', 'queries_generation'],
-          saveQueries: true,
           from: expect.any(Number),
           to: expect.any(Number),
         }),
