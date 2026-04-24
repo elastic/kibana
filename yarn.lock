@@ -2382,10 +2382,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.11.1.tgz#435248596e044fa1d39a54d820115fefedfe25ef"
   integrity sha512-zUJCq/0RUUGLcsFpZ8iHReboE8POZZ3XBnEd8DtxWnkf0Eb87VvcZWoQNwQHctPdQkzEmN4VRwLk4kuPX2Es+A==
 
-"@elastic/esql@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-2.0.0.tgz#6794e2791d3b342bd29b49fa1ec56a6354b16314"
-  integrity sha512-KiP4m8pXdbmvqt8jEbQltKF4sBg/GhZSFoSFX82Fp9HDY/N+SlZIg9GdrxEGScugSvf1+CO8aJbaHONwS0MNnA==
+"@elastic/esql@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-3.0.0.tgz#7a057eb5c17e1e9da0822cf9a700167ae9d62813"
+  integrity sha512-rvqzpq/ahK4e8VFP38Bk8/oxFpM72CUWr2OQkBwY9Xp+MNne/SvRcXWigh9AGfsDRwNd7+eXWZtYJgnxhQ22Lw==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
