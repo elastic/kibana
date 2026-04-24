@@ -81,7 +81,9 @@ export const installEndpointSecurityPrebuiltRule = async ({
       );
       return;
     }
-    const ruleAssetsToInstall = await ruleAssetsClient.fetchAssetsByVersion(latestRuleVersion);
+    const { assets: ruleAssetsToInstall } = await ruleAssetsClient.fetchAssetsByVersion(
+      latestRuleVersion
+    );
     await createPrebuiltRules(detectionRulesClient, ruleAssetsToInstall, logger);
   } catch (err) {
     logger.error(

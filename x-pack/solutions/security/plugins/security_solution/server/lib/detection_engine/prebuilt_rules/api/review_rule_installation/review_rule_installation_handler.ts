@@ -223,7 +223,6 @@ async function fetchRules({
       sort: prepareQueryDslSort(sort),
       aggs,
       fields,
-      trackTotalHits: true,
     }
   );
 

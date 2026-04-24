@@ -67,7 +67,7 @@ paths:
                 per_page:
                   type: integer
                   minimum: 0
-                  maximum: 10000
+                  maximum: 500
                   default: 20
                   description: Page size.
                   example: 20

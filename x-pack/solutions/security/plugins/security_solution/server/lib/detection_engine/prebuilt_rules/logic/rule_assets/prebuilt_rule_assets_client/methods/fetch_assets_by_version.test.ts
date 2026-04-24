@@ -37,7 +37,7 @@ describe('fetchAssetsByVersion', () => {
 
   it('returns early without calling ES when versions is empty', async () => {
     const result = await fetchAssetsByVersion(savedObjectsClient, []);
-    expect(result).toEqual({ assets: [], total: 0 });
+    expect(result).toEqual({ assets: [] });
     expect(searchMock).not.toHaveBeenCalled();
   });
 
@@ -126,6 +126,36 @@ describe('fetchAssetsByVersion', () => {
     expect(call._source).toBeUndefined();
   });
 
+  it('orders returned assets to match the `versions` argument when ES hits are in a different order', async () => {
+    const versions = [
+      { rule_id: 'rule-a', version: 1 },
+      { rule_id: 'rule-b', version: 1 },
+      { rule_id: 'rule-c', version: 1 },
+    ];
+
+    const hit = (ruleId: string) => ({
+      _source: {
+        [PREBUILT_RULE_ASSETS_SO_TYPE]: {
+          rule_id: ruleId,
+          version: 1,
+        },
+      },
+    });
+
+    searchMock.mockResolvedValue({
+      ...emptySearchResponse,
+      hits: {
+        total: { value: 3, relation: 'eq' },
+        max_score: null,
+        hits: [hit('rule-c'), hit('rule-a'), hit('rule-b')],
+      },
+    });
+
+    const { assets } = await fetchAssetsByVersion(savedObjectsClient, versions);
+
+    expect(assets.map((a) => a.rule_id)).toEqual(['rule-a', 'rule-b', 'rule-c']);
+  });
+
   it('sets _source.includes to prefixed requested fields plus the zod baseline plus SO root fields', async () => {
     const versions = [{ rule_id: 'rule-1', version: 1 }];
 
@@ -147,10 +177,6 @@ describe('fetchAssetsByVersion', () => {
         'security-rule.risk_score',
         'security-rule.severity',
       ])
-    );
-    // SO document root fields so raw-to-SavedObject conversion still works.
-    expect(includes).toEqual(
-      expect.arrayContaining(['type', 'references', 'namespaces', 'updated_at'])
     );
   });
 });

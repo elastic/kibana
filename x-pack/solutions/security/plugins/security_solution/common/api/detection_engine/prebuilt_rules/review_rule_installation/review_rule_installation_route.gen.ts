@@ -14,12 +14,12 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   GranularRulesSearch,
   FacetCounts,
-} from '../../rule_management/granular_rules_contract.gen';
+} from '../../rule_management/granular_rules/granular_rules_contract.gen';
 import { SortOrder } from '../../model/sorting.gen';
 import { RuleTagArray } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
@@ -30,89 +30,93 @@ import { WarningSchema } from '../../model/warning_schema.gen';
 rule fields that may appear when reviewing installable prebuilt rules.
 
   */
+export const ReviewRuleInstallationField = lazySchema(() =>
+  z.enum([
+    'actions',
+    'alias_purpose',
+    'alias_target_id',
+    'alert_suppression',
+    'anomaly_threshold',
+    'author',
+    'building_block_type',
+    'concurrent_searches',
+    'created_at',
+    'created_by',
+    'data_view_id',
+    'description',
+    'enabled',
+    'event_category_override',
+    'exceptions_list',
+    'execution_summary',
+    'false_positives',
+    'filters',
+    'from',
+    'history_window_start',
+    'id',
+    'immutable',
+    'index',
+    'investigation_fields',
+    'items_per_search',
+    'interval',
+    'language',
+    'license',
+    'machine_learning_job_id',
+    'max_signals',
+    'meta',
+    'name',
+    'namespace',
+    'new_terms_fields',
+    'note',
+    'outcome',
+    'output_index',
+    'query',
+    'references',
+    'related_integrations',
+    'required_fields',
+    'response_actions',
+    'revision',
+    'risk_score',
+    'risk_score_mapping',
+    'rule_id',
+    'rule_name_override',
+    'rule_source',
+    'saved_id',
+    'severity',
+    'severity_mapping',
+    'setup',
+    'tags',
+    'threat',
+    'threat_filters',
+    'threat_index',
+    'threat_indicator_path',
+    'threat_language',
+    'threat_mapping',
+    'threat_query',
+    'throttle',
+    'tiebreaker_field',
+    'timeline_id',
+    'timeline_title',
+    'timestamp_field',
+    'timestamp_override',
+    'timestamp_override_fallback_disabled',
+    'to',
+    'type',
+    'updated_at',
+    'updated_by',
+    'version',
+  ])
+);
 export type ReviewRuleInstallationField = z.infer<typeof ReviewRuleInstallationField>;
-export const ReviewRuleInstallationField = z.enum([
-  'actions',
-  'alias_purpose',
-  'alias_target_id',
-  'alert_suppression',
-  'anomaly_threshold',
-  'author',
-  'building_block_type',
-  'concurrent_searches',
-  'created_at',
-  'created_by',
-  'data_view_id',
-  'description',
-  'enabled',
-  'event_category_override',
-  'exceptions_list',
-  'execution_summary',
-  'false_positives',
-  'filters',
-  'from',
-  'history_window_start',
-  'id',
-  'immutable',
-  'index',
-  'investigation_fields',
-  'items_per_search',
-  'interval',
-  'language',
-  'license',
-  'machine_learning_job_id',
-  'max_signals',
-  'meta',
-  'name',
-  'namespace',
-  'new_terms_fields',
-  'note',
-  'outcome',
-  'output_index',
-  'query',
-  'references',
-  'related_integrations',
-  'required_fields',
-  'response_actions',
-  'revision',
-  'risk_score',
-  'risk_score_mapping',
-  'rule_id',
-  'rule_name_override',
-  'rule_source',
-  'saved_id',
-  'severity',
-  'severity_mapping',
-  'setup',
-  'tags',
-  'threat',
-  'threat_filters',
-  'threat_index',
-  'threat_indicator_path',
-  'threat_language',
-  'threat_mapping',
-  'threat_query',
-  'throttle',
-  'tiebreaker_field',
-  'timeline_id',
-  'timeline_title',
-  'timestamp_field',
-  'timestamp_override',
-  'timestamp_override_fallback_disabled',
-  'to',
-  'type',
-  'updated_at',
-  'updated_by',
-  'version',
-]);
 export type ReviewRuleInstallationFieldEnum = typeof ReviewRuleInstallationField.enum;
 export const ReviewRuleInstallationFieldEnum = ReviewRuleInstallationField.enum;
 
 /**
  * Field to sort prebuilt rule assets by.
  */
+export const PrebuiltRuleAssetsSortField = lazySchema(() =>
+  z.enum(['name', 'risk_score', 'severity'])
+);
 export type PrebuiltRuleAssetsSortField = z.infer<typeof PrebuiltRuleAssetsSortField>;
-export const PrebuiltRuleAssetsSortField = z.enum(['name', 'risk_score', 'severity']);
 export type PrebuiltRuleAssetsSortFieldEnum = typeof PrebuiltRuleAssetsSortField.enum;
 export const PrebuiltRuleAssetsSortFieldEnum = PrebuiltRuleAssetsSortField.enum;
 
@@ -120,140 +124,150 @@ export const PrebuiltRuleAssetsSortFieldEnum = PrebuiltRuleAssetsSortField.enum;
   * One sort criterion. Only `name`, `risk_score`, and `severity` are valid for `field`.
 
   */
+export const PrebuiltRuleAssetsSortItem = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Field to sort by.
+       */
+      field: PrebuiltRuleAssetsSortField,
+      /**
+       * Sort order.
+       */
+      order: SortOrder,
+    })
+    .strict()
+);
 export type PrebuiltRuleAssetsSortItem = z.infer<typeof PrebuiltRuleAssetsSortItem>;
-export const PrebuiltRuleAssetsSortItem = z
-  .object({
-    /**
-     * Field to sort by.
-     */
-    field: PrebuiltRuleAssetsSortField,
-    /**
-     * Sort order.
-     */
-    order: SortOrder,
-  })
-  .strict();
 
 /**
   * Ordered multi-field sort for prebuilt rule assets. Only `name`, `risk_score`, and `severity`
 may appear as `field` values (see `PrebuiltRuleAssetsSortField`).
 
   */
+export const PrebuiltRuleAssetsSort = lazySchema(() => z.array(PrebuiltRuleAssetsSortItem).min(1));
 export type PrebuiltRuleAssetsSort = z.infer<typeof PrebuiltRuleAssetsSort>;
-export const PrebuiltRuleAssetsSort = z.array(PrebuiltRuleAssetsSortItem).min(1);
 
 /**
   * Facet categories available for prebuilt rule asset aggregations.
 
   */
+export const PrebuiltRuleAssetsFacetCategory = lazySchema(() => z.enum(['tags', 'type']));
 export type PrebuiltRuleAssetsFacetCategory = z.infer<typeof PrebuiltRuleAssetsFacetCategory>;
-export const PrebuiltRuleAssetsFacetCategory = z.enum(['tags', 'type']);
 export type PrebuiltRuleAssetsFacetCategoryEnum = typeof PrebuiltRuleAssetsFacetCategory.enum;
 export const PrebuiltRuleAssetsFacetCategoryEnum = PrebuiltRuleAssetsFacetCategory.enum;
 
 /**
  * Aggregation options for prebuilt rule asset queries.
  */
+export const PrebuiltRuleAssetsAggregations = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Facet categories for which to compute counts over the filtered + searched set.
+       */
+      counts: z.array(PrebuiltRuleAssetsFacetCategory).optional(),
+    })
+    .strict()
+);
 export type PrebuiltRuleAssetsAggregations = z.infer<typeof PrebuiltRuleAssetsAggregations>;
-export const PrebuiltRuleAssetsAggregations = z
-  .object({
-    /**
-     * Facet categories for which to compute counts over the filtered + searched set.
-     */
-    counts: z.array(PrebuiltRuleAssetsFacetCategory).optional(),
-  })
-  .strict();
 
 /**
  * Aggregated info about all rules available for installation.
  */
+export const RuleInstallationStatsForReview = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Number of prebuilt rules available for installation (before applying filters).
+       */
+      num_rules_to_install: z.number().int().min(0),
+      /**
+       * A union of all tags of all rules available for installation.
+       */
+      tags: RuleTagArray,
+    })
+    .strict()
+);
 export type RuleInstallationStatsForReview = z.infer<typeof RuleInstallationStatsForReview>;
-export const RuleInstallationStatsForReview = z
-  .object({
-    /**
-     * Number of prebuilt rules available for installation (before applying filters).
-     */
-    num_rules_to_install: z.number().int().min(0),
-    /**
-     * A union of all tags of all rules available for installation.
-     */
-    tags: RuleTagArray,
-  })
-  .strict();
 
+export const ReviewRuleInstallationResponseBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Current page number.
+       */
+      page: z.number().int(),
+      /**
+       * Rules per page.
+       */
+      per_page: z.number().int(),
+      /**
+       * The total number of rules available for installation that match the filter criteria.
+       */
+      total: z.number().int(),
+      stats: RuleInstallationStatsForReview,
+      /**
+       * Info about individual rules; one object per each rule available for installation.
+       */
+      rules: z.array(RuleResponse),
+      /**
+       * Facet counts per category requested in `aggregations.counts`.
+       */
+      counts: FacetCounts.optional(),
+      /**
+       * Warnings produced while serving the request.
+       */
+      warnings: z.array(WarningSchema).optional(),
+    })
+    .strict()
+);
 export type ReviewRuleInstallationResponseBody = z.infer<typeof ReviewRuleInstallationResponseBody>;
-export const ReviewRuleInstallationResponseBody = z
-  .object({
-    /**
-     * Current page number.
-     */
-    page: z.number().int(),
-    /**
-     * Rules per page.
-     */
-    per_page: z.number().int(),
-    /**
-     * The total number of rules available for installation that match the filter criteria.
-     */
-    total: z.number().int(),
-    stats: RuleInstallationStatsForReview,
-    /**
-     * Info about individual rules; one object per each rule available for installation.
-     */
-    rules: z.array(RuleResponse),
-    /**
-     * Facet counts per category requested in `aggregations.counts`.
-     */
-    counts: FacetCounts.optional(),
-    /**
-     * Warnings produced while serving the request.
-     */
-    warnings: z.array(WarningSchema).optional(),
-  })
-  .strict();
 
-export type ReviewRuleInstallationRequestBody = z.infer<typeof ReviewRuleInstallationRequestBody>;
-export const ReviewRuleInstallationRequestBody = z
-  .object({
-    /**
-     * Page number starting from 1.
-     */
-    page: z.number().int().min(1).optional().default(1),
-    /**
-     * Rules per page.
-     */
-    per_page: z.number().int().min(1).max(10000).optional().default(20),
-    /**
-     * KQL filter string applied to prebuilt rule assets.
-     */
-    filter: z.string().optional(),
-    /**
-     * Free-text search.
-     */
-    search: GranularRulesSearch.optional(),
-    /**
+export const ReviewRuleInstallationRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Page number starting from 1.
+       */
+      page: z.number().int().min(1).optional().default(1),
+      /**
+       * Rules per page.
+       */
+      per_page: z.number().int().min(1).max(500).optional().default(20),
+      /**
+       * KQL filter string applied to prebuilt rule assets.
+       */
+      filter: z.string().optional(),
+      /**
+       * Free-text search.
+       */
+      search: GranularRulesSearch.optional(),
+      /**
       * Aggregation options computed over the filtered set of
 installable rules.
 
       */
-    aggregations: PrebuiltRuleAssetsAggregations.optional(),
-    /**
+      aggregations: PrebuiltRuleAssetsAggregations.optional(),
+      /**
       * Ordered sort criteria (only `name`, `risk_score`, and `severity` as `field` values).
 
       */
-    sort: PrebuiltRuleAssetsSort.optional(),
-    /**
+      sort: PrebuiltRuleAssetsSort.optional(),
+      /**
       * Subset of top-level `RuleResponse` keys used to narrow Elasticsearch `_source` for each
 prebuilt-rule saved object (snake_case, as in the REST payload). The server merges a small
 baseline attribute set so rule payloads remain convertible. Omit to fetch full assets.
 
       */
-    fields: z.array(ReviewRuleInstallationField).optional(),
-  })
-  .strict();
+      fields: z.array(ReviewRuleInstallationField).optional(),
+    })
+    .strict()
+);
+export type ReviewRuleInstallationRequestBody = z.infer<typeof ReviewRuleInstallationRequestBody>;
 export type ReviewRuleInstallationRequestBodyInput = z.input<
   typeof ReviewRuleInstallationRequestBody
 >;
 
+export const ReviewRuleInstallationResponse = lazySchema(() => ReviewRuleInstallationResponseBody);
 export type ReviewRuleInstallationResponse = z.infer<typeof ReviewRuleInstallationResponse>;
-export const ReviewRuleInstallationResponse = ReviewRuleInstallationResponseBody;

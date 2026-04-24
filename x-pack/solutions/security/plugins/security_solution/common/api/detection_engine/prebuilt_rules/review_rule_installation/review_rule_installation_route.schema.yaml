@@ -28,7 +28,7 @@ paths:
                 per_page:
                   type: integer
                   minimum: 1
-                  maximum: 10000
+                  maximum: 500
                   default: 20
                   description: Rules per page.
                 filter:
@@ -36,7 +36,7 @@ paths:
                   description: KQL filter string applied to prebuilt rule assets.
                 search:
                   description: Free-text search.
-                  $ref: '../../rule_management/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
+                  $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
                 aggregations:
                   description: |
                     Aggregation options computed over the filtered set of
@@ -232,7 +232,7 @@ components:
             $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
         counts:
           description: Facet counts per category requested in `aggregations.counts`.
-          $ref: '../../rule_management/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+          $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
         warnings:
           type: array
           description: Warnings produced while serving the request.

@@ -28,7 +28,6 @@ export interface FetchAssetsByVersionSearchParams {
   filter?: string;
   aggs?: Record<string, AggregationsAggregationContainer>;
   sort?: Sort;
-  trackTotalHits?: boolean;
   page?: number;
   perPage?: number;
   fields?: string[];
@@ -42,7 +41,6 @@ export interface FetchAssetsByVersionSearchParams {
 
 export interface FetchAssetsByVersionResult {
   assets: PrebuiltRuleAsset[];
-  total?: number;
   aggregations?: Record<string, AggregationsAggregationContainer>;
 }
 
@@ -55,7 +53,7 @@ export interface FetchAssetsByVersionResult {
  * @param savedObjectsClient - The saved objects client used to query the saved objects store
  * @param versions - An array of rule version specifiers, each containing a rule_id and version.
  * @param params - Optional search options (e.g. `aggs`, `sort`, `_source`) merged into the underlying SO search.
- * @returns A promise that resolves to an array of prebuilt rule assets.
+ * @returns A promise that resolves to assets (and optional aggregations when requested).
  */
 export async function fetchAssetsByVersion(
   savedObjectsClient: SavedObjectsClientContract,
@@ -66,7 +64,6 @@ export async function fetchAssetsByVersion(
     // NOTE: without early return it would build incorrect filter and fetch all existing saved objects
     return {
       assets: [],
-      total: 0,
     };
   }
 
@@ -94,7 +91,6 @@ export async function fetchAssetsByVersion(
     ...(postFilterSoIds ? { post_filter: { terms: { _id: postFilterSoIds } } } : {}),
     ...(sourceIncludes ? { _source: { includes: sourceIncludes } } : {}),
     runtime_mappings: PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
-    track_total_hits: params?.trackTotalHits,
     size: params?.perPage,
     from:
       params?.page != null && params?.perPage != null
@@ -104,20 +100,27 @@ export async function fetchAssetsByVersion(
     aggs: params?.aggs,
   });
 
-  const ruleAssets = searchResult.hits.hits.map((hit) => {
+  const ruleAssetsMap = new Map<string, PrebuiltRuleAsset>();
+
+  for (const hit of searchResult.hits.hits) {
     const hitSource = hit?._source;
     invariant(hitSource, 'Expected hit source to be defined');
 
-    const savedObject = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
-    return savedObject;
-  });
+    const asset = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
+    ruleAssetsMap.set(getPrebuiltRuleAssetSoId(asset.rule_id, asset.version), asset);
+  }
+
+  const orderedRuleAssets: PrebuiltRuleAsset[] = [];
+
+  for (const id of soIds) {
+    const asset = ruleAssetsMap.get(id);
+    if (asset !== undefined) {
+      orderedRuleAssets.push(asset);
+    }
+  }
 
   return {
-    assets: validatePrebuiltRuleAssets(ruleAssets),
-    total:
-      typeof searchResult.hits.total === 'number'
-        ? searchResult.hits.total
-        : searchResult.hits.total?.value,
+    assets: validatePrebuiltRuleAssets(orderedRuleAssets),
     aggregations: searchResult.aggregations as Record<string, AggregationsAggregationContainer>,
   };
 }

@@ -85,7 +85,8 @@ const fetchMatchingAssets = async ({
     };
   });
 
-  return ruleAssetsClient.fetchAssetsByVersion(incomingRuleVersions);
+  const { assets } = await ruleAssetsClient.fetchAssetsByVersion(incomingRuleVersions);
+  return assets;
 };
 
 /**

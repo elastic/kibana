@@ -131,11 +131,15 @@ async function calculateUpgradeableRulesDiff({
     sortField: sort.field,
     sortOrder: sort.order,
   });
-  const latestRules = await ruleAssetsClient.fetchAssetsByVersion(
+  const latestRulesResult = await ruleAssetsClient.fetchAssetsByVersion(
     currentRules.map(({ rule_id: ruleId }) => latestVersionsMap.get(ruleId) as RuleVersionSpecifier)
   );
-  const baseRules = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
-  const ruleVersionsMap = zipRuleVersions(currentRules, baseRules, latestRules);
+  const baseRulesResult = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
+  const ruleVersionsMap = zipRuleVersions(
+    currentRules,
+    baseRulesResult.assets,
+    latestRulesResult.assets
+  );
 
   // Calculate the diff between current, base, and target versions
   // Iterate through the current rules array to keep the order of the results

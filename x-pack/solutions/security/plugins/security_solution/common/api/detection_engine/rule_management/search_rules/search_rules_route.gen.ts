@@ -74,7 +74,7 @@ export const SearchRulesRequestBody = lazySchema(() =>
       /**
        * Page size.
        */
-      per_page: z.number().int().min(0).max(10000).optional().default(20),
+      per_page: z.number().int().min(0).max(500).optional().default(20),
       /**
       * For pagination beyond elasticsearch's default 10,000 result window, requires `sort_field` and `sort_order`. When set, `page` is ignored.
 

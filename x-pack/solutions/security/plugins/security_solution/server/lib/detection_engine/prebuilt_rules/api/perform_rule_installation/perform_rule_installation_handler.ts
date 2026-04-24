@@ -113,7 +113,7 @@ export const performRuleInstallationHandler = async (
     const BATCH_SIZE = 100;
     while (ruleInstallQueue.length > 0) {
       const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
-      const ruleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
+      const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
 
       const { results, errors } = await createPrebuiltRules(
         detectionRulesClient,

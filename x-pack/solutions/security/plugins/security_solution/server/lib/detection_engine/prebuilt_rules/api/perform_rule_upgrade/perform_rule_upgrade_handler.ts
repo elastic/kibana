@@ -116,14 +116,18 @@ export const performRuleUpgradeHandler = async (
     while (ruleUpgradeQueue.length > 0) {
       const targetRulesForUpgrade = ruleUpgradeQueue.splice(0, BATCH_SIZE);
 
-      const [currentRules, latestRules] = await Promise.all([
+      const [currentRules, latestRulesResult] = await Promise.all([
         ruleObjectsClient.fetchInstalledRulesByIds({
           ruleIds: targetRulesForUpgrade.map(({ rule_id: ruleId }) => ruleId),
         }),
         ruleAssetsClient.fetchAssetsByVersion(targetRulesForUpgrade),
       ]);
-      const baseRules = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
-      const ruleVersionsMap = zipRuleVersions(currentRules, baseRules, latestRules);
+      const baseRulesResult = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
+      const ruleVersionsMap = zipRuleVersions(
+        currentRules,
+        baseRulesResult.assets,
+        latestRulesResult.assets
+      );
 
       const upgradeableRules: RuleTriad[] = [];
       targetRulesForUpgrade.forEach((targetRule) => {
