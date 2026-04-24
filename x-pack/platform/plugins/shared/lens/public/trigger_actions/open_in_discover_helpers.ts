@@ -85,6 +85,18 @@ const getQueryWithFilter = (
   };
 };
 
+/**
+ * Builds the object passed to Discover’s app locator for “open underlying data”.
+ *
+ * **Filters**
+ * - **ES|QL (`isTextBasedLanguage`)** with at least one filter: predicates that can be expressed
+ *   in ES|QL are merged into the chart query (`getQueryWithFilter`).
+ * - **Form-based / non-ES|QL**: the underlying `query` and all applicable filters are passed
+ *   through—Discover uses the normal query bar + filter pills.
+ *
+ * When `timeFieldName` matches the data view’s time field, a time range may be pulled out of the
+ * filter list (`extractTimeRange`) so Discover’s time picker matches the chart drill-in.
+ */
 async function getDiscoverLocationParams({
   embeddable,
   filters,
@@ -122,6 +134,7 @@ async function getDiscoverLocationParams({
     ? embeddable.parentApi
     : undefined;
 
+  // Lens ES|QL charts: fold applicable filter pills into the ES|QL text for Discover (see getQueryWithFilter)
   const shouldMergeFiltersIntoEsql = embeddable.isTextBasedLanguage() && filtersToApply.length > 0;
 
   let discoverQuery: AggregateQuery | Query | undefined = args.query;

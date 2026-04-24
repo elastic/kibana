@@ -331,25 +331,23 @@ export function appendWhereClauseToESQLQuery(
 const isSourceCommand = (name: string) => ['from', 'ts'].includes(name);
 
 /**
- * Merges a pre-built ES|QL WHERE fragment (e.g. from `convertFiltersToESQLExpression`) into an
- * existing query. The filter is applied immediately after the first `FROM` / `TS` source command
- * (so it applies before `STATS` and the rest of the pipeline), not at the end of the query.
+ * Merges a pre-built ES|QL WHERE fragment into an existing query.
+ * The filter is applied immediately after the first `FROM` / `TS` source command.
  * If a `WHERE` already follows the source, the expression is combined with `AND`.
  */
-export function appendEsqlFilterExpressionToQuery(
-  baseESQLQuery: string,
-  filterExpression: string
-): string {
-  const trimmed = filterExpression.trim();
-  if (!trimmed) {
+export function appendEsqlFilterExpressionToQuery(baseESQLQuery: string, filterExpression: string) {
+  const whereFragment = filterExpression.trim();
+  if (!whereFragment) {
     return baseESQLQuery;
   }
+
   try {
     const { root } = Parser.parse(baseESQLQuery);
     const sourceIndex = root.commands.findIndex((cmd) => isSourceCommand(cmd.name));
     if (sourceIndex < 0) {
-      return appendToESQLQuery(baseESQLQuery, `| WHERE ${trimmed}`);
+      return appendToESQLQuery(baseESQLQuery, `| WHERE ${whereFragment}`);
     }
+
     const sourceCommand = root.commands[sourceIndex];
     const nextCommand = root.commands[sourceIndex + 1];
 
@@ -357,14 +355,15 @@ export function appendEsqlFilterExpressionToQuery(
       return `${baseESQLQuery.substring(
         0,
         nextCommand.location.max + 1
-      )} AND ${trimmed}${baseESQLQuery.substring(nextCommand.location.max + 1)}`;
+      )} AND ${whereFragment}${baseESQLQuery.substring(nextCommand.location.max + 1)}`;
     }
 
     const afterSource = sourceCommand.location.max + 1;
-    return `${baseESQLQuery.substring(0, afterSource)}\n| WHERE ${trimmed}${baseESQLQuery.substring(
+    return `${baseESQLQuery.substring(
+      0,
       afterSource
-    )}`;
+    )}\n\t| WHERE ${whereFragment}${baseESQLQuery.substring(afterSource)}`;
   } catch {
-    return appendToESQLQuery(baseESQLQuery, `| WHERE ${trimmed}`);
+    return appendToESQLQuery(baseESQLQuery, `| WHERE ${whereFragment}`);
   }
 }
