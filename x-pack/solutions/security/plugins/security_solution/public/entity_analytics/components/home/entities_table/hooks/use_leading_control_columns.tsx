@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { RowControlColumn } from '@kbn/discover-utils';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { createDataProviders } from '../../../../../app/actions/add_to_timeline/data_provider';
@@ -30,7 +31,8 @@ const createEntityDataProviders = (
 interface UseLeadingControlColumnsArgs {
   canUseTimeline: boolean;
   investigateInTimeline: (args: {
-    dataProviders: NonNullable<ReturnType<typeof createDataProviders>>;
+    query?: { query: string; language: string };
+    dataProviders?: NonNullable<ReturnType<typeof createDataProviders>>;
   }) => void;
 }
 
@@ -38,6 +40,8 @@ export const useLeadingControlColumns = ({
   canUseTimeline,
   investigateInTimeline,
 }: UseLeadingControlColumnsArgs): RowControlColumn[] => {
+  const euidApi = useEntityStoreEuidApi();
+
   return useMemo(() => {
     const columns: RowControlColumn[] = [];
 
@@ -59,9 +63,17 @@ export const useLeadingControlColumns = ({
               )}
               color="text"
               onClick={() => {
-                const dataProviders = createEntityDataProviders(entityType, entityName);
-                if (dataProviders?.length) {
-                  investigateInTimeline({ dataProviders });
+                const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
+                  entityType,
+                  record.raw
+                );
+                if (kqlFilter) {
+                  investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
+                } else {
+                  const dataProviders = createEntityDataProviders(entityType, entityName);
+                  if (dataProviders?.length) {
+                    investigateInTimeline({ dataProviders });
+                  }
                 }
               }}
               data-test-subj="entity-analytics-home-timeline-icon"
@@ -72,5 +84,5 @@ export const useLeadingControlColumns = ({
     }
 
     return columns;
-  }, [canUseTimeline, investigateInTimeline]);
+  }, [canUseTimeline, investigateInTimeline, euidApi]);
 };

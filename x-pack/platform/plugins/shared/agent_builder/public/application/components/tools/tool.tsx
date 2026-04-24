@@ -333,7 +333,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                   values={{
                     learnMoreLink: (
                       <EuiLink
-                        href={docLinksService.tools}
+                        href={docLinksService.agentBuilderTools}
                         target="_blank"
                         aria-label={i18n.translate(
                           'xpack.agentBuilder.tools.createToolDocumentationAriaLabel',

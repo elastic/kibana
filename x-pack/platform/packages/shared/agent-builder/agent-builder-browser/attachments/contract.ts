@@ -129,6 +129,13 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   renderInlineContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
   /**
+   * Optional preferred width for the canvas flyout when opened in full-screen context.
+   * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).
+   * Defaults to `'50vw'` when not specified.
+   * Has no effect in sidebar context.
+   */
+  canvasWidth?: string;
+  /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
    *
