@@ -749,20 +749,40 @@ export type AlertSuppressionGroupBy = z.infer<typeof AlertSuppressionGroupBy>;
 export const AlertSuppressionGroupBy = z.array(z.string()).min(1).max(3);
 
 /**
+ * Per-field suppression options. Reserved for field-specific duration windows and sequence event targeting; executors may not honor all properties until follow-up work lands.
+ */
+export type AlertSuppressionGroupByFieldV2 = z.infer<typeof AlertSuppressionGroupByFieldV2>;
+export const AlertSuppressionGroupByFieldV2 = z.object({
+  field: z.string(),
+  /**
+   * When using EQL sequence rules, identifies which sequence event this field applies to.
+   */
+  sequence_index: z.number().int().min(0).optional(),
+  duration: AlertSuppressionDuration.optional(),
+});
+
+export type AlertSuppressionGroupByV2 = z.infer<typeof AlertSuppressionGroupByV2>;
+export const AlertSuppressionGroupByV2 = z.array(AlertSuppressionGroupByFieldV2).min(1).max(3);
+
+/**
  * Defines alert suppression configuration.
  */
 export type AlertSuppression = z.infer<typeof AlertSuppression>;
 export const AlertSuppression = z.object({
-  group_by: AlertSuppressionGroupBy,
+  group_by: AlertSuppressionGroupBy.optional(),
+  group_by_v2: AlertSuppressionGroupByV2.optional(),
   duration: AlertSuppressionDuration.optional(),
   missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
+  anyOf: z.unknown(),
 });
 
 export type AlertSuppressionCamel = z.infer<typeof AlertSuppressionCamel>;
 export const AlertSuppressionCamel = z.object({
-  groupBy: AlertSuppressionGroupBy,
+  groupBy: AlertSuppressionGroupBy.optional(),
+  groupByV2: AlertSuppressionGroupByV2.optional(),
   duration: AlertSuppressionDuration.optional(),
   missingFieldsStrategy: AlertSuppressionMissingFieldsStrategy.optional(),
+  anyOf: z.unknown(),
 });
 
 export type GapFillStatus = z.infer<typeof GapFillStatus>;

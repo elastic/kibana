@@ -11,6 +11,8 @@ import { firstValueFrom } from 'rxjs';
 
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
 
+import { getEffectiveSuppressionGroupByFields } from './effective_alert_suppression_fields';
+
 interface GetIsAlertSuppressionActiveParams {
   alertSuppression: AlertSuppressionCamel | undefined;
   isFeatureDisabled?: boolean | undefined;
@@ -19,7 +21,8 @@ interface GetIsAlertSuppressionActiveParams {
 
 export const alertSuppressionTypeGuard = (
   alertSuppression: AlertSuppressionCamel | undefined
-): alertSuppression is AlertSuppressionCamel => Boolean(alertSuppression?.groupBy?.length);
+): alertSuppression is AlertSuppressionCamel =>
+  getEffectiveSuppressionGroupByFields(alertSuppression).length > 0;
 
 /**
  * checks if alert suppression is active:

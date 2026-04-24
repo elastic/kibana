@@ -50,6 +50,7 @@ import {
   ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 
 describe('helpers', () => {
@@ -468,6 +469,66 @@ describe('helpers', () => {
         };
 
         expect(result).toEqual(expect.objectContaining(expected));
+      });
+
+      test('should include group_by_v2 for eql sequence rules', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          ruleType: 'eql',
+          queryBar: {
+            ...mockData.queryBar,
+            query: {
+              ...mockData.queryBar.query,
+              language: 'eql',
+              query: 'sequence by field1 [process where true] [file where true]',
+            },
+          },
+          [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: [],
+          [ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME]: [
+            { field: 'process.pid', sequenceIndex: 0 },
+            { field: 'file.path' },
+          ],
+          [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]:
+            AlertSuppressionDurationType.PerRuleExecution,
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        const expected: DefineStepRuleJson = {
+          filters: mockStepData.queryBar.filters,
+          index: mockStepData.index,
+          language: 'eql',
+          query: 'sequence by field1 [process where true] [file where true]',
+          type: 'eql',
+          alert_suppression: {
+            group_by_v2: [{ field: 'process.pid', sequence_index: 0 }, { field: 'file.path' }],
+            duration: undefined,
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        expect(result).toEqual(expect.objectContaining(expected));
+      });
+
+      test('does not include group_by_v2 for non-sequence EQL even if form rows exist', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          ruleType: 'eql',
+          queryBar: {
+            ...mockData.queryBar,
+            query: {
+              ...mockData.queryBar.query,
+              language: 'eql',
+              query: 'process where process_name == "explorer.exe"',
+            },
+          },
+          [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: [],
+          [ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME]: [{ field: 'process.pid', sequenceIndex: 0 }],
+          [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]:
+            AlertSuppressionDurationType.PerRuleExecution,
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.alert_suppression).toBeUndefined();
       });
     });
 

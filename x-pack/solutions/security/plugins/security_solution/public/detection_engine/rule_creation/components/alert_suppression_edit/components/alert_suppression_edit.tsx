@@ -17,6 +17,11 @@ import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../constants/fields';
 interface AlertSuppressionEditProps {
   suppressibleFields: DataViewFieldBase[];
   labelAppend?: React.ReactNode;
+  /**
+   * When the rule uses additional suppression config (e.g. EQL `group_by_v2`) without legacy `group_by` fields, duration/missing still apply.
+   */
+  hasAdditionalSuppressionSelection?: boolean;
+  preDurationContent?: React.ReactNode;
   disabled?: boolean;
   disabledText?: string;
   warningText?: string;
@@ -25,6 +30,8 @@ interface AlertSuppressionEditProps {
 
 export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
   suppressibleFields,
+  hasAdditionalSuppressionSelection = false,
+  preDurationContent,
   labelAppend,
   disabled,
   disabledText,
@@ -36,7 +43,7 @@ export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
   }>({
     watch: ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   });
-  const hasSelectedFields = suppressionFields?.length > 0;
+  const hasSelectedFields = suppressionFields?.length > 0 || hasAdditionalSuppressionSelection;
   const content = (
     <>
       <SuppressionFieldsSelector
@@ -45,6 +52,7 @@ export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
         disabled={disabled}
         fullWidth={fullWidth}
       />
+      {preDurationContent}
       {warningText && (
         <EuiText size="xs" color="warning" data-test-subj="alertSuppressionWarning">
           {warningText}

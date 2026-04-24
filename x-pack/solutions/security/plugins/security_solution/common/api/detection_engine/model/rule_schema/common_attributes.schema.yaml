@@ -762,30 +762,61 @@ components:
       minItems: 1
       maxItems: 3
 
+    AlertSuppressionGroupByFieldV2:
+      type: object
+      description: 
+        Per-field suppression options. Reserved for field-specific duration windows and sequence
+        event targeting; executors may not honor all properties until follow-up work lands.
+      required:
+        - field
+      properties:
+        field:
+          type: string
+        sequence_index:
+          type: integer
+          minimum: 0
+          description: 
+            When using EQL sequence rules, identifies which sequence event this field applies to.
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+
+    AlertSuppressionGroupByV2:
+      type: array
+      items:
+        $ref: '#/components/schemas/AlertSuppressionGroupByFieldV2'
+      minItems: 1
+      maxItems: 3
+
     AlertSuppression:
       type: object
       description: Defines alert suppression configuration.
       properties:
         group_by:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        group_by_v2:
+          $ref: '#/components/schemas/AlertSuppressionGroupByV2'
         duration:
           $ref: '#/components/schemas/AlertSuppressionDuration'
         missing_fields_strategy:
           $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-      required:
-        - group_by
+        anyOf:
+          - group_by
+          - group_by_v2
 
     AlertSuppressionCamel:
       type: object
       properties:
         groupBy:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        groupByV2:
+          $ref: '#/components/schemas/AlertSuppressionGroupByV2'
         duration:
           $ref: '#/components/schemas/AlertSuppressionDuration'
         missingFieldsStrategy:
           $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-      required:
-        - groupBy
+        anyOf:
+          - group_by
+          - group_by_v2
 
     # Gap fill status used in aggregated rule gap summaries
     GapFillStatus:

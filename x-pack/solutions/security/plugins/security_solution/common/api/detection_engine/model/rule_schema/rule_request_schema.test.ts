@@ -1301,6 +1301,21 @@ describe('rules schema', () => {
           expect(result.data).toMatchObject(payload);
         });
 
+        test(`should validate suppression group_by_v2 for "${ruleType}" rule type`, () => {
+          const payload = {
+            ...ruleMock,
+            alert_suppression: {
+              group_by_v2: [{ field: 'agent.name', sequence_index: 0 }],
+              duration: { value: 5, unit: 'm' },
+              missing_fields_strategy: 'suppress',
+            },
+          };
+
+          const result = RuleCreateProps.safeParse(payload);
+          expectParseSuccess(result);
+          expect(result.data).toMatchObject(payload);
+        });
+
         test(`should throw error if suppression fields not valid for "${ruleType}" rule`, () => {
           const payload = {
             ...ruleMock,
@@ -1328,8 +1343,8 @@ describe('rules schema', () => {
 
           const result = RuleCreateProps.safeParse(payload);
           expectParseError(result);
-          expect(stringifyZodError(result.error)).toEqual(
-            'alert_suppression.group_by: Invalid input: expected array, received undefined'
+          expect(stringifyZodError(result.error)).toContain(
+            'Either group_by or group_by_v2 must be provided with at least one field'
           );
         });
 

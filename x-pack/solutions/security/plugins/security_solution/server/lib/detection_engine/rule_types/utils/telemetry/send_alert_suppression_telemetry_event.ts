@@ -11,6 +11,7 @@ import type { AlertSuppressionDuration } from '../../../../../../common/api/dete
 import type { RuleParams } from '../../../rule_schema';
 
 import { isThresholdParams } from '../utils';
+import { getEffectiveSuppressionGroupByFields } from '../effective_alert_suppression_fields';
 
 export const suppressionDurationToSeconds = (
   duration: AlertSuppressionDuration | undefined
@@ -57,11 +58,11 @@ export const sendAlertSuppressionTelemetryEvent = ({
 
   const suppressionGroupByFieldsNumber = isThresholdParams(ruleParams)
     ? ruleParams.threshold?.field?.length || 0
-    : ruleParams.alertSuppression.groupBy.length;
+    : getEffectiveSuppressionGroupByFields(ruleParams.alertSuppression).length;
 
   const suppressionGroupByFields = isThresholdParams(ruleParams)
     ? ruleParams.threshold?.field || []
-    : ruleParams.alertSuppression.groupBy;
+    : getEffectiveSuppressionGroupByFields(ruleParams.alertSuppression);
 
   const suppressionMissingFields = isThresholdParams(ruleParams)
     ? false
