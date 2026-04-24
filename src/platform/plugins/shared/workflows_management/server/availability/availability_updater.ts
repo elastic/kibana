@@ -31,7 +31,7 @@ export class AvailabilityUpdater {
   private licenseSubscription?: Subscription;
 
   constructor(private readonly deps: AvailabilityUpdaterDeps) {
-    this.logger = this.deps.logger.get('[AvailabilityUpdater]');
+    this.logger = this.deps.logger.get('AvailabilityUpdater');
     this.listen().catch((error) => {
       this.logger.error('Failed to listen for availability updates', { error });
     });
@@ -58,24 +58,39 @@ export class AvailabilityUpdater {
 
   private async runConfigUnavailableDisable(): Promise<void> {
     try {
-      await this.deps.api.disableAllWorkflows();
-      this.logger.info('Disabled all workflows because workflowsManagement.available is false');
+      const { disabled, failures } = await this.deps.api.disableAllWorkflows();
+      if (disabled > 0) {
+        this.logger.info(`Workflows is not available. Disabled ${disabled} active workflows`);
+      }
+      if (failures.length > 0) {
+        this.logger.error(
+          `Workflows is not available. Failed to disable ${failures.length} active workflows`,
+          { error: new Error(failures.map((f) => f.error).join(', ')) }
+        );
+      }
     } catch (error) {
-      this.logger.error(
-        'Failed to disable all workflows when workflowsManagement.available is false',
-        { error }
-      );
+      this.logger.error('Failed to disable workflows on workflows not available', {
+        error,
+      });
     }
   }
 
   private async runLicenseDowngradeDisable(): Promise<void> {
     try {
-      await this.deps.api.disableAllWorkflows();
-      this.logger.info(
-        `Disabled all workflows due to license no longer supporting Workflows (${REQUIRED_LICENSE_TYPE} required)`
-      );
+      const { disabled, failures } = await this.deps.api.disableAllWorkflows();
+      if (disabled > 0) {
+        this.logger.info(
+          `License no longer supports Workflows (${REQUIRED_LICENSE_TYPE}). Disabled ${disabled} active workflows`
+        );
+      }
+      if (failures.length > 0) {
+        this.logger.error(
+          `License no longer supports Workflows (${REQUIRED_LICENSE_TYPE}). Failed to disable ${failures.length} active workflows`,
+          { error: new Error(failures.map((f) => f.error).join(', ')) }
+        );
+      }
     } catch (error) {
-      this.logger.error('Failed to disable all workflows on license downgrade.', { error });
+      this.logger.error('Failed to disable workflows on license downgrade.', { error });
     }
   }
 }

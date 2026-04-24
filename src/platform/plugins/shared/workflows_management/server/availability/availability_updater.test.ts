@@ -34,6 +34,12 @@ async function flushAsync(): Promise<void> {
   await Promise.resolve();
 }
 
+const emptyDisableResult = () => ({
+  total: 0,
+  disabled: 0,
+  failures: [] as Array<{ id: string; error: string }>,
+});
+
 describe('isLicenseValid', () => {
   it('returns true when active and at least enterprise', () => {
     expect(isLicenseValid(enterpriseLicense())).toBe(true);
@@ -61,7 +67,7 @@ describe('AvailabilityUpdater', () => {
 
   beforeEach(() => {
     license$ = new Subject<ILicense>();
-    disableAllWorkflows = jest.fn().mockResolvedValue(undefined);
+    disableAllWorkflows = jest.fn().mockResolvedValue(emptyDisableResult());
     mockLogger = loggerMock.create();
   });
 
@@ -81,6 +87,8 @@ describe('AvailabilityUpdater', () => {
   }
 
   it('calls api.disableAllWorkflows once when config.available is false (constructor listen)', async () => {
+    disableAllWorkflows.mockResolvedValue({ total: 3, disabled: 3, failures: [] });
+
     createUpdater({
       config: { ...baseConfig, available: false } as AvailabilityUpdaterDeps['config'],
     });
@@ -89,7 +97,57 @@ describe('AvailabilityUpdater', () => {
 
     expect(disableAllWorkflows).toHaveBeenCalledTimes(1);
     expect(mockLogger.info).toHaveBeenCalledWith(
-      'Disabled all workflows because workflowsManagement.available is false'
+      'Workflows is not available. Disabled 3 active workflows'
+    );
+  });
+
+  it('does not log info when config unavailable disable returns disabled count 0', async () => {
+    disableAllWorkflows.mockResolvedValue({ total: 0, disabled: 0, failures: [] });
+
+    createUpdater({
+      config: { ...baseConfig, available: false } as AvailabilityUpdaterDeps['config'],
+    });
+
+    await flushAsync();
+
+    expect(disableAllWorkflows).toHaveBeenCalledTimes(1);
+    expect(mockLogger.info).not.toHaveBeenCalled();
+  });
+
+  it('logs error when config unavailable disable returns failures', async () => {
+    disableAllWorkflows.mockResolvedValue({
+      total: 1,
+      disabled: 0,
+      failures: [{ id: 'wf-1', error: 'bulk failed' }],
+    });
+
+    createUpdater({
+      config: { ...baseConfig, available: false } as AvailabilityUpdaterDeps['config'],
+    });
+
+    await flushAsync();
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Workflows is not available. Failed to disable 1 active workflows',
+      { error: expect.any(Error) }
+    );
+    expect((mockLogger.error.mock.calls[0][1] as { error: Error }).error.message).toBe(
+      'bulk failed'
+    );
+  });
+
+  it('logs catch when config unavailable disable throws', async () => {
+    disableAllWorkflows.mockRejectedValue(new Error('ES down'));
+
+    createUpdater({
+      config: { ...baseConfig, available: false } as AvailabilityUpdaterDeps['config'],
+    });
+
+    await flushAsync();
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Failed to disable workflows on workflows not available',
+      { error: expect.any(Error) }
     );
   });
 
@@ -117,6 +175,8 @@ describe('AvailabilityUpdater', () => {
   });
 
   it('calls disableAllWorkflows when license is available but no longer valid (downgrade)', async () => {
+    disableAllWorkflows.mockResolvedValue({ total: 2, disabled: 2, failures: [] });
+
     createUpdater();
 
     license$.next(enterpriseLicense());
@@ -128,7 +188,49 @@ describe('AvailabilityUpdater', () => {
 
     expect(disableAllWorkflows).toHaveBeenCalledTimes(1);
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringMatching(/Disabled all workflows due to license/)
+      'License no longer supports Workflows (enterprise). Disabled 2 active workflows'
+    );
+  });
+
+  it('logs error when license downgrade disable returns failures', async () => {
+    disableAllWorkflows.mockResolvedValue({
+      total: 2,
+      disabled: 0,
+      failures: [
+        { id: 'wf-a', error: 'version conflict' },
+        { id: 'wf-b', error: 'index closed' },
+      ],
+    });
+
+    createUpdater();
+
+    license$.next(enterpriseLicense());
+    await flushAsync();
+    license$.next(basicLicense());
+    await flushAsync();
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'License no longer supports Workflows (enterprise). Failed to disable 2 active workflows',
+      { error: expect.any(Error) }
+    );
+    expect((mockLogger.error.mock.calls[0][1] as { error: Error }).error.message).toBe(
+      'version conflict, index closed'
+    );
+  });
+
+  it('logs catch when license downgrade disable throws', async () => {
+    disableAllWorkflows.mockRejectedValue(new Error('cluster unavailable'));
+
+    createUpdater();
+
+    license$.next(enterpriseLicense());
+    await flushAsync();
+    license$.next(basicLicense());
+    await flushAsync();
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Failed to disable workflows on license downgrade.',
+      { error: expect.any(Error) }
     );
   });
 
@@ -145,6 +247,8 @@ describe('AvailabilityUpdater', () => {
   });
 
   it('disables once when license becomes available and invalid after unavailable emissions', async () => {
+    disableAllWorkflows.mockResolvedValue({ total: 1, disabled: 1, failures: [] });
+
     createUpdater();
 
     license$.next(unavailableLicense());
@@ -163,6 +267,8 @@ describe('AvailabilityUpdater', () => {
   });
 
   it('disables when license is available but not active (e.g. expired enterprise)', async () => {
+    disableAllWorkflows.mockResolvedValue({ total: 1, disabled: 1, failures: [] });
+
     createUpdater();
 
     license$.next(enterpriseLicense());
@@ -175,6 +281,8 @@ describe('AvailabilityUpdater', () => {
   });
 
   it('does not call disableAllWorkflows again after stop (subscription ended)', async () => {
+    disableAllWorkflows.mockResolvedValue({ total: 1, disabled: 1, failures: [] });
+
     createUpdater();
 
     license$.next(basicLicense());
