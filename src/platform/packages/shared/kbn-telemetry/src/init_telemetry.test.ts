@@ -105,7 +105,10 @@ describe('initTelemetry', () => {
     test('ensure naming consistency', () => {
       const apmConfig = new ApmConfiguration(
         REPO_ROOT,
-        { elastic: { apm: { environment: 'test-environment' } } },
+        {
+          elastic: { apm: { environment: 'test-environment' } },
+          server: { uuid: 'test-kibana-uuid' },
+        },
         false
       );
 
