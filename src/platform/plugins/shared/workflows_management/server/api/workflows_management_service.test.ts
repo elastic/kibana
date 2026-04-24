@@ -4167,6 +4167,22 @@ steps:
       const result = await service.disableAllWorkflows();
 
       expect(result).toEqual({ total: 0, disabled: 0, failures: [] });
+      const searchQuery = mockEsClient.search.mock.calls[0][0] as any;
+      expect(searchQuery.query.bool.must).toEqual([{ term: { enabled: true } }]);
+    });
+
+    it('should scope search to spaceId when provided', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      await service.disableAllWorkflows('my-space');
+
+      const searchQuery = mockEsClient.search.mock.calls[0][0] as any;
+      expect(searchQuery.query.bool.must).toEqual([
+        { term: { enabled: true } },
+        { term: { spaceId: 'my-space' } },
+      ]);
     });
 
     it('should bulk-disable all enabled workflows and unschedule tasks', async () => {

@@ -220,7 +220,7 @@ These routes use `access: internal` and are **not** included in the public OpenA
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/internal/workflows/config` | Execution engine feature flags for the plugin. |
-| POST | `/internal/workflows/disable_all_workflows` | Disable all workflows (administrative). |
+| POST | `/internal/workflows/disable` | Disable all workflows (administrative). |
 | POST | `/api/workflows/validate` | Validate a workflow YAML definition without saving. |
 
 ---

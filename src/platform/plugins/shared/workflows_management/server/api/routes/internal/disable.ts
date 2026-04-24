@@ -12,10 +12,10 @@ import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerDisableAllWorkflowsRoute({ router, api }: RouteDependencies) {
+export function registerDisableAllWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .post({
-      path: '/internal/workflows/disable_all_workflows',
+      path: '/internal/workflows/disable',
       access: 'internal',
       security: WORKFLOW_UPDATE_SECURITY,
     })
@@ -24,8 +24,9 @@ export function registerDisableAllWorkflowsRoute({ router, api }: RouteDependenc
         version: INTERNAL_API_VERSION,
         validate: false,
       },
-      withLicenseCheck(async (_context, _request, response) => {
-        const result = await api.disableAllWorkflows();
+      withLicenseCheck(async (_context, request, response) => {
+        const spaceId = spaces.getSpaceId(request);
+        const result = await api.disableAllWorkflows(spaceId);
         return response.ok({
           body: result,
         });
