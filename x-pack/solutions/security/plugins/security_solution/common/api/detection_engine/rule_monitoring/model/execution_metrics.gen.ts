@@ -14,54 +14,56 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const RuleExecutionMetrics = lazySchema(() =>
+  z.object({
+    /**
+     * Total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response
+     */
+    total_search_duration_ms: z.number().int().min(0).optional(),
+    /**
+     * Total time spent indexing documents during current rule execution cycle
+     */
+    total_indexing_duration_ms: z.number().int().min(0).optional(),
+    /**
+     * Total time spent enriching documents during current rule execution cycle
+     */
+    total_enrichment_duration_ms: z.number().int().min(0).optional(),
+    /**
+     * Duration in seconds of execution gap
+     */
+    execution_gap_duration_s: z.number().int().min(0).optional(),
+    /**
+     * Count of frozen indices queried during the rule execution. These indices could not be entirely excluded after applying the time range filter.
+     */
+    frozen_indices_queried_count: z.number().int().min(0).optional(),
+    /**
+     * Range of the execution gap
+     */
+    gap_range: z
+      .object({
+        /**
+         * Start date of the execution gap
+         */
+        gte: z.string(),
+        /**
+         * End date of the execution gap
+         */
+        lte: z.string(),
+      })
+      .optional(),
+    /**
+     * Detected reason for the execution gap
+     */
+    gap_reason: z
+      .object({
+        /**
+         * The type of reason for the gap (rule_disabled or rule_did_not_run)
+         */
+        type: z.enum(['rule_disabled', 'rule_did_not_run']),
+      })
+      .optional(),
+  })
+);
 export type RuleExecutionMetrics = z.infer<typeof RuleExecutionMetrics>;
-export const RuleExecutionMetrics = z.object({
-  /**
-   * Total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response
-   */
-  total_search_duration_ms: z.number().int().min(0).optional(),
-  /**
-   * Total time spent indexing documents during current rule execution cycle
-   */
-  total_indexing_duration_ms: z.number().int().min(0).optional(),
-  /**
-   * Total time spent enriching documents during current rule execution cycle
-   */
-  total_enrichment_duration_ms: z.number().int().min(0).optional(),
-  /**
-   * Duration in seconds of execution gap
-   */
-  execution_gap_duration_s: z.number().int().min(0).optional(),
-  /**
-   * Count of frozen indices queried during the rule execution. These indices could not be entirely excluded after applying the time range filter.
-   */
-  frozen_indices_queried_count: z.number().int().min(0).optional(),
-  /**
-   * Range of the execution gap
-   */
-  gap_range: z
-    .object({
-      /**
-       * Start date of the execution gap
-       */
-      gte: z.string(),
-      /**
-       * End date of the execution gap
-       */
-      lte: z.string(),
-    })
-    .optional(),
-  /**
-   * Detected reason for the execution gap
-   */
-  gap_reason: z
-    .object({
-      /**
-       * The type of reason for the gap (rule_disabled or rule_did_not_run)
-       */
-      type: z.enum(['rule_disabled', 'rule_did_not_run']),
-    })
-    .optional(),
-});

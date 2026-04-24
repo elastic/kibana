@@ -37,12 +37,15 @@ export const ModelSettings: React.FC = () => {
     assignments,
     sections,
     invalidEndpointIds,
+    hasSavedObject,
+    dirtyFeatureIds,
     updateEndpoints,
     save: saveFeatures,
     resetSection,
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
+  const globalDefaultId = defaultModelSettings.savedState.defaultModelId;
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const {
     services: { application, http },
@@ -235,12 +238,15 @@ export const ModelSettings: React.FC = () => {
                     features={section.children.map((f) => ({
                       endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
                       feature: f,
+                      hasSavedObject: hasSavedObject[f.featureId] ?? false,
+                      isFeatureDirty: dirtyFeatureIds.has(f.featureId),
                     }))}
                     onReset={() => setResetParentKey(section.featureId)}
                     onEndpointsChange={updateEndpoints}
                     invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
+                    globalDefaultId={globalDefaultId}
                   />
                   <EuiSpacer size="xl" />
                 </React.Fragment>
