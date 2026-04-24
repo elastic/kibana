@@ -17,6 +17,9 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 
+/** Logo frame in the header (square). Used to align other UI (e.g. wizard rails) to the logo center. */
+export const INTEGRATION_HEADER_LOGO_FRAME_PX = 64;
+
 interface IntegrationHeaderProps {
   logoSrc?: string;
   logoAlt?: string;
@@ -47,8 +50,8 @@ export const IntegrationHeader: React.FC<IntegrationHeaderProps> = ({
           <EuiFlexItem grow={false}>
             <div
               style={{
-                width: 64,
-                height: 64,
+                width: INTEGRATION_HEADER_LOGO_FRAME_PX,
+                height: INTEGRATION_HEADER_LOGO_FRAME_PX,
                 borderRadius: 14,
                 backgroundColor: euiTheme.colors.backgroundBaseSubdued,
                 border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
