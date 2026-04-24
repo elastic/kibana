@@ -16,19 +16,16 @@ export interface IndexSelectionHandlerServices {
   dataViews: DataViewsContract;
   application: ApplicationStart;
 }
-
 export interface IndexSelectionHandlerOptions {
   /* Maximum number of results to return from the search API. Defaults to 20. */
   maxResults?: number;
   /* Whether to allow wildcard patterns in the resolution API. Defaults to false. */
   allowWildcard?: boolean;
 }
-
-export type IndexSelectionHandler = PropertySelectionHandler<
-  string,
-  Record<string, unknown>,
-  { index: string }
->;
+const DEFAULT_OPTIONS: Required<IndexSelectionHandlerOptions> = {
+  maxResults: 20,
+  allowWildcard: false,
+};
 
 const indexLabel = i18n.translate('workflows.indexSelection.kindIndex', {
   defaultMessage: 'Index',
@@ -75,10 +72,10 @@ function toPatternSelectionOption(pattern: string, count: number): SelectionOpti
 
 export const getIndexSelectionHandler = (
   services: IndexSelectionHandlerServices,
-  options?: IndexSelectionHandlerOptions
-): IndexSelectionHandler => {
+  options: IndexSelectionHandlerOptions = {}
+): PropertySelectionHandler<string> => {
   const { dataViews, application } = services;
-  const { maxResults = 20, allowWildcard = false } = options ?? {};
+  const { maxResults, allowWildcard } = { ...DEFAULT_OPTIONS, ...options };
 
   return {
     search: async (rawInput) => {
@@ -91,7 +88,7 @@ export const getIndexSelectionHandler = (
       const pattern = endsWithWildcard ? input : `${input}*`;
       const matches = await dataViews.getIndices({
         pattern,
-        showAllIndices: true,
+        showAllIndices: false,
         isRollupIndex: () => false,
       });
       const results: Array<SelectionOption<string>> = [];

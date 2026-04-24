@@ -81,7 +81,7 @@ describe('getIndexSelectionHandler', () => {
 
       expect(dataViews.getIndices).toHaveBeenCalledTimes(1);
       expect(dataViews.getIndices).toHaveBeenCalledWith(
-        expect.objectContaining({ pattern: 'logs-*', showAllIndices: true })
+        expect.objectContaining({ pattern: 'logs-*', showAllIndices: false })
       );
     });
 
