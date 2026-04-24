@@ -12,7 +12,7 @@ class InferenceEndpointsDocLinks {
   public elasticInferenceService: string = '';
   public semanticSearchElser: string = '';
   public semanticSearchE5: string = '';
-
+  public featureSettings: string = '';
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
@@ -20,6 +20,7 @@ class InferenceEndpointsDocLinks {
     this.elasticInferenceService = newDocLinks.enterpriseSearch.elasticInferenceService;
     this.semanticSearchElser = newDocLinks.enterpriseSearch.elser;
     this.semanticSearchE5 = newDocLinks.enterpriseSearch.e5Model;
+    this.featureSettings = newDocLinks.inferenceManagement.featureSettings;
   }
 }
 
