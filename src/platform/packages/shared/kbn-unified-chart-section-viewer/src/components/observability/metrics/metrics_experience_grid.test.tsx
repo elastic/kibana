@@ -34,7 +34,12 @@ jest.mock('@kbn/ebt-tools', () => ({
     onPageReady: jest.fn(),
   }),
 }));
-jest.mock('./hooks');
+jest.mock('./hooks', () => ({
+  ...jest.requireActual('./hooks'),
+  useMetricsGridFullScreen: jest.fn(),
+  useMetricFieldsFilter: jest.fn(),
+  useDiscoverFieldForBreakdown: jest.fn(),
+}));
 jest.mock('./hooks/use_fetch_metrics_data', () => ({
   useFetchMetricsData: jest.fn(),
 }));
