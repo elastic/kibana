@@ -55,12 +55,9 @@ export class LensClient {
       data,
       meta,
       id: responseId,
-    } = await this.http.get<LensGetResponseBody>(
-      buildPath(`${LENS_VIS_API_PATH}/{id}`, { id }),
-      {
-        version: LENS_API_VERSION,
-      }
-    );
+    } = await this.http.get<LensGetResponseBody>(buildPath(`${LENS_VIS_API_PATH}/{id}`, { id }), {
+      version: LENS_API_VERSION,
+    });
 
     const chartType = this.builder?.getType(data);
 
@@ -220,13 +217,10 @@ export class LensClient {
   }
 
   async delete(id: string): Promise<{ success: boolean }> {
-    const response = await this.http.delete(
-      buildPath(`${LENS_VIS_API_PATH}/{id}`, { id }),
-      {
-        asResponse: true,
-        version: LENS_API_VERSION,
-      }
-    );
+    const response = await this.http.delete(buildPath(`${LENS_VIS_API_PATH}/{id}`, { id }), {
+      asResponse: true,
+      version: LENS_API_VERSION,
+    });
     const success = response.response?.ok ?? false;
 
     return { success };
