@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 import { SigeventsOverview } from '../../components/sigevents_overview';
+import { SignificantEventDetailBody } from '../../components/sigevents_overview/significant_event_detail_body';
+import type { SignificantEventDetailFields } from '../../components/sigevents_overview/significant_event_detail_body';
+import { SignificantEventDetailHeader } from '../../components/sigevents_overview/significant_event_detail_header';
 
 const MAX_CONTENT_WIDTH = 900;
 
@@ -29,10 +39,25 @@ const contentColumnStyles = css`
   min-height: 0;
 `;
 
+const DEFAULT_DETAIL_EVENT: SignificantEventDetailFields = {
+  id: 'main-significant-event',
+  label:
+    'Dropped payments on oteldemo.com and video streams on otelfix.com due to unavailable Auth Service',
+  subtitle: 'logs · checkout',
+  severityLabel: 'Critical',
+  severityColor: 'danger',
+};
+
 export function SigeventsOverviewPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { services } = useKibana();
   const { agentBuilder } = services;
+
+  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
+  const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
+
+  const openDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(true), []);
+  const closeDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(false), []);
 
   const EmbeddableConversation = useMemo(
     () => agentBuilder?.getEmbeddableConversation(),
@@ -63,7 +88,7 @@ export function SigeventsOverviewPage() {
             data-test-subj="obltSigeventsConversation"
           >
             <EuiFlexItem grow={false}>
-              <SigeventsOverview />
+              <SigeventsOverview onViewDetails={openDetailFlyout} />
             </EuiFlexItem>
 
             {EmbeddableConversation && (
@@ -79,6 +104,31 @@ export function SigeventsOverviewPage() {
           </EuiFlexGroup>
         </div>
       </div>
+
+      {isDetailFlyoutOpen ? (
+        <EuiFlyout
+          type="push"
+          side="right"
+          size="m"
+          paddingSize="m"
+          onClose={closeDetailFlyout}
+          aria-labelledby={flyoutHeadingId}
+          data-test-subj="obltSigeventsDetailFlyout"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <div id={flyoutHeadingId}>
+              <SignificantEventDetailHeader
+                title={DEFAULT_DETAIL_EVENT.label}
+                severityLabel={DEFAULT_DETAIL_EVENT.severityLabel}
+                severityColor={DEFAULT_DETAIL_EVENT.severityColor}
+              />
+            </div>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <SignificantEventDetailBody event={DEFAULT_DETAIL_EVENT} hideHeader />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      ) : null}
     </ObservabilityPageTemplate>
   );
 }

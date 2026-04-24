@@ -12,14 +12,6 @@ import { SignificantEventDetailBody } from './significant_event_detail_body';
 const meta: Meta<typeof SignificantEventDetailBody> = {
   title: 'app/SigeventsOverview/SignificantEventDetailBody',
   component: SignificantEventDetailBody,
-  argTypes: {
-    relevanceScore: {
-      control: { type: 'range', min: 0, max: 100 },
-    },
-    suggestionsCount: {
-      control: { type: 'number', min: 0 },
-    },
-  },
 };
 
 export default meta;
@@ -34,11 +26,9 @@ export const CriticalEvent: Story = {
       severityLabel: 'Critical',
       severityColor: 'danger',
     },
-    relevanceScore: 75,
-    suggestionsCount: 2,
+    detectedAtLabel: 'Detected 5 minutes ago',
     onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
+    onOpenDetails: action('onOpenDetails'),
   },
 };
 
@@ -51,32 +41,19 @@ export const HighSeverityEvent: Story = {
       severityLabel: 'High',
       severityColor: 'warning',
     },
-    relevanceScore: 62,
-    suggestionsCount: 3,
+    detectedAtLabel: 'Detected 12 minutes ago',
+    criticalityLabel: 'Medium',
+    criticalityColor: 'warning',
+    impactLabel: 'Medium',
+    impactColor: 'warning',
+    confidenceLabel: 'Medium (72%)',
+    impactingLabel: '2 services',
     onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
+    onOpenDetails: action('onOpenDetails'),
   },
 };
 
-export const LowRelevance: Story = {
-  args: {
-    event: {
-      id: '3',
-      label: 'Background Job Scheduler - Missed Execution Windows',
-      subtitle: 'metrics · job-runner',
-      severityLabel: 'High',
-      severityColor: 'warning',
-    },
-    relevanceScore: 25,
-    suggestionsCount: 1,
-    onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
-  },
-};
-
-export const CustomMetrics: Story = {
+export const CustomMetadata: Story = {
   args: {
     event: {
       id: '4',
@@ -85,29 +62,21 @@ export const CustomMetrics: Story = {
       severityLabel: 'Critical',
       severityColor: 'danger',
     },
-    relevanceScore: 88,
-    suggestionsCount: 4,
-    metrics: [
-      {
-        subtitle: 'db.connections.active',
-        value: 450,
-        domainMax: 500,
-        extra: { value: '+90%' },
-      },
-      {
-        subtitle: 'db.queries.slow',
-        value: 125,
-        domainMax: 200,
-        extra: { value: '+45%' },
-      },
-    ],
+    detectedAtLabel: 'Detected Jan 18, 2025 @ 14:12:31',
+    criticalityLabel: 'High',
+    criticalityColor: 'danger',
+    impactLabel: 'High',
+    impactColor: 'danger',
+    recommendedActionLabel: 'Escalate',
+    recommendedActionIconType: 'warning',
+    confidenceLabel: 'High (95%)',
+    impactingLabel: '6 services',
     onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
+    onOpenDetails: action('onOpenDetails'),
   },
 };
 
-export const CustomRemediationSteps: Story = {
+export const CustomRecommendationSteps: Story = {
   args: {
     event: {
       id: '5',
@@ -116,17 +85,28 @@ export const CustomRemediationSteps: Story = {
       severityLabel: 'Critical',
       severityColor: 'danger',
     },
-    relevanceScore: 92,
-    suggestionsCount: 5,
-    remediationSteps: [
-      { id: '1', label: 'Check etcd cluster health' },
-      { id: '2', label: 'Review API server logs' },
-      { id: '3', label: 'Scale control plane nodes' },
-      { id: '4', label: 'Verify network policies' },
-      { id: '5', label: 'Update monitoring alerts' },
+    detectedAtLabel: 'Detected 3 minutes ago',
+    recommendationSteps: [
+      {
+        id: '1',
+        title: 'Check etcd cluster health',
+        description:
+          'Inspect etcd member health, leader election history, and disk fsync latency for signs of degraded consensus.',
+      },
+      {
+        id: '2',
+        title: 'Review API server logs',
+        description:
+          'Filter API server logs for elevated error rates and identify the noisiest clients responsible for the latency.',
+      },
+      {
+        id: '3',
+        title: 'Scale control plane nodes',
+        description:
+          'Add additional control plane replicas if CPU saturation is observed across the existing instances.',
+      },
     ],
     onRemediate: action('onRemediate'),
-    onRunInBackground: action('onRunInBackground'),
-    onOpenConversation: action('onOpenConversation'),
+    onOpenDetails: action('onOpenDetails'),
   },
 };

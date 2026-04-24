@@ -37,12 +37,17 @@ export function MetadataIconCard({
 }: MetadataIconCardProps) {
   const { euiTheme } = useEuiTheme();
 
+  const panelCss = css`
+    border-radius: 8px;
+  `;
+
   if (hideIcon) {
     return (
       <EuiPanel
         hasShadow={false}
         hasBorder
         paddingSize="s"
+        css={panelCss}
         data-test-subj="sigeventsOverviewMetadataIconCard"
       >
         <EuiTitle size="xxxs">
@@ -60,6 +65,7 @@ export function MetadataIconCard({
       hasShadow={false}
       hasBorder
       paddingSize="s"
+      css={panelCss}
       data-test-subj="sigeventsOverviewMetadataIconCard"
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

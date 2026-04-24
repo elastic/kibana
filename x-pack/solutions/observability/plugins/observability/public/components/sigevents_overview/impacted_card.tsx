@@ -28,7 +28,7 @@ export const ImpactedCard = ({
   const cardCss = css`
     background: ${euiTheme.colors.backgroundBaseDanger};
     border: ${euiTheme.border.thin};
-    border-radius: ${euiTheme.border.radius.medium};
+    border-radius: 8px;
 
     // EuiCard wraps its description in an EuiText <p>. Force danger styling
     // for both the title header row and the value description.
