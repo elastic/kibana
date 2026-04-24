@@ -20,45 +20,9 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
-import type {
-  InferenceInferenceEndpointInfo,
-  InferenceTaskType,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoint_helper';
 import { isProviderTechPreview } from '../../../../utils/reranker_helper';
-
-export const TASK_TYPE_TOOLTIPS: Partial<Record<InferenceTaskType, string>> = {
-  text_embedding: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.textEmbedding',
-    {
-      defaultMessage: 'Converts text into dense vector representations for semantic search',
-    }
-  ),
-  sparse_embedding: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.sparseEmbedding',
-    {
-      defaultMessage: 'Converts text into sparse vector representations for semantic search',
-    }
-  ),
-  rerank: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.rerank',
-    {
-      defaultMessage: 'Re-ranks search results by relevance',
-    }
-  ),
-  completion: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.completion',
-    {
-      defaultMessage: 'Generates text completions from a given input',
-    }
-  ),
-  chat_completion: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.chatCompletion',
-    {
-      defaultMessage: 'Generates conversational responses from a chat input',
-    }
-  ),
-};
 
 const COPIED_ICON_DISPLAY_DURATION_MS = 1000;
 
