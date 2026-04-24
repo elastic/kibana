@@ -11,11 +11,11 @@ import type { LineCounter, Scalar } from 'yaml';
 import { YAMLMap } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import {
-  getCustomPropertySuggestions,
-  type GetCustomPropertySuggestionsContext,
-} from './get_custom_property_suggestions';
+  getStepPropertySuggestions,
+  type GetStepPropertySuggestionsContext,
+} from './get_step_property_suggestions';
 
-describe('getCustomPropertySuggestions', () => {
+describe('getStepPropertySuggestions', () => {
   const createMockYamlLineCounter = (
     startPos = { line: 1, col: 1 },
     endPos = { line: 1, col: 10 }
@@ -26,8 +26,8 @@ describe('getCustomPropertySuggestions', () => {
   };
 
   const createMockContext = (
-    overrides?: Partial<GetCustomPropertySuggestionsContext>
-  ): GetCustomPropertySuggestionsContext => ({
+    overrides?: Partial<GetStepPropertySuggestionsContext>
+  ): GetStepPropertySuggestionsContext => ({
     focusedStepInfo: {
       stepId: '1',
       stepYamlNode: new YAMLMap(),
@@ -71,7 +71,7 @@ describe('getCustomPropertySuggestions', () => {
         ])
       );
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toHaveLength(2);
       expect(suggestions.map((s) => s.label)).toEqual(['custom-label', 'custom-label-2']);
@@ -87,7 +87,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      await getCustomPropertySuggestions(context, getPropertyHandler);
+      await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(getPropertyHandler).toHaveBeenCalledWith('custom-type', 'config', 'my-config-key');
     });
@@ -102,7 +102,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      await getCustomPropertySuggestions(context, getPropertyHandler);
+      await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(getPropertyHandler).toHaveBeenCalledWith('custom-type', 'input', 'my-input-key');
     });
@@ -118,7 +118,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler(searchMock);
 
-      await getCustomPropertySuggestions(context, getPropertyHandler);
+      await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(searchMock).toHaveBeenCalledWith('partial-input', {
         stepType: 'custom-type',
@@ -134,7 +134,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext({ focusedStepInfo: null });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
       expect(getPropertyHandler).not.toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
       expect(getPropertyHandler).not.toHaveBeenCalled();
@@ -172,7 +172,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
@@ -181,7 +181,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext({ focusedYamlPair: null });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
       expect(getPropertyHandler).not.toHaveBeenCalled();
@@ -197,7 +197,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
@@ -212,7 +212,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
@@ -221,7 +221,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext({ yamlLineCounter: null as unknown as LineCounter });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
@@ -236,7 +236,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
@@ -247,7 +247,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(null);
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
@@ -256,7 +256,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext();
       const getPropertyHandler = jest.fn().mockReturnValue(null);
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
@@ -269,7 +269,7 @@ describe('getCustomPropertySuggestions', () => {
         },
       });
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
@@ -278,7 +278,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(jest.fn().mockResolvedValue([]));
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
@@ -295,7 +295,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      await getCustomPropertySuggestions(context, getPropertyHandler);
+      await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(getPropertyHandler).toHaveBeenCalledWith('custom-type', 'config', 'connector-id');
     });
@@ -310,7 +310,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      await getCustomPropertySuggestions(context, getPropertyHandler);
+      await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(getPropertyHandler).toHaveBeenCalledWith('custom-type', 'input', 'message');
     });
@@ -325,7 +325,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      await getCustomPropertySuggestions(context, getPropertyHandler);
+      await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(getPropertyHandler).toHaveBeenCalledWith(
         'custom-type',
@@ -345,7 +345,7 @@ describe('getCustomPropertySuggestions', () => {
         ])
       );
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       suggestions.forEach((suggestion) => {
         expect(suggestion.kind).toBe(monaco.languages.CompletionItemKind.Value);
@@ -358,7 +358,7 @@ describe('getCustomPropertySuggestions', () => {
         jest.fn().mockResolvedValue([{ label: 'Display Label', value: 'actual-insert-value' }])
       );
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions[0].insertText).toBe('actual-insert-value');
     });
@@ -373,7 +373,7 @@ describe('getCustomPropertySuggestions', () => {
           ])
       );
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions[0].detail).toBe('This is a description');
     });
@@ -388,7 +388,7 @@ describe('getCustomPropertySuggestions', () => {
           ])
       );
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions[0].documentation).toBe('Extended documentation here');
     });
@@ -399,7 +399,7 @@ describe('getCustomPropertySuggestions', () => {
         jest.fn().mockResolvedValue([{ label: 'minimal', value: 'min-val' }])
       );
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions[0].detail).toBeUndefined();
       expect(suggestions[0].documentation).toBeUndefined();
@@ -412,7 +412,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext({ yamlLineCounter });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions[0].range).toEqual({
         startLineNumber: 5,
@@ -427,7 +427,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext({ yamlLineCounter });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions[0].range).toEqual({
         startLineNumber: 3,
@@ -450,7 +450,7 @@ describe('getCustomPropertySuggestions', () => {
       });
       const getPropertyHandler = createMockGetPropertyHandler();
 
-      await getCustomPropertySuggestions(context, getPropertyHandler);
+      await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(linePosMock).toHaveBeenCalledWith(100); // startOffset
       expect(linePosMock).toHaveBeenCalledWith(150); // endOffset
@@ -468,7 +468,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(searchMock);
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toHaveLength(1);
       expect(suggestions[0].label).toBe('async-option');
@@ -479,7 +479,7 @@ describe('getCustomPropertySuggestions', () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(searchMock);
 
-      await expect(getCustomPropertySuggestions(context, getPropertyHandler)).rejects.toThrow(
+      await expect(getStepPropertySuggestions(context, getPropertyHandler)).rejects.toThrow(
         'Search failed'
       );
     });
@@ -497,7 +497,7 @@ describe('getCustomPropertySuggestions', () => {
         jest.fn().mockResolvedValue(manyCompletions)
       );
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toHaveLength(100);
       expect(suggestions[0].label).toBe('option-0');
@@ -515,7 +515,7 @@ describe('getCustomPropertySuggestions', () => {
         jest.fn().mockResolvedValue(orderedCompletions)
       );
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions.map((s) => s.label)).toEqual(['zebra', 'apple', 'mango']);
     });
@@ -536,7 +536,7 @@ describe('getCustomPropertySuggestions', () => {
           propInfos: {},
         },
       });
-      await getCustomPropertySuggestions(slackContext, getPropertyHandler);
+      await getStepPropertySuggestions(slackContext, getPropertyHandler);
       expect(getPropertyHandler).toHaveBeenCalledWith('slack', 'config', 'custom-id');
 
       getPropertyHandler.mockClear();
@@ -552,7 +552,7 @@ describe('getCustomPropertySuggestions', () => {
           propInfos: {},
         },
       });
-      await getCustomPropertySuggestions(esContext, getPropertyHandler);
+      await getStepPropertySuggestions(esContext, getPropertyHandler);
       expect(getPropertyHandler).toHaveBeenCalledWith('elasticsearch.index', 'config', 'custom-id');
     });
   });

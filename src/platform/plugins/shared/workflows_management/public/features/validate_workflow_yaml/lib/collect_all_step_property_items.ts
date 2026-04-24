@@ -8,33 +8,25 @@
  */
 
 import type { LineCounter } from 'yaml';
-import {
-  isBuiltInStepProperty,
-  isBuiltInStepType,
-  type SelectionContext,
-  type StepPropertyHandler,
-} from '@kbn/workflows';
+import { isBuiltInStepProperty, isBuiltInStepType, type SelectionContext } from '@kbn/workflows';
 import type { WorkflowLookup } from '../../../entities/workflows/store';
 import {
   buildStepSelectionValues,
   getValueFromValueNode,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { CustomPropertyItem } from '../model/types';
+import type { GetStepPropertyHandler } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/step_property/get_step_property_suggestions';
+import type { StepPropertyItem } from '../model/types';
 
-export function collectAllCustomPropertyItems(
+export function collectAllStepPropertyItems(
   workflowLookup: WorkflowLookup,
   lineCounter: LineCounter,
-  getPropertyHandler: (
-    stepType: string,
-    scope: 'config' | 'input',
-    key: string
-  ) => StepPropertyHandler | null
-): CustomPropertyItem[] {
-  const customPropertyItems: CustomPropertyItem[] = [];
+  getPropertyHandler: GetStepPropertyHandler
+): StepPropertyItem[] {
+  const stepPropertyItems: StepPropertyItem[] = [];
 
   const steps = Object.values(workflowLookup.steps);
   for (const step of steps) {
-    // Only collect custom properties for non-built-in step types
+    // Skip built-in step types (flow control steps: if, foreach, while, wait, etc.)
     if (!isBuiltInStepType(step.stepType)) {
       for (const [propKey, prop] of Object.entries(step.propInfos)) {
         if (
@@ -59,14 +51,14 @@ export function collectAllCustomPropertyItems(
               propertyKey: key,
               values: contextValues,
             };
-            customPropertyItems.push({
+            stepPropertyItems.push({
               id: `${step.stepId}-${key}-${startPos.line}-${startPos.col}-${endPos.line}-${endPos.col}`,
               stepId: step.stepId,
               startLineNumber: startPos.line,
               startColumn: startPos.col,
               endLineNumber: endPos.line,
               endColumn: endPos.col,
-              type: 'custom-property',
+              type: 'step-property',
               scope,
               stepType: step.stepType,
               propertyKey: key,
@@ -81,5 +73,5 @@ export function collectAllCustomPropertyItems(
       }
     }
   }
-  return customPropertyItems;
+  return stepPropertyItems;
 }

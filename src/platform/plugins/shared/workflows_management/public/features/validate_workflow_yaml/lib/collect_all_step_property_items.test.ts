@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { collectAllCustomPropertyItems } from './collect_all_custom_property_items';
+import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 
-describe('collectAllCustomPropertyItems', () => {
-  it('should collect zero custom property items from steps if no handlers exist in schemas', () => {
+describe('collectAllStepPropertyItems', () => {
+  it('should collect zero step property items from steps if no handlers exist in schemas', () => {
     const yaml = `
 name: test-workflow
 steps:
@@ -24,14 +24,14 @@ steps:
     const getPropertyHandler = jest.fn();
     const computedData = performComputation(yaml);
     const { workflowLookup, yamlLineCounter } = computedData;
-    const customPropertyItems = collectAllCustomPropertyItems(
+    const stepPropertyItems = collectAllStepPropertyItems(
       workflowLookup!,
       yamlLineCounter!,
       getPropertyHandler
     );
-    expect(customPropertyItems).toHaveLength(0);
+    expect(stepPropertyItems).toHaveLength(0);
   });
-  it('should collect custom property items at step level from steps if handlers exist in schemas', () => {
+  it('should collect step property items at step level from steps if handlers exist in schemas', () => {
     const yaml = `
 name: test-workflow
 steps:
@@ -56,13 +56,13 @@ steps:
         return null;
       }
     );
-    const customPropertyItems = collectAllCustomPropertyItems(
+    const stepPropertyItems = collectAllStepPropertyItems(
       workflowLookup!,
       yamlLineCounter!,
       getPropertyHandler
     );
-    expect(customPropertyItems).toHaveLength(1);
-    expect(customPropertyItems[0]).toMatchObject({
+    expect(stepPropertyItems).toHaveLength(1);
+    expect(stepPropertyItems[0]).toMatchObject({
       propertyKey: 'agent-id',
       propertyValue: 'great-agent',
       stepType: 'run-agent',
@@ -72,7 +72,7 @@ steps:
       key: 'agent-id',
     });
   });
-  it('should collect custom property items at "with" level if handlers exist in schemas', () => {
+  it('should collect step property items at "with" level if handlers exist in schemas', () => {
     const yaml = `
 name: test-workflow
 steps:
@@ -97,13 +97,13 @@ steps:
         return null;
       }
     );
-    const customPropertyItems = collectAllCustomPropertyItems(
+    const stepPropertyItems = collectAllStepPropertyItems(
       workflowLookup!,
       yamlLineCounter!,
       getPropertyHandler
     );
-    expect(customPropertyItems).toHaveLength(1);
-    expect(customPropertyItems[0]).toMatchObject({
+    expect(stepPropertyItems).toHaveLength(1);
+    expect(stepPropertyItems[0]).toMatchObject({
       propertyKey: 'debug',
       propertyValue: true,
       stepType: 'run-agent',
@@ -113,7 +113,7 @@ steps:
       key: 'debug',
     });
   });
-  it('should collect nested custom property items at both config and input level', () => {
+  it('should collect nested step property items at both config and input level', () => {
     const yaml = `
 name: test-workflow
 steps:
@@ -149,13 +149,13 @@ steps:
         return null;
       }
     );
-    const customPropertyItems = collectAllCustomPropertyItems(
+    const stepPropertyItems = collectAllStepPropertyItems(
       workflowLookup!,
       yamlLineCounter!,
       getPropertyHandler
     );
-    expect(customPropertyItems).toHaveLength(2);
-    expect(customPropertyItems[0]).toMatchObject({
+    expect(stepPropertyItems).toHaveLength(2);
+    expect(stepPropertyItems[0]).toMatchObject({
       propertyKey: 'agent-config.agent.id',
       propertyValue: 'great-agent',
       stepType: 'run-agent',
@@ -164,7 +164,7 @@ steps:
       yamlPath: ['agent-config', 'agent', 'id'],
       key: 'id',
     });
-    expect(customPropertyItems[1]).toMatchObject({
+    expect(stepPropertyItems[1]).toMatchObject({
       propertyKey: 'obj.message',
       propertyValue: 'Hello, world!',
       stepType: 'run-agent',
@@ -197,12 +197,12 @@ steps:
         return null;
       }
     );
-    const customPropertyItems = collectAllCustomPropertyItems(
+    const stepPropertyItems = collectAllStepPropertyItems(
       workflowLookup!,
       yamlLineCounter!,
       getPropertyHandler
     );
-    expect(customPropertyItems[0].context.values).toEqual({ config: {}, input: {} });
+    expect(stepPropertyItems[0].context.values).toEqual({ config: {}, input: {} });
   });
 
   it('should pass filtered context.values when dependsOnValues is set', () => {
@@ -231,15 +231,55 @@ steps:
         return null;
       }
     );
-    const customPropertyItems = collectAllCustomPropertyItems(
+    const stepPropertyItems = collectAllStepPropertyItems(
       workflowLookup!,
       yamlLineCounter!,
       getPropertyHandler
     );
-    expect(customPropertyItems).toHaveLength(1);
-    expect(customPropertyItems[0].context.values).toEqual({
+    expect(stepPropertyItems).toHaveLength(1);
+    expect(stepPropertyItems[0].context.values).toEqual({
       config: { other: 'ignored', proxy: { ssl: true } },
       input: {},
+    });
+  });
+
+  it('should collect step property items for internal steps like elasticsearch.search when resolver returns a handler', () => {
+    const yaml = `
+name: test-workflow
+steps:
+  - name: es-search
+    type: elasticsearch.search
+    with:
+      index: my-index
+`;
+    const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
+    const selectionHandler = {
+      search: jest.fn(),
+      resolve: jest.fn(),
+      getDetails: jest.fn(),
+    };
+    const getPropertyHandler = jest.fn(
+      (stepType: string, scope: 'config' | 'input', key: string) => {
+        if (stepType === 'elasticsearch.search' && scope === 'input' && key === 'index') {
+          return { selection: selectionHandler };
+        }
+        return null;
+      }
+    );
+    const esStepPropertyItems = collectAllStepPropertyItems(
+      workflowLookup!,
+      yamlLineCounter!,
+      getPropertyHandler
+    );
+    expect(esStepPropertyItems).toHaveLength(1);
+    expect(esStepPropertyItems[0]).toMatchObject({
+      propertyKey: 'index',
+      propertyValue: 'my-index',
+      stepType: 'elasticsearch.search',
+      scope: 'input',
+      selectionHandler,
+      yamlPath: ['with', 'index'],
+      key: 'index',
     });
   });
 });

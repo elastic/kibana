@@ -13,7 +13,7 @@ import type {
   SelectionOption,
   StepSelectionValues,
 } from '@kbn/workflows/types/v1';
-import type { CustomPropertyItem } from '../../features/validate_workflow_yaml/model/types';
+import type { StepPropertyItem } from '../../features/validate_workflow_yaml/model/types';
 
 const searchOptionsCache = new Map<string, SelectionOption[]>();
 
@@ -86,14 +86,14 @@ function stableSerializePropertyValue(value: unknown): string {
   return safeJsonStringify(value) ?? String(value);
 }
 
-export function getCustomPropertyValidationOutcomeCacheKey(item: CustomPropertyItem): string {
+export function getStepPropertyValidationOutcomeCacheKey(item: StepPropertyItem): string {
   const { stepType, scope, propertyKey, values } = item.context;
   const fp = getFingerprintFromValues(values) ?? '';
   const valueKey = stableSerializePropertyValue(item.propertyValue);
   return `${item.stepId}\0${stepType}\0${scope}\0${propertyKey}\0${fp}\0${valueKey}`;
 }
 
-export function getCachedCustomPropertyValidationOutcome(
+export function getCachedStepPropertyValidationOutcome(
   key: string
 ): { resolvedOption: SelectionOption | null; details: SelectionDetails } | null {
   const cached = validationOutcomeCache.get(key);
@@ -107,7 +107,7 @@ export function getCachedCustomPropertyValidationOutcome(
   return { resolvedOption: cached.resolvedOption, details: cached.details };
 }
 
-export function setCachedCustomPropertyValidationOutcome(
+export function setCachedStepPropertyValidationOutcome(
   key: string,
   resolvedOption: SelectionOption | null,
   details: SelectionDetails
@@ -115,7 +115,7 @@ export function setCachedCustomPropertyValidationOutcome(
   validationOutcomeCache.set(key, { timestamp: Date.now(), resolvedOption, details });
 }
 
-export function clearCustomPropertyValidationOutcomeCache(): void {
+export function clearStepPropertyValidationOutcomeCache(): void {
   validationOutcomeCache.clear();
 }
 

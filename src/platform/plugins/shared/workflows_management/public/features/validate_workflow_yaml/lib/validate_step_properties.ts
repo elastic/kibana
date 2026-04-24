@@ -13,24 +13,24 @@ import type { z } from '@kbn/zod/v4';
 import { isTemplateReference } from './is_template_reference';
 import { stepSchemas } from '../../../../common/step_schemas';
 import {
-  getCachedCustomPropertyValidationOutcome,
   getCachedSearchOption,
-  getCustomPropertyValidationOutcomeCacheKey,
-  setCachedCustomPropertyValidationOutcome,
-} from '../../../shared/lib/custom_property_selection_cache';
-import type { CustomPropertyItem, CustomPropertyValidationResult } from '../model/types';
+  getCachedStepPropertyValidationOutcome,
+  getStepPropertyValidationOutcomeCacheKey,
+  setCachedStepPropertyValidationOutcome,
+} from '../../../shared/lib/step_property_selection_cache';
+import type { StepPropertyItem, StepPropertyValidationResult } from '../model/types';
 
-export { clearCustomPropertyValidationOutcomeCache } from '../../../shared/lib/custom_property_selection_cache';
+export { clearStepPropertyValidationOutcomeCache } from '../../../shared/lib/step_property_selection_cache';
 
 function buildValidationResult(
-  customPropertyItem: CustomPropertyItem,
+  stepPropertyItem: StepPropertyItem,
   resolvedOption: SelectionOption | null,
   details: SelectionDetails
-): CustomPropertyValidationResult {
+): StepPropertyValidationResult {
   const hasError =
     !resolvedOption &&
-    customPropertyItem.propertyValue !== null &&
-    customPropertyItem.propertyValue !== undefined;
+    stepPropertyItem.propertyValue !== null &&
+    stepPropertyItem.propertyValue !== undefined;
 
   const hoverParts: string[] = [];
   if (details.message) {
@@ -41,36 +41,36 @@ function buildValidationResult(
   }
   const hoverMessage = hoverParts.length > 0 ? hoverParts.join('\n\n') : null;
 
-  const beforeMessage = resolvedOption ? `✓ ${resolvedOption.label}` : undefined;
+  const beforeMessage = resolvedOption?.label ? `✓ ${resolvedOption.label}` : undefined;
 
   if (hasError) {
     return {
-      id: customPropertyItem.id,
+      id: stepPropertyItem.id,
       severity: 'error' as const,
       message: details.message,
       beforeMessage,
       afterMessage: null,
       hoverMessage,
-      startLineNumber: customPropertyItem.startLineNumber,
-      startColumn: customPropertyItem.startColumn,
-      endLineNumber: customPropertyItem.endLineNumber,
-      endColumn: customPropertyItem.endColumn,
-      owner: 'custom-property-validation' as const,
+      startLineNumber: stepPropertyItem.startLineNumber,
+      startColumn: stepPropertyItem.startColumn,
+      endLineNumber: stepPropertyItem.endLineNumber,
+      endColumn: stepPropertyItem.endColumn,
+      owner: 'step-property-validation' as const,
     };
   }
 
   return {
-    id: customPropertyItem.id,
+    id: stepPropertyItem.id,
     severity: null,
     message: null,
     beforeMessage,
     afterMessage: null,
     hoverMessage,
-    startLineNumber: customPropertyItem.startLineNumber,
-    startColumn: customPropertyItem.startColumn,
-    endLineNumber: customPropertyItem.endLineNumber,
-    endColumn: customPropertyItem.endColumn,
-    owner: 'custom-property-validation' as const,
+    startLineNumber: stepPropertyItem.startLineNumber,
+    startColumn: stepPropertyItem.startColumn,
+    endLineNumber: stepPropertyItem.endLineNumber,
+    endColumn: stepPropertyItem.endColumn,
+    owner: 'step-property-validation' as const,
   };
 }
 
@@ -93,7 +93,7 @@ function getPropertySchema(
   return result.schema;
 }
 
-function shouldValidateProperty(item: CustomPropertyItem): boolean {
+function shouldValidateProperty(item: StepPropertyItem): boolean {
   const { propertyValue, context } = item;
   const { stepType, scope, propertyKey } = context;
 
@@ -111,22 +111,22 @@ function shouldValidateProperty(item: CustomPropertyItem): boolean {
   return validationResult.success;
 }
 
-export async function validateCustomProperties(
-  customPropertyItems: CustomPropertyItem[]
-): Promise<CustomPropertyValidationResult[]> {
-  const validationResultsPromises: Promise<CustomPropertyValidationResult>[] = [];
-  for (const customPropertyItem of customPropertyItems) {
-    if (shouldValidateProperty(customPropertyItem)) {
-      const { selectionHandler, propertyValue, context } = customPropertyItem;
+export async function validateStepProperties(
+  stepPropertyItems: StepPropertyItem[]
+): Promise<StepPropertyValidationResult[]> {
+  const validationResultsPromises: Promise<StepPropertyValidationResult>[] = [];
+  for (const stepPropertyItem of stepPropertyItems) {
+    if (shouldValidateProperty(stepPropertyItem)) {
+      const { selectionHandler, propertyValue, context } = stepPropertyItem;
       const { stepType, scope, propertyKey } = context;
 
       validationResultsPromises.push(
-        (async (): Promise<CustomPropertyValidationResult> => {
-          const outcomeKey = getCustomPropertyValidationOutcomeCacheKey(customPropertyItem);
-          const cachedOutcome = getCachedCustomPropertyValidationOutcome(outcomeKey);
+        (async (): Promise<StepPropertyValidationResult> => {
+          const outcomeKey = getStepPropertyValidationOutcomeCacheKey(stepPropertyItem);
+          const cachedOutcome = getCachedStepPropertyValidationOutcome(outcomeKey);
           if (cachedOutcome) {
             return buildValidationResult(
-              customPropertyItem,
+              stepPropertyItem,
               cachedOutcome.resolvedOption,
               cachedOutcome.details
             );
@@ -146,9 +146,9 @@ export async function validateCustomProperties(
           const input = String(propertyValue);
           const details = await selectionHandler.getDetails(input, context, resolvedOption);
 
-          setCachedCustomPropertyValidationOutcome(outcomeKey, resolvedOption, details);
+          setCachedStepPropertyValidationOutcome(outcomeKey, resolvedOption, details);
 
-          return buildValidationResult(customPropertyItem, resolvedOption, details);
+          return buildValidationResult(stepPropertyItem, resolvedOption, details);
         })()
       );
     }

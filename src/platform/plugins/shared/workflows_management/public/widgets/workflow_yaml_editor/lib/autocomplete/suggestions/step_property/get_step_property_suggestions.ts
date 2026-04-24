@@ -21,21 +21,23 @@ import {
   buildStepSelectionValues,
   getValueFromValueNode,
 } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import { cacheSearchOptions } from '../../../../../../shared/lib/custom_property_selection_cache';
+import { cacheSearchOptions } from '../../../../../../shared/lib/step_property_selection_cache';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
-export type GetCustomPropertySuggestionsContext = Pick<
+export type GetStepPropertyHandler = (
+  stepType: string,
+  scope: 'config' | 'input',
+  key: string
+) => StepPropertyHandler | null;
+
+export type GetStepPropertySuggestionsContext = Pick<
   AutocompleteContext,
   'focusedStepInfo' | 'focusedYamlPair' | 'yamlLineCounter'
 >;
 
-export async function getCustomPropertySuggestions(
-  autocompleteContext: GetCustomPropertySuggestionsContext,
-  getPropertyHandler: (
-    stepType: string,
-    scope: 'config' | 'input',
-    key: string
-  ) => StepPropertyHandler | null
+export async function getStepPropertySuggestions(
+  autocompleteContext: GetStepPropertySuggestionsContext,
+  getPropertyHandler: GetStepPropertyHandler
 ): Promise<monaco.languages.CompletionItem[]> {
   const { focusedStepInfo, focusedYamlPair, yamlLineCounter } = autocompleteContext;
 
@@ -97,7 +99,7 @@ export async function getCustomPropertySuggestions(
 
   return options.map(
     (option): monaco.languages.CompletionItem => ({
-      label: option.label,
+      label: option.label ?? String(option.value),
       kind: monaco.languages.CompletionItemKind.Value,
       insertText: String(option.value),
       range: replaceRange,

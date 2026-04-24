@@ -11,14 +11,14 @@ import type { SelectionDetails, SelectionOption } from '@kbn/workflows/types/v1'
 import {
   cacheSearchOptions,
   clearCache,
-  getCachedCustomPropertyValidationOutcome,
   getCachedSearchOption,
-  getCustomPropertyValidationOutcomeCacheKey,
-  setCachedCustomPropertyValidationOutcome,
-} from './custom_property_selection_cache';
-import type { CustomPropertyItem } from '../../features/validate_workflow_yaml/model/types';
+  getCachedStepPropertyValidationOutcome,
+  getStepPropertyValidationOutcomeCacheKey,
+  setCachedStepPropertyValidationOutcome,
+} from './step_property_selection_cache';
+import type { StepPropertyItem } from '../../features/validate_workflow_yaml/model/types';
 
-describe('custom_property_selection_cache', () => {
+describe('step_property_selection_cache', () => {
   const mockOption1: SelectionOption = {
     value: 'proxy-1',
     label: 'Production Proxy',
@@ -51,7 +51,7 @@ describe('custom_property_selection_cache', () => {
     jest.clearAllMocks();
   });
 
-  function makeItem(overrides: Partial<CustomPropertyItem> = {}): CustomPropertyItem {
+  function makeItem(overrides: Partial<StepPropertyItem> = {}): StepPropertyItem {
     return {
       id: 'item-1',
       stepId: 'step-a',
@@ -61,7 +61,7 @@ describe('custom_property_selection_cache', () => {
       endColumn: 1,
       yamlPath: ['x'],
       key: 'x',
-      selectionHandler: {} as CustomPropertyItem['selectionHandler'],
+      selectionHandler: {} as StepPropertyItem['selectionHandler'],
       context: {
         stepType: 'step.type',
         scope: 'config',
@@ -72,12 +72,12 @@ describe('custom_property_selection_cache', () => {
       propertyKey: 'proxy.id',
       stepType: 'step.type',
       scope: 'config',
-      type: 'custom-property',
+      type: 'step-property',
       ...overrides,
     };
   }
 
-  describe('getCustomPropertyValidationOutcomeCacheKey', () => {
+  describe('getStepPropertyValidationOutcomeCacheKey', () => {
     it('should include step id, context fields, and serialized value', () => {
       const item = makeItem({
         stepId: 's1',
@@ -89,7 +89,7 @@ describe('custom_property_selection_cache', () => {
           values: { config: { a: 1 }, input: {} },
         },
       });
-      const key = getCustomPropertyValidationOutcomeCacheKey(item);
+      const key = getStepPropertyValidationOutcomeCacheKey(item);
       expect(key).toContain('s1');
       expect(key).toContain('t');
       expect(key).toContain('input');
@@ -99,38 +99,38 @@ describe('custom_property_selection_cache', () => {
     });
 
     it('should produce different keys for different property values', () => {
-      const a = getCustomPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'a' }));
-      const b = getCustomPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'b' }));
+      const a = getStepPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'a' }));
+      const b = getStepPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'b' }));
       expect(a).not.toBe(b);
     });
   });
 
-  describe('getCachedCustomPropertyValidationOutcome and setCachedCustomPropertyValidationOutcome', () => {
+  describe('getCachedStepPropertyValidationOutcome and setCachedStepPropertyValidationOutcome', () => {
     it('should store and retrieve validation outcome', () => {
       const key = 'k1';
-      setCachedCustomPropertyValidationOutcome(key, mockOption1, mockDetails);
-      expect(getCachedCustomPropertyValidationOutcome(key)).toEqual({
+      setCachedStepPropertyValidationOutcome(key, mockOption1, mockDetails);
+      expect(getCachedStepPropertyValidationOutcome(key)).toEqual({
         resolvedOption: mockOption1,
         details: mockDetails,
       });
     });
 
     it('should return null for missing key', () => {
-      expect(getCachedCustomPropertyValidationOutcome('missing')).toBeNull();
+      expect(getCachedStepPropertyValidationOutcome('missing')).toBeNull();
     });
 
     it('should expire after TTL', () => {
       const key = 'k-exp';
-      setCachedCustomPropertyValidationOutcome(key, null, mockDetails);
+      setCachedStepPropertyValidationOutcome(key, null, mockDetails);
       jest.advanceTimersByTime(30 * 1000 + 1);
-      expect(getCachedCustomPropertyValidationOutcome(key)).toBeNull();
+      expect(getCachedStepPropertyValidationOutcome(key)).toBeNull();
     });
 
     it('should return outcome within TTL', () => {
       const key = 'k-ok';
-      setCachedCustomPropertyValidationOutcome(key, mockOption1, mockDetails);
+      setCachedStepPropertyValidationOutcome(key, mockOption1, mockDetails);
       jest.advanceTimersByTime(30 * 1000 - 1);
-      expect(getCachedCustomPropertyValidationOutcome(key)?.resolvedOption).toEqual(mockOption1);
+      expect(getCachedStepPropertyValidationOutcome(key)?.resolvedOption).toEqual(mockOption1);
     });
   });
 

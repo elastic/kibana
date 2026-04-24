@@ -12,12 +12,12 @@ import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_p
 import { z } from '@kbn/zod/v4';
 
 import {
-  clearCustomPropertyValidationOutcomeCache,
-  validateCustomProperties,
-} from './validate_custom_properties';
+  clearStepPropertyValidationOutcomeCache,
+  validateStepProperties,
+} from './validate_step_properties';
 import { stepSchemas } from '../../../../common/step_schemas';
-import * as customPropertySelectionCache from '../../../shared/lib/custom_property_selection_cache';
-import type { CustomPropertyItem } from '../model/types';
+import * as stepPropertySelectionCache from '../../../shared/lib/step_property_selection_cache';
+import type { StepPropertyItem } from '../model/types';
 
 // Mock the dependencies
 jest.mock('../../../../common/step_schemas', () => ({
@@ -30,10 +30,10 @@ jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path', () => ({
   getSchemaAtPath: jest.fn(),
 }));
 
-jest.mock('../../../shared/lib/custom_property_selection_cache', () => {
+jest.mock('../../../shared/lib/step_property_selection_cache', () => {
   const actual = jest.requireActual<
-    typeof import('../../../shared/lib/custom_property_selection_cache')
-  >('../../../shared/lib/custom_property_selection_cache');
+    typeof import('../../../shared/lib/step_property_selection_cache')
+  >('../../../shared/lib/step_property_selection_cache');
   return {
     ...actual,
     getCachedSearchOption: jest.fn(actual.getCachedSearchOption),
@@ -47,17 +47,17 @@ const mockGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache as jes
 >;
 const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
 const mockGetCachedSearchOption =
-  customPropertySelectionCache.getCachedSearchOption as jest.MockedFunction<
-    typeof customPropertySelectionCache.getCachedSearchOption
+  stepPropertySelectionCache.getCachedSearchOption as jest.MockedFunction<
+    typeof stepPropertySelectionCache.getCachedSearchOption
   >;
 
-describe('validateCustomProperties', () => {
+describe('validateStepProperties', () => {
   beforeEach(() => {
-    clearCustomPropertyValidationOutcomeCache();
+    clearStepPropertyValidationOutcomeCache();
     jest.clearAllMocks();
     const actual = jest.requireActual<
-      typeof import('../../../shared/lib/custom_property_selection_cache')
-    >('../../../shared/lib/custom_property_selection_cache');
+      typeof import('../../../shared/lib/step_property_selection_cache')
+    >('../../../shared/lib/step_property_selection_cache');
     mockGetCachedSearchOption.mockImplementation(actual.getCachedSearchOption);
   });
 
@@ -78,7 +78,7 @@ describe('validateCustomProperties', () => {
     mockGetAllConnectorsMapCache.mockReturnValue(new Map([['1', mockConnector as any]]));
     mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: '1' });
 
-    const customPropertyItems: CustomPropertyItem[] = [
+    const customPropertyItems: StepPropertyItem[] = [
       {
         id: '1',
         stepId: 'step-1',
@@ -99,11 +99,11 @@ describe('validateCustomProperties', () => {
         propertyKey: '1',
         stepType: '1',
         scope: 'config',
-        type: 'custom-property',
+        type: 'step-property',
       },
     ];
 
-    const validationResults = await validateCustomProperties(customPropertyItems);
+    const validationResults = await validateStepProperties(customPropertyItems);
 
     expect(selectionHandler.resolve).toHaveBeenCalledWith('1', {
       stepType: '1',
@@ -153,7 +153,7 @@ describe('validateCustomProperties', () => {
     mockGetAllConnectorsMapCache.mockReturnValue(new Map([['2', mockConnector as any]]));
     mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: '2' });
 
-    const customPropertyItems: CustomPropertyItem[] = [
+    const customPropertyItems: StepPropertyItem[] = [
       {
         id: '2',
         stepId: 'step-2',
@@ -174,11 +174,11 @@ describe('validateCustomProperties', () => {
         propertyKey: '2',
         stepType: '2',
         scope: 'input',
-        type: 'custom-property',
+        type: 'step-property',
       },
     ];
 
-    const validationResults = await validateCustomProperties(customPropertyItems);
+    const validationResults = await validateStepProperties(customPropertyItems);
 
     expect(selectionHandler.resolve).toHaveBeenCalledWith('2', {
       stepType: '2',
@@ -230,7 +230,7 @@ describe('validateCustomProperties', () => {
     mockGetAllConnectorsMapCache.mockReturnValue(new Map([['3', mockConnector as any]]));
     mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: '3' });
 
-    const customPropertyItems: CustomPropertyItem[] = [
+    const customPropertyItems: StepPropertyItem[] = [
       {
         id: '3',
         stepId: 'step-3',
@@ -251,11 +251,11 @@ describe('validateCustomProperties', () => {
         propertyKey: '3',
         stepType: '3',
         scope: 'config',
-        type: 'custom-property',
+        type: 'step-property',
       },
     ];
 
-    const validationResults = await validateCustomProperties(customPropertyItems);
+    const validationResults = await validateStepProperties(customPropertyItems);
 
     expect(selectionHandler.resolve).not.toHaveBeenCalled();
     expect(selectionHandler.getDetails).toHaveBeenCalledWith(
@@ -292,7 +292,7 @@ describe('validateCustomProperties', () => {
     mockGetAllConnectorsMapCache.mockReturnValue(new Map([['5', mockConnector as any]]));
     mockGetSchemaAtPath.mockReturnValue({ schema: z.number(), scopedToPath: '5' });
 
-    const customPropertyItems: CustomPropertyItem[] = [
+    const customPropertyItems: StepPropertyItem[] = [
       {
         id: '5',
         stepId: 'step-5',
@@ -313,11 +313,11 @@ describe('validateCustomProperties', () => {
         propertyKey: '5',
         stepType: '5',
         scope: 'config',
-        type: 'custom-property',
+        type: 'step-property',
       },
     ];
 
-    const validationResults = await validateCustomProperties(customPropertyItems);
+    const validationResults = await validateStepProperties(customPropertyItems);
 
     expect(selectionHandler.resolve).not.toHaveBeenCalled();
     expect(selectionHandler.getDetails).not.toHaveBeenCalled();
@@ -338,7 +338,7 @@ describe('validateCustomProperties', () => {
     mockGetAllConnectorsMapCache.mockReturnValue(new Map([['6a', mockConnector as any]]));
     mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'prop' });
 
-    const customPropertyItems: CustomPropertyItem[] = [
+    const customPropertyItems: StepPropertyItem[] = [
       {
         id: '6a',
         stepId: 'step-6a',
@@ -359,11 +359,11 @@ describe('validateCustomProperties', () => {
         propertyKey: 'prop',
         stepType: '6a',
         scope: 'config',
-        type: 'custom-property',
+        type: 'step-property',
       },
     ];
 
-    const validationResults = await validateCustomProperties(customPropertyItems);
+    const validationResults = await validateStepProperties(customPropertyItems);
 
     expect(selectionHandler.resolve).not.toHaveBeenCalled();
     expect(selectionHandler.getDetails).not.toHaveBeenCalled();
@@ -379,7 +379,7 @@ describe('validateCustomProperties', () => {
 
     mockGetAllConnectorsMapCache.mockReturnValue(new Map());
 
-    const customPropertyItems: CustomPropertyItem[] = [
+    const customPropertyItems: StepPropertyItem[] = [
       {
         id: '6',
         stepId: 'step-6',
@@ -400,11 +400,11 @@ describe('validateCustomProperties', () => {
         propertyKey: '6',
         stepType: '6',
         scope: 'config',
-        type: 'custom-property',
+        type: 'step-property',
       },
     ];
 
-    const validationResults = await validateCustomProperties(customPropertyItems);
+    const validationResults = await validateStepProperties(customPropertyItems);
 
     expect(selectionHandler.resolve).not.toHaveBeenCalled();
     expect(selectionHandler.getDetails).not.toHaveBeenCalled();
@@ -450,7 +450,7 @@ describe('validateCustomProperties', () => {
       .mockReturnValueOnce({ schema: z.string(), scopedToPath: '1' })
       .mockReturnValueOnce({ schema: z.string(), scopedToPath: '2' });
 
-    const customPropertyItems: CustomPropertyItem[] = [
+    const customPropertyItems: StepPropertyItem[] = [
       {
         id: '1',
         stepId: 'multi-step-a',
@@ -471,7 +471,7 @@ describe('validateCustomProperties', () => {
         propertyKey: '1',
         stepType: '1',
         scope: 'config',
-        type: 'custom-property',
+        type: 'step-property',
       },
       {
         id: '2',
@@ -493,11 +493,11 @@ describe('validateCustomProperties', () => {
         propertyKey: '2',
         stepType: '2',
         scope: 'input',
-        type: 'custom-property',
+        type: 'step-property',
       },
     ];
 
-    const validationResults = await validateCustomProperties(customPropertyItems);
+    const validationResults = await validateStepProperties(customPropertyItems);
 
     expect(validationResults).toHaveLength(2);
     expect(validationResults[0]).toMatchObject({
@@ -532,7 +532,7 @@ describe('validateCustomProperties', () => {
     mockGetAllConnectorsMapCache.mockReturnValue(new Map([['cache-test', mockConnector as any]]));
     mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'field' });
 
-    const item: CustomPropertyItem = {
+    const item: StepPropertyItem = {
       id: 'cache-test-item',
       stepId: 'cache-step',
       startLineNumber: 2,
@@ -552,11 +552,11 @@ describe('validateCustomProperties', () => {
       propertyKey: 'field',
       stepType: 'cache-test',
       scope: 'config',
-      type: 'custom-property',
+      type: 'step-property',
     };
 
-    await validateCustomProperties([item]);
-    await validateCustomProperties([item]);
+    await validateStepProperties([item]);
+    await validateStepProperties([item]);
 
     expect(selectionHandler.resolve).toHaveBeenCalledTimes(1);
     expect(selectionHandler.getDetails).toHaveBeenCalledTimes(1);
