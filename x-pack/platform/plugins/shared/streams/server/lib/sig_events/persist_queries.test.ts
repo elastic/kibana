@@ -6,9 +6,9 @@
  */
 
 import type { GeneratedSignificantEventQuery, QueryLink, Streams } from '@kbn/streams-schema';
-import { persistQueries } from './onboarding';
-import type { QueryClient } from '../../streams/assets/query/query_client';
-import type { StreamsClient } from '../../streams/client';
+import { persistQueries } from './persist_queries';
+import type { QueryClient } from '../streams/assets/query/query_client';
+import type { StreamsClient } from '../streams/client';
 
 jest.mock('uuid', () => ({ v4: () => 'generated-uuid' }));
 

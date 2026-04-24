@@ -115,10 +115,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         align: 'right',
         'data-test-subj': 'riskLevelBreakdownTable-scoreRange',
         render: (scoreRange: string) => (
-          <EuiText
-            size="s"
-            css={{ whiteSpace: 'nowrap', fontWeight: euiTheme.font.weight.medium }}
-          >
+          <EuiText size="s" css={{ whiteSpace: 'nowrap', fontWeight: euiTheme.font.weight.medium }}>
             {scoreRange}
           </EuiText>
         ),
