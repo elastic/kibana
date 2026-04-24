@@ -13,7 +13,7 @@ import { setupConsoleErrorsProvider } from './console_errors_provider';
 import { ConsoleWorkerProxyService } from './console_worker_proxy';
 import type { monaco } from '../../monaco_imports';
 import { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
-import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from '../esql';
+import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS, ESQLLang } from '../esql';
 import { wrapAsMonacoSuggestions } from '../esql/lib/converters/suggestions';
 import { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';
 import { buildConsoleTheme } from './theme';
@@ -86,7 +86,9 @@ export const ConsoleLang: LangModuleType = {
   lexerRules,
   languageConfiguration,
   foldingRangeProvider,
-  onLanguage: () => {
+  onLanguage: async () => {
+    // Ensure the embedded ES|QL grammar is registered before Console tokenization runs.
+    await ESQLLang.onLanguage();
     workerProxyService.setup();
     setupConsoleErrorsProvider(workerProxyService);
   },
