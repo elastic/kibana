@@ -7,11 +7,11 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { BlastRadiusDonut } from './blast_radius_donut';
+import { CriticalityDonut } from './criticality_donut';
 
-const meta: Meta<typeof BlastRadiusDonut> = {
-  title: 'app/SigeventsOverview/BlastRadiusDonut',
-  component: BlastRadiusDonut,
+const meta: Meta<typeof CriticalityDonut> = {
+  title: 'app/SigeventsOverview/CriticalityDonut',
+  component: CriticalityDonut,
   argTypes: {
     score: {
       control: { type: 'range', min: 0, max: 100 },
@@ -29,7 +29,7 @@ const meta: Meta<typeof BlastRadiusDonut> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof BlastRadiusDonut>;
+type Story = StoryObj<typeof CriticalityDonut>;
 
 export const Critical: Story = {
   args: {
@@ -88,10 +88,10 @@ export const SmallSize: Story = {
 export const MultipleDonutsComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-      <BlastRadiusDonut score={15} isCritical={false} />
-      <BlastRadiusDonut score={45} isCritical={false} />
-      <BlastRadiusDonut score={75} isCritical={true} />
-      <BlastRadiusDonut score={95} isCritical={true} />
+      <CriticalityDonut score={15} isCritical={false} />
+      <CriticalityDonut score={45} isCritical={false} />
+      <CriticalityDonut score={75} isCritical={true} />
+      <CriticalityDonut score={95} isCritical={true} />
     </div>
   ),
 };

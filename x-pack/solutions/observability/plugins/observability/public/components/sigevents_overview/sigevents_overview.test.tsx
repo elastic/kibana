@@ -10,14 +10,6 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SigeventsOverview } from './sigevents_overview';
 
-jest.mock('@elastic/charts', () => ({
-  Chart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Settings: () => null,
-  Metric: () => <div data-test-subj="mock-metric" />,
-  LayoutDirection: { Vertical: 'vertical' },
-  LIGHT_THEME: {},
-}));
-
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(<IntlProvider locale="en">{ui}</IntlProvider>);
 };
@@ -25,10 +17,7 @@ const renderWithIntl = (ui: React.ReactElement) => {
 describe('SigeventsOverview', () => {
   const defaultProps = {
     onRemediate: jest.fn(),
-    onRunInBackground: jest.fn(),
-    onAttachEntity: jest.fn(),
-    onAttachEvent: jest.fn(),
-    onOpenConversation: jest.fn(),
+    onViewDetails: jest.fn(),
   };
 
   beforeEach(() => {
@@ -41,17 +30,7 @@ describe('SigeventsOverview', () => {
   });
 
   it('renders with default state (critical)', () => {
-    const { onRemediate, onRunInBackground, onAttachEntity, onAttachEvent, onOpenConversation } =
-      defaultProps;
-    renderWithIntl(
-      <SigeventsOverview
-        onRemediate={onRemediate}
-        onRunInBackground={onRunInBackground}
-        onAttachEntity={onAttachEntity}
-        onAttachEvent={onAttachEvent}
-        onOpenConversation={onOpenConversation}
-      />
-    );
+    renderWithIntl(<SigeventsOverview {...defaultProps} />);
     expect(screen.getByTestId('sigeventsOverview')).toBeInTheDocument();
   });
 
@@ -65,47 +44,60 @@ describe('SigeventsOverview', () => {
     expect(container.querySelector('[data-test-subj="sigeventsOverview"]')).not.toBeInTheDocument();
   });
 
-  it('renders mode badge', () => {
+  it('renders the StatusHeader', () => {
     renderWithIntl(<SigeventsOverview {...defaultProps} state="critical" />);
-    expect(screen.getByText('SIGNIFICANT EVENTS')).toBeInTheDocument();
+    expect(screen.getByTestId('sigeventsOverviewStatusHeader')).toBeInTheDocument();
   });
 
-  it('renders main heading', () => {
+  it('renders the MainSignificantEvent card', () => {
     renderWithIntl(<SigeventsOverview {...defaultProps} state="critical" />);
-    expect(screen.getByText('Your system requires attention')).toBeInTheDocument();
+    expect(screen.getByTestId('sigeventsOverviewMainSignificantEvent')).toBeInTheDocument();
   });
 
-  it('renders intro description', () => {
-    renderWithIntl(<SigeventsOverview {...defaultProps} state="critical" />);
-    expect(
-      screen.getByText(/Our system is detecting more unusual behaviour than normal/)
-    ).toBeInTheDocument();
-  });
-
-  it('renders blast radius summary panel', () => {
-    const { container } = renderWithIntl(<SigeventsOverview {...defaultProps} state="critical" />);
-    expect(
-      container.querySelector('[data-test-subj="sigeventsOverviewBlastRadiusPanel"]')
-    ).toBeInTheDocument();
-  });
-
-  it('passes blast radius score to summary panel', () => {
+  it('passes blast radius score to the MainSignificantEvent', () => {
     renderWithIntl(<SigeventsOverview {...defaultProps} state="critical" blastRadiusScore={95} />);
     expect(screen.getByText('95')).toBeInTheDocument();
   });
 
-  it('passes counts to summary panel', () => {
+  it('passes a custom main event title', () => {
     renderWithIntl(
       <SigeventsOverview
         {...defaultProps}
         state="critical"
-        criticalCount={10}
-        highCount={15}
-        significantEventsCount={30}
+        mainEventTitle="Custom event title"
       />
     );
-    expect(screen.getByText(/10 Critical/)).toBeInTheDocument();
-    expect(screen.getByText(/15 High/)).toBeInTheDocument();
-    expect(screen.getByText(/30 Significant events/)).toBeInTheDocument();
+    expect(screen.getByText('Custom event title')).toBeInTheDocument();
+  });
+
+  it('renders the default impacted cards between the header and the main event', () => {
+    renderWithIntl(<SigeventsOverview {...defaultProps} state="critical" />);
+    expect(screen.getByTestId('sigeventsOverviewImpactedCards')).toBeInTheDocument();
+    expect(screen.getByText('Impacted')).toBeInTheDocument();
+    expect(screen.getAllByTestId('sigeventsOverviewImpactedCard')).toHaveLength(2);
+  });
+
+  it('renders custom impacted cards', () => {
+    renderWithIntl(
+      <SigeventsOverview
+        {...defaultProps}
+        state="critical"
+        impactedCards={[
+          { id: 'a', label: 'Service', value: 'service-a' },
+          { id: 'b', label: 'Service', value: 'service-b' },
+          { id: 'c', label: 'Dropped events', value: '1,234' },
+        ]}
+      />
+    );
+    expect(screen.getAllByTestId('sigeventsOverviewImpactedCard')).toHaveLength(3);
+    expect(screen.getByText('service-a')).toBeInTheDocument();
+    expect(screen.getByText('1,234')).toBeInTheDocument();
+  });
+
+  it('does not render the impacted cards section when empty', () => {
+    renderWithIntl(
+      <SigeventsOverview {...defaultProps} state="critical" impactedCards={[]} />
+    );
+    expect(screen.queryByTestId('sigeventsOverviewImpactedCards')).not.toBeInTheDocument();
   });
 });

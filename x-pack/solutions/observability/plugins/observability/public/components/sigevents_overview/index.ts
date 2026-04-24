@@ -6,16 +6,26 @@
  */
 
 export { SigeventsOverview } from './sigevents_overview';
-export type { SigeventsOverviewProps, SigEventSeverity } from './sigevents_overview';
+export type {
+  SigeventsOverviewProps,
+  SigEventSeverity,
+  ImpactedCardItem,
+} from './sigevents_overview';
 
-export { BlastRadiusDonut } from './blast_radius_donut';
-export type { BlastRadiusDonutProps } from './blast_radius_donut';
+export { StatusHeader } from './status_header';
+export type { StatusHeaderProps } from './status_header';
+
+export { MainSignificantEvent } from './main_significant_event';
+export type { MainSignificantEventProps, ImpactedService } from './main_significant_event';
+
+export { ImpactedCard } from './impacted_card';
+export type { ImpactedCardProps } from './impacted_card';
+
+export { CriticalityDonut } from './criticality_donut';
+export type { CriticalityDonutProps } from './criticality_donut';
 
 export { BlastRadiusEntityFlyout } from './blast_radius_entity_flyout';
 export type { BlastRadiusEntityFlyoutProps } from './blast_radius_entity_flyout';
-
-export { BlastRadiusSummaryPanel } from './blast_radius_summary_panel';
-export type { BlastRadiusSummaryPanelProps, EntityRowConfig } from './blast_radius_summary_panel';
 
 export { InfoPanel } from './info_panel';
 export type { InfoPanelProps } from './info_panel';

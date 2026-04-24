@@ -10,7 +10,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-export interface BlastRadiusDonutProps {
+export interface CriticalityDonutProps {
   score: number;
   isCritical: boolean;
   size?: number;
@@ -20,12 +20,12 @@ export interface BlastRadiusDonutProps {
 const DEFAULT_SIZE = 100;
 const DEFAULT_STROKE = 18;
 
-export function BlastRadiusDonut({
+export const CriticalityDonut = ({
   score,
   isCritical,
   size = DEFAULT_SIZE,
   strokeWidth = DEFAULT_STROKE,
-}: BlastRadiusDonutProps) {
+}: CriticalityDonutProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { radius, circumference, dashOffset, trackColor, arcColor, labelColor } = useMemo(() => {
@@ -53,8 +53,8 @@ export function BlastRadiusDonut({
     strokeWidth,
   ]);
 
-  const label = i18n.translate('xpack.observability.sigeventsOverview.blastRadiusDonut.ariaLabel', {
-    defaultMessage: 'Blast radius score {score} out of 100',
+  const label = i18n.translate('xpack.observability.sigeventsOverview.criticalityDonut.ariaLabel', {
+    defaultMessage: 'Criticality score {score} out of 100',
     values: { score },
   });
 
@@ -68,7 +68,7 @@ export function BlastRadiusDonut({
       `}
       role="img"
       aria-label={label}
-      data-test-subj="sigeventsOverviewBlastRadiusDonut"
+      data-test-subj="sigeventsOverviewCriticalityDonut"
     >
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
         <circle
@@ -105,8 +105,8 @@ export function BlastRadiusDonut({
           css={css`
             color: ${labelColor};
             font-family: ${euiTheme.font.familyCode};
-            font-size: ${euiTheme.font.scale.xxl}rem;
-            font-weight: ${euiTheme.font.weight.semiBold};
+            font-size: 1.275rem;
+            font-weight: 400;
             line-height: 1;
           `}
         >
@@ -115,4 +115,4 @@ export function BlastRadiusDonut({
       </div>
     </div>
   );
-}
+};
