@@ -264,7 +264,9 @@ export function systemRoutes(
       {
         version: '1',
         validate: {
-          request: { body: schema.object({ indices: schema.arrayOf(schema.string()) }) },
+          request: {
+            body: schema.object({ indices: schema.arrayOf(schema.string(), { maxSize: 10000 }) }),
+          },
         },
       },
       routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
