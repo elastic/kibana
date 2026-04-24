@@ -41,9 +41,6 @@ export const createOriginSyncSubscription = ({
       if (origin === previousDashboardId || origin === dashboardId) {
         return true;
       }
-      if (!origin && !previousDashboardId) {
-        return true;
-      }
       return false;
     });
     if (attachmentToSync) {

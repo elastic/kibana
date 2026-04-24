@@ -7,11 +7,8 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderInternalService } from '../services';
-
-export type { ActiveConversation };
 
 export interface EmbeddableConversationDependencies {
   services: AgentBuilderInternalService;

@@ -43,7 +43,7 @@ export const createAgentLiveUpdatesSubscription = ({
 
     setAttachments(
       dashboardAttachments
-        ?.map((attachment): DashboardAttachment | undefined => {
+        .map((attachment): DashboardAttachment => {
           const latestVersionData = getLatestVersion(attachment)?.data;
           return latestVersionData
             ? {

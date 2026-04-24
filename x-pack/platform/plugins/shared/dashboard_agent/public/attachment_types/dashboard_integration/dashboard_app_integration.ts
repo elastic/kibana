@@ -19,7 +19,7 @@ import {
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createManualChangesSubscription } from './manual_changes_subscription';
 import {
-  createIdGenerator,
+  type IdGenerator,
   createNewAttachmentIdRegenerationSubscription,
 } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
@@ -27,6 +27,7 @@ import { createOriginSyncSubscription } from './origin_sync_subscription';
 export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
+  draftAttachmentId: IdGenerator;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   /**
    * Lookup for the framework-provided `updateOrigin` callback bound to a specific
@@ -45,12 +46,10 @@ interface State {
   conversationId: string | undefined;
 }
 
-// for draft attachments, we want to keep stable ids across dashboards even if dashboardApi changes (we move to another dashboard)
-const draftAttachmentId = createIdGenerator();
-
 export const registerDashboardAppIntegration = ({
   agentBuilder,
   api,
+  draftAttachmentId,
   checkSavedDashboardExist,
   getUpdateOrigin,
 }: DashboardAppIntegrationParams): (() => void) => {

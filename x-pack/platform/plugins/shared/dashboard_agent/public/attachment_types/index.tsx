@@ -24,6 +24,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasAttachment } from './canvas_integration/dashboard_canvas_attachment';
 import { createDashboardAppIntegration$ } from './dashboard_integration/dashboard_app_integration';
+import { createIdGenerator } from './dashboard_integration/new_attachment_id_regeneration_subscription';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
 import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
@@ -45,6 +46,8 @@ export const registerDashboardAttachmentUiDefinition = ({
   canWriteDashboards: boolean;
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
+  // Keep one stable draft attachment id even if dashboardApi changes while moving between dashboards.
+  const draftAttachmentId = createIdGenerator();
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
   const checkSavedDashboardExist = async (dashboardId: string) => {
     const findDashboardsService = await findDashboardsServicePromise;
@@ -77,6 +80,7 @@ export const registerDashboardAttachmentUiDefinition = ({
           ? createDashboardAppIntegration$({
               agentBuilder,
               api,
+              draftAttachmentId,
               checkSavedDashboardExist,
               getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
             })
