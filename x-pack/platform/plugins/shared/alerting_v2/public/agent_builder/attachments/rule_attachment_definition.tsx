@@ -8,12 +8,9 @@
 import React, { useEffect, useState } from 'react';
 import {
   EuiBadge,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
-  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -27,8 +24,10 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { ApplicationStart, IBasePath, NotificationsStart } from '@kbn/core/public';
+import { RuleProvider } from '../../components/rule_details/rule_context';
+import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
 import { paths } from '../../constants';
-import type { RulesApi } from '../../services/rules_api';
+import type { RuleApiResponse, RulesApi } from '../../services/rules_api';
 
 type RuleAttachment = Attachment<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData>;
 
@@ -63,9 +62,6 @@ const RuleCanvasContent = ({
 }: RuleCanvasContentProps) => {
   const { data, origin } = attachment;
   const isSaved = Boolean(origin);
-  const isProposed = !isSaved;
-  const status = isProposed ? 'proposed' : data.enabled ? 'enabled' : 'disabled';
-  const statusColor = isProposed ? 'default' : data.enabled ? 'success' : 'warning';
 
   // Mirrors the dashboard pattern: start false so the first effect registers [],
   // matching the canvas_flyout clear effect. The second cycle (mounted=true)
@@ -185,113 +181,11 @@ const RuleCanvasContent = ({
   ]);
 
   return (
-    <EuiPanel paddingSize="l" hasShadow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
-            <h2>{data.metadata.name}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color={statusColor}>{status}</EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{data.kind}</EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      {data.metadata.description && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued">{data.metadata.description}</EuiText>
-        </>
-      )}
-
-      {data.metadata.tags && data.metadata.tags.length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="xs" wrap>
-            {data.metadata.tags.map((tag) => (
-              <EuiFlexItem key={tag} grow={false}>
-                <EuiBadge color="default">{tag}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </>
-      )}
-
-      <EuiHorizontalRule />
-
-      {data.schedule?.every && (
-        <>
-          <EuiText size="s">
-            <strong>Schedule</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiText size="s">
-            Every {data.schedule.every}
-            {data.schedule.lookback ? `, lookback ${data.schedule.lookback}` : ''}
-          </EuiText>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {data.evaluation?.query?.base && (
-        <>
-          <EuiText size="s">
-            <strong>ES|QL Query</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiCode language="sql">{data.evaluation.query.base}</EuiCode>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {data.grouping?.fields && data.grouping.fields.length > 0 && (
-        <>
-          <EuiText size="s">
-            <strong>Group by</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiText size="s">{data.grouping.fields.join(', ')}</EuiText>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {data.state_transition && (
-        <>
-          <EuiText size="s">
-            <strong>State transition</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiText size="s">
-            {data.state_transition.pending_count !== undefined && (
-              <>Pending after {data.state_transition.pending_count} breaches</>
-            )}
-            {data.state_transition.pending_timeframe && (
-              <> within {data.state_transition.pending_timeframe}</>
-            )}
-          </EuiText>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {data.recovery_policy && (
-        <>
-          <EuiText size="s">
-            <strong>Recovery</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiText size="s">{data.recovery_policy.type}</EuiText>
-          {data.recovery_policy.type === 'query' && data.recovery_policy.query?.base && (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiCode language="sql">{data.recovery_policy.query.base}</EuiCode>
-            </>
-          )}
-        </>
-      )}
-    </EuiPanel>
+    <RuleProvider rule={data as unknown as RuleApiResponse}>
+      <EuiPanel paddingSize="l" hasShadow={false}>
+        <RuleSidebar />
+      </EuiPanel>
+    </RuleProvider>
   );
 };
 
