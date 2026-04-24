@@ -4,7 +4,7 @@
     {
       "id": "b4b539a64e36b08-cf340212ea83da6",
       "title": "Rule details alerts tab filters alerts table with search bar query",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -12,6 +12,370 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_alerts_tab.spec.ts",
         "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "88e933498897a4e-ece821f6c3bbd60",
+      "title": "Rule Details Page - Admin should navigate from rules table to rule details and display page correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "88e933498897a4e-e5a9cc15ae46b2a",
+      "title": "Rule Details Page - Admin should load rule details page directly by URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "88e933498897a4e-a10166571f2daf4",
+      "title": "Rule Details Page - Admin should display alert summary widget on the page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
+        "line": 76,
+        "column": 7
+      }
+    },
+    {
+      "id": "88e933498897a4e-daabe00867abf81",
+      "title": "Rule Details Page - Admin should navigate to alerts tab with active filter when clicking active alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "88e933498897a4e-553570ada722d2a",
+      "title": "Rule Details Page - Admin should navigate to alerts tab with all statuses when clicking total alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
+        "line": 99,
+        "column": 7
+      }
+    },
+    {
+      "id": "88e933498897a4e-b977afb55e35f29",
+      "title": "Rule Details Page - Admin should show edit and delete actions for admin user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "id": "88e933498897a4e-cce1d74e8b769f6",
+      "title": "Rule Details Page - Admin should close actions popover when clicking actions button again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
+        "line": 127,
+        "column": 7
+      }
+    },
+    {
+      "id": "88e933498897a4e-c7422a09250b93c",
+      "title": "Rule Details Page - Admin should display dashboard options in related dashboards dropdown when editing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
+    {
+      "id": "0975eada2a70904-4e6f2f8522f14b8",
+      "title": "Rule Details Page - Viewer should navigate to rule details page and display page correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "0975eada2a70904-fddb05bad330ebf",
+      "title": "Rule Details Page - Viewer should display alert summary widget on the page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "0975eada2a70904-2ec40f279008b55",
+      "title": "Rule Details Page - Viewer should navigate to alerts tab when clicking active alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "0975eada2a70904-af6c94c81910541",
+      "title": "Rule Details Page - Viewer should navigate to alerts tab when clicking total alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
+        "line": 73,
+        "column": 7
+      }
+    },
+    {
+      "id": "0975eada2a70904-b87bedab0eccd3a",
+      "title": "Rule Details Page - Viewer should not show actions button for viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "08215ccd84da029-e82f776718385af",
+      "title": "Rules Page - Header - Admin should filter rule types using search and close modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_header/rules_page_header.admin.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "647a99dc9b11927-843aaf9d9b29bc8",
+      "title": "Rules Page - Header - Viewer should open settings flyout, verify buttons state, and close successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_header/rules_page_header.viewer.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "50798bf68361151-a7c028fa32e529f",
+      "title": "Rules Page - Logs Tab - Viewer should navigate to logs tab and display event log table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "50798bf68361151-74ee1e1aab99298",
+      "title": "Rules Page - Logs Tab - Viewer should load logs tab content when navigating directly via URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "50798bf68361151-606ba5f0e0fc0ab",
+      "title": "Rules Page - Logs Tab - Viewer should persist logs tab selection in URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "50798bf68361151-008e253ab1cbf74",
+      "title": "Rules Page - Logs Tab - Viewer should navigate to rule details when clicking on a rule in event logs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
+        "line": 54,
+        "column": 7
+      }
+    },
+    {
+      "id": "239efaa6fa80931-4bb680bf338e8b0",
+      "title": "Rules Page - Rules Tab - Admin should see the Rules Table container",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "239efaa6fa80931-3b7d24167ada980",
+      "title": "Rules Page - Rules Tab - Admin should see an editable rule in the Rules Table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "239efaa6fa80931-3abf0fcbd4423f1",
+      "title": "Rules Page - Rules Tab - Admin should show the edit action button and navigate to the edit rule page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "239efaa6fa80931-51caeb6067b353f",
+      "title": "Rules Page - Rules Tab - Admin changes the rule status to \"disabled\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
+        "line": 74,
+        "column": 7
+      }
+    },
+    {
+      "id": "a0f958634c2d2f2-a165012f6e90df9",
+      "title": "Rules Page - Rules Tab - Viewer should see the Rules Table container",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "a0f958634c2d2f2-db31f67efa60459",
+      "title": "Rules Page - Rules Tab - Viewer should see a non-editable rule in the Rules Table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "a0f958634c2d2f2-86a849b4b0eca72",
+      "title": "Rules Page - Rules Tab - Viewer should not show the edit action button for a rule when logged in as viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
+        "line": 43,
         "column": 7
       }
     }

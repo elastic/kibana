@@ -5,7 +5,19 @@
  * 2.0.
  */
 
-import type { ApiServicesFixture } from '@kbn/scout-oblt';
+import type { ApiServicesFixture } from '@kbn/scout';
+
+/**
+ * Find a rule's id by its exact name.
+ */
+export async function getRuleIdByName(
+  apiServices: ApiServicesFixture,
+  ruleName: string
+): Promise<string | undefined> {
+  const rules = await apiServices.alerting.rules.find({ search: ruleName });
+  const rule = rules?.data?.data?.find((r: { name: string }) => r.name === ruleName);
+  return rule?.id;
+}
 
 /**
  * Delete a rule by its exact name, ignoring errors if it no longer exists.

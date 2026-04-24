@@ -7,11 +7,12 @@
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { RuleDetailsPage } from './page_objects';
+import { RuleDetailsPage, RulesPage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     ruleDetailsPage: RuleDetailsPage;
+    rulesPage: RulesPage;
   };
 }
 
@@ -29,6 +30,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
     const extendedPageObjects = {
       ...pageObjects,
       ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
+      rulesPage: createLazyPageObject(RulesPage, page),
     };
 
     await use(extendedPageObjects);

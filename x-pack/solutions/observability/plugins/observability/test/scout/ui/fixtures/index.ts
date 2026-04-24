@@ -36,5 +36,3 @@ export const test = baseWithSynthtrace.extend<
     await use(extendedPageObjects);
   },
 });
-
-export { RULES_SETTINGS_TEST_SUBJECTS } from './constants';

@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { test } from '../fixtures';
+import { BIGGER_TIMEOUT } from '../fixtures/constants';
 
 const TEST_RUN_ID = Date.now();
 const INDEX_THRESHOLD_RULE_NAME = `Scout Rule Details Index Threshold ${TEST_RUN_ID}`;
@@ -16,8 +17,7 @@ const ALERTS_INDEX_PATTERN = '.alerts-stack.alerts-*';
 const STATEFUL_ALERTS_INDEX = '.internal.alerts-stack.alerts-default-000001';
 const INDEX_THRESHOLD_RULE_TYPE_ID = '.index-threshold';
 
-// Failing: See https://github.com/elastic/kibana/issues/255610
-test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
+test.describe('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
   let indexThresholdRuleId: string;
 
   test.beforeAll(async ({ apiServices }) => {
@@ -77,7 +77,7 @@ test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, ()
     }
   });
 
-  test('filters alerts table with search bar query', async ({ pageObjects, esClient }) => {
+  test('filters alerts table with search bar query', async ({ page, pageObjects, esClient }) => {
     const now = new Date().toISOString();
 
     const createAlertDocument = ({
@@ -114,41 +114,54 @@ test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, ()
     });
 
     await test.step('index alerts for filtering', async () => {
-      await esClient.index({
-        index: STATEFUL_ALERTS_INDEX,
-        refresh: 'wait_for',
-        document: createAlertDocument({
-          idSuffix: 'active',
-          ruleId: indexThresholdRuleId,
-          ruleName: INDEX_THRESHOLD_RULE_NAME,
-          ruleTypeId: INDEX_THRESHOLD_RULE_TYPE_ID,
-          ruleCategory: 'index threshold',
-          ruleConsumer: 'alerts',
-          status: 'active',
+      // Index both docs in parallel with `refresh: 'wait_for'` so both are visible to the
+      // widget's fetch on first render. Indexing sequentially (with the default refresh
+      // interval between writes) caused the widget to occasionally observe only the first
+      // document on load, making the `totalAlertCount === '2'` assertion flake. See
+      // https://github.com/elastic/kibana/issues/255610.
+      await Promise.all([
+        esClient.index({
+          index: STATEFUL_ALERTS_INDEX,
+          refresh: 'wait_for',
+          document: createAlertDocument({
+            idSuffix: 'active',
+            ruleId: indexThresholdRuleId,
+            ruleName: INDEX_THRESHOLD_RULE_NAME,
+            ruleTypeId: INDEX_THRESHOLD_RULE_TYPE_ID,
+            ruleCategory: 'index threshold',
+            ruleConsumer: 'alerts',
+            status: 'active',
+          }),
         }),
-      });
-
-      await esClient.index({
-        index: STATEFUL_ALERTS_INDEX,
-        refresh: 'wait_for',
-        document: createAlertDocument({
-          idSuffix: 'recovered',
-          ruleId: indexThresholdRuleId,
-          ruleName: INDEX_THRESHOLD_RULE_NAME,
-          ruleTypeId: INDEX_THRESHOLD_RULE_TYPE_ID,
-          ruleCategory: 'index threshold',
-          ruleConsumer: 'alerts',
-          status: 'recovered',
+        esClient.index({
+          index: STATEFUL_ALERTS_INDEX,
+          refresh: 'wait_for',
+          document: createAlertDocument({
+            idSuffix: 'recovered',
+            ruleId: indexThresholdRuleId,
+            ruleName: INDEX_THRESHOLD_RULE_NAME,
+            ruleTypeId: INDEX_THRESHOLD_RULE_TYPE_ID,
+            ruleCategory: 'index threshold',
+            ruleConsumer: 'alerts',
+            status: 'recovered',
+          }),
         }),
-      });
+      ]);
     });
 
     await pageObjects.ruleDetailsPage.gotoById(indexThresholdRuleId);
     await expect(pageObjects.ruleDetailsPage.ruleName).toHaveText(INDEX_THRESHOLD_RULE_NAME);
+
+    // Reload after navigation to force the alert summary widget to refetch against the freshly
+    // indexed documents, rather than relying on the initial fetch that raced the ES refresh.
+    await page.reload();
+    await expect(pageObjects.ruleDetailsPage.ruleName).toHaveText(INDEX_THRESHOLD_RULE_NAME);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
 
     await test.step('filter alerts by status', async () => {
-      await expect(pageObjects.ruleDetailsPage.alertSummaryTotalCount).toHaveText('2');
+      await expect(pageObjects.ruleDetailsPage.alertSummaryTotalCount).toHaveText('2', {
+        timeout: BIGGER_TIMEOUT,
+      });
       await pageObjects.ruleDetailsPage.filterAlertsByKql('kibana.alert.status : "active"');
 
       await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
