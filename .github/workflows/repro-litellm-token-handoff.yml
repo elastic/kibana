@@ -50,14 +50,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |-
             /review REPO: ${{ github.repository }} PR_NUMBER: ${{ github.event.pull_request.number }}
-            Review the changed files for correctness, security, reliability, testing, and maintainability issues.
 
-            For findings tied to a specific changed line, use `mcp__github_inline_comment__create_inline_comment`.
-
-            After all inline comments are posted, submit exactly one final review summary on the PR. Prefer creating `/tmp/review.md` with the `Write` tool and submitting it with:
-            `gh pr review ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --comment --body-file /tmp/review.md`
-
-            If there are no issues, the final review body must be exactly: `No issues found.`
+            Use the repository root `REVIEW.md` as the canonical review instructions for this run. Defer to that file for review scope, posting rules, and final summary format.
           claude_args: |
             --max-turns 5
             --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Bash(gh api:*),Write,mcp__github_inline_comment__create_inline_comment"
