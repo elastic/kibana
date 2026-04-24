@@ -64,9 +64,8 @@ export const EntitiesOverview: React.FC = () => {
     (entityStoreV2Enabled && (userEntityFromStore.entityRecord != null || userName != null));
   const showHostOverview =
     (!entityStoreV2Enabled && hostName != null) ||
-    (entityStoreV2Enabled && hostEntityFromStore.entityRecord != null);
-  const hasAnyEntity =
-    (showUserOverview && !!userEntityIdentifiers) || (showHostOverview && !!hostEntityIdentifiers);
+    (entityStoreV2Enabled && (hostEntityFromStore.entityRecord != null || hostName != null));
+  const hasAnyEntity = showUserOverview || showHostOverview;
 
   const navigateToLeftPanel = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,

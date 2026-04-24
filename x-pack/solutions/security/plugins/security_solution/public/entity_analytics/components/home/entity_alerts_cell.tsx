@@ -77,6 +77,13 @@ export const EntityAlertsCell: React.FC<{
     return [{ term: { [filterField]: entityName } }];
   }, [euidApi?.euid, filterField, entityName, entityType, entityRecord]);
 
+  const euidKqlEntityFilter = useMemo(() => {
+    if (euidApi?.euid && entityRecord) {
+      return euidApi.euid.kql.getEuidFilterBasedOnDocument(entityType, entityRecord);
+    }
+    return undefined;
+  }, [euidApi?.euid, entityType, entityRecord]);
+
   const { data, setQuery: setAlertsQuery } = useQueryAlerts<{}, AlertsByStatusAgg>({
     query: getAlertsByStatusQuery({
       from,
@@ -115,26 +122,33 @@ export const EntityAlertsCell: React.FC<{
     },
   });
 
-  const filters = [
-    {
-      title: getFilterTitle(entityType),
-      selected_options: [entityName],
-      field_name: filterField,
-    },
-    {
-      title: OPEN_IN_ALERTS_TITLE_STATUS,
-      selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-      field_name: 'kibana.alert.workflow_status',
-    },
-  ];
+  const statusPageFilter = {
+    title: OPEN_IN_ALERTS_TITLE_STATUS,
+    selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+    field_name: 'kibana.alert.workflow_status',
+  };
 
-  const urlFilterParams = encode(formatPageFilterSearchParam(filters));
+  const pageFilters = euidKqlEntityFilter
+    ? [statusPageFilter]
+    : [
+        {
+          title: getFilterTitle(entityType),
+          selected_options: [entityName],
+          field_name: filterField,
+        },
+        statusPageFilter,
+      ];
+
+  const urlFilterParams = encode(formatPageFilterSearchParam(pageFilters));
+  const appQueryPath = euidKqlEntityFilter
+    ? `&${URL_PARAM_KEY.appQuery}=${encode({ language: 'kuery', query: euidKqlEntityFilter })}`
+    : '';
   const timerangePath = timerange ? `&timerange=${timerange}` : '';
 
   const openAlertsPage = () => {
     navigateTo({
       deepLinkId: SecurityPageName.alerts,
-      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${timerangePath}`,
+      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${appQueryPath}${timerangePath}`,
       openInNewTab: true,
     });
   };

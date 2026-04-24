@@ -102,20 +102,20 @@ export const EntitiesDetails: React.FC = () => {
 
   const showUserDetails =
     timestamp &&
-    resolvedUserName != null &&
-    (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+    (resolvedUserName != null ||
+      (entityStoreV2Enabled && userEntityFromStore.entityRecord != null));
   const showHostDetails =
     hostEntityIdentifiers &&
     timestamp &&
-    resolvedHostName != null &&
-    (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
+    (resolvedHostName != null ||
+      (entityStoreV2Enabled && hostEntityFromStore.entityRecord != null));
   const showDetails = timestamp && (showUserDetails || showHostDetails);
 
   return (
     <>
       {showDetails ? (
         <EuiFlexGroup direction="column" gutterSize="m" data-test-subj={ENTITIES_DETAILS_TEST_ID}>
-          {showUserDetails && (
+          {showUserDetails && resolvedUserName != null && (
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h3>
@@ -134,7 +134,7 @@ export const EntitiesDetails: React.FC = () => {
               />
             </EuiFlexItem>
           )}
-          {showHostDetails && (
+          {showHostDetails && resolvedHostName != null && (
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h3>
