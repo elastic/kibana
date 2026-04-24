@@ -8,26 +8,26 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { useApmRouter } from '../../../../../../../hooks/use_apm_router';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
   TRANSACTION_NAME,
-} from '../../../../../../../../common/es_fields/apm';
+} from '../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getNextEnvironmentUrlParam,
-} from '../../../../../../../../common/environment_filter_values';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
-import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { useAnyOfApmParams } from '../../../../../../../hooks/use_apm_params';
-import { DependencyLink } from '../../../../../../shared/links/dependency_link';
-import { TransactionDetailLink } from '../../../../../../shared/links/apm/transaction_detail_link';
-import { ServiceLink } from '../../../../../../shared/links/apm/service_link';
-import { StickyProperties } from '../../../../../../shared/sticky_properties';
-import { LatencyAggregationType } from '../../../../../../../../common/latency_aggregation_types';
+} from '../../../../common/environment_filter_values';
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import type { Span } from '../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { DependencyLink } from '../links/dependency_link';
+import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
+import { ServiceLink } from '../links/apm/service_link';
+import { StickyProperties } from '../sticky_properties';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 interface Props {
   span: Span;

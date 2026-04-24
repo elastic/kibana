@@ -10,11 +10,11 @@ import type { StoryFn } from '@storybook/react';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
 import { SpanFlyout } from '.';
-import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import type { ApmPluginContextValue } from '../../../../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginStorybook } from '../../../../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
+import type { Span } from '../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 type Args = ComponentProps<typeof SpanFlyout>;
 type SpanDetailsApiReturnType = APIReturnType<'GET /internal/apm/traces/{traceId}/spans/{spanId}'>;

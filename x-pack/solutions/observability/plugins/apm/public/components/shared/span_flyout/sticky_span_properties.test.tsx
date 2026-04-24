@@ -8,11 +8,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { Span } from '../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { StickySpanProperties } from './sticky_span_properties';
 
-jest.mock('../../../../../../../hooks/use_apm_params', () => ({
+jest.mock('../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: () => ({
     query: {
       kuery: '',
@@ -25,7 +25,7 @@ jest.mock('../../../../../../../hooks/use_apm_params', () => ({
   }),
 }));
 
-jest.mock('../../../../../../../hooks/use_apm_router', () => ({
+jest.mock('../../../hooks/use_apm_router', () => ({
   useApmRouter: () => ({
     link: jest.fn().mockReturnValue('/mock-link'),
   }),

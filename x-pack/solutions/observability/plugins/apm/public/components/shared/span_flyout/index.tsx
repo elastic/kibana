@@ -27,23 +27,23 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
-import { getTimestampUs } from '../../../../../../../../common/utils/get_timestamp_us';
-import { OpenInDiscover } from '../../../../../../shared/links/discover_links/open_in_discover';
-import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../../../../hooks/use_time_range';
-import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
-import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
-import { Summary } from '../../../../../../shared/summary';
-import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
-import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
+import { OpenInDiscover } from '../links/discover_links/open_in_discover';
+import type { Span } from '../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { SpanMetadata } from '../metadata_table/span_metadata';
+import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
+import { Summary } from '../summary';
+import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_duration_summary_item';
+import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
 import { SyncBadge } from '../badge/sync_badge';
-import { FailureBadge } from '../failure_badge';
+import { FailureBadge } from '../badge/failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import type { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { useFetcher, isPending } from '../../../hooks/use_fetcher';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
+import type { SpanLinksCount } from '../span_links';
 
 function formatType(type: string) {
   switch (type) {

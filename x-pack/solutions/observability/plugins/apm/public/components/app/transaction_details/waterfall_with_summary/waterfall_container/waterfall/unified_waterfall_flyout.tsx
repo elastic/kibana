@@ -12,8 +12,8 @@ import type { TraceItem } from '../../../../../../../common/waterfall/unified_tr
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../../../hooks/use_time_range';
 import { useTraceWaterfallContext } from '../../../../../shared/trace_waterfall/trace_waterfall_context';
-import { SpanFlyout } from './span_flyout';
-import { TransactionFlyout } from './transaction_flyout';
+import { TransactionFlyout } from '../../../../../shared/transaction_flyout';
+import { SpanFlyout } from '../../../../../shared/span_flyout';
 
 interface Props {
   waterfallItemId?: string;

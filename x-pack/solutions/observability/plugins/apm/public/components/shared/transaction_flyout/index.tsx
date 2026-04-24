@@ -20,16 +20,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
-import { TransactionMetadata } from '../../../../../../shared/metadata_table/transaction_metadata';
-import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
-import { TransactionSummary } from '../../../../../../shared/summary/transaction_summary';
-import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/transaction_action_menu';
-import { FlyoutTopLevelProperties } from '../flyout_top_level_properties';
+import { TransactionMetadata } from '../metadata_table/transaction_metadata';
+import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
+import { TransactionSummary } from '../summary/transaction_summary';
+import { TransactionActionMenu } from '../transaction_action_menu/transaction_action_menu';
+import { FlyoutTopLevelProperties } from './flyout_top_level_properties';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import type { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
+import type { SpanLinksCount } from '../span_links';
 import { DroppedSpansWarning } from './dropped_spans_warning';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 
 interface Props {
   transactionId: string;

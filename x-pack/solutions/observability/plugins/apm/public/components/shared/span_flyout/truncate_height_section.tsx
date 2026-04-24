@@ -20,7 +20,9 @@ interface Props {
   children: ReactNode;
   previewHeight: number;
 }
-
+/**
+ * TODO: caue looks like this is no longer used
+ */
 export function TruncateHeightSection({ children, previewHeight }: Props) {
   const contentContainerEl = useRef<HTMLDivElement>(null);
 
@@ -59,6 +61,7 @@ export function TruncateHeightSection({ children, previewHeight }: Props) {
                 transform: `rotate(${isOpen ? 90 : 0}deg)`,
               }}
               type="chevronSingleRight"
+              aria-hidden={true}
             />{' '}
             {isOpen
               ? i18n.translate('xpack.apm.toggleHeight.showLessButtonLabel', {
