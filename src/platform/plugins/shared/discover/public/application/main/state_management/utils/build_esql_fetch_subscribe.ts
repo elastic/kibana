@@ -155,7 +155,7 @@ export const buildEsqlFetchSubscribe = ({
 
     // When the schema changes on a non-transformational query, check whether any
     // user-selected columns are no longer present.
-    let ghostColumnFilter: string[] | undefined;
+    let retainedColumns: string[] | undefined;
     if (
       responseColumns !== undefined &&
       !wasInitialFetch &&
@@ -167,7 +167,7 @@ export const buildEsqlFetchSubscribe = ({
       if (currentAppStateColumns?.length) {
         const filtered = currentAppStateColumns.filter((col) => nextAllColumns.includes(col));
         if (filtered.length < currentAppStateColumns.length) {
-          ghostColumnFilter = filtered;
+          retainedColumns = filtered;
         }
       }
     }
@@ -175,7 +175,7 @@ export const buildEsqlFetchSubscribe = ({
     const changeDefaultColumns =
       indexPatternChanged ||
       !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns) ||
-      ghostColumnFilter !== undefined;
+      retainedColumns !== undefined;
 
     const { viewMode } = getCurrentTab().appState;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
@@ -200,7 +200,7 @@ export const buildEsqlFetchSubscribe = ({
       // just change URL state if necessary
       if (changeDefaultColumns || changeViewMode) {
         const nextState = {
-          ...(changeDefaultColumns && { columns: ghostColumnFilter ?? nextDefaultColumns }),
+          ...(changeDefaultColumns && { columns: retainedColumns ?? nextDefaultColumns }),
           ...(changeViewMode && { viewMode: undefined }),
         };
 
