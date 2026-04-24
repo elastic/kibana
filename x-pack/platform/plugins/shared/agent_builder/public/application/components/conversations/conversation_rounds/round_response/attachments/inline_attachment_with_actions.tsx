@@ -10,7 +10,6 @@ import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -18,7 +17,6 @@ import type { AttachmentsService } from '../../../../../../services/attachments/
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { usePersistedConversationId } from '../../../../../hooks/use_persisted_conversation_id';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
-import { useConversation } from '../../../../../hooks/use_conversation';
 import { AttachmentHeader } from './attachment_header';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
@@ -56,20 +54,10 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   const { conversationActions } = useConversationContext();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
   const { updatePersistedConversationId } = usePersistedConversationId({});
-  const { conversation } = useConversation();
-
-  // Always use the latest version from the query cache so the inline reflects
-  // mutations (enable/disable/update) without waiting for the markdown to re-parse.
-  const liveAttachment = useMemo(() => {
-    const versioned = conversation?.attachments?.find((a) => a.id === attachment.id);
-    const latest = versioned ? getLatestVersion(versioned) : undefined;
-    if (!latest) return attachment;
-    return { ...attachment, data: latest.data, origin: versioned?.origin ?? attachment.origin };
-  }, [attachment, conversation?.attachments]);
 
   const openCanvas = useCallback(() => {
-    openCanvasContext(liveAttachment, isSidebar);
-  }, [openCanvasContext, liveAttachment, isSidebar]);
+    openCanvasContext(attachment, isSidebar, version);
+  }, [openCanvasContext, attachment, isSidebar, version]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {
@@ -87,13 +75,13 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     openSidebarConversationInternal();
   }, [conversationId, updatePersistedConversationId, openSidebarConversationInternal]);
 
-  const uiDefinition = attachmentsService.getAttachmentUiDefinition(liveAttachment.type);
-  const attachmentPreviewKey = getAttachmentPreviewKey(liveAttachment.id, version);
+  const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
+  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, version);
 
   const inlineActionButtons = useMemo(
     () =>
       uiDefinition?.getActionButtons?.({
-        attachment: liveAttachment,
+        attachment,
         isSidebar,
         updateOrigin,
         openCanvas,
@@ -107,7 +95,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       }),
     [
       uiDefinition,
-      liveAttachment,
+      attachment,
       isSidebar,
       updateOrigin,
       openCanvas,
@@ -126,7 +114,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     return null;
   }
 
-  const title = uiDefinition?.getLabel?.(liveAttachment) ?? liveAttachment.type.toUpperCase();
+  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
 
   return (
     <EuiSplitPanel.Outer
@@ -144,7 +132,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
         {uiDefinition?.renderInlineContent?.({
-          attachment: liveAttachment,
+          attachment,
           isSidebar,
           screenContext,
           openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
