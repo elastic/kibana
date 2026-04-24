@@ -15,7 +15,15 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import { securityTool } from './constants';
 import { pciIndexPatternSchema, buildScopeClaim } from './pci_compliance_schemas';
 
-const pciScopeType = z.enum(['all', 'network', 'identity', 'endpoint', 'cloud', 'application']);
+const pciScopeType = z.enum([
+  'all',
+  'network',
+  'identity',
+  'endpoint',
+  'cloud',
+  'application',
+  'vulnerability',
+]);
 
 const pciScopeDiscoverySchema = z.object({
   scopeType: pciScopeType
@@ -68,6 +76,10 @@ const SCOPE_RULES: Record<
   application: {
     fieldHints: ['event.category', 'url.domain', 'http.request.method', 'service.name'],
     nameHints: ['app', 'web', 'nginx', 'apache'],
+  },
+  vulnerability: {
+    fieldHints: ['vulnerability.id', 'vulnerability.severity', 'event.kind'],
+    nameHints: ['vuln', 'vulnerability', 'cve', 'ids', 'intrusion'],
   },
 };
 

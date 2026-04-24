@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
@@ -12,6 +14,7 @@ import type {
   EvalsExecutorClient,
   Example,
 } from '@kbn/evals';
+import { createSkillInvocationEvaluator } from '@kbn/evals';
 import type { PciEvalChatClient } from './chat_client';
 
 export interface PciDatasetExample extends Example {
@@ -70,10 +73,14 @@ export function createEvaluatePciDataset({
   evaluators,
   executorClient,
   chatClient,
+  traceEsClient,
+  log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: PciEvalChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
 }): EvaluatePciDataset {
   return async function evaluatePciDataset({
     dataset: { name, description, examples },
@@ -104,7 +111,14 @@ export function createEvaluatePciDataset({
           };
         },
       },
-      [createPciCriteriaEvaluator({ evaluators })]
+      [
+        createPciCriteriaEvaluator({ evaluators }),
+        createSkillInvocationEvaluator({
+          traceEsClient,
+          log,
+          skillName: 'pci-compliance',
+        }),
+      ]
     );
   };
 }

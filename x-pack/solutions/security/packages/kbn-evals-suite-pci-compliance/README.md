@@ -37,25 +37,42 @@ node scripts/evals start --suite pci-compliance
 
 All evaluation specs live under [`evals/pci_compliance`](./evals/pci_compliance).
 
+### Seeding a dev cluster manually
+
+To import the eval data into a remote dev cluster (e.g. Elastic Cloud):
+
+```sh
+# Requires x-pack/.env with: Elasticsearch=<url>, username=<user>, password=<pass>
+./scripts/seed_dev_cluster.sh            # seed data
+./scripts/seed_dev_cluster.sh --cleanup  # delete data streams
+```
+
 ## Scenarios
 
-| Spec                              | Skill / Tool                          | What it asserts                                                                                                |
-| --------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `requirement 8 — brute force`     | `pci_compliance` (`mode: "check"`)    | Detects failed-login evidence and scores Requirement 8 correctly.                                              |
-| `requirement 4 — weak TLS`        | `pci_compliance` (`mode: "check"`)    | Flags legacy TLS/SSL and surfaces affected destinations.                                                       |
-| `scope discovery`                 | `pci_scope_discovery`                 | Identifies PCI-relevant indices (auth, network, CHD) across seeded data and classifies them.                   |
-| `field mapping for custom data`   | `pci_field_mapper`                    | Suggests correct ECS targets for non-ECS custom fields.                                                        |
-| `posture report`                  | `pci_compliance` (`mode: "report"`)   | Generates a multi-requirement scorecard with appropriate statuses, counts, and confidence rollups.             |
+| Spec                                    | Skill / Tool                        | What it asserts                                                                                    |
+| --------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `full compliance report`                | `pci_compliance` (`mode: "report"`) | Full scorecard across all 12 requirements with correct RED/AMBER/GREEN status.                     |
+| `requirement 8.3.4 — brute force`       | `pci_compliance` (`mode: "check"`)  | Detects 7 failed logins for jdoe (exceeds threshold of 6), RED status.                             |
+| `requirement 4.1 — weak TLS`            | `pci_compliance` (`mode: "check"`)  | Flags TLS 1.0, TLS 1.1, and plain HTTP as violations.                                             |
+| `requirement 2.2.4 — default accounts`  | `pci_compliance` (`mode: "check"`)  | Flags admin and root successful logins as default-account violations.                              |
+| `scope discovery`                       | `pci_scope_discovery`               | Identifies 4 ECS indices and classifies them (identity, network, endpoint).                        |
+| `field mapping for custom data`         | `pci_field_mapper`                  | Suggests correct ECS targets for non-ECS fields (username → user.name, etc.).                      |
+| `scoped check (auth-only)`              | `pci_compliance`                    | Auth requirements produce real findings; network/vuln/malware requirements are NOT_ASSESSABLE.     |
+| `requirement 9 — no matching data`      | `pci_compliance` (`mode: "check"`)  | Returns AMBER/NOT_ASSESSABLE when no physical access events exist.                                 |
 
 ## Data generators
 
 Deterministic seed data lives in
 [`src/data_generators/pci_data.ts`](./src/data_generators/pci_data.ts). It
-provisions three index patterns:
+provisions five data streams:
 
-- `logs-pci-eval-auth-*` (ECS auth events, successful and failed logins)
-- `logs-pci-eval-network-*` (TLS connections with mixed versions)
-- `logs-pci-eval-custom-*` (non-ECS legacy field shapes for field-mapping tests)
+| Index                     | Contents                                             | Doc count |
+| ------------------------- | ---------------------------------------------------- | --------- |
+| `logs-pci-auth-eval`      | ECS auth events: 7 failed logins (jdoe), admin/root successes, IAM events | 13        |
+| `logs-pci-network-eval`   | TLS 1.3/1.2 (good), TLS 1.0/1.1 (weak), plain HTTP | 6         |
+| `logs-pci-vuln-eval`      | Critical/high CVEs, IDS alerts (exploit, port scan)  | 4         |
+| `logs-pci-endpoint-eval`  | Malware detection, suspicious process execution      | 2         |
+| `logs-pci-custom-eval`    | Non-ECS legacy fields for field-mapper tests         | 4         |
 
 The generators expose `seedPciEvalData()` and `cleanupPciEvalData()` so each
 spec owns its lifecycle without leaking indices between runs.

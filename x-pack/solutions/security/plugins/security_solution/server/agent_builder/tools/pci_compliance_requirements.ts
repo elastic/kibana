@@ -274,8 +274,12 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Upgrade to TLS 1.2 or 1.3 and restrict cipher suites to strong algorithms.',
     ],
     buildViolationEsql: (i) =>
-      `FROM ${i} | WHERE ${TIME_WINDOW} AND tls.version IS NOT NULL AND tls.version IN ("1.0", "1.1", "SSLv3", "SSLv2") | STATS connection_count = COUNT(*) BY destination.ip, tls.version | SORT connection_count DESC | LIMIT 50`,
-    buildCoverageEsql: (i) => coverageQuery(i, 'tls.version IS NOT NULL'),
+      `FROM ${i} | WHERE ${TIME_WINDOW} AND (` +
+      `(tls.version IS NOT NULL AND tls.version IN ("1.0", "1.1", "SSLv3", "SSLv2")) OR ` +
+      `(network.protocol == "http" AND tls.version IS NULL)` +
+      `) | STATS connection_count = COUNT(*) BY destination.ip, tls.version | SORT connection_count DESC | LIMIT 50`,
+    buildCoverageEsql: (i) =>
+      coverageQuery(i, 'tls.version IS NOT NULL OR network.protocol IS NOT NULL'),
   },
 
   '5.2.1': {
