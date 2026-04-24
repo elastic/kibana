@@ -84,29 +84,57 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     });
 
     // When CCS is enabled, also fetch remote-only monitors from ping data.
+    // We need ALL local config IDs (not just the current page) to correctly
+    // identify remote-only monitors, and we paginate them after local monitors.
     // Wrapped in try-catch so a CCS failure doesn't break the management page.
     let remoteMonitors: RemoteMonitorListItem[] | undefined;
+    let remoteTotal = 0;
     if (isCCSEnabled(server)) {
       try {
+        // Fetch all local config IDs to correctly exclude monitors that exist locally
+        const allLocalMonitors = await monitorConfigRepository.getAll({
+          fields: [ConfigKey.CONFIG_ID],
+        });
         const localConfigIds = new Set(
-          savedObjects.map((so) => so.attributes[ConfigKey.CONFIG_ID])
+          allLocalMonitors.map((so) => so.attributes[ConfigKey.CONFIG_ID])
         );
-        remoteMonitors = await getRemoteMonitorsList({
+        const allRemote = await getRemoteMonitorsList({
           syntheticsEsClient,
           localConfigIds,
         });
+        remoteTotal = allRemote.length;
+
+        // Paginate remote monitors after local ones.
+        // Remote monitors logically come after all local monitors in the list.
+        const localTotal = queryResultSavedObjects.total;
+        const perPage = queryParams.perPage ?? 50;
+        const page = queryParams.page ?? 1;
+        const pageStart = (page - 1) * perPage; // absolute offset of current page
+        const pageEnd = pageStart + perPage;
+
+        if (remoteTotal > 0 && pageEnd > localTotal) {
+          // This page overlaps with the remote monitors region
+          const remoteStart = Math.max(0, pageStart - localTotal);
+          const remoteEnd = pageEnd - localTotal;
+          remoteMonitors = allRemote.slice(remoteStart, remoteEnd);
+        }
       } catch (e) {
         server.logger.error(`Failed to fetch remote monitors list: ${e.message}`);
       }
     }
 
+    // Include remote monitor count in totals so frontend pagination is correct
+    const totalWithRemote = queryResultSavedObjects.total + remoteTotal;
+    const absoluteTotalWithRemote = absoluteTotal + remoteTotal;
+
     return {
       ...rest,
+      total: totalWithRemote,
       monitors,
-      absoluteTotal,
+      absoluteTotal: absoluteTotalWithRemote,
       perPage: perPageT,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
-      ...(remoteMonitors ? { remoteMonitors } : {}),
+      ...(remoteMonitors && remoteMonitors.length > 0 ? { remoteMonitors } : {}),
     };
   },
 });

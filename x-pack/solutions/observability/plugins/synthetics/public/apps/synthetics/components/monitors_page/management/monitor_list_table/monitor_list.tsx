@@ -107,7 +107,8 @@ export const MonitorList = ({
     return [...localItems, ...remoteItems];
   }, [syntheticsMonitors, remoteMonitors]);
 
-  const totalItemCount = total + remoteMonitors.length;
+  // total already includes remote monitors (server-side pagination)
+  const totalItemCount = total;
 
   const handleOnChange = useCallback(
     ({
