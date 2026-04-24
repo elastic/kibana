@@ -100,22 +100,19 @@ export const EntitiesDetails: React.FC = () => {
     hostNameFromStore
   );
 
-  const showUserDetails =
-    timestamp &&
-    (resolvedUserName != null ||
-      (entityStoreV2Enabled && userEntityFromStore.entityRecord != null));
+  const userDisplayName = userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName;
+  const hostDisplayName = hostEntityFromStore.entityRecord?.entity?.name ?? resolvedHostName;
+
+  const showUserDetails = timestamp != null && userDisplayName != null;
   const showHostDetails =
-    hostEntityIdentifiers &&
-    timestamp &&
-    (resolvedHostName != null ||
-      (entityStoreV2Enabled && hostEntityFromStore.entityRecord != null));
-  const showDetails = timestamp && (showUserDetails || showHostDetails);
+    hostEntityIdentifiers != null && timestamp != null && hostDisplayName != null;
+  const showDetails = showUserDetails || showHostDetails;
 
   return (
     <>
       {showDetails ? (
         <EuiFlexGroup direction="column" gutterSize="m" data-test-subj={ENTITIES_DETAILS_TEST_ID}>
-          {showUserDetails && resolvedUserName != null && (
+          {showUserDetails && (
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h3>
@@ -127,14 +124,14 @@ export const EntitiesDetails: React.FC = () => {
               </EuiTitle>
               <EuiSpacer size="s" />
               <UserDetails
-                userName={userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName}
+                userName={userDisplayName}
                 entityId={userEntityFromStore?.entityRecord?.entity?.id}
                 timestamp={timestamp}
                 scopeId={scopeId}
               />
             </EuiFlexItem>
           )}
-          {showHostDetails && resolvedHostName != null && (
+          {showHostDetails && (
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h3>
@@ -147,7 +144,7 @@ export const EntitiesDetails: React.FC = () => {
               <EuiSpacer size="s" />
 
               <HostDetails
-                hostName={resolvedHostName}
+                hostName={hostDisplayName}
                 entityId={hostEntityFromStore?.entityRecord?.entity?.id}
                 timestamp={timestamp}
                 scopeId={scopeId}

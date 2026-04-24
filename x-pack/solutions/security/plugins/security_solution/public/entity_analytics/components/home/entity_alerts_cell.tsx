@@ -72,7 +72,9 @@ export const EntityAlertsCell: React.FC<{
   const entityFilters = useMemo(() => {
     if (euidApi?.euid && entityRecord) {
       const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(entityType, entityRecord);
-      return filter != null ? [filter] : [];
+      if (filter != null) {
+        return [filter];
+      }
     }
     return [{ term: { [filterField]: entityName } }];
   }, [euidApi?.euid, filterField, entityName, entityType, entityRecord]);
