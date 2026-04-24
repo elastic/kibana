@@ -7,6 +7,7 @@
 
 import { hostname as osHostname } from 'os';
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -35,11 +36,14 @@ import {
   buildSingleScoreDocument,
 } from './utils/report_model_score';
 import { getGitMetadata } from './utils/git_metadata';
-import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
+import {
+  createDefaultTerminalReporter,
+  type EvaluationReporter,
+} from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
-import { EvaluationScoreRepository } from './utils/score_repository';
+import { EvaluationScoreRepository, type EvaluationScoreDocument } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
   createCachedTokensEvaluator,
@@ -58,12 +62,12 @@ import type {
 } from './types';
 
 export interface ExportAndReportOptions {
-  documents: import('./utils/score_repository').EvaluationScoreDocument[];
+  documents: EvaluationScoreDocument[];
   scoreRepository: EvaluationScoreRepository;
   evaluationsEsClient: EsClient;
-  reportModelScore: import('./utils/reporting/evaluation_reporter').EvaluationReporter;
+  reportModelScore: EvaluationReporter;
   runId: string;
-  log: import('@kbn/some-dev-log').SomeDevLog;
+  log: SomeDevLog;
   taskModelId?: string;
   suiteId?: string;
 }
