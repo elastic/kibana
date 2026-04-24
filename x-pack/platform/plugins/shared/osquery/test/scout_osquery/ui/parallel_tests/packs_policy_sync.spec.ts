@@ -19,13 +19,6 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
   // requiring try/finally inside test bodies.
   const transientPackIds: string[] = [];
 
-  test.afterEach(async ({ apiServices }) => {
-    while (transientPackIds.length > 0) {
-      const id = transientPackIds.pop();
-      if (id) await apiServices.osquery.packs.delete(id);
-    }
-  });
-
   test.beforeAll(async ({ apiServices }) => {
     // Orphan `scout-policy-*` / `scout-dup-*` cleanup is handled once per
     // environment by the defensive-cleanup globalSetupHook.
@@ -41,9 +34,21 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     savedQueryLabel = inner.id;
   });
 
+  test.afterEach(async ({ apiServices }) => {
+    while (transientPackIds.length > 0) {
+      const id = transientPackIds.pop();
+      if (id) await apiServices.osquery.packs.delete(id);
+    }
+  });
+
   test.afterAll(async ({ apiServices }) => {
     await apiServices.osquery.savedQueries.delete(savedQueryId);
   });
+
+  interface FleetPackPolicyItem {
+    name: string;
+    inputs?: Array<{ config?: { osquery?: { value?: { packs?: Record<string, unknown> } } } }>;
+  }
 
   test('toggles pack active state and observes Fleet policy updates', async ({
     browserAuth,
@@ -82,14 +87,38 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     // action can proceed.
     await pageObjects.osqueryPackForm.confirmPolicyChangeModal();
 
-    const afterToggle = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
-    const items = (afterToggle.data as { items: Array<{ name: string; enabled?: boolean }> })
-      .items;
-    const match = items.find((p) => p.name === `Policy for Default policy`);
-    expect(match).toBeDefined();
+    const packKey = `default--${packName}`;
+    await expect
+      .poll(
+        async () => {
+          const policies = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
+          const items = (policies.data as { items: FleetPackPolicyItem[] }).items;
+          const match = items.find((p) => p.name === 'Policy for Default policy');
+          const packsAfterDisable = match?.inputs?.[0]?.config?.osquery?.value?.packs ?? {};
+
+          return Object.prototype.hasOwnProperty.call(packsAfterDisable, packKey);
+        },
+        { timeout: 120_000 }
+      )
+      .toBe(false);
 
     await pageObjects.osqueryPackForm.togglePackActiveFromList(packName);
     await pageObjects.osqueryPackForm.confirmPolicyChangeModal();
+
+    await expect
+      .poll(
+        async () => {
+          const policies = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
+          const items = (policies.data as { items: FleetPackPolicyItem[] }).items;
+          const match = items.find((p) => p.name === 'Policy for Default policy');
+          const packsAfterEnable = match?.inputs?.[0]?.config?.osquery?.value?.packs ?? {};
+
+          return Object.prototype.hasOwnProperty.call(packsAfterEnable, packKey);
+        },
+        // Re-enable + Fleet PUT can lag disable on cold serverless stacks.
+        { timeout: 180_000 }
+      )
+      .toBe(true);
   });
 
   test('duplicates a pack from the kebab menu with a _copy suffix', async ({
@@ -135,12 +164,29 @@ test.describe('Pack Fleet policy sync', { tag: localTags }, () => {
     const nameInput = page.locator('input[name="name"]');
     await expect(nameInput).toHaveValue(`${packName}_copy`, { timeout: 30_000 });
 
-    // Find the persisted duplicate saved object so cleanup can remove it —
-    // relying on the UI toast alone would leak the copy across CI runs.
+    // `POST /api/osquery/packs/{id}/copy` persists the `_copy` pack server-side and
+    // navigates here in edit mode — there is no `save-pack-button` (create-only).
+    const copyPackName = `${packName}_copy`;
+    await expect
+      .poll(
+        async () => {
+          const listed = await apiServices.osquery.packs.list();
+          const rows = (listed.data as { data: Array<{ name?: string }> }).data;
+
+          return rows.some((p) => p.name === copyPackName);
+        },
+        { timeout: 60_000 }
+      )
+      .toBe(true);
+
     const packs = await apiServices.osquery.packs.list();
-    const items = (packs.data as { data: Array<{ name?: string; saved_object_id: string }> })
+    const dupItems = (packs.data as { data: Array<{ name?: string; saved_object_id: string }> })
       .data;
-    const duplicatePackId = items.find((p) => p.name === `${packName}_copy`)?.saved_object_id;
-    if (duplicatePackId) transientPackIds.push(duplicatePackId);
+    const duplicatePackId = dupItems.find((p) => p.name === copyPackName)?.saved_object_id;
+    expect(
+      duplicatePackId,
+      `duplicate pack ${packName}_copy should persist after save`
+    ).toBeDefined();
+    transientPackIds.push(duplicatePackId!);
   });
 });

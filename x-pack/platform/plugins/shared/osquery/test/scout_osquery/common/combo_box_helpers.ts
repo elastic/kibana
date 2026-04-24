@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 /**
  * `EuiComboBoxWrapper.selectSingleOption` from `@kbn/scout` doesn't cover the
@@ -27,7 +28,9 @@ import type { Locator, ScoutPage } from '@kbn/scout';
  * `euiFilterSelectItem`, so this is stable across both variants above.
  *
  * Callers scope to the combobox wrapper (by `data-test-subj` or an existing
- * `Locator`). The helper handles focus → type → click-by-title.
+ * `Locator`). The helper opens the list via `comboBoxSearchInput`, fills the
+ * filter, polls until the matching row appears (async options), then clicks by
+ * `title`.
  */
 export interface SelectComboBoxOptionParams {
   /**
@@ -59,21 +62,39 @@ export async function selectSingleAsPlainTextOption(
   const searchInput = wrapperLocator.locator('[data-test-subj="comboBoxSearchInput"]');
 
   await searchInput.waitFor({ state: 'visible', timeout: 15_000 });
+  await expect(searchInput).toBeEnabled({ timeout: 15_000 });
 
-  // Click the main input to open the popover. Scope to the wrapper's own
-  // main input (not the inner search input) because clicking the inner
-  // input doesn't always open the dropdown on the first attempt.
-  await wrapperLocator.locator('[data-test-subj="comboBoxInput"]').click();
+  // Open the dropdown by clicking `comboBoxSearchInput`, not the `comboBoxInput`
+  // wrapper div. EUI mounts the wrapper as a focus target; when the pack
+  // combobox re-renders after `usePacks` hydrates options (e.g. flyout pack
+  // mode on serverless), Playwright can lose the wrapper mid-click ("element
+  // was detached from the DOM"). The inner `<input>` is the stable typing
+  // target — same pattern as `AlertFlyoutPage.clearAgentsAndSelectAllAgents`.
+  const escaped = optionName.replace(/"/g, '\\"');
+  // Prefer visible options only: stacked Security flyouts / portals can leave
+  // duplicate `.euiFilterSelectItem` nodes in the DOM (hidden shells + active
+  // listbox). `page.locator(...).first()` then races the wrong row and times
+  // out on click — the alert pack-picker and live-query flows both hit this.
+  const optionLocator = page
+    .locator(`.euiFilterSelectItem[title="${escaped}"]`)
+    .filter({ visible: true });
 
-  // Type with a per-key delay so async option loading (e.g., packs/saved
-  // queries fetched server-side) can filter down to our target label.
-  await searchInput.pressSequentially(optionName, { delay: 20 });
+  // Options often hydrate after async fetches (e.g. `usePacks` in the live-query
+  // form). Opening the list right after toggling pack mode can race ahead of
+  // `/api/osquery/packs` — the dropdown is empty until react-query settles, so
+  // a single click+type+click misses every time. Re-open and re-apply the filter
+  // until the row mounts (virtualized list still renders matching rows).
+  await expect(async () => {
+    await searchInput.click({ timeout: 15_000 });
+    await searchInput.fill(optionName);
+    // eslint-disable-next-line playwright/no-nth-methods -- first matching option after async/virtualized list hydration
+    await expect(optionLocator.first()).toBeVisible({ timeout: 8_000 });
+  }).toPass({ timeout: 60_000 });
 
   // Click the option by `title` — EUI's stable label attribute, independent of
-  // the option's accessible name / visible text. Escape double-quotes in the
-  // user-supplied label so selectors with quotes don't break. NOTE: do NOT
-  // press Escape afterwards — the key bubbles up and closes the surrounding
-  // alert flyout when this helper runs from a flyout context.
-  const escaped = optionName.replace(/"/g, '\\"');
-  await page.locator(`.euiFilterSelectItem[title="${escaped}"]`).click();
+  // the option's accessible name / visible text. NOTE: do NOT press Escape
+  // afterwards — the key bubbles up and closes the surrounding alert flyout
+  // when this helper runs from a flyout context.
+  // eslint-disable-next-line playwright/no-nth-methods -- same locator as visibility check above; first visible option
+  await optionLocator.first().click({ timeout: 30_000 });
 }

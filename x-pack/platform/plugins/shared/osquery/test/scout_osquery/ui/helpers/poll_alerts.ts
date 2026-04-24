@@ -10,7 +10,8 @@ import type { KbnClient } from '@kbn/scout';
 /**
  * Serverless security projects show meaningfully higher task-manager latency between
  * detection-rule creation and the first alert landing in `.alerts-security.alerts-*`.
- * `openRuleAlertsView()` assumes the alerts view will populate within its inline wait,
+ * `openRuleAlertsView()` / `openSeededAlertFlyout()` assume the alerts view (or redirect)
+ * will populate within their inline wait,
  * but under UIAM/task-manager lag the view renders with zero rows and the follow-on
  * assertions race a still-empty index.
  *

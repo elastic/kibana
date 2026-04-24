@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class OsqueryCasesPage {
   public readonly packQueriesKebabs: Locator;
@@ -87,12 +88,12 @@ export class OsqueryCasesPage {
   async expectOsqueryAttachmentVisible(): Promise<void> {
     // eslint-disable-next-line playwright/no-nth-methods -- a case body may render multiple "attached Osquery results" entries when several queries are attached; first-match readiness is sufficient for the assertion
     const firstAttachment = this.osqueryAttachmentText.first();
-    await firstAttachment.waitFor({ state: 'visible', timeout: 60_000 });
+    await expect(firstAttachment).toBeVisible({ timeout: 60_000 });
   }
 
   async expectTextInCaseBody(text: string): Promise<void> {
     // eslint-disable-next-line playwright/no-nth-methods -- multiple case-body elements may contain the same text (e.g. comment + activity log); first-match is sufficient for the visibility assertion
-    await this.page.getByText(text).first().waitFor({ state: 'visible', timeout: 60_000 });
+    await expect(this.page.getByText(text).first()).toBeVisible({ timeout: 60_000 });
   }
 
   async navigateToOsqueryApp(): Promise<void> {

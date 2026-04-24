@@ -5,14 +5,12 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
-import {
-  buildOsqueryAlertTestRule,
-  createDetectionRule,
-  deleteDetectionRule,
-} from '../helpers/detection_rule_lifecycle';
+import { buildOsqueryAlertTestRule } from '../helpers/detection_rule_lifecycle';
 import { getFirstOnlineAgent } from '../helpers/fleet_agents';
 import {
   bootstrapSecurityAlertsIndex,
@@ -27,16 +25,27 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
   let ruleName: string;
   let packId: string;
   let packName: string;
+  let embeddedRuleBody: ReturnType<typeof buildOsqueryAlertTestRule>;
   // Tracks case ids this test's test body created so `afterEach` can clean up
   // without a try/finally inside the test body.
   const transientCaseIds: string[] = [];
 
-  test.beforeAll(async ({ esClient, kbnClient, apiServices }) => {
+  test.beforeAll(async ({ kbnClient, apiServices }) => {
+    const policiesResponse = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
+    const firstPolicyId = (policiesResponse.data as { items: Array<{ policy_ids: string[] }> })
+      .items[0]?.policy_ids?.[0];
+    if (!firstPolicyId) {
+      throw new Error(
+        'alert_case_creation: no Fleet policy id from listFleetWrapperPackagePolicies'
+      );
+    }
+
     const pack = await apiServices.osquery.packs.create({
       name: `scout-alert-case-pack-${Date.now()}`,
       enabled: true,
       description: 'scout',
       shards: {},
+      policy_ids: [firstPolicyId],
       queries: {
         q1: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
       },
@@ -45,13 +54,13 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
       .saved_object_id;
     packName = (pack.data as { data: { saved_object_id: string; name: string } }).data.name;
 
-    const rule = buildOsqueryAlertTestRule({ includeResponseActions: true });
-    const created = await createDetectionRule(kbnClient, rule);
-    ruleId = created.id;
-    ruleName = created.name;
+    embeddedRuleBody = buildOsqueryAlertTestRule({
+      includeResponseActions: true,
+      nameSuffix: `scout-case-${Date.now()}`,
+    });
+    ruleId = randomUUID();
+    ruleName = embeddedRuleBody.name;
 
-    // Pre-warm the security alerts index so the per-test seed goes to a
-    // ready data stream. Idempotent.
     await bootstrapSecurityAlertsIndex(kbnClient);
   });
 
@@ -62,11 +71,10 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     }
   });
 
-  test.afterAll(async ({ esClient, kbnClient, apiServices, log }) => {
+  test.afterAll(async ({ esClient, apiServices, log }) => {
     await deleteSeededAlerts(esClient, ruleId).catch((err: Error) =>
       log.debug(`deleteSeededAlerts failed: ${err.message}`)
     );
-    await deleteDetectionRule(kbnClient, ruleId);
     await apiServices.osquery.packs.delete(packId);
   });
 
@@ -105,18 +113,19 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
     const existingCaseId = existingCase.data.id;
     transientCaseIds.push(existingCaseId);
 
-    // Seed an alert directly into `.alerts-security.alerts-default` for this
-    // rule + a known Osquery-enrolled agent. Bypasses task-manager latency;
-    // `openRuleAlertsView` sees the row immediately. See `helpers/seed_alert.ts`
-    // for the schema contract and the `agent.id` gating on the Run Osquery menu.
     const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
-    await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
+    const seed = await seedAlertForRule(esClient, {
+      ruleId,
+      ruleName,
+      agentId,
+      hostName,
+      embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
+    });
 
     await browserAuth.loginAsOsqueryPowerUser();
 
     await test.step('submit osquery in pack mode from the alert flyout', async () => {
-      await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
-      await pageObjects.osqueryAlertFlyout.expandFirstAlert();
+      await pageObjects.osqueryRuleEditor.openSeededAlertFlyout(seed);
       await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
       await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
       await pageObjects.osqueryAlertFlyout.waitForFlyoutEditorReady();

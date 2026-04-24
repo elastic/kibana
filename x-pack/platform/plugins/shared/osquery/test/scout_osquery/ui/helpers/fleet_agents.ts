@@ -7,6 +7,8 @@
 
 import type { KbnClient } from '@kbn/scout';
 
+import { SCOUT_ALERT_HOST_OS_NAME_FALLBACK } from './seed_alert';
+
 /**
  * Poll Fleet until at least `expectedCount` agents are in `online`/`degraded` state.
  *
@@ -68,6 +70,7 @@ interface FleetAgentItem {
   status: string;
   local_metadata?: {
     host?: { hostname?: string; name?: string };
+    os?: { name?: string };
   };
 }
 
@@ -77,13 +80,18 @@ interface FleetAgentItem {
  * Run Osquery item is gated on `agent.id` being present on the alert doc AND
  * the agent being Osquery-enabled in Fleet.
  *
+ * `hostOsName` comes from Fleet `local_metadata.os.name`, which matches
+ * `os_version.name` for `SELECT * FROM os_version where name='…'` on typical
+ * elastic-agent Linux images (Ubuntu vs RHEL/UBI, etc.). Falls back to
+ * `SCOUT_ALERT_HOST_OS_NAME_FALLBACK` when metadata is missing.
+ *
  * Internally gates on `waitForAtLeastOneAgentOnline` so callers don't race the
  * Fleet listing when `global.setup.ts` enrollment has just completed.
  */
 export async function getFirstOnlineAgent(
   kbnClient: KbnClient,
   opts?: { timeoutMs?: number; pollIntervalMs?: number }
-): Promise<{ agentId: string; hostName: string }> {
+): Promise<{ agentId: string; hostName: string; hostOsName: string }> {
   await waitForAtLeastOneAgentOnline(kbnClient, opts);
 
   const { data } = await kbnClient.request<{ items: FleetAgentItem[] }>({
@@ -102,7 +110,13 @@ export async function getFirstOnlineAgent(
   const hostName =
     agent.local_metadata?.host?.hostname ?? agent.local_metadata?.host?.name ?? 'scout-host';
 
-  return { agentId: agent.id, hostName };
+  const rawOsName = agent.local_metadata?.os?.name;
+  const hostOsName =
+    typeof rawOsName === 'string' && rawOsName.trim().length > 0
+      ? rawOsName.trim()
+      : SCOUT_ALERT_HOST_OS_NAME_FALLBACK;
+
+  return { agentId: agent.id, hostName, hostOsName };
 }
 
 /**

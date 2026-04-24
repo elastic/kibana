@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class FleetIntegrationPage {
   public readonly gotItButton: Locator;
@@ -16,7 +17,6 @@ export class FleetIntegrationPage {
   public readonly addPackagePolicyButton: Locator;
   public readonly addIntegrationFlyout: Locator;
   public readonly addIntegrationFlyoutSubmit: Locator;
-  public readonly comboBoxInput: Locator;
   public readonly packagePolicyNameInput: Locator;
   public readonly integrationPolicyUpgradeBtn: Locator;
 
@@ -29,7 +29,6 @@ export class FleetIntegrationPage {
     this.addPackagePolicyButton = this.page.testSubj.locator('addPackagePolicyButton');
     this.addIntegrationFlyout = this.page.testSubj.locator('addIntegrationFlyout');
     this.addIntegrationFlyoutSubmit = this.page.testSubj.locator('addIntegrationFlyout.submitBtn');
-    this.comboBoxInput = this.page.testSubj.locator('comboBoxInput');
     this.packagePolicyNameInput = this.page.testSubj.locator('packagePolicyNameInput');
     this.integrationPolicyUpgradeBtn = this.page.testSubj.locator('integrationPolicyUpgradeBtn');
   }
@@ -68,7 +67,19 @@ export class FleetIntegrationPage {
    * the tour overlay.
    */
   async createAgentPolicy(policyName: string): Promise<void> {
-    await this.createAgentPolicyButton.click();
+    const headerCreate = this.createAgentPolicyButton;
+    const emptyStateCreate = this.page.testSubj.locator('emptyPromptCreateAgentPolicyButton');
+
+    await headerCreate.waitFor({ state: 'visible', timeout: 120_000 });
+
+    if (await emptyStateCreate.isVisible().catch(() => false)) {
+      await expect(emptyStateCreate).toBeEnabled({ timeout: 30_000 });
+      await emptyStateCreate.click();
+    } else {
+      await expect(headerCreate).toBeEnabled({ timeout: 30_000 });
+      await headerCreate.click();
+    }
+
     await this.createAgentPolicyNameField.fill(policyName);
     await this.createAgentPolicyFlyoutBtn.click();
   }
@@ -85,12 +96,25 @@ export class FleetIntegrationPage {
     await this.addPackagePolicyButton.click();
     await this.addIntegrationFlyout.waitFor({ state: 'visible' });
 
-    await this.comboBoxInput.fill('osquery manager');
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
+    // Inner `comboBoxSearchInput` — the wrapper `comboBoxInput` is not fillable.
+    const integrationSearchInput = this.addIntegrationFlyout.locator(
+      '[data-test-subj="comboBoxSearchInput"]'
+    );
+    await integrationSearchInput.fill('osquery manager');
 
-    await this.packagePolicyNameInput.fill('');
-    await this.packagePolicyNameInput.fill(integrationName);
+    // EUI portals the combobox listbox into a separate overlay dialog, not a
+    // descendant of `addIntegrationFlyout`. Cypress selects via
+    // `cy.get('[role="option"]').first()` on `body` for the same reason.
+    await this.page
+      .getByRole('option', { name: /Osquery Manager/i })
+      // eslint-disable-next-line playwright/no-nth-methods -- listbox is portaled; multiple matches possible across overlays
+      .first()
+      .click();
+
+    const packagePolicyNameField = this.page.getByTestId('packagePolicyNameInput');
+    await packagePolicyNameField.waitFor({ state: 'visible', timeout: 120_000 });
+    await packagePolicyNameField.fill('');
+    await packagePolicyNameField.fill(integrationName);
     await this.addIntegrationFlyoutSubmit.click();
     await this.page.locator(`[title="${integrationName}"]`).waitFor({ timeout: 60_000 });
   }

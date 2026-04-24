@@ -90,96 +90,96 @@ test.describe('Pack agent-triggered results', { tag: localTags }, () => {
     transientPackIds.push(packId);
 
     await test.step('scheduled results surface in the history API', async () => {
-        // The unified-history aggregation groups by `schedule_id` over
-        // `logs-osquery_manager.result-*`. Poll until a row matching our pack
-        // name appears — this is the definitive "agent ran it, ES ingested
-        // it, Kibana aggregated it" signal. 6 min budget leaves enough
-        // headroom for Docker-agent cold starts on CI.
-        const deadline = Date.now() + 360_000;
-        let matched: UnifiedHistoryRow | undefined;
-        while (Date.now() < deadline) {
-          try {
-            const { data } = await kbnClient.request<{ data: UnifiedHistoryRow[] }>({
-              method: 'GET',
-              path: '/api/osquery/history',
-              query: { pageSize: 100, sourceFilters: 'scheduled' },
-              headers: { 'elastic-api-version': '2023-10-31' },
-            });
-            matched = data.data?.find((row) => row.packName === packName);
-            if (matched) break;
-          } catch {
-            // retry — ES may still be warming up
-          }
-
-          await new Promise((r) => setTimeout(r, 5_000));
+      // The unified-history aggregation groups by `schedule_id` over
+      // `logs-osquery_manager.result-*`. Poll until a row matching our pack
+      // name appears — this is the definitive "agent ran it, ES ingested
+      // it, Kibana aggregated it" signal. 6 min budget leaves enough
+      // headroom for Docker-agent cold starts on CI.
+      const deadline = Date.now() + 360_000;
+      let matched: UnifiedHistoryRow | undefined;
+      while (Date.now() < deadline) {
+        try {
+          const { data } = await kbnClient.request<{ data: UnifiedHistoryRow[] }>({
+            method: 'GET',
+            path: '/api/osquery/history',
+            query: { pageSize: 100, sourceFilters: 'scheduled' },
+            headers: { 'elastic-api-version': '2023-10-31' },
+          });
+          matched = data.data?.find((row) => row.packName === packName);
+          if (matched) break;
+        } catch {
+          // retry — ES may still be warming up
         }
 
-        expect(
-          matched,
-          `expected scheduled history row with packName="${packName}" within 6 min (agent did not ship scheduled results to ES)`
-        ).toBeDefined();
-        capturedScheduleId = matched!.scheduleId;
-        capturedExecutionCount = matched!.executionCount;
+        await new Promise((r) => setTimeout(r, 5_000));
+      }
+
+      expect(
+        matched,
+        `expected scheduled history row with packName="${packName}" within 6 min (agent did not ship scheduled results to ES)`
+      ).toBeDefined();
+      capturedScheduleId = matched!.scheduleId;
+      capturedExecutionCount = matched!.executionCount;
+    });
+
+    await browserAuth.loginAsOsqueryPowerUser();
+
+    await test.step('unified history page renders the scheduled row', async () => {
+      await pageObjects.osqueryNavigation.gotoHistory();
+      // Rows carry `data-test-subj="row-${scheduleId}_${executionCount}"`
+      // (see `process_scheduled_history.ts`). We know both values from the
+      // API step above, so target the exact row to avoid strict-mode
+      // duplicate matches when several executions have landed.
+      const rowTestSubj = `row-${capturedScheduleId}_${capturedExecutionCount}`;
+      await expect(page.testSubj.locator(rowTestSubj)).toBeVisible({ timeout: 60_000 });
+    });
+
+    await test.step('scheduled execution details page resolves with real result data', async () => {
+      // The scheduled-execution details route is at
+      // `/app/osquery/history/scheduled/{scheduleId}/{executionCount}` (see
+      // `routes/history/index.tsx`). Navigate there directly using the
+      // values captured from the history API — going via the row's Details
+      // button in the `UnifiedHistoryTable` fights EUI's actions-on-hover
+      // behaviour for no additional coverage. The route resolution +
+      // `<PackQueriesStatusTable>` mount is what we want to exercise.
+      await page.gotoApp(
+        `osquery/history/scheduled/${capturedScheduleId}/${capturedExecutionCount}`
+      );
+
+      // Page-load signal: the "Query results" header on the details page.
+      await expect(page.getByRole('heading', { name: 'Query results' })).toBeVisible({
+        timeout: 60_000,
       });
 
-      await browserAuth.loginAsOsqueryPowerUser();
+      // The pack name is rendered as an `EuiBadge` next to the query ID —
+      // asserting the badge is visible ties the rendered page specifically
+      // to OUR pack (the page shell itself is generic).
+      await expect(page.getByText(packName, { exact: true })).toBeVisible({ timeout: 30_000 });
 
-      await test.step('unified history page renders the scheduled row', async () => {
-        await pageObjects.osqueryNavigation.gotoHistory();
-        // Rows carry `data-test-subj="row-${scheduleId}_${executionCount}"`
-        // (see `process_scheduled_history.ts`). We know both values from the
-        // API step above, so target the exact row to avoid strict-mode
-        // duplicate matches when several executions have landed.
-        const rowTestSubj = `row-${capturedScheduleId}_${capturedExecutionCount}`;
-        await expect(page.testSubj.locator(rowTestSubj)).toBeVisible({ timeout: 60_000 });
-      });
-
-      await test.step('scheduled execution details page resolves with real result data', async () => {
-        // The scheduled-execution details route is at
-        // `/app/osquery/history/scheduled/{scheduleId}/{executionCount}` (see
-        // `routes/history/index.tsx`). Navigate there directly using the
-        // values captured from the history API — going via the row's Details
-        // button in the `UnifiedHistoryTable` fights EUI's actions-on-hover
-        // behaviour for no additional coverage. The route resolution +
-        // `<PackQueriesStatusTable>` mount is what we want to exercise.
-        await page.gotoApp(
-          `osquery/history/scheduled/${capturedScheduleId}/${capturedExecutionCount}`
-        );
-
-        // Page-load signal: the "Query results" header on the details page.
-        await expect(page.getByRole('heading', { name: 'Query results' })).toBeVisible({
-          timeout: 60_000,
+      // The details page mounts the result data grid with one row per agent
+      // that shipped a result for this execution. Asserting that the
+      // enrolled Docker agent's hostname renders confirms:
+      //   - the aggregation found the agent's doc for this schedule_id + exec count
+      //   - `<PackQueriesStatusTable>` mounted and the data grid rendered
+      // `scout-osquery-agent-0` / `scout-osquery-agent-1` are provisioned
+      // by `global.setup.ts`; either one is sufficient.
+      //
+      // The Results tab mounts `<ResultsTable>` which kicks off its own
+      // indexPattern + search request before any cells render. On
+      // cold serverless stacks that can take longer than a raw 30 s
+      // `toBeVisible` budget, so we wait for the panel wrapper first
+      // (signals the tab's content has mounted) and then poll the agent
+      // cell inside the panel with `toPass` — retries survive the
+      // data-grid virtualization remount that happens once the first
+      // response arrives.
+      const resultsPanel = page.testSubj.locator('osqueryResultsPanel');
+      await resultsPanel.waitFor({ state: 'visible', timeout: 60_000 });
+      await expect(async () => {
+        // eslint-disable-next-line playwright/no-nth-methods -- either agent-0 or agent-1 appearing in the panel proves results landed; the regex may match both within the virtualized grid
+        await expect(resultsPanel.getByText(/scout-osquery-agent-[01]/).first()).toBeVisible({
+          timeout: 5_000,
         });
-
-        // The pack name is rendered as an `EuiBadge` next to the query ID —
-        // asserting the badge is visible ties the rendered page specifically
-        // to OUR pack (the page shell itself is generic).
-        await expect(page.getByText(packName, { exact: true })).toBeVisible({ timeout: 30_000 });
-
-        // The details page mounts the result data grid with one row per agent
-        // that shipped a result for this execution. Asserting that the
-        // enrolled Docker agent's hostname renders confirms:
-        //   - the aggregation found the agent's doc for this schedule_id + exec count
-        //   - `<PackQueriesStatusTable>` mounted and the data grid rendered
-        // `scout-osquery-agent-0` / `scout-osquery-agent-1` are provisioned
-        // by `global.setup.ts`; either one is sufficient.
-        //
-        // The Results tab mounts `<ResultsTable>` which kicks off its own
-        // indexPattern + search request before any cells render. On
-        // cold serverless stacks that can take longer than a raw 30 s
-        // `toBeVisible` budget, so we wait for the panel wrapper first
-        // (signals the tab's content has mounted) and then poll the agent
-        // cell inside the panel with `toPass` — retries survive the
-        // data-grid virtualization remount that happens once the first
-        // response arrives.
-        const resultsPanel = page.testSubj.locator('osqueryResultsPanel');
-        await resultsPanel.waitFor({ state: 'visible', timeout: 60_000 });
-        await expect(async () => {
-          // eslint-disable-next-line playwright/no-nth-methods -- either agent-0 or agent-1 appearing in the panel proves results landed; the regex may match both within the virtualized grid
-          await expect(resultsPanel.getByText(/scout-osquery-agent-[01]/).first()).toBeVisible({
-            timeout: 5_000,
-          });
-        }).toPass({ timeout: 90_000, intervals: [2_000, 5_000, 10_000] });
+      }).toPass({ timeout: 90_000, intervals: [2_000, 5_000, 10_000] });
     });
   });
 });

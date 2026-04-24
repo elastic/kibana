@@ -28,7 +28,16 @@ export class AlertFlyoutPage {
   private readonly agentSelection: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.flyoutBody = this.page.testSubj.locator(FLYOUT_OSQUERY_EDITOR);
+    // Several `flyout-body-osquery` nodes can exist in the DOM (e.g. alert +
+    // timeline, or prior portal shells). A bare `testSubj.locator` matches all
+    // of them — clicks then hit a hidden root while the user-visible flyout
+    // never leaves "Single query" (pack switch / combobox appear to no-op).
+    // Match `alert_parameter_substitution.spec.ts`: last *visible* portal root.
+    this.flyoutBody = this.page
+      .getByTestId(FLYOUT_OSQUERY_EDITOR)
+      .filter({ visible: true })
+      // eslint-disable-next-line playwright/no-nth-methods -- stacked Security flyouts; the active Osquery editor mounts last among visible roots
+      .last();
     this.flyoutOsqueryEditor = this.flyoutBody.getByTestId('osqueryEditor');
     this.expandEventButton = this.page.testSubj.locator('expand-event');
     this.flyoutFooterDropdown = this.page.testSubj.locator(
@@ -42,7 +51,11 @@ export class AlertFlyoutPage {
     this.sendAlertToTimelineButton = this.page.testSubj.locator('send-alert-to-timeline-button');
     this.addToTimelineButton = this.page.testSubj.locator('add-to-timeline');
     this.cancelButton = this.page.getByRole('button', { name: 'Cancel' });
-    this.agentSelection = this.page.testSubj.locator('agentSelection');
+    // Same multi-root issue as `flyoutBody`: a page-wide `agentSelection` hits
+    // the wrong (hidden) live-query shell — clears/type there while the visible
+    // flyout still has the alert's single agent, so Submit never passes RHF or
+    // the POST never matches what the test expects.
+    this.agentSelection = this.flyoutBody.getByTestId('agentSelection');
     this.timelineModalHeader = this.page.testSubj.locator('timeline-modal-header-panel');
     this.timelineExpandEventToggle = this.page.testSubj.locator('docTableExpandToggleColumn');
   }
@@ -146,22 +159,37 @@ export class AlertFlyoutPage {
   }
 
   // The mode selector is an `EuiCard` with the `selectable` prop. The card's onClick
-  // lives on the selectable footer button, not on the description text — clicking
-  // the description via `getByText` frequently fails to toggle the mode. Target the
-  // card's role+name, then assert the pack selector's INPUT renders before continuing.
+  // lives on the selectable `button[role='switch']`, not on the body — clicking the
+  // wrapper often hits a no-op region. After a toggle, React can still re-render
+  // (agent resolution, packs query) and snap back to "Single query", so we click the
+  // switch, wait for the UI to settle, and only proceed when the pack combobox input
+  // stays mounted (`queryType === 'pack'` in live_queries/form/index.tsx).
   async switchFlyoutToPackMode(): Promise<void> {
     const packCard = this.flyoutBody.locator('.euiCard', {
       has: this.page.getByText('Run a set of queries in a pack.'),
     });
+    const packToggle = packCard.locator('button[role="switch"]');
+    const packModeInput = this.flyoutBody.locator(
+      '[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]'
+    );
+
     await packCard.waitFor({ state: 'visible', timeout: 15_000 });
-    await packCard.click();
-    // Wait for the search INPUT (not the wrapper div) to be visible. The
-    // EuiComboBox wrapper re-renders a few times as React settles after the
-    // mode toggle; the inner `comboBoxSearchInput` is a stable leaf so its
-    // readiness is the cleanest signal that the selector is actually interactable.
-    await this.flyoutBody
-      .locator('[data-test-subj="select-live-pack"] [data-test-subj="comboBoxSearchInput"]')
-      .waitFor({ state: 'visible', timeout: 15_000 });
+    await packToggle.waitFor({ state: 'visible', timeout: 15_000 });
+
+    const settleMs = 1_000;
+    const maxAttempts = 20;
+
+    for (let i = 0; i < maxAttempts; i++) {
+      await packToggle.click();
+      await new Promise((resolve) => {
+        setTimeout(resolve, settleMs);
+      });
+      if (await packModeInput.isVisible()) {
+        return;
+      }
+    }
+
+    await packModeInput.waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   /**
@@ -205,7 +233,7 @@ export class AlertFlyoutPage {
     await this.page.keyboard.press('Enter');
     // Do NOT press Escape here — the key bubbles up and closes the surrounding
     // alert flyout (same rationale as `selectFlyoutPack`).
-    await this.page
+    await this.flyoutBody
       .getByText('All agents')
       .waitFor({ state: 'visible', timeout: 15_000 })
       .catch(() => {});
@@ -214,7 +242,14 @@ export class AlertFlyoutPage {
   // See `common/submit_live_query.ts` for why a plain click-and-hope is not
   // reliable here (Monaco debounce race + EuiButton re-render + toast overlays).
   async clickSubmitInFlyout(): Promise<void> {
-    await submitLiveQuery(this.page, this.submitButton);
+    await submitLiveQuery(this.page, this.submitButton, {
+      // Fleet + "All agents" scheduling on Security flyouts can exceed the default
+      // 10 s `waitForResponse` budget on serverless / cold CI (three misses burn
+      // the whole 60 s budget with no successful POST).
+      perAttemptTimeoutMs: 35_000,
+      maxAttempts: 4,
+      timeoutMs: 120_000,
+    });
   }
 
   async clickAddToTimeline(): Promise<void> {

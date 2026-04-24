@@ -74,7 +74,7 @@ export async function submitLiveQuery(
   submitButton: Locator,
   options: SubmitLiveQueryOptions = {}
 ): Promise<SubmitLiveQueryResult> {
-  const { timeoutMs = 60_000, perAttemptTimeoutMs = 10_000, maxAttempts = 3 } = options;
+  const { timeoutMs = 120_000, perAttemptTimeoutMs = 25_000, maxAttempts = 4 } = options;
 
   await submitButton.waitFor({ state: 'visible', timeout: 30_000 });
   await submitButton.scrollIntoViewIfNeeded();

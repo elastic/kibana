@@ -5,14 +5,12 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
-import {
-  buildOsqueryAlertTestRule,
-  createDetectionRule,
-  deleteDetectionRule,
-} from '../helpers/detection_rule_lifecycle';
+import { buildOsqueryAlertTestRule } from '../helpers/detection_rule_lifecycle';
 import { getFirstOnlineAgent, waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 import {
   bootstrapSecurityAlertsIndex,
@@ -25,20 +23,22 @@ const localTags = [...tags.stateful.classic, ...tags.serverless.security.complet
 test.describe('Osquery parameter substitution from alerts', { tag: localTags }, () => {
   let ruleId: string;
   let ruleName: string;
+  let embeddedRuleBody: ReturnType<typeof buildOsqueryAlertTestRule>;
 
   test.beforeAll(async ({ kbnClient }) => {
-    const rule = buildOsqueryAlertTestRule({ includeResponseActions: true });
-    const created = await createDetectionRule(kbnClient, rule);
-    ruleId = created.id;
-    ruleName = created.name;
+    embeddedRuleBody = buildOsqueryAlertTestRule({
+      includeResponseActions: true,
+      nameSuffix: `scout-param-${Date.now()}`,
+    });
+    ruleId = randomUUID();
+    ruleName = embeddedRuleBody.name;
     await bootstrapSecurityAlertsIndex(kbnClient);
   });
 
-  test.afterAll(async ({ esClient, kbnClient, log }) => {
+  test.afterAll(async ({ esClient, log }) => {
     await deleteSeededAlerts(esClient, ruleId).catch((err: Error) =>
       log.debug(`deleteSeededAlerts failed: ${err.message}`)
     );
-    await deleteDetectionRule(kbnClient, ruleId);
   });
 
   // NOTE: the originally-planned "double-click IG query → osquery editor
@@ -60,8 +60,15 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     // 5 min: alert seed + flyout open + 2-agent wait + substituted-query submit.
     test.setTimeout(300_000);
 
-    const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
-    await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
+    const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
+    const seed = await seedAlertForRule(esClient, {
+      ruleId,
+      ruleName,
+      agentId,
+      hostName,
+      hostOsName,
+      embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
+    });
 
     // The assertion below requires two response rows (one per enrolled Docker
     // agent). `global.setup.ts` provisions two agents but on serverless CI the
@@ -73,8 +80,7 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
 
     await browserAuth.loginAsOsqueryPowerUser();
 
-    await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
-    await pageObjects.osqueryAlertFlyout.expandFirstAlert();
+    await pageObjects.osqueryRuleEditor.openSeededAlertFlyout(seed);
     await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
     await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
     await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectAllAgents();
@@ -83,9 +89,19 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     );
     await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
 
-    const gridRows = page.testSubj.locator('flyout-body-osquery').locator('[data-grid-row-index]');
-    // eslint-disable-next-line playwright/no-nth-methods -- `data-grid-row-index=0` is the header row in EuiDataGrid; row 1 is the first data row which confirms the substituted query returned at least one result
-    await expect(gridRows.nth(1)).toBeVisible({ timeout: 180_000 });
+    // Multiple `flyout-body-osquery` roots can exist (alert + timeline). `.last()`
+    // alone picked a hidden serverless portal instance with no results grid.
+    // Match Cypress `alert_response_actions.cy.ts`: at least header + one data row.
+    // eslint-disable-next-line playwright/no-nth-methods -- when multiple portals match, the active Osquery flyout is the most recently mounted visible root
+    const flyoutOsquery = page.getByTestId('flyout-body-osquery').filter({ visible: true }).last();
+    await expect
+      .poll(async () => flyoutOsquery.locator('[data-grid-row-index]').count(), {
+        timeout: 180_000,
+      })
+      .toBeGreaterThanOrEqual(2);
+    await expect(flyoutOsquery).toContainText(/version/i, {
+      timeout: 60_000,
+    });
   });
 
   test('substitutes parameters in osquery launched from timeline-linked alerts', async ({
@@ -98,12 +114,22 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
     // 5 min: alert seed + timeline-open flow + flyout + substituted-query submit.
     test.setTimeout(300_000);
 
-    const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
-    await seedAlertForRule(esClient, { ruleId, ruleName, agentId, hostName });
+    const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
+    const seed = await seedAlertForRule(esClient, {
+      ruleId,
+      ruleName,
+      agentId,
+      hostName,
+      hostOsName,
+      embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
+    });
+
+    await waitForAtLeastOneAgentOnline(kbnClient, { expectedCount: 2, timeoutMs: 180_000 });
 
     await browserAuth.loginAsOsqueryPowerUser();
 
-    await pageObjects.osqueryRuleEditor.openRuleAlertsView(ruleName);
+    await pageObjects.osqueryRuleEditor.openSeededAlertFlyout(seed);
+    await pageObjects.osqueryRuleEditor.dismissDocumentFlyoutToExposeAlertsTable();
     await pageObjects.osqueryAlertFlyout.openFirstAlertInTimelineAndExpand();
     await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
     await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
@@ -112,8 +138,19 @@ test.describe('Osquery parameter substitution from alerts', { tag: localTags }, 
       "SELECT * FROM os_version where name='{{host.os.name}}';"
     );
     await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-    await page.testSubj
-      .locator('osqueryResultsTable')
-      .waitFor({ state: 'visible', timeout: 180_000 });
+
+    const flyoutOsqueryTimeline = page
+      .getByTestId('flyout-body-osquery')
+      .filter({ visible: true })
+      // eslint-disable-next-line playwright/no-nth-methods -- timeline stacks on alert UI; the live Osquery flyout is the last visible portal root
+      .last();
+    await expect
+      .poll(async () => flyoutOsqueryTimeline.locator('[data-grid-row-index]').count(), {
+        timeout: 300_000,
+      })
+      .toBeGreaterThanOrEqual(2);
+    await expect(flyoutOsqueryTimeline).toContainText(/version/i, {
+      timeout: 60_000,
+    });
   });
 });

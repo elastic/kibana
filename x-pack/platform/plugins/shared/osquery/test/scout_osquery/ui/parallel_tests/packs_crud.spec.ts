@@ -25,13 +25,6 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
   // try/finally inside test bodies.
   const transientPackIds: string[] = [];
 
-  test.afterEach(async ({ apiServices }) => {
-    while (transientPackIds.length > 0) {
-      const id = transientPackIds.pop();
-      if (id) await apiServices.osquery.packs.delete(id);
-    }
-  });
-
   test.beforeAll(async ({ apiServices }) => {
     // Orphan `scout-pack-*` cleanup is handled once per environment by the
     // defensive-cleanup globalSetupHook in `parallel_tests/global.setup.ts`;
@@ -57,6 +50,13 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
       .data;
     extraSavedQueryId = extraInner.saved_object_id;
     extraSavedQueryLabel = extraInner.id;
+  });
+
+  test.afterEach(async ({ apiServices }) => {
+    while (transientPackIds.length > 0) {
+      const id = transientPackIds.pop();
+      if (id) await apiServices.osquery.packs.delete(id);
+    }
   });
 
   test.afterAll(async ({ apiServices }) => {
@@ -107,7 +107,7 @@ test.describe('Pack CRUD from UI', { tag: localTags }, () => {
     const queries = (packs as Record<string, { queries?: Record<string, unknown> }>)[packKey]
       ?.queries;
     expect(queries).toBeDefined();
-    expect(Object.keys(queries ?? {}).length).toBeGreaterThan(0);
+    expect(Object.keys(queries ?? {})).toHaveLength(1);
 
     await pageObjects.osqueryPackForm.setPagination50Rows();
     await pageObjects.osqueryPackForm.openPackFromList(packName);

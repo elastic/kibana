@@ -30,6 +30,10 @@ import type { EsClient, KbnClient } from '@kbn/scout';
  *     `agent.id` MUST be present and reference a Fleet-enrolled Osquery agent;
  *     the rule's own `response_actions` only gates the *automatic* post-alert
  *     execution, not the manual Take Action flow.
+ *   - Optional embedded rule (`embeddedDetectionRuleBody`): when no detection
+ *     rule saved object exists, `useRuleWithFallback` loads rule fields from
+ *     the alert hit (`transformRuleFromAlertHit`); dotted `kibana.alert.rule.*`
+ *     fields must mirror what that path expects.
  *   - Write target: `DEFAULT_ALERTS_INDEX = '.alerts-security.alerts'` is the
  *     alias (security_solution/common/constants.ts:57); we write to the
  *     concrete per-space data stream backing it.
@@ -40,6 +44,15 @@ const DETECTION_ENGINE_INDEX_URL = '/api/detection_engine/index';
 /** ALWAYS use the concrete per-space data stream name so we can scope delete-by-query too. */
 export const alertsIndexForSpace = (spaceId: string = 'default'): string =>
   `.alerts-security.alerts-${spaceId}`;
+
+/**
+ * Osquery `replaceParamsQuery` uses lodash `get(alert, 'host.os.name')`, so the
+ * alert `_source` must carry nested `host.os.name`, not a flat `'host.os.name'` key.
+ * The value must equal `os_version.name` on enrolled agents — pass `hostOsName`
+ * from Fleet `local_metadata.os.name` (see `fleet_agents.ts::getFirstOnlineAgent`);
+ * this constant is only used when Fleet has not reported `os.name` yet.
+ */
+export const SCOUT_ALERT_HOST_OS_NAME_FALLBACK = 'Ubuntu';
 
 /**
  * Bootstrap the `.alerts-security.alerts-{spaceId}` data stream and its
@@ -67,39 +80,156 @@ export interface SeedAlertInput {
   ruleName: string;
   agentId: string;
   hostName?: string;
+  /**
+   * Must match `os_version.name` on agents that run the substituted query.
+   * Prefer `hostOsName` from `getFirstOnlineAgent` (Fleet `local_metadata.os.name`).
+   */
+  hostOsName?: string;
   spaceId?: string;
   /** Overrides `@timestamp` / `kibana.alert.original_time`; defaults to now. */
   timestampIso?: string;
+  /**
+   * When set, merges fields from a detection-rule create body (e.g. from
+   * `buildOsqueryAlertTestRule`) onto the alert so `useRuleWithFallback` can
+   * resolve the rule from the alert without a `POST /api/detection_engine/rules`
+   * saved object.
+   */
+  embeddedDetectionRuleBody?: Record<string, unknown>;
+}
+
+export interface SeedAlertResult {
+  /** ES document `_id` / `kibana.alert.uuid` */
+  alertId: string;
+  /** Same `@timestamp` indexed on the alert (for `security/alerts/redirect` URL). */
+  timestampIso: string;
+  /** Concrete alerts data stream written to (for redirect `index` query param). */
+  indexName: string;
+}
+
+/**
+ * Maps a subset of the detection-engine rule create payload onto dotted
+ * `kibana.alert.rule.*` fields for alert-as-data documents.
+ */
+function embeddedRuleFieldsFromDetectionBody(
+  ruleId: string,
+  ruleName: string,
+  body: Record<string, unknown>
+): Record<string, unknown> {
+  const fields: Record<string, unknown> = {
+    'kibana.alert.rule.id': ruleId,
+    'kibana.alert.rule.uuid': ruleId,
+    'kibana.alert.rule.name': typeof body.name === 'string' ? body.name : ruleName,
+  };
+
+  if (typeof body.note === 'string') {
+    fields['kibana.alert.rule.note'] = body.note;
+  }
+
+  if (typeof body.description === 'string') {
+    fields['kibana.alert.rule.description'] = body.description;
+  }
+
+  if (Array.isArray(body.response_actions)) {
+    fields['kibana.alert.rule.response_actions'] = body.response_actions;
+  }
+
+  if (Array.isArray(body.index)) {
+    fields['kibana.alert.rule.index'] = body.index;
+  }
+
+  if (typeof body.language === 'string') {
+    fields['kibana.alert.rule.language'] = body.language;
+  }
+
+  if (typeof body.query === 'string') {
+    fields['kibana.alert.rule.query'] = body.query;
+  }
+
+  if (typeof body.type === 'string') {
+    fields['kibana.alert.rule.type'] = body.type;
+  }
+
+  if (typeof body.from === 'string') {
+    fields['kibana.alert.rule.from'] = body.from;
+  }
+
+  if (typeof body.to === 'string') {
+    fields['kibana.alert.rule.to'] = body.to;
+  }
+
+  if (typeof body.interval === 'string') {
+    fields['kibana.alert.rule.interval'] = body.interval;
+  }
+
+  if (typeof body.enabled === 'boolean') {
+    fields['kibana.alert.rule.enabled'] = body.enabled;
+  }
+
+  if (typeof body.throttle === 'string') {
+    fields['kibana.alert.rule.throttle'] = body.throttle;
+  }
+
+  if (Array.isArray(body.actions)) {
+    fields['kibana.alert.rule.actions'] = body.actions;
+  }
+
+  if (Array.isArray(body.filters)) {
+    fields['kibana.alert.rule.filters'] = body.filters;
+  }
+
+  return fields;
 }
 
 /**
  * Direct-indexes a single detection-engine alert document keyed to the given
- * rule and agent. Returns the alert's `kibana.alert.uuid`.
+ * rule and agent. Returns alert id, timestamp, and index for deep-link navigation.
  *
  * The document carries the minimum set of fields from `SecurityAlertRequired`
- * plus `agent.id` / `host.name` / `event.kind: 'signal'`, which is what the
+ * plus nested `agent` / `host` (including `host.os.name`) / `event.kind: 'signal'`, which is what the
  * alerts table + flyout read from. Uses `refresh: 'wait_for'` so the doc is
  * query-visible immediately on return.
  */
 export async function seedAlertForRule(
   esClient: EsClient,
-  { ruleId, ruleName, agentId, hostName, spaceId, timestampIso }: SeedAlertInput
-): Promise<string> {
+  {
+    ruleId,
+    ruleName,
+    agentId,
+    hostName,
+    hostOsName,
+    spaceId,
+    timestampIso,
+    embeddedDetectionRuleBody,
+  }: SeedAlertInput
+): Promise<SeedAlertResult> {
   const alertUuid = randomUUID();
   const timestamp = timestampIso ?? new Date().toISOString();
   const effectiveSpaceId = spaceId ?? 'default';
   const host = hostName ?? 'scout-host';
+  const resolvedHostOsName = hostOsName ?? SCOUT_ALERT_HOST_OS_NAME_FALLBACK;
+  const indexName = alertsIndexForSpace(effectiveSpaceId);
+
+  const embeddedFields = embeddedDetectionRuleBody
+    ? embeddedRuleFieldsFromDetectionBody(ruleId, ruleName, embeddedDetectionRuleBody)
+    : {};
 
   await esClient.index({
-    index: alertsIndexForSpace(effectiveSpaceId),
+    index: indexName,
     refresh: 'wait_for',
     op_type: 'create',
     id: alertUuid,
     document: {
       '@timestamp': timestamp,
-      'agent.id': agentId,
-      'agent.type': 'endpoint',
-      'host.name': host,
+      agent: {
+        id: agentId,
+        type: 'endpoint',
+      },
+      host: {
+        name: host,
+        os: {
+          name: resolvedHostOsName,
+        },
+      },
       'event.kind': 'signal',
       'event.action': 'scout-seeded-alert',
       'ecs.version': '8.11.0',
@@ -154,10 +284,11 @@ export async function seedAlertForRule(
       'kibana.alert.uuid': alertUuid,
       'kibana.space_ids': [effectiveSpaceId],
       'kibana.alert.workflow_status': 'open',
+      ...embeddedFields,
     },
   });
 
-  return alertUuid;
+  return { alertId: alertUuid, timestampIso: timestamp, indexName };
 }
 
 /**

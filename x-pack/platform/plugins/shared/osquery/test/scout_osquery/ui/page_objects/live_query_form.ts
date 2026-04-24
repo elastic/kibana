@@ -77,7 +77,6 @@ export class LiveQueryFormPage {
   }
 
   async selectAllAgents(): Promise<void> {
-
     const agentInput = this.agentSelection.getByTestId('comboBoxSearchInput');
     await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
     await agentInput.click();
@@ -120,8 +119,10 @@ export class LiveQueryFormPage {
    * (when the POST response carries one). Callers can feed the id to
    * `helpers/poll_live_query_history.ts::waitForLiveQueryComplete` before
    * asserting results, to gate on agent-side completion rather than racing
-   * the UI aggregator. Returns `undefined` if the response body can't be
-   * parsed — existing callers that don't need the id remain unaffected.
+   * the UI aggregator. Callers chain `waitForSingleQueryResults` /
+   * `waitForPackResults` for results visibility. Returns `undefined` if the
+   * response body can't be parsed — existing callers that don't need the id
+   * remain unaffected.
    */
   async submitQuery(): Promise<string | undefined> {
     // Clear any open toasts that may intercept the Submit click.
@@ -130,13 +131,6 @@ export class LiveQueryFormPage {
     }
 
     const { actionId } = await submitLiveQuery(this.page, this.submitButton);
-
-    // Results UI lands as either a tab (single query) or a heading (pack).
-    // Do a best-effort wait so callers can chain on results visibility.
-    await Promise.race([
-      this.resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
-      this.packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
-    ]).catch(() => {});
 
     return actionId;
   }
@@ -152,26 +146,32 @@ export class LiveQueryFormPage {
   }
 
   /**
-   * Wait for a pack-mode submission's results to render. Pack mode surfaces
-   * results inside the `osqueryResultsPanel` (one `dataGridRowCell` per
-   * result doc) and, when submitted from the live-query page, adds a
-   * `resultsTab` that must be clicked first. Use `waitForSingleQueryResults`
-   * for single-query submissions.
+   * Wait for a pack-mode submission's results to render. Pack-mode rendering
+   * differs between the two entry points that call this method:
+   *   - Live-query page (`live_query_pack_submission`, `custom_space`):
+   *     results land in `osqueryResultsPanel` with one `dataGridRowCell` per
+   *     result doc and a clickable `resultsTab`.
+   *   - Alert flyout (`alert_case_creation`): results land in
+   *     `osqueryResultsTable` (the same test-subj single-query uses) because
+   *     the flyout doesn't render the per-query tab UI.
+   * Race both signals and return on whichever resolves first. Scoping the
+   * cell probe to `osqueryResultsPanel` is important because a page-wide
+   * `dataGridRowCell` would also match the alerts EuiDataGrid rendered
+   * behind the osquery flyout — which would resolve the race immediately
+   * before any osquery result has landed.
    */
   async waitForPackResults(): Promise<void> {
+    // The alert-flyout context renders `resultsTable` directly (no tabbed layout); the live-query-page context renders a `resultsTab` that must be clicked to reveal the grid. Probing `isVisible` rather than branching on context keeps the helper reusable across both.
     if (await this.resultsTab.isVisible().catch(() => false)) {
       await this.resultsTab.click();
     }
 
-    // Scope the cell probe to the osquery results panel. Page-wide
-    // `dataGridRowCell` also matches cells in the alerts EuiDataGrid rendered
-    // behind the osquery flyout, which would cause this race to resolve
-    // immediately — before any osquery result has actually landed — and
-    // leave downstream actions (e.g. clicking "Add to Case") clicking
-    // against a still-loading flyout.
-    // eslint-disable-next-line playwright/no-nth-methods -- any populated cell in the osquery panel indicates results loaded
+    // eslint-disable-next-line playwright/no-nth-methods -- any populated cell in the osquery panel indicates pack results loaded
     const dataCell = this.resultsPanel.getByTestId('dataGridRowCell').first();
-    await dataCell.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS });
+    await Promise.race([
+      this.resultsTable.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS }),
+      dataCell.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS }),
+    ]);
   }
 
   async clickAdvanced(): Promise<void> {

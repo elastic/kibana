@@ -45,7 +45,7 @@ export class CustomSpacePage {
     // Wait for the packs table to actually render before callers start
     // hunting for a specific row — otherwise `runPackByName`'s default
     // 10 s click budget is spent waiting for the list query, not the row.
-    await this.packsTable.waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
+    await this.packsTable.waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   /**

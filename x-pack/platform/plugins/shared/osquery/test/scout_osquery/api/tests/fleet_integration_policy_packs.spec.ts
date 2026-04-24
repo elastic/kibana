@@ -32,6 +32,7 @@ apiTest.describe(
       'creates a policy with an osquery pack and sees the pack in Fleet listing',
       async ({ apiClient, apiServices, kbnClient }) => {
         const policyName = `scout-upgrade-${Date.now()}`;
+        const integrationName = `${policyName}-integration`;
         const packName = `scout-fleet-pack-${Date.now()}`;
 
         // 1. Create an agent policy via Fleet API.
@@ -52,7 +53,7 @@ apiTest.describe(
         const pkgResponse = await apiClient.post(testData.API_PATHS.FLEET_PACKAGE_POLICIES, {
           headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
           body: {
-            name: `${policyName}-integration`,
+            name: integrationName,
             namespace: 'default',
             policy_ids: [testPolicyId],
             package: { name: 'osquery_manager', version: '' },
@@ -82,12 +83,13 @@ apiTest.describe(
           // 4. Read back via the Fleet wrapper — the policy should surface.
           const policies = await apiServices.osquery.packs.listFleetWrapperPackagePolicies();
           const items = (policies.data as { items: Array<{ name: string }> }).items;
-          const matchingPolicy = items.find((p) => p.name.includes(policyName));
+          const matchingPolicy = items.find((p) => p.name === integrationName);
           expect(matchingPolicy).toBeDefined();
         } finally {
           if (packId) {
             await apiServices.osquery.packs.delete(packId);
           }
+
           await kbnClient.request({
             method: 'DELETE',
             path: `${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${testPkgPolicyId}`,

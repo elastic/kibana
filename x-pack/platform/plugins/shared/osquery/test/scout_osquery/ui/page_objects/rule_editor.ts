@@ -7,6 +7,9 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
+import { selectSingleAsPlainTextOption } from '../../common/combo_box_helpers';
+import type { SeedAlertResult } from '../helpers/seed_alert';
+
 const OSQUERY_RESPONSE_ACTION_ADD_BUTTON = 'Osquery-response-action-type-selection-option';
 
 export class RuleEditorPage {
@@ -70,6 +73,42 @@ export class RuleEditorPage {
     await firstAlert.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
+  /**
+   * Opens the document-details flyout for a seeded alert via
+   * `security/alerts/redirect/:id` — avoids Security Rules management (prebuilt
+   * rules bootstrap / registry) entirely.
+   */
+  async openSeededAlertFlyout(seed: SeedAlertResult): Promise<void> {
+    const qs = new URLSearchParams({
+      index: seed.indexName,
+      timestamp: seed.timestampIso,
+    }).toString();
+    await this.page.gotoApp(`security/alerts/redirect/${seed.alertId}?${qs}`);
+    await this.page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').waitFor({
+      state: 'visible',
+      timeout: 60_000,
+    });
+  }
+
+  /**
+   * After `openSeededAlertFlyout`, the alerts table row actions (e.g. send to
+   * timeline) may be obscured. Close the flyout so `expand-event` / timeline
+   * controls are reachable.
+   */
+  async dismissDocumentFlyoutToExposeAlertsTable(): Promise<void> {
+    // Close the document-details dialog that contains the flyout footer (avoids
+    // ambiguous `euiFlyoutCloseButton` when multiple flyouts are mounted).
+    const documentFlyoutClose = this.page
+      .getByRole('dialog')
+      .filter({ has: this.page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton') })
+      .getByTestId('euiFlyoutCloseButton');
+    await documentFlyoutClose.click({ timeout: 5_000 }).catch(async () => {
+      await this.page.keyboard.press('Escape');
+    });
+    // eslint-disable-next-line playwright/no-nth-methods -- same readiness signal as `openRuleAlertsView`: first alert row on the filtered alerts page
+    await this.expandEvent.first().waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
   async goToAlertsTab(): Promise<void> {
     await this.alertsTab.click();
   }
@@ -113,37 +152,14 @@ export class RuleEditorPage {
     expectedQueryIds?: readonly string[]
   ): Promise<void> {
     const row = this.responseActionItem(itemIndex);
-    const search = row.getByTestId('comboBoxSearchInput');
-    await row.getByTestId('comboBoxInput').click();
-    await search.click();
-    await search.press('Control+a');
-    await search.fill(packName);
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
-
-    // EuiComboBox commits the selection asynchronously. Without waiting for the
-    // input value to actually carry the new pack name, callers can race a
-    // subsequent save click before the form's `pack` field updates — the
-    // request body then carries the previous pack's queries.
-    //
-    // CSS `[value="..."]` attribute selectors do NOT match React-controlled
-    // input values (the attribute reflects defaultValue only; the live value
-    // lives in the DOM property), so read the property via
-    // `page.waitForFunction`. That's a Playwright synchronization primitive,
-    // which preserves the page-object "no `expect()`" rule.
-    await search.waitFor({ state: 'visible', timeout: 30_000 });
-    await this.page.waitForFunction(
-      ({ itemSubj, expectedValue }) => {
-        const row = document.querySelector(`[data-test-subj="${itemSubj}"]`);
-        const input = row?.querySelector('[data-test-subj="comboBoxSearchInput"]') as
-          | HTMLInputElement
-          | null;
-
-        return input?.value === expectedValue;
-      },
-      { itemSubj: `response-actions-list-item-${itemIndex}`, expectedValue: packName },
-      { timeout: 30_000 }
-    );
+    // Same `asPlainText` + `title=` selection path as live-query / alert flyout
+    // pack pickers — ArrowDown/Enter races async `usePacks` hydration and
+    // `waitForFunction` on `comboBoxSearchInput.value` breaks once EUI swaps
+    // the input for plain-text rendering after commit.
+    await selectSingleAsPlainTextOption(this.page, {
+      wrapper: { locator: row.locator('[data-test-subj="select-live-pack"]') },
+      optionName: packName,
+    });
 
     // The combobox commit only marks `packId` in the form; the form's
     // `queries` field is populated by a subsequent `useEffect` that waits on
@@ -162,20 +178,21 @@ export class RuleEditorPage {
     // row only has the ID column text, the query text, and EuiBasicTable
     // `<tr>` nodes. We anchor on the EuiBasicTable itself plus a row count
     // check, which works regardless of whether `action_id` is populated.
-    // eslint-disable-next-line playwright/no-nth-methods -- the row scope may contain nested euiTable instances (tooltip content, combobox popover lists); the outermost euiTable in DOM order is the pack-queries table
-    const packQueriesTable = row.locator('table.euiTable').first();
-    await packQueriesTable.waitFor({ state: 'visible', timeout: 30_000 });
+    // eslint-disable-next-line playwright/no-nth-methods -- prefer the first *visible* table in the row (pack queries); stray hidden shells can precede it in DOM order
+    const packQueriesTable = row.locator('table.euiTable').filter({ visible: true }).first();
+    await packQueriesTable.waitFor({ state: 'visible', timeout: 60_000 });
 
     const expectedRowCount = expectedQueryIds?.length ?? 1;
     // Wait for the Nth row to mount — equivalent to "row count >= N" but
     // expressed as a single `waitFor` so we stay out of the `expect.poll`
     // page-object anti-pattern. Targeting the (N-1)-th row is safe because
     // EuiBasicTable mounts rows in order.
-    // eslint-disable-next-line playwright/no-nth-methods -- target the Nth row to confirm at least N rows have rendered
+
     await packQueriesTable
       .locator('tbody tr.euiTableRow')
+      // eslint-disable-next-line playwright/no-nth-methods -- wait for the last expected data row by index; row count is the hydration signal, not an arbitrary pick
       .nth(expectedRowCount - 1)
-      .waitFor({ state: 'attached', timeout: 30_000 });
+      .waitFor({ state: 'attached', timeout: 60_000 });
 
     // Optional per-id belt-and-braces: if the caller knows the exact ids we
     // expect, confirm each one's ID-column text is rendered. Missing IDs

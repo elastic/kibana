@@ -214,9 +214,7 @@ apiTest.describe(
                 action_type_id: '.osquery',
                 params: {
                   pack_id: singlePackId,
-                  queries: [
-                    { id: 'uptime', query: 'select * from uptime;', interval: 3600 },
-                  ],
+                  queries: [{ id: 'uptime', query: 'select * from uptime;', interval: 3600 }],
                 },
               },
             ],
@@ -241,9 +239,24 @@ apiTest.describe(
                 params: {
                   pack_id: multiPackId,
                   queries: [
-                    { id: 'mem', query: 'SELECT * FROM memory_info;', interval: 3600, platform: 'linux' },
-                    { id: 'sys', query: 'SELECT * FROM system_info;', interval: 3600, platform: 'linux,windows,darwin' },
-                    { id: 'opera', query: 'select opera_extensions.* from users join opera_extensions using (uid);', interval: 10 },
+                    {
+                      id: 'mem',
+                      query: 'SELECT * FROM memory_info;',
+                      interval: 3600,
+                      platform: 'linux',
+                    },
+                    {
+                      id: 'sys',
+                      query: 'SELECT * FROM system_info;',
+                      interval: 3600,
+                      platform: 'linux,windows,darwin',
+                    },
+                    {
+                      id: 'opera',
+                      query:
+                        'select opera_extensions.* from users join opera_extensions using (uid);',
+                      interval: 10,
+                    },
                   ],
                 },
               },

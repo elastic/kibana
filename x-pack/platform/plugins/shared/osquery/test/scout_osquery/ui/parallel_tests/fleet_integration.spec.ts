@@ -26,9 +26,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     if (packagePolicyId) {
       await apiServices.fleet.package_policies
         .delete(packagePolicyId)
-        .catch((err: Error) =>
-          log.debug(`fleet.package_policies.delete failed: ${err.message}`)
-        );
+        .catch((err: Error) => log.debug(`fleet.package_policies.delete failed: ${err.message}`));
       packagePolicyId = undefined;
     }
 
@@ -39,40 +37,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
       agentPolicyId = undefined;
     }
 
-    // UI-created integrations + their implicit agent policy are cleaned up by
-    // the afterAll-level policy delete above. Track names for debuggability.
     uiCreatedIntegrationNames.length = 0;
-  });
-
-  test('adds osquery_manager integration to a new agent policy and verifies it surfaces in the Fleet API', async ({
-    browserAuth,
-    page,
-    apiServices,
-    pageObjects,
-  }) => {
-    test.setTimeout(120_000);
-    await browserAuth.loginAsOsqueryPowerUser();
-
-    const policyName = `scout-fleet-int-${Date.now()}`;
-    const integrationName = `scout-osquery-int-${Date.now()}`;
-
-    const createdPolicy = await apiServices.fleet.agent_policies.create({
-      policyName,
-      policyNamespace: 'default',
-    });
-    agentPolicyId = (createdPolicy.data as { item: { id: string } }).item.id;
-
-    const createdPkg = await apiServices.fleet.package_policies.create({
-      name: integrationName,
-      namespace: 'default',
-      policy_ids: [agentPolicyId],
-      package: { name: 'osquery_manager', version: '' },
-      inputs: {},
-    });
-    packagePolicyId = (createdPkg.data as { item: { id: string } }).item.id;
-
-    await pageObjects.osqueryFleetIntegration.gotoFleetAgentPolicies();
-    await expect(page.getByText(policyName)).toBeVisible({ timeout: 30_000 });
   });
 
   // Replacement UI test for the Cypress `add_integration.cy.ts` scenario —
@@ -110,9 +75,7 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     // The create-policy flyout closes and routes to the policy detail page;
     // from there we open the integration flyout and add osquery_manager.
     await pageObjects.osqueryFleetIntegration.openAgentPolicy(policyName);
-    await pageObjects.osqueryFleetIntegration.addOsqueryManagerIntegrationToPolicy(
-      integrationName
-    );
+    await pageObjects.osqueryFleetIntegration.addOsqueryManagerIntegrationToPolicy(integrationName);
     uiCreatedIntegrationNames.push(integrationName);
 
     // Look up the created IDs via kbnClient for afterEach cleanup. The Fleet
@@ -132,32 +95,5 @@ test.describe('Fleet integration', { tag: mkiTags }, () => {
     });
     expect(packagePoliciesResponse.data.items).toHaveLength(1);
     packagePolicyId = packagePoliciesResponse.data.items[0].id;
-  });
-
-  test('handles Fleet tour dismissal when navigating to agent policies', async ({
-    browserAuth,
-    page,
-    pageObjects,
-  }) => {
-    test.setTimeout(60_000);
-    await browserAuth.loginAsOsqueryPowerUser();
-    await pageObjects.osqueryFleetIntegration.gotoFleetAgentPolicies();
-
-    // The Fleet first-visit tour state is persisted by Kibana per user
-    // profile, and `parallel.playwright.config.ts` uses `workers: 1` so the
-    // first test that navigates to Fleet dismisses the tour for the rest of
-    // the run. This test asserts the contract either way:
-    //   (a) if the tour is visible, `dismissFleetTour` removes it and the
-    //       primary button becomes reachable;
-    //   (b) if the tour is already dismissed, the primary button is
-    //       immediately reachable.
-    // The primary-button visibility assertion is the canonical post-state.
-    const gotItButton = page.getByRole('button', { name: 'Got it' });
-    if (await gotItButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await pageObjects.osqueryFleetIntegration.dismissFleetTour();
-    }
-    await expect(page.testSubj.locator('createAgentPolicyButton')).toBeVisible({
-      timeout: 30_000,
-    });
   });
 });

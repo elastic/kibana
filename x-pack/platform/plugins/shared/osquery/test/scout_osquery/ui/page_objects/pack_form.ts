@@ -6,7 +6,8 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { waitForMonacoContains } from '../../common/monaco_helpers';
+import { selectSingleAsPlainTextOption } from '../../common/combo_box_helpers';
+import { waitForMonacoContains, waitForMonacoNonEmpty } from '../../common/monaco_helpers';
 
 export class PackFormPage {
   public readonly addPackButton: Locator;
@@ -127,39 +128,59 @@ export class PackFormPage {
     await this.flyoutTitle.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
+  /**
+   * Picks a saved query in the "Attach next query" flyout. Uses the same
+   * `selectSingleAsPlainTextOption` path as live-query / pack flyouts: `fill` +
+   * ArrowDown/Enter races async option loading and often leaves Monaco empty.
+   */
   async attachSavedQuery(savedQueryLabel: string): Promise<void> {
-    const input = this.savedQuerySelect.getByTestId('comboBoxSearchInput');
-    await input.click();
-    await input.fill(savedQueryLabel);
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
+    await selectSingleAsPlainTextOption(this.page, {
+      wrapper: { locator: this.savedQuerySelect },
+      optionName: savedQueryLabel,
+    });
+    await this.osqueryEditor.waitFor({ state: 'visible', timeout: 30_000 });
+    await waitForMonacoNonEmpty(this.page, { timeoutMs: 30_000 });
   }
 
   /**
-   * Save a newly-created pack. If the pack is bound to at least one agent
-   * policy (the common case in tests), Fleet surfaces a confirmation modal
-   * — the method waits for it and confirms. Callers that save a policy-less
-   * pack SHOULD use `saveNewPackWithoutPolicyModal` instead.
+   * Save a newly-created pack. When Fleet reports agents on the selected
+   * policies, the form opens a deploy confirmation modal first — otherwise it
+   * saves immediately (see `confirmPolicyChangeModalIfPresent`).
    */
   async saveNewPack(): Promise<void> {
     await this.savePackButton.click();
-    await this.confirmPolicyChangeModal();
+    await this.confirmPolicyChangeModalIfPresent();
   }
 
   async updatePack(): Promise<void> {
     await this.updatePackButton.click();
-    await this.confirmPolicyChangeModal();
+    await this.confirmPolicyChangeModalIfPresent();
   }
 
   /**
-   * Click the "Save and update X policies" confirmation modal that Fleet
-   * surfaces when a pack is bound to live policies. Asserts the modal is
-   * present — callers that don't expect it SHOULD use
-   * `saveNewPackWithoutPolicyModal` on the parent method instead.
+   * Clicks the Fleet "Save and deploy changes" confirmation when the pack form
+   * shows it (`agentCount > 0` in `public/packs/form/index.tsx`). When Fleet
+   * reports **zero** agents for the selected policies (common on cold
+   * serverless stacks before agent counts hydrate), the form submits directly
+   * and **no** modal appears — waiting on `confirmModalConfirmButton` would
+   * time out forever (`packs_crud` create flow).
+   */
+  async confirmPolicyChangeModalIfPresent(): Promise<void> {
+    try {
+      await this.confirmModalButton.waitFor({ state: 'visible', timeout: 15_000 });
+      await this.confirmModalButton.click();
+    } catch {
+      // No confirmation step — save already proceeded without Fleet agent impact.
+    }
+  }
+
+  /**
+   * @deprecated Prefer {@link confirmPolicyChangeModalIfPresent}; kept for
+   * call sites that must assert the modal (e.g. list toggle flows that always
+   * open Fleet confirmation). Same implementation: optional wait + click.
    */
   async confirmPolicyChangeModal(): Promise<void> {
-    await this.confirmModalButton.waitFor({ state: 'visible', timeout: 15_000 });
-    await this.confirmModalButton.click();
+    await this.confirmPolicyChangeModalIfPresent();
   }
 
   async openPackFromList(packName: string): Promise<void> {

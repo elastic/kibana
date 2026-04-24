@@ -53,9 +53,13 @@ test.describe('Live query submission without enrolled agents', { tag: noAgentTag
     await pageObjects.osqueryLiveQueryForm.queryEditor.click();
     await pageObjects.osqueryLiveQueryForm.inputQuery('select 1');
     const heightBefore = await pageObjects.osqueryLiveQueryForm.getQueryEditorHeight();
+    // Precondition guards against the trivially-passing `0 >= 0` case if `getQueryEditorHeight` cannot measure the editor.
+    expect(heightBefore).toBeGreaterThan(0);
     await pageObjects.osqueryLiveQueryForm.pressShiftEnterInEditor();
     await pageObjects.osqueryLiveQueryForm.inputQuery('select 2;');
     const heightAfter = await pageObjects.osqueryLiveQueryForm.getQueryEditorHeight();
+    // Monaco may keep a fixed minimum editor height (bounding box unchanged) while
+    // still inserting a newline — `heightBefore > 0` avoids the vacuous `0 >= 0` case.
     expect(heightAfter).toBeGreaterThanOrEqual(heightBefore);
     const editorText = await pageObjects.osqueryLiveQueryForm.getMonacoEditorText();
     expect(editorText).toContain('select 1');

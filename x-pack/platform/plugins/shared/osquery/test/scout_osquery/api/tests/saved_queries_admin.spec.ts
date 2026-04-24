@@ -79,5 +79,38 @@ apiTest.describe(
       expect('created_by_profile_uid' in match).toBe(true);
       expect('updated_by_profile_uid' in match).toBe(true);
     });
+
+    apiTest('persists ecs_mapping on saved-query create-then-read', async ({ apiClient }) => {
+      const queryId = `scout-ecs-${Date.now()}`;
+      const ecsMapping = { 'host.name': { field: 'name' } };
+
+      const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
+        headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+        body: testData.getMinimalSavedQuery({
+          id: queryId,
+          description: 'scout ecs mapping round-trip',
+          query: 'select name from os_version;',
+          ecs_mapping: ecsMapping,
+          platform: 'linux',
+        }),
+        responseType: 'json',
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse.body.data).toBeDefined();
+      const savedObjectId = createResponse.body.data.saved_object_id as string;
+      createdSavedObjectIds.push(savedObjectId);
+
+      const readResponse = await apiClient.get(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(readResponse).toHaveStatusCode(200);
+      expect(
+        (readResponse.body.data as { ecs_mapping: Record<string, unknown> }).ecs_mapping
+      ).toMatchObject(ecsMapping);
+    });
   }
 );
