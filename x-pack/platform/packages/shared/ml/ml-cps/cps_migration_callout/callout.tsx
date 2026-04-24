@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -36,13 +36,11 @@ export interface BulkUpdateProjectRoutingResult {
 }
 
 export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({ http, uiActions }) => {
-  const [loading, setLoading] = useState(true);
   const [jobCount, setJobCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
 
-    setLoading(true);
     void http
       .post<BulkUpdateProjectRoutingResult>(BULK_UPDATE_PROJECT_ROUTING_PATH, {
         body: JSON.stringify({
@@ -62,11 +60,6 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({ http, uiActi
       .catch(() => {
         if (cancelled) {
           return;
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
         }
       });
 
@@ -93,29 +86,24 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({ http, uiActi
         iconType="iInCircle"
         data-test-subj="mlCpsMigrationCallout"
       >
-        {loading ? (
-          <EuiLoadingSpinner size="m" data-test-subj="mlCpsMigrationCalloutLoading" />
-        ) : (
-          <>
-            <EuiText size="s" data-test-subj="mlCpsMigrationCalloutJobCount">
-              <FormattedMessage
-                id="xpack.ml.cpsMigrationCallout.jobCount"
-                defaultMessage="Some jobs are legacy. Migrate them to cross-project search."
-              />
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiButton
-              data-test-subj="mlCpsMigrationCalloutMigrate"
-              onClick={onMigrate}
-              color="primary"
-            >
-              {i18n.translate('xpack.ml.cpsMigrationCallout.migrateButton', {
-                defaultMessage: 'Migrate {count, plural, one {# job} other {# jobs}}',
-                values: { count: jobCount },
-              })}
-            </EuiButton>
-          </>
-        )}
+        <EuiText size="s" data-test-subj="mlCpsMigrationCalloutJobCount">
+          <FormattedMessage
+            id="xpack.ml.cpsMigrationCallout.jobCount"
+            defaultMessage="Some jobs are legacy. Migrate them to cross-project search."
+          />
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiButton
+          data-test-subj="mlCpsMigrationCalloutMigrate"
+          onClick={onMigrate}
+          color="primary"
+          size="s"
+        >
+          {i18n.translate('xpack.ml.cpsMigrationCallout.migrateButton', {
+            defaultMessage: 'Migrate {count, plural, one {# job} other {# jobs}}',
+            values: { count: jobCount },
+          })}
+        </EuiButton>
       </EuiCallOut>
 
       <EuiSpacer size="m" />
