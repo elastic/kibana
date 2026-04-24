@@ -16,8 +16,7 @@ import {
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/260324
-test.describe.skip(
+test.describe.only(
   'Stream data routing - AI suggestions button',
   { tag: tags.stateful.classic },
   () => {
