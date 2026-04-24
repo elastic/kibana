@@ -13,11 +13,12 @@ import {
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 const SERVICE_MAP_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
 export const serviceMapCustomStateSchema = schema.object({
-  environment: schema.maybe(schema.string()),
+  environment: schema.string({ defaultValue: ENVIRONMENT_ALL.value }),
   kuery: schema.maybe(schema.string()),
   serviceName: schema.maybe(schema.string()),
   serviceGroupId: schema.maybe(schema.string()),
