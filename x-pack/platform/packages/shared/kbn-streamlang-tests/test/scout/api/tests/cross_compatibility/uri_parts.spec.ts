@@ -540,8 +540,16 @@ apiTest.describe(
         const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
+        // Parity note: this is the intentional ES|QL-vs-ingest divergence
+        // documented on `buildIgnoreMissingFilter` in
+        // transpilers/esql/processors/common.ts. Ingest raises a
+        // "field [<from>] not present" error (rejecting the doc) because
+        // `ignore_failure` is implicitly false; ES|QL has no per-row error
+        // primitive so it pre-filters with WHERE and silently drops the row.
+        // Both halves of the contract are asserted below.
         const docs = [{ case: 'missing', attributes: {} }];
         const { errors } = await testBed.ingest('ingest-uri-parts-fail-missing', docs, processors);
+        // Ingest half: the doc is rejected with a "not present" error.
         expect(errors[0].reason).toContain('attributes.href');
 
         const mappingDoc = {
@@ -551,8 +559,9 @@ apiTest.describe(
         await testBed.ingest('esql-uri-parts-fail-missing', [mappingDoc, ...docs]);
         const esqlResult = await esql.queryOnIndex('esql-uri-parts-fail-missing', query);
 
-        // Only the mapping doc survives the WHERE NOT(attributes.href IS NULL)
-        // guard the ES|QL transpiler emits.
+        // ES|QL half: the missing doc is silently dropped by the
+        // `WHERE NOT(attributes.href IS NULL)` guard the transpiler emits.
+        // Only the mapping doc survives.
         expect(esqlResult.documentsWithoutKeywords).toHaveLength(1);
       }
     );

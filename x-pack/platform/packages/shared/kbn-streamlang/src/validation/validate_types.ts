@@ -225,6 +225,24 @@ function convertTypeToFieldType(convertType: string): FieldType {
 }
 
 /**
+ * Returns the sub-field name when `fieldName === \`${prefix}.<subfield>\``
+ * and the sub-field is non-empty. Returns `null` otherwise.
+ *
+ * Used by `getProcessorOutputType` to safely classify `uri_parts` output
+ * sub-fields (e.g. `port` → number). Without the `startsWith` guard a raw
+ * `fieldName.slice(prefix.length + 1)` can silently produce a substring
+ * that accidentally matches a valid sub-field name — e.g. `prefix = "x"`,
+ * `fieldName = "abcport"` → `slice(2) === "port"` → misclassified as number.
+ */
+function subfieldAfterPrefix(fieldName: string, prefix: string): string | null {
+  const expectedStart = `${prefix}.`;
+  if (!fieldName.startsWith(expectedStart) || fieldName.length === expectedStart.length) {
+    return null;
+  }
+  return fieldName.slice(expectedStart.length);
+}
+
+/**
  * Get the expected output type for each processor action.
  */
 export function getProcessorOutputType(
@@ -271,10 +289,10 @@ export function getProcessorOutputType(
 
     case 'uri_parts': {
       const prefix = processor.to || URI_PARTS_DEFAULT_TARGET;
+      const subfield = subfieldAfterPrefix(fieldName, prefix);
       if (
-        (URI_PARTS_NUMBER_SUBFIELDS as readonly string[]).includes(
-          fieldName.slice(prefix.length + 1)
-        )
+        subfield !== null &&
+        (URI_PARTS_NUMBER_SUBFIELDS as readonly string[]).includes(subfield)
       ) {
         return 'number';
       }

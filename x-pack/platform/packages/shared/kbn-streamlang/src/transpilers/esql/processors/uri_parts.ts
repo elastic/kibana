@@ -94,9 +94,17 @@ export function convertUriPartsProcessorToESQL(processor: UriPartsProcessor): ES
   const needConditional = ignoreMissing || Boolean(where);
   const commands: ESQLAstCommand[] = [];
 
-  // Drop rows whose source field is null when ignore_missing=false. Emitted
-  // unconditionally (both branches) so a `where` clause doesn't accidentally
-  // let null sources through — matches dissect.ts / grok.ts.
+  // Drop rows whose source field is null when ignore_missing=false. This is
+  // the intentional ES|QL-vs-ingest divergence documented on
+  // `buildIgnoreMissingFilter` in ./common.ts: the ingest processor raises
+  // a "field [<from>] not present" error and rejects the doc, whereas
+  // ES|QL has no per-row error primitive so we pre-filter with WHERE and
+  // silently drop. The cross-compat spec
+  // (`missing source field with ignore_missing=false fails ingest and
+  // drops the ES|QL row`) pins both halves of that contract.
+  //
+  // Emitted unconditionally (both branches) so a `where` clause doesn't
+  // accidentally let null sources through — matches dissect.ts / grok.ts.
   const missingFieldFilter = buildIgnoreMissingFilter(ignoreMissing, from);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
