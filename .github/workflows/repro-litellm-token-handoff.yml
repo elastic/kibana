@@ -4,10 +4,10 @@ run-name: Repro LiteLLM token handoff
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [ opened, synchronize, reopened, ready_for_review ]
 
 env:
-  CLAUDE_MODEL: llm-gateway/claude-opus-4-5
+  CLAUDE_MODEL: llm-gateway/claude-opus-4-6
 
 jobs:
   mint-token:
@@ -48,7 +48,7 @@ jobs:
           show_full_output: true
           anthropic_api_key: ${{ needs.mint-token.outputs.api_key }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: >-
+          prompt: |-
             /review REPO: ${{ github.repository }} PR_NUMBER: ${{ github.event.pull_request.number }}
             Review the changed files for correctness, security, reliability, testing, and maintainability issues.
 
@@ -57,8 +57,7 @@ jobs:
             After all inline comments are posted, submit exactly one final review summary on the PR. Prefer creating `/tmp/review.md` with the `Write` tool and submitting it with:
             `gh pr review ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --comment --body-file /tmp/review.md`
 
-            If there are no issues, the final review body must be exactly:
-            `No issues found.`
+            If there are no issues, the final review body must be exactly: `No issues found.`
           claude_args: |
             --max-turns 5
             --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Bash(gh api:*),Write,mcp__github_inline_comment__create_inline_comment"
@@ -68,7 +67,7 @@ jobs:
 
   revoke-token:
     if: ${{ always() && needs.mint-token.result != 'skipped' }}
-    needs: [mint-token, claude-review]
+    needs: [ mint-token, claude-review ]
     runs-on: ubuntu-latest
     permissions: {}
     steps:
