@@ -4732,6 +4732,45 @@
       },
       {
         "parentPluginId": "@kbn/zod",
+        "id": "def-common.lazySchema",
+        "type": "Function",
+        "tags": [],
+        "label": "lazySchema",
+        "description": [
+          "\nZod-typed wrapper for generated schemas (e.g. from `@kbn/openapi-generator`).\n\nDefault behavior: defers construction of the schema until any property\n(`.parse`, `.safeParse`, `.extend`, `.optional`, ...) is first accessed, and\nlets the GC reclaim the materialized schema once no consumer is holding a\nreference (see `lazyImmutableGCableObject`).\n\nWhen disabled via `setLazySchemaEnabled(false)`: calls the factory eagerly\nat wrap time and returns the real schema object, bypassing the Proxy and\nGC-eligibility machinery entirely.\n\nCaveat (Proxy mode only): chaining e.g. Schema.optional().nullable() will\nagain retain the memory.\n\nCaveat (Proxy mode only): `instanceof z.ZodObject` / `instanceof z.ZodType`\non the returned value will be `false` because the Proxy target is an empty\nobject. Zod's own internals and typical consumers use structural `_zod` /\n`.def` checks rather than `instanceof`, so this is safe in practice."
+        ],
+        "signature": [
+          "<T extends object>(factory: () => T) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod/v4/lazy_schema.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.lazySchema.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "factory",
+            "description": [],
+            "signature": [
+              "() => T"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod/v4/lazy_schema.ts",
+            "lineNumber": 49,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod",
         "id": "def-common.literal",
         "type": "Function",
         "tags": [],
@@ -6983,6 +7022,45 @@
       },
       {
         "parentPluginId": "@kbn/zod",
+        "id": "def-common.setLazySchemaDisabled",
+        "type": "Function",
+        "tags": [],
+        "label": "setLazySchemaDisabled",
+        "description": [
+          "\nDisables the lazy-wrapping behavior of `lazySchema`. When `true`,\n`lazySchema` calls its factory eagerly at wrap time and returns the real\nschema object (no Proxy, no WeakRef). When `false` (the default), schemas\nare wrapped lazily.\n\nCaveat: in typical Kibana plugin layouts, generated schema modules are\nimported at plugin-module-load time — which runs before `setup()` returns.\nCall this as early as possible (e.g. from a static config read before plugin\nconstruction) if you need it to affect module-load-time wraps."
+        ],
+        "signature": [
+          "(value: boolean) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod/v4/lazy_schema.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.setLazySchemaDisabled.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod/v4/lazy_schema.ts",
+            "lineNumber": 25,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod",
         "id": "def-common.strictObject",
         "type": "Function",
         "tags": [],
@@ -8181,7 +8259,7 @@
         "label": "uuid",
         "description": [],
         "signature": [
-          "(params: string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+          "(params: string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
           "node_modules/zod/v4/core/errors",
           "$ZodErrorMap<",
           "node_modules/zod/v4/core/errors",
@@ -8204,7 +8282,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+              "string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
               "node_modules/zod/v4/core/errors",
               "$ZodErrorMap<",
               "node_modules/zod/v4/core/errors",
@@ -8231,7 +8309,7 @@
         "label": "uuidv4",
         "description": [],
         "signature": [
-          "(params: string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+          "(params: string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
           "node_modules/zod/v4/core/errors",
           "$ZodErrorMap<",
           "node_modules/zod/v4/core/errors",
@@ -8254,7 +8332,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+              "string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
               "node_modules/zod/v4/core/errors",
               "$ZodErrorMap<",
               "node_modules/zod/v4/core/errors",
@@ -8281,7 +8359,7 @@
         "label": "uuidv6",
         "description": [],
         "signature": [
-          "(params: string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+          "(params: string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
           "node_modules/zod/v4/core/errors",
           "$ZodErrorMap<",
           "node_modules/zod/v4/core/errors",
@@ -8304,7 +8382,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+              "string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
               "node_modules/zod/v4/core/errors",
               "$ZodErrorMap<",
               "node_modules/zod/v4/core/errors",
@@ -8331,7 +8409,7 @@
         "label": "uuidv7",
         "description": [],
         "signature": [
-          "(params: string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+          "(params: string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
           "node_modules/zod/v4/core/errors",
           "$ZodErrorMap<",
           "node_modules/zod/v4/core/errors",
@@ -8354,7 +8432,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+              "string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
               "node_modules/zod/v4/core/errors",
               "$ZodErrorMap<",
               "node_modules/zod/v4/core/errors",
@@ -9918,6 +9996,38 @@
               {
                 "plugin": "@kbn/connector-schemas",
                 "path": "src/platform/packages/shared/kbn-connector-schemas/http/schemas/v1.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/build_alert_entity_graph_step/build_alert_entity_graph_step_common.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/build_alert_entity_graph_step/build_alert_entity_graph_step_common.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/build_alert_entity_graph_step/build_alert_entity_graph_step_common.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/build_alert_entity_graph_step/build_alert_entity_graph_step_common.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/build_alert_entity_graph_step/build_alert_entity_graph_step_common.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/build_alert_entity_graph_step/build_alert_entity_graph_step_common.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/build_alert_entity_graph_step/build_alert_entity_graph_step_common.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/build_alert_entity_graph_step/build_alert_entity_graph_step_common.ts"
               }
             ],
             "children": [
@@ -17453,7 +17563,7 @@
             "label": "uuid",
             "description": [],
             "signature": [
-              "(params?: string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+              "(params?: string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
               "node_modules/zod/v4/core/errors",
               "$ZodErrorMap<",
               "node_modules/zod/v4/core/errors",
@@ -17511,7 +17621,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+                  "string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
                   "node_modules/zod/v4/core/errors",
                   "$ZodErrorMap<",
                   "node_modules/zod/v4/core/errors",
@@ -17537,7 +17647,7 @@
             "label": "uuidv4",
             "description": [],
             "signature": [
-              "(params?: string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+              "(params?: string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
               "node_modules/zod/v4/core/errors",
               "$ZodErrorMap<",
               "node_modules/zod/v4/core/errors",
@@ -17558,7 +17668,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+                  "string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
                   "node_modules/zod/v4/core/errors",
                   "$ZodErrorMap<",
                   "node_modules/zod/v4/core/errors",
@@ -17584,7 +17694,7 @@
             "label": "uuidv6",
             "description": [],
             "signature": [
-              "(params?: string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+              "(params?: string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
               "node_modules/zod/v4/core/errors",
               "$ZodErrorMap<",
               "node_modules/zod/v4/core/errors",
@@ -17605,7 +17715,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+                  "string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
                   "node_modules/zod/v4/core/errors",
                   "$ZodErrorMap<",
                   "node_modules/zod/v4/core/errors",
@@ -17631,7 +17741,7 @@
             "label": "uuidv7",
             "description": [],
             "signature": [
-              "(params?: string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+              "(params?: string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
               "node_modules/zod/v4/core/errors",
               "$ZodErrorMap<",
               "node_modules/zod/v4/core/errors",
@@ -17652,7 +17762,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "string | { version?: \"v2\" | \"v1\" | \"v8\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | undefined; abort?: boolean | undefined; error?: string | ",
+                  "string | { version?: \"v2\" | \"v1\" | \"v3\" | \"v4\" | \"v5\" | \"v6\" | \"v7\" | \"v8\" | undefined; abort?: boolean | undefined; error?: string | ",
                   "node_modules/zod/v4/core/errors",
                   "$ZodErrorMap<",
                   "node_modules/zod/v4/core/errors",
@@ -18395,18 +18505,6 @@
               {
                 "plugin": "@kbn/anonymization-common",
                 "path": "x-pack/platform/packages/shared/ai-infra/anonymization-common/impl/schemas/common_attributes.gen.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts"
               },
               {
                 "plugin": "cases",

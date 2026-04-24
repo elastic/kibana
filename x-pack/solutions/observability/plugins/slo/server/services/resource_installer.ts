@@ -11,15 +11,18 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
+  COMPOSITE_SUMMARY_INDEX_NAME,
   HEALTH_DATA_STREAM_NAME,
   SLI_DESTINATION_INDEX_NAME,
   SUMMARY_DESTINATION_INDEX_NAME,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
+import { COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/composite_summary_mappings_template';
 import { SLI_MAPPINGS_TEMPLATE } from '../assets/component_templates/sli_mappings_template';
 import { SLI_SETTINGS_TEMPLATE } from '../assets/component_templates/sli_settings_template';
 import { SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/summary_mappings_template';
 import { SUMMARY_SETTINGS_TEMPLATE } from '../assets/component_templates/summary_settings_template';
+import { COMPOSITE_SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/composite_summary_index_template';
 import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_template';
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
 import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
@@ -40,14 +43,17 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         this.createOrUpdateComponentTemplate(SLI_SETTINGS_TEMPLATE),
         this.createOrUpdateComponentTemplate(SUMMARY_MAPPINGS_TEMPLATE),
         this.createOrUpdateComponentTemplate(SUMMARY_SETTINGS_TEMPLATE),
+        this.createOrUpdateComponentTemplate(COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE),
       ]);
 
       await this.createOrUpdateIndexTemplate(SLI_INDEX_TEMPLATE);
       await this.createOrUpdateIndexTemplate(SUMMARY_INDEX_TEMPLATE);
+      await this.createOrUpdateIndexTemplate(COMPOSITE_SUMMARY_INDEX_TEMPLATE);
 
       await this.createIndex(SLI_DESTINATION_INDEX_NAME);
       await this.createIndex(SUMMARY_DESTINATION_INDEX_NAME);
       await this.createIndex(SUMMARY_TEMP_INDEX_NAME);
+      await this.createIndex(COMPOSITE_SUMMARY_INDEX_NAME);
 
       await this.createOrUpdateIndexTemplate(HEALTH_INDEX_TEMPLATE);
       await this.createDataStream(HEALTH_DATA_STREAM_NAME);

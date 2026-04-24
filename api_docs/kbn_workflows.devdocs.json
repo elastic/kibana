@@ -176,6 +176,44 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowRepository.areWorkflowsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "areWorkflowsEnabled",
+            "description": [
+              "\nBulk-check whether the given (workflowId, spaceId) pairs refer to enabled,\nnon-soft-deleted workflows. Runs a single `_search` fetching only the\n`enabled` field across all requested ids.\n\nThe returned map is keyed by `${spaceId}:${workflowId}`. Missing docs and\nsoft-deleted docs (`deleted_at` present) resolve to `false`."
+            ],
+            "signature": [
+              "(refs: { workflowId: string; spaceId: string; }[]) => Promise<Map<string, boolean>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/server/repositories/workflow_repository.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows",
+                "id": "def-common.WorkflowRepository.areWorkflowsEnabled.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "refs",
+                "description": [],
+                "signature": [
+                  "{ workflowId: string; spaceId: string; }[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows/server/repositories/workflow_repository.ts",
+                "lineNumber": 96,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5750,7 +5788,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"transform\" | \"literal\" | \"date\" | \"map\" | \"readonly\" | \"success\" | \"default\" | \"set\" | \"optional\" | \"int\" | \"null\" | \"void\" | \"never\" | \"any\" | \"record\" | \"file\" | \"array\" | \"tuple\" | \"union\" | \"intersection\" | \"enum\" | \"nullable\" | \"nonoptional\" | \"prefault\" | \"catch\" | \"nan\" | \"pipe\" | \"template_literal\" | \"promise\" | \"lazy\" | \"custom\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"transform\" | \"literal\" | \"date\" | \"map\" | \"readonly\" | \"success\" | \"any\" | \"default\" | \"set\" | \"optional\" | \"int\" | \"null\" | \"void\" | \"never\" | \"record\" | \"file\" | \"array\" | \"tuple\" | \"union\" | \"intersection\" | \"enum\" | \"nullable\" | \"nonoptional\" | \"prefault\" | \"catch\" | \"nan\" | \"pipe\" | \"template_literal\" | \"promise\" | \"lazy\" | \"custom\""
             ],
             "path": "src/platform/packages/shared/kbn-workflows/common/utils/extract_schema_property_paths/extract_schema_property_paths.ts",
             "lineNumber": 16,
@@ -10503,6 +10541,25 @@
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "lineNumber": 292,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.BulkScheduleWorkflowResult",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkScheduleWorkflowResult",
+        "description": [
+          "\nPer-item result of a bulk workflow schedule call. The array is order- and\nlength-preserving with respect to the input items: `results[i]` corresponds\nto `items[i]`."
+        ],
+        "signature": [
+          "({ status: \"scheduled\"; workflowExecutionId: string; } | { status: \"error\"; error: { message: string; }; })[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "lineNumber": 711,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
