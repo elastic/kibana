@@ -155,6 +155,8 @@
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
     "@kbn/shared-ux-ai-components",
+    "@kbn/esql-composer",
+    "@kbn/esql-utils",
   ],
   "exclude": ["target/**/*"]
 }

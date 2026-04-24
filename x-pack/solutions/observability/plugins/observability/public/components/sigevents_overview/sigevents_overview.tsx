@@ -43,9 +43,13 @@ export interface SigeventsOverviewProps {
   title?: string;
   description?: string;
   mainEventTitle?: string;
+  mainEventDescription?: string;
+  severityLabel?: string;
+  severityColor?: 'danger' | 'warning' | 'primary' | 'subdued';
   impactedServices?: ImpactedService[];
   impactedCards?: ImpactedCardItem[];
   healthyMetrics?: HealthyMetricCardItem[];
+  lastUpdatedLabel?: React.ReactNode;
   onRemediate?: () => void;
   onViewDetails?: () => void;
 }
@@ -56,9 +60,13 @@ export const SigeventsOverview = ({
   title,
   description,
   mainEventTitle,
+  mainEventDescription,
+  severityLabel,
+  severityColor,
   impactedServices,
   impactedCards = DEFAULT_IMPACTED_CARDS,
   healthyMetrics,
+  lastUpdatedLabel,
   onRemediate,
   onViewDetails,
 }: SigeventsOverviewProps) => {
@@ -218,7 +226,11 @@ export const SigeventsOverview = ({
       <MainSignificantEvent
         blastRadiusScore={blastRadiusScore}
         title={mainEventTitle}
+        description={mainEventDescription}
+        severityLabel={severityLabel}
+        severityColor={severityColor}
         impactedServices={impactedServices}
+        lastUpdatedLabel={lastUpdatedLabel}
         onRemediate={onRemediate}
         onViewDetails={onViewDetails}
       />

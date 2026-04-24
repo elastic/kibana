@@ -39,7 +39,7 @@ export interface MainSignificantEventProps {
   blastRadiusScore?: number;
   severityLabel?: string;
   severityColor?: EuiBadgeProps['color'];
-  lastUpdatedLabel?: string;
+  lastUpdatedLabel?: React.ReactNode;
   title?: string;
   impactedServices?: ImpactedService[];
   description?: string;

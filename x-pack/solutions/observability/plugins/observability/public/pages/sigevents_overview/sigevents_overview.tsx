@@ -7,19 +7,23 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiLoadingSpinner,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
+import { useFetchLatestSignificantEvent } from '../../hooks/use_fetch_latest_significant_event';
 import { SigeventsOverview } from '../../components/sigevents_overview';
 import { SignificantEventDetailBody } from '../../components/sigevents_overview/significant_event_detail_body';
-import type { SignificantEventDetailFields } from '../../components/sigevents_overview/significant_event_detail_body';
 import { SignificantEventDetailHeader } from '../../components/sigevents_overview/significant_event_detail_header';
 
 const MAX_CONTENT_WIDTH = 900;
@@ -39,34 +43,55 @@ const contentColumnStyles = css`
   min-height: 0;
 `;
 
-const DEFAULT_DETAIL_EVENT: SignificantEventDetailFields = {
-  id: 'main-significant-event',
-  label:
-    'Dropped payments on oteldemo.com and video streams on otelfix.com due to unavailable Auth Service',
-  subtitle: 'logs · checkout',
-  severityLabel: 'Critical',
-  severityColor: 'danger',
-};
-
 export function SigeventsOverviewPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { services } = useKibana();
   const { agentBuilder } = services;
 
+  const { loading, error, data: eventData } = useFetchLatestSignificantEvent();
+
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
+  const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
   const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'sigeventsDetailFlyout' });
 
   const openDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(true), []);
   const closeDetailFlyout = useCallback(() => setIsDetailFlyoutOpen(false), []);
+
+  const handleRemediate = useCallback(() => {
+    const eventTitle = eventData?.mainEventTitle ?? 'the significant event';
+    setRemediationPrompt(
+      i18n.translate('xpack.observability.sigeventsOverview.remediationPrompt', {
+        defaultMessage:
+          'Help me remediate: {eventTitle}. What are the possible root causes and recommended next steps?',
+        values: { eventTitle },
+      })
+    );
+  }, [eventData?.mainEventTitle]);
 
   const EmbeddableConversation = useMemo(
     () => agentBuilder?.getEmbeddableConversation(),
     [agentBuilder]
   );
 
+  const detailFields = eventData?.detailFields;
+
+  const lastUpdatedLabel = useMemo(() => {
+    if (!eventData?.timestamp) {
+      return undefined;
+    }
+    const timestampMs = new Date(eventData.timestamp).getTime();
+    const nowMs = Date.now();
+    const diffSeconds = Math.round((timestampMs - nowMs) / 1000);
+    return (
+      <>
+        (<FormattedRelativeTime value={diffSeconds} numeric="auto" updateIntervalInSeconds={60} />)
+      </>
+    );
+  }, [eventData?.timestamp]);
+
   return (
     <ObservabilityPageTemplate
-      isPageDataLoaded={true}
+      isPageDataLoaded={!loading}
       data-test-subj="obltSigeventsOverviewPageHeader"
       pageSectionProps={{
         grow: true,
@@ -88,7 +113,47 @@ export function SigeventsOverviewPage() {
             data-test-subj="obltSigeventsConversation"
           >
             <EuiFlexItem grow={false}>
-              <SigeventsOverview onViewDetails={openDetailFlyout} />
+              {loading ? (
+                <EuiEmptyPrompt
+                  icon={<EuiLoadingSpinner size="xl" />}
+                  title={
+                    <h2>
+                      {i18n.translate('xpack.observability.sigeventsOverview.loadingTitle', {
+                        defaultMessage: 'Loading significant events...',
+                      })}
+                    </h2>
+                  }
+                />
+              ) : error ? (
+                <EuiEmptyPrompt
+                  iconType="warning"
+                  color="danger"
+                  title={
+                    <h2>
+                      {i18n.translate('xpack.observability.sigeventsOverview.errorTitle', {
+                        defaultMessage: 'Unable to load significant events',
+                      })}
+                    </h2>
+                  }
+                  body={<p>{error.message}</p>}
+                />
+              ) : eventData ? (
+                <SigeventsOverview
+                  state={eventData.state}
+                  blastRadiusScore={eventData.blastRadiusScore}
+                  mainEventTitle={eventData.mainEventTitle}
+                  mainEventDescription={eventData.description}
+                  severityLabel={eventData.severityLabel}
+                  severityColor={eventData.severityColor}
+                  impactedServices={eventData.impactedServices}
+                  impactedCards={eventData.impactedCards}
+                  lastUpdatedLabel={lastUpdatedLabel}
+                  onViewDetails={openDetailFlyout}
+                  onRemediate={handleRemediate}
+                />
+              ) : (
+                <SigeventsOverview state="healthy" onViewDetails={openDetailFlyout} />
+              )}
             </EuiFlexItem>
 
             {EmbeddableConversation && (
@@ -98,6 +163,9 @@ export function SigeventsOverviewPage() {
                   hideWelcomeTitle
                   hideCloseButton
                   initialTitle="Systems overview"
+                  initialMessage={remediationPrompt}
+                  autoSendInitialMessage={false}
+                  autoFocus={false}
                 />
               </EuiFlexItem>
             )}
@@ -105,7 +173,7 @@ export function SigeventsOverviewPage() {
         </div>
       </div>
 
-      {isDetailFlyoutOpen ? (
+      {isDetailFlyoutOpen && detailFields ? (
         <EuiFlyout
           type="push"
           side="right"
@@ -118,14 +186,14 @@ export function SigeventsOverviewPage() {
           <EuiFlyoutHeader hasBorder>
             <div id={flyoutHeadingId}>
               <SignificantEventDetailHeader
-                title={DEFAULT_DETAIL_EVENT.label}
-                severityLabel={DEFAULT_DETAIL_EVENT.severityLabel}
-                severityColor={DEFAULT_DETAIL_EVENT.severityColor}
+                title={detailFields.label}
+                severityLabel={detailFields.severityLabel}
+                severityColor={detailFields.severityColor}
               />
             </div>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <SignificantEventDetailBody event={DEFAULT_DETAIL_EVENT} hideHeader />
+            <SignificantEventDetailBody event={detailFields} hideHeader />
           </EuiFlyoutBody>
         </EuiFlyout>
       ) : null}
