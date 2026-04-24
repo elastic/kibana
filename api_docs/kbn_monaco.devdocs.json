@@ -2658,6 +2658,24 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.MonacoMessage",
+        "type": "Type",
+        "tags": [],
+        "label": "MonacoMessage",
+        "description": [],
+        "signature": [
+          "editor",
+          ".IMarkerData & { code: string; underlinedWarning?: boolean | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.PainlessCompletionKind",
         "type": "Type",
         "tags": [],

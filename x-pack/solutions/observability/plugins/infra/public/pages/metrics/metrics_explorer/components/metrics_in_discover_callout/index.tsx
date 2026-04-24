@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { timeseries } from '@kbn/esql-composer';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import type { MetricsExplorerTimeOptions } from '../../hooks/use_metrics_explorer_options';
 
@@ -25,8 +24,6 @@ const calloutTitle = i18n.translate('xpack.infra.metricsExplorer.deprecationEuiC
   defaultMessage: 'Deprecated',
 });
 
-const metricsInDiscoverCalloutStorageKey = 'infra.metricsInDiscoverCalloutDismissed';
-
 function getEsqlQuery(metricsIndex: string): string {
   return timeseries(metricsIndex).toString();
 }
@@ -37,10 +34,6 @@ interface MetricsInDiscoverCalloutProps {
 
 export function MetricsInDiscoverCallout({ timeRange }: MetricsInDiscoverCalloutProps) {
   const { services } = useKibanaContextForPlugin();
-  const [dismissedCallout, setDismissedCallout] = useLocalStorage<boolean>(
-    metricsInDiscoverCalloutStorageKey,
-    false
-  );
 
   const discoverHref = services.share?.url.locators.get(DISCOVER_APP_LOCATOR)?.useUrl({
     timeRange: {
@@ -52,12 +45,8 @@ export function MetricsInDiscoverCallout({ timeRange }: MetricsInDiscoverCallout
     },
   });
 
-  if (dismissedCallout || !discoverHref) {
+  if (!discoverHref) {
     return null;
-  }
-
-  function dismissCallout() {
-    setDismissedCallout(true);
   }
 
   function handleViewInDiscoverClick() {
@@ -75,7 +64,6 @@ export function MetricsInDiscoverCallout({ timeRange }: MetricsInDiscoverCallout
         color="warning"
         title={calloutTitle}
         iconType="warning"
-        onDismiss={dismissCallout}
       >
         <EuiText size="s">
           <FormattedMessage

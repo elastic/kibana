@@ -100,7 +100,6 @@ import {
 } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
-import { CachedUiSettingsClient } from './services';
 import { sqlSearchStrategyProvider } from './strategies/sql_search';
 import { searchSessionSavedObjectType } from './saved_objects';
 import { esqlSearchStrategyProvider } from './strategies/esql_search';
@@ -559,9 +558,8 @@ export class SearchService {
         searchSessionsClient,
         savedObjectsClient,
         esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
-        uiSettingsClient: new CachedUiSettingsClient(
-          uiSettings.asScopedToClient(savedObjectsClient)
-        ),
+        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+
         request,
         rollupsEnabled,
       };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -196,7 +196,7 @@ export interface SmlService {
     query: string;
     size?: number;
     spaceId: string;
-    esClient: ElasticsearchClient;
+    esClient: IScopedClusterClient;
     request: KibanaRequest;
     /** When true, Elasticsearch omits `content` from `_source` (smaller payloads for autocomplete). */
     skipContent?: boolean;
@@ -209,7 +209,7 @@ export interface SmlService {
   checkItemsAccess: (params: {
     ids: string[];
     spaceId: string;
-    esClient: ElasticsearchClient;
+    esClient: IScopedClusterClient;
     request: KibanaRequest;
   }) => Promise<Map<string, boolean>>;
 
@@ -228,7 +228,7 @@ export interface SmlService {
   getDocuments: (params: {
     ids: string[];
     spaceId: string;
-    esClient: ElasticsearchClient;
+    esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
 
   /** Get a type definition by ID */

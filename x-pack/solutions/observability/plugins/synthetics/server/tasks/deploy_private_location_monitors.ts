@@ -370,6 +370,7 @@ export class DeployPrivateLocationMonitors {
             spaceId,
             monitor: normalizedMonitor,
             configId: monitor.id,
+            kibanaUrl: this.serverSetup.basePath.publicBaseUrl ?? undefined,
           },
           paramsString
         )

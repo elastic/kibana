@@ -65,8 +65,8 @@ import type {
   AttachmentAttributes,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
-import { AttachmentType, CaseStatuses } from '../../../common/types/domain';
-import { validateCustomFields } from './validators';
+import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import { validateCustomFields, validateExtendedFieldsInRequest } from './validators';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
 
 /**
@@ -418,6 +418,7 @@ export const bulkUpdate = async (
       licensingService,
       notificationService,
       attachmentService,
+      templatesService,
     },
     user,
     logger,
@@ -541,6 +542,12 @@ export const bulkUpdate = async (
     );
 
     await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
+
+    await Promise.all(
+      casesToUpdate.map(({ updateReq, originalCase }) =>
+        validateExtendedFieldsInRequest({ updateReq, originalCase, templatesService })
+      )
+    );
 
     const patchCasesPayload = createPatchCasesPayload({
       user,

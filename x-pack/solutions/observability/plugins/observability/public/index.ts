@@ -41,14 +41,7 @@ export {
   apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
 export { alertsLocatorID, uptimeOverviewLocatorID } from '../common';
-export {
-  ruleDetailsLocatorID,
-  rulesLocatorID,
-  sloDetailsLocatorID,
-  sloEditLocatorID,
-} from '@kbn/deeplinks-observability';
-
-export type { RulesLocatorParams } from '@kbn/deeplinks-observability';
+export { sloDetailsLocatorID, sloEditLocatorID } from '@kbn/deeplinks-observability';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker';
@@ -122,6 +115,7 @@ export { useAnnotations } from './components/annotations/use_annotations';
 export { RuleConditionChart } from './components/rule_condition_chart';
 export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_group';
 export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';
+export { AnomalyThreshold } from './components/custom_threshold/components/anomaly_threshold';
 export { Threshold } from './components/custom_threshold/components/threshold';
 
 export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';

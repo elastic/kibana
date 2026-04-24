@@ -227,6 +227,7 @@ const runLeadGenerationTask = async ({
       riskScoreDataClient,
       executionId: executionUuid,
       sourceType: 'scheduled',
+      analytics: core.analytics,
       chatModel,
     });
 

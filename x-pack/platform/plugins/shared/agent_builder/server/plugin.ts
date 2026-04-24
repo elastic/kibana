@@ -195,7 +195,10 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
-    registerSkillToolsLoaderHook(serviceSetups);
+    registerSkillToolsLoaderHook(serviceSetups, {
+      analyticsService: this.analyticsService,
+      trackingService: this.trackingService,
+    });
 
     const smlTools = createSmlTools({
       getSmlService: () => {
@@ -263,7 +266,13 @@ export class AgentBuilderPlugin
 
   start(
     coreStart: CoreStart,
-    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
+    {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+    }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
@@ -281,6 +290,7 @@ export class AgentBuilderPlugin
       taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+      searchInferenceEndpoints,
     });
 
     const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
@@ -296,6 +306,7 @@ export class AgentBuilderPlugin
       uiSettings,
       savedObjects,
       trackingService: this.trackingService,
+      searchInferenceEndpoints,
     });
 
     // Schedule SML crawler tasks for all registered types
