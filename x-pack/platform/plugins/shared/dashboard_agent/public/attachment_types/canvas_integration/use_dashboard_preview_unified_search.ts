@@ -19,8 +19,7 @@ import { DEFAULT_TIME_RANGE } from '@kbn/dashboard-agent-common';
 interface UseDashboardPreviewUnifiedSearchParams {
   dashboardApi: DashboardApi | undefined;
   dashboardState: DashboardState;
-  filterManager: DataPublicPluginStart['query']['filterManager'];
-  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
+  data: DataPublicPluginStart;
 }
 
 const DEFAULT_EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -40,9 +39,11 @@ const normalizeQuery = (nextQuery: Query | undefined): Query => {
 export const useDashboardPreviewUnifiedSearch = ({
   dashboardApi,
   dashboardState,
-  filterManager,
-  timefilter,
+  data,
 }: UseDashboardPreviewUnifiedSearchParams) => {
+  const { filterManager } = data.query;
+  const { timefilter } = data.query.timefilter;
+
   const [timeRange, setTimeRange] = useState<TimeRange>(
     dashboardState.time_range ?? DEFAULT_TIME_RANGE
   );

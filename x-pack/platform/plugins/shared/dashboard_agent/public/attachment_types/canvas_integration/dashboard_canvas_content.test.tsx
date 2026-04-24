@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, act, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
@@ -108,6 +109,16 @@ describe('DashboardCanvasAttachment', () => {
     };
   };
 
+  const createMockData = (
+    filterManager: ReturnType<typeof createMockFilterManager>,
+    timefilter: ReturnType<typeof createMockTimefilter>
+  ) => {
+    const data = dataPluginMock.createStartContract();
+    Object.assign(data.query.filterManager, filterManager);
+    Object.assign(data.query.timefilter.timefilter, timefilter);
+    return data;
+  };
+
   const mockAttachment: DashboardAttachment = {
     type: DASHBOARD_ATTACHMENT_TYPE,
     id: 'test-dashboard-id',
@@ -168,13 +179,13 @@ describe('DashboardCanvasAttachment', () => {
     > = jest.fn().mockResolvedValue(false);
     const mockFilterManager = createMockFilterManager();
     const mockTimefilter = createMockTimefilter();
+    const mockData = createMockData(mockFilterManager, mockTimefilter);
     const mockApi = createMockDashboardApi(mockApiOverrides);
     const openSidebarConversation = jest.fn();
 
     const props: DashboardCanvasAttachmentProps = {
       ...defaultProps,
-      filterManager: mockFilterManager as any,
-      timefilter: mockTimefilter as any,
+      data: mockData,
       registerActionButtons,
       updateOrigin,
       closeCanvas,
@@ -386,7 +397,7 @@ describe('DashboardCanvasAttachment', () => {
         showFilterBar: true,
         showDatePicker: true,
         showQueryMenu: false,
-        useDefaultBehaviors: true,
+        useDefaultBehaviors: false,
       })
     );
   });
@@ -442,7 +453,7 @@ describe('DashboardCanvasAttachment', () => {
   });
 
   it('updates dashboard filters from the preview filter bar', async () => {
-    const { mockApi, props } = await renderDashboardCanvasAttachment();
+    const { mockApi, mockFilterManager } = await renderDashboardCanvasAttachment();
     const nextFilters = [{ meta: { key: 'host.name' } }] as Filter[];
 
     (mockApi.setFilters as jest.MockedFunction<typeof mockApi.setFilters>).mockClear();
@@ -450,7 +461,7 @@ describe('DashboardCanvasAttachment', () => {
       getLatestSearchBarProps()?.onFiltersUpdated(nextFilters);
     });
 
-    expect(props.filterManager.setFilters).toHaveBeenCalledWith(nextFilters);
+    expect(mockFilterManager.setFilters).toHaveBeenCalledWith(nextFilters);
     expect(mockApi.setFilters).toHaveBeenCalledWith(nextFilters);
     expect(mockApi.setFilters).toHaveBeenCalledTimes(1);
   });
@@ -837,12 +848,12 @@ describe('DashboardCanvasAttachment', () => {
       const checkSavedDashboardExist = jest.fn().mockResolvedValue(false);
       const filterManager = createMockFilterManager();
       const timefilter = createMockTimefilter();
+      const data = createMockData(filterManager, timefilter);
 
       const { container } = renderWithKibanaRenderContext(
         <DashboardCanvasAttachment
           {...defaultProps}
-          filterManager={filterManager as any}
-          timefilter={timefilter as any}
+          data={data}
           registerActionButtons={registerActionButtons}
           updateOrigin={updateOrigin}
           closeCanvas={closeCanvas}
@@ -873,12 +884,12 @@ describe('DashboardCanvasAttachment', () => {
       const checkSavedDashboardExist = jest.fn().mockResolvedValue(false);
       const filterManager = createMockFilterManager();
       const timefilter = createMockTimefilter();
+      const data = createMockData(filterManager, timefilter);
 
       const { container } = renderWithKibanaRenderContext(
         <DashboardCanvasAttachment
           {...defaultProps}
-          filterManager={filterManager as any}
-          timefilter={timefilter as any}
+          data={data}
           registerActionButtons={registerActionButtons}
           updateOrigin={updateOrigin}
           closeCanvas={closeCanvas}

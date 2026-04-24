@@ -47,8 +47,7 @@ export class DashboardAgentPlugin
         canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
         dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
         unifiedSearch: plugins.unifiedSearch,
-        filterManager: plugins.data.query.filterManager,
-        timefilter: plugins.data.query.timefilter.timefilter,
+        data: plugins.data,
         dashboardPlugin: plugins.dashboard,
       });
     });

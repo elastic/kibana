@@ -26,8 +26,7 @@ export type DashboardCanvasAttachmentProps = AttachmentRenderProps<DashboardAtta
   dashboardLocator?: DashboardRendererProps['locator'];
   openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
-  filterManager: DataPublicPluginStart['query']['filterManager'];
-  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
+  data: DataPublicPluginStart;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   canWriteDashboards: boolean;
 };

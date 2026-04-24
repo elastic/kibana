@@ -31,16 +31,14 @@ export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder,
   dashboardLocator,
   unifiedSearch,
-  filterManager,
-  timefilter,
+  data,
   dashboardPlugin,
   canWriteDashboards,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  filterManager: DataPublicPluginStart['query']['filterManager'];
-  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
+  data: DataPublicPluginStart;
   dashboardPlugin: DashboardStart;
   canWriteDashboards: boolean;
 }): (() => void) => {
@@ -107,8 +105,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         {...callbacks}
         dashboardLocator={dashboardLocator}
         searchBarComponent={unifiedSearch.ui.SearchBar}
-        filterManager={filterManager}
-        timefilter={timefilter}
+        data={data}
         checkSavedDashboardExist={checkSavedDashboardExist}
         canWriteDashboards={canWriteDashboards}
       />
