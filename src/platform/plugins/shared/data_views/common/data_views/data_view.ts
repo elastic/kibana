@@ -103,10 +103,10 @@ export class DataView extends AbstractDataView implements DataViewBase {
       ...baseSpec,
       fields,
       // Clear timeFieldName if the time field is not in the provided fields
-      timeFieldName:
-        baseSpec.timeFieldName && fields[baseSpec.timeFieldName]
-          ? baseSpec.timeFieldName
-          : undefined,
+      // timeFieldName:
+      //   baseSpec.timeFieldName && fields[baseSpec.timeFieldName]
+      //     ? baseSpec.timeFieldName
+      //     : undefined,
     };
 
     return new DataView({
