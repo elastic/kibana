@@ -33,6 +33,31 @@ interface ChartTypeRegistryEntry {
    * don't need that extra guidance.
    */
   supportsDynamicColoring?: boolean;
+  /**
+   * Number of color stops the LLM should put in `steps[]` for this chart type
+   * (and the number of preview hex codes we sample from each gradient palette
+   * when describing it in the system prompt).
+   *
+   * Only meaningful when `supportsDynamicColoring` is true. Picked to match
+   * how each chart renders dynamic coloring in the Lens UI — e.g. a `metric`
+   * chart shows a single value so 3 contiguous bands (low / mid / high or
+   * good / warn / bad) are the most useful default, while `gauge`, `heatmap`,
+   * and `datatable` benefit from the full 5 stops.
+   */
+  paletteStepsCount?: number;
+  /**
+   * Whether the chart's schema accepts a categorical `colorMappingSchema`
+   * (`{ mode: 'categorical', palette: '<palette id>', mapping: [...] }`) on
+   * top of (or instead of) `colorByValueSchema`.
+   *
+   * Used to decide whether the system prompt should also describe the named
+   * categorical Lens palettes the LLM can pick when coloring keyword/text
+   * columns. Currently only datatable rows / metrics surface a meaningful
+   * categorical mapping option — for other charts that accept
+   * `colorMappingSchema` (xy, pie, treemap, etc.) Lens applies sensible
+   * defaults so we omit the section.
+   */
+  supportsCategoricalColoring?: boolean;
 }
 
 /**
@@ -56,6 +81,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
         "Choose 'metric' for single numerical statistics, aggregations, counts, or KPIs without ranges",
     },
     supportsDynamicColoring: true,
+    paletteStepsCount: 3,
   },
   [SupportedChartType.Gauge]: {
     schema: gaugeConfigSchemaESQL,
@@ -71,6 +97,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       'Only include goal/target-related fields when the user explicitly asks for a goal or threshold.',
     ],
     supportsDynamicColoring: true,
+    paletteStepsCount: 5,
   },
   [SupportedChartType.XY]: {
     schema: xyConfigSchemaESQL,
@@ -93,6 +120,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
         "Choose 'heatmap' when both axes are buckets and you want to visualize density/intensity with color across the x/y grid",
     },
     supportsDynamicColoring: true,
+    paletteStepsCount: 5,
   },
   [SupportedChartType.Tagcloud]: {
     schema: tagcloudConfigSchemaESQL,
@@ -121,6 +149,8 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
         "Choose 'datatable' when the user needs precise values, sortable columns, or a spreadsheet-like view of the data",
     },
     supportsDynamicColoring: true,
+    paletteStepsCount: 5,
+    supportsCategoricalColoring: true,
   },
   [SupportedChartType.Pie]: {
     schema: pieConfigSchemaESQL,

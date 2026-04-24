@@ -94,5 +94,22 @@ export const LENS_DYNAMIC_COLOR_PALETTES = lightKbnPalettes
   .getAll()
   .filter((palette) => palette.type === 'gradient');
 
+/**
+ * Palettes the Lens UI exposes in its categorical color-mapping picker.
+ *
+ * Mirrors the filter used by `PaletteSelector` in
+ * `src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/palette_selector/palette_selector.tsx`,
+ * which renders `palettes.getAll().filter(d => d.type === 'categorical')`.
+ *
+ * Resolved from the light Borealis registry for the same reasons as
+ * `LENS_DYNAMIC_COLOR_PALETTES`: categorical palette colors do not depend on
+ * the `euiColorVisText*` tokens that diverge between light and dark Borealis,
+ * so the hex values are identical in dark mode and we can safely evaluate this
+ * once at module load.
+ */
+export const LENS_CATEGORICAL_COLOR_PALETTES = lightKbnPalettes
+  .getAll()
+  .filter((palette) => palette.type === 'categorical');
+
 export { elasticPalette, elasticLineOptimizedPalette } from './categorical';
 export * from './get_kbn_palettes';

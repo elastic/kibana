@@ -5,74 +5,134 @@
  * 2.0.
  */
 
-import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { LENS_DYNAMIC_COLOR_PALETTES } from '@kbn/palettes';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { LENS_DYNAMIC_COLOR_PALETTES, LENS_CATEGORICAL_COLOR_PALETTES } from '@kbn/palettes';
 import { chartTypeRegistry } from './chart_type_registry';
 
 /**
- * Number of color stops sampled from each palette when describing it to the LLM.
- *
- * Matches the default the Lens UI palette picker renders (`DEFAULT_COLOR_STEPS = 5`
- * in `@kbn/coloring`), so the colors we surface here are exactly what a user
- * would see when picking the palette in the editor.
+ * Number of color stops sampled from each categorical palette in the prompt
  */
-const PROMPT_PALETTE_PREVIEW_STEPS = 5;
+const CATEGORICAL_PALETTE_PREVIEW_STEPS = 5;
 
-const PALETTE_PREVIEWS: ReadonlyArray<{
-  id: string;
+const formatPalettePreview = ({
+  name,
+  colors,
+}: {
   name: string;
   colors: readonly string[];
-}> = LENS_DYNAMIC_COLOR_PALETTES.map((palette) => ({
-  id: palette.id,
-  name: palette.name,
-  colors: palette.colors(PROMPT_PALETTE_PREVIEW_STEPS),
-}));
+}): string => `- ${name}: ${colors.join(', ')}`;
 
-const formatPalettePreview = ({ name, colors }: (typeof PALETTE_PREVIEWS)[number]): string =>
-  `- ${name}: ${colors.join(', ')}`;
+const getGradientPalettePreviews = (steps: number): string[] =>
+  LENS_DYNAMIC_COLOR_PALETTES.map((palette) =>
+    formatPalettePreview({ name: palette.name, colors: palette.colors(steps) })
+  );
+
+const getCategoricalPalettePreviews = (): string[] =>
+  LENS_CATEGORICAL_COLOR_PALETTES.map((palette) =>
+    formatPalettePreview({
+      name: `${palette.id} (${palette.name})`,
+      colors: palette.colors(CATEGORICAL_PALETTE_PREVIEW_STEPS),
+    })
+  );
 
 /**
- * Returns the color-rules section appended to `createGenerateConfigPrompt`'s
- * system prompt for chart types whose schema accepts `colorByValueSchema`
- * (i.e. `supportsDynamicColoring` in the chart registry — currently `metric`,
- * `gauge`, `heatmap`, `datatable`). For all other chart types Lens applies
- * sensible defaults, so we return an empty string and skip the section.
- *
- * Palette previews are derived from `LENS_DYNAMIC_COLOR_PALETTES` at module
- * load, so any change to the palettes Lens registers for dynamic coloring is
- * picked up automatically.
+ * Returns the color-rules section appended to the visualization config
+ * generation prompt. Gated by `supportsDynamicColoring` and
+ * `supportsCategoricalColoring` on the chart registry entry; returns an empty
+ * string for chart types with neither (they inherit Lens defaults).
  */
 export const getColorPalettesPromptContent = (chartType: SupportedChartType): string => {
-  if (!chartTypeRegistry[chartType]?.supportsDynamicColoring) {
+  const entry = chartTypeRegistry[chartType];
+  const supportsDynamic = entry?.supportsDynamicColoring ?? false;
+  const supportsCategorical = entry?.supportsCategoricalColoring ?? false;
+
+  if (!supportsDynamic && !supportsCategorical) {
     return '';
   }
 
-  return [
-    'COLOR PALETTE RULES:',
-    '',
-    '1) WHEN to apply color',
+  const stepsCount = entry?.paletteStepsCount ?? 5;
+  const lines: string[] = ['COLOR PALETTE RULES:', ''];
+  let sectionNumber = 1;
+  const nextSection = () => sectionNumber++;
+
+  lines.push(
+    `${nextSection()}) WHEN to apply color`,
     '- Apply value-based coloring proactively whenever color adds meaning — e.g. utilization / saturation, latency, error rates or counts, success rates, throughput, anything with status or good-vs-bad / hot-vs-cold semantics.',
     '- For neutral data with no such meaning (raw counts, IDs, names, arbitrary categorical labels), OMIT the `color` field and let Lens use its defaults.',
     '- When the user explicitly requests a palette or scheme ("color from green to red", "use a temperature palette"), honor that request directly.',
-    '- When you do set color, use `type: "dynamic"`. NEVER use the deprecated `type: "legacy_dynamic"`.',
-    '',
-    '2) PICK exactly ONE palette',
-    '- Choose a single palette from the list below whose semantics match the metric. The chosen palette name MUST come from this list verbatim.',
-    '  - "Status" — good→bad ranges with success / warning / danger zones (SLO compliance, severity).',
-    '  - "Temperature" — diverging cool→hot data with a meaningful middle (latency, response time, anything temperature-like).',
-    '  - "Complementary" — symmetric diverging data with a neutral midpoint.',
-    '  - "Negative" (red) — "lower is better" or alarming metrics (errors, failures, anomalies).',
-    '  - "Positive" (green) — "higher is better" metrics (success rate, conversions, throughput).',
-    '  - "Cool", "Warm", or "Gray" — monochromatic gradients when only magnitude matters and there is no inherent good/bad signal.',
-    '',
-    '3) FILL `steps` from THAT palette ONLY',
-    '- EVERY hex code in `steps` MUST be copied verbatim from the single palette you picked in step 2. Do NOT mix colors from different palettes — combining e.g. a red from "Negative" with a blue from "Cool" in the same `steps` array is forbidden, even when it would look "nicer".',
-    '- Do NOT invent colors, do NOT interpolate between palettes, and do NOT modify hex values. If a palette does not match the data, pick a different palette in step 2 — never substitute individual colors.',
-    "- By default keep the chosen palette's natural order (low values → first color, high values → last color) so the rendered result matches the Lens UI palette picker.",
-    '- There is no `reverse` field in the schema, so to flip the gradient (e.g. you want LOW success rates highlighted with the most saturated Positive color), reverse the colors yourself in the `steps` array — but still use only colors from the SAME palette.',
-    '- To use fewer than 5 steps, take a contiguous slice starting from one end of the chosen palette (the end you choose depends on whether low or high values should stand out).',
-    '',
-    `Available named palettes (canonical ${PROMPT_PALETTE_PREVIEW_STEPS}-stop previews from the Lens UI palette picker):`,
-    ...PALETTE_PREVIEWS.map(formatPalettePreview),
-  ].join('\n');
+    ''
+  );
+
+  if (supportsDynamic && supportsCategorical) {
+    lines.push(
+      `${nextSection()}) CHOOSE the coloring mode based on the column type`,
+      '- Numeric columns (counts, durations, percentages, bytes, etc.) → use the dynamic gradient form: `color: { type: "dynamic", range, steps: [...] }`. Follow the dynamic gradient rules below.',
+      '- Keyword / text columns (status, host, service, env, error type, etc.) → use the categorical mapping form: `color: { mode: "categorical", palette: "<palette id>", mapping: [] }`. Follow the categorical mapping rules below.',
+      '- NEVER apply categorical mapping to a numeric column or dynamic gradient steps to a keyword column.',
+      '- NEVER use the deprecated `type: "legacy_dynamic"`.',
+      ''
+    );
+  }
+
+  if (supportsDynamic) {
+    lines.push(
+      `${nextSection()}) DYNAMIC GRADIENT — pick exactly ONE palette`,
+      '- Choose a single palette from the gradient list below whose semantics match the metric. The chosen palette name MUST come from this list verbatim.',
+      '  - "Status" — good→bad ranges with success / warning / danger zones (SLO compliance, severity).',
+      '  - "Temperature" — diverging cool→hot data with a meaningful middle (latency, response time, anything temperature-like).',
+      '  - "Complementary" — symmetric diverging data with a neutral midpoint.',
+      '  - "Negative" (red) — "lower is better" or alarming metrics (errors, failures, anomalies).',
+      '  - "Positive" (green) — "higher is better" metrics (success rate, conversions, throughput).',
+      '  - "Cool", "Warm", or "Gray" — monochromatic gradients when only magnitude matters and there is no inherent good/bad signal.'
+    );
+
+    if (chartType === SupportedChartType.Metric) {
+      lines.push(
+        '- Metric charts use 3 contiguous bands (low / mid / high or good / warn / bad), so prefer "Status", "Negative", "Positive", or "Temperature" — these carry semantic good→bad meaning that maps cleanly onto 3 bands. Avoid monochromatic palettes ("Cool", "Warm", "Gray") for metric unless the user explicitly asks for them.'
+      );
+    }
+
+    lines.push(
+      '',
+      `${nextSection()}) DYNAMIC GRADIENT — fill \`steps\` from THAT palette ONLY`,
+      `- Use exactly ${stepsCount} step${
+        stepsCount === 1 ? '' : 's'
+      } for a ${chartType} chart. Take a contiguous slice of ${stepsCount} colors from one end of the chosen palette (the end you choose depends on whether low or high values should stand out).`,
+      '- HARD CONSTRAINT — single source palette: every hex in `steps[*].color` MUST come from ONE preview line below, character-for-character. Find the preview line for your chosen palette; every hex you produce must appear, exactly as written, somewhere in THAT one line.',
+      '- This rule applies even to palettes that look visually similar or share tones. For example, building a custom red→green gradient by combining greens from "Positive" with reds from "Status" is FORBIDDEN — even though both palettes contain green-ish and red-ish hues, the exact hex values differ and Lens has tuned each palette as a coherent unit. The same applies to any other pairing: "Negative" + "Cool", "Temperature" + "Status", "Positive" + "Negative", etc. If the chosen palette\'s colors do not look "nice enough" on their own, that means you picked the wrong palette in the previous step — go back and pick a different one.',
+      '- Do NOT invent colors, do NOT interpolate between palettes, and do NOT modify hex values (no shading, no opacity tweaks, no shortening `#aabbcc` to `#abc`). If a palette does not match the data, pick a different palette in the previous step — never substitute individual colors.',
+      "- By default keep the chosen palette's natural order (low values → first color, high values → last color) so the rendered result matches the Lens UI palette picker.",
+      '- There is no `reverse` field in the schema, so to flip the gradient (e.g. you want LOW success rates highlighted with the most saturated Positive color), reverse the colors yourself in the `steps` array — but still use only colors from the SAME palette.',
+      '- VERIFY before output: scan your `steps` array. Every `color` value must appear, byte-for-byte, in the preview line of the SINGLE palette you picked. If even one hex is missing from that line, your output is invalid — fix it before producing the final JSON.',
+      ''
+    );
+  }
+
+  if (supportsCategorical) {
+    lines.push(
+      `${nextSection()}) CATEGORICAL MAPPING — pick a palette by id`,
+      '- Set `color: { mode: "categorical", palette: "<palette id>", mapping: [] }` and let Lens auto-assign a distinct color per distinct value at render time.',
+      '- The `palette` value MUST be one of the categorical palette ids listed below verbatim (e.g. `"default"`, `"eui_amsterdam"`).',
+      '- Leave `mapping: []` by default. Only define explicit `mapping[]` entries when the user names specific values to color a certain way (e.g. "color errors red, success green") — at config-generation time you do not know the actual data values, so guessing them is wrong.',
+      '- When the user does name explicit values, use `color: { type: "color_code", value: "#hex" }` for each entry, drawing the hex from one of the palettes below.',
+      ''
+    );
+  }
+
+  if (supportsDynamic) {
+    lines.push(
+      `Available gradient palettes (canonical ${stepsCount}-stop previews from the Lens UI palette picker, sized to match the ${stepsCount} \`steps\` you must produce for a ${chartType} chart):`,
+      ...getGradientPalettePreviews(stepsCount),
+      ''
+    );
+  }
+
+  if (supportsCategorical) {
+    lines.push(
+      `Available categorical palettes (${CATEGORICAL_PALETTE_PREVIEW_STEPS}-color preview of each palette from the Lens UI color-mapping picker; pass the id, not the name):`,
+      ...getCategoricalPalettePreviews()
+    );
+  }
+
+  return lines.join('\n').trimEnd();
 };
