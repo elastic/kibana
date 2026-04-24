@@ -36,7 +36,8 @@ interface CanvasFlyoutProps {
  */
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
-  const { canvasState, closeCanvas, setCanvasAttachmentOrigin, setCanvasAttachmentData } = useCanvasContext();
+  const { canvasState, closeCanvas, setCanvasAttachmentOrigin, setCanvasAttachmentData } =
+    useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
