@@ -95,6 +95,9 @@ ${additionalContext ?? ''}`,
 };
 
 export const esqlAdditionalInstructions = `
+You are generating an ES|QL query for a Kibana Lens visualization. The query will be used to create a visualization in Kibana.
+
+For that purpose, follow these guidelines:
 
 ## Human-readable column aliases
 
@@ -102,11 +105,21 @@ Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`
 
 ## Time Bucketing
 
-For time series charts, use the \`BUCKET\` function to create "auto" buckets that automatically scale with the time range.
-Always use \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\` instead of hardcoded intervals like
-\`DATE_TRUNC(1 hour, @timestamp)\`:
+For time series charts, use the \`BUCKET\` or \`TBUCKET\` functions to create "auto" buckets that automatically scale with the time range.
+Always use \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\` (or TBUCKET when relevant) instead of hardcoded intervals like \`DATE_TRUNC(1 hour, @timestamp)\`.
+Also always omit a \`LIMIT\` command in that case as the BUCKET range already bounds the results.
 
+e.g. with for a normal index with FROM and BUCKET:
+
+\`\`\`esql
 FROM logs | STATS count = COUNT() BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+\`\`\`
+
+or for a time-series datastream with TS and TBUCKET:
+
+\`\`\`esql
+TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
+\`\`\`
 
 When generating or passing "esql" for time-based XY charts, prefer this pattern (adjust the aggregation and timestamp field as needed) so the chart responds correctly to the dashboard or lens time range.
 `;
