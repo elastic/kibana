@@ -23,7 +23,9 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
+import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
+import { createTodoTool } from '../../../tools/builtin/todo';
 import { getStoreTools } from '../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
 
@@ -40,6 +42,7 @@ export const selectTools = async ({
   spaceId,
   runner,
   experimentalFeatures,
+  todoStateManager,
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
@@ -53,6 +56,7 @@ export const selectTools = async ({
   spaceId: string;
   runner: ScopedRunner;
   experimentalFeatures: ExperimentalFeatures;
+  todoStateManager: TodoStateManager;
 }) => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -81,6 +85,10 @@ export const selectTools = async ({
     ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
     : [];
 
+  const todoTools = experimentalFeatures.todos
+    ? [builtinToolToExecutable({ tool: createTodoTool({ todoStateManager }), runner })]
+    : [];
+
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
     selection: [
@@ -99,6 +107,7 @@ export const selectTools = async ({
     ...versionedAttachmentTools,
     ...staticRegistryTools,
     ...filestoreTools,
+    ...todoTools,
   ];
 
   const dedupedStaticTools = new Map<string, ExecutableTool>();

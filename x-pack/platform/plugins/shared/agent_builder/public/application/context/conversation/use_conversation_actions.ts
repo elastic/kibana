@@ -17,13 +17,16 @@ import type {
   Conversation,
   CompactionStep,
   BackgroundAgentCompleteStep,
+  TodosStep,
 } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
   isCompactionStep,
+  isTodosStep,
   ConversationRoundStatus,
   ConversationRoundStepType,
 } from '@kbn/agent-builder-common';
+import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -79,6 +82,7 @@ export interface ConversationActions {
     title: string;
   }) => void;
   addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
+  addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => void;
   addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
   setCompactionStepComplete: ({
     tokenCountAfter,
@@ -149,9 +153,26 @@ const createConversationActions = ({
             conversationAttachments: current?.attachments,
           });
 
+          // Carry over todos from the previous round if any items are still incomplete
+          const prevTodosStep = draft?.rounds?.at(-1)?.steps?.filter(isTodosStep)?.at(-1);
+          const carryoverTodos = prevTodosStep?.todos?.some(
+            (t) => t.status !== 'completed' && t.status !== 'cancelled'
+          )
+            ? prevTodosStep.todos
+            : undefined;
+
           const nextRound = createNewRound({
             userMessage,
             attachments: fallbackAttachments,
+            steps: carryoverTodos
+              ? [
+                  {
+                    type: ConversationRoundStepType.todos,
+                    todos: carryoverTodos,
+                    carried_over: true,
+                  },
+                ]
+              : [],
           });
           if (attachmentRefs.length) {
             nextRound.input.attachment_refs = attachmentRefs;
@@ -237,6 +258,18 @@ const createConversationActions = ({
     addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
+      });
+    },
+    addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => {
+      setCurrentRound((round) => {
+        const existing = round.steps.find(isTodosStep);
+        if (existing) {
+          existing.todos = todos;
+          existing.carried_over = false;
+        } else {
+          const step: TodosStep = { type: ConversationRoundStepType.todos, todos };
+          round.steps.push(step);
+        }
       });
     },
     addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {

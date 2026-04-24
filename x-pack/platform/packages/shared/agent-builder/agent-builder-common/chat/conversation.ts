@@ -77,6 +77,7 @@ export enum ConversationRoundStepType {
   reasoning = 'reasoning',
   compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
+  todos = 'todos',
 }
 
 // tool call step
@@ -206,11 +207,24 @@ export const isBackgroundAgentCompleteStep = (
   return step.type === ConversationRoundStepType.backgroundAgentComplete;
 };
 
+export interface TodosStepData {
+  todos: TodoItem[];
+  /** True when todos were inherited from the previous round, not written by the agent this round */
+  carried_over?: boolean;
+}
+
+export type TodosStep = ConversationRoundStepMixin<ConversationRoundStepType.todos, TodosStepData>;
+
+export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
+  return step.type === ConversationRoundStepType.todos;
+};
+
 export type ConversationRoundStep =
   | ToolCallStep
   | ReasoningStep
   | CompactionStep
-  | BackgroundAgentCompleteStep;
+  | BackgroundAgentCompleteStep
+  | TodosStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -307,6 +321,15 @@ export interface Conversation {
   state?: ConversationInternalState;
 }
 
+export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+export type TodoPriority = 'high' | 'medium' | 'low';
+
+export interface TodoItem {
+  content: string;
+  status: TodoStatus;
+  priority: TodoPriority;
+}
+
 /**
  * Internal storage for the conversation's arbitrary state.
  * Used for example to keep track of the prompt responses.
@@ -326,6 +349,8 @@ export interface ConversationInternalState {
   compaction_summary?: CompactionSummary;
   /** Background sub-agent executions keyed by execution ID. */
   background_executions?: Record<string, BackgroundExecutionState>;
+  /** Active todo list for the current conversation. Replaced wholesale on each write. */
+  todos?: TodoItem[];
 }
 
 export interface BackgroundExecutionCompletedAt {

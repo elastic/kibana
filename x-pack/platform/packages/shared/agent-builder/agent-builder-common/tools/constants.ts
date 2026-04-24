@@ -67,6 +67,10 @@ export const filestoreTools = {
   glob: `${internalNamespaces.filestore}.glob`,
 };
 
+export const todoTools = {
+  write: platformCoreTool('todo_write'),
+} as const;
+
 export const internalTools = {
   subAgentTool: 'run_subagent',
   sleepTool: 'sleep',
@@ -78,10 +82,16 @@ export const isAttachmentTool = (toolName: string) =>
 export const isFilestoreTool = (toolName: string) =>
   Object.values(filestoreTools).includes(toolName);
 
+export const isTodoTool = (toolName: string) =>
+  (Object.values(todoTools) as string[]).includes(toolName);
+
 const isInternalToolName = (toolName: string) => Object.values(internalTools).includes(toolName);
 
 export const isInternalTool = (toolName: string) =>
-  isAttachmentTool(toolName) || isFilestoreTool(toolName) || isInternalToolName(toolName);
+  isAttachmentTool(toolName) ||
+  isFilestoreTool(toolName) ||
+  isTodoTool(toolName) ||
+  isInternalToolName(toolName);
 
 export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
 
