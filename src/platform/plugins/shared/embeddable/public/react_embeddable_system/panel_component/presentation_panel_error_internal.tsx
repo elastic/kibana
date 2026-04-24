@@ -101,7 +101,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
   const ariaLabel = useMemo(
     () =>
       panelTitle
-        ? i18n.translate('presentationPanel.error.editButton', {
+        ? i18n.translate('embeddableApi.error.editButton', {
             defaultMessage: 'Edit {value}',
             values: { value: panelTitle },
           })
@@ -188,7 +188,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
                   <Markdown css={errorTextStyle} data-test-subj="errorMessageMarkdown" readOnly>
                     {error.message?.length
                       ? error.message
-                      : i18n.translate('presentationPanel.emptyErrorMessage', {
+                      : i18n.translate('embeddableApi.emptyErrorMessage', {
                           defaultMessage: 'Error',
                         })}
                   </Markdown>
@@ -219,7 +219,7 @@ const NarrowError = ({ error }: { error: ErrorLike }) => {
       size="s"
     >
       <FormattedMessage
-        id="presentationPanel.error.popoverButton"
+        id="embeddableApi.error.popoverButton"
         defaultMessage="An error occurred. View more..."
       />
     </EuiButtonEmpty>
@@ -234,14 +234,14 @@ const NarrowError = ({ error }: { error: ErrorLike }) => {
       panelProps={{
         css: styles.popoverErrorStyles,
       }}
-      aria-label={i18n.translate('presentationPanel.error.popover.ariaLabel', {
+      aria-label={i18n.translate('embeddableApi.error.popover.ariaLabel', {
         defaultMessage: 'An error occurred. View more...',
       })}
     >
       <Markdown data-test-subj="errorMessageMarkdown" readOnly css={errorTextStyle}>
         {error.message?.length
           ? error.message
-          : i18n.translate('presentationPanel.emptyErrorMessage', {
+          : i18n.translate('embeddableApi.emptyErrorMessage', {
               defaultMessage: 'Error',
             })}
       </Markdown>

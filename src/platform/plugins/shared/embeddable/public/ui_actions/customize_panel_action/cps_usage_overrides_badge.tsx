@@ -166,19 +166,19 @@ export class CpsUsageOverridesBadge
 }
 
 const strings = {
-  badgeLabel: i18n.translate('presentationPanel.badge.cpsUsageOverrides.label', {
+  badgeLabel: i18n.translate('embeddableApi.badge.cpsUsageOverrides.label', {
     defaultMessage: 'Custom CPS scope',
   }),
-  displayName: i18n.translate('presentationPanel.badge.cpsUsageOverrides.displayName', {
+  displayName: i18n.translate('embeddableApi.badge.cpsUsageOverrides.displayName', {
     defaultMessage: 'This panel uses custom CPS scope',
   }),
-  editButton: i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.editButton', {
+  editButton: i18n.translate('embeddableApi.badge.cpsUsageOverrides.popover.editButton', {
     defaultMessage: 'Edit',
   }),
-  exploreButton: i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.exploreButton', {
+  exploreButton: i18n.translate('embeddableApi.badge.cpsUsageOverrides.popover.exploreButton', {
     defaultMessage: 'Explore',
   }),
-  error: i18n.translate('presentationPanel.badge.cpsUsageOverrides.editError', {
+  error: i18n.translate('embeddableApi.badge.cpsUsageOverrides.editError', {
     defaultMessage: 'Failed to open panel configuration',
   }),
 };

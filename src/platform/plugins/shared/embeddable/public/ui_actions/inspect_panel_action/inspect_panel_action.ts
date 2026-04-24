@@ -34,7 +34,7 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
   constructor() {}
 
   public getDisplayName() {
-    return i18n.translate('presentationPanel.action.inspectPanel.displayName', {
+    return i18n.translate('embeddableApi.action.inspectPanel.displayName', {
       defaultMessage: 'Inspect',
     });
   }
@@ -56,7 +56,7 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
 
     const panelTitle =
       getTitle(embeddable) ||
-      i18n.translate('presentationPanel.action.inspectPanel.untitledEmbeddableFilename', {
+      i18n.translate('embeddableApi.action.inspectPanel.untitledEmbeddableFilename', {
         defaultMessage: '[No Title]',
       });
 

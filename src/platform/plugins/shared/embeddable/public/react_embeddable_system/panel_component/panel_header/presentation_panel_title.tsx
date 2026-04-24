@@ -85,7 +85,7 @@ export const PresentationPanelTitle = ({
         color="text"
         onClick={onClick}
         css={titleStyles}
-        aria-label={i18n.translate('presentationPanel.header.titleAriaLabel', {
+        aria-label={i18n.translate('embeddableApi.header.titleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
           values: { title: panelTitle },
         })}
@@ -133,13 +133,13 @@ export const PresentationPanelTitle = ({
               <EuiScreenReaderOnly>
                 <span id={headerId}>
                   {panelTitle
-                    ? i18n.translate('presentationPanel.ariaLabel', {
+                    ? i18n.translate('embeddableApi.ariaLabel', {
                         defaultMessage: 'Panel: {title}',
                         values: {
                           title: panelTitle,
                         },
                       })
-                    : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
+                    : i18n.translate('embeddableApi.untitledPanelAriaLabel', {
                         defaultMessage: 'Untitled panel',
                       })}
                 </span>
@@ -152,7 +152,7 @@ export const PresentationPanelTitle = ({
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
             tabIndex={0}
-            aria-label={i18n.translate('presentationPanel.header.descriptionIconAriaLabel', {
+            aria-label={i18n.translate('embeddableApi.header.descriptionIconAriaLabel', {
               defaultMessage: 'Description',
             })}
           />

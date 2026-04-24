@@ -45,18 +45,18 @@ import { DEFAULT_QUICK_ACTION_IDS } from '../constants';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
-    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithTitle', {
+    return i18n.translate('embeddableApi.contextMenu.ariaLabelWithTitle', {
       defaultMessage: 'Panel options for {title}',
       values: { title },
     });
   }
   if (index) {
-    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithIndex', {
+    return i18n.translate('embeddableApi.contextMenu.ariaLabelWithIndex', {
       defaultMessage: 'Options for panel {index}',
       values: { index },
     });
   }
-  return i18n.translate('presentationPanel.contextMenu.ariaLabel', {
+  return i18n.translate('embeddableApi.contextMenu.ariaLabel', {
     defaultMessage: 'Panel options',
   });
 };
@@ -419,7 +419,7 @@ export const PresentationPanelHoverActions = ({
             margin: ${euiTheme.size.xs};
           `}
           data-test-subj="embeddablePanelDragHandle"
-          aria-label={i18n.translate('presentationPanel.dragHandle', {
+          aria-label={i18n.translate('embeddableApi.dragHandle', {
             defaultMessage: 'Move panel',
           })}
         />

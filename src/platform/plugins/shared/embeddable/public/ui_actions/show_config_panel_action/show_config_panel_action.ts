@@ -42,7 +42,7 @@ export class ShowConfigPanelAction
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return i18n.translate('presentationPanel.action.showConfigPanel.displayName', {
+    return i18n.translate('embeddableApi.action.showConfigPanel.displayName', {
       defaultMessage: 'Show {value} configuration',
       values: {
         value: embeddable.getTypeDisplayName(),

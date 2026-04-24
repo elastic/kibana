@@ -19,7 +19,7 @@ import { isPromise } from '@kbn/std';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 
-const errorLoadingPanel = i18n.translate('presentationPanel.error.errorWhenLoadingPanel', {
+const errorLoadingPanel = i18n.translate('embeddableApi.error.errorWhenLoadingPanel', {
   defaultMessage: 'An error occurred while loading this panel.',
 });
 

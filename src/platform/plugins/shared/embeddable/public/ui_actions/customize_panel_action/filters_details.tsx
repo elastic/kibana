@@ -21,11 +21,11 @@ import { executeEditPanelAction } from '../edit_panel_action/execute_edit_action
 
 export const filterDetailsActionStrings = {
   getQueryTitle: () =>
-    i18n.translate('presentationPanel.filters.queryTitle', {
+    i18n.translate('embeddableApi.filters.queryTitle', {
       defaultMessage: 'Query',
     }),
   getFiltersTitle: () =>
-    i18n.translate('presentationPanel.filters.filtersTitle', {
+    i18n.translate('embeddableApi.filters.filtersTitle', {
       defaultMessage: 'Filters',
     }),
 };
@@ -77,14 +77,14 @@ export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
                 data-test-subj="customizePanelEditQueryButton"
                 onClick={() => executeEditPanelAction(api)}
                 aria-label={i18n.translate(
-                  'presentationPanel.action.customizePanel.flyout.optionsMenuForm.editQueryButtonAriaLabel',
+                  'embeddableApi.action.customizePanel.flyout.optionsMenuForm.editQueryButtonAriaLabel',
                   {
                     defaultMessage: 'Edit query',
                   }
                 )}
               >
                 <FormattedMessage
-                  id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.editQueryButtonLabel"
+                  id="embeddableApi.action.customizePanel.flyout.optionsMenuForm.editQueryButtonLabel"
                   defaultMessage="Edit"
                 />
               </EuiButtonEmpty>
@@ -114,14 +114,14 @@ export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
                 data-test-subj="customizePanelEditFiltersButton"
                 onClick={() => executeEditPanelAction(api)}
                 aria-label={i18n.translate(
-                  'presentationPanel.action.customizePanel.flyout.optionsMenuForm.editFiltersButtonAriaLabel',
+                  'embeddableApi.action.customizePanel.flyout.optionsMenuForm.editFiltersButtonAriaLabel',
                   {
                     defaultMessage: 'Edit filters',
                   }
                 )}
               >
                 <FormattedMessage
-                  id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.editFiltersButtonLabel"
+                  id="embeddableApi.action.customizePanel.flyout.optionsMenuForm.editFiltersButtonLabel"
                   defaultMessage="Edit"
                 />
               </EuiButtonEmpty>
