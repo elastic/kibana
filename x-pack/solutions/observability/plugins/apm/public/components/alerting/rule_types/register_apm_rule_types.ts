@@ -157,6 +157,10 @@ export function registerApmRuleTypes(
     },
     ruleParamsExpression: lazy(() => import('./anomaly_rule_type')),
     validate: validateAnomalyRule,
+    alertDetailsAppSection: createLazyApmComponentWithContext(
+      coreSetup,
+      () => import('../ui_components/alert_details_app_section')
+    ),
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
     defaultRecoveryMessage: anomalyRecoveryMessage,

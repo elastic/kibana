@@ -38,6 +38,7 @@ import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
 import { getValueColumn } from '../../columns/esql_column';
 import { axisLabelOrientationCompat } from '../common';
+import { getColumnTypeFromScaleType } from '../utils';
 
 const ACCESSOR = 'heatmap_value_accessor';
 
@@ -126,9 +127,12 @@ function buildFormBasedLayer(layer: HeatmapConfigNoESQL): FormBasedPersistedStat
 }
 
 function getValueColumns(layer: HeatmapConfigESQL) {
+  const xFieldType = layer.axis?.x?.scale
+    ? getColumnTypeFromScaleType(layer.axis.x.scale)
+    : undefined;
   return [
     getValueColumn(getAccessorName('value'), layer.metric, 'number'),
-    ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x)] : []),
+    ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x, xFieldType)] : []),
     ...(layer.y ? [getValueColumn(getAccessorName('y'), layer.y)] : []),
   ];
 }
