@@ -164,7 +164,7 @@ spaceTest.describe(
         await spaceTest.step(
           'click waterfall preview to open expanded timeline flyout',
           async () => {
-            await flyout.traceSummary.waterfallClickArea.click();
+            await flyout.traceSummary.clickWaterfallPreview();
             await expect(flyout.waterfallFlyout.container).toBeVisible();
             await flyout.waterfallFlyout.backButton.click();
             await expect(flyout.waterfallFlyout.container).toBeHidden();
