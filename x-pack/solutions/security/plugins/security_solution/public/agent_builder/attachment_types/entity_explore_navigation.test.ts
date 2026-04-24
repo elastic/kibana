@@ -172,6 +172,36 @@ describe('entity_explore_navigation', () => {
     });
 
     describe('navigateToEntityAnalyticsWithFlyoutInApp', () => {
+      it('preserves current entity analytics query state and appends flyout', () => {
+        const application = buildApplicationMock();
+        const risonQuery = '(pageIndex:3,sort:!((@timestamp,desc)))';
+
+        window.history.replaceState(
+          {},
+          '',
+          `/app/security/entity_analytics_home_page?cspq=${encodeURIComponent(
+            risonQuery
+          )}&watchlistId=wl-123&watchlistName=VIPs&groupBy=resolution`
+        );
+
+        navigateToEntityAnalyticsWithFlyoutInApp({
+          application,
+          appId: 'securitySolutionUI',
+          flyout: { right: { id: 'service-panel', params: { serviceName: 'svc-a' } } },
+        });
+
+        expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+        const [, options] = application.navigateToApp.mock.calls[0];
+        const path = (options as { path?: string }).path ?? '';
+        const params = new URLSearchParams(path.startsWith('?') ? path.slice(1) : path);
+
+        expect(params.get('cspq')).toBe(risonQuery);
+        expect(params.get('watchlistId')).toBe('wl-123');
+        expect(params.get('watchlistName')).toBe('VIPs');
+        expect(params.get('groupBy')).toBe('resolution');
+        expect(params.get('flyout')).toContain('right');
+      });
+
       it('clears the search session before navigateToApp is called', () => {
         const application = buildApplicationMock();
         const searchSession = buildSearchSessionMock();

@@ -9,7 +9,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import { encodeFlyout } from '@kbn/cloud-security-posture/src/utils/query_utils';
+import { encodeFlyout, FLYOUT_PARAM_KEY } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation,
   readLastAgentBuilderAgentIdForSecuritySession,
@@ -30,6 +30,33 @@ const INVALID_PLACEHOLDER_ENTITY_NAME = 'name';
 const USER_EUID_PREFIX = 'user:';
 
 const AGENT_BUILDER_SIDEBAR_APP_ID = 'agentBuilder' as const;
+const ENTITY_ANALYTICS_HOME_PATH = '/entity_analytics_home_page';
+
+const getEntityAnalyticsStateSearchParams = (): URLSearchParams => {
+  if (!window.location.pathname.includes(ENTITY_ANALYTICS_HOME_PATH)) {
+    return new URLSearchParams();
+  }
+
+  return new URLSearchParams(window.location.search);
+};
+
+const getEntityAnalyticsNavigationPathWithFlyout = (
+  flyout: Record<string, unknown>
+): string | undefined => {
+  const encodedFlyoutSearch = encodeFlyout(flyout);
+  if (encodedFlyoutSearch == null) {
+    return undefined;
+  }
+
+  const flyoutValue = new URLSearchParams(encodedFlyoutSearch).get(FLYOUT_PARAM_KEY);
+  if (flyoutValue == null) {
+    return undefined;
+  }
+
+  const searchParams = getEntityAnalyticsStateSearchParams();
+  searchParams.set(FLYOUT_PARAM_KEY, flyoutValue);
+  return `?${searchParams.toString()}`;
+};
 
 export type SecurityAgentBuilderChrome = CoreStart['chrome'];
 
@@ -259,10 +286,11 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
    */
   searchSession?: ISessionService;
 }): void => {
-  const encoded = encodeFlyout(flyout);
-  if (encoded == null) {
+  const path = getEntityAnalyticsNavigationPathWithFlyout(flyout);
+  if (path == null) {
     return;
   }
+
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
   if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
     agentBuilder.toggleChat();
@@ -270,7 +298,7 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   clearSearchSessionBeforeSecurityNavigation(searchSession);
   application.navigateToApp(appId, {
     deepLinkId: SecurityPageName.entityAnalyticsHomePage,
-    path: `?${encoded}`,
+    path,
     replace: true,
   });
   scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
