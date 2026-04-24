@@ -34,7 +34,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { HuntingLead } from './types';
 import { LeadCard } from './lead_card';
 import * as i18n from './translations';
-import illustrationGenAi from '../../../../common/images/illustration_genai.svg';
+import illustrationGenAi from '../../../../common/images/illustration_genai_transparent_background.svg';
 
 const MAX_VISIBLE_CARDS = 5;
 const MIN_CARD_WIDTH = 280;
