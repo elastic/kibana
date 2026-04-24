@@ -9,7 +9,7 @@
 
 import type { Transaction } from 'elastic-apm-node';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { CiStatsReporter, type CiStatsMetric } from '@kbn/ci-stats-reporter';
 import type { AllPluginStats, BuildApiMapResult, CliOptions, SetupProjectResult } from '../types';
 import { getLink } from './get_link';
 
@@ -86,7 +86,7 @@ export function reportMetrics(
       'stats'
     );
 
-    const metrics = [
+    const metrics: CiStatsMetric[] = [
       {
         id,
         meta: { pluginTeam },
