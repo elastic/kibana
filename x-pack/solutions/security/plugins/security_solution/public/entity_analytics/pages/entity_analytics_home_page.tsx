@@ -15,7 +15,7 @@ import {
   EuiTitle,
   EuiButtonIcon,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '../../app/types';
@@ -65,11 +65,11 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   sort: [['@timestamp', 'desc']],
 });
 
-const RiskPanelFlexItem = styled(EuiFlexItem)`
+const riskPanelFlexItemStyle = css`
   min-width: 460px;
 `;
 
-const AnomaliesPanelFlexItem = styled(EuiFlexItem)`
+const anomaliesPanelFlexItemStyle = css`
   min-width: 500px;
 `;
 
@@ -269,7 +269,7 @@ export const EntityAnalyticsHomePage = () => {
 
             <EuiFlexItem>
               <EuiFlexGroup wrap gutterSize="m">
-                <RiskPanelFlexItem grow={3}>
+                <EuiFlexItem grow={3} css={riskPanelFlexItemStyle}>
                   <EuiPanel hasBorder>
                     <DynamicRiskLevelPanel
                       watchlistId={selectedWatchlistId}
@@ -277,12 +277,12 @@ export const EntityAnalyticsHomePage = () => {
                       entityDataView={entityDataView}
                     />
                   </EuiPanel>
-                </RiskPanelFlexItem>
-                <AnomaliesPanelFlexItem grow={5}>
+                </EuiFlexItem>
+                <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
                   <EuiPanel hasBorder>
                     <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
                   </EuiPanel>
-                </AnomaliesPanelFlexItem>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
 

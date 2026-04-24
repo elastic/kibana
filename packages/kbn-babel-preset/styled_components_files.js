@@ -291,7 +291,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detections[\/\\]components[\/\\]osquery[\/\\]osquery_flyout.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]asset_criticality[\/\\]asset_criticality_selector.stories.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]asset_criticality_file_uploader[\/\\]asset_criticality_file_uploader.stories.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]pages[\/\\]entity_analytics_home_page.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]exceptions[\/\\]components[\/\\]exceptions_utility[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]exceptions[\/\\]components[\/\\]shared_list_utilty_bar[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]paginated_table[\/\\]index.test.tsx/,
