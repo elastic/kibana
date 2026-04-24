@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
-import type { FeedbackFormData } from '../types';
+import type { FeedbackFormData, FeedbackRegistryEntry } from '../types';
 import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
 import { FeedbackFooter } from './footer/feedback_footer';
+import { FeedbackContainerSkeleton } from './feedback_container_skeleton';
+import { useQuestionsForApp } from '../hooks/use_questions_for_app';
 
 interface Props {
-  getQuestions: (appId: string) => FeedbackRegistryEntry[];
+  getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
   getAppDetails: () => { title: string; id: string; url: string };
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: FeedbackFormData) => Promise<void>;
@@ -44,7 +45,29 @@ export const FeedbackContainer = ({
   const [forceShowEmailError, setForceShowEmailError] = useState(false);
 
   const { title: appTitle, id: appId, url: appUrl } = getAppDetails();
-  const questions = getQuestions(appId);
+
+  const { questions, isLoading, error } = useQuestionsForApp({ getQuestions, appId });
+
+  const containerCss = css`
+    padding: ${euiTheme.size.l};
+    width: 576px;
+  `;
+
+  useEffect(() => {
+    if (error) {
+      hideFeedbackContainer();
+      showToast(
+        i18n.translate('feedback.loadQuestionsFailureToast.title', {
+          defaultMessage: 'Failed to load feedback form. Please try again later.',
+        }),
+        'error'
+      );
+    }
+  }, [error, hideFeedbackContainer, showToast]);
+
+  if (isLoading || error) {
+    return <FeedbackContainerSkeleton />;
+  }
 
   const isFormFilled =
     selectedCsatOptionId ||
@@ -121,11 +144,6 @@ export const FeedbackContainer = ({
       setIsSubmitting(false);
     }
   };
-
-  const containerCss = css`
-    padding: ${euiTheme.size.l};
-    width: 576px;
-  `;
 
   return (
     <EuiFlexGroup

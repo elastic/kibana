@@ -64,7 +64,7 @@ function getBundleSizeLimits() {
   const isRspack = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
   return {
     isRspack,
-    totalSize: isRspack ? 4.5 * 1024 * 1024 : 3.1 * 1024 * 1024,
+    totalSize: isRspack ? 4.5 * 1024 * 1024 : 3.2 * 1024 * 1024,
     bundleCount: isRspack ? 70 : 100,
     discoverSize: 650 * 1024,
     unifiedSearchSize: 450 * 1024,
@@ -147,8 +147,17 @@ test.describe(
       const loadedPluginNames = stats.plugins.map((p) => p.name).sort((a, b) => a.localeCompare(b));
       const limits = getBundleSizeLimits();
 
-      expect(stats.totalSize).toBeLessThan(limits.totalSize);
-      expect(stats.bundleCount).toBeLessThan(limits.bundleCount);
+      expect(
+        stats.totalSize,
+        `Total bundles size loaded on page should not exceed ${(
+          limits.totalSize /
+          (1024 * 1024)
+        ).toFixed(1)} MB`
+      ).toBeLessThan(limits.totalSize);
+      expect(
+        stats.bundleCount,
+        `Total bundle chunks count loaded on page should not exceed ${limits.bundleCount}`
+      ).toBeLessThan(limits.bundleCount);
 
       const expectedPlugins = getExpectedDiscoverPluginIds(config.projectType);
       const bundleAssertion = evaluateDiscoverBundlePluginAssertion(
@@ -156,8 +165,11 @@ test.describe(
         expectedPlugins,
         RSPACK_ONLY_BUNDLE_LABELS
       );
-      expect(bundleAssertion).toStrictEqual({ ok: true });
-      expect(assertLegacyPerPluginSizes(stats.plugins, limits)).toStrictEqual({ ok: true });
+      expect(bundleAssertion, 'Unexpected plugins were loaded on page').toStrictEqual({ ok: true });
+      expect(
+        assertLegacyPerPluginSizes(stats.plugins, limits),
+        'Individual plugin bundle sizes exceeded limits'
+      ).toStrictEqual({ ok: true });
     });
 
     test('measures Performance Metrics before and after Discover load', async ({

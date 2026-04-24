@@ -14,10 +14,10 @@ if [[ "${KIBANA_BUILD_ID:-}" != "false" ]]; then
     # Falls back to KIBANA_BUILD_ID or BUILDKITE_BUILD_ID for non-PR pipelines.
     EFFECTIVE_BUILD_ID=$(buildkite-agent meta-data get "kibana-effective-build-id" 2>/dev/null || echo "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}")
 
-    download_artifact kibana-default.tar.gz . --build "$EFFECTIVE_BUILD_ID"
+    download_artifact kibana-default.tar.zst . --build "$EFFECTIVE_BUILD_ID"
 
     mkdir -p "$KIBANA_BUILD_LOCATION"
-    tar -xzf kibana-default.tar.gz -C "$KIBANA_BUILD_LOCATION" --strip=1
+    tar -xf kibana-default.tar.zst -I zstd -C "$KIBANA_BUILD_LOCATION" --strip=1
 
     if is_pr_with_label "ci:build-example-plugins"; then
       # Testing against an example plugin distribution is not supported,
