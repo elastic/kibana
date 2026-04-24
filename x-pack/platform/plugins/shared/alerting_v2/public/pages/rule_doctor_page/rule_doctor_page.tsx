@@ -6,11 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiPageHeader,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
