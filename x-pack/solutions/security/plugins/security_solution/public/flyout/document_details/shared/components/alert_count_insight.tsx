@@ -35,12 +35,13 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
 const ORDER = ['Low', 'Medium', 'High', 'Critical'];
 
 interface AlertCountInsightProps {
   /**
-   * Entity identifiers used to filter the alerts by.
+   * These identity fields are wrong for the user and need to be fixed.
    */
   identityFields: Record<string, string>;
   /**
@@ -48,6 +49,8 @@ interface AlertCountInsightProps {
    * from the store for the alerts query (same as `useAlertsByStatus` / `useNonClosedAlerts`).
    */
   entityType?: string;
+
+  entityRecord?: EntityStoreRecord | null;
   /**
    * Global query inspector id; use a unique suffix when multiple instances mount (e.g. left + right flyout).
    */
@@ -107,6 +110,7 @@ export const getFormattedAlertStats = (
 export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   identityFields,
   entityType,
+  entityRecord,
   queryId = DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   direction,
   openDetailsPanel,
@@ -117,6 +121,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   const { signalIndexName } = useSignalIndex();
 
   const { items, isLoading } = useAlertsByStatus({
+    entityRecord,
     identityFields,
     entityType,
     signalIndexName,

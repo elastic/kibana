@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
@@ -58,18 +60,37 @@ const getFilterTitle = (entityType: EntityType): string => {
 export const EntityAlertsCell: React.FC<{
   entityName: string;
   entityType: EntityType;
-}> = ({ entityName, entityType }) => {
+  entityRecord?: EntityStoreRecord | null;
+}> = ({ entityName, entityType, entityRecord }) => {
   const { signalIndexName } = useSignalIndex();
   const { from, to } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
+  const euidApi = useEntityStoreEuidApi();
 
   const filterField = EntityTypeToIdentifierField[entityType] || 'entity.id';
+
+  const entityFilters = useMemo(() => {
+    if (euidApi?.euid && entityRecord) {
+      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(entityType, entityRecord);
+      if (filter != null) {
+        return [filter];
+      }
+    }
+    return [{ term: { [filterField]: entityName } }];
+  }, [euidApi?.euid, filterField, entityName, entityType, entityRecord]);
+
+  const euidKqlEntityFilter = useMemo(() => {
+    if (euidApi?.euid && entityRecord) {
+      return euidApi.euid.kql.getEuidFilterBasedOnDocument(entityType, entityRecord);
+    }
+    return undefined;
+  }, [euidApi?.euid, entityType, entityRecord]);
 
   const { data, setQuery: setAlertsQuery } = useQueryAlerts<{}, AlertsByStatusAgg>({
     query: getAlertsByStatusQuery({
       from,
       to,
-      identityFields: { [filterField]: entityName },
+      entityFilters,
     }),
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.BY_STATUS,
@@ -80,10 +101,10 @@ export const EntityAlertsCell: React.FC<{
       getAlertsByStatusQuery({
         from,
         to,
-        identityFields: { [filterField]: entityName },
+        entityFilters,
       })
     );
-  }, [setAlertsQuery, from, to, entityName, filterField]);
+  }, [setAlertsQuery, from, to, entityName, entityFilters]);
 
   const { navigateTo } = useNavigation();
 
@@ -103,26 +124,33 @@ export const EntityAlertsCell: React.FC<{
     },
   });
 
-  const filters = [
-    {
-      title: getFilterTitle(entityType),
-      selected_options: [entityName],
-      field_name: filterField,
-    },
-    {
-      title: OPEN_IN_ALERTS_TITLE_STATUS,
-      selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-      field_name: 'kibana.alert.workflow_status',
-    },
-  ];
+  const statusPageFilter = {
+    title: OPEN_IN_ALERTS_TITLE_STATUS,
+    selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+    field_name: 'kibana.alert.workflow_status',
+  };
 
-  const urlFilterParams = encode(formatPageFilterSearchParam(filters));
+  const pageFilters = euidKqlEntityFilter
+    ? [statusPageFilter]
+    : [
+        {
+          title: getFilterTitle(entityType),
+          selected_options: [entityName],
+          field_name: filterField,
+        },
+        statusPageFilter,
+      ];
+
+  const urlFilterParams = encode(formatPageFilterSearchParam(pageFilters));
+  const appQueryPath = euidKqlEntityFilter
+    ? `&${URL_PARAM_KEY.appQuery}=${encode({ language: 'kuery', query: euidKqlEntityFilter })}`
+    : '';
   const timerangePath = timerange ? `&timerange=${timerange}` : '';
 
   const openAlertsPage = () => {
     navigateTo({
       deepLinkId: SecurityPageName.alerts,
-      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${timerangePath}`,
+      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${appQueryPath}${timerangePath}`,
       openInNewTab: true,
     });
   };

@@ -9,7 +9,7 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { VIEWS_ROUTE } from '@kbn/esql-types';
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
