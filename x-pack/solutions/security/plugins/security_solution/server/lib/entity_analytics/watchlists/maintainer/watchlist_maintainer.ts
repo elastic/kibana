@@ -28,7 +28,7 @@ export const createWatchlistMaintainer = ({
     logger.info(`Watchlist maintainer setup completed for namespace "${namespace}"`);
     return status.state;
   },
-  run: async ({ status, esClient, fakeRequest }) => {
+  run: async ({ status, esClient, fakeRequest, abortController }) => {
     const namespace = status.metadata.namespace;
 
     const [coreStart, pluginsStart] = await getStartServices();
@@ -56,7 +56,7 @@ export const createWatchlistMaintainer = ({
       namespace,
     });
 
-    await entitySourcesService.syncAllWatchlists();
+    await entitySourcesService.syncAllWatchlists({ abortSignal: abortController.signal });
 
     return status.state;
   },

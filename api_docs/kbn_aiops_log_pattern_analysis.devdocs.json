@@ -35,7 +35,7 @@
           "{ readonly query?: any; readonly intervalMs?: number | undefined; readonly index: string; readonly field: string; readonly from: number; readonly to: number; readonly timeField: string; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis/schema.ts",
-        "lineNumber": 56,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -119,7 +119,7 @@
           "<number | undefined>; }>"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis/schema.ts",
-        "lineNumber": 46,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

@@ -13,6 +13,20 @@ import { TestProviders } from '../../common/mock';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+
+jest.mock('../../common/components/links/link_props', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const mockReact = require('react');
+  return {
+    withSecuritySolutionLink:
+      (WrappedComponent: React.ComponentType<Record<string, unknown>>) =>
+      (props: Record<string, unknown>) =>
+        mockReact.createElement(WrappedComponent, { ...props, href: '/mocked' }),
+    useGetSecuritySolutionLinkProps: jest.fn(() => () => ({ href: '/mocked', onClick: jest.fn() })),
+    useSecuritySolutionLinkProps: jest.fn(() => ({ href: '/mocked', onClick: jest.fn() })),
+  };
+});
 
 jest.mock('../../common/components/link_to', () => ({
   useGetSecuritySolutionUrl:
@@ -97,6 +111,12 @@ jest.mock('../components/home/use_entity_store_data_view', () => ({
   })),
 }));
 
+jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
+  useEntityStoreStatus: jest.fn(() => ({
+    data: { status: 'running', engines: [] },
+  })),
+}));
+
 // useEntityURLState is already mocked inside the entities_table mock above
 
 jest.mock('../../common/hooks/use_space_id', () => ({
@@ -112,6 +132,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockUseDataView = useDataView as jest.Mock;
+const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
 
 describe('EntityAnalyticsHomePage', () => {
   beforeEach(() => {
@@ -131,6 +152,10 @@ describe('EntityAnalyticsHomePage', () => {
     mockUseDataView.mockReturnValue({
       dataView: { id: 'test', matchedIndices: ['index-1'] },
       status: 'ready',
+    });
+
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'running', engines: [] },
     });
   });
 
@@ -238,6 +263,122 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     // EmptyPrompt should be rendered
+    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
+  });
+
+  it("renders entity store disabled empty prompt when status is 'not_installed'", () => {
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'not_installed', engines: [] },
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByTestId('entityStoreDisabledEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Entity analytics' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
+    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
+  });
+
+  it("renders entity store disabled empty prompt when status is 'stopped'", () => {
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'stopped', engines: [] },
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByTestId('entityStoreDisabledEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Entity analytics' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
+    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
+  });
+
+  it("does not render disabled empty prompt when status is 'running'", () => {
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'running', engines: [] },
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.queryByTestId('entityStoreDisabledEmptyPrompt')).not.toBeInTheDocument();
+    expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
+  });
+
+  it("does not render disabled empty prompt when status is 'installing'", () => {
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'installing', engines: [] },
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.queryByTestId('entityStoreDisabledEmptyPrompt')).not.toBeInTheDocument();
+    expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
+  });
+
+  it('disabled empty prompt footer renders a Read the docs link to the entity analytics docs', () => {
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'not_installed', engines: [] },
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByText('Want to learn more?', { exact: false })).toBeInTheDocument();
+    const docsLink = screen.getByRole('link', { name: /Read the docs/ });
+    expect(docsLink).toBeInTheDocument();
+    expect(docsLink).toHaveAttribute('href', expect.stringContaining('entity-risk-scoring'));
+    expect(docsLink).toHaveAttribute('target', '_blank');
+  });
+
+  it('indicesExist=false still wins over entity store disabled state', () => {
+    mockUseSourcererDataView.mockReturnValue({
+      indicesExist: false,
+      loading: false,
+      sourcererDataView: { id: 'test', matchedIndices: [] },
+    });
+
+    mockUseDataView.mockReturnValue({
+      dataView: { id: 'test', matchedIndices: [] },
+      status: 'ready',
+    });
+
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'not_installed', engines: [] },
+    });
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.queryByTestId('entityStoreDisabledEmptyPrompt')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type SyntheticEvent } from 'react';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import type { Columns } from '../../../components/paginated_table';
 import { HostDetailsLink } from '../../../../common/components/links';
@@ -24,7 +24,9 @@ export const getHostNames = (hosts: HostEcs[]): string[] => {
     .map((host) => (host.name != null && host.name[0] != null ? host.name[0] : ''));
 };
 
-export const getUncommonColumns = (): UncommonProcessTableColumns => [
+export const getUncommonColumns = (
+  openHostFlyout: (hostName: string) => void
+): UncommonProcessTableColumns => [
   {
     name: i18n.NAME,
     truncateText: false,
@@ -63,7 +65,15 @@ export const getUncommonColumns = (): UncommonProcessTableColumns => [
         values: getHostNames(node.hosts),
         fieldName: 'host.name',
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
-        render: (item) => <HostDetailsLink hostName={item} />,
+        render: (item) => (
+          <HostDetailsLink
+            hostName={item}
+            onClick={(e: SyntheticEvent) => {
+              e.preventDefault();
+              openHostFlyout(item);
+            }}
+          />
+        ),
       }),
   },
   {
@@ -92,8 +102,11 @@ export const getUncommonColumns = (): UncommonProcessTableColumns => [
   },
 ];
 
-export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessTableColumns => {
-  const columns: UncommonProcessTableColumns = getUncommonColumns();
+export const getUncommonColumnsCurated = (
+  pageType: HostsType,
+  openHostFlyout: (hostName: string) => void
+): UncommonProcessTableColumns => {
+  const columns: UncommonProcessTableColumns = getUncommonColumns(openHostFlyout);
 
   if (pageType === HostsType.details) {
     const columnsToRemove = new Set([i18n.HOSTS, i18n.NUMBER_OF_HOSTS]);
