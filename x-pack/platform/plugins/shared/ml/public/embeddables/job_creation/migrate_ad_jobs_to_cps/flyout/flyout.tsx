@@ -272,7 +272,8 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
             >
               <FormattedMessage
                 id="xpack.ml.embeddables.migrateADJobsToCpsFlyout.migrateButton"
-                defaultMessage="Migrate"
+                defaultMessage="Migrate {count, plural, one {# job} other {# jobs}}"
+                values={{ count: jobIds.length }}
               />
             </EuiButton>
           </EuiFlexItem>

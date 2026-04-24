@@ -1,0 +1,124 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+
+import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { MIGRATE_AD_JOBS_TO_CPS_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
+/** Matches the migrate flyout dry-run. */
+const BULK_UPDATE_PROJECT_ROUTING_PATH = '/internal/ml/jobs/bulk_update_project_routing' as const;
+
+export interface CpsMigrationCalloutProps {
+  http: HttpStart;
+  uiActions: UiActionsStart;
+}
+
+/**
+ * @internal
+ * Matches the ML plugin response for {@code bulk_update_project_routing}.
+ */
+export interface BulkUpdateProjectRoutingResult {
+  simulate: boolean;
+  results: Record<
+    string,
+    { success: boolean; datafeedId: string; simulated?: boolean; error?: unknown }
+  >;
+}
+
+export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({ http, uiActions }) => {
+  const [loading, setLoading] = useState(true);
+  const [jobCount, setJobCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setLoading(true);
+    void http
+      .post<BulkUpdateProjectRoutingResult>(BULK_UPDATE_PROJECT_ROUTING_PATH, {
+        body: JSON.stringify({
+          projectRouting: '_alias:_origin',
+          simulate: true,
+          auto: true,
+        }),
+        version: '1',
+        asSystemRequest: true,
+      })
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+        setJobCount(Object.keys(response.results).length);
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [http]);
+
+  const onMigrate = useCallback(() => {
+    void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {});
+  }, [uiActions]);
+
+  if (jobCount === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiCallOut
+        title={i18n.translate('xpack.ml.cpsMigrationCallout.title', {
+          defaultMessage: 'Anomaly detection jobs and cross-project search',
+        })}
+        color="primary"
+        iconType="iInCircle"
+        data-test-subj="mlCpsMigrationCallout"
+      >
+        {loading ? (
+          <EuiLoadingSpinner size="m" data-test-subj="mlCpsMigrationCalloutLoading" />
+        ) : (
+          <>
+            <EuiText size="s" data-test-subj="mlCpsMigrationCalloutJobCount">
+              <FormattedMessage
+                id="xpack.ml.cpsMigrationCallout.jobCount"
+                defaultMessage="Some jobs are legacy. Migrate them to cross-project search."
+              />
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiButton
+              data-test-subj="mlCpsMigrationCalloutMigrate"
+              onClick={onMigrate}
+              color="primary"
+            >
+              {i18n.translate('xpack.ml.cpsMigrationCallout.migrateButton', {
+                defaultMessage: 'Migrate {count, plural, one {# job} other {# jobs}}',
+                values: { count: jobCount },
+              })}
+            </EuiButton>
+          </>
+        )}
+      </EuiCallOut>
+
+      <EuiSpacer size="m" />
+    </>
+  );
+};

@@ -33,7 +33,7 @@ export function migrateADJobsToCps(
 
         await showMigrateADJobsToCpsFlyout(coreStart, share, data, dashboard, cps);
       } catch (e) {
-        return Promise.reject();
+        return Promise.reject(e);
       }
     },
     async isCompatible() {
