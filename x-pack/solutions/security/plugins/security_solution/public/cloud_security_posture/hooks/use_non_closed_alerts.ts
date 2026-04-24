@@ -10,6 +10,7 @@ import type { ESBoolQuery } from '../../../common/typed_json';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
+import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export const useNonClosedAlerts = ({
   identityFields,
@@ -19,8 +20,10 @@ export const useNonClosedAlerts = ({
   additionalFilters,
   skip = false,
   entityType,
+  entityRecord,
 }: {
   identityFields: Record<string, string>;
+  entityRecord?: EntityStoreRecord | null;
   to: string;
   from: string;
   queryId: string;
@@ -35,6 +38,7 @@ export const useNonClosedAlerts = ({
   const { signalIndexName } = useSignalIndex();
 
   const { items: alertsData } = useAlertsByStatus({
+    entityRecord,
     identityFields,
     entityType,
     signalIndexName,

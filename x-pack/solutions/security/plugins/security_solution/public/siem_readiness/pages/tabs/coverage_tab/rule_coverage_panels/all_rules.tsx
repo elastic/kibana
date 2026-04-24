@@ -188,6 +188,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
               options={enabledIntegrationsOptions}
               statusMap={enabledIntegrationsStatusMap}
               disabled={enabledIntegrationsOptions.length === 0}
+              telemetrySource="all_rules_enabled"
             />
           );
         } else {
@@ -196,6 +197,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
               options={missingOrDisabledIntegrationsOptions}
               statusMap={missingOrDisabledStatusMap}
               disabled={missingOrDisabledIntegrationsOptions.length === 0}
+              telemetrySource="all_rules_missing"
             />
           );
         }
