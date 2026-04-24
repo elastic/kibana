@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import React, { Children } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSplitPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
@@ -31,6 +31,8 @@ export interface FieldCategoryProps
   children:
     | ReactElement<FieldRowProps, 'FieldRow'>
     | Array<ReactElement<FieldRowProps, 'FieldRow'>>;
+  /** Optional notice to display between the category header and fields. */
+  notice?: ReactNode;
 }
 
 /**
@@ -39,7 +41,7 @@ export interface FieldCategoryProps
  * @param props - the props to pass to the {@link FieldCategory} component.
  */
 export const FieldCategory = (props: FieldCategoryProps) => {
-  const { category, fieldCount, onClearQuery, children } = props;
+  const { category, fieldCount, onClearQuery, children, notice } = props;
   const {
     euiTheme: { size },
   } = useEuiTheme();
@@ -68,6 +70,7 @@ export const FieldCategory = (props: FieldCategoryProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
+      {notice && <EuiSplitPanel.Inner color="plain">{notice}</EuiSplitPanel.Inner>}
       <EuiSplitPanel.Inner>{children}</EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

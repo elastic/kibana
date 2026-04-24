@@ -10,7 +10,11 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_UI_SETTING_ID,
+  WORKFLOWS_SHOW_SYSTEM_WORKFLOWS_SETTING_ID,
+  WORKFLOWS_SHOW_SYSTEM_EXECUTIONS_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../common';
 
@@ -48,6 +52,37 @@ export const registerUISettings = (
       readonly: false,
       requiresPageReload: true,
       category: ['general'],
+    },
+
+    [WORKFLOWS_SHOW_SYSTEM_WORKFLOWS_SETTING_ID]: {
+      name: i18n.translate('workflowsManagement.uiSettings.showSystemWorkflows.name', {
+        defaultMessage: 'Show system workflows',
+      }),
+      description: i18n.translate('workflowsManagement.uiSettings.showSystemWorkflows.description', {
+        defaultMessage: 'Display internal system workflows in the Workflows list.',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      type: 'boolean',
+      requiresPageReload: false,
+      category: ['workflows'],
+    },
+
+    [WORKFLOWS_SHOW_SYSTEM_EXECUTIONS_SETTING_ID]: {
+      name: i18n.translate('workflowsManagement.uiSettings.showSystemExecutions.name', {
+        defaultMessage: 'Show system workflow executions',
+      }),
+      description: i18n.translate(
+        'workflowsManagement.uiSettings.showSystemExecutions.description',
+        {
+          defaultMessage: 'Display execution history for internal system workflows.',
+        }
+      ),
+      schema: schema.boolean(),
+      value: false,
+      type: 'boolean',
+      requiresPageReload: false,
+      category: ['workflows'],
     },
   });
 };

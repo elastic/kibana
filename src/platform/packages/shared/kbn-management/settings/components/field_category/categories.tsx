@@ -9,6 +9,8 @@
 
 import React from 'react';
 
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type {
   CategorizedFields,
   UnsavedFieldChanges,
@@ -18,6 +20,25 @@ import type {
 import type { FieldRowProps } from '@kbn/management-settings-components-field-row';
 import { FieldRow } from '@kbn/management-settings-components-field-row';
 import { FieldCategory, type FieldCategoryProps } from './category';
+
+const CATEGORY_NOTICES: Record<string, React.ReactNode> = {
+  workflows: (
+    <EuiCallOut
+      title={i18n.translate('management.settings.fieldCategories.workflows.warningTitle', {
+        defaultMessage: 'System workflow settings',
+      })}
+      color="warning"
+      iconType="warning"
+    >
+      <p>
+        {i18n.translate('management.settings.fieldCategories.workflows.warningBody', {
+          defaultMessage:
+            'System workflows are managed by Elastic and power core platform features. Editing, disabling, or deleting them may cause unexpected behaviour or break product functionality. Enable these settings only if you know what you are doing.',
+        })}
+      </p>
+    </EuiCallOut>
+  ),
+};
 
 /**
  * Props for the {@link FieldCategories} component.
@@ -51,6 +72,7 @@ export const FieldCategories = ({
       <FieldCategory
         key={category}
         fieldCount={categoryCounts[category]}
+        notice={CATEGORY_NOTICES[category]}
         {...{ category, onClearQuery }}
       >
         {fields.map((field) => (

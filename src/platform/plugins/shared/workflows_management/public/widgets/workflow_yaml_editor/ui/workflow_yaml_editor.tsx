@@ -30,6 +30,7 @@ import {
   useWorkflowIdDecorations,
 } from './decorations';
 import { DocumentationLink } from './documentation_link';
+import { EditorSettingsPopover } from './editor_settings_popover';
 import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
@@ -119,6 +120,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   fontSize: 14,
   lineHeight: 23, // default ~21px + 2px
   renderWhitespace: 'none',
+  guides: { indentation: true },
   wordWrap: 'on',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
@@ -649,8 +651,13 @@ export const WorkflowYAMLEditor = ({
         content: <KeyboardShortcutsPopover />,
         showInReadOnly: true,
       },
+      {
+        id: 'editor-settings',
+        content: <EditorSettingsPopover editorRef={editorRef} />,
+        showInReadOnly: true,
+      },
     ],
-    [openActionsPopover]
+    [openActionsPopover, editorRef]
   );
 
   // These were triggering rerendering of the actions containers on every scroll, because they were
