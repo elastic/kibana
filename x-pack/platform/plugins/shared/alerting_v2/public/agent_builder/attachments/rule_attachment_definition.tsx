@@ -24,6 +24,8 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { ApplicationStart, IBasePath, NotificationsStart } from '@kbn/core/public';
+import { Context } from '@kbn/core-di-browser';
+import type { Container } from 'inversify';
 import { RuleProvider } from '../../components/rule_details/rule_context';
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
 import { paths } from '../../constants';
@@ -36,6 +38,7 @@ interface RuleAttachmentDefinitionServices {
   application: ApplicationStart;
   basePath: IBasePath;
   notifications: NotificationsStart;
+  container: Container;
 }
 
 // ─── Canvas content ───────────────────────────────────────────────────────────
@@ -47,6 +50,7 @@ interface RuleCanvasContentProps
   application: ApplicationStart;
   basePath: IBasePath;
   notifications: NotificationsStart;
+  container: Container;
 }
 
 
@@ -59,6 +63,7 @@ const RuleCanvasContent = ({
   application,
   basePath,
   notifications,
+  container,
 }: RuleCanvasContentProps) => {
   const { data, origin } = attachment;
   const isSaved = Boolean(origin);
@@ -181,11 +186,13 @@ const RuleCanvasContent = ({
   ]);
 
   return (
-    <RuleProvider rule={data as unknown as RuleApiResponse}>
-      <EuiPanel paddingSize="l" hasShadow={false}>
-        <RuleSidebar />
-      </EuiPanel>
-    </RuleProvider>
+    <Context.Provider value={container}>
+      <RuleProvider rule={data as unknown as RuleApiResponse}>
+        <EuiPanel paddingSize="l" hasShadow={false}>
+          <RuleSidebar />
+        </EuiPanel>
+      </RuleProvider>
+    </Context.Provider>
   );
 };
 
@@ -196,6 +203,7 @@ export const createRuleAttachmentDefinition = ({
   application,
   basePath,
   notifications,
+  container,
 }: RuleAttachmentDefinitionServices): AttachmentUIDefinition<RuleAttachment> => ({
   getLabel: (attachment) => attachment.data.metadata.name,
   getIcon: () => 'bell',
@@ -265,6 +273,7 @@ export const createRuleAttachmentDefinition = ({
       application={application}
       basePath={basePath}
       notifications={notifications}
+      container={container}
     />
   ),
 

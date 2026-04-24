@@ -68,6 +68,7 @@ export const module = new ContainerModule(({ bind }) => {
             application: coreStart.application,
             basePath: coreStart.http.basePath,
             notifications: coreStart.notifications,
+            container: diContainer,
           })
         );
       }
