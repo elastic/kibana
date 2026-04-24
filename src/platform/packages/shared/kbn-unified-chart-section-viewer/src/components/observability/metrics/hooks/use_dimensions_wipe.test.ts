@@ -13,9 +13,7 @@ import { useDimensionsWipe, type UseDimensionsWipeParams } from './use_dimension
 
 const dim = (name: string): Dimension => ({ name });
 
-const baseParams = (
-  overrides: Partial<UseDimensionsWipeParams> = {}
-): UseDimensionsWipeParams => ({
+const baseParams = (overrides: Partial<UseDimensionsWipeParams> = {}): UseDimensionsWipeParams => ({
   selectedDimensions: [dim('host.name'), dim('environment')],
   allDimensions: [dim('host.name')],
   isLoading: false,
@@ -30,9 +28,7 @@ describe('useDimensionsWipe', () => {
   describe('on a fresh, successful response', () => {
     it('prunes selectedDimensions to the intersection with allDimensions', () => {
       const onSelectedDimensionsChange = jest.fn();
-      renderHook(() =>
-        useDimensionsWipe(baseParams({ onSelectedDimensionsChange }))
-      );
+      renderHook(() => useDimensionsWipe(baseParams({ onSelectedDimensionsChange })));
 
       expect(onSelectedDimensionsChange).toHaveBeenCalledTimes(1);
       expect(onSelectedDimensionsChange).toHaveBeenCalledWith([dim('host.name')]);
