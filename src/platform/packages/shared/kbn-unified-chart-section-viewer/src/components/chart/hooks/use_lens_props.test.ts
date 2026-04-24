@@ -336,12 +336,6 @@ describe('useLensProps', () => {
       // again and goes down the `effectiveError` branch (build with no
       // datasource) so the chart surfaces an error instead of spinning
       // forever.
-      // First build rejects (the silent-failure path). Subsequent builds
-      // fall back to the beforeEach `mockImplementation` that resolves —
-      // after setBuildError triggers a re-render, buildAttributesFn runs
-      // again and goes down the `effectiveError` branch (build with no
-      // datasource) so the chart surfaces an error instead of spinning
-      // forever.
       LensConfigBuilderMock.prototype.build.mockImplementationOnce(() =>
         Promise.reject(builderError)
       );
