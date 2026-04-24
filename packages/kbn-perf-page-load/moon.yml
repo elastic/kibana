@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/perf-page-load'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-tooling'
+  defaultOwner: '@elastic/kibana-operations'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/perf-page-load'
   description: Moon project for @kbn/perf-page-load
   channel: ''
-  owner: '@elastic/kibana-tooling'
+  owner: '@elastic/kibana-operations'
   sourceRoot: packages/kbn-perf-page-load
 dependsOn:
   - '@kbn/repo-info'
