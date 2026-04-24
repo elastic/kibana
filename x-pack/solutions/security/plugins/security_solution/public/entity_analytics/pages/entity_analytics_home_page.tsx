@@ -13,9 +13,9 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiTitle,
-  useIsWithinBreakpoints,
   EuiButtonIcon,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '../../app/types';
@@ -62,6 +62,14 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   pageFilters: [],
   sort: [['@timestamp', 'desc']],
 });
+
+const RiskPanelFlexItem = styled(EuiFlexItem)`
+  min-width: 460px;
+`;
+
+const AnomaliesPanelFlexItem = styled(EuiFlexItem)`
+  min-width: 500px;
+`;
 
 export const EntityAnalyticsHomePage = () => {
   const { telemetry } = useKibana().services;
@@ -149,7 +157,6 @@ export const EntityAnalyticsHomePage = () => {
     [entityDataViewLoading, newDataViewPickerEnabled, oldIndicesExist]
   );
 
-  const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
 
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
@@ -249,24 +256,21 @@ export const EntityAnalyticsHomePage = () => {
             )}
 
             <EuiFlexItem>
-              <EuiFlexGroup
-                direction={isXlScreen ? 'row' : 'column'}
-                responsive={false}
-                gutterSize="l"
-              >
-                <EuiFlexItem grow={1}>
+              <EuiFlexGroup wrap gutterSize="m">
+                <RiskPanelFlexItem grow={3}>
                   <EuiPanel hasBorder>
                     <DynamicRiskLevelPanel
                       watchlistId={selectedWatchlistId}
                       watchlistName={selectedWatchlistName}
+                      entityDataView={entityDataView}
                     />
                   </EuiPanel>
-                </EuiFlexItem>
-                <EuiFlexItem grow={2}>
+                </RiskPanelFlexItem>
+                <AnomaliesPanelFlexItem grow={5}>
                   <EuiPanel hasBorder>
                     <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
                   </EuiPanel>
-                </EuiFlexItem>
+                </AnomaliesPanelFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
 

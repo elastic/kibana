@@ -6,28 +6,36 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { EMPTY_SEVERITY_COUNT, RiskSeverity } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
-import { RiskLevelBreakdownTable } from './risk_level_breakdown_table';
+import { ENTITY_RISK_LEVEL_FIELD, RiskLevelBreakdownTable } from './risk_level_breakdown_table';
 import { useCombinedRiskScoreKpi } from './use_combined_risk_score_kpi';
-import { useUiSetting } from '../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../common/lib/kibana';
 import { useRiskLevelsEsqlQuery } from '../watchlists/components/hooks/use_risk_levels_esql_query';
 
 interface DynamicRiskLevelPanelProps {
   watchlistId?: string;
   watchlistName?: string;
+  /**
+   * The ad-hoc entity store data view used to resolve the field spec for
+   * `entity.risk.calculated_level` when rendering inline cell actions.
+   */
+  entityDataView?: DataView;
 }
 
 export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
   watchlistId,
   watchlistName,
+  entityDataView,
 }) => {
   const spaceId = useSpaceId();
   const hasWatchlist = !!watchlistId;
+  const { filterManager } = useKibana().services.data.query;
   const isEntityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
 
   const useLegacy = !isEntityStoreV2Enabled;
@@ -56,6 +64,22 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
 
   const loading = useLegacy ? combinedRiskStats.loading : riskLevelsStats.isLoading;
 
+  const handlePartitionClick = useCallback(
+    (level: RiskSeverity) => {
+      filterManager.addFilters([
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: { match_phrase: { [ENTITY_RISK_LEVEL_FIELD]: level } },
+        },
+      ]);
+    },
+    [filterManager]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
@@ -81,12 +105,20 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-          <EuiFlexItem grow={4}>
-            <RiskLevelBreakdownTable severityCount={severityCount} loading={loading} />
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={3}>
+            <RiskLevelBreakdownTable
+              severityCount={severityCount}
+              loading={loading}
+              entityDataView={entityDataView}
+            />
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <RiskScoreDonutChart showLegend={false} severityCount={severityCount} />
+          <EuiFlexItem grow={2}>
+            <RiskScoreDonutChart
+              showLegend={false}
+              severityCount={severityCount}
+              onPartitionClick={handlePartitionClick}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
