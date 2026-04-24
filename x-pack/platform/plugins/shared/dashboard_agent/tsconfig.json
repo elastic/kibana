@@ -10,7 +10,7 @@
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
-    "@kbn/agent-builder-genai-utils",
+    "@kbn/agent-builder-tools-base",
     "@kbn/agent-builder-server",
     "@kbn/dashboard-plugin",
     "@kbn/dashboard-agent-common",

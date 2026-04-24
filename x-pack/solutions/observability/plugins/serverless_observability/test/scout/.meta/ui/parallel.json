@@ -1,0 +1,165 @@
+{
+  "sha1": "e1e6ffb0f31e8ee14c08b5d851d69abceccf16a5",
+  "tests": [
+    {
+      "id": "08c621ad2871856-3596071962e357d",
+      "title": "Serverless Observability Navigation - Complete tier body renders expected body nav items with working links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
+        "line": 22,
+        "column": 9
+      }
+    },
+    {
+      "id": "08c621ad2871856-a09fd1e365d7489",
+      "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link, updates breadcrumbs, and navigates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
+        "line": 66,
+        "column": 9
+      }
+    },
+    {
+      "id": "08c621ad2871856-84fd07f729aa1c1",
+      "title": "Serverless Observability Navigation - Complete tier body footer-panel children navigate and update breadcrumbs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
+        "line": 121,
+        "column": 9
+      }
+    },
+    {
+      "id": "08c621ad2871856-364004d2509d6f9",
+      "title": "Serverless Observability Navigation - Complete tier body Management landing renders cards navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
+        "line": 169,
+        "column": 9
+      }
+    },
+    {
+      "id": "08c621ad2871856-740d2af7b5ecc74",
+      "title": "Serverless Observability Navigation - Complete tier body navigates between apps without a full page reload (SPA) and restores via logo",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
+        "line": 176,
+        "column": 9
+      }
+    },
+    {
+      "id": "d9ea792e44eb946-67acad55d175bd5",
+      "title": "Serverless Observability Navigation - Footer renders expected footer items with working links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
+        "line": 22,
+        "column": 9
+      }
+    },
+    {
+      "id": "d9ea792e44eb946-62b242e9c2f2725",
+      "title": "Serverless Observability Navigation - Footer clicking footer items navigates to the correct destinations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
+        "line": 46,
+        "column": 9
+      }
+    },
+    {
+      "id": "d9ea792e44eb946-9d4509ff4807e9a",
+      "title": "Serverless Observability Navigation - Footer active sidenav panel is re-opened after a browser refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
+        "line": 73,
+        "column": 9
+      }
+    },
+    {
+      "id": "dd531796bab2f79-947f52b9b06f95e",
+      "title": "Serverless Observability Navigation - Logs Essentials tier body renders expected body nav items with working links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
+        "line": 23,
+        "column": 9
+      }
+    },
+    {
+      "id": "dd531796bab2f79-47b47f35c7839e9",
+      "title": "Serverless Observability Navigation - Logs Essentials tier body clicking body nav items sets the active link and navigates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "dd531796bab2f79-300c8ffeec3440f",
+      "title": "Serverless Observability Navigation - Logs Essentials tier body disabled apps return a not-found page when visited directly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
+        "line": 84,
+        "column": 9
+      }
+    }
+  ]
+}
