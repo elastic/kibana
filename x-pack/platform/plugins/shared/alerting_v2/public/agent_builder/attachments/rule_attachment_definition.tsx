@@ -26,6 +26,7 @@ import type { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { ApplicationStart, IBasePath, NotificationsStart } from '@kbn/core/public';
 import { Context } from '@kbn/core-di-browser';
+import { i18n } from '@kbn/i18n';
 import type { Container } from 'inversify';
 import { RuleProvider } from '../../components/rule_details/rule_context';
 import { RuleHeaderDescription } from '../../components/rule_details/rule_header_description';
@@ -54,7 +55,6 @@ interface RuleCanvasContentProps
   notifications: NotificationsStart;
   container: Container;
 }
-
 
 const RuleCanvasContent = ({
   attachment,
@@ -87,7 +87,9 @@ const RuleCanvasContent = ({
     if (!isSaved) {
       registerActionButtons([
         {
-          label: 'Save as Rule',
+          label: i18n.translate('xpack.alertingV2.ruleAttachment.saveAsRule', {
+            defaultMessage: 'Save as Rule',
+          }),
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
@@ -104,7 +106,12 @@ const RuleCanvasContent = ({
               ...(data.artifacts ? { artifacts: data.artifacts } : {}),
             });
             await updateOrigin(created.id);
-            notifications.toasts.addSuccess(`Rule "${data.metadata.name}" saved`);
+            notifications.toasts.addSuccess(
+              i18n.translate('xpack.alertingV2.ruleAttachment.savedSuccess', {
+                defaultMessage: 'Rule "{name}" saved',
+                values: { name: data.metadata.name },
+              })
+            );
           },
         },
       ]);
@@ -115,7 +122,9 @@ const RuleCanvasContent = ({
 
     registerActionButtons([
       {
-        label: 'Update Rule',
+        label: i18n.translate('xpack.alertingV2.ruleAttachment.updateRule', {
+          defaultMessage: 'Update Rule',
+        }),
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         handler: async () => {
@@ -124,16 +133,25 @@ const RuleCanvasContent = ({
             schedule: data.schedule,
             evaluation: { query: data.evaluation?.query },
             state_transition: data.state_transition ?? null,
-            ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
+            ...(data.recovery_policy !== undefined
+              ? { recovery_policy: data.recovery_policy }
+              : {}),
             ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
             ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
             ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
           });
-          notifications.toasts.addSuccess(`Rule "${data.metadata.name}" updated`);
+          notifications.toasts.addSuccess(
+            i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
+              defaultMessage: 'Rule "{name}" updated',
+              values: { name: data.metadata.name },
+            })
+          );
         },
       },
       {
-        label: 'View in Rules',
+        label: i18n.translate('xpack.alertingV2.ruleAttachment.viewInRules', {
+          defaultMessage: 'View in Rules',
+        }),
         icon: 'popout',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
@@ -184,8 +202,19 @@ export const createRuleAttachmentDefinition = ({
   renderInlineContent: ({ attachment }) => {
     const { data, origin } = attachment;
     const isProposed = !origin;
-    const status = isProposed ? 'proposed' : (data.enabled ?? true) ? 'enabled' : 'disabled';
-    const statusColor = isProposed ? 'default' : (data.enabled ?? true) ? 'success' : 'warning';
+    const isEnabled = data.enabled ?? true;
+    const status = isProposed
+      ? i18n.translate('xpack.alertingV2.ruleAttachment.statusProposed', {
+          defaultMessage: 'proposed',
+        })
+      : isEnabled
+      ? i18n.translate('xpack.alertingV2.ruleAttachment.statusEnabled', {
+          defaultMessage: 'enabled',
+        })
+      : i18n.translate('xpack.alertingV2.ruleAttachment.statusDisabled', {
+          defaultMessage: 'disabled',
+        });
+    const statusColor = isProposed ? 'default' : isEnabled ? 'success' : 'warning';
 
     return (
       <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
@@ -209,7 +238,10 @@ export const createRuleAttachmentDefinition = ({
           {data.schedule?.every && (
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
-                Every {data.schedule.every}
+                {i18n.translate('xpack.alertingV2.ruleAttachment.scheduleEvery', {
+                  defaultMessage: 'Every {interval}',
+                  values: { interval: data.schedule.every },
+                })}
               </EuiText>
             </EuiFlexItem>
           )}
@@ -254,7 +286,9 @@ export const createRuleAttachmentDefinition = ({
     if (isCanvas) return [];
     return [
       {
-        label: 'Preview',
+        label: i18n.translate('xpack.alertingV2.ruleAttachment.preview', {
+          defaultMessage: 'Preview',
+        }),
         icon: 'eye',
         type: ActionButtonType.SECONDARY,
         handler: () => openCanvas?.(),
