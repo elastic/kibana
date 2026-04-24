@@ -20,7 +20,8 @@ import { css } from '@emotion/react';
 import { AlertEpisodeAcknowledgeActionButton } from './acknowledge_action_button';
 import { AlertEpisodeSnoozeActionButton } from './snooze_action_button';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
-import { AlertEpisodeTagsFlyout } from './alert_episode_tags_flyout';
+import { AlertEpisodeTagsFlyout } from './edit_episode_tags_flyout';
+import { EditEpisodeAssigneeFlyout } from './edit_episode_assignee_flyout';
 import { AlertEpisodeResolveActionButton } from './resolve_action_button';
 import { AlertEpisodeTagsMenuItem } from './tags_action_button';
 import { AlertEpisodeViewDetailsActionButton } from './view_details_action_button';
@@ -31,6 +32,8 @@ export interface AlertEpisodeActionsProps {
   groupHash?: string;
   episodeAction?: EpisodeActionState;
   groupAction?: AlertEpisodeGroupAction;
+  /** Latest assignee profile uid for this episode (from episode actions). */
+  lastAssigneeUid?: string | null;
   /**
    * When set, "Open in Discover" appears in the more-actions menu (the rule query must exist).
    */
@@ -67,10 +70,12 @@ export function AlertEpisodeActions({
   openInDiscoverHref,
   expressions,
   viewDetailsHref,
+  lastAssigneeUid,
   buttonsOutlined = true,
 }: AlertEpisodeActionsProps) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isTagsFlyoutOpen, setIsTagsFlyoutOpen] = useState(false);
+  const [isAssigneeFlyoutOpen, setIsAssigneeFlyoutOpen] = useState(false);
 
   return (
     <EuiFlexGroup
@@ -142,6 +147,18 @@ export function AlertEpisodeActions({
                   setIsTagsFlyoutOpen(true);
                 }}
               />
+              {episodeId && groupHash ? (
+                <EuiListGroupItem
+                  label={i18n.ACTIONS_EDIT_ASSIGNEE_LABEL}
+                  size="s"
+                  iconType="user"
+                  onClick={() => {
+                    setIsMoreOpen(false);
+                    setIsAssigneeFlyoutOpen(true);
+                  }}
+                  data-test-subj="alertingEpisodeActionsEditAssigneeButton"
+                />
+              ) : null}
               {openInDiscoverHref && (
                 <EuiListGroupItem
                   label={i18n.ACTIONS_OPEN_IN_DISCOVER_LABEL}
@@ -162,6 +179,14 @@ export function AlertEpisodeActions({
               currentTags={groupAction?.tags ?? []}
               http={http}
               services={{ expressions }}
+            />
+          ) : null}
+          {isAssigneeFlyoutOpen && episodeId && groupHash ? (
+            <EditEpisodeAssigneeFlyout
+              episodeId={episodeId}
+              groupHash={groupHash}
+              lastAssigneeUid={lastAssigneeUid}
+              onClose={() => setIsAssigneeFlyoutOpen(false)}
             />
           ) : null}
         </>

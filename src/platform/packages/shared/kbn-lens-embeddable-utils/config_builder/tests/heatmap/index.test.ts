@@ -13,9 +13,10 @@ import { heatmapConfigSchema } from '../../schema/charts/heatmap';
 import type { HeatmapConfig } from '../../schema/charts/heatmap';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
-import { validateConverter } from '../validate';
+import { validateConverter, validateAPIConverter } from '../validate';
 import * as dslMocks from './dsl.mocks';
 import * as esqlMocks from './esql.mocks';
+import * as esqlApiMocks from './lens_api_config.mock';
 
 describe('Heatmap', () => {
   describe('DSL', () => {
@@ -89,6 +90,40 @@ describe('Heatmap', () => {
       const apiOutput = builder.toAPIFormat(lensState) as HeatmapConfig;
 
       expect(apiOutput.metric.color).toEqual(AUTO_COLOR);
+    });
+  });
+
+  describe('validateAPIConverter', () => {
+    describe('axis scale support', () => {
+      it('should convert temporal scale correctly', () => {
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(esqlApiMocks.withTemporalXAxisScale);
+        const outputConfig = builder.toAPIFormat(lensState) as HeatmapConfig;
+
+        expect(outputConfig.axis?.x?.scale).toBe('temporal');
+
+        validateAPIConverter(esqlApiMocks.withTemporalXAxisScale, heatmapConfigSchema);
+      });
+
+      it('should convert ordinal scale correctly', () => {
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(esqlApiMocks.withOrdinalXAxisScale);
+        const outputConfig = builder.toAPIFormat(lensState) as HeatmapConfig;
+
+        expect(outputConfig.axis?.x?.scale).toBe('ordinal');
+
+        validateAPIConverter(esqlApiMocks.withOrdinalXAxisScale, heatmapConfigSchema);
+      });
+
+      it('should convert linear scale correctly', () => {
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(esqlApiMocks.withLinearXAxisScale);
+        const outputConfig = builder.toAPIFormat(lensState) as HeatmapConfig;
+
+        expect(outputConfig.axis?.x?.scale).toBe('linear');
+
+        validateAPIConverter(esqlApiMocks.withLinearXAxisScale, heatmapConfigSchema);
+      });
     });
   });
 });

@@ -33,4 +33,5 @@ export type AlertEpisodesKibanaServices = CoreStart & {
   storage: Storage;
   toastNotifications: CoreStart['notifications']['toasts'];
   unifiedDocViewer: UnifiedDocViewerStart;
+  userProfile: CoreStart['userProfile'];
 };

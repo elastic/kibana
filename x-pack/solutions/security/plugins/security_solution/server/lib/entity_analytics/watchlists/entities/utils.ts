@@ -13,7 +13,8 @@ export const ENTITY_ANALYTICS_WATCHLISTS_PREFIX = '.entity_analytics.watchlists'
 export const getIndexForWatchlist = (namespace: string) =>
   `${ENTITY_ANALYTICS_WATCHLISTS_PREFIX}.${namespace}`;
 
-/** Builds a composite document _id for the watchlist entity index. */
+// Design debt: this creates a per-(watchlist, entity) key instead of a per-entity key.
+// The intended design is one doc per entity across all watchlists; fixing this requires a migration.
 export const buildWatchlistDocId = (watchlistId: string, euid: string) => `${watchlistId}:${euid}`;
 
 /** Extracts the euid from a composite watchlist doc _id ({watchlistId}:{euid}). */

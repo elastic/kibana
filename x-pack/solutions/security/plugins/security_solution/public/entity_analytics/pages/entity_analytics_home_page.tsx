@@ -13,11 +13,12 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiTitle,
-  useIsWithinBreakpoints,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
@@ -30,6 +31,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useKibana } from '../../common/lib/kibana';
 import { EntityEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useLicense } from '../../common/hooks/use_license';
 import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
@@ -48,12 +50,15 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
 import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
 import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
+import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
@@ -61,17 +66,30 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   filters,
   pageFilters: [],
   sort: [['@timestamp', 'desc']],
+  pageIndex: 0,
 });
 
+const riskPanelFlexItemStyle = css`
+  min-width: 460px;
+`;
+
+const anomaliesPanelFlexItemStyle = css`
+  min-width: 500px;
+`;
+
 export const EntityAnalyticsHomePage = () => {
-  const { telemetry } = useKibana().services;
+  const { telemetry, agentBuilder, http } = useKibana().services;
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const { data: availableConnectors } = useLoadConnectors({ http, featureId: 'lead_generation' });
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const leadGenerationEnabled = useIsExperimentalFeatureEnabled('leadGenerationEnabled');
+  const isEnterprise = useLicense().isEnterprise();
+  const leadGenerationEnabled =
+    useIsExperimentalFeatureEnabled('leadGenerationEnabled') && isEnterprise;
   const spaceId = useSpaceId();
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
@@ -79,6 +97,7 @@ export const EntityAnalyticsHomePage = () => {
   const resolvedSpaceId = spaceId ?? 'default';
   const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
   const connectorId = spaceId ? storedConnectorId ?? '' : '';
+  const hasValidConnector = !!availableConnectors?.find((c) => c.id === connectorId);
   const safeSetConnectorId = useCallback(
     (id: string | undefined) => {
       if (spaceId) {
@@ -107,23 +126,28 @@ export const EntityAnalyticsHomePage = () => {
     [newDataViewPickerEnabled, oldIsSourcererLoading, entityDataViewLoading]
   );
 
-  const location = useLocation();
+  // Only subscribe to `search` rather than the whole `location` object so this
+  // component doesn't re-render (and re-create callbacks) on unrelated URL
+  // updates like flyout params.
+  const { search } = useLocation();
   const history = useHistory();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
   const selectedWatchlistId = useMemo(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(search);
     return params.get('watchlistId') || undefined;
-  }, [location.search]);
+  }, [search]);
 
   const selectedWatchlistName = useMemo(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(search);
     return params.get('watchlistName') || undefined;
-  }, [location.search]);
+  }, [search]);
 
   const setSelectedWatchlist = useCallback(
     (id?: string, name?: string) => {
-      const params = new URLSearchParams(location.search);
+      // Read the latest search from `history.location` to keep this callback's
+      // reference stable across unrelated URL updates.
+      const params = new URLSearchParams(history.location.search);
       if (id) {
         params.set('watchlistId', id);
       } else {
@@ -134,9 +158,9 @@ export const EntityAnalyticsHomePage = () => {
       } else {
         params.delete('watchlistName');
       }
-      history.replace({ ...location, search: params.toString() });
+      history.replace({ ...history.location, search: params.toString() });
     },
-    [location, history]
+    [history]
   );
 
   const indicesExist = useMemo(
@@ -144,8 +168,12 @@ export const EntityAnalyticsHomePage = () => {
     [entityDataViewLoading, newDataViewPickerEnabled, oldIndicesExist]
   );
 
-  const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
+
+  const { data: entityStoreStatusData } = useEntityStoreStatus();
+  const entityStoreDisabled =
+    entityStoreStatusData?.status === 'not_installed' ||
+    entityStoreStatusData?.status === 'stopped';
 
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
@@ -159,11 +187,8 @@ export const EntityAnalyticsHomePage = () => {
   );
 
   const handleHuntInChat = useCallback(() => {
-    const firstLead = leads[0];
-    if (firstLead) {
-      openAgentBuilderWithLead(firstLead);
-    }
-  }, [leads, openAgentBuilderWithLead]);
+    agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
+  }, [agentBuilder]);
 
   if (newDataViewPickerEnabled && entityDataViewLoading) {
     return <PageLoader />;
@@ -173,6 +198,10 @@ export const EntityAnalyticsHomePage = () => {
     return <EmptyPrompt />;
   }
 
+  if (entityStoreDisabled) {
+    return <EntityStoreDisabledEmptyPrompt />;
+  }
+
   return (
     <>
       <FiltersGlobal>
@@ -180,6 +209,7 @@ export const EntityAnalyticsHomePage = () => {
           dataView={entityDataView}
           id={InputsModelId.global}
           sourcererDataViewSpec={oldSourcererDataViewSpec}
+          hideDatePicker
         />
       </FiltersGlobal>
 
@@ -238,26 +268,25 @@ export const EntityAnalyticsHomePage = () => {
                   onHuntInChat={handleHuntInChat}
                   onGenerate={generate}
                   connectorId={connectorId}
+                  hasValidConnector={hasValidConnector}
                   onConnectorIdSelected={safeSetConnectorId}
+                  isAgentChatExperienceEnabled={isAgentChatExperienceEnabled}
                 />
               </EuiFlexItem>
             )}
 
             <EuiFlexItem>
-              <EuiFlexGroup
-                direction={isXlScreen ? 'row' : 'column'}
-                responsive={false}
-                gutterSize="l"
-              >
-                <EuiFlexItem grow={1}>
+              <EuiFlexGroup wrap gutterSize="m">
+                <EuiFlexItem grow={3} css={riskPanelFlexItemStyle}>
                   <EuiPanel hasBorder>
                     <DynamicRiskLevelPanel
                       watchlistId={selectedWatchlistId}
                       watchlistName={selectedWatchlistName}
+                      entityDataView={entityDataView}
                     />
                   </EuiPanel>
                 </EuiFlexItem>
-                <EuiFlexItem grow={2}>
+                <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
                   <EuiPanel hasBorder>
                     <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
                   </EuiPanel>
