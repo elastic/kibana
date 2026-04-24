@@ -26,7 +26,7 @@ describe('StatusBadge', () => {
       status: SiemMigrationStatus.FAILED,
     });
     const { getByText } = render(<StatusBadge migrationRule={rule} />);
-    expect(getByText('Error')).toBeInTheDocument();
+    expect(getByText('Failed')).toBeInTheDocument();
   });
 
   it('shows tooltip with comment on failed translation', async () => {
@@ -44,7 +44,7 @@ describe('StatusBadge', () => {
     });
     const { getByText, findByText } = render(<StatusBadge migrationRule={rule} />);
 
-    fireEvent.mouseOver(getByText('Error'));
+    fireEvent.mouseOver(getByText('Failed'));
 
     const tooltip = await findByText(errorMessage);
     expect(tooltip).toBeInTheDocument();
