@@ -5,11 +5,14 @@
  * 2.0.
  */
 import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { inputsActions } from '../../../../../common/store/inputs';
+import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useUrlQuery } from './use_url_query';
 import { usePageSize } from './use_page_size';
 import { useBaseEsQuery } from './use_base_es_query';
@@ -73,6 +76,7 @@ export const useEntityURLState = ({
       query: { filterManager },
     },
   } = useKibana().services;
+  const dispatch = useDispatch();
 
   // Track current URL filters in a render-phase ref so the subscription below
   // can detect whether a filterManager update was triggered by us (URL → filterManager)
@@ -119,7 +123,22 @@ export const useEntityURLState = ({
         language: 'kuery',
       },
     });
-  }, [setUrlQuery]);
+
+    dispatch(
+      inputsActions.setFilterQuery({
+        id: InputsModelId.global,
+        query: '',
+        language: 'kuery',
+      })
+    );
+
+    dispatch(
+      inputsActions.setSavedQuery({
+        id: InputsModelId.global,
+        savedQuery: undefined,
+      })
+    );
+  }, [setUrlQuery, dispatch]);
 
   const onChangePage = useCallback(
     (newPageIndex: number) => {
