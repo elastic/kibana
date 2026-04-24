@@ -58,7 +58,7 @@ test.describe(
       });
 
       await test.step('add Service map panel with filters', async () => {
-        await expect(page.getByRole('heading', { name: 'Add panel' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Add to Dashboard' })).toBeVisible();
         const serviceMapMenuItem = page.getByRole('menuitem', {
           name: 'Service map',
           exact: true,
