@@ -11,6 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { rspack, type Compiler, type Stats } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { createSingleCompileConfig } from './config/create_single_compile_config';
 import { isHmrEnabled } from './hmr/hmr_enabled';
 import { HmrServer } from './hmr/hmr_server';
@@ -73,7 +74,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cache = true,
     examples = false,
     testPlugins = false,
-    themeTags = ['borealislight', 'borealisdark'],
+    themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
     profileStatsOnly = false,

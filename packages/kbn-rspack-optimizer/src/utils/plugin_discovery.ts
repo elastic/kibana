@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { readPackageMap, Package, getPluginPackagesFilter } from '@kbn/repo-packages';
+import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import type { PluginPackage } from '@kbn/repo-packages';
 import type { PluginEntry } from '../types';
 
@@ -52,24 +52,10 @@ function toPluginEntry(repoRoot: string, pkg: PluginPackage): PluginEntry | null
 export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<PluginEntry[]> {
   const { repoRoot, examples = false, testPlugins = false } = options;
 
-  const packageMap = readPackageMap();
   const pluginFilter = getPluginPackagesFilter({ examples, testPlugins, browser: true });
 
-  const packages: Package[] = [];
-  for (const relDir of packageMap.values()) {
-    const manifestPath = Path.resolve(repoRoot, relDir, 'kibana.jsonc');
-    if (!Fs.existsSync(manifestPath)) {
-      continue;
-    }
-    try {
-      packages.push(Package.fromManifest(repoRoot, manifestPath));
-    } catch {
-      // skip malformed manifests
-    }
-  }
-
   const plugins: PluginEntry[] = [];
-  for (const pkg of packages) {
+  for (const pkg of getPackages(repoRoot)) {
     if (!pluginFilter(pkg)) {
       continue;
     }

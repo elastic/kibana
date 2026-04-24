@@ -10,6 +10,7 @@
 import * as Rx from 'rxjs';
 import { fork, type ChildProcess } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import type { ThemeTag } from './types';
 import { getInspectExecArgv } from './utils/inspect';
 
@@ -127,7 +128,7 @@ export class RspackOptimizer {
                 cache: this.options.cache,
                 dist: this.options.dist,
                 examples: this.options.examples,
-                themeTags: this.options.themeTags ?? ['borealislight', 'borealisdark'],
+                themeTags: this.options.themeTags ?? [...DEFAULT_THEME_TAGS],
                 hmr: this.options.hmr,
                 basePath: this.options.basePath,
               },

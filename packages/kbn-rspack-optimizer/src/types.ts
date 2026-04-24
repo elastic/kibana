@@ -70,4 +70,4 @@ export interface BundleRemote {
   targets: readonly string[];
 }
 
-export type ThemeTag = 'borealislight' | 'borealisdark';
+export type { ThemeTag } from '@kbn/core-ui-settings-common';

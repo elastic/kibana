@@ -8,8 +8,15 @@
  */
 
 import Path from 'path';
-import type { RuleSetRule, Configuration } from '@rspack/core';
+import Fs from 'fs';
+import {
+  rspack,
+  type RuleSetRule,
+  type Configuration,
+  type RspackPluginInstance,
+} from '@rspack/core';
 import { getSharedConfig } from '@kbn/transpiler-config';
+import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import type { ThemeTag } from '../types';
 
 /**
@@ -282,7 +289,7 @@ function getSassLoaderChain(repoRoot: string, theme: ThemeTag, dist: boolean): R
 export function getScssLoaderRule(
   repoRoot: string,
   dist: boolean,
-  themeTags: ThemeTag[] = ['borealislight', 'borealisdark'],
+  themeTags: ThemeTag[] = [...DEFAULT_THEME_TAGS],
   bundleId: string = 'kibana'
 ): RuleSetRule {
   return {
@@ -424,7 +431,7 @@ export function getPeggyLoaderRule(): RuleSetRule {
 export function getSharedModuleRules(
   repoRoot: string,
   dist: boolean,
-  themeTags: ThemeTag[] = ['borealislight', 'borealisdark'],
+  themeTags: ThemeTag[] = [...DEFAULT_THEME_TAGS],
   bundleId: string = 'kibana',
   useBabel: boolean = false,
   hmr: boolean = false
@@ -459,5 +466,52 @@ export function getSharedIgnoreWarnings(): RegExp[] {
     // RSPack-specific: Node.js globals mocking (webpack silently mocks these)
     /__dirname.*is used and has been mocked/,
     /__filename.*is used and has been mocked/,
+  ];
+}
+
+/**
+ * Compute a short hash of the given config files for cache versioning.
+ * Used by both the main and external plugin configs to ensure cache
+ * invalidation when config changes, since RSPack's buildDependencies
+ * may not work correctly with TypeScript files.
+ */
+export function computeConfigHash(repoRoot: string, files: readonly string[]): string {
+  const hash = rspack.util.createHash('xxhash64');
+  for (const file of files) {
+    try {
+      hash.update(Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8'), 'utf-8');
+    } catch {
+      // File might not exist in some scenarios, skip
+    }
+  }
+  return hash.digest('hex').slice(0, 8);
+}
+
+/**
+ * Shared SWC minimizer configuration for production builds.
+ * Targets ES2020 (safe based on .browserslistrc / Firefox ESR 115+).
+ */
+export function getMinimizer(dist: boolean): RspackPluginInstance[] {
+  if (!dist) {
+    return [];
+  }
+
+  return [
+    new rspack.SwcJsMinimizerRspackPlugin({
+      extractComments: false,
+      minimizerOptions: {
+        ecma: 2020,
+        compress: {
+          passes: 2,
+          ecma: 2020,
+        },
+        mangle: {
+          keep_classnames: true,
+        },
+        format: {
+          ecma: 2020,
+        },
+      },
+    }),
   ];
 }

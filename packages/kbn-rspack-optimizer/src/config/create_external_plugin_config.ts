@@ -13,6 +13,7 @@ import { rspack, type Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { parseKbnImportReq } from '@kbn/repo-packages';
+import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { discoverPlugins } from '../utils/plugin_discovery';
 import { findTargetEntry } from './create_single_compile_config';
 import { loadDllManifest } from './dll_manifest';
@@ -22,12 +23,14 @@ import {
   getSharedResolveFallback,
   getSharedModuleRules,
   getSharedIgnoreWarnings,
+  computeConfigHash,
+  getMinimizer,
 } from './shared_config';
 import type { ThemeTag } from '../types';
 
 /**
  * Files that affect the external plugin RSPack build. Used as the single source
- * of truth for both getExternalPluginConfigHash (version string) and
+ * of truth for both computeConfigHash (version string) and
  * buildDependencies so they stay in sync. Repo-relative paths are resolved
  * against repoRoot; absolute paths (like the DLL manifest) are used as-is.
  */
@@ -42,18 +45,6 @@ const CACHE_CONFIG_FILES = [
   'package.json',
   UiSharedDepsNpm.dllManifestPath,
 ];
-
-function getExternalPluginConfigHash(repoRoot: string): string {
-  const hash = rspack.util.createHash('xxhash64');
-  for (const file of CACHE_CONFIG_FILES) {
-    try {
-      hash.update(Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8'), 'utf-8');
-    } catch {
-      // File might not exist in some scenarios, skip
-    }
-  }
-  return hash.digest('hex').slice(0, 8);
-}
 
 export interface ExternalPluginConfigOptions {
   /** Path to the Kibana repository root */
@@ -98,7 +89,7 @@ export async function createExternalPluginConfig(
     dist = false,
     watch = false,
     cache = true,
-    themeTags = ['borealislight', 'borealisdark'] as ThemeTag[],
+    themeTags = [...DEFAULT_THEME_TAGS],
   } = options;
 
   // Discover all in-repo browser plugins to build the cross-plugin externals map.
@@ -198,29 +189,7 @@ export async function createExternalPluginConfig(
       usedExports: dist,
       sideEffects: dist,
       concatenateModules: dist,
-      minimizer: dist
-        ? [
-            new rspack.SwcJsMinimizerRspackPlugin({
-              // Match legacy webpack optimizer (TerserPlugin) config
-              extractComments: false,
-              minimizerOptions: {
-                // Target ES2020 - safe based on .browserslistrc (Firefox ESR 115+ supports it)
-                ecma: 2020,
-                compress: {
-                  passes: 2,
-                  ecma: 2020,
-                },
-                mangle: {
-                  keep_classnames: true,
-                },
-                format: {
-                  ecma: 2020,
-                },
-              },
-            }),
-            // Note: CSS is injected via style-loader, not extracted to files
-          ]
-        : [],
+      minimizer: getMinimizer(dist),
     },
 
     experiments: {
@@ -232,8 +201,9 @@ export async function createExternalPluginConfig(
               Path.resolve(pluginDir, 'package.json'),
               ...CACHE_CONFIG_FILES.map((f) => Path.resolve(repoRoot, f)),
             ],
-            version: `external-plugin-v3-${dist ? 'prod' : 'dev'}-${getExternalPluginConfigHash(
-              repoRoot
+            version: `external-plugin-v3-${dist ? 'prod' : 'dev'}-${computeConfigHash(
+              repoRoot,
+              CACHE_CONFIG_FILES
             )}`,
             storage: {
               type: 'filesystem',

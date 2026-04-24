@@ -13,8 +13,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { parseThemeTags } from '@kbn/core-ui-settings-common';
 import { runBuild } from './run_build';
-import type { ThemeTag } from './types';
 import { validateLimitsForAllBundles, updateBundleLimits, DEFAULT_LIMITS_PATH } from './limits';
 import { resolveBundlesDir, METRICS_FILENAME } from './paths';
 import { discoverPlugins } from './utils/plugin_discovery';
@@ -111,7 +111,9 @@ export function runRspackCli(options: CliOptions = {}): void {
         return;
       }
 
-      const themes = parseThemes(log, typeof flags.themes === 'string' ? flags.themes : undefined);
+      const themes = [
+        ...parseThemeTags(typeof flags.themes === 'string' ? flags.themes : undefined),
+      ];
 
       const outputRoot =
         typeof flags['output-root'] === 'string' && flags['output-root'].length > 0
@@ -330,21 +332,4 @@ function runProfileWorker(
       reject(err);
     });
   });
-}
-
-function parseThemes(log: ToolingLog, themesArg: string | undefined): ThemeTag[] {
-  if (!themesArg || themesArg === '*') {
-    return ['borealislight', 'borealisdark'];
-  }
-
-  const themes = themesArg.split(',').map((s) => s.trim()) as ThemeTag[];
-  const valid: ThemeTag[] = ['borealislight', 'borealisdark'];
-
-  for (const theme of themes) {
-    if (!valid.includes(theme)) {
-      log.warning(`Unknown theme "${theme}", valid themes are: ${valid.join(', ')}`);
-    }
-  }
-
-  return themes.filter((t) => valid.includes(t));
 }

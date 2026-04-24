@@ -20,6 +20,7 @@
  * - Worker sends: { type: 'done', success: boolean, summary?: string, errors?: string[] }
  */
 
+import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { runBuild, formatSize } from './run_build';
 import type { ThemeTag } from './types';
 
@@ -61,7 +62,7 @@ async function handleStart(options: StartMessage['options']) {
       cache: options.cache,
       dist: options.dist,
       examples: options.examples,
-      themeTags: options.themeTags ?? ['borealislight', 'borealisdark'],
+      themeTags: options.themeTags ?? [...DEFAULT_THEME_TAGS],
       hmr: options.hmr,
       basePath: options.basePath,
       log,

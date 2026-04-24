@@ -13,6 +13,7 @@ import { rspack, type Configuration, type Compiler, type RspackPluginInstance } 
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import {
   discoverPlugins,
   createCoreEntry,
@@ -27,6 +28,8 @@ import {
   getSharedResolveFallback,
   getSharedModuleRules,
   getSharedIgnoreWarnings,
+  computeConfigHash,
+  getMinimizer,
 } from './shared_config';
 import type { ThemeTag } from '../types';
 import { XPackBannerPlugin } from '../plugins/xpack_banner_plugin';
@@ -39,7 +42,7 @@ import { CrossPluginTargetValidationPlugin } from '../plugins/cross_plugin_targe
 
 /**
  * Files that affect the main Kibana RSPack build. Used as the single source of
- * truth for both getConfigHash (version string) and buildDependencies so they
+ * truth for both computeConfigHash (version string) and buildDependencies so they
  * stay in sync. Repo-relative paths are resolved against repoRoot; absolute
  * paths (like the DLL manifest) are used as-is by Path.resolve.
  */
@@ -59,23 +62,6 @@ const CACHE_CONFIG_FILES = [
   'package.json',
   UiSharedDepsNpm.dllManifestPath,
 ];
-
-/**
- * Compute a hash of the config files that affect the build.
- * This ensures cache invalidation when config changes, since RSPack's
- * buildDependencies may not work correctly with TypeScript files.
- */
-function getConfigHash(repoRoot: string): string {
-  const hash = rspack.util.createHash('xxhash64');
-  for (const file of CACHE_CONFIG_FILES) {
-    try {
-      hash.update(Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8'), 'utf-8');
-    } catch {
-      // File might not exist in some scenarios, skip
-    }
-  }
-  return hash.digest('hex').slice(0, 8);
-}
 
 /**
  * Global shutdown flag - when set to true, RSPack logging will stop immediately.
@@ -103,8 +89,8 @@ export function resetShutdown(): void {
  * This avoids terminal state issues when pressing Ctrl+C.
  *
  * Logging strategy:
- * - Logs at 5% intervals (more frequent feedback)
- * - Also logs if 3+ seconds have passed (never wait too long)
+ * - Logs at 10% intervals
+ * - Also logs if 10+ seconds have passed (never wait too long)
  * - Shows current stage (building, sealing, emitting, etc.)
  * - Shows elapsed time
  * - Immediately stops logging when shutdown is signaled
@@ -252,7 +238,7 @@ export async function createSingleCompileConfig(
     cache = true,
     examples = false,
     testPlugins = false,
-    themeTags = ['borealislight', 'borealisdark'] as ThemeTag[],
+    themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
     profileStatsOnly = false,
@@ -437,30 +423,7 @@ export async function createSingleCompileConfig(
       runtimeChunk: false,
       // Production optimizations
       minimize: dist,
-      minimizer: dist
-        ? [
-            new rspack.SwcJsMinimizerRspackPlugin({
-              // Match legacy webpack optimizer (TerserPlugin) config
-              extractComments: false, // Don't extract license comments to separate files
-              minimizerOptions: {
-                // Target ES2020 - safe based on .browserslistrc (Firefox ESR 115+ supports it)
-                ecma: 2020,
-                compress: {
-                  passes: 2, // Multiple compression passes (same as legacy)
-                  ecma: 2020,
-                },
-                mangle: {
-                  keep_classnames: true, // Same as legacy - required for Kibana
-                },
-                format: {
-                  ecma: 2020,
-                },
-              },
-            }),
-            // Note: CSS is injected via style-loader, not extracted to files
-            // So we don't need LightningCssMinimizerRspackPlugin
-          ]
-        : [],
+      minimizer: getMinimizer(dist),
     },
 
     // Enable in-memory caching
@@ -481,7 +444,10 @@ export async function createSingleCompileConfig(
             buildDependencies: CACHE_CONFIG_FILES.map((f) => Path.resolve(repoRoot, f)),
             // Version includes hash of this config file for reliable invalidation
             // RSPack's buildDependencies may not trigger on TypeScript file changes
-            version: `v8-${dist ? 'prod' : 'dev'}-${getConfigHash(repoRoot)}`,
+            version: `v8-${dist ? 'prod' : 'dev'}-${computeConfigHash(
+              repoRoot,
+              CACHE_CONFIG_FILES
+            )}`,
             // Use separate cache directories for dev vs dist to avoid stale cache issues
             // Structure: .rspack-cache/dev or .rspack-cache/dist
             // Clear all: rm -rf node_modules/.cache/.rspack-cache

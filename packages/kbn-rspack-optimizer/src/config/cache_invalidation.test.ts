@@ -16,7 +16,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
  * includes all required build dependencies.
  *
  * Both configs use a CACHE_CONFIG_FILES constant as the single source of truth
- * for getConfigHash / getExternalPluginConfigHash and buildDependencies.
+ * for computeConfigHash and buildDependencies.
  * These tests verify the source files listed there exist and are referenced.
  */
 describe('RSPack cache invalidation configuration', () => {
@@ -119,8 +119,8 @@ describe('RSPack cache invalidation configuration', () => {
       expect(configSource).toContain('create_external_plugin_config.ts');
     });
 
-    it('should have getExternalPluginConfigHash function', () => {
-      expect(configSource).toContain('getExternalPluginConfigHash');
+    it('should use computeConfigHash from shared_config', () => {
+      expect(configSource).toContain('computeConfigHash');
     });
   });
 });
