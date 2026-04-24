@@ -27,5 +27,32 @@ export const uiamServiceMock = {
     exchangeOAuthToken: jest.fn().mockResolvedValue('mock-ephemeral-token'),
     revokeApiKey: jest.fn().mockResolvedValue(undefined),
     convertApiKeys: jest.fn().mockResolvedValue({ results: [] }),
+    createOAuthClient: jest.fn().mockResolvedValue({
+      id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+    }),
+    listOAuthClients: jest.fn().mockResolvedValue({ clients: [] }),
+    updateOAuthClient: jest.fn().mockResolvedValue({
+      id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+    }),
+    revokeOAuthClient: jest.fn().mockResolvedValue({
+      id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      revoked: true,
+    }),
+    listOAuthConnections: jest.fn().mockResolvedValue({ connections: [] }),
+    updateOAuthConnection: jest.fn().mockResolvedValue({
+      id: 'mock-connection-id',
+      client_id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      name: 'mock-connection-name',
+    }),
+    revokeOAuthConnection: jest.fn().mockResolvedValue({
+      id: 'mock-connection-id',
+      client_id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      revoked: true,
+    }),
   }),
 };
