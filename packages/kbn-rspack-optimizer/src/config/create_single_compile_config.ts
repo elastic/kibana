@@ -155,9 +155,12 @@ export async function createSingleCompileConfig(
   // Uses relative paths for cache portability across machines
   const unifiedEntryPath = createUnifiedEntry(wrapperDir, repoRoot, pluginEntries);
 
+  const extraTargets = pluginEntries.length - 1 - plugins.length;
   if (log) {
     log.info(
-      `Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`
+      `Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins${
+        extraTargets > 0 ? `, ${extraTargets} extra targets` : ''
+      })`
     );
     if (hmr) {
       log.info(`HMR enabled (port ${resolvedHmrPort})`);
