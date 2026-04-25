@@ -20,7 +20,7 @@ export interface RuleDetailsProps {
   /**
    * The unique identifier of the rule to display.
    */
-  ruleId: string;
+  ruleId?: string;
 }
 
 /**

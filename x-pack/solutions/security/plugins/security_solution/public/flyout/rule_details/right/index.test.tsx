@@ -92,7 +92,7 @@ describe('<RulePanel />', () => {
       ruleActionsData: { actions: ['action'] },
     });
 
-    const { getByTestId, queryByTestId, queryByText } = renderRulePanel();
+    const { queryByTestId, queryByText } = renderRulePanel();
 
     expect(queryByTestId(LOADING_TEST_ID)).not.toBeInTheDocument();
     expect(queryByText(ERROR_MESSAGE)).not.toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('<RulePanel />', () => {
       isExistingRule: true,
     });
     mockGetStepsData.mockReturnValue({});
-    const { queryByTestId, getByText } = renderRulePanel();
+    const { getByText } = renderRulePanel();
 
     expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
   });

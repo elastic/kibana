@@ -49,7 +49,7 @@ describe('<RuleDetails />', () => {
       ruleActionsData: { actions: ['action'] },
     });
 
-    const { getByTestId, queryByTestId } = renderRuleDetails();
+    const { queryByTestId } = renderRuleDetails();
 
     expect(queryByTestId(RULE_DETAILS_LOADING_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(FLYOUT_ERROR_TEST_ID)).not.toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('<RuleDetails />', () => {
     });
     mockGetStepsData.mockReturnValue({});
 
-    const { getByTestId, queryByTestId } = renderRuleDetails();
+    const { getByTestId } = renderRuleDetails();
 
     expect(getByTestId(FLYOUT_ERROR_TEST_ID)).toBeInTheDocument();
   });

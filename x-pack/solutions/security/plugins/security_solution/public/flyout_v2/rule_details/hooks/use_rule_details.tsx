@@ -13,7 +13,7 @@ export interface UseRuleDetailsParams {
   /**
    * Id of the rule
    */
-  ruleId: string;
+  ruleId?: string;
 }
 
 export interface UseRuleDetailsResult {
