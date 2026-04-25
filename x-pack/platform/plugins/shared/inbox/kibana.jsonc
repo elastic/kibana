@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/inbox-plugin",
-  "owner": ["@elastic/security-generative-ai"],
+  "owner": ["@elastic/security-pds-deployment", "@elastic/security-generative-ai"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
