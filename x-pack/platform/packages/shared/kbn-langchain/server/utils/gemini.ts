@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   Content,
   EnhancedGenerateContentResponse,
-  FinishReason,
   FunctionCallPart,
   FunctionResponsePart,
   InlineDataPart,
@@ -18,17 +17,13 @@ import {
   SafetyRating,
   TextPart,
 } from '@google/generative-ai';
-import {
-  AIMessageChunk,
-  BaseMessage,
-  ChatMessage,
-  isBaseMessage,
-  UsageMetadata,
-} from '@langchain/core/messages';
+import { FinishReason } from '@google/generative-ai';
+import type { BaseMessage, UsageMetadata } from '@langchain/core/messages';
+import { AIMessageChunk, ChatMessage, isBaseMessage } from '@langchain/core/messages';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
-import { ToolCallChunk } from '@langchain/core/dist/messages/tool';
-import { Readable } from 'stream';
-import { StreamParser } from './types';
+import type { ToolCallChunk } from '@langchain/core/dist/messages/tool';
+import type { Readable } from 'stream';
+import type { StreamParser } from './types';
 
 export function convertResponseContentToChatGenerationChunk(
   response: EnhancedGenerateContentResponse,
@@ -182,11 +177,11 @@ export function convertMessageContentToParts(
         if (!isMultimodalModel) {
           throw new Error(`This model does not support images`);
         }
-        let source;
+        let source: string;
         if (typeof c.image_url === 'string') {
           source = c.image_url;
-        } else if (typeof c.image_url === 'object' && 'url' in c.image_url) {
-          source = c.image_url.url;
+        } else if (c.image_url && typeof c.image_url === 'object' && 'url' in c.image_url) {
+          source = c.image_url.url as string;
         } else {
           throw new Error('Please provide image as base64 encoded data URL');
         }

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -41,7 +41,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('should respond with correct enrollment settings', function () {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/fleet_server');
         // package verification error without force
         await supertest
           .post(`/api/fleet/epm/packages/fleet_server`)
@@ -51,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
         await fleetAndAgents.setup();
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/fleet_server');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/fleet_server');
       });
 
       it('when there are multiple fleet server policies and an active host', async function () {
@@ -68,14 +68,12 @@ export default function (providerContext: FtrProviderContext) {
                 is_default_fleet_server: true,
                 is_managed: false,
                 name: 'Fleet Server Policy',
-                space_ids: ['default'],
               },
               {
                 id: 'fleet-server-policy-2',
                 is_default_fleet_server: false,
                 is_managed: false,
                 name: 'Fleet Server Policy 2',
-                space_ids: ['default'],
               },
             ],
             has_active: true,
@@ -90,15 +88,7 @@ export default function (providerContext: FtrProviderContext) {
             host_proxy: {
               id: 'my-proxy',
               name: 'my proxy',
-              proxy_headers: {
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Accept-Language': 'en-US,en;q=0.5',
-              },
               url: 'https://my-proxy',
-              certificate: '',
-              certificate_authorities: '',
-              certificate_key: '',
-              is_preconfigured: false,
             },
             es_output: {
               hosts: ['http://localhost:9200'],
@@ -133,7 +123,6 @@ export default function (providerContext: FtrProviderContext) {
                 is_default_fleet_server: false,
                 is_managed: false,
                 name: 'Fleet Server Policy 2',
-                space_ids: ['default'],
               },
             ],
             has_active: true,
@@ -148,15 +137,7 @@ export default function (providerContext: FtrProviderContext) {
             host_proxy: {
               id: 'my-proxy',
               name: 'my proxy',
-              proxy_headers: {
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Accept-Language': 'en-US,en;q=0.5',
-              },
               url: 'https://my-proxy',
-              certificate: '',
-              certificate_authorities: '',
-              certificate_key: '',
-              is_preconfigured: false,
             },
             es_output: {
               hosts: ['http://localhost:9200'],
@@ -203,16 +184,8 @@ export default function (providerContext: FtrProviderContext) {
             proxy_id: 'my-proxy',
           },
           download_source_proxy: {
-            certificate: '',
-            certificate_authorities: '',
-            certificate_key: '',
             id: 'my-proxy',
-            is_preconfigured: false,
             name: 'my proxy',
-            proxy_headers: {
-              'Accept-Encoding': 'gzip, deflate, br',
-              'Accept-Language': 'en-US,en;q=0.5',
-            },
             url: 'https://my-proxy',
           },
         });

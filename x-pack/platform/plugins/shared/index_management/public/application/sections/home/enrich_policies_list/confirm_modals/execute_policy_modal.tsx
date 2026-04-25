@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { executeEnrichPolicy } from '../../../../services/api';
@@ -19,6 +19,7 @@ export const ExecutePolicyModal = ({
   policyToExecute: string;
   callback: (data?: { hasExecutedPolicy: boolean }) => void;
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const mounted = useRef(false);
   const {
     services: { notificationService },
@@ -76,9 +77,11 @@ export const ExecutePolicyModal = ({
   return (
     <EuiConfirmModal
       data-test-subj="executePolicyModal"
+      aria-labelledby={confirmModalTitleId}
       title={i18n.translate('xpack.idxMgmt.enrichPolicies.executeModal.confirmTitle', {
         defaultMessage: 'Execute enrich policy',
       })}
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={handleOnCancel}
       onConfirm={handleExecutePolicy}
       cancelButtonText={i18n.translate('xpack.idxMgmt.enrichPolicies.executeModal.cancelButton', {

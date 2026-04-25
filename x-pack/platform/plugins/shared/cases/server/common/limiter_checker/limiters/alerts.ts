@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../../../../common/types/api';
+import type { AttachmentRequestV2 } from '../../../../common/types/api';
 import type { AttachmentService } from '../../../services';
 import type { AlertAttachmentPayload } from '../../../../common/types/domain';
 import { AttachmentType } from '../../../../common/types/domain';
 import { CASE_COMMENT_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../../common/constants';
+import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
 import { isCommentRequestTypeAlert } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 
@@ -43,8 +44,9 @@ export class AlertLimiter extends BaseLimiter {
     return itemsAttachedToCase?.limiter?.value ?? 0;
   }
 
-  public countOfItemsInRequest(requests: AttachmentRequest[]): number {
-    const totalAlertsInReq = requests
+  public countOfItemsInRequest(requests: AttachmentRequestV2[]): number {
+    const legacyRequests = requests.filter(isLegacyAttachmentRequest);
+    const totalAlertsInReq = legacyRequests
       .filter<AlertAttachmentPayload>(isCommentRequestTypeAlert)
       .reduce((count, attachment) => {
         const ids = Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];

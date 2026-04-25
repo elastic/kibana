@@ -7,10 +7,11 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
+import { CASE_EXTENDED_FIELDS } from '../../../constants';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
-import { AttachmentRt } from '../attachment/v1';
+import { AttachmentRtV2 } from '../attachment/v2';
 import { CaseCustomFieldsRt } from '../custom_field/v1';
 import { CaseObservableRt } from '../observable/v1';
 
@@ -26,6 +27,20 @@ export const CaseStatusRt = rt.union([
 ]);
 
 export const caseStatuses = Object.values(CaseStatuses);
+
+export const DefaultCloseReasonRt = rt.union([
+  rt.literal('false_positive'),
+  rt.literal('duplicate'),
+  rt.literal('true_positive'),
+  rt.literal('benign_positive'),
+  rt.literal('automated_closure'),
+  rt.literal('other'),
+]);
+
+/**
+ * Close reason
+ */
+export const CaseCloseReasonRt = rt.union([DefaultCloseReasonRt, rt.string]);
 
 /**
  * Severity
@@ -49,8 +64,20 @@ export const CaseSeverityRt = rt.union([
  * Case
  */
 
-export const CaseSettingsRt = rt.strict({
-  syncAlerts: rt.boolean,
+export const CaseSettingsRt = rt.intersection([
+  rt.strict({
+    syncAlerts: rt.boolean,
+  }),
+  rt.exact(
+    rt.partial({
+      extractObservables: rt.boolean,
+    })
+  ),
+]);
+
+export const CaseTemplate = rt.strict({
+  id: rt.string,
+  version: rt.number,
 });
 
 const CaseBaseFields = {
@@ -126,6 +153,7 @@ export const CaseAttributesRt = rt.intersection([
     external_service: rt.union([ExternalServiceRt, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
+    total_observables: rt.union([rt.number, rt.null]),
   }),
   rt.exact(
     rt.partial({
@@ -134,6 +162,8 @@ export const CaseAttributesRt = rt.intersection([
       time_to_acknowledge: rt.union([rt.number, rt.null]),
       time_to_investigate: rt.union([rt.number, rt.null]),
       time_to_resolve: rt.union([rt.number, rt.null]),
+      template: rt.union([rt.null, CaseTemplate]),
+      [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);
@@ -144,11 +174,12 @@ export const CaseRt = rt.intersection([
     id: rt.string,
     totalComment: rt.number,
     totalAlerts: rt.number,
+    totalEvents: rt.union([rt.number, rt.undefined]),
     version: rt.string,
   }),
   rt.exact(
     rt.partial({
-      comments: rt.array(AttachmentRt),
+      comments: rt.array(AttachmentRtV2),
     })
   ),
 ]);
@@ -157,6 +188,7 @@ export const CasesRt = rt.array(CaseRt);
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
+  events: rt.number,
   userComments: rt.number,
 });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type Primitive = string | number | boolean | null | undefined;
 
@@ -18,19 +18,34 @@ export const primitive: z.ZodType<Primitive> = z.union([
 ]);
 
 export interface RecursiveRecord {
-  [key: PropertyKey]: Primitive | Primitive[] | RecursiveRecord;
+  [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
 }
 
-export const recursiveRecord: z.ZodType<RecursiveRecord> = z.lazy(() =>
-  z.record(z.union([primitive, z.array(primitive), recursiveRecord]))
-);
+export const recursiveRecord: z.ZodType<RecursiveRecord> = z
+  .lazy(() =>
+    z.record(
+      z.string(),
+      z.union([primitive, z.array(primitive), z.array(z.unknown()), recursiveRecord])
+    )
+  )
+  .meta({ id: 'RecursiveRecord' });
 
-export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[]>;
+export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
 
 export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
-  z.union([primitive, z.array(primitive)])
+  z.string(),
+  z.union([primitive, z.array(primitive), z.array(z.unknown())])
 );
 
 export const sampleDocument = recursiveRecord;
 
 export type SampleDocument = RecursiveRecord;
+
+export interface IgnoredField {
+  field: string;
+}
+
+export interface DocumentWithIgnoredFields {
+  values?: SampleDocument;
+  ignored_fields: IgnoredField[];
+}

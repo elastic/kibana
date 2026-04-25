@@ -6,15 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
+import { useKibana } from '../../../../../../../../shared_imports';
 import {
   noCustomAttributesTitle,
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
 export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () => {
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   return (
     <EuiCallOut
       data-test-subj="noTiersAvailableUsingNodeAttributesNotice"
@@ -29,11 +35,7 @@ export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () =
           }
         )}
       </p>
-
-      {
-        // @ts-expect-error Type '({ docLinks }: Props) => React.JSX.Element' is not assignable to type 'ReactNode'.
-        nodeAllocationMigrationGuidance
-      }
+      {nodeAllocationMigrationGuidance({ docLinks })}
     </EuiCallOut>
   );
 };

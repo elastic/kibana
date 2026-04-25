@@ -7,8 +7,6 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -21,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { Table } from './waterfall_flyout_table';
 import { MiddleTruncatedText } from '../middle_truncated_text';
-import { WaterfallMetadataEntry } from '../../../common/network_data/types';
-import { OnFlyoutClose } from './use_flyout';
+import type { WaterfallMetadataEntry } from '../../../common/network_data/types';
+import type { OnFlyoutClose } from './use_flyout';
 
 export const DETAILS = i18n.translate('xpack.synthetics.synthetics.waterfall.flyout.details', {
   defaultMessage: 'Details',
@@ -48,10 +46,6 @@ export const RESPONSE_HEADERS = i18n.translate(
     defaultMessage: 'Response headers',
   }
 );
-
-const FlyoutContainer = euiStyled(EuiFlyout)`
-  z-index: ${(props) => props.theme.eui.euiZLevel5};
-`;
 
 export interface WaterfallFlyoutProps {
   flyoutData?: WaterfallMetadataEntry;
@@ -88,7 +82,7 @@ export const WaterfallFlyout = ({
       data-test-subj="waterfallFlyout"
       aria-labelledby="flyoutTitle"
     >
-      <FlyoutContainer size="s" onClose={onFlyoutClose}>
+      <EuiFlyout size="s" onClose={onFlyoutClose} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
@@ -119,7 +113,7 @@ export const WaterfallFlyout = ({
             </>
           )}
         </EuiFlyoutBody>
-      </FlyoutContainer>
+      </EuiFlyout>
     </div>
   );
 };

@@ -17,7 +17,7 @@ import { MemoryRouter } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import userEvent from '@testing-library/user-event';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
 import {
   searchFindingsHandler,
@@ -42,7 +42,8 @@ const renderFindingsPage = (dependencies = getMockServerDependencies()) => {
   );
 };
 
-describe('<Findings />', () => {
+// Failing: See https://github.com/elastic/kibana/issues/244001
+describe.skip('<Findings />', () => {
   startMockServer(server);
 
   (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({

@@ -8,12 +8,12 @@
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import type { SearchHit } from '../../../../../common/search_strategy';
@@ -46,6 +46,10 @@ export interface UseEventDetailsParams {
    * Name of the index used in the parent's page
    */
   indexName: string | undefined;
+  /**
+   * Whether to skip the event details retrieval
+   */
+  skip?: boolean;
 }
 
 export interface UseEventDetailsResult {
@@ -85,6 +89,7 @@ export interface UseEventDetailsResult {
 export const useEventDetails = ({
   eventId,
   indexName,
+  skip = false,
 }: UseEventDetailsParams): UseEventDetailsResult => {
   const currentSpaceId = useSpaceId();
   // TODO Replace getAlertIndexAlias way to retrieving the eventIndex with the GET /_alias
@@ -92,9 +97,7 @@ export const useEventDetails = ({
   const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
-    pageName === SecurityPageName.detections
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
+    pageName === SecurityPageName.detections ? PageScope.alerts : PageScope.default;
 
   const sourcererDataView = useSourcererDataView(sourcererScope);
 
@@ -116,7 +119,7 @@ export const useEventDetails = ({
       indexName: eventIndex,
       eventId: eventId ?? '',
       runtimeMappings,
-      skip: !eventId,
+      skip: !eventId || skip,
     });
   const { getFieldsData } = useGetFieldsData({ fieldsData: searchHit?.fields });
 

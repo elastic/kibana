@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserProfileData } from '@kbn/core-user-profile-common';
+import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { UserProfileService } from './service';
 
 export type CoreUserProfileDelegateContract = UserProfileService & {

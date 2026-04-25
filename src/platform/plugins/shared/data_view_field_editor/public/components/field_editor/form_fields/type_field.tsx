@@ -14,7 +14,7 @@ import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 
 import { UseField } from '../../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS, RUNTIME_FIELD_OPTIONS_PRIMITIVE } from '../constants';
-import { TypeSelection } from '../types';
+import type { TypeSelection } from '../types';
 
 interface Props {
   isDisabled?: boolean;

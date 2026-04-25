@@ -10,18 +10,18 @@
 /** Controls group state */
 export const CONTROLS_GROUP_TYPE = 'control_group';
 
-export const CONTROLS_LABEL_POSITION_ONE_LINE = 'oneLine';
-export const CONTROLS_LABEL_POSITION_TWO_LINE = 'twoLine';
-
-export const CONTROLS_CHAINING_NONE = 'NONE';
-export const CONTROLS_CHAINING_HIERARCHICAL = 'HIERARCHICAL';
-
-export const DEFAULT_CONTROLS_CHAINING = CONTROLS_CHAINING_HIERARCHICAL;
-export const DEFAULT_CONTROLS_LABEL_POSITION = CONTROLS_LABEL_POSITION_ONE_LINE;
-export const DEFAULT_IGNORE_PARENT_SETTINGS = {
-  ignoreFilters: false,
-  ignoreQuery: false,
-  ignoreTimerange: false,
-  ignoreValidations: false,
-} as const;
 export const DEFAULT_AUTO_APPLY_SELECTIONS = true;
+
+/** This state is only relevant for sticky controls */
+export const CONTROL_WIDTH_SMALL = 'small';
+export const CONTROL_WIDTH_MEDIUM = 'medium';
+export const CONTROL_WIDTH_LARGE = 'large';
+type ControlWidth =
+  | typeof CONTROL_WIDTH_SMALL
+  | typeof CONTROL_WIDTH_MEDIUM
+  | typeof CONTROL_WIDTH_LARGE;
+
+export const DEFAULT_PINNED_CONTROL_STATE = {
+  width: CONTROL_WIDTH_MEDIUM as ControlWidth,
+  grow: false,
+};

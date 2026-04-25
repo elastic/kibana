@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
-const TOTAL_ALERTS_CELL_COUNT = 440;
-const RECOVERED_ALERTS_CELL_COUNT = 330;
-const ACTIVE_ALERTS_CELL_COUNT = 110;
+const TOTAL_ALERTS_CELL_COUNT = 480;
+const RECOVERED_ALERTS_CELL_COUNT = 360;
+const ACTIVE_ALERTS_CELL_COUNT = 120;
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -84,7 +84,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     let customThresholdRuleId: string;
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       const setup = async () => {
         await observability.alerts.common.setKibanaTimeZoneToUTC();
         await observability.alerts.common.navigateToTimeWithData();
@@ -104,7 +106,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
@@ -114,12 +118,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('Alerts table', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+        );
         await observability.alerts.common.navigateToTimeWithData();
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+        );
       });
 
       it('Renders the table', async () => {
@@ -205,6 +213,29 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
+      describe('Actions Button', () => {
+        after(async () => {
+          await observability.alerts.common.navigateToTimeWithData();
+          // Clear active status
+          await alertControls.clearControlSelections('0');
+          await observability.alerts.common.waitForAlertTableToLoad();
+        });
+
+        it('Opens rule details page when click on "View Rule Details"', async () => {
+          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+          await actionsButton.click();
+          await observability.alerts.common.viewRuleDetailsButtonClick();
+
+          await retry.try(async () => {
+            expect(
+              await (
+                await find.byCssSelector('[data-test-subj*="breadcrumb first"]')
+              ).getVisibleText()
+            ).to.eql('Rules');
+          });
+        });
+      });
+
       describe('Flyout', () => {
         it('Can be opened', async () => {
           await observability.alerts.common.openAlertsFlyout();
@@ -230,7 +261,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               const titleText = await (
                 await observability.alerts.common.getAlertsFlyoutTitle()
               ).getVisibleText();
-              expect(titleText).to.contain('Failed transaction rate threshold breached');
+              expect(titleText).to.contain('APM Failed Transaction Rate (one)');
             });
           });
 
@@ -275,18 +306,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           it('Displays a View rule details link', async () => {
             await observability.alerts.common.getAlertsFlyoutViewRuleDetailsLinkOrFail();
           });
-        });
-      });
-
-      describe('Actions Button', () => {
-        it('Opens rule details page when click on "View Rule Details"', async () => {
-          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
-          await actionsButton.click();
-          await observability.alerts.common.viewRuleDetailsButtonClick();
-
-          expect(
-            await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
-          ).to.eql('Observability');
         });
       });
     });

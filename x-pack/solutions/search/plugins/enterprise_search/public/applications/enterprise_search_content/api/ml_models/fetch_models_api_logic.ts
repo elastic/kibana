@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MlModel } from '../../../../../common/types/ml';
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { MlModel } from '../../../../../common/types/ml';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export type FetchModelsApiResponse = MlModel[];

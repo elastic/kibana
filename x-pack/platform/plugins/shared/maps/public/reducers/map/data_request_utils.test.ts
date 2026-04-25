@@ -7,7 +7,7 @@
 
 jest.mock('../../actions', () => ({}));
 
-import { DataRequestMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
+import type { DataRequestMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
 import {
   getDataRequest,
   setDataRequest,
@@ -15,7 +15,7 @@ import {
   stopDataRequest,
   updateSourceDataRequest,
 } from './data_request_utils';
-import { MapState } from './types';
+import type { MapState } from './types';
 import _ from 'lodash';
 
 describe('getDataRequest', () => {

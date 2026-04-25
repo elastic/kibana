@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 
-import { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import type { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { hasMinLengthArray } from '../../../validators/array';
 import { multiSelectComponent } from '../serializers';
-import { ERROR_CODE } from './types';
+import type { ERROR_CODE } from './types';
 
 const { optionsToSelectedValue } = multiSelectComponent;
 

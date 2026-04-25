@@ -17,17 +17,20 @@ import type {
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { isUserError } from '@kbn/task-manager-plugin/server/task_running';
+import { trace } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
 import { filter, from, identity, map, mergeMap, tap } from 'rxjs';
 import type OpenAI from 'openai';
 import type { ChatCompletionChunk } from 'openai/resources';
 import {
+  SUB_ACTION,
   ChatCompleteParamsSchema,
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
   TextEmbeddingParamsSchema,
   UnifiedChatCompleteParamsSchema,
-} from '../../../common/inference/schema';
+} from '@kbn/connector-schemas/inference';
 import type {
   Config,
   Secrets,
@@ -43,10 +46,13 @@ import type {
   DashboardActionResponse,
   ChatCompleteParams,
   ChatCompleteResponse,
-} from '../../../common/inference/types';
-import { SUB_ACTION } from '../../../common/inference/constants';
+} from '@kbn/connector-schemas/inference';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { chunksIntoMessage, eventSourceStreamIntoObservable } from './helpers';
+import {
+  chunksIntoMessage,
+  eventSourceStreamIntoObservable,
+  detectandThrowUserError,
+} from './helpers';
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
@@ -118,7 +124,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
@@ -181,33 +187,40 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
   public async performApiUnifiedCompletionStream(params: UnifiedChatCompleteParams) {
+    const parentSpan = trace.getActiveSpan();
+    const body = { ...params.body, n: undefined }; // exclude n param for now, constant is used on the inference API side
+    if (parentSpan?.isRecording()) {
+      parentSpan.setAttribute('inference.raw_request', JSON.stringify(body));
+    }
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
         path: `_inference/chat_completion/${this.inferenceId}/_stream`,
-        body: { ...params.body, n: undefined }, // exclude n param for now, constant is used on the inference API side
+        querystring: {
+          timeout: '180s',
+        },
+        body,
       },
       {
         asStream: true,
         meta: true,
+        requestTimeout: 180_000,
         signal: params.signal,
-        ...(params.telemetryMetadata?.pluginId
-          ? {
-              headers: {
-                'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
-              },
-            }
-          : {}),
+        headers: {
+          // always send a value for EIS
+          'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId ?? 'inference',
+        },
       }
     );
     // errors should be thrown as it will not be a stream response
     if (response.statusCode >= 400) {
       const error = await streamToString(response.body as unknown as Readable);
+      detectandThrowUserError(error);
       throw new Error(error);
     }
 
@@ -243,6 +256,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       return { consumerStream: teed[0], tokenCountStream: teed[1] };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
+      if (isUserError(e)) {
+        // Bubble up user errors as-is
+        throw e;
+      }
       const errorMessage = this.getResponseErrorMessage(e);
       throw new Error(errorMessage);
     }
@@ -269,7 +286,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.rerank!.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }));
+    return (response?.rerank ?? []).map(({ relevance_score: score, ...rest }) => ({
+      score,
+      ...rest,
+    }));
   }
 
   /**
@@ -286,7 +306,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.sparse_embedding!;
+    return response?.sparse_embedding ?? [];
   }
 
   /**
@@ -311,7 +331,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.text_embedding!;
+    return response?.text_embedding ?? [];
   }
 
   /**
@@ -352,7 +372,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.completion!;
+    return response?.completion ?? [];
   }
 
   /**

@@ -29,6 +29,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -154,6 +155,7 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
     createdAt: '2024-01-30T00:00:00.000Z',
     duration: '12h',
     enabled: true,
+    initiator: 'user',
     rule: {
       name: fakeRuleName,
       tags: ['foo'],
@@ -228,6 +230,8 @@ describe('findBackfill()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     });
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       filter,
@@ -813,6 +817,71 @@ describe('findBackfill()', () => {
       total: 1,
       data: [transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })],
     });
+  });
+
+  test('should successfully find backfill with initiator filter', async () => {
+    const result = await rulesClient.findBackfill({
+      page: 1,
+      perPage: 10,
+      initiator: 'user',
+    });
+
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+          ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+        },
+        type: 'kql',
+      },
+    });
+
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: {
+          type: 'function',
+          function: 'and',
+          arguments: [
+            {
+              type: 'function',
+              function: 'is',
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'ad_hoc_run_params.attributes.initiator',
+                },
+                { isQuoted: false, type: 'literal', value: 'user' },
+              ],
+            },
+            authDslFilter,
+          ],
+        },
+        page: 1,
+        perPage: 10,
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      })
+    );
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 1,
+      data: [transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })],
+    });
+  });
+
+  test('should validate initiatorId requires system initiator', async () => {
+    await expect(
+      rulesClient.findBackfill({
+        page: 1,
+        perPage: 10,
+        initiator: 'user',
+        initiatorId: 'id',
+      })
+    ).rejects.toThrowError('Failed to find backfills: Could not validate find parameters');
   });
 
   describe('error handling', () => {

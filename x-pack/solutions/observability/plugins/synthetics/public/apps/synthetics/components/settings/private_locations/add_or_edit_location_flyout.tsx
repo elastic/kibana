@@ -17,19 +17,19 @@ import {
   EuiTitle,
   EuiFlyout,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { useSelector } from 'react-redux';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LocationForm } from './location_form';
 import { ManageEmptyState } from './manage_empty_state';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { selectPrivateLocationsState } from '../../../state/private_locations/selectors';
 
 export type NewLocation = Omit<PrivateLocation, 'id'>;
@@ -57,7 +57,7 @@ export const AddOrEditLocationFlyout = ({
         lat: 0,
         lon: 0,
       },
-      spaces: [ALL_SPACES_ID],
+      spaces: [],
     },
   });
 
@@ -75,13 +75,15 @@ export const AddOrEditLocationFlyout = ({
 
   const { handleSubmit } = form;
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <ContextWrapper>
       <FormProvider {...form}>
-        <EuiFlyout onClose={onCloseFlyout} css={{ width: 540 }}>
+        <EuiFlyout onClose={onCloseFlyout} css={{ width: 540 }} aria-labelledby={flyoutTitleId}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>
+              <h2 id={flyoutTitleId}>
                 {privateLocationToEdit !== undefined ? EDIT_PRIVATE_LOCATION : ADD_PRIVATE_LOCATION}
               </h2>
             </EuiTitle>

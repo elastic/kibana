@@ -509,7 +509,7 @@ export class JobCreator {
   }
 
   public get query(): object {
-    return this._datafeed_config.query;
+    return this._datafeed_config.query!;
   }
 
   public set query(query: object) {

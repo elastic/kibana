@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   PerformRuleInstallationResponseBody,
   SkippedRuleInstall,
   PerformRuleInstallationRequestBody,
+  InstalledRuleBasicInfo,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -27,7 +29,8 @@ import { excludeLicenseRestrictedRules } from '../../logic/utils';
 export const performRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest<unknown, unknown, PerformRuleInstallationRequestBody>,
-  response: KibanaResponseFactory
+  response: KibanaResponseFactory,
+  logger: Logger
 ) => {
   const siemResponse = buildSiemResponse(response);
 
@@ -48,32 +51,33 @@ export const performRuleInstallationHandler = async (
 
     // If this API is used directly without hitting any detection engine
     // pages first, the rules package might be missing.
-    await ensureLatestRulesPackageInstalled(ruleAssetsClient, ctx.securitySolution);
-
-    const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
-    const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
-    const currentRuleVersionsMap = new Map(
-      currentRuleVersions.map((version) => [version.rule_id, version])
-    );
-
-    const allInstallableRules = allLatestVersions.filter(
-      (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
-    );
+    await ensureLatestRulesPackageInstalled(ruleAssetsClient, ctx.securitySolution, logger);
 
     const ruleInstallQueue: Array<{
       rule_id: RuleSignatureId;
       version: RuleVersion;
     }> = [];
     const ruleErrors = [];
-    const installedRules = [];
+    const installedRules: InstalledRuleBasicInfo[] = [];
     const skippedRules: SkippedRuleInstall[] = [];
 
     // Perform all the checks we can before we start the upgrade process
     if (mode === 'SPECIFIC_RULES') {
-      const installableRuleIds = new Set(allInstallableRules.map((rule) => rule.rule_id));
+      const requestedRuleIds = request.body.rules.map((rule) => rule.rule_id);
+      const [latestVersions, installedVersions] = await Promise.all([
+        ruleAssetsClient.fetchLatestVersions({ ruleIds: requestedRuleIds }),
+        ruleObjectsClient.fetchInstalledRuleVersionsByIds({ ruleIds: requestedRuleIds }),
+      ]);
+      const installedRuleIds = new Set(installedVersions.map((version) => version.rule_id));
+      const installableRuleIds = new Set(
+        latestVersions
+          .filter((version) => !installedRuleIds.has(version.rule_id))
+          .map((version) => version.rule_id)
+      );
+
       request.body.rules.forEach((rule) => {
         // Check that the requested rule is not installed yet
-        if (currentRuleVersionsMap.has(rule.rule_id)) {
+        if (installedRuleIds.has(rule.rule_id)) {
           skippedRules.push({
             rule_id: rule.rule_id,
             reason: SkipRuleInstallReason.ALREADY_INSTALLED,
@@ -95,6 +99,14 @@ export const performRuleInstallationHandler = async (
         ruleInstallQueue.push(rule);
       });
     } else if (mode === 'ALL_RULES') {
+      const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
+      const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
+      const currentRuleVersionsMap = new Map(
+        currentRuleVersions.map((version) => [version.rule_id, version])
+      );
+      const allInstallableRules = allLatestVersions.filter(
+        (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
+      );
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
@@ -103,8 +115,17 @@ export const performRuleInstallationHandler = async (
       const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
       const ruleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
 
-      const { results, errors } = await createPrebuiltRules(detectionRulesClient, ruleAssets);
-      installedRules.push(...results);
+      const { results, errors } = await createPrebuiltRules(
+        detectionRulesClient,
+        ruleAssets,
+        logger
+      );
+
+      const batchInstalledRules = results.map(({ result: rule }) =>
+        pick(rule, ['id', 'rule_id', 'version'])
+      );
+
+      installedRules.push(...batchInstalledRules);
       ruleErrors.push(...errors);
     }
 
@@ -128,7 +149,7 @@ export const performRuleInstallationHandler = async (
         failed: ruleErrors.length,
       },
       results: {
-        created: installedRules.map(({ result }) => result),
+        created: installedRules,
         skipped: skippedRules,
       },
       errors: allErrors,
@@ -136,6 +157,7 @@ export const performRuleInstallationHandler = async (
 
     return response.ok({ body });
   } catch (err) {
+    logger.error(`performRuleInstallationHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

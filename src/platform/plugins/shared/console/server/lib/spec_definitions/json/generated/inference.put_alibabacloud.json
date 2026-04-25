@@ -4,13 +4,18 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "url_components": {
       "task_type": [
         "completion",
         "rerank",
-        "space_embedding",
+        "sparse_embedding",
         "text_embedding"
       ]
     },
@@ -21,6 +26,7 @@
       "_inference/{task_type}/{alibabacloud_inference_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-alibabacloud",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-inference-put-alibabacloud",
     "availability": {
       "stack": true,
       "serverless": true

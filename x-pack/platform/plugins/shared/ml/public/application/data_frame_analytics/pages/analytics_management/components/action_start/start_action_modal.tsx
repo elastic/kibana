@@ -8,19 +8,23 @@
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { StartAction } from './use_start_action';
 
 export const StartActionModal: FC<StartAction> = ({ closeModal, item, startAndCloseModal }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <>
       {item !== undefined && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate('xpack.ml.dataframe.analyticsList.startModalTitle', {
             defaultMessage: 'Start {analyticsId}?',
             values: { analyticsId: item.config.id },
           })}
+          titleProps={{ id: modalTitleId }}
           onCancel={closeModal}
           onConfirm={startAndCloseModal}
           cancelButtonText={i18n.translate(

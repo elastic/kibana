@@ -93,6 +93,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             ...config,
             defaultModel: 'gpt-4.1',
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -123,6 +124,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             ...config,
             defaultModel: 'gpt-3.5-turbo',
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -145,8 +147,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]\n- [2.apiProvider]: expected at least one defined value but got [undefined]',
+              message: `error validating connector type config: ✖ Invalid or missing apiProvider: expected one of "Azure OpenAI", "OpenAI", or "Other"\n  → at apiProvider`,
             });
           });
       });
@@ -166,8 +167,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]\n- [2.apiProvider]: expected value to equal [Other]',
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -191,7 +191,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -211,7 +211,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+                'error validating connector type secrets: [apiKey]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -236,7 +236,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Certificate data must be provided for PKI',
+                'error validating connector type secrets: Certificate data must be provided for PKI',
             });
           });
       });
@@ -261,7 +261,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Private key data must be provided for PKI',
+                'error validating connector type secrets: Private key data must be provided for PKI',
             });
           });
       });
@@ -286,7 +286,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Invalid Certificate data file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN CERTIFICATE-----".',
+                'error validating connector type secrets: Invalid Certificate data file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN CERTIFICATE-----".',
             });
           });
       });
@@ -311,7 +311,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----" or "-----BEGIN RSA PRIVATE KEY-----".',
+                'error validating connector type secrets: Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----" or "-----BEGIN RSA PRIVATE KEY-----".',
             });
           });
       });
@@ -383,6 +383,47 @@ export default function genAiTest({ getService }: FtrProviderContext) {
         expect(body.status).to.equal('ok');
         expect(body.connector_id).to.equal(createdAction.id);
       });
+
+      it('should return 200 when creating an Azure connector with defaultModel', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              apiProvider: 'Azure OpenAI',
+              apiUrl: config.apiUrl,
+              defaultModel: 'gpt-4o',
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Azure OpenAI');
+        expect(createdAction.config.defaultModel).to.equal('gpt-4o');
+      });
+
+      it('should return 200 when creating an Azure connector without defaultModel', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              apiProvider: 'Azure OpenAI',
+              apiUrl: config.apiUrl,
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Azure OpenAI');
+        expect(createdAction.config).to.not.have.property('defaultModel');
+      });
     });
 
     describe('executor', () => {
@@ -415,8 +456,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: genAiActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -647,8 +687,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: genAiActionId,
-              message:
-                'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+              message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });
@@ -673,7 +712,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               connector_id: genAiActionId,
               message: 'an error occurred while running the action',
               retry: true,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message:
                 'Status code: 422. Message: API Error: Unprocessable Entity - The model `bad model` does not exist',
             });

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AgentPolicy, DownloadSource, FleetProxy } from '../../types';
+import type {
+  AgentPolicy,
+  DownloadSource,
+  EnrollmentSettingsProxy,
+  FleetServerHost,
+} from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 
@@ -70,6 +75,7 @@ export interface FlyOutProps extends BaseProps {
 export interface InstructionProps extends BaseProps {
   agentPolicies: AgentPolicy[];
   selectedPolicy: AgentPolicy | undefined;
+  selectedPolicyId?: string;
   setSelectedPolicyId: (policyId?: string) => void;
   refreshAgentPolicies: () => void;
   isLoadingAgentPolicies?: boolean;
@@ -81,7 +87,8 @@ export interface InstructionProps extends BaseProps {
   selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
   fleetServerHost: string;
-  fleetProxy?: FleetProxy;
+  fleetServerHostConfig?: FleetServerHost;
+  fleetProxy?: EnrollmentSettingsProxy;
   downloadSource?: DownloadSource;
-  downloadSourceProxy?: FleetProxy;
+  downloadSourceProxy?: EnrollmentSettingsProxy;
 }

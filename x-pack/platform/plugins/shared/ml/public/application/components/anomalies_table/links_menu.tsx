@@ -40,13 +40,13 @@ import {
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 import { isDefined } from '@kbn/ml-is-defined';
 import { escapeQuotes } from '@kbn/es-query';
 import { isQuery } from '@kbn/data-plugin/public';
 
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -63,6 +63,8 @@ import { useMlApi, useMlKibana } from '../../contexts/kibana';
 import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
+import type { FocusTrapProps } from '../../util/create_focus_trap_props';
+import { createFocusTrapProps } from '../../util/create_focus_trap_props';
 
 const LOG_RATE_ANALYSIS_MARGIN_FACTOR = 20;
 const LOG_RATE_ANALYSIS_BASELINE_FACTOR = 15;
@@ -74,10 +76,11 @@ interface LinksMenuProps {
   showViewSeriesLink: boolean;
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
-  showRuleEditorFlyout: (anomaly: MlAnomaliesTableRecord) => void;
+  showRuleEditorFlyout: (anomaly: MlAnomaliesTableRecord, focusTrapProps: FocusTrapProps) => void;
   onItemClick: () => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
   selectedJob?: MlJob;
+  showAnomalyAlertFlyout?: (anomaly: MlAnomaliesTableRecord) => void;
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
@@ -99,6 +102,12 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const isCategorizationAnomalyRecord = isCategorizationAnomaly(props.anomaly);
 
   const closePopover = props.onItemClick;
+  const focusTrapProps = useMemo(() => {
+    const triggerElement = document.getElementById(
+      `mlAnomaliesListRowActionsButton-${props.anomaly.rowId}`
+    );
+    return createFocusTrapProps(triggerElement);
+  }, [props.anomaly.rowId]);
 
   const kibana = useMlKibana();
   const {
@@ -764,8 +773,12 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     }
   };
 
-  const { anomaly, showViewSeriesLink } = props;
-  const [canUpdateJob, canUseAiops] = usePermissionCheck(['canUpdateJob', 'canUseAiops']);
+  const { anomaly, showViewSeriesLink, showAnomalyAlertFlyout } = props;
+  const [canUpdateJob, canCreateMlAlerts, canUseAiops] = usePermissionCheck([
+    'canUpdateJob',
+    'canCreateMlAlerts',
+    'canUseAiops',
+  ]);
   const canConfigureRules = isRuleSupported(anomaly.source) && canUpdateJob;
 
   const contextMenuItems = useMemo(() => {
@@ -775,7 +788,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         items.push(
           <EuiContextMenuItem
             key={`custom_url_${index}`}
-            icon="popout"
+            icon="external"
             onClick={() => {
               closePopover();
               openCustomUrl(customUrl);
@@ -885,7 +898,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="view_examples"
-          icon="popout"
+          icon="external"
           onClick={() => {
             closePopover();
             viewExamples();
@@ -914,16 +927,35 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="create_rule"
-          icon="controlsHorizontal"
+          icon="controls"
           onClick={() => {
             closePopover();
-            props.showRuleEditorFlyout(anomaly);
+            props.showRuleEditorFlyout(anomaly, focusTrapProps);
           }}
           data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
             defaultMessage="Configure job rules"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (showAnomalyAlertFlyout && canCreateMlAlerts) {
+      items.push(
+        <EuiContextMenuItem
+          key="create_alert_rule"
+          icon="bell"
+          onClick={() => {
+            closePopover();
+            showAnomalyAlertFlyout(anomaly);
+          }}
+          data-test-subj="mlAnomaliesListRowActionCreateAlertRuleButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.createAlertRuleLabel"
+            defaultMessage="Create alert rule"
           />
         </EuiContextMenuItem>
       );
@@ -949,11 +981,11 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="run_pattern_analysis"
-          icon="logPatternAnalysis"
+          icon="pattern"
           onClick={() => {
             closePopover();
             const additionalField = getAdditionalField(anomaly);
-            uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec({
+            uiActions.executeTriggerActions(CATEGORIZE_FIELD_TRIGGER, {
               dataView: messageField.dataView,
               field: messageField.field,
               originatingApp: PLUGIN_ID,
@@ -969,6 +1001,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
                     }
                   : {}),
               },
+              focusTrapProps,
             });
           }}
           data-test-subj="mlAnomaliesListRowActionPatternAnalysisButton"
@@ -992,6 +1025,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     viewExamples,
     viewSeries,
     canConfigureRules,
+    canCreateMlAlerts,
     isCategorizationAnomalyRecord,
   ]);
 
@@ -1017,6 +1051,7 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
         values: { time: formatHumanReadableDateTimeSeconds(props.anomaly.time) },
       })}
       data-test-subj="mlAnomaliesListRowActionsButton"
+      id={`mlAnomaliesListRowActionsButton-${props.anomaly.rowId}`}
     />
   );
 
@@ -1028,6 +1063,12 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate(
+          'xpack.ml.anomaliesTable.linksMenu.anomalyLinksMenuPopoverAriaLabel',
+          {
+            defaultMessage: 'Anomaly links menu',
+          }
+        )}
       >
         <LinksMenuUI {...props} onItemClick={closePopover} />
       </EuiPopover>

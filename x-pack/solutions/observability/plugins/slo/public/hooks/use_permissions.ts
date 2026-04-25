@@ -15,13 +15,11 @@ export function usePermissions() {
 
   const { data: globalDiagnosis, isLoading } = useFetchSloGlobalDiagnosis();
 
-  const hasRequiredReadCapabilities = !!capabilities[sloFeatureId].read ?? false;
-  const hasRequiredWriteCapabilities = !!capabilities[sloFeatureId].write ?? false;
+  const hasRequiredReadCapabilities = !!capabilities[sloFeatureId].read;
+  const hasRequiredWriteCapabilities = !!capabilities[sloFeatureId].write;
 
-  const hasRequiredReadPrivileges =
-    !!globalDiagnosis?.userPrivileges.read.has_all_requested ?? false;
-  const hasRequiredWritePrivileges =
-    !!globalDiagnosis?.userPrivileges.write.has_all_requested ?? false;
+  const hasRequiredReadPrivileges = !!globalDiagnosis?.userPrivileges.read.has_all_requested;
+  const hasRequiredWritePrivileges = !!globalDiagnosis?.userPrivileges.write.has_all_requested;
 
   return {
     isLoading,

@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon } from '@elastic/eui';
-import { Ping } from '../../../../../../common/runtime_types/ping';
+import type { Ping } from '../../../../../../common/runtime_types/ping';
 import { PingListExpandedRowComponent } from '../expanded_row';
 
 export const toggleDetails = (
@@ -55,7 +55,7 @@ export const ExpandRowColumn = ({ item, expandedRows, setExpandedRows }: Props) 
             })
           : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
       }
-      iconType={expandedRows[item.docId] ? 'arrowUp' : 'arrowDown'}
+      iconType={expandedRows[item.docId] ? 'chevronSingleUp' : 'chevronSingleDown'}
     />
   );
 };

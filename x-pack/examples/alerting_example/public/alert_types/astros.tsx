@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
 
 export function registerNavigation(alerting: AlertingSetup) {
@@ -139,7 +139,12 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
   return (
     <Fragment>
       {errorsCallout.length ? (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
+        <EuiCallOut
+          announceOnMount
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="warning"
+        >
           {errorsCallout}
         </EuiCallOut>
       ) : (
@@ -149,6 +154,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="craft"
+            aria-label="Select spacecraft"
             button={
               <EuiExpression
                 description="When the People in"
@@ -177,6 +183,12 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
               <EuiPopoverTitle>When the People in</EuiPopoverTitle>
               <EuiSelect
                 compressed
+                aria-label={i18n.translate(
+                  'AlertingExample.peopleInSpaceExpression.craftSelectAriaLabel',
+                  {
+                    defaultMessage: 'Spacecraft',
+                  }
+                )}
                 value={craftTrigger.craft}
                 onChange={(event) => {
                   setRuleParams('craft', event.target.value);
@@ -197,6 +209,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="outerSpaceCapacity"
+            aria-label="Set capacity threshold"
             button={
               <EuiExpression
                 description={outerSpaceCapacityTrigger.op}
@@ -226,6 +239,12 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
                 <EuiFlexItem grow={false} style={{ width: 150 }}>
                   <EuiSelect
                     compressed
+                    aria-label={i18n.translate(
+                      'AlertingExample.peopleInSpaceExpression.operatorSelectAriaLabel',
+                      {
+                        defaultMessage: 'People in space comparison',
+                      }
+                    )}
                     value={outerSpaceCapacityTrigger.op}
                     onChange={(event) => {
                       setRuleParams('op', event.target.value);

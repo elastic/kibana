@@ -21,20 +21,20 @@ describe('Applications deep links', () => {
         cy.getByTestSubj('nav-search-input').should('be.visible').type(keyword, { force: true });
 
         cy.contains('Applications');
-        cy.contains('Applications / Service Inventory');
+        cy.contains('Applications / Service inventory');
         cy.contains('Applications / Service groups');
         // scroll to the center & bottom because results are not rendering otherwise
         scrollToPositionResults('center');
         cy.contains('Applications / Traces');
-        cy.contains('Applications / Service Map');
+        cy.contains('Applications / Service map');
         scrollToPositionResults('bottom');
         cy.contains('Applications / Dependencies');
         cy.contains('Applications / Settings');
       });
 
-      it('navigates to Service Inventory page', () => {
+      it('navigates to Service inventory page', () => {
         cy.visitKibana('/');
-        assertDeepLink(keyword, 'Applications / Service Inventory', '/apm/services');
+        assertDeepLink(keyword, 'Applications / Service inventory', '/apm/services');
       });
 
       it('navigates to Service groups page', () => {
@@ -47,9 +47,9 @@ describe('Applications deep links', () => {
         assertDeepLink(keyword, 'Applications / Traces', '/apm/traces', 'center');
       });
 
-      it('navigates to Service Map page', () => {
+      it('navigates to Service map page', () => {
         cy.visitKibana('/');
-        assertDeepLink(keyword, 'Applications / Service Map', '/apm/service-map', 'center');
+        assertDeepLink(keyword, 'Applications / Service map', '/apm/service-map', 'center');
       });
 
       it('navigates to Dependencies page', () => {

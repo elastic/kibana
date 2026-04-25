@@ -6,8 +6,9 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { elasticsearchServiceMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import {
@@ -15,11 +16,11 @@ import {
   createSummaryTransformManagerMock,
   createTransformManagerMock,
 } from './mocks';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
+import type { SLODefinitionRepository } from './slo_definition_repository';
+import type { TransformManager } from './transform_manager';
 
 describe('DeleteSLO', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
+  let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let mockScopedClusterClient: ScopedClusterClientMock;
@@ -42,7 +43,7 @@ describe('DeleteSLO', () => {
   });
 
   describe('happy path', () => {
-    it('removes all resources associatde to the slo', async () => {
+    it('removes all resources associated to the slo', async () => {
       const slo = createSLO({
         id: 'irrelevant',
         indicator: createAPMTransactionErrorRateIndicator(),

@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/alerting-api-integration-test-plugin",
   "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "alertingApiIntegrationTestPlugin",
     "server": true,

@@ -8,7 +8,7 @@ import CDP from 'chrome-remote-interface';
 import { promises as Fs } from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import getPort from 'get-port';
 import { getNodeProcesses } from './get_node_processes';
@@ -61,35 +61,39 @@ export async function getProfiler({
   log,
   type,
   pid,
+  inspectorPort,
 }: {
   log: ToolingLog;
   type: 'cpu' | 'heap';
   pid: number;
+  inspectorPort: number;
 }): Promise<() => Promise<void>> {
   const port = await getPort({
     host: '127.0.0.1',
-    port: 9229,
+    port: inspectorPort,
   });
 
-  if (port !== 9229) {
+  if (port !== inspectorPort) {
     // Inspector is already running, see if it's attached to the selected process
     await getNodeProcesses()
       .then((processes) => processes.find((process) => process.pid === pid))
       .then((candidate) => {
-        if (!candidate?.ports.includes(9229)) {
+        if (!candidate?.ports.includes(inspectorPort)) {
           throw new InspectorSessionConflictError();
         }
       });
   }
 
-  const client = await CDP({ port: 9229 });
+  const client = await CDP({ port: inspectorPort });
 
-  log.info(`Attached to remote debugger at 9229`);
+  log.info(`Attached to remote debugger at ${inspectorPort}`);
 
   const stop =
     type === 'cpu' ? await getCpuProfiler({ client, log }) : await getHeapProfiler({ client, log });
 
   log.debug(`Started profiling session`);
+
+  await client.Runtime.runIfWaitingForDebugger();
 
   return async () => {
     log.debug(`Stopping profiling session`);

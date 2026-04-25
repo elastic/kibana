@@ -8,5 +8,4 @@
  */
 
 export { CoreAppsService } from './core_app';
-export { URL_MAX_LENGTH } from './errors';
 export type { CoreAppsServiceSetupDeps, CoreAppsServiceStartDeps } from './core_app';

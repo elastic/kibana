@@ -15,7 +15,7 @@ import { TextField, NumericField } from '../../../components';
 import { useForm } from '../../hooks/use_form';
 import { Form } from '../form';
 import { UseField } from '../use_field';
-import { FormArgs } from './types';
+import type { FormArgs } from './types';
 import { submitForm } from './form_utils';
 
 interface MyForm {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
@@ -14,12 +15,13 @@ import { AuthConfig } from '../../../common/auth/auth_config';
 interface Props {
   display: boolean;
   readOnly: boolean;
+  isEdit?: boolean;
 }
 
-export const AuthStep: FunctionComponent<Props> = ({ display, readOnly }) => {
+export const AuthStep: FunctionComponent<Props> = ({ display, readOnly, isEdit }) => {
   return (
     <span data-test-subj="authStep" style={{ display: display ? 'block' : 'none' }}>
-      <AuthConfig readOnly={readOnly} />
+      <AuthConfig readOnly={readOnly} isEdit={isEdit} />
       <EuiSpacer size="s" />
     </span>
   );

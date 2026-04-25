@@ -16,6 +16,7 @@ import type {
   ServiceStatusLevel,
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
+import type { MonitoringBulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { KIBANA_STATS_TYPE_MONITORING, KIBANA_SETTINGS_TYPE } from '../../common/constants';
 
 import { sendBulkPayload } from './lib';
@@ -181,7 +182,10 @@ export class BulkUploader implements IBulkUploader {
     }
   }
 
-  private async _onPayload(esClient: ElasticsearchClient, payload: object[]) {
+  private async _onPayload(
+    esClient: ElasticsearchClient,
+    payload: Required<MonitoringBulkRequest['operations']>
+  ) {
     return await sendBulkPayload(esClient, this._interval, payload);
   }
 
@@ -250,7 +254,9 @@ export class BulkUploader implements IBulkUploader {
    *      }
    *    ]
    */
-  private toBulkUploadFormat(rawData: Array<{ type: string; result: any }>) {
+  private toBulkUploadFormat(
+    rawData: Array<{ type: string; result: any }>
+  ): Required<MonitoringBulkRequest['operations']> {
     // convert the raw data into a flat array, with each payload prefixed
     // with an 'index' instruction, for bulk upload
     return rawData.reduce((accum, { type, result }) => {

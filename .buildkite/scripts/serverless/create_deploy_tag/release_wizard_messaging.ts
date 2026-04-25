@@ -17,7 +17,7 @@ import {
   SELECTED_COMMIT_META_KEY,
   sendSlackMessage,
 } from './shared';
-import { GithubCommitType } from './info_sections/commit_info';
+import type { GithubCommitType } from './info_sections/commit_info';
 import { getUsefulLinks } from './info_sections/useful_links';
 
 const WIZARD_CTX_INSTRUCTION = 'wizard-instruction';

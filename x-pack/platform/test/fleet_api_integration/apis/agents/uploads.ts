@@ -11,7 +11,7 @@ import {
   FILE_STORAGE_DATA_AGENT_INDEX,
   FILE_STORAGE_METADATA_AGENT_INDEX,
 } from '@kbn/fleet-plugin/server/constants';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -158,13 +158,13 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
       await cleanupFiles();
     });
     after(async () => {
       await Promise.all([
-        esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server'),
+        esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'),
         cleanupFiles(),
       ]);
     });

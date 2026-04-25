@@ -20,7 +20,7 @@ export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment, kuery, comparisonEnabled },
+    query: { environment, kuery, comparisonEnabled, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/errors');
 
   const { errorDistributionData, errorDistributionStatus } = useErrorGroupDistributionFetcher({
@@ -29,6 +29,11 @@ export function ErrorGroupOverview() {
     environment,
     kuery,
   });
+
+  const headerTitle = i18n.translate(
+    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+    { defaultMessage: 'Error occurrences' }
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -40,10 +45,19 @@ export function ErrorGroupOverview() {
                 <ErrorDistribution
                   fetchStatus={errorDistributionStatus}
                   distribution={errorDistributionData}
-                  title={i18n.translate(
-                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
-                    { defaultMessage: 'Error occurrences' }
-                  )}
+                  title={headerTitle}
+                  discoverParams={{
+                    label: i18n.translate('xpack.apm.errorGroupOverview.openErrorsInDiscover', {
+                      defaultMessage: 'Open errors in Discover',
+                    }),
+                    rangeFrom,
+                    rangeTo,
+                    queryParams: {
+                      kuery,
+                      serviceName,
+                      sortDirection: 'DESC',
+                    },
+                  }}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -69,6 +83,7 @@ export function ErrorGroupOverview() {
             serviceName={serviceName}
             comparisonEnabled={comparisonEnabled}
             initialPageSize={10}
+            tableCaption={headerTitle}
           />
         </EuiPanel>
       </EuiFlexItem>

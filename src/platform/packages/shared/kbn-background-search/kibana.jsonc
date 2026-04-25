@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/background-search",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

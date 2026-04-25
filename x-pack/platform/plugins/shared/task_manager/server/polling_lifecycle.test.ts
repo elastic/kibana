@@ -25,10 +25,12 @@ import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
-import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
+import type { TaskEventLogger } from './task';
+import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
+import { EsApiKeyStrategy } from './api_key_strategy';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -56,6 +58,8 @@ interface EsError extends Error {
   };
 }
 
+const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
+
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
   const taskManagerLogger = mockLogger();
@@ -67,6 +71,10 @@ describe('TaskPollingLifecycle', () => {
         interval: 10000,
       },
       kibanas_per_partition: 2,
+      invalidate_api_key_task: {
+        interval: '5m',
+        removalDelay: '1h',
+      },
       enabled: true,
       index: 'foo',
       max_attempts: 9,
@@ -104,6 +112,8 @@ describe('TaskPollingLifecycle', () => {
         update_by_query: 1000,
       },
       auto_calculate_default_ech_capacity: false,
+      api_key_type: ApiKeyType.ES,
+      grant_uiam_api_keys: false,
     },
     basePathService: httpServiceMock.createBasePath(),
     taskStore: mockTaskStore,
@@ -118,6 +128,8 @@ describe('TaskPollingLifecycle', () => {
       kibanaDiscoveryService: {} as KibanaDiscoveryService,
       kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
     }),
+    apiKeyStrategy: new EsApiKeyStrategy(),
+    eventLogger: eventLoggerMock,
   };
 
   beforeEach(() => {

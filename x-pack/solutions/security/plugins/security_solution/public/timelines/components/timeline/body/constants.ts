@@ -8,9 +8,6 @@
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
 
-/** The minimum width of a resized column */
-export const RESIZED_COLUMN_MIN_WITH = 70; // px
-
 /** The default minimum width of a column of type `date` */
 export const DEFAULT_DATE_COLUMN_MIN_WIDTH = 190; // px
 

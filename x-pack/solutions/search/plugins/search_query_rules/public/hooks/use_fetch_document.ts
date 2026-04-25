@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import { useQuery } from '@kbn/react-query';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from './use_kibana';
-import { SearchQueryDocumentResponse } from '../types';
+import type { SearchQueryDocumentResponse } from '../types';
 
 export const useFetchDocument = (indexName: string, documentId: string) => {
   const {

@@ -6,23 +6,26 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import { LogSourcesService } from '../../../common/types';
-import { RegisterServicesParams } from '../register_services';
-import { LogDataService } from './types';
+import type { LogSourcesService } from '../../../common/types';
+import type { RegisterServicesParams } from '../register_services';
+import type { LogDataService } from './types';
 
 export function createLogDataService(
   params: RegisterServicesParams & { logSourcesService: LogSourcesService }
 ): LogDataService {
   const { logSourcesService, deps } = params;
 
-  async function getStatus() {
+  async function getStatus(opts?: { excludeIndices?: string[] }) {
+    const excludeLogSourcesIndex = (opts?.excludeIndices ?? [])
+      .map((index) => `-${index}`)
+      .join(',');
     const logSourcesIndex = await logSourcesService.getFlattenedLogSources();
     const status = await lastValueFrom(
       deps.search.search({
         params: {
           ignore_unavailable: true,
           allow_no_indices: true,
-          index: logSourcesIndex,
+          index: [logSourcesIndex, excludeLogSourcesIndex].join(','),
           size: 0,
           terminate_after: 1,
           track_total_hits: 1,

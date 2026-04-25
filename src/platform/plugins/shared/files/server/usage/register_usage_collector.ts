@@ -9,7 +9,8 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FileServiceStart } from '../file_service';
-import { filesSchema, FileKindUsageSchema } from './schema';
+import type { FileKindUsageSchema } from './schema';
+import { filesSchema } from './schema';
 interface Args {
   usageCollection?: UsageCollectionSetup;
   getFileService: () => undefined | FileServiceStart;

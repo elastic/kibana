@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
@@ -17,13 +17,14 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 
-import { Pipeline } from '../../../../common/types';
-import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_imports';
+import type { Pipeline } from '../../../../common/types';
+import { useKibana, SectionLoading } from '../../../shared_imports';
 
 import { getListPath } from '../../services/navigation';
 import { PipelineForm } from '../../components';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
 import { getErrorText } from '../utils';
+import { normalizePipelineNameFromParams } from '../../lib/normalize_pipeline_name_from_params';
 
 interface MatchParams {
   name: string;
@@ -79,7 +80,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
   const [saveError, setSaveError] = useState<any>(null);
   const redirectToPathOrRedirectPath = useRedirectToPathOrRedirectPath(history);
 
-  const decodedPipelineName = attemptToURIDecode(name)!;
+  const decodedPipelineName = normalizePipelineNameFromParams(name) ?? '';
 
   const {
     error,

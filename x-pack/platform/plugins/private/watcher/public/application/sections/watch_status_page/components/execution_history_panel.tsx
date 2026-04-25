@@ -8,7 +8,7 @@
 import React, { Fragment, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
 import {
   EuiCodeBlock,
@@ -28,7 +28,8 @@ import {
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
-import { ActionStateBadge, WatchStateBadge, SectionError, Error } from '../../../components';
+import type { Error } from '../../../components';
+import { ActionStateBadge, WatchStateBadge, SectionError } from '../../../components';
 import { useLoadWatchHistory, useLoadWatchHistoryDetail } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 
@@ -151,7 +152,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
@@ -174,7 +175,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
               defaultMessage: 'Condition met',
             })}{' '}
@@ -207,7 +208,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
               defaultMessage: 'Comment',
             })}{' '}
@@ -283,7 +284,7 @@ export const ExecutionHistoryPanel = () => {
                 }
               )}
             >
-              <span>
+              <span tabIndex={0}>
                 {i18n.translate(
                   'xpack.watcher.sections.watchHistory.watchActionStatusTable.state',
                   {
@@ -329,10 +330,17 @@ export const ExecutionHistoryPanel = () => {
               </h4>
             </EuiTitle>
             <EuiInMemoryTable
+              tableCaption={i18n.translate(
+                'xpack.watcher.sections.watchHistory.watchHistoryDetail.actionsTableCaption',
+                {
+                  defaultMessage: 'Action statuses for execution on {date}',
+                  values: { date: watchHistoryDetails.startTime?.format() },
+                }
+              )}
               items={(watchHistoryDetails.watchStatus as any).actionStatuses}
               itemId="id"
               columns={detailColumns}
-              message={
+              noItemsMessage={
                 <FormattedMessage
                   id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
                   defaultMessage="No current status to show"
@@ -378,13 +386,16 @@ export const ExecutionHistoryPanel = () => {
       <EuiSpacer size="s" />
 
       <EuiInMemoryTable
+        tableCaption={i18n.translate('xpack.watcher.sections.watchHistory.watchTable.caption', {
+          defaultMessage: 'Watch execution history',
+        })}
         items={history || []}
         columns={columns}
         pagination={PAGINATION}
         sorting={true}
         loading={isLoading}
         data-test-subj="watchHistoryTable"
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.watcher.sections.watchHistory.watchTable.noCurrentStatus"
             defaultMessage="No execution history to show"

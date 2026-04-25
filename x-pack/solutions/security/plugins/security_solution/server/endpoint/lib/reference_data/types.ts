@@ -5,17 +5,15 @@
  * 2.0.
  */
 
+import type { REF_DATA_KEYS } from './constants';
+
 /** A union of all valid `owner` values for reference data entries */
 export type ReferenceDataOwner = 'EDR';
 
 /**
  * List of allowed `key`'s of reference data items.
- * Use the `REF_DATA_KEYS` object from `./constants` to reference these in code.
  */
-export type ReferenceDataItemKey =
-  | 'SPACE-AWARENESS-ARTIFACT-MIGRATION'
-  | 'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION'
-  | 'ORPHAN-RESPONSE-ACTIONS-SPACE';
+export type ReferenceDataItemKey = (typeof REF_DATA_KEYS)[keyof typeof REF_DATA_KEYS];
 
 export interface ReferenceDataSavedObject<Meta extends object = {}> {
   id: ReferenceDataItemKey;
@@ -41,9 +39,23 @@ export interface MigrationMetadata {
   started: string;
   finished: string;
   status: 'not-started' | 'complete' | 'pending';
+  /**
+   * Any data that needs to be persisted with the migration
+   */
   data?: unknown;
+  /**
+   * Version may be helpful in cases where the migration code might have had issues and we need to re-run it
+   */
+  version?: number;
 }
 
 export interface OrphanResponseActionsMetadata {
   spaceId: string;
+}
+
+export interface OptInStatusMetadata {
+  status: boolean;
+  reason?: 'newDeployment' | 'userOptedIn';
+  user?: string;
+  timestamp?: string;
 }

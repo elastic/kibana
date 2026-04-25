@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getIpRangeQuery, getIpSegments, getMinMaxIp } from './ip_search';
+import {
+  getIpRangeQuery,
+  getIpSegments,
+  getMinMaxIp,
+  getIsCidrNotation,
+  getValidCidrRange,
+} from './ip_search';
 
 describe('test IP search functionality', () => {
   test('get IP segments', () => {
@@ -39,6 +45,45 @@ describe('test IP search functionality', () => {
       min: 'a:b:c:d:e:f:g::',
       max: 'a:b:c:d:e:f:g:ffff',
     });
+  });
+
+  test('detect CIDR notation', () => {
+    // Valid CIDR notation
+    expect(getIsCidrNotation('192.168.1.0/24')).toBe(true);
+    expect(getIsCidrNotation('10.0.0.0/8')).toBe(true);
+    expect(getIsCidrNotation('172.16.0.0/12')).toBe(true);
+    expect(getIsCidrNotation('2001:db8::/32')).toBe(true);
+    expect(getIsCidrNotation('fe80::/10')).toBe(true);
+    expect(getIsCidrNotation('::1/128')).toBe(true);
+
+    // Invalid CIDR notation
+    expect(getIsCidrNotation('192.168.1.0')).toBe(false);
+    expect(getIsCidrNotation('192.168.1.0/')).toBe(false);
+    expect(getIsCidrNotation('/24')).toBe(false);
+    expect(getIsCidrNotation('192.168.1')).toBe(false);
+    expect(getIsCidrNotation('test/24')).toBe(false);
+  });
+
+  test('validate CIDR range', () => {
+    // Valid IPv4 CIDR
+    expect(getValidCidrRange('192.168.1.0/24')).toStrictEqual({ isValid: true, ipType: 'ipv4' });
+    expect(getValidCidrRange('10.0.0.0/8')).toStrictEqual({ isValid: true, ipType: 'ipv4' });
+    expect(getValidCidrRange('0.0.0.0/0')).toStrictEqual({ isValid: true, ipType: 'ipv4' });
+    expect(getValidCidrRange('192.168.1.1/32')).toStrictEqual({ isValid: true, ipType: 'ipv4' });
+
+    // Valid IPv6 CIDR
+    expect(getValidCidrRange('2001:db8::/32')).toStrictEqual({ isValid: true, ipType: 'ipv6' });
+    expect(getValidCidrRange('fe80::/10')).toStrictEqual({ isValid: true, ipType: 'ipv6' });
+    expect(getValidCidrRange('::1/128')).toStrictEqual({ isValid: true, ipType: 'ipv6' });
+    expect(getValidCidrRange('::/0')).toStrictEqual({ isValid: true, ipType: 'ipv6' });
+
+    // Invalid CIDR - prefix length out of range
+    expect(getValidCidrRange('192.168.1.0/33')).toStrictEqual({ isValid: false });
+    expect(getValidCidrRange('2001:db8::/129')).toStrictEqual({ isValid: false });
+
+    // Invalid CIDR - malformed
+    expect(getValidCidrRange('192.168.1/24')).toStrictEqual({ isValid: false });
+    expect(getValidCidrRange('not-an-ip/24')).toStrictEqual({ isValid: false });
   });
 
   test('get IP range query', () => {
@@ -125,6 +170,43 @@ describe('test IP search functionality', () => {
       key: 'ipv6',
       from: '123::',
       to: '123:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+    });
+  });
+
+  test('CIDR notation searches - IPv4', () => {
+    expect(getIpRangeQuery('192.168.1.0/24')).toStrictEqual({
+      validSearch: true,
+      rangeQuery: [{ key: 'ipv4', mask: '192.168.1.0/24' }],
+    });
+    expect(getIpRangeQuery('10.0.0.0/8')).toStrictEqual({
+      validSearch: true,
+      rangeQuery: [{ key: 'ipv4', mask: '10.0.0.0/8' }],
+    });
+    expect(getIpRangeQuery('0.0.0.0/0')).toStrictEqual({
+      validSearch: true,
+      rangeQuery: [{ key: 'ipv4', mask: '0.0.0.0/0' }],
+    });
+  });
+
+  test('CIDR notation searches - IPv6', () => {
+    expect(getIpRangeQuery('2001:db8::/32')).toStrictEqual({
+      validSearch: true,
+      rangeQuery: [{ key: 'ipv6', mask: '2001:db8::/32' }],
+    });
+    expect(getIpRangeQuery('fe80::/10')).toStrictEqual({
+      validSearch: true,
+      rangeQuery: [{ key: 'ipv6', mask: 'fe80::/10' }],
+    });
+  });
+
+  test('Invalid CIDR notation searches', () => {
+    expect(getIpRangeQuery('192.168.1.0/33')).toStrictEqual({
+      validSearch: false,
+      rangeQuery: undefined,
+    });
+    expect(getIpRangeQuery('192.168.1/24')).toStrictEqual({
+      validSearch: false,
+      rangeQuery: undefined,
     });
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { pipe } from 'fp-ts/pipeable';
-import { TaskEither } from 'fp-ts/TaskEither';
+import type { TaskEither } from 'fp-ts/TaskEither';
 import { fold } from 'fp-ts/Either';
 
 // TODO: This is copied in a few other spots and probably should live within its own kbn package

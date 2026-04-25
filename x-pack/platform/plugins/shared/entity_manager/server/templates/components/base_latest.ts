@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1 } from '../../../common/constants_entities';
 
 export const entitiesLatestBaseComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
@@ -18,6 +18,11 @@ export const entitiesLatestBaseComponentTemplateConfig: ClusterPutComponentTempl
     managed: true,
   },
   template: {
+    settings: {
+      index: {
+        mode: 'lookup',
+      },
+    },
     mappings: {
       properties: {
         entity: {

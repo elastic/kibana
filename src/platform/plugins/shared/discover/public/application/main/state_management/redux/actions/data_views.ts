@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { differenceBy } from 'lodash';
-import {
-  internalStateSlice,
-  type TabActionPayload,
-  type InternalStateThunkActionCreator,
-} from '../internal_state';
-import { selectTabRuntimeState } from '../runtime_state';
+import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
 import { createInternalStateAsyncThunk } from '../utils';
 
 export const loadDataViewList = createInternalStateAsyncThunk(
@@ -22,30 +17,15 @@ export const loadDataViewList = createInternalStateAsyncThunk(
   async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
 );
 
-export const setDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
-> =
-  ({ tabId, dataView }) =>
-  (dispatch, _, { runtimeStateManager }) => {
-    dispatch(
-      internalStateSlice.actions.setDataViewId({
-        tabId,
-        dataViewId: dataView.id,
-      })
-    );
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    currentDataView$.next(dataView);
-  };
-
-export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> =
-  (adHocDataViews) =>
-  (_, __, { runtimeStateManager }) => {
+export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> = (adHocDataViews) =>
+  function setAdHocDataViewsThunkFn(_, __, { runtimeStateManager }) {
     runtimeStateManager.adHocDataViews$.next(adHocDataViews);
   };
 
-export const setDefaultProfileAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> =
-  (defaultProfileAdHocDataViews) =>
-  (dispatch, getState, { runtimeStateManager }) => {
+export const setDefaultProfileAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> = (
+  defaultProfileAdHocDataViews
+) =>
+  function setDefaultProfileAdHocDataViewsThunkFn(dispatch, getState, { runtimeStateManager }) {
     const prevAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
     const prevState = getState();
 
@@ -63,9 +43,10 @@ export const setDefaultProfileAdHocDataViews: InternalStateThunkActionCreator<[D
     );
   };
 
-export const appendAdHocDataViews: InternalStateThunkActionCreator<[DataView | DataView[]]> =
-  (dataViewsAdHoc) =>
-  (dispatch, _, { runtimeStateManager }) => {
+export const appendAdHocDataViews: InternalStateThunkActionCreator<[DataView | DataView[]]> = (
+  dataViewsAdHoc
+) =>
+  function appendAdHocDataViewsThunkFn(dispatch, _, { runtimeStateManager }) {
     const prevAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
     const newDataViews = Array.isArray(dataViewsAdHoc) ? dataViewsAdHoc : [dataViewsAdHoc];
     const existingDataViews = differenceBy(prevAdHocDataViews, newDataViews, 'id');
@@ -73,9 +54,11 @@ export const appendAdHocDataViews: InternalStateThunkActionCreator<[DataView | D
     dispatch(setAdHocDataViews(existingDataViews.concat(newDataViews)));
   };
 
-export const replaceAdHocDataViewWithId: InternalStateThunkActionCreator<[string, DataView]> =
-  (prevId, newDataView) =>
-  (dispatch, getState, { runtimeStateManager }) => {
+export const replaceAdHocDataViewWithId: InternalStateThunkActionCreator<[string, DataView]> = (
+  prevId,
+  newDataView
+) =>
+  function replaceAdHocDataViewWithIdThunkFn(dispatch, getState, { runtimeStateManager }) {
     const prevAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
     let defaultProfileAdHocDataViewIds = getState().defaultProfileAdHocDataViewIds;
 

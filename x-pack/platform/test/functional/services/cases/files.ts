@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function CasesFilesTableServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const common = getPageObject('common');
@@ -28,6 +28,9 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
       // upload a file
       await common.setFileInputPath(fileInputPath);
       await testSubjects.click('uploadButton');
+
+      // hide the upload notification
+      await (await find.byCssSelector('[data-test-subj="toastCloseButton"]')).click();
     },
 
     async searchByFileName(fileName: string) {

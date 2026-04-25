@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IndicatorType } from '@kbn/slo-schema';
+import type { IndicatorType } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import deepmerge from 'deepmerge';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useFetchApmIndex } from '../../../hooks/use_fetch_apm_indices';
+import { useFetchApmIndices } from '../../../hooks/use_fetch_apm_indices';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
   APM_LATENCY_DEFAULT_VALUES,
@@ -22,7 +22,7 @@ import {
   SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY,
   TIMESLICE_METRIC_DEFAULT_VALUES,
 } from '../constants';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 
 /**
  * This hook handles the unregistration of inputs when selecting another SLI indicator.
@@ -30,7 +30,9 @@ import { CreateSLOForm } from '../types';
  * which was unmounting the components and therefore unregistering the associated values.
  */
 export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
-  const { data: apmIndex } = useFetchApmIndex();
+  const {
+    data: { metric: apmIndex },
+  } = useFetchApmIndices();
   const { watch, unregister, reset, resetField } = useFormContext<CreateSLOForm>();
   const [indicatorTypeState, setIndicatorTypeState] = useState<IndicatorType>(
     watch('indicator.type')

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Flags } from '@kbn/dev-cli-runner';
+import type { Flags } from '@kbn/dev-cli-runner';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
-import { Logger } from '@kbn/core/server';
-import { LogLevelId, LogMessageSource } from '@kbn/logging';
+import type { Logger } from '@kbn/core/server';
+import type { LogLevelId, LogMessageSource } from '@kbn/logging';
 
 export function toolingLogToLogger({ flags, log }: { flags: Flags; log: ToolingLog }): Logger {
   const toolingLogLevels = {

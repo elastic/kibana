@@ -193,117 +193,6 @@ export const FleetNoneIntegrAllUser: User = {
   roles: [FleetNoneIntegrAllRole.name],
 };
 
-export const getIntegrationsAutoImportRole = (feature: FeaturesPrivileges): Role => ({
-  name: 'automatic_import_integrations_read_role',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-      cluster: ['manage_service_account'],
-    },
-    kibana: [
-      {
-        feature,
-        spaces: ['*'],
-      },
-    ],
-  },
-});
-
-export const AutomaticImportConnectorNoneRole: Role = {
-  name: 'automatic_import_connectors_none_role',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-      cluster: ['manage_service_account'],
-    },
-    kibana: [
-      {
-        feature: {
-          fleetv2: ['all'],
-          fleet: ['all'],
-          actions: ['none'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-export const AutomaticImportConnectorNoneUser: User = {
-  username: 'automatic_import_connectors_none_user',
-  password: 'password',
-  roles: [AutomaticImportConnectorNoneRole.name],
-};
-
-export const AutomaticImportConnectorReadRole: Role = {
-  name: 'automatic_import_connectors_read_role',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-      cluster: ['manage_service_account'],
-    },
-    kibana: [
-      {
-        feature: {
-          fleetv2: ['all'],
-          fleet: ['all'],
-          actions: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-export const AutomaticImportConnectorReadUser: User = {
-  username: 'automatic_import_connectors_read_user',
-  password: 'password',
-  roles: [AutomaticImportConnectorReadRole.name],
-};
-
-export const AutomaticImportConnectorAllRole: Role = {
-  name: 'automatic_import_connectors_all_role',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-      cluster: ['manage_service_account'],
-    },
-    kibana: [
-      {
-        feature: {
-          fleetv2: ['all'],
-          fleet: ['all'],
-          actions: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-export const AutomaticImportConnectorAllUser: User = {
-  username: 'automatic_import_connectors_all_user',
-  password: 'password',
-  roles: [AutomaticImportConnectorAllRole.name],
-};
-
 export const BuiltInEditorUser: User = {
   username: 'editor_user',
   password: 'password',
@@ -358,7 +247,7 @@ export const deleteRoles = (roles: Role[]) => {
 };
 
 // This function can also be used to create users with built-in roles
-// see https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-roles.html
+// see https://www.elastic.co/docs/reference/elasticsearch/roles
 export const createUsers = (users: User[]) => {
   const envUser = getEnvAuth();
 

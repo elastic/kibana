@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { PublishingSubject } from '../publishing_subject';
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
+import type { PublishingSubject } from '../publishing_subject';
 
 /** ------------------------------------------------------------------------------------------
  * Performance Tracking Types

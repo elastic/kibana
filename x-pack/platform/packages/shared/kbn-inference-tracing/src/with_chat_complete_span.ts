@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import {
+import type {
   AssistantMessage,
   ChatCompleteCompositeResponse,
   Message,
-  MessageRole,
   Model,
   ToolCall,
   ToolChoice,
   ToolDefinition,
   ToolMessage,
+  UnvalidatedToolCall,
   UserMessage,
+} from '@kbn/inference-common';
+import {
+  MessageRole,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
-import { Span } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
-import { withInferenceSpan } from './with_inference_span';
-import {
+import { withActiveInferenceSpan } from './with_active_inference_span';
+import type {
   AssistantMessageEvent,
   ChoiceEvent,
-  ElasticGenAIAttributes,
   GenAISemConvAttributes,
-  GenAISemanticConventions,
   MessageEvent,
   SystemMessageEvent,
   ToolMessageEvent,
   UserMessageEvent,
 } from './types';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from './types';
 import { flattenAttributes } from './util/flatten_attributes';
 
 function addEvent(span: Span, event: MessageEvent) {
@@ -49,7 +51,10 @@ function addEvent(span: Span, event: MessageEvent) {
 
 export function setChoice(
   span: Span,
-  { content, toolCalls }: { content: string; toolCalls: ToolCall[] }
+  {
+    content,
+    toolCalls,
+  }: { content: string; toolCalls: Array<ToolCall> | Array<UnvalidatedToolCall> }
 ) {
   addEvent(span, {
     name: GenAISemanticConventions.GenAIChoice,
@@ -74,6 +79,15 @@ function setTokens(
     [GenAISemanticConventions.GenAIUsageInputTokens]: prompt,
     [GenAISemanticConventions.GenAIUsageOutputTokens]: completion,
     [GenAISemanticConventions.GenAIUsageCachedInputTokens]: cached ?? 0,
+  } satisfies GenAISemConvAttributes);
+}
+
+function setResponseModel(span: Span, { modelName }: { modelName?: string }) {
+  if (!span.isRecording()) {
+    return;
+  }
+  span.setAttributes({
+    [GenAISemanticConventions.GenAIResponseModel]: modelName ?? 'unknown',
   } satisfies GenAISemConvAttributes);
 }
 
@@ -123,7 +137,7 @@ function mapAssistantResponse({
   toolCalls,
 }: {
   content?: string | null;
-  toolCalls?: ToolCall[];
+  toolCalls?: Array<ToolCall> | Array<UnvalidatedToolCall>;
 }) {
   return {
     content: content || null,
@@ -132,9 +146,10 @@ function mapAssistantResponse({
       return {
         function: {
           name: toolCall.function.name,
-          arguments: JSON.stringify(
-            'arguments' in toolCall.function ? toolCall.function.arguments : {}
-          ),
+          arguments:
+            typeof toolCall.function.arguments === 'string'
+              ? toolCall.function.arguments
+              : JSON.stringify(toolCall.function.arguments),
         },
         id: toolCall.toolCallId,
         type: 'function' as const,
@@ -144,7 +159,7 @@ function mapAssistantResponse({
 }
 
 /**
- * Wrapper around {@link withInferenceSpan} that sets the right attributes for a chat operation span.
+ * Wrapper around {@link withActiveInferenceSpan} that sets the right attributes for a chat operation span.
  * @param options
  * @param cb
  */
@@ -159,16 +174,22 @@ export function withChatCompleteSpan(
 ): ChatCompleteCompositeResponse {
   const { system, messages, model, toolChoice, tools, ...attributes } = options;
 
-  const next = withInferenceSpan(
+  const modelProvider = model?.provider ?? 'unknown';
+  const modelId = model?.id ?? model?.family ?? 'unknown';
+
+  const next = withActiveInferenceSpan(
+    'ChatComplete',
     {
-      name: 'chatComplete',
-      ...attributes,
-      [GenAISemanticConventions.GenAIOperationName]: 'chat',
-      [GenAISemanticConventions.GenAIResponseModel]: model?.family ?? 'unknown',
-      [GenAISemanticConventions.GenAISystem]: model?.provider ?? 'unknown',
-      [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
-      [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
-      [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+      attributes: {
+        ...attributes,
+        [GenAISemanticConventions.GenAIOperationName]: 'chat',
+        [GenAISemanticConventions.GenAIRequestModel]: modelId,
+        [GenAISemanticConventions.GenAISystem]: modelProvider,
+        [GenAISemanticConventions.GenAIProviderName]: modelProvider,
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
+        [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
+        [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+      },
     },
     (span) => {
       if (!span) {
@@ -215,6 +236,7 @@ export function withChatCompleteSpan(
                 });
               } else if (isChatCompletionTokenCountEvent(value)) {
                 setTokens(span, value.tokens);
+                setResponseModel(span, { modelName: value.model });
               }
             },
           })
@@ -230,6 +252,7 @@ export function withChatCompleteSpan(
           if (value.tokens) {
             setTokens(span, value.tokens);
           }
+
           return value;
         });
       }

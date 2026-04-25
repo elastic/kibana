@@ -48,7 +48,9 @@ export function checkObjectForFunctionProperty(object: unknown): boolean {
   */
 export function normalizeObject(object: unknown) {
   if (checkObjectForFunctionProperty(object)) {
-    throw new Error('a function cannot be used as a property name');
+    throw new Error('Object normalization error', {
+      cause: 'A function cannot be used as a property name',
+    });
   }
   const normalizedObject = object ? JSON.parse(JSON.stringify(object)) : null;
   ensureNoUnsafeProperties(normalizedObject);

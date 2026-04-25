@@ -10,7 +10,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
-import { RowHeightSettings, RowHeightSettingsProps } from '../..';
+import type { RowHeightSettingsProps } from '../..';
+import { RowHeightSettings } from '../..';
 
 const renderRowHeightSettings = ({
   maxRowHeight,

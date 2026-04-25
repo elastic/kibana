@@ -7,11 +7,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { SlmPolicyPayload } from '../../../../common/types';
-import { SectionError, Error, PageError } from '../../../shared_imports';
+import type { SlmPolicyPayload } from '../../../../common/types';
+import type { Error } from '../../../shared_imports';
+import { SectionError, PageError } from '../../../shared_imports';
 import { useDecodedParams } from '../../lib';
 import { TIME_UNITS } from '../../../../common/constants';
 import { PageLoading, PolicyForm } from '../../components';
@@ -211,6 +212,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
       {policy.isManagedPolicy ? (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             iconType="info"

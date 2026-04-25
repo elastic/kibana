@@ -163,7 +163,7 @@ export class FollowerIndicesTable extends PureComponent {
         name: actionI18nTexts.unfollow,
         description: actionI18nTexts.unfollow,
         onClick: (item) => actionHandlers.unfollowLeaderIndex(item.name),
-        icon: 'indexFlush',
+        icon: 'chartThreshold',
         'data-test-subj': 'unfollowButton',
       },
     ];
@@ -296,7 +296,7 @@ export class FollowerIndicesTable extends PureComponent {
         <EuiButton
           {...reactRouterNavigate(routing._reactRouter.history, `/follower_indices/add`)}
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="createFollowerIndexButton"
         >
           <FormattedMessage
@@ -319,6 +319,12 @@ export class FollowerIndicesTable extends PureComponent {
           return (
             <>
               <EuiInMemoryTable
+                tableCaption={i18n.translate(
+                  'xpack.crossClusterReplication.followerIndexList.table.tableCaption',
+                  {
+                    defaultMessage: 'List of follower indices',
+                  }
+                )}
                 items={filteredIndices}
                 itemId="name"
                 columns={this.getTableColumns(actionHandlers)}

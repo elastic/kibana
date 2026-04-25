@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const find = getService('find');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'dashboard']);
 
   describe('overview page - page header', function describeIndexTests() {
@@ -38,12 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on integrations leads to integrations', async () => {
-      const header = await find.byCssSelector('.euiPageHeaderContent');
-      const items = await header.findAllByTestSubject('kbnRedirectAppLink');
-      expect(items!.length).to.be(3);
-
-      const integrations = await items!.at(2);
-      await integrations!.click();
+      await testSubjects.click('homeAddData');
       await PageObjects.common.waitUntilUrlIncludes('app/integrations/browse');
     });
 
@@ -51,11 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const header = await find.byCssSelector('.euiPageHeaderContent');
-      const items = await header.findAllByTestSubject('kbnRedirectAppLink');
-
-      const management = await items!.at(1);
-      await management!.click();
+      await testSubjects.click('homeManage');
       await PageObjects.common.waitUntilUrlIncludes('app/management');
     });
 
@@ -63,11 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const header = await find.byCssSelector('.euiPageHeaderContent');
-      const items = await header.findAllByTestSubject('kbnRedirectAppLink');
-
-      const devTools = await items!.at(0);
-      await devTools!.click();
+      await testSubjects.click('homeDevTools');
       await PageObjects.common.waitUntilUrlIncludes('app/dev_tools');
     });
   });

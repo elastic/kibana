@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
-import { FeaturesService } from '../../common/services';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import type { FeaturesService } from '../../common/services';
+import type { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UnreachableError } from '../../common/lib';
 import { SpaceScenarios } from '../scenarios';
 

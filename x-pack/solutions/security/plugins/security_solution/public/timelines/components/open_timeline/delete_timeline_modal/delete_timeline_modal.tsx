@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
@@ -46,8 +46,13 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
       />
     );
   }, [title]);
+
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       cancelButtonText={i18n.CANCEL}
       confirmButtonText={i18n.DELETE}

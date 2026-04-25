@@ -39,7 +39,25 @@ describe('createSearchItems', () => {
         },
         grid: {},
         hideChart: false,
+        hideTable: false,
         isTextBasedQuery: false,
+        tabs: [
+          {
+            id: 'tab_0',
+            label: 'label_0',
+            attributes: {
+              columns: ['_source'],
+              sort: [],
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: '',
+              },
+              grid: {},
+              hideChart: false,
+              hideTable: false,
+              isTextBasedQuery: false,
+            },
+          },
+        ],
       },
       [],
       {

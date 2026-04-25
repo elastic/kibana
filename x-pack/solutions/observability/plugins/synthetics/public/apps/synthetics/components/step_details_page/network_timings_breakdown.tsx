@@ -11,7 +11,7 @@ import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMonitorQueryFilters } from '../monitor_details/hooks/use_monitor_query_filters';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 
 export const NetworkTimingsBreakdown = ({ monitorQueryId }: { monitorQueryId: string }) => {

@@ -300,6 +300,10 @@ describe('policy details: ', () => {
                       supported: false,
                       reputation_service: false,
                     },
+                    device_control: {
+                      enabled: false,
+                      usb_storage: 'audit',
+                    },
                     ransomware: { mode: 'off', supported: false },
                     attack_surface_reduction: {
                       credential_hardening: {
@@ -323,6 +327,10 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                      device_control: {
+                        enabled: false,
+                        message: '',
+                      },
                     },
                     logging: { file: 'info' },
                     antivirus_registration: {
@@ -338,10 +346,19 @@ describe('policy details: ', () => {
                       supported: false,
                       reputation_service: false,
                     },
+                    device_control: {
+                      enabled: false,
+                      usb_storage: 'audit',
+                    },
                     memory_protection: { mode: 'off', supported: false },
+                    ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      ransomware: {
+                        enabled: false,
                         message: '',
                       },
                       behavior_protection: {
@@ -349,6 +366,10 @@ describe('policy details: ', () => {
                         message: '',
                       },
                       memory_protection: {
+                        enabled: false,
+                        message: '',
+                      },
+                      device_control: {
                         enabled: false,
                         message: '',
                       },
@@ -361,8 +382,9 @@ describe('policy details: ', () => {
                   },
                   linux: {
                     events: {
-                      process: true,
+                      dns: true,
                       file: true,
+                      process: true,
                       network: true,
                       session_data: false,
                       tty_io: false,

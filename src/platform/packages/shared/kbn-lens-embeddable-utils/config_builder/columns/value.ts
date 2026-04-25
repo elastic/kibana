@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 export function getValueColumn(
   id: string,
   fieldName?: string,
-  type?: DatatableColumnType
+  type?: DatatableColumnType,
+  format?: NonNullable<TextBasedLayerColumn['params']>['format']
 ): TextBasedLayerColumn {
   return {
     columnId: id,
     fieldName: fieldName || id,
     ...(type ? { meta: { type } } : {}),
+    ...(format ? { params: { format } } : {}),
   };
 }

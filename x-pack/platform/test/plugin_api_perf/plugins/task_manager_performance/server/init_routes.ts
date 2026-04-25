@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
@@ -15,8 +15,11 @@ import {
   CoreSetup,
 } from '@kbn/core/server';
 import { range, chunk } from 'lodash';
-import { TaskManagerStartContract, ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { PerfApi, PerfResult } from './types';
+import type {
+  TaskManagerStartContract,
+  ConcreteTaskInstance,
+} from '@kbn/task-manager-plugin/server';
+import type { PerfApi, PerfResult } from './types';
 
 const scope = 'perf-testing';
 

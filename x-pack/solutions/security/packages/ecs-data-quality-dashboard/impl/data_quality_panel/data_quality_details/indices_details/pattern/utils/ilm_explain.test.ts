@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IlmExplainLifecycleLifecycleExplain,
   IlmExplainLifecycleLifecycleExplainManaged,
   IlmExplainLifecycleLifecycleExplainUnmanaged,
@@ -34,6 +34,7 @@ const hot: IlmExplainLifecycleLifecycleExplainManaged = {
     version: 1,
     modified_date_in_millis: 1675536751205,
   },
+  skip: false,
 };
 const warm = {
   ...hot,

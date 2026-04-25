@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { builtInAggregationTypes } from '../constants';
-import { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
-import { IErrorObject } from '../../types';
+import type { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
+import type { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 import { firstFieldOption } from '../index_controls';
 
@@ -102,6 +102,10 @@ export const OfExpression = ({
   return (
     <EuiPopover
       id="aggFieldPopover"
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.common.expressionItems.of.popoverAriaLabel',
+        { defaultMessage: 'Of' }
+      )}
       button={
         <EuiExpression
           description={i18n.translate(

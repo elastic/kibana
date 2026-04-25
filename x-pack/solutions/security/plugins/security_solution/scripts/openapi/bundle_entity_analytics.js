@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 const { bundle } = require('@kbn/openapi-bundler');
 const { join, resolve } = require('path');
 
@@ -23,7 +23,7 @@ const ROOT = resolve(__dirname, '../..');
       prototypeDocument: {
         info: {
           title: 'Security Entity Analytics API (Elastic Cloud Serverless)',
-          description: '',
+          description: 'Manage entity risk scores, asset criticality, and the Entity Store.',
         },
         tags: [
           {
@@ -47,7 +47,7 @@ const ROOT = resolve(__dirname, '../..');
       prototypeDocument: {
         info: {
           title: 'Security Entity Analytics API (Elastic Cloud and self-hosted)',
-          description: '',
+          description: 'Manage entity risk scores, asset criticality, and the Entity Store.',
         },
         tags: [
           {

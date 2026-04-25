@@ -6,7 +6,8 @@
  */
 
 import { DEFAULT_THROTTLING_VALUE } from '../../../../common/constants/monitor_defaults';
-import { Formatter, commonFormatters } from './common_formatters';
+import type { Formatter } from './common_formatters';
+import { commonFormatters } from './common_formatters';
 import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
@@ -14,7 +15,8 @@ import {
 } from './formatting_utils';
 
 import { tlsFormatters } from './tls_formatters';
-import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
+import type { BrowserFields } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
@@ -41,7 +43,10 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.PORT]: stringToJsonFormatter,
   [ConfigKey.URLS]: stringToJsonFormatter,
   [ConfigKey.METADATA]: objectToJsonFormatter,
-  [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
+  // Private browser monitors encode SOURCE_INLINE in formatSyntheticsPolicy and set
+  // source.inline.encoding=base64. Keep this null so the generic string formatter
+  // does not JSON-stringify the script before that private-location encoding step.
+  [ConfigKey.SOURCE_INLINE]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,

@@ -54,6 +54,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -65,6 +67,8 @@
             "label": "{\n  log,\n  prompt,\n  signal,\n  kibanaClient: givenKibanaClient,\n  connectorId,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
+            "lineNumber": 28,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -85,6 +89,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -99,6 +105,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -113,6 +121,8 @@
                   "AbortSignal"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
+                "lineNumber": 31,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -134,6 +144,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
+                "lineNumber": 32,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -148,6 +160,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
+                "lineNumber": 33,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -170,6 +184,8 @@
           ", RunRecipeCallback]) => void"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/run_recipe.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -187,6 +203,8 @@
               ", RunRecipeCallback]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_run_recipe.ts",
+            "lineNumber": 38,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -220,6 +238,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -241,6 +261,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

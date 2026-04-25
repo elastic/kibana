@@ -8,9 +8,9 @@
 import { renderHook, act } from '@testing-library/react';
 import { useAnonymizationUpdater } from './use_anonymization_updater'; // Adjust the import path
 import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
 
 jest.mock('../../api/anonymization_fields/bulk_update_anonymization_fields', () => ({
   bulkUpdateAnonymizationFields: jest.fn(),

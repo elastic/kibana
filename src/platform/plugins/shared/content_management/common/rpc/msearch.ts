@@ -10,17 +10,19 @@
 import { schema } from '@kbn/config-schema';
 import type { Version } from '@kbn/object-versioning';
 import { versionSchema } from './constants';
-import { searchQuerySchema, searchResultSchema, SearchQuery, SearchResult } from './search';
+import type { SearchQuery, SearchResult } from './search';
+import { searchQuerySchema, searchResultSchema } from './search';
 
 import type { ProcedureSchemas } from './types';
 
-export const mSearchSchemas: ProcedureSchemas = {
+export const mSearchSchemas = {
   in: schema.object(
     {
       contentTypes: schema.arrayOf(
         schema.object({ contentTypeId: schema.string(), version: versionSchema }),
         {
           minSize: 1,
+          maxSize: 100,
         }
       ),
       query: searchQuerySchema,
@@ -29,6 +31,7 @@ export const mSearchSchemas: ProcedureSchemas = {
   ),
   out: schema.object(
     {
+      // codeql[js/kibana/unbounded-array-in-schema] output schema — server controls the response size
       contentTypes: schema.arrayOf(
         schema.object({ contentTypeId: schema.string(), version: versionSchema })
       ),
@@ -36,7 +39,7 @@ export const mSearchSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-};
+} satisfies ProcedureSchemas;
 
 export type MSearchQuery = SearchQuery;
 

@@ -13,7 +13,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { TryInConsoleButton, TryInConsoleButtonProps } from './try_in_console_button';
+import type { TryInConsoleButtonProps } from './try_in_console_button';
+import { TryInConsoleButton } from './try_in_console_button';
 
 describe('TryInConsoleButton', () => {
   let windowOpenSpy: jest.SpyInstance;
@@ -83,6 +84,22 @@ describe('TryInConsoleButton', () => {
       undefined,
       [props.request]
     );
+  });
+  it('can pass custom buttonProps to button type', async () => {
+    const buttonRef = React.createRef<HTMLButtonElement>();
+    const props: Partial<TryInConsoleButtonProps> = {
+      request: 'GET /_stats',
+      type: 'button',
+    };
+    const wrapper = render(
+      <TryInConsoleButton {...defaultProps(props)} buttonProps={{ buttonRef }} />
+    );
+    const button = wrapper.getByTestId('tryInConsoleButton');
+    expect(button.textContent).toBe('Run in Console');
+    // Verify buttonRef is passed correctly
+    expect(buttonRef.current).toBeTruthy();
+    buttonRef.current!.textContent = 'Updated text';
+    expect(button.textContent).toBe('Updated text');
   });
   it('can render as a link', async () => {
     const props: Partial<TryInConsoleButtonProps> = { request: 'GET /_stats', type: 'link' };

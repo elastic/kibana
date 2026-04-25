@@ -7,16 +7,16 @@
 
 import React, { Fragment, useCallback } from 'react';
 import { EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { CommonAlertParamDetails, ExpressionConfig } from '../../../../common/types/alerts';
+import type { CommonAlertParamDetails, ExpressionConfig } from '../../../../common/types/alerts';
 import { AlertParamDuration } from '../../flyout_expressions/alert_param_duration';
 import { AlertParamType } from '../../../../common/enums';
 import { AlertParamPercentage } from '../../flyout_expressions/alert_param_percentage';
 import { AlertParamNumber } from '../../flyout_expressions/alert_param_number';
 import { AlertParamTextField } from '../../flyout_expressions/alert_param_textfield';
-import { MonitoringConfig } from '../../../types';
+import type { MonitoringConfig } from '../../../types';
 import { useDerivedIndexPattern } from './use_derived_index_pattern';
 import { KueryBar } from '../../../components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../lib/kuery';

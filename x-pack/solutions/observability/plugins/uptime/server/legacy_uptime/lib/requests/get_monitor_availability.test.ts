@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import {
-  formatBuckets,
-  GetMonitorAvailabilityResult,
-  AvailabilityKey,
-  getMonitorAvailability,
-} from './get_monitor_availability';
+import type { GetMonitorAvailabilityResult, AvailabilityKey } from './get_monitor_availability';
+import { formatBuckets, getMonitorAvailability } from './get_monitor_availability';
 import { getUptimeESMockClient, setupMockEsCompositeQuery } from './test_helpers';
-import { GetMonitorAvailabilityParams, makePing, Ping } from '../../../../common/runtime_types';
+import type { GetMonitorAvailabilityParams, Ping } from '../../../../common/runtime_types';
+import { makePing } from '../../../../common/runtime_types';
 
 interface AvailabilityTopHit {
   _source: Ping;

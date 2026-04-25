@@ -8,24 +8,32 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { StorageContext } from '@kbn/content-management-plugin/server';
-import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
-import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
-import { CONTENT_ID as LINKS_SAVED_OBJECT_TYPE } from '../../common';
-import type { LinksAttributes, LinksItem, LinksSearchOut } from '../../common/content_management';
+import type {
+  CreateResult,
+  DeleteResult,
+  SearchQuery,
+} from '@kbn/content-management-plugin/common';
+import { LINKS_SAVED_OBJECT_TYPE } from '../../common';
+import type { LinksItem, LinksSearchOut } from '../../common/content_management';
 import { cmServicesDefinition } from './schema/cm_services';
-import {
+import type {
   LinksCreateOptions,
   LinksCreateOut,
   LinksGetOut,
-  LinksSavedObjectAttributes,
-  savedObjectToItem,
-  itemToSavedObject,
   LinksUpdateOptions,
   LinksUpdateOut,
   LinksSearchOptions,
+  LinksState,
+  StoredLinksState,
 } from './schema/latest';
+import { savedObjectToItem, itemToAttributes } from './schema/latest';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -75,9 +83,9 @@ export class LinksStorage {
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<LinksSavedObjectAttributes>(LINKS_SAVED_OBJECT_TYPE, id);
+    } = await soClient.resolve<StoredLinksState>(LINKS_SAVED_OBJECT_TYPE, id);
 
-    const item = savedObjectToItem(savedObject, false);
+    const item = savedObjectToItem(savedObject);
     const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
 
     const validationError = transforms.get.out.result.validate(response);
@@ -91,6 +99,7 @@ export class LinksStorage {
 
     // Validate response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<LinksGetOut, LinksGetOut>(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -110,7 +119,7 @@ export class LinksStorage {
 
   async create(
     ctx: StorageContext,
-    data: LinksAttributes,
+    data: LinksState,
     options: LinksCreateOptions
   ): Promise<LinksCreateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
@@ -118,8 +127,8 @@ export class LinksStorage {
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
-      LinksAttributes,
-      LinksAttributes
+      LinksState,
+      LinksState
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
@@ -133,19 +142,16 @@ export class LinksStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = await itemToSavedObject({
-      attributes: dataToLatest,
-      references: options.references,
-    });
+    const { attributes, references } = itemToAttributes(dataToLatest);
 
     // Save data in DB
-    const savedObject = await soClient.create<LinksSavedObjectAttributes>(
+    const savedObject = await soClient.create<StoredLinksState>(
       LINKS_SAVED_OBJECT_TYPE,
-      soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      attributes,
+      { ...optionsToLatest, references }
     );
 
-    const item = savedObjectToItem(savedObject, false);
+    const item = savedObjectToItem(savedObject);
 
     const validationError = transforms.create.out.result.validate({ item });
     if (validationError) {
@@ -160,6 +166,7 @@ export class LinksStorage {
     const { value, error: resultError } = transforms.create.out.result.down<
       CreateResult<LinksItem>
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -175,7 +182,7 @@ export class LinksStorage {
   async update(
     ctx: StorageContext,
     id: string,
-    data: LinksAttributes,
+    data: LinksState,
     options: LinksUpdateOptions
   ): Promise<LinksUpdateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
@@ -183,8 +190,8 @@ export class LinksStorage {
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
-      LinksAttributes,
-      LinksAttributes
+      LinksState,
+      LinksState
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
@@ -198,20 +205,22 @@ export class LinksStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = await itemToSavedObject({
-      attributes: dataToLatest,
-      references: options.references,
-    });
+    const { attributes, references } = itemToAttributes(dataToLatest);
 
     // Save data in DB
-    const partialSavedObject = await soClient.update<LinksSavedObjectAttributes>(
+    const partialSavedObject = await soClient.update<StoredLinksState>(
       LINKS_SAVED_OBJECT_TYPE,
       id,
-      soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      attributes,
+      {
+        references: [
+          ...references,
+          ...((optionsToLatest.references as SavedObjectReference[]) ?? []),
+        ],
+      }
     );
 
-    const item = savedObjectToItem(partialSavedObject, true);
+    const item = savedObjectToItem(partialSavedObject);
 
     const validationError = transforms.update.out.result.validate({ item });
     if (validationError) {
@@ -227,6 +236,7 @@ export class LinksStorage {
       LinksUpdateOut,
       LinksUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -269,11 +279,11 @@ export class LinksStorage {
 
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
     // Execute the query in the DB
-    const soResponse = await soClient.find<LinksSavedObjectAttributes>(soQuery);
+    const soResponse = await soClient.find<StoredLinksState>(soQuery);
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
-          const item = savedObjectToItem(so, false);
+          const item = savedObjectToItem(so);
           return item;
         })
         // Ignore any saved objects that failed to convert to items.
@@ -300,6 +310,7 @@ export class LinksStorage {
       LinksSearchOut,
       LinksSearchOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -314,13 +325,10 @@ export class LinksStorage {
 
   mSearch = {
     savedObjectType: LINKS_SAVED_OBJECT_TYPE,
-    toItemResult: (
-      ctx: StorageContext,
-      savedObject: SavedObject<LinksSavedObjectAttributes>
-    ): LinksItem => {
+    toItemResult: (ctx: StorageContext, savedObject: SavedObject<StoredLinksState>): LinksItem => {
       const transforms = ctx.utils.getTransforms(cmServicesDefinition);
 
-      const contentItem = savedObjectToItem(savedObject, false);
+      const contentItem = savedObjectToItem(savedObject);
 
       const validationError = transforms.mSearch.out.result.validate(contentItem);
       if (validationError) {
@@ -336,6 +344,7 @@ export class LinksStorage {
         LinksItem,
         LinksItem
       >(
+        // @ts-expect-error - fix type error
         contentItem,
         undefined, // do not override version
         { validate: false } // validation is done above

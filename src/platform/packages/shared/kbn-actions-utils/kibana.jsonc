@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/actions-utils",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

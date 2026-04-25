@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin } from '@kbn/core/public';
+import type { Plugin } from '@kbn/core/public';
 import type {
   CustomBrandingPublicSetup,
   CustomBrandingPublicStart,

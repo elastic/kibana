@@ -7,8 +7,8 @@
 
 import type { Rule, AsApiContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
-import { useQuery } from '@tanstack/react-query';
-import { BurnRateRuleParams } from '../typings';
+import { useQuery } from '@kbn/react-query';
+import type { BurnRateRuleParams } from '../typings';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
 

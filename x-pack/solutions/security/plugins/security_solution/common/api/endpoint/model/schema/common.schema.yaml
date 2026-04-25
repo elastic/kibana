@@ -7,6 +7,7 @@ components:
   schemas:
     Id:
       type: string
+      description: A unique identifier
     IdOrUndefined:
       $ref: '#/components/schemas/Id'
       nullable: true
@@ -42,6 +43,7 @@ components:
       type: array
       description: A set of agent health statuses to filter by.
       example: [ "healthy", "updating" ]
+      maxItems: 20
       items:
         type: string
         enum:
@@ -79,10 +81,10 @@ components:
             type: string
             minLength: 1
           minItems: 1
-          maxItems: 50
+          maxItems: 250
         - type: string
           minLength: 1
-      description: A list of agent IDs. Max of 50.
+      description: A list of agent IDs. Max of 250.
       example: [ "agent-id-1", "agent-id-2" ]
       minLength: 1
 
@@ -98,13 +100,17 @@ components:
         - execute
         - upload
         - scan
+        - runscript
+        - cancel
+        - memory-dump
       minLength: 1
-      description: The command to be executed (cannot be an empty string)
+      description: The command for the response action
 
     Commands:
       type: array
       description: A list of response action command names.
       example: [ "isolate", "unisolate" ]
+      maxItems: 50
       items:
         $ref: '#/components/schemas/Command'
 
@@ -115,6 +121,7 @@ components:
 
     Status:
       type: string
+      description: The status of a response action.
       enum:
         - failed
         - pending
@@ -122,6 +129,7 @@ components:
 
     Statuses:
       type: array
+      description: A list of response action statuses to filter by.
       items:
         $ref: '#/components/schemas/Status'
       minLength: 1
@@ -134,9 +142,10 @@ components:
             type: string
             minLength: 1
           minItems: 1
+          maxItems: 50
         - type: string
           minLength: 1
-      description: A list of user IDs.
+      description: A list of user IDs. Max of 50.
       example: [ "user-id-1", "user-id-2" ]
 
     WithOutputs:
@@ -146,9 +155,10 @@ components:
             type: string
             minLength: 1
           minItems: 1
+          maxItems: 50
         - type: string
           minLength: 1
-      description: A list of action IDs that should include the complete output of the action.
+      description: A list of action IDs that should include the complete output of the action. Max of 50.
       example: [ "action-id-1", "action-id-2" ]
 
     Type:
@@ -169,21 +179,13 @@ components:
 
     EndpointIds:
       type: array
-      description: List of endpoint IDs (cannot contain empty strings)
+      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
       example: [ "endpoint-id-1", "endpoint-id-2" ]
       items:
         type: string
         minLength: 1
       minItems: 1
-
-    CaseIds:
-      type: array
-      description: Case IDs to be updated (cannot contain empty strings)
-      example: [ "case-id-1", "case-id-2" ]
-      items:
-        type: string
-        minLength: 1
-      minItems: 1
+      maxItems: 250
 
     Comment:
       type: string
@@ -192,7 +194,7 @@ components:
 
     Parameters:
       type: object
-      description: Optional parameters object
+      description: Parameters object
 
     AgentTypes:
       type: string
@@ -211,9 +213,23 @@ components:
         endpoint_ids:
           $ref: '#/components/schemas/EndpointIds'
         alert_ids:
-          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
+          type: array
+          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
+          example: [ "alert-id-1", "alert-id-2" ]
+          minItems: 1
+          maxItems: 50
+          items:
+            type: string
+            minLength: 1
         case_ids:
-          $ref: '#/components/schemas/CaseIds'
+          type: array
+          description: The IDs of cases where the action taken will be logged. Max of 50.
+          example: [ "case-id-1", "case-id-2" ]
+          minItems: 1
+          maxItems: 50
+          items:
+            type: string
+            minLength: 1
         comment:
           $ref: '#/components/schemas/Comment'
         parameters:
@@ -236,8 +252,130 @@ components:
       properties:
         note:
           type: string
+          description: A note associated with the protection updates for the given package policy.
+
+    ResponseActionDetails:
+       type: object
+       required:
+         - command
+       properties:
+         id:
+           type: string
+           format: uuid
+           description: The response action ID
+         command:
+           $ref: '#/components/schemas/Command'
+         agentType:
+           $ref: '#/components/schemas/AgentTypes'
+         isExpired:
+           type: boolean
+           description: Whether the response action is expired
+         isComplete:
+           type: boolean
+           description: Whether the response action is complete
+         wasSuccessful:
+           type: boolean
+           description: Whether the response action was successful
+         status:
+           type: string
+           description: The response action status
+         startedAt:
+           type: string
+           format: date-time
+           description: The response action start time
+         completedAt:
+           type: string
+           format: date-time
+           description: The response action completion time
+         createdBy:
+           type: string
+           description: The user who created the response action
+         agents:
+           type: array
+           description: The agent IDs for the hosts that the response action was sent to
+           items:
+             type: string
+             format: uuid
+         parameters:
+           type: object
+           description: The parameters of the response action. Content different depending on the response action command
+         hosts:
+           type: object
+           description: An object containing the host names associated with the agent IDs the response action was sent to
+           additionalProperties:
+             type: object
+             format: uuid
+             properties:
+               name:
+                 type: string
+                 description: The host name
+         agentState:
+           type: object
+           description: The state of the response action for each agent ID that it was sent to
+           additionalProperties:
+             type: object
+             format: uuid
+             properties:
+               isCompleted:
+                 type: boolean
+                 description: Whether the response action is completed for the agent ID
+               wasSuccessful:
+                 type: boolean
+                 description: Whether the response action was successful for the agent ID
+               completedAt:
+                 type: string
+                 description: The date and time the response action was completed for the agent ID
+         outputs:
+           type: object
+           description: |
+             The outputs of the response action for each agent ID that it was sent to. Content different depending on the
+             response action command and will only be present for agents that have responded to the response action
+           additionalProperties:
+             type: object
+             title: Agent ID
+             description: The agent id
+             format: uuid
+             required: [ type, content ]
+             properties:
+               type:
+                 type: string
+                 enum: [ json, text ]
+               content:
+                 description: The response action output content for the agent ID. Exact format depends on the response action command.
+                 oneOf:
+                   - type: object
+                   - type: string
+
+
+
+    ResponseActionCreateSuccessResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ResponseActionDetails'
+      example:
+        data:
+          id: "233db9ea-6733-4849-9226-5a7039c7161d"
+          command: "__command__name__here__"
+          agentType: "__agent__type__here_"
+          isExpired: false
+          isCompleted: false
+          wasSuccessful: false
+          status: "pending"
+          startedAt: "2022-07-29T19:08:49.126Z"
+          createdBy: "elastic"
+          agents:
+            - "ed518850-681a-4d60-bb98-e22640cae2a8"
+          hosts:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              name: "gke-node-1235412"
+          agentState:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              isCompleted: false
+              wasSuccessful: false
+          parameters: {}
+          outputs: {}
 
     SuccessResponse:
       type: object
-      properties: {}
-      # Define properties for the success response if needed
+      description: A generic successful response.

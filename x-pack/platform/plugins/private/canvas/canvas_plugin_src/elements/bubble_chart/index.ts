@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const bubbleChart: ElementFactory = () => ({
   name: 'bubbleChart',
@@ -14,7 +14,7 @@ export const bubbleChart: ElementFactory = () => ({
   help: 'A customizable bubble chart',
   width: 700,
   height: 300,
-  icon: 'heatmap',
+  icon: 'chartHeatmap',
   expression: `kibana
 | selectFilter
 | demodata

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { EuiFieldNumberProps, EuiFieldNumber } from '@elastic/eui';
+import type { EuiFieldNumberProps } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_RANK_ID, PERCENTILE_RANK_NAME } from '@kbn/lens-formula-docs';
-import { OperationDefinition } from '.';
+import type { PercentileRanksIndexPatternColumn } from '@kbn/lens-common';
+import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -21,17 +23,9 @@ import {
   getFilter,
   isColumnOfType,
 } from './helpers';
-import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-
-export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof PERCENTILE_RANK_ID;
-  params: {
-    value: number;
-  };
-}
 
 function ofName(
   name: string,

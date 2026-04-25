@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicJWKS } from '@elastic/request-crypto';
+import type { PublicJWKS } from '@elastic/request-crypto';
 
 export const telemetryJWKS: PublicJWKS = {
   keys: [

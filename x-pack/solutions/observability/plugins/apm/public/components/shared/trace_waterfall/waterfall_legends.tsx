@@ -24,20 +24,15 @@ const LEGEND_LABELS = {
   [WaterfallLegendType.ServiceName]: i18n.translate('xpack.apm.transactionDetails.servicesTitle', {
     defaultMessage: 'Services',
   }),
-  [WaterfallLegendType.SpanType]: i18n.translate(
-    'xpack.apm.transactionDetails.spanTypeLegendTitle',
-    {
-      defaultMessage: 'Type',
-    }
-  ),
+  [WaterfallLegendType.Type]: i18n.translate('xpack.apm.transactionDetails.typeLegendTitle', {
+    defaultMessage: 'Type',
+  }),
 };
 export function WaterfallLegends({ serviceName, legends, type }: Props) {
   const displayedLegends = legends.filter((legend) => legend.type === type);
 
-  // default to serviceName if value is empty, e.g. for transactions (which don't
-  // have span.type or span.subtype)
   const legendsWithFallbackLabel = displayedLegends.map((legend) => {
-    return { ...legend, value: !legend.value ? serviceName : legend.value };
+    return { ...legend, value: legend?.value || serviceName };
   });
 
   return (

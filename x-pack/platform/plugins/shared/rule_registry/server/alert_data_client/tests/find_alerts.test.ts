@@ -29,6 +29,7 @@ describe('find()', () => {
     logger: loggingSystemMock.create().get(),
     authorization: alertingAuthMock,
     esClient: esClientMock,
+    esClientScoped: esClientMock,
     auditLogger,
     ruleDataService: ruleDataServiceMock.create(),
     getRuleType: jest.fn(),
@@ -218,6 +219,10 @@ describe('find()', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",
@@ -441,6 +446,10 @@ describe('find()', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",

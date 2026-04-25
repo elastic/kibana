@@ -1,0 +1,1193 @@
+{
+  "id": "@kbn/mcp-client",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.McpClient",
+        "type": "Class",
+        "tags": [],
+        "label": "McpClient",
+        "description": [
+          "\nMcpClient is a wrapper around the MCP client SDK.\nIt provides a simple interface for connecting to an MCP client,\nlisting tools, and calling tools."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClient.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClient.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.McpClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+                "lineNumber": 58,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.McpClient.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "clientDetails",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/mcp-client",
+                    "scope": "common",
+                    "docId": "kibKbnMcpClientPluginApi",
+                    "section": "def-common.ClientDetails",
+                    "text": "ClientDetails"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+                "lineNumber": 59,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.McpClient.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n      headers = {},\n      fetch: customFetch,\n      maxRetries = 3,\n      reconnectionDelayGrowFactor = 1.5,\n      initialReconnectionDelay = 1000,\n      maxReconnectionDelay = 10000,\n    }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/mcp-client",
+                    "scope": "common",
+                    "docId": "kibKbnMcpClientPluginApi",
+                    "section": "def-common.McpClientOptions",
+                    "text": "McpClientOptions"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+                "lineNumber": 60,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClient.isConnected",
+            "type": "Function",
+            "tags": [],
+            "label": "isConnected",
+            "description": [
+              "\nPublic getter for the connection status."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClient.connect",
+            "type": "Function",
+            "tags": [],
+            "label": "connect",
+            "description": [
+              "\nConnect to the MCP client and return the connected status and capabilities."
+            ],
+            "signature": [
+              "() => Promise<{ connected: boolean; capabilities?: { experimental?: { [x: string]: object; } | undefined; logging?: object | undefined; completions?: object | undefined; prompts?: { listChanged?: boolean | undefined; } | undefined; resources?: { subscribe?: boolean | undefined; listChanged?: boolean | undefined; } | undefined; tools?: { listChanged?: boolean | undefined; } | undefined; tasks?: { [x: string]: unknown; list?: object | undefined; cancel?: object | undefined; requests?: { [x: string]: unknown; tools?: { [x: string]: unknown; call?: object | undefined; } | undefined; } | undefined; } | undefined; } | undefined; }>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClient.disconnect",
+            "type": "Function",
+            "tags": [],
+            "label": "disconnect",
+            "description": [
+              "\nDisconnect from the MCP client and return the disconnected status."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClient.listTools",
+            "type": "Function",
+            "tags": [],
+            "label": "listTools",
+            "description": [
+              "\nList the tools available on the MCP client."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/mcp-client",
+                "scope": "common",
+                "docId": "kibKbnMcpClientPluginApi",
+                "section": "def-common.ListToolsResponse",
+                "text": "ListToolsResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClient.callTool",
+            "type": "Function",
+            "tags": [],
+            "label": "callTool",
+            "description": [
+              "\nCall a tool on the MCP client.\nThis method returns text content, plus resource links and embedded resources.\nIt does not support other content types such as images and audio."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/mcp-client",
+                "scope": "common",
+                "docId": "kibKbnMcpClientPluginApi",
+                "section": "def-common.CallToolParams",
+                "text": "CallToolParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/mcp-client",
+                "scope": "common",
+                "docId": "kibKbnMcpClientPluginApi",
+                "section": "def-common.CallToolResponse",
+                "text": "CallToolResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 183,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.McpClient.callTool.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "- The parameters for the tool call."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/mcp-client",
+                    "scope": "common",
+                    "docId": "kibKbnMcpClientPluginApi",
+                    "section": "def-common.CallToolParams",
+                    "text": "CallToolParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+                "lineNumber": 189,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.StreamableHTTPError",
+        "type": "Class",
+        "tags": [],
+        "label": "StreamableHTTPError",
+        "description": [],
+        "signature": [
+          "StreamableHTTPError",
+          " extends Error"
+        ],
+        "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+        "lineNumber": 4,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.StreamableHTTPError.code",
+            "type": "number",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+            "lineNumber": 5,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.StreamableHTTPError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+            "lineNumber": 6,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.StreamableHTTPError.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "code",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+                "lineNumber": 6,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.StreamableHTTPError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+                "lineNumber": 6,
+                "columnNumber": 43,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.UnauthorizedError",
+        "type": "Class",
+        "tags": [],
+        "label": "UnauthorizedError",
+        "description": [],
+        "signature": [
+          "UnauthorizedError",
+          " extends Error"
+        ],
+        "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.d.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.UnauthorizedError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.d.ts",
+            "lineNumber": 146,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.UnauthorizedError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.d.ts",
+                "lineNumber": 146,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.CallToolParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CallToolParams",
+        "description": [
+          "\nParameters for calling a tool on the MCP client."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.CallToolParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.CallToolParams.arguments",
+            "type": "Object",
+            "tags": [],
+            "label": "arguments",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.CallToolResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "CallToolResponse",
+        "description": [
+          "\nResponse from calling a tool on the MCP client."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.CallToolResponse.content",
+            "type": "Array",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/mcp-client",
+                "scope": "common",
+                "docId": "kibKbnMcpClientPluginApi",
+                "section": "def-common.ContentPart",
+                "text": "ContentPart"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.CallToolResponse.provider",
+            "type": "Object",
+            "tags": [],
+            "label": "provider",
+            "description": [
+              "\nOptional provider metadata for attribution and audit trails.\nIncluded in tool execution results for tracking and logging."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/mcp-client",
+                "scope": "common",
+                "docId": "kibKbnMcpClientPluginApi",
+                "section": "def-common.ToolProviderMetadata",
+                "text": "ToolProviderMetadata"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.ClientDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClientDetails",
+        "description": [
+          "\nDetails about the MCP client."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.ClientDetails.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.ClientDetails.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.ClientDetails.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.ListToolsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ListToolsResponse",
+        "description": [
+          "\nResponse from listing the tools available on the MCP client."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 164,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.ListToolsResponse.tools",
+            "type": "Array",
+            "tags": [],
+            "label": "tools",
+            "description": [
+              "\nThe tools available on the MCP client."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/mcp-client",
+                "scope": "common",
+                "docId": "kibKbnMcpClientPluginApi",
+                "section": "def-common.Tool",
+                "text": "Tool"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.McpClientOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "McpClientOptions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClientOptions.headers",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClientOptions.fetch",
+            "type": "Function",
+            "tags": [],
+            "label": "fetch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/mcp-client",
+                "scope": "common",
+                "docId": "kibKbnMcpClientPluginApi",
+                "section": "def-common.FetchLike",
+                "text": "FetchLike"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClientOptions.maxRetries",
+            "type": "number",
+            "tags": [],
+            "label": "maxRetries",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClientOptions.reconnectionDelayGrowFactor",
+            "type": "number",
+            "tags": [],
+            "label": "reconnectionDelayGrowFactor",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClientOptions.initialReconnectionDelay",
+            "type": "number",
+            "tags": [],
+            "label": "initialReconnectionDelay",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.McpClientOptions.maxReconnectionDelay",
+            "type": "number",
+            "tags": [],
+            "label": "maxReconnectionDelay",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.NonTextPart",
+        "type": "Interface",
+        "tags": [],
+        "label": "NonTextPart",
+        "description": [
+          "\nNon-text (or otherwise unknown) content returned as part of a tool call response."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.NonTextPart.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.NonTextPart.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.Tool",
+        "type": "Interface",
+        "tags": [],
+        "label": "Tool",
+        "description": [
+          "\nA tool available on the MCP client."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 150,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.Tool.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.Tool.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.Tool.inputSchema",
+            "type": "Object",
+            "tags": [],
+            "label": "inputSchema",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.Tool.provider",
+            "type": "Object",
+            "tags": [],
+            "label": "provider",
+            "description": [
+              "\nOptional provider metadata for attribution and audit trails.\nWhen present, indicates the source of the tool (e.g., which MCP connector)."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/mcp-client",
+                "scope": "common",
+                "docId": "kibKbnMcpClientPluginApi",
+                "section": "def-common.ToolProviderMetadata",
+                "text": "ToolProviderMetadata"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.ToolProviderMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolProviderMetadata",
+        "description": [
+          "\nMetadata about the provider of a tool.\nUsed for attribution, audit trails, and UI display."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 123,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.ToolProviderMetadata.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nProvider identifier (e.g., 'mcp.github')"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.ToolProviderMetadata.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nHuman-readable provider name (e.g., 'GitHub MCP Server')"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.ToolProviderMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nProvider type constant"
+            ],
+            "signature": [
+              "\"mcp\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.ToolProviderMetadata.uniqueId",
+            "type": "string",
+            "tags": [],
+            "label": "uniqueId",
+            "description": [
+              "\nUnique ID of the MCP connector (from config.uniqueId)"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.ToolProviderMetadata.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nOptional description of when to use this MCP server (for LLM context)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.ContentPart",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentPart",
+        "description": [],
+        "signature": [
+          "{ type: \"text\"; text: string; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; } | { uri: string; name: string; type: \"resource_link\"; description?: string | undefined; mimeType?: string | undefined; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; icons?: { src: string; mimeType?: string | undefined; sizes?: string[] | undefined; theme?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ light: \"light\"; dark: \"dark\"; }> | undefined; }[] | undefined; title?: string | undefined; } | { type: \"resource\"; resource: { uri: string; text: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; } | { uri: string; blob: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; }; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; } | ",
+          {
+            "pluginId": "@kbn/mcp-client",
+            "scope": "common",
+            "docId": "kibKbnMcpClientPluginApi",
+            "section": "def-common.NonTextPart",
+            "text": "NonTextPart"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.EmbeddedResourcePart",
+        "type": "Type",
+        "tags": [],
+        "label": "EmbeddedResourcePart",
+        "description": [
+          "\nEmbedded resource returned as part of a tool call response.\nServers may embed resource contents (text or base64 blob) inline."
+        ],
+        "signature": [
+          "{ type: \"resource\"; resource: { uri: string; text: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; } | { uri: string; blob: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; }; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.FetchLike",
+        "type": "Type",
+        "tags": [],
+        "label": "FetchLike",
+        "description": [
+          "\nOptions for the MCP client.\nThese map to reconnection options for the StreamableHTTPClientTransport."
+        ],
+        "signature": [
+          "(url: string | URL, init?: RequestInit | undefined) => Promise<Response>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.FetchLike.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              "string | URL"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 26,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.FetchLike.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "init",
+            "description": [],
+            "signature": [
+              "RequestInit | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.ResourceAnnotations",
+        "type": "Type",
+        "tags": [],
+        "label": "ResourceAnnotations",
+        "description": [
+          "\nA resource link returned as part of a tool call response.\nLinks are references to resources that can be fetched via resources/read."
+        ],
+        "signature": [
+          "{ audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.ResourceLinkPart",
+        "type": "Type",
+        "tags": [],
+        "label": "ResourceLinkPart",
+        "description": [],
+        "signature": [
+          "{ uri: string; name: string; type: \"resource_link\"; description?: string | undefined; mimeType?: string | undefined; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; icons?: { src: string; mimeType?: string | undefined; sizes?: string[] | undefined; theme?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ light: \"light\"; dark: \"dark\"; }> | undefined; }[] | undefined; title?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.TextPart",
+        "type": "Type",
+        "tags": [],
+        "label": "TextPart",
+        "description": [
+          "\nA text content as part of a tool call response."
+        ],
+        "signature": [
+          "{ type: \"text\"; text: string; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

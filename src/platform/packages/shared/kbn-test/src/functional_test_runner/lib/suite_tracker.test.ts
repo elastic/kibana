@@ -20,7 +20,7 @@ jest.mock('@kbn/repo-info', () => {
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Lifecycle } from './lifecycle';
 import { SuiteTracker } from './suite_tracker';
-import { Suite } from '../fake_mocha_types';
+import type { Suite } from '../fake_mocha_types';
 
 const DEFAULT_TEST_METADATA_PATH = join(REPO_ROOT, 'target', 'test_metadata.json');
 const MOCK_CONFIG_PATH = join('test', 'config.js');

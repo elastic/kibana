@@ -25,8 +25,12 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '../../../../flyout_v2/shared/components/test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
+
+jest.mock('../../../../common/hooks/use_upselling');
+const mockUseUpsellingComponent = useUpsellingComponent as jest.Mock;
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
   uiMetricService: {
@@ -50,6 +54,10 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 }));
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+
+jest.mock('../../../shared/hooks/use_should_show_graph', () => ({
+  useShouldShowGraph: jest.fn().mockReturnValue(false),
+}));
 
 jest.mock('../../shared/hooks/use_graph_preview');
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
@@ -84,6 +92,7 @@ describe('<GraphPreviewContainer />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    mockUseUpsellingComponent.mockReturnValue(null);
   });
 
   it('should render component and link in header', async () => {
@@ -98,7 +107,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       isAlert: true,
     });
 
@@ -157,7 +166,7 @@ describe('<GraphPreviewContainer />', () => {
       timestamp,
       eventIds: ['eventId'],
       isAlert: true,
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -218,7 +227,7 @@ describe('<GraphPreviewContainer />', () => {
       timestamp,
       eventIds: ['eventId'],
       isAlert: false,
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -278,7 +287,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       isAlert: true,
     });
 
@@ -332,7 +341,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       isAlert: true,
     });
 
@@ -374,7 +383,27 @@ describe('<GraphPreviewContainer />', () => {
     });
   });
 
-  it('should not render when graph data is not available', async () => {
+  it('should not render when graph data is not available', () => {
+    mockUseFetchGraphData.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: undefined,
+    });
+
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      timestamp: new Date().toISOString(),
+      eventIds: [],
+      shouldShowGraph: false,
+      isAlert: true,
+    });
+
+    const { container } = renderGraphPreview();
+
+    expect(container).toBeEmptyDOMElement();
+    expect(uiMetricServiceMock.trackUiMetric).not.toHaveBeenCalled();
+  });
+
+  it('should render upsell when shouldShowGraph is false and upsell component is available', () => {
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -386,40 +415,37 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      hasGraphRepresentation: false,
+      shouldShowGraph: false,
       isAlert: true,
     });
 
-    const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
+    const MockUpsell = () => <div data-test-subj="graphVisualizationUpsell">{'Upgrade'}</div>;
+    mockUseUpsellingComponent.mockReturnValue(MockUpsell);
 
-    // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
-    expect(
-      await findByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).not.toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(mockUseFetchGraphData).toHaveBeenCalled();
-    expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
-      req: {
-        query: {
-          originEventIds: [],
-          start: `${timestamp}||-30m`,
-          end: `${timestamp}||+30m`,
-        },
-      },
-      options: {
-        enabled: false,
-        refetchOnWindowFocus: false,
-      },
+    const { getByTestId } = renderGraphPreview();
+
+    expect(getByTestId('graphVisualizationUpsell')).toBeInTheDocument();
+    expect(uiMetricServiceMock.trackUiMetric).not.toHaveBeenCalled();
+  });
+
+  it('should return null when shouldShowGraph is false and no upsell component', () => {
+    mockUseFetchGraphData.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: undefined,
     });
 
-    expect(uiMetricServiceMock.trackUiMetric).not.toHaveBeenCalled();
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      timestamp: new Date().toISOString(),
+      eventIds: [],
+      shouldShowGraph: false,
+      isAlert: true,
+    });
+
+    mockUseUpsellingComponent.mockReturnValue(null);
+
+    const { container } = renderGraphPreview();
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

@@ -4,21 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import {
-  EuiLink,
-  EuiPopover,
-  EuiToolTip,
-  EuiText,
-  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiPopover,
+  EuiText,
+  EuiTextColor,
+  EuiToolTip,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
-import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { CellActionsMode, SecurityCellActions } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
@@ -50,7 +53,7 @@ export const getRowItemsWithActions = ({
           mode={CellActionsMode.HOVER_DOWN}
           visibleCellActions={5}
           showActionTooltips
-          triggerId={SecurityCellActionsTrigger.DEFAULT}
+          triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
           data={{
             value,
             field: fieldName,
@@ -177,6 +180,13 @@ const PopoverComponent: React.FC<PopoverComponentProps> = ({ children, count, id
             />
           </EuiLink>
         }
+        aria-label={i18n.translate(
+          'xpack.securitySolution.tables.rowItemHelper.overflowButtonAriaLabel',
+          {
+            defaultMessage: 'Show {count} more items',
+            values: { count },
+          }
+        )}
         closePopover={() => setIsOpen(!isOpen)}
         id={`${idPrefix}-popover`}
         isOpen={isOpen}
@@ -207,14 +217,14 @@ export const OverflowFieldComponent = ({
   <span>
     {showToolTip ? (
       <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
-        <>{value.substring(0, overflowLength)}</>
+        <span tabIndex={0}>{value.substring(0, overflowLength)}</span>
       </EuiToolTip>
     ) : (
       <>{value.substring(0, overflowLength)}</>
     )}
     {value.length > overflowLength && (
       <EuiToolTip content={value}>
-        <MoreRowItems type="boxesHorizontal" />
+        <MoreRowItems type="boxesVertical" />
       </EuiToolTip>
     )}
   </span>

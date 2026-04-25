@@ -18,6 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiSteps,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +28,7 @@ import { CredentialsApiUrl } from './credentials_api_url';
 import { CredentialsAuth, OAuth } from './auth_types';
 import { SNStoreLink } from './sn_store_button';
 import { ApplicationRequiredCallout } from './application_required_callout';
-import { ServiceNowConfig, ServiceNowSecrets } from './types';
+import type { ServiceNowConfig, ServiceNowSecrets } from './types';
 
 const title = i18n.translate('xpack.stackConnectors.components.serviceNow.updateFormTitle', {
   defaultMessage: 'Update ServiceNow connector',
@@ -102,6 +103,8 @@ const UpdateConnectorComponent: React.FC<Props> = ({
   onConfirm,
   updateErrorMessage,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { form } = useForm<UpdateConnectorFormSchema>();
   const { submit, isValid } = form;
 
@@ -117,10 +120,15 @@ const UpdateConnectorComponent: React.FC<Props> = ({
 
   return (
     <Form form={form}>
-      <EuiFlyout ownFocus onClose={onCancel} data-test-subj="updateConnectorForm">
+      <EuiFlyout
+        aria-labelledby={modalTitleId}
+        ownFocus
+        onClose={onCancel}
+        data-test-subj="updateConnectorForm"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h1>{title}</h1>
+            <h1 id={modalTitleId}>{title}</h1>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody

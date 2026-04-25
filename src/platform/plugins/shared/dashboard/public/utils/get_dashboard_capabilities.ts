@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardCapabilities } from '../../common';
+import type { DashboardCapabilities } from '../../common';
 import { coreServices } from '../services/kibana_services';
 
 export const getDashboardCapabilities = (): DashboardCapabilities => {

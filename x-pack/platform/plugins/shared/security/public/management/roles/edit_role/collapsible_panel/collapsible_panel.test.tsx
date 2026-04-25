@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiProvider } from '@elastic/eui';
 import React from 'react';
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { CollapsiblePanel } from './collapsible_panel';
 
+const mountWithEuiProvider = (node: React.ReactElement) =>
+  mountWithIntl(<EuiProvider>{node}</EuiProvider>);
+
+const shallowWithEuiProvider = (node: React.ReactElement) =>
+  shallowWithIntl(<EuiProvider>{node}</EuiProvider>);
+
 test('it renders without blowing up', () => {
-  const wrapper = shallowWithIntl(
+  const wrapper = shallowWithEuiProvider(
     <CollapsiblePanel iconType="logoElasticsearch" title="Elasticsearch">
       <p>child</p>
     </CollapsiblePanel>
@@ -23,7 +29,7 @@ test('it renders without blowing up', () => {
 });
 
 test('it renders children by default', () => {
-  const wrapper = mountWithIntl(
+  const wrapper = mountWithEuiProvider(
     <CollapsiblePanel iconType="logoElasticsearch" title="Elasticsearch">
       <p className="child">child 1</p>
       <p className="child">child 2</p>
@@ -35,7 +41,7 @@ test('it renders children by default', () => {
 });
 
 test('it hides children when the "hide" link is clicked', () => {
-  const wrapper = mountWithIntl(
+  const wrapper = mountWithEuiProvider(
     <CollapsiblePanel iconType="logoElasticsearch" title="Elasticsearch">
       <p className="child">child 1</p>
       <p className="child">child 2</p>

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, Suspense, useCallback } from 'react';
 import { css } from '@emotion/react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -14,7 +15,6 @@ import {
   EuiIcon,
   EuiText,
   EuiFlyoutHeader,
-  IconType,
   EuiBetaBadge,
   EuiTab,
   EuiTabs,
@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { SubFeature } from '@kbn/actions-plugin/common';
+import type { SubFeature } from '@kbn/actions-plugin/common';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { EditConnectorTabs } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -37,6 +37,8 @@ const FlyoutHeaderComponent: React.FC<{
   selectedTab: EditConnectorTabs;
   setTab: (nextPage: EditConnectorTabs) => void;
   icon?: IconType | null;
+  isTestable?: boolean;
+  hideRulesTab?: boolean;
 }> = ({
   icon,
   isExperimental = false,
@@ -46,6 +48,8 @@ const FlyoutHeaderComponent: React.FC<{
   connectorTypeDesc,
   selectedTab,
   setTab,
+  isTestable,
+  hideRulesTab = false,
 }) => {
   const {
     application: { capabilities },
@@ -70,15 +74,17 @@ const FlyoutHeaderComponent: React.FC<{
     <EuiFlyoutHeader hasBorder data-test-subj="edit-connector-flyout-header">
       <EuiFlexGroup gutterSize="s" alignItems="center">
         {icon ? (
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={icon} size="m" data-test-subj="edit-connector-flyout-header-icon" />
-          </EuiFlexItem>
+          <Suspense fallback={null}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={icon} size="m" data-test-subj="edit-connector-flyout-header-icon" />
+            </EuiFlexItem>
+          </Suspense>
         ) : null}
         <EuiFlexItem grow={false}>
           {isPreconfigured ? (
             <>
-              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-                <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
+                <EuiFlexItem autoFocus={true} grow={false} style={{ minWidth: '200px' }}>
                   <EuiTitle size="s">
                     <h3 id="flyoutTitle">
                       <FormattedMessage
@@ -119,8 +125,8 @@ const FlyoutHeaderComponent: React.FC<{
               </EuiText>
             </>
           ) : (
-            <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-              <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
+              <EuiFlexItem style={{ minWidth: '200px' }}>
                 <EuiTitle size="s">
                   <h3 id="flyoutTitle">
                     <FormattedMessage
@@ -158,16 +164,18 @@ const FlyoutHeaderComponent: React.FC<{
             defaultMessage: 'Configuration',
           })}
         </EuiTab>
-        <EuiTab
-          onClick={setRulesTab}
-          data-test-subj="rulesConnectorTab"
-          isSelected={EditConnectorTabs.Rules === selectedTab}
-        >
-          {i18n.translate('xpack.triggersActionsUI.sections.rulesConnectorList.tabText', {
-            defaultMessage: 'Rules',
-          })}
-        </EuiTab>
-        {canExecute && (
+        {!hideRulesTab && (
+          <EuiTab
+            onClick={setRulesTab}
+            data-test-subj="rulesConnectorTab"
+            isSelected={EditConnectorTabs.Rules === selectedTab}
+          >
+            {i18n.translate('xpack.triggersActionsUI.sections.rulesConnectorList.tabText', {
+              defaultMessage: 'Rules',
+            })}
+          </EuiTab>
+        )}
+        {isTestable && canExecute && (
           <EuiTab
             onClick={setTestTab}
             data-test-subj="testConnectorTab"

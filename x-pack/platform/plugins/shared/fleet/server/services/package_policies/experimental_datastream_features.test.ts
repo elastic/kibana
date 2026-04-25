@@ -72,25 +72,28 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 jest.mock('../epm/elasticsearch/template/template');
 jest.mock('../epm/elasticsearch/template/install', () => {
   return {
-    prepareTemplate: jest.fn().mockReturnValue({
-      componentTemplates: {
-        'metrics-test.test@package': {
-          template: {
-            mappings: {
-              properties: {
-                sequence: {
-                  type: 'long',
-                },
-                name: {
-                  type: 'keyword',
-                  index: false,
+    prepareDataStreamTemplates: jest.fn().mockResolvedValue([
+      {
+        componentTemplates: {
+          'metrics-test.test@package': {
+            template: {
+              mappings: {
+                properties: {
+                  sequence: {
+                    type: 'long',
+                  },
+                  name: {
+                    type: 'keyword',
+                    index: false,
+                  },
                 },
               },
             },
           },
         },
+        indexTemplate: {},
       },
-    }),
+    ]),
   };
 });
 

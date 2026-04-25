@@ -7,6 +7,7 @@
 
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';
+import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 export function successResult<T = unknown>(
   actionId: string,
@@ -15,11 +16,16 @@ export function successResult<T = unknown>(
   return { status: 'ok', data, actionId };
 }
 
-export function errorResult(actionId: string, message: string): ConnectorTypeExecutorResult<void> {
+export function errorResult(
+  actionId: string,
+  message: string,
+  errorSource?: TaskErrorSource
+): ConnectorTypeExecutorResult<void> {
   return {
     status: 'error',
     message,
     actionId,
+    errorSource,
   };
 }
 export function serviceErrorResult(

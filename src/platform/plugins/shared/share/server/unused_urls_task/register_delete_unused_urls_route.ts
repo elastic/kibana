@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Duration } from 'moment';
-import { IRouter, Logger, ReservedPrivilegesSet } from '@kbn/core/server';
-import { CoreSetup } from '@kbn/core/server';
+import type { Duration } from 'moment';
+import type { IRouter, Logger } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { runDeleteUnusedUrlsTask } from './task';
 
 export const registerDeleteUnusedUrlsRoute = ({

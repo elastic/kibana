@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -56,9 +56,11 @@ export const getAddAlertsTableAction = (
                 embeddable.addNewPanel(
                   {
                     panelType: EMBEDDABLE_ALERTS_TABLE_ID,
-                    serializedState: { rawState: { tableConfig } },
+                    serializedState: { tableConfig },
                   },
-                  true
+                  {
+                    displaySuccessMessage: true,
+                  }
                 );
               }}
             />

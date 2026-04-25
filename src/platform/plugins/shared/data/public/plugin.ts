@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './index.scss';
-
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
-  Storage,
-  IStorageWrapper,
-  createStartServicesGetter,
-} from '@kbn/kibana-utils-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage, createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { ON_CLICK_VALUE, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   EVENT_PROPERTY_EXECUTION_CONTEXT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -30,15 +26,16 @@ import type {
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import {
+  setHttp,
   setIndexPatterns,
   setOverlays,
   setSearchService,
   setUiSettings,
   setTheme,
 } from './services';
-import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
-import { NowProvider, NowProviderInternalContract } from './now_provider';
+import type { NowProviderInternalContract } from './now_provider';
+import { NowProvider } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
 import type {
   MultiValueClickDataContext,
@@ -98,8 +95,6 @@ export class DataPublicPlugin
       nowProvider: this.nowProvider,
     });
 
-    uiActions.registerTrigger(applyFilterTrigger);
-
     inspector.registerView(
       getTableViewDescription(() => ({
         uiActions: startServices().plugins.uiActions,
@@ -142,11 +137,20 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: DataStartDependencies
+    {
+      uiActions,
+      fieldFormats,
+      dataViews,
+      inspector,
+      screenshotMode,
+      share,
+      cps,
+    }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, overlays } = core;
+    const { uiSettings, overlays, http } = core;
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setHttp(http);
     setIndexPatterns(dataViews);
 
     const query = this.queryService.start({
@@ -157,14 +161,16 @@ export class DataPublicPlugin
 
     const search = this.searchService.start(core, {
       fieldFormats,
-      indexPatterns: dataViews,
+      dataViews,
       inspector,
       screenshotMode,
+      share,
       scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
+      cps,
     });
     setSearchService(search);
 
-    uiActions.addTriggerActionAsync('SELECT_RANGE_TRIGGER', 'ACTION_SELECT_RANGE', async () => {
+    uiActions.addTriggerActionAsync(ON_SELECT_RANGE, 'ACTION_SELECT_RANGE', async () => {
       const { createSelectRangeActionDefinition } = await import('./actions');
       const rangeSelectAction = createSelectRangeActionDefinition(() => ({
         uiActions,
@@ -172,7 +178,7 @@ export class DataPublicPlugin
       return rangeSelectAction;
     });
 
-    uiActions.addTriggerActionAsync('VALUE_CLICK_TRIGGER', 'ACTION_VALUE_CLICK', async () => {
+    uiActions.addTriggerActionAsync(ON_CLICK_VALUE, 'ACTION_VALUE_CLICK', async () => {
       const { createValueClickActionDefinition } = await import('./actions');
       const valueClickAction = createValueClickActionDefinition(() => ({
         uiActions,
@@ -210,7 +216,6 @@ export class DataPublicPlugin
       },
       datatableUtilities,
       fieldFormats,
-      indexPatterns: dataViews,
       dataViews,
       query,
       search,

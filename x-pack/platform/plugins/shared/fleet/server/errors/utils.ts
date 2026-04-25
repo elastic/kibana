@@ -58,3 +58,52 @@ export const catchAndSetErrorStackTrace: CatchAndSetErrorStackTrace = (
 catchAndSetErrorStackTrace.withMessage = (message) => {
   return (err: Error) => catchAndSetErrorStackTrace(err, message);
 };
+
+/**
+ * Re-throws an error, preserving the original error if it's already an instance of the target error class,
+ * or wrapping it in the target error class if it's not.
+ *
+ * This prevents double-wrapping errors while ensuring consistent error types.
+ *
+ * @param error - The error to re-throw
+ * @param ErrorClass - The error class constructor to use for wrapping
+ * @param message - Optional custom message for the wrapped error
+ *
+ * @example
+ * try {
+ *   // some operation
+ * } catch (error) {
+ *   rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to create cloud connector');
+ * }
+ */
+/**
+ * Extracts a string message from an unknown error value.
+ * Returns the error's message if it's an Error instance, otherwise converts to string.
+ *
+ * @param error - The error value to extract a message from
+ * @returns The error message as a string
+ */
+export function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+export function rethrowIfInstanceOrWrap<T extends new (message: string) => Error>(
+  error: unknown,
+  ErrorClass: T,
+  message?: string
+): never {
+  // If it's already an instance of the target error class, just rethrow it
+  if (error instanceof ErrorClass) {
+    throw error;
+  }
+
+  // Otherwise, wrap it in the target error class
+  const errorMessage = getErrorMessage(error);
+  const errorStack = error instanceof Error ? error.stack : undefined;
+
+  const wrappedMessage = message
+    ? `${message}: ${errorMessage}${errorStack ? `\n${errorStack}` : ''}`
+    : errorMessage;
+
+  throw new ErrorClass(wrappedMessage);
+}

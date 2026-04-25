@@ -62,11 +62,11 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Alert - Find - RBAC - spaces', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     it(`${superUser.username} should reject at route level when aggs contains script alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {

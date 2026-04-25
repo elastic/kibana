@@ -83,8 +83,7 @@ export class OptionsListFetchCache {
     abortSignal: AbortSignal
   ): Promise<OptionsListResponse> {
     const requestHash = this.getRequestHash(request);
-
-    if (this.cache.has(requestHash)) {
+    if (!request.isReload && this.cache.has(requestHash)) {
       return Promise.resolve(this.cache.get(requestHash)!);
     } else {
       const index = request.dataView.getIndexPattern();
@@ -101,7 +100,7 @@ export class OptionsListFetchCache {
         filters: esFilters,
         fieldName: field.name,
         fieldSpec: field,
-        runtimeFieldMap: dataView.toSpec?.().runtimeFieldMap,
+        runtimeFieldMap: dataView.toSpec?.(false).runtimeFieldMap,
       };
 
       const result = await coreServices.http.fetch<OptionsListResponse>(

@@ -8,11 +8,11 @@
  */
 
 import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 
 import { toExpressionAst } from './to_ast';
-import { VisParams } from './types';
+import type { VisParams } from './types';
 
 describe('metric vis toExpressionAst function', () => {
   let vis: Vis<VisParams>;

@@ -6,15 +6,18 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { useRouteMatch, useLocation } from 'react-router-dom';
+import { useRouteMatch, useLocation, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { OutputsForAgentPolicy } from '../../../../../../server/types';
+
 import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../common/services/version_specific_policies_utils';
 import { Loading, Error } from '../../../components';
 import {
   useGetOneAgent,
@@ -23,11 +26,12 @@ import {
   useBreadcrumbs,
   useStartServices,
   useIntraAppState,
-  useUrlParams,
-  sendGetAgentTags,
+  sendGetAgentTagsForRq,
+  useAgentlessResources,
+  useGetInfoOutputsForPolicy,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
-
+import { ExperimentalFeaturesService } from '../../../services';
 import { TagsAddRemove } from '../agent_list_page/components';
 
 import { AgentRefreshContext } from './hooks';
@@ -36,6 +40,7 @@ import {
   AgentDetailsActionMenu,
   AgentDetailsContent,
   AgentDiagnosticsTab,
+  AgentCollectorConfig,
 } from './components';
 import { AgentSettings } from './components/agent_settings';
 
@@ -44,8 +49,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
-  const { urlParams } = useUrlParams();
-  const showAgentless = urlParams.showAgentless === 'true';
+  const { showAgentless } = useAgentlessResources();
   const {
     isLoading,
     isInitialRequest,
@@ -62,7 +66,13 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     isLoading: isAgentPolicyLoading,
     data: agentPolicyData,
     sendRequest: sendAgentPolicyRequest,
-  } = useGetOneAgentPolicy(agentData?.item?.policy_id);
+  } = useGetOneAgentPolicy(
+    agentData?.item?.policy_id
+      ? removeVersionSuffixFromPolicyId(agentData.item.policy_id)
+      : undefined
+  );
+
+  const { data: outputsData } = useGetInfoOutputsForPolicy(agentPolicyData?.item?.id);
 
   const {
     application: { navigateToApp },
@@ -78,18 +88,22 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     }
   }, [routeState, navigateToApp]);
 
+  const isAgentlessAgent = agentPolicyData?.item.supports_agentless;
   const agent =
-    agentData?.item &&
-    (showAgentless || !agentData.item.local_metadata?.host?.hostname?.startsWith('agentless-')) // Hide agentless agents
-      ? agentData.item
-      : null;
+    agentData?.item && (isAgentlessAgent ? showAgentless : true) ? agentData.item : null;
   const host = agent && agent.local_metadata?.host;
 
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" href={getHref('agent_list')} flush="left" size="xs">
+          <EuiButtonEmpty
+            iconType="chevronSingleLeft"
+            href={getHref('agent_list')}
+            flush="left"
+            size="xs"
+            aria-label="View all agents"
+          >
             <FormattedMessage
               id="xpack.fleet.agentDetails.viewAgentListTitle"
               defaultMessage="View all agents"
@@ -129,13 +143,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     // Fetch all tags when the component mounts
     const fetchTags = async () => {
       try {
-        const agentTagsResponse = await sendGetAgentTags({
+        const agentTagsResponse = await sendGetAgentTagsForRq({
           showInactive: agent?.status === 'inactive',
         });
-        if (agentTagsResponse.error) {
-          throw agentTagsResponse.error;
-        }
-        const newAllTags = agentTagsResponse?.data?.items ?? [];
+        const newAllTags = agentTagsResponse?.items ?? [];
         setAllTags(newAllTags);
       } catch (err) {
         notifications.toasts.addError(err, {
@@ -182,6 +193,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     [agentPolicyData, agentData, getHref, isAgentPolicyLoading]
   );
 
+  const { enableOtelUI } = ExperimentalFeaturesService.get();
+
   const headerTabs = useMemo(() => {
     const tabs = [
       {
@@ -216,9 +229,24 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
         isSelected: tabId === 'settings',
       },
+      ...(enableOtelUI && agent?.type === 'OPAMP'
+        ? [
+            {
+              id: 'collector-config',
+              name: i18n.translate('xpack.fleet.agentDetails.subTabs.collectorConfigTab', {
+                defaultMessage: 'Collector config',
+              }),
+              href: getHref('agent_details_collector_config', {
+                agentId,
+                tabId: 'collector-config',
+              }),
+              isSelected: tabId === 'collector-config',
+            },
+          ]
+        : []),
     ];
     return tabs;
-  }, [getHref, agentId, tabId]);
+  }, [getHref, agentId, tabId, enableOtelUI, agent]);
 
   return (
     <AgentRefreshContext.Provider
@@ -248,7 +276,11 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           />
         ) : agent ? (
           <>
-            <AgentDetailsPageContent agent={agent} agentPolicy={agentPolicyData?.item} />
+            <AgentDetailsPageContent
+              agent={agent}
+              agentPolicy={agentPolicyData?.item}
+              outputs={outputsData?.item}
+            />
             {showTagsAddRemove && (
               <TagsAddRemove
                 agentId={agent?.id!}
@@ -291,7 +323,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = ({ agent, agentPolicy }) => {
+  outputs?: OutputsForAgentPolicy;
+}> = ({ agent, agentPolicy, outputs }) => {
+  const { enableOtelUI } = ExperimentalFeaturesService.get();
+  const { getPath } = useLink();
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
@@ -319,10 +354,21 @@ const AgentDetailsPageContent: React.FunctionComponent<{
           return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
+      {enableOtelUI && (
+        <Route
+          path={FLEET_ROUTING_PATHS.agent_details_collector_config}
+          render={() => {
+            if (agent.type !== 'OPAMP') {
+              return <Redirect to={getPath('agent_details', { agentId: agent.id })} />;
+            }
+            return <AgentCollectorConfig agent={agent} />;
+          }}
+        />
+      )}
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {
-          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
+          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} outputs={outputs} />;
         }}
       />
     </Routes>

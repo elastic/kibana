@@ -28,6 +28,7 @@ interface CreateAndPopulateIndexOpts {
   manifest: any;
   archive: ZipArchive;
   esClient: ElasticsearchClient;
+  abortController?: AbortController;
 }
 
 export class IndexManager {
@@ -47,6 +48,7 @@ export class IndexManager {
     manifest,
     archive,
     esClient,
+    abortController,
   }: CreateAndPopulateIndexOpts): Promise<void> {
     if (this.elserInferenceId === defaultInferenceEndpoints.ELSER) {
       await ensureDefaultElserDeployed({
@@ -58,6 +60,7 @@ export class IndexManager {
       indexName,
       legacySemanticText: isLegacySemanticTextVersion(manifest.formatVersion),
       esClient,
+      abortController,
       elserInferenceId: this.elserInferenceId,
       log: this.log,
     };
@@ -91,6 +94,21 @@ export class IndexManager {
       this.log.debug(`Deleted index [${indexName}]`);
     } catch (error) {
       this.log.warn(`Failed to delete index [${indexName}]: ${error.message}`);
+    }
+  }
+
+  async hasIndex({
+    indexName,
+    esClient,
+  }: {
+    indexName: string;
+    esClient: ElasticsearchClient;
+  }): Promise<boolean> {
+    try {
+      return await esClient.indices.exists({ index: indexName });
+    } catch (error) {
+      this.log.warn(`Failed to check if index exists [${indexName}]: ${error.message}`);
+      return false;
     }
   }
 }

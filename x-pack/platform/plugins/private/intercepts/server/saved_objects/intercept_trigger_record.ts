@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
+import type { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
 import type { InferObjectSchema } from './types';
 
 const interceptTriggerV1 = schema.object({

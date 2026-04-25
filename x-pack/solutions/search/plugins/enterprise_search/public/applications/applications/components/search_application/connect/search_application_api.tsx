@@ -23,7 +23,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CloudDetails, useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
+import type { CloudDetails } from '../../../../shared/cloud_details/cloud_details';
+import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 
@@ -130,7 +131,7 @@ export const SearchApplicationAPI = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconSide="left"
-                iconType="plusInCircleFilled"
+                iconType="plusCircle"
                 onClick={openGenerateModal}
                 data-telemetry-id="entSearchApplications-searchApi-step2-createApiKeyButton"
               >
@@ -145,7 +146,7 @@ export const SearchApplicationAPI = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconSide="left"
-                iconType="popout"
+                iconType="external"
                 data-telemetry-id="entSearchApplications-searchApi-step2-viewKeysButton"
                 onClick={() =>
                   KibanaLogic.values.navigateToUrl('/app/management/security/api_keys', {

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import {
   KibanaRootContextProvider,
@@ -28,11 +29,21 @@ export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderPro
 export const KibanaRenderContextProvider: FC<
   PropsWithChildren<KibanaRenderContextProviderProps>
 > = ({ children, ...props }) => {
-  const { analytics, executionContext, i18n, theme, userProfile, colorMode, modify } = props;
+  const {
+    analytics,
+    executionContext,
+    i18n,
+    theme,
+    userProfile,
+    colorMode,
+    modify,
+    coreEnv,
+    chrome,
+  } = props;
   return (
     <KibanaRootContextProvider
       globalStyles={false}
-      {...{ executionContext, i18n, theme, userProfile, modify, colorMode }}
+      {...{ executionContext, i18n, theme, userProfile, modify, colorMode, coreEnv, chrome }}
     >
       <KibanaErrorBoundaryProvider analytics={analytics}>
         <KibanaErrorBoundary>{children}</KibanaErrorBoundary>

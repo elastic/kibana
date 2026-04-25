@@ -14,17 +14,17 @@ import {
   type EntityDetailsLeftPanelTab,
   type LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
+import type { UseGetGenericEntityParams } from '../generic_right/hooks/use_get_generic_entity';
 import { useGetGenericEntity } from '../generic_right/hooks/use_get_generic_entity';
 import {
   getInsightsInputTab,
   getFieldsTableTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../generic_right/constants';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
-export interface GenericEntityDetailsPanelProps extends Record<string, unknown> {
-  entityDocId: string;
-  value: string;
-  field: string;
+interface BaseGenericEntityDetailsPanelProps {
+  identityFields: IdentityFields;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
@@ -34,6 +34,10 @@ export interface GenericEntityDetailsPanelProps extends Record<string, unknown> 
     subTab?: CspInsightLeftPanelSubTab;
   };
 }
+
+export type GenericEntityDetailsPanelProps = BaseGenericEntityDetailsPanelProps &
+  UseGetGenericEntityParams &
+  Record<string, unknown>;
 
 export interface GenericEntityDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'generic_entity_details';
@@ -70,25 +74,41 @@ const useSelectedTab = (params: GenericEntityDetailsPanelProps, tabs: LeftPanelT
 
 export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps) => {
   const {
-    entityDocId,
-    field,
-    value,
+    identityFields,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
     scopeId,
   } = params;
-  const { getGenericEntity } = useGetGenericEntity(entityDocId);
+
+  // By passing the entire params object, we maintain the union type constraints that enforce
+  // either entityDocId or entityId to be present
+  // Destructuring of the params to extract the relevant fields happens internally in useGetGenericEntity
+  const { getGenericEntity } = useGetGenericEntity(params);
   const source = getGenericEntity.data?._source;
 
   const tabs: LeftPanelTabsType = useMemo(() => {
+    const fields = identityFields ?? {};
+    const field = Object.keys(fields)[0] ?? 'host.name';
+    const value = fields['host.name'] ?? fields['user.name'] ?? Object.values(fields)[0] ?? '';
+    const entityIdForInsights =
+      fields['host.entity.id'] ?? fields['user.entity.id'] ?? fields['service.entity.id'] ?? '';
+    const entityType: 'host' | 'user' | 'service' =
+      field === 'user.name' || fields['user.entity.id'] !== undefined
+        ? 'user'
+        : String(field).startsWith('service.')
+        ? 'service'
+        : 'host';
+
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
         ? [
             getInsightsInputTab({
-              name: value,
-              fieldName: field as 'related.entity',
+              field,
+              value,
+              entityId: entityIdForInsights,
               scopeId,
+              entityType,
             }),
           ]
         : [];
@@ -103,8 +123,7 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
-    value,
-    field,
+    identityFields,
     scopeId,
     source,
   ]);

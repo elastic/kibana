@@ -8,9 +8,9 @@
  */
 
 import NormalizePath from 'normalize-path';
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { Minimatch } from 'minimatch';
-import { Bundle } from '../common';
+import type { Bundle } from '../common';
 
 export class BundleRemoteUsedExportsPlugin {
   constructor(private readonly bundle: Bundle) {}

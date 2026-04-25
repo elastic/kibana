@@ -26,9 +26,9 @@ import {
   setFileKindsRegistry,
 } from '../../common/file_kinds_registry';
 import { InternalFileShareService } from '../file_share_service';
-import { FileMetadataClient } from '../file_client';
+import type { FileMetadataClient } from '../file_client';
 import { SavedObjectsFileMetadataClient } from '../file_client/file_metadata_client/adapters/saved_objects';
-import { File as IFile } from '../../common';
+import type { File as IFile } from '../../common';
 import { createFileHashTransform } from '..';
 import { FilesPluginError } from '../file_client/utils';
 

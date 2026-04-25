@@ -7,9 +7,9 @@
 
 // eslint-disable-next-line max-classes-per-file
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
+import type { ProvidedType } from '@kbn/test';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
 
 export type TrainedModelsActions = ProvidedType<typeof TrainedModelsProvider>;
 

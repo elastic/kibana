@@ -17,8 +17,9 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css, SerializedStyles } from '@emotion/react';
-import { UserMessage } from '../../../types';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
+import type { UserMessage } from '@kbn/lens-common';
 
 export const MessageList = ({
   messages,
@@ -69,6 +70,7 @@ export const MessageList = ({
 
   return (
     <EuiPopover
+      aria-label={buttonLabel}
       panelPaddingSize="none"
       button={
         <EuiToolTip content={buttonLabel}>
@@ -89,7 +91,7 @@ export const MessageList = ({
             {warningCount > 0 && (
               <>
                 <EuiIcon
-                  type="alert"
+                  type="warning"
                   css={css`
                     margin-left: 4px;
                   `}
@@ -123,7 +125,7 @@ export const MessageList = ({
                     {message.severity === 'error' ? (
                       <EuiIcon type="error" color="danger" />
                     ) : (
-                      <EuiIcon type="alert" color="warning" />
+                      <EuiIcon type="warning" color="warning" />
                     )}
                   </EuiFlexItem>
                 )}

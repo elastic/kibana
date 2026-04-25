@@ -7,8 +7,14 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
+/**
+ * NOTE: This scenario has been migrated to the new evaluation framework.
+ * - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/connector/connector.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
 import expect from '@kbn/expect';
-import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/execute_connector';
+import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, kibanaClient, logger } from '../../services';
 
 const EMAIL_PROMPT =
@@ -124,6 +130,10 @@ describe('execute_connector function', () => {
         pathname: `/api/actions/connector/${emailConnectorId}`,
       });
       logger.success('Email connector deleted');
+      // delete the user instructions
+      await fetch('/internal/observability_ai_assistant/kb/entries/send_email', {
+        method: 'DELETE',
+      });
     });
   });
 });

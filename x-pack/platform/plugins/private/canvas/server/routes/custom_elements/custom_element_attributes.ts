@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomElement } from '../../../types';
+import type { CustomElement } from '../../../types';
 
 // Exclude ID attribute for the type used for SavedObjectClient
 export type CustomElementAttributes = Pick<CustomElement, Exclude<keyof CustomElement, 'id'>> & {

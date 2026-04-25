@@ -9,6 +9,8 @@
 
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
+import { getXState } from '../../../../util';
+import type { IContext } from '../context';
 
 export const stripBadDefault = (schema: OpenAPIV3.SchemaObject): void => {
   if (schema.default?.special === 'deep') {
@@ -42,6 +44,24 @@ export const processDiscontinued = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
+export const processAvailability = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
+  if (metaFields.META_FIELD_X_OAS_AVAILABILITY in schema) {
+    const state = getXState(
+      schema[metaFields.META_FIELD_X_OAS_AVAILABILITY] as {
+        stability?: 'experimental' | 'beta' | 'stable';
+        since?: string;
+      },
+      ctx.getEnv()
+    );
+
+    if (state !== undefined) {
+      (schema as OpenAPIV3.SchemaObject & { 'x-state'?: string })['x-state'] = state;
+    }
+
+    deleteField(schema, metaFields.META_FIELD_X_OAS_AVAILABILITY);
+  }
+};
+
 /** Just for type convenience */
 export const deleteField = (schema: object, field: string): void => {
   delete (schema as Record<string, unknown>)[field];
@@ -49,4 +69,9 @@ export const deleteField = (schema: object, field: string): void => {
 
 export const isAnyType = (schema: OpenAPIV3.SchemaObject): boolean => {
   return metaFields.META_FIELD_X_OAS_ANY in schema;
+};
+
+/** Assumes ref is in the form of "#/components/schemas/my-schema-my-team" */
+export const getIdFromRefString = (ref: string): string => {
+  return ref.split('/').pop()!;
 };

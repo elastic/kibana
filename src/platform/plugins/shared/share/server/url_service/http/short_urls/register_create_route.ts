@@ -8,10 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HttpServiceSetup, IRouter } from '@kbn/core/server';
+import type { HttpServiceSetup, IRouter } from '@kbn/core/server';
 import { isInternalURL } from '@kbn/std';
 import { UrlServiceError } from '../../error';
-import { ServerUrlService } from '../../types';
+import type { ServerUrlService } from '../../types';
 
 export const registerCreateRoute = (
   router: IRouter,

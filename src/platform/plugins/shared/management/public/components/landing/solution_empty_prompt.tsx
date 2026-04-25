@@ -9,7 +9,7 @@
 import React, { type FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { type CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
@@ -18,35 +18,26 @@ interface Props {
   coreStart: CoreStart;
 }
 
-const IndicesLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
+const RulesLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
   <EuiLink
-    href={coreStart.application.getUrlForApp('management', { path: 'data/index_management' })}
-    data-test-subj="managementLinkToIndices"
+    href={coreStart.application.getUrlForApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    })}
+    data-test-subj="managementLinkToRules"
   >
-    {i18n.translate('management.landing.subhead.indicesLink', {
-      defaultMessage: 'indices',
+    {i18n.translate('management.landing.subhead.rulesLink', {
+      defaultMessage: 'rules',
     })}
   </EuiLink>
 );
 
-const DataViewsLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
+const SavedObjectsLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
   <EuiLink
-    href={coreStart.application.getUrlForApp('management', { path: 'kibana/dataViews' })}
-    data-test-subj="managementLinkToDataViews"
+    href={coreStart.application.getUrlForApp('management', { path: 'kibana/objects' })}
+    data-test-subj="managementLinkToSavedObjects"
   >
-    {i18n.translate('management.landing.subhead.dataViewsLink', {
-      defaultMessage: 'data views',
-    })}
-  </EuiLink>
-);
-
-const IngestPipelinesLink: FC<{ coreStart: CoreStart }> = ({ coreStart }) => (
-  <EuiLink
-    href={coreStart.application.getUrlForApp('management', { path: 'ingest/ingest_pipelines' })}
-    data-test-subj="managementLinkToIngestPipelines"
-  >
-    {i18n.translate('management.landing.subhead.ingestPipelinesLink', {
-      defaultMessage: 'ingest pipelines',
+    {i18n.translate('management.landing.subhead.savedObjectsLink', {
+      defaultMessage: 'saved objects',
     })}
   </EuiLink>
 );
@@ -81,30 +72,20 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
           <p>
             <FormattedMessage
               id="management.landing.solution.subhead"
-              defaultMessage="Manage your {indicesLink}, {dataViewsLink}, {ingestPipelinesLink}, {usersLink}, and more."
+              defaultMessage="Manage your {rulesLink}, {usersLink}, {savedObjectsLink} and more."
               values={{
-                indicesLink: <IndicesLink coreStart={coreStart} />,
-                dataViewsLink: <DataViewsLink coreStart={coreStart} />,
-                ingestPipelinesLink: <IngestPipelinesLink coreStart={coreStart} />,
+                rulesLink: <RulesLink coreStart={coreStart} />,
                 usersLink: <UsersLink coreStart={coreStart} />,
+                savedObjectsLink: <SavedObjectsLink coreStart={coreStart} />,
               }}
             />
           </p>
 
           <p>
-            <EuiButton
-              fill
-              iconType="spaces"
-              onClick={() => {
-                coreStart.chrome.sideNav.setPanelSelectedNode('stack_management');
-              }}
-              data-test-subj="viewAllStackMngtPagesButton"
-            >
-              <FormattedMessage
-                id="management.landing.solution.viewAllPagesButton"
-                defaultMessage="View all pages"
-              />
-            </EuiButton>
+            <FormattedMessage
+              id="management.landing.text"
+              defaultMessage="A complete list of apps is in the menu on the left."
+            />
           </p>
         </>
       }

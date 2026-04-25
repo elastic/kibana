@@ -13,16 +13,16 @@ import {
   EuiPageTemplate,
   EuiSelect,
   EuiTitle,
-  useEuiTheme,
   type EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { PlaygroundHeaderDocs } from './playground_header_docs';
-import { Toolbar } from './toolbar';
-import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
+import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
+import { PlaygroundHeaderDocs } from './playground_header_docs';
+import { SaveNewPlaygroundButton } from './save_new_playground_button';
+import { Toolbar } from './toolbar';
 
 interface HeaderProps {
   pageMode: PlaygroundPageMode;
@@ -42,7 +42,6 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectPageModeChange,
 }) => {
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
-  const { euiTheme } = useEuiTheme();
   const options: Array<EuiButtonGroupOptionProps & { id: PlaygroundViewMode }> = [
     {
       id: PlaygroundViewMode.preview,
@@ -67,12 +66,12 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <EuiPageTemplate.Header
-      css={{
+      css={({ euiTheme }) => ({
         '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' },
         backgroundColor: euiTheme.colors.emptyShade,
-      }}
-      paddingSize="s"
+      })}
       data-test-subj="chat-playground-home-page"
+      paddingSize="s"
     >
       <EuiPageHeaderSection>
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -82,7 +81,10 @@ export const Header: React.FC<HeaderProps> = ({
             size="xs"
           >
             <h2>
-              <FormattedMessage id="xpack.searchPlayground.pageTitle" defaultMessage="Playground" />
+              <FormattedMessage
+                id="xpack.searchPlayground.unsaved.pageTitle"
+                defaultMessage="Unsaved playground"
+              />
             </h2>
           </EuiTitle>
 
@@ -94,6 +96,9 @@ export const Header: React.FC<HeaderProps> = ({
                 { value: PlaygroundPageMode.Search, text: 'Search' },
               ]}
               value={pageMode}
+              aria-label={i18n.translate('xpack.searchPlayground.header.pageModeSelectAriaLabel', {
+                defaultMessage: 'Page mode',
+              })}
               onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}
             />
           )}
@@ -110,10 +115,15 @@ export const Header: React.FC<HeaderProps> = ({
           data-test-subj="viewModeSelector"
         />
       </EuiPageHeaderSection>
-      <EuiPageHeaderSection>
+      <EuiPageHeaderSection
+        css={({ euiTheme }) => ({
+          paddingRight: euiTheme.size.s,
+        })}
+      >
         <EuiFlexGroup alignItems="center">
           {showDocs && <PlaygroundHeaderDocs />}
           <Toolbar selectedPageMode={pageMode} />
+          <SaveNewPlaygroundButton disabled={isActionsDisabled} />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>

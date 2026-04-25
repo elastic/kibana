@@ -10,9 +10,6 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
 import { JobSelector } from '../components/job_selector';
 
 import { HelpMenu } from '../components/help_menu';
@@ -60,19 +57,12 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
         ref={resizeRef}
         data-test-subj="mlPageSingleMetricViewer"
       >
-        <MlPageHeader>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <AnomalyResultsViewSelector viewId="timeseriesexplorer" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <PageTitle
-                title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
-                  defaultMessage: 'Single Metric Viewer',
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <MlPageHeader wrapHeader={true}>
+          <PageTitle
+            title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
+              defaultMessage: 'Single Metric Viewer',
+            })}
+          />
         </MlPageHeader>
 
         {noSingleMetricJobsFound ? null : (

@@ -23,6 +23,7 @@ import {
   createIncident,
   dedupAssignees,
   getClosedInfoForUpdate,
+  getCloseReasonIfValid,
   getDurationForUpdate,
   getEntity,
   getLatestPushInfo,
@@ -33,8 +34,16 @@ import {
   normalizeCreateCaseRequest,
   getInProgressInfoForUpdate,
   getTimingMetricsForUpdate,
+  isObservable,
+  processObservables,
 } from './utils';
-import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
+import type {
+  CaseCustomFields,
+  CustomFieldsConfiguration,
+  Observable,
+  CaseConnector,
+  JiraFieldsType,
+} from '../../../common/types/domain';
 import {
   CaseStatuses,
   CustomFieldTypes,
@@ -47,6 +56,8 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';
+import type { ObservablePost } from '../../../common/types/api';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const allComments = [
   commentObj,
@@ -80,6 +91,20 @@ describe('utils', () => {
     });
   });
 
+  describe('getCloseReasonIfValid', () => {
+    it('returns any non-empty close reason', () => {
+      expect(getCloseReasonIfValid('false_positive')).toBe('false_positive');
+      expect(getCloseReasonIfValid('automated_closure')).toBe('automated_closure');
+      expect(getCloseReasonIfValid('my custom reason')).toBe('my custom reason');
+    });
+
+    it('returns undefined for empty values', () => {
+      expect(getCloseReasonIfValid('')).toBeUndefined();
+      expect(getCloseReasonIfValid('   ')).toBeUndefined();
+      expect(getCloseReasonIfValid()).toBeUndefined();
+    });
+  });
+
   describe('createIncident', () => {
     const theCase = {
       ...flattenCaseSavedObject({
@@ -89,17 +114,14 @@ describe('utils', () => {
       totalComments: 1,
     };
 
-    const connector = {
+    const connector = createMockConnector({
       id: '456',
       actionTypeId: '.jira',
       name: 'Connector without isCaseOwned',
       config: {
         apiUrl: 'https://elastic.jira.com',
       },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
 
     it('creates an external incident correctly for Jira', async () => {
       const res = await createIncident({
@@ -117,6 +139,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
@@ -219,6 +242,7 @@ describe('utils', () => {
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
           externalId: null,
+          additionalFields: null,
         },
         comments: [],
       });
@@ -304,6 +328,52 @@ describe('utils', () => {
           labels: ['LOLBins'],
           issueType: 'Task',
           parent: null,
+          otherFields: null,
+          summary: 'Another bad one',
+          description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('includes Jira otherFields in the incident payload', async () => {
+      const caseWithOtherFields = {
+        ...flattenCaseSavedObject({
+          savedObject: {
+            ...mockCases[2],
+            attributes: {
+              ...mockCases[2].attributes,
+              connector: {
+                ...mockCases[2].attributes.connector,
+                fields: {
+                  ...(mockCases[2].attributes.connector.fields as JiraFieldsType),
+                  otherFields: '{"customfield_123456":"Blue team"}',
+                },
+              } as CaseConnector,
+            },
+          },
+        }),
+        comments: [],
+        totalComments: 0,
+      };
+
+      const res = await createIncident({
+        theCase: caseWithOtherFields,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          priority: 'High',
+          labels: ['LOLBins'],
+          issueType: 'Task',
+          parent: null,
+          otherFields: '{"customfield_123456":"Blue team"}',
           summary: 'Another bad one',
           description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
           externalId: null,
@@ -424,6 +494,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1',
@@ -450,6 +521,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/s/test-space/app/security/cases/mock-id-1',
@@ -480,6 +552,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -518,6 +591,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -1914,7 +1988,7 @@ describe('normalizeCreateCaseRequest', () => {
       type: ConnectorTypes.none,
       fields: null,
     },
-    settings: { syncAlerts: true },
+    settings: { syncAlerts: true, extractObservables: true },
     severity: CaseSeverity.LOW,
     owner: SECURITY_SOLUTION_OWNER,
     assignees: [{ uid: '1' }],
@@ -1993,5 +2067,85 @@ describe('normalizeCreateCaseRequest', () => {
       ...theCase,
       customFields: [],
     });
+  });
+});
+
+describe('isObservable', () => {
+  it('should return true if the observable is an Observable', () => {
+    expect(
+      isObservable({
+        id: '1',
+        typeKey: 'ip',
+        value: '127.0.0.1',
+        description: null,
+        createdAt: '2021-01-01',
+        updatedAt: '2021-01-01',
+      })
+    ).toBe(true);
+  });
+
+  it('should return false if the observable is not an Observable', () => {
+    expect(isObservable({ typeKey: 'ip', value: '127.0.0.1', description: null })).toBe(false);
+  });
+});
+
+describe('processObservables', () => {
+  const mockObservablePost: ObservablePost = {
+    typeKey: 'ip',
+    value: '127.0.0.1',
+    description: null,
+  };
+
+  const mockObservable: Observable = {
+    ...mockObservablePost,
+    id: '1',
+    createdAt: '2021-01-01',
+    updatedAt: '2021-01-01',
+  };
+
+  it('should process the current observable', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+  });
+
+  it('should process the new observable post', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservablePost);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+  });
+
+  it('should not add the observable if it already exists', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    processObservables(observablesMap, mockObservable);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.size).toBe(1);
+
+    processObservables(observablesMap, mockObservablePost);
+    expect(observablesMap.size).toBe(1);
+  });
+
+  it('should add a new observable if the key-value pair does not exist', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservablePost);
+    processObservables(observablesMap, { ...mockObservablePost, typeKey: 'ip2' });
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.get('ip2-127.0.0.1')).toBeDefined();
+    expect(observablesMap.size).toBe(2);
+  });
+
+  it('should not override the existing observable if the key-value pair already exists', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    processObservables(observablesMap, {
+      ...mockObservable,
+      id: '2',
+      createdAt: '2021-01-02',
+      updatedAt: '2021-01-02',
+    });
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.get('ip-127.0.0.1')).toEqual(mockObservable);
+    expect(observablesMap.size).toBe(1);
   });
 });

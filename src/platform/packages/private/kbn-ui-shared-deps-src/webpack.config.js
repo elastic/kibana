@@ -20,10 +20,8 @@ const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
-
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
-
-const useEuiAmsterdamRelease = process.env.EUI_AMSTERDAM === 'true';
+const DOMPURIFY_SRC = require.resolve('dompurify/purify.js');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 /** @returns {import('webpack').Configuration} */
 module.exports = {
@@ -112,26 +110,19 @@ module.exports = {
     ],
   },
 
+  cache: {
+    type: 'filesystem',
+  },
+
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
     mainFields: ['browser', 'module', 'main'],
     conditionNames: ['browser', 'module', 'import', 'require', 'default'],
     alias: {
-      // @elastic/eui-amsterdam is a package alias defined in Kibana's package.json
-      // that points to special EUI releases bundled with Amsterdam set as the default theme
-      // and meant to be used with Kibana 8.x. Kibana 9.0 and later use the Borealis theme
-      // and should use the regular @elastic/eui package.
-      // TODO: Remove when Kibana 8.19 is EOL and Amsterdam backports aren't needed anymore
-      // https://github.com/elastic/kibana/issues/221593
-      '@elastic/eui$': useEuiAmsterdamRelease
-        ? '@elastic/eui-amsterdam/optimize/es'
-        : '@elastic/eui/optimize/es',
-      '@elastic/eui/lib/components/provider/nested$': useEuiAmsterdamRelease
-        ? '@elastic/eui-amsterdam/optimize/es/components/provider/nested'
-        : '@elastic/eui/optimize/es/components/provider/nested',
-      '@elastic/eui/lib/services/theme/warning$': useEuiAmsterdamRelease
-        ? '@elastic/eui-amsterdam/optimize/es/services/theme/warning'
-        : '@elastic/eui/optimize/es/services/theme/warning',
+      '@elastic/eui$': '@elastic/eui/optimize/es',
+      '@elastic/eui/lib/components/provider/nested$':
+        '@elastic/eui/optimize/es/components/provider/nested',
+      '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
@@ -164,5 +155,12 @@ module.exports = {
       context: REPO_ROOT,
       manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line import/no-dynamic-require
     }),
+
+    // Replace Monaco Editor's bundled DOMPurify 3.0.5 with the project's DOMPurify 3.2.4
+    // Monaco Editor imports DOMPurify using relative paths like './dompurify/dompurify.js' or '../../dompurify/dompurify.js'
+    new webpack.NormalModuleReplacementPlugin(
+      /(\.\.\/)*(\.\/)?dompurify[/\\]dompurify\.js$/,
+      DOMPURIFY_SRC
+    ),
   ],
 };

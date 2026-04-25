@@ -8,11 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
+import { customHostSettingsSchema } from '@kbn/actions-utils';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_EMAIL_BODY_LENGTH,
+  MAX_EMAIL_BODY_LENGTH,
 } from '../common';
+
 import { validateDuration } from './lib/parse_date';
 
 export enum AllowedHosts {
@@ -39,42 +43,13 @@ const preconfiguredActionSchema = schema.object({
   exposeConfig: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
-const customHostSettingsSchema = schema.object({
-  url: schema.string({ minLength: 1 }),
-  smtp: schema.maybe(
-    schema.object({
-      ignoreTLS: schema.maybe(schema.boolean()),
-      requireTLS: schema.maybe(schema.boolean()),
-    })
-  ),
-  ssl: schema.maybe(
-    schema.object({
-      verificationMode: schema.maybe(
-        schema.oneOf(
-          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-          { defaultValue: 'full' }
-        )
-      ),
-      certificateAuthoritiesFiles: schema.maybe(
-        schema.oneOf([
-          schema.string({ minLength: 1 }),
-          schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-        ])
-      ),
-      certificateAuthoritiesData: schema.maybe(schema.string({ minLength: 1 })),
-    })
-  ),
-});
-
-export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
-
 const connectorTypeSchema = schema.object({
   id: schema.string(),
   maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
-// We leverage enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
-// The list can be overwritten only if it's not already been set in the config.
+// We leverage the enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
+// The list can be overwritten only if it has not already been set in the config.
 const enabledConnectorTypesSchema = schema.arrayOf(
   schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
   {
@@ -97,6 +72,17 @@ const rateLimiterSchema = schema.recordOf(
     limit: schema.number({ defaultValue: 500, min: 1, max: 5000 }),
   })
 );
+
+const oauthAuthorizationCodeRateLimitsSchema = schema.object({
+  authorize: schema.object({
+    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+  }),
+  callback: schema.object({
+    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+  }),
+});
 
 export const configSchema = schema.object({
   allowedHosts: schema.arrayOf(
@@ -142,6 +128,9 @@ export const configSchema = schema.object({
       {
         domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
         recipient_allowlist: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+        maximum_body_length: schema.maybe(
+          schema.number({ min: 0, defaultValue: DEFAULT_EMAIL_BODY_LENGTH })
+        ),
         services: schema.maybe(
           schema.object(
             {
@@ -201,6 +190,7 @@ export const configSchema = schema.object({
       max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
     })
   ),
+  // @deprecated: This config is deprecated and will be removed in the future in favor of the new Usage API plugin.
   usage: schema.maybe(
     schema.object({
       url: schema.maybe(schema.string()),
@@ -222,11 +212,23 @@ export const configSchema = schema.object({
     })
   ),
   rateLimiter: schema.maybe(rateLimiterSchema),
+  auth: schema.object({
+    oauth_authorization_code: schema.object({
+      rate_limits: oauthAuthorizationCodeRateLimitsSchema,
+    }),
+  }),
+  ears: schema.maybe(
+    schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      url: schema.maybe(schema.uri({ scheme: ['https'] })),
+    })
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
 export type EnabledConnectorTypes = TypeOf<typeof enabledConnectorTypesSchema>;
 export type ConnectorRateLimiterConfig = TypeOf<typeof rateLimiterSchema>;
+export type OAuthRateLimiterConfig = TypeOf<typeof oauthAuthorizationCodeRateLimitsSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
 // simultaneous usage in the config validator directly, but there's no good way to express
@@ -251,6 +253,21 @@ export function getValidatedConfig(logger: Logger, originalConfig: ActionsConfig
     const tmp: Record<string, unknown> = originalConfig;
     delete tmp.proxyOnlyHosts;
     return tmp as ActionsConfig;
+  }
+
+  if (originalConfig.email && originalConfig.email.maximum_body_length != null) {
+    const emailMaximumBodyLength = originalConfig.email.maximum_body_length;
+    if (emailMaximumBodyLength === 0) {
+      logger.warn(
+        `The configuration xpack.actions.email.maximum_body_length is set to 0 and will result in sending empty emails`
+      );
+    }
+
+    if (emailMaximumBodyLength > MAX_EMAIL_BODY_LENGTH) {
+      logger.warn(
+        `The configuration xpack.actions.email.maximum_body_length value ${emailMaximumBodyLength} is larger than the maximum setting of ${MAX_EMAIL_BODY_LENGTH} and the maximum value will be used instead`
+      );
+    }
   }
 
   return originalConfig;

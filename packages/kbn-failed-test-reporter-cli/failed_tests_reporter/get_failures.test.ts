@@ -17,7 +17,7 @@ it('discovers failures in ftr report', async () => {
     Array [
       Object {
         "classname": "Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js",
-        "commandLine": "node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts",
+        "commandLine": "node scripts/functional_tests --config=x-pack/platform/test/api_integration/apis/status/config.ts",
         "failure": "
             Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj~=\\"layerTocActionsPanelToggleButtonRoad_Map_-_Bright\\"])
     Wait timed out after 10055ms
@@ -40,7 +40,7 @@ it('discovers failures in ftr report', async () => {
       },
       Object {
         "classname": "Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps",
-        "commandLine": "node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts",
+        "commandLine": "node scripts/functional_tests --config=x-pack/platform/test/api_integration/apis/status/config.ts",
         "failure": "
             { NoSuchSessionError: This driver instance does not have a valid session ID (did you call WebDriver.quit()?) and may no longer be used.
         at promise.finally (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:726:38)
@@ -60,8 +60,8 @@ it('discovers failures in ftr report', async () => {
         "time": "0.179",
       },
       Object {
-        "classname": "Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts",
-        "commandLine": "node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts",
+        "classname": "Firefox XPack UI Functional Tests.x-pack/platform/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts",
+        "commandLine": "node scripts/functional_tests --config=x-pack/platform/test/api_integration/apis/status/config.ts",
         "failure": "{ NoSuchSessionError: Tried to run command without establishing a connection
         at Object.throwDecodedError (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/error.js:550:15)
         at parseHttpResponse (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:563:13)

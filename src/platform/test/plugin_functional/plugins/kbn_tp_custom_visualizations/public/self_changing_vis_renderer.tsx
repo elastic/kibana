@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
-import { CoreSetup } from '@kbn/core-lifecycle-browser';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { SelfChangingComponent } from './self_changing_vis/self_changing_components';
-import { SelfChangingVisRenderValue } from './self_changing_vis_fn';
+import type { SelfChangingVisRenderValue } from './self_changing_vis_fn';
 
 export const getSelfChangingVisRenderer = (core: CoreSetup) => {
   const selfChangingVisRenderer: ExpressionRenderDefinition<SelfChangingVisRenderValue> = {
@@ -22,15 +22,15 @@ export const getSelfChangingVisRenderer = (core: CoreSetup) => {
     reuseDomNode: true,
     render: async (domNode, { visParams }, handlers) => {
       const [coreSetup] = await core.getStartServices();
+      const root = createRoot(domNode);
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaRenderContextProvider {...coreSetup}>
           <SelfChangingComponent renderComplete={handlers.done} visParams={visParams} />
-        </KibanaRenderContextProvider>,
-        domNode
+        </KibanaRenderContextProvider>
       );
     },
   };

@@ -9,7 +9,7 @@ import React, { Fragment, Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';
@@ -63,7 +63,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
     this.setState({
       indexPattern,
-      fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      fields: indexPattern.fields.filter((field) => !isNestedField(field)),
     });
   }
 

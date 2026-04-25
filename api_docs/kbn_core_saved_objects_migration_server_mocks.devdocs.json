@@ -24,6 +24,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -41,6 +43,8 @@
           "(fn: () => Promise<T>, options: { retryAttempts: number; retryDelayMs: number; }) => Promise<T>"
         ],
         "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +59,8 @@
               "() => Promise<T>"
             ],
             "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +73,8 @@
             "label": "options",
             "description": [],
             "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
+            "lineNumber": 16,
+            "columnNumber": 12,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,6 +86,8 @@
                 "label": "retryAttempts",
                 "description": [],
                 "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
+                "lineNumber": 16,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -89,6 +99,8 @@
                 "label": "retryDelayMs",
                 "description": [],
                 "path": "src/core/packages/saved-objects/migration-server-mocks/src/helpers/retry_async.ts",
+                "lineNumber": 16,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -111,6 +123,8 @@
         "label": "migrationMocks",
         "description": [],
         "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,6 +141,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -142,6 +158,8 @@
                   "{ migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
+                "lineNumber": 28,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -158,6 +176,8 @@
         "label": "mockKibanaMigrator",
         "description": [],
         "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -176,6 +196,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -193,6 +215,8 @@
                   "<any>[]; }"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts",
+                "lineNumber": 38,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

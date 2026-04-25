@@ -12,6 +12,10 @@ import { getRuleMock, resolveRuleMock } from '../../../routes/__mocks__/request_
 import { requestContextMock, serverMock, requestMock } from '../../../routes/__mocks__';
 import { createRuleExceptionsRoute } from './route';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../routes/__mocks__/request_context';
 
 const getMockExceptionItem = () => ({
   description: 'Exception item for rule default exception list',
@@ -30,9 +34,11 @@ const getMockExceptionItem = () => ({
 describe('createRuleExceptionsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     request = requestMock.create({
@@ -53,6 +59,11 @@ describe('createRuleExceptionsRoute', () => {
       .mockResolvedValue(getDetectionsExceptionListSchemaMock());
 
     createRuleExceptionsRoute(server.router);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('happy paths', () => {

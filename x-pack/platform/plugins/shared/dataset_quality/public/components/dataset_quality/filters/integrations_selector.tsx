@@ -17,7 +17,7 @@ import {
 import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import { Integration } from '../../../../common/data_streams_stats/integration';
+import type { Integration } from '../../../../common/data_streams_stats/integration';
 import { IntegrationIcon } from '../../common';
 
 const integrationsSelectorLabel = i18n.translate('xpack.datasetQuality.integrationsSelectorLabel', {
@@ -90,7 +90,7 @@ export function IntegrationsSelector({
   const button = (
     <EuiFilterButton
       data-test-subj="datasetQualityIntegrationsSelectableButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="success"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}

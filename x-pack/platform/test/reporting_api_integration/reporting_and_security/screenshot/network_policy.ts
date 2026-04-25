@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
@@ -16,7 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   /*
    * The tests server config implements a network policy that is designed to disallow the following Canvas worksheet
    */
-  describe('Network Policy', () => {
+
+  describe('Network Policy violation', () => {
     before(async () => {
       await reportingAPI.initLogs(); // includes a canvas worksheet with an offending image URL
     });

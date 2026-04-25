@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { installPackage } from '../../packages';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {

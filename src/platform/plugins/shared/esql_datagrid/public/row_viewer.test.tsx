@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -68,6 +69,11 @@ describe('RowViewer', () => {
               },
             } as unknown as CoreStart['notifications']
           }
+          chrome={
+            {
+              getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
+            } as unknown as CoreStart['chrome']
+          }
           hit={hit}
           hits={hits}
           columns={columns}
@@ -89,7 +95,7 @@ describe('RowViewer', () => {
   it('should run the onClose prop when the close button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
     renderComponent(closeFlyoutSpy);
-    await userEvent.click(screen.getByTestId('docViewerFlyoutCloseButton'));
+    await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 

@@ -8,9 +8,9 @@
  */
 
 import { validateDataView } from '@kbn/data-view-validation';
-import { ValidationFunc } from '../../hook_form_lib';
+import type { ValidationFunc } from '../../hook_form_lib';
 import { containsChars } from '../../../validators/string';
-import { ERROR_CODE } from './types';
+import type { ERROR_CODE } from './types';
 
 export const indexPatternField =
   (i18n: any) =>

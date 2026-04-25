@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatternRollup } from '../../types';
+import type { PatternRollup } from '../../types';
 
 /**
  * This `PatternRollup` containing the following indices:
@@ -25,6 +25,7 @@ export const auditbeatNoResults: PatternRollup = {
       managed: true,
       policy: 'auditbeat',
       phase: 'hot',
+      skip: false,
     },
     'auditbeat-custom-empty-index-1': {
       index: 'auditbeat-custom-empty-index-1',
@@ -90,6 +91,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       managed: true,
       policy: 'auditbeat',
       phase: 'hot',
+      skip: false,
     },
     'auditbeat-custom-empty-index-1': {
       index: 'auditbeat-custom-empty-index-1',

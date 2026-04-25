@@ -5,30 +5,13 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseFleetApiConfig = await readConfigFile(require.resolve('./config.base.ts'));
 
-  const serverArgs: string[] = [...baseFleetApiConfig.get('kbnTestServer.serverArgs')];
-
-  const enableExperimentalIndex = serverArgs.findIndex((val) =>
-    val.includes('xpack.fleet.enableExperimental')
-  );
-  serverArgs[enableExperimentalIndex] = `--xpack.fleet.enableExperimental=${JSON.stringify([
-    'outputSecretsStorage',
-    'agentTamperProtectionEnabled',
-    'enableStrictKQLValidation',
-    'subfeaturePrivileges',
-    'useSpaceAwareness',
-  ])}`;
-
   return {
     ...baseFleetApiConfig.getAll(),
-    kbnTestServer: {
-      ...baseFleetApiConfig.get('kbnTestServer'),
-      serverArgs,
-    },
     testFiles: [require.resolve('./apis/space_awareness')],
     junit: {
       reportName: 'X-Pack Fleet Agent Policy API Integration Tests',

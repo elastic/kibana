@@ -6,14 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  EuiHighlight,
-  EuiLink,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiSelectableOption,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiHighlight, EuiLink, EuiPopoverTitle, EuiSelectable, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';

@@ -8,22 +8,18 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import type { Query } from '@kbn/es-query';
-import { Feature } from 'geojson';
-import {
-  EMSVectorTileStyleDescriptor,
-  HeatmapStyleDescriptor,
-  StyleDescriptor,
-  VectorStyleDescriptor,
-} from './style_property_descriptor_types';
-import { DataRequestDescriptor } from './data_request_descriptor_types';
-import { AbstractSourceDescriptor, JoinSourceDescriptor } from './source_descriptor_types';
-import { LAYER_TYPE } from '../constants';
+import type { Feature } from 'geojson';
+import type {
+  StoredEMSVectorTileLayer,
+  StoredHeatmapLayer,
+  StoredLayerGroup,
+  StoredRasterLayer,
+  StoredVectorLayer,
+} from '../../server';
+import type { DataRequestDescriptor } from './data_request_descriptor_types';
+import type { JoinSourceDescriptor } from '.';
 
-export type Attribution = {
-  label: string;
-  url: string;
-};
+export type { Attribution } from '../../server';
 
 export type JoinDescriptor = {
   leftField?: string;
@@ -57,50 +53,40 @@ export type TileError = {
   error?: ErrorCause;
 };
 
-export type LayerDescriptor = {
+interface RuntimeLayerState {
   __dataRequests?: DataRequestDescriptor[];
   __isPreviewLayer?: boolean;
-  __trackedLayerDescriptor?: LayerDescriptor;
+  __trackedLayerDescriptor?:
+    | StoredEMSVectorTileLayer
+    | StoredHeatmapLayer
+    | StoredLayerGroup
+    | StoredRasterLayer
+    | StoredVectorLayer;
   __areTilesLoaded?: boolean;
   __tileMetaFeatures?: TileMetaFeature[];
   __tileErrors?: TileError[];
-  alpha?: number;
-  attribution?: Attribution;
-  id: string;
-  label?: string | null;
-  locale?: string | null;
-  areLabelsOnTop?: boolean;
-  minZoom?: number;
-  maxZoom?: number;
-  sourceDescriptor: AbstractSourceDescriptor | null;
-  type?: string;
-  visible?: boolean;
-  style?: StyleDescriptor | null;
-  query?: Query;
-  includeInFitToBounds?: boolean;
-  parent?: string;
-};
+}
 
-export type VectorLayerDescriptor = LayerDescriptor & {
-  type: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
-  joins?: Array<Partial<JoinDescriptor>>;
-  style: VectorStyleDescriptor;
-  disableTooltips?: boolean;
-};
+export type VectorLayerDescriptor = Omit<StoredVectorLayer, 'joins'> & {
+  joins?: JoinDescriptor[];
+} & RuntimeLayerState;
 
-export type HeatmapLayerDescriptor = LayerDescriptor & {
-  type: LAYER_TYPE.HEATMAP;
-  style: HeatmapStyleDescriptor;
-};
+export type HeatmapLayerDescriptor = StoredHeatmapLayer & RuntimeLayerState;
 
-export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
-  type: LAYER_TYPE.EMS_VECTOR_TILE;
-  style: EMSVectorTileStyleDescriptor;
-};
+export type EMSVectorTileLayerDescriptor = StoredEMSVectorTileLayer & RuntimeLayerState;
 
-export type LayerGroupDescriptor = LayerDescriptor & {
-  type: LAYER_TYPE.LAYER_GROUP;
-  label: string;
-  sourceDescriptor: null;
-  visible: boolean;
-};
+export type LayerGroupDescriptor = StoredLayerGroup & RuntimeLayerState;
+
+export type RasterLayerDescriptor = StoredRasterLayer & RuntimeLayerState;
+
+export type LayerDescriptor =
+  | VectorLayerDescriptor
+  | HeatmapLayerDescriptor
+  | EMSVectorTileLayerDescriptor
+  | (LayerGroupDescriptor & {
+      sourceDescriptor?: { type: string };
+      style?: { type: string };
+    })
+  | (RasterLayerDescriptor & {
+      style?: { type: string };
+    });

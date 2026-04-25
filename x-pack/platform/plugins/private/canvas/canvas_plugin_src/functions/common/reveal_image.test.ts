@@ -7,7 +7,7 @@
 
 import { elasticOutline, elasticLogo } from '../../../public/lib';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { errors } from '../../../i18n/functions/dict/reveal_image';
 import { revealImage, Origin } from './reveal_image';
 

@@ -5,11 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
+import type { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 
 interface Option {
   label: string;

@@ -13,7 +13,8 @@ import { useLegacyUrlParams } from '../../../../../context/url_params_context/us
 import { I18LABELS } from '../../translations';
 import { formatToSec } from '../../ux_metrics/key_ux_metrics';
 import { getPercentileLabel } from '../../ux_metrics/translations';
-import { selectableRenderOptions, UrlOption } from './render_option';
+import type { UrlOption } from './render_option';
+import { selectableRenderOptions } from './render_option';
 import { useUrlSearch } from './use_url_search';
 
 interface Props {

@@ -23,6 +23,8 @@
         "label": "environmentServiceMock",
         "description": [],
         "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "() => jest.Mocked<EnvironmentServiceContract>"
             ],
             "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
               ">"
             ],
             "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -73,6 +79,8 @@
               ">"
             ],
             "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const colourToClassName = (colour: string) => {
-  const colourWithoutHash = colour.substring(1);
-  return `grok-pattern-match-${colourWithoutHash}`;
-};
+export const colourToClassName = (colour: string) => `grok-pattern-match-${colour}`;

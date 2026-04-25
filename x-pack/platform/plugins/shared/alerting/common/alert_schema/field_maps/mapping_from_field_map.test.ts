@@ -103,6 +103,11 @@ export const testFieldMap: FieldMap = {
     required: false,
     format: 'epoch_millis||strict_date_optional_time',
   },
+  // this field should be skipped in the mapping
+  unmapped_field: {
+    type: 'unmapped',
+    required: false,
+  },
 };
 export const expectedTestMapping = {
   properties: {
@@ -203,7 +208,20 @@ describe('mappingFromFieldMap', () => {
             },
             original: {
               type: 'keyword',
-              ignore_above: 1024,
+              ignore_above: 32766,
+            },
+          },
+        },
+        data_stream: {
+          properties: {
+            type: {
+              type: 'keyword',
+            },
+            dataset: {
+              type: 'keyword',
+            },
+            namespace: {
+              type: 'keyword',
             },
           },
         },
@@ -236,7 +254,13 @@ describe('mappingFromFieldMap', () => {
                 flapping_history: {
                   type: 'boolean',
                 },
+                index_pattern: {
+                  type: 'keyword',
+                },
                 maintenance_window_ids: {
+                  type: 'keyword',
+                },
+                maintenance_window_names: {
                   type: 'keyword',
                 },
                 instance: {
@@ -248,6 +272,9 @@ describe('mappingFromFieldMap', () => {
                 },
                 last_detected: {
                   type: 'date',
+                },
+                muted: {
+                  type: 'boolean',
                 },
                 pending_recovered_count: {
                   type: 'long',
@@ -311,6 +338,16 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                scheduled_action: {
+                  properties: {
+                    date: {
+                      type: 'keyword',
+                    },
+                    group: {
+                      type: 'keyword',
+                    },
+                  },
+                },
                 severity_improving: {
                   type: 'boolean',
                 },
@@ -370,6 +407,7 @@ describe('mappingFromFieldMap', () => {
         },
         tags: {
           type: 'keyword',
+          ignore_above: 1024,
         },
       },
     });
@@ -421,7 +459,7 @@ describe('mappingFromFieldMap', () => {
             },
           },
         },
-        ecs: { properties: { version: { type: 'keyword' } } },
+        ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
       },
     });
   });

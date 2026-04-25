@@ -5,13 +5,41 @@
  * 2.0.
  */
 
-import { Page } from '@playwright/test';
+import { expect, type Page, type Locator } from '@playwright/test';
 
 export class OtelHostFlowPage {
   page: Page;
 
+  private readonly exploreLogsButton: Locator;
+  private readonly exploreMetricsButton: Locator;
+
   constructor(page: Page) {
     this.page = page;
+
+    this.exploreLogsButton = this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-logs'
+    );
+    this.exploreMetricsButton = this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-metrics'
+    );
+  }
+
+  public async selectPlatform(osName: string) {
+    const platformLabel = this.getPlatformLabel(osName);
+    await this.page.getByRole('button', { name: platformLabel, exact: true }).click();
+  }
+
+  private getPlatformLabel(osName: string): string {
+    switch (osName.toLowerCase()) {
+      case 'darwin':
+        return 'Mac';
+      case 'windows':
+      case 'win32':
+        return 'Windows';
+      case 'linux':
+      default:
+        return 'Linux';
+    }
   }
 
   public async copyCollectorDownloadSnippetToClipboard() {
@@ -25,6 +53,17 @@ export class OtelHostFlowPage {
   }
 
   public async clickHostsOverviewCTA() {
-    await this.page.getByTestId('obltOnboardingExploreMetrics').click();
+    await this.exploreMetricsButton.click();
+  }
+
+  public async clickLogsExplorationCTA() {
+    await this.exploreLogsButton.click();
+  }
+
+  public async assertDataReceivedIndicator(): Promise<void> {
+    await expect(
+      this.exploreLogsButton,
+      'Explore logs action link should be visible after data is detected'
+    ).toBeVisible();
   }
 }

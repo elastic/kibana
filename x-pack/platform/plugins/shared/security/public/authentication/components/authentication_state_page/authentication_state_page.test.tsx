@@ -21,11 +21,11 @@ describe('AuthenticationStatePage', () => {
     );
 
     // Page wrapper with expected class
-    const wrapper = container.querySelector('.secAuthenticationStatePage');
+    const wrapper = container.querySelector('[data-test-subj="secAuthenticationStatePage"]');
     expect(wrapper).toBeInTheDocument();
 
     // Header section
-    const header = container.querySelector('.secAuthenticationStatePage__header');
+    const header = container.querySelector('[data-test-subj="secAuthenticationStatePageHeader"]');
     expect(header).toBeInTheDocument();
 
     // Title in <h1>
@@ -36,22 +36,13 @@ describe('AuthenticationStatePage', () => {
     expect(screen.getByText('hello world')).toBeInTheDocument();
 
     // Icon wrapper with logo class
-    const logoWrapper = container.querySelector('.secAuthenticationStatePage__logo');
+    const logoWrapper = container.querySelector(
+      '[data-test-subj="secAuthenticationStatePageLogo"]'
+    );
     expect(logoWrapper).toBeInTheDocument();
 
     // Check the EuiIcon is rendered with correct type
     const icon = logoWrapper?.querySelector('[data-euiicon-type="logoElastic"]');
     expect(icon).toBeInTheDocument();
-  });
-
-  it('renders with custom CSS class', () => {
-    const { container } = renderWithI18n(
-      <AuthenticationStatePage className="customClassName" title={'foo'}>
-        <span>hello world</span>
-      </AuthenticationStatePage>
-    );
-    expect(
-      container.querySelector('.secAuthenticationStatePage.customClassName')
-    ).toBeInTheDocument();
   });
 });

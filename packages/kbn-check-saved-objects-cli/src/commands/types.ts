@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ListrTask } from 'listr2';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { Root } from '@kbn/core-root-server-internal';
+import type {
+  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectTypeRegistration,
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import type { MigrationSnapshot } from '../types';
+import type { TypeVersionFixtures } from '../migrations/fixtures/types';
+
+export type Task = ListrTask<TaskContext>['task'];
+
+export type FixtureMap = Record<string, TypeVersionFixtures>;
+
+export type MigrationAlgorithm = 'v2' | 'zdt';
+
+export interface TaskContext {
+  gitRev: string;
+  serverlessGitRev?: string;
+  esServer?: TestElasticsearchUtils;
+  kibanaServer?: Root;
+  registeredTypes?: SavedObjectsType<any>[];
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  from?: MigrationSnapshot;
+  serverlessFrom?: MigrationSnapshot;
+  to?: MigrationSnapshot;
+  updatedTypes: SavedObjectsType<any>[];
+  migrationTypes?: SavedObjectsType<any>[];
+  currentRemovedTypes: string[];
+  newRemovedTypes: string[];
+  baselineMappings?: SavedObjectsTypeMappingDefinitions;
+  fixtures: {
+    previous: FixtureMap;
+    current: FixtureMap;
+  };
+  test: boolean; // whether the script is running with TEST data
+  fix: boolean;
+  migrationAlgorithms: MigrationAlgorithm[];
+  migrationAlgorithm?: MigrationAlgorithm;
+  migrationKibanaIndex?: string;
+}
+
+export const encryptionOverrides: EncryptedSavedObjectTypeRegistration[] = [
+  {
+    type: 'connector_token',
+    attributesToEncrypt: new Set(['token']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'tokenType',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
+  },
+];

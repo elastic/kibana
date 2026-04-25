@@ -18,12 +18,15 @@ import {
 } from '@elastic/eui';
 import type { FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { IOCPanelKey } from '../../ai_for_soc/constants/panel_keys';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { IOCRightPanelKey } from '../../ioc_details/constants/panel_keys';
+import { EasePanelKey } from '../../ease/constants/panel_keys';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
-import { getAlertTitle, getEventTitle, getField } from '../../document_details/shared/utils';
+import { getAlertTitle, getEventTitle } from '../../../flyout_v2/document/utils/get_header_title';
+import { getField } from '../../document_details/shared/utils';
 import { RulePanelKey } from '../../rule_details/right';
 import { NetworkPanelKey } from '../../network_details';
 import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
@@ -32,15 +35,22 @@ import {
   GENERIC_HISTORY_ROW_TEST_ID,
   HISTORY_ROW_LOADING_TEST_ID,
   HOST_HISTORY_ROW_TEST_ID,
+  IOC_HISTORY_ROW_TEST_ID,
   MISCONFIGURATION_HISTORY_ROW_TEST_ID,
   NETWORK_HISTORY_ROW_TEST_ID,
   RULE_HISTORY_ROW_TEST_ID,
   USER_HISTORY_ROW_TEST_ID,
   VULNERABILITY_HISTORY_ROW_TEST_ID,
+  ATTACK_DETAILS_HISTORY_ROW_TEST_ID,
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 import { VulnerabilityFindingsPanelKey } from '../../csp_details/vulnerabilities_flyout/constants';
 import { MisconfigurationFindingsPanelKey } from '../../csp_details/findings_flyout/constants';
+import {
+  AttackDetailsPreviewPanelKey,
+  AttackDetailsRightPanelKey,
+} from '../../attack_details/constants/panel_keys';
+import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 
 const MAX_WIDTH = 300; // px
 
@@ -61,7 +71,7 @@ export interface FlyoutHistoryRowProps {
 export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
   switch (item.panel.id) {
     case DocumentDetailsRightPanelKey:
-    case IOCPanelKey:
+    case EasePanelKey:
       return <DocumentDetailsHistoryRow item={item} index={index} />;
     case RulePanelKey:
       return <RuleHistoryRow item={item} index={index} />;
@@ -70,7 +80,14 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
         <GenericHistoryRow
           item={item}
           index={index}
-          title={String(item.panel.params?.hostName)}
+          title={String(
+            item.panel.params?.hostName ??
+              (item.panel.params?.identityFields as Record<string, string>)?.['host.name'] ??
+              Object.values(
+                (item.panel.params?.identityFields as Record<string, string>) || {}
+              )[0] ??
+              ''
+          )}
           icon={'storage'}
           name={'Host'}
           dataTestSubj={HOST_HISTORY_ROW_TEST_ID}
@@ -81,7 +98,14 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
         <GenericHistoryRow
           item={item}
           index={index}
-          title={String(item.panel.params?.userName)}
+          title={String(
+            item.panel.params?.userName ??
+              (item.panel.params?.identityFields as Record<string, string>)?.['user.name'] ??
+              Object.values(
+                (item.panel.params?.identityFields as Record<string, string>) || {}
+              )[0] ??
+              ''
+          )}
           icon={'user'}
           name={'User'}
           dataTestSubj={USER_HISTORY_ROW_TEST_ID}
@@ -115,6 +139,20 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
           dataTestSubj={TEST_ID}
         />
       );
+    case IOCRightPanelKey:
+      return (
+        <GenericHistoryRow
+          item={item}
+          index={index}
+          title={'Indicator'}
+          icon={'document'}
+          name={'Document'}
+          dataTestSubj={IOC_HISTORY_ROW_TEST_ID}
+        />
+      );
+    case AttackDetailsRightPanelKey:
+    case AttackDetailsPreviewPanelKey:
+      return <AttackDetailsHistoryRow item={item} index={index} />;
     default:
       return null;
   }
@@ -135,8 +173,12 @@ export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item
   const title = useMemo(
     () =>
       isAlert
-        ? getAlertTitle({ ruleName })
-        : getEventTitle({ eventKind, eventCategory, getFieldsData }),
+        ? getAlertTitle(ruleName)
+        : getEventTitle(
+            eventKind,
+            eventCategory,
+            (field) => getField(getFieldsData(field)) ?? undefined
+          ),
     [isAlert, ruleName, eventKind, eventCategory, getFieldsData]
   );
 
@@ -149,6 +191,43 @@ export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item
       name={isAlert ? 'Alert' : 'Event'}
       isLoading={loading}
       dataTestSubj={DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID}
+    />
+  );
+});
+
+/**
+ * Row item for attack details
+ */
+export const AttackDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
+  const attackId = useMemo(() => {
+    if (item?.panel?.params?.attackId) {
+      return String(item.panel.params.attackId);
+    }
+    return undefined;
+  }, [item]);
+  const { assistantAvailability, http } = useAssistantContext();
+
+  const { data: attackData, isLoading } = useFindAttackDiscoveries({
+    ids: attackId ? [attackId] : [],
+    http,
+    isAssistantEnabled: assistantAvailability.isAssistantEnabled,
+    perPage: 1,
+  });
+
+  const title = useMemo(
+    () => (attackData && attackData.data.length > 0 ? attackData.data[0]?.title : ''),
+    [attackData]
+  );
+
+  return (
+    <GenericHistoryRow
+      item={item}
+      index={index}
+      title={title}
+      icon={'bolt'}
+      name={'Attack'}
+      isLoading={isLoading}
+      dataTestSubj={ATTACK_DETAILS_HISTORY_ROW_TEST_ID}
     />
   );
 });
@@ -292,6 +371,7 @@ export const GenericHistoryRow: FC<GenericHistoryRowProps> = memo(
 
 FlyoutHistoryRow.displayName = 'FlyoutHistoryRow';
 DocumentDetailsHistoryRow.displayName = 'DocumentDetailsHistoryRow';
+AttackDetailsHistoryRow.displayName = 'AttackDetailsHistoryRow';
 RuleHistoryRow.displayName = 'RuleHistoryRow';
 RowTitle.displayName = 'RowTitle';
 GenericHistoryRow.displayName = 'GenericHistoryRow';

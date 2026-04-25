@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
-import { SerializedStyles, css } from '@emotion/react';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import { tint, useEuiTheme } from '@elastic/eui';
 
 interface BoxProps {

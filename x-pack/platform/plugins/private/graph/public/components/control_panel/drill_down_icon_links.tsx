@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import { UrlTemplate } from '../../types';
+import type { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 
 interface UrlTemplateButtonsProps {
@@ -41,12 +41,13 @@ export const DrillDownIconLinks = ({
 
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={cur.description}>
+        <EuiToolTip content={cur.description} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType={cur.icon ? () => <IconRenderer icon={cur.icon} /> : ''}
             size="xs"
             isDisabled={hasNodes}
             onClick={onUrlTemplateClick}
+            aria-label={cur.description}
           />
         </EuiToolTip>
       </EuiFlexItem>

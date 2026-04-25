@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { CommentServiceActions } from '@kbn/elastic-assistant-shared-state';
-import { ClientMessage } from '@kbn/elastic-assistant';
+import type { Observable } from 'rxjs';
+import type { CommentServiceActions } from '@kbn/elastic-assistant-shared-state';
+import type { ClientMessage } from '@kbn/elastic-assistant';
 import useObservable from 'react-use/lib/useObservable';
 import React, { useEffect, useRef } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';

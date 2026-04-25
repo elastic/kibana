@@ -10,7 +10,7 @@
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 jest.mock('../app_navigation_handler', () => {
   return {
@@ -21,6 +21,12 @@ jest.mock('../app_navigation_handler', () => {
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     trackUiMetric: jest.fn(),
+    addDataService: {
+      getCloudConnectStatusHook: jest.fn(() => () => ({
+        isLoading: false,
+        isCloudConnected: false,
+      })),
+    },
   }),
 }));
 

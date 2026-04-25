@@ -12,6 +12,8 @@ import { defineLoggedOutRoutes } from './logged_out';
 import { defineLoginRoutes } from './login';
 import { defineLogoutRoutes } from './logout';
 import { defineOverwrittenSessionRoutes } from './overwritten_session';
+import { defineResetSessionRoutes } from './reset_session';
+import { defineUnauthenticatedRoutes } from './unauthenticated';
 import type { RouteDefinitionParams } from '..';
 
 export function defineViewRoutes(params: RouteDefinitionParams) {
@@ -20,6 +22,8 @@ export function defineViewRoutes(params: RouteDefinitionParams) {
   defineLoggedOutRoutes(params);
   defineLogoutRoutes(params);
   defineOverwrittenSessionRoutes(params);
+  defineResetSessionRoutes(params);
+  defineUnauthenticatedRoutes(params);
 
   if (
     params.config.accessAgreement?.message ||

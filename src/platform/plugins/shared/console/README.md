@@ -43,6 +43,28 @@ POST /_some_endpoint
 }
 ```
 
+## Elasticsearch host management
+
+### How the host is determined
+
+Console needs to know which Elasticsearch node to proxy requests to. The server exposes a `/api/console/es_config` endpoint that returns the configured host(s):
+
+```json
+{ "host": "https://localhost:9200/", "allHosts": ["https://localhost:9200/"] }
+```
+
+These values come from `elasticsearch.hosts` in `kibana.yml`. On Elastic Cloud the `host` field is the Cloud URL. URLs are normalised through the `URL` constructor (trailing slash added, credentials stripped) before being sent to the browser.
+
+The client stores the user's selection in `localStorage` via `Settings.setSelectedHost` / `getSelectedHost` (key `selected_host`). On load, `EsHostService.init()` fetches `es_config` and populates the available host list. The Settings panel then displays a dropdown limited to that list.
+
+### Proxy host allowlist (SSRF protection)
+
+When the browser sends a request through the Console proxy (`/api/console/proxy`), it passes the chosen host as a `host` query parameter. The proxy handler (`server/routes/api/console/proxy/create_handler.ts`) validates that parameter against the configured `elasticsearch.hosts` allowlist; comparing credential-stripped, normalised versions and returns `400` for any host not on the list. The actual upstream request always uses the **original** configured host (which may contain credentials) so that authentication still works even though the browser never sees those credentials.
+
+### Stale `localStorage` values
+
+Because the allowlist check is strict, a `host` value left in `localStorage` from a previous Kibana configuration (different port, protocol, or address) will be rejected. To avoid breaking existing sessions, `sendRequests` in `MonacoEditorActionsProvider` validates the stored host against `EsHostService.getAllHosts()` before forwarding it to the proxy; using the same URL normalisation the server uses. If the stored host is no longer valid it is cleared from `localStorage` and the request falls back to the server's default. The Settings panel applies the same check and resets its displayed selection when it detects a stale value.
+
 ## Architecture
 Console uses Monaco editor that is wrapped with [`kbn-monaco`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-monaco/index.ts), so that if needed it can easily be replaced with another editor.
 The autocomplete logic is located in [`autocomplete`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/autocomplete) folder. Autocomplete rules are computed by classes in `components` sub-folder.

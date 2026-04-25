@@ -22,33 +22,44 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../hooks/use_integrations', () => ({
-  useEntityAnalyticsIntegrations: jest.fn(() => [
-    {
-      name: 'Okta',
-      version: '1.0.0',
-      title: 'Okta Integration',
-      description: 'Okta integration description',
-      icon: 'oktaIcon',
-    },
-    {
-      name: 'Active Directory',
-      version: '1.0.0',
-      title: 'Active Directory Integration',
-      description: 'Active Directory integration description',
-      icon: 'adIcon',
-    },
-  ]),
-}));
+jest.mock(
+  '../../entity_analytics_integrations_cards/hooks/use_entity_analytics_integrations',
+  () => ({
+    useEntityAnalyticsIntegrations: jest.fn(() => [
+      {
+        packageInfo: {
+          name: 'Okta',
+          version: '1.0.0',
+          title: 'Okta Integration',
+          description: 'Okta integration description',
+          icon: 'oktaIcon',
+          status: 'not_installed',
+        },
+        hasDataStreams: false,
+      },
+      {
+        packageInfo: {
+          name: 'Active Directory',
+          version: '1.0.0',
+          title: 'Active Directory Integration',
+          description: 'Active Directory integration description',
+          icon: 'adIcon',
+          status: 'not_installed',
+        },
+        hasDataStreams: false,
+      },
+    ]),
+  })
+);
 
 describe('AddDataSourcePanel', () => {
   it('renders the panel title and description', () => {
     render(<AddDataSourcePanel onComplete={() => {}} />, { wrapper: TestProviders });
 
-    expect(screen.getByText('Add data source of your privileged users')).toBeInTheDocument();
+    expect(screen.getByText('Add data source for your privileged users')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'To get started, define your privileged users by selecting an index with the relevant data, or importing your list of privileged users from a CSV file.'
+        'To get started, define your privileged users by selecting an index with user data or importing your list of privileged users from a supported file.'
       )
     ).toBeInTheDocument();
   });

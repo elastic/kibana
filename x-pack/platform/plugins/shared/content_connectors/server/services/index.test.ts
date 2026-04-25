@@ -5,39 +5,26 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
-  ElasticsearchClientMock,
-  elasticsearchClientMock,
-} from '@kbn/core-elasticsearch-client-server-mocks';
-import {
-  AgentlessConnectorsInfraService,
-  ConnectorMetadata,
-  PackagePolicyMetadata,
-  getConnectorsToDeploy,
-  getPoliciesToDelete,
-} from '.';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ConnectorMetadata, PackagePolicyMetadata } from '.';
+import { AgentlessConnectorsInfraService, getConnectorsToDeploy, getPoliciesToDelete } from '.';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   createPackagePolicyServiceMock,
   createMockAgentService,
-  createMockAgentPolicyService,
+  createMockAgentlessPoliciesService,
 } from '@kbn/fleet-plugin/server/mocks';
-import {
-  AgentPolicyServiceInterface,
+import type {
+  AgentlessPoliciesService,
   AgentService,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { createAgentPolicyWithPackages } from '@kbn/fleet-plugin/server/services/agent_policy_create';
-
-jest.mock('@kbn/fleet-plugin/server/services/agent_policy_create', () => {
-  return {
-    createAgentPolicyWithPackages: jest.fn().mockReturnValue({ id: 'test-policy' }),
-  };
-});
 
 jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
   const mockedGetPackageInfo = ({ pkgName }: { pkgName: string }) => {
@@ -85,7 +72,7 @@ describe('AgentlessConnectorsInfraService', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: ElasticsearchClientMock;
   let packagePolicyService: jest.Mocked<PackagePolicyClient>;
-  let agentPolicyInterface: jest.Mocked<AgentPolicyServiceInterface>;
+  let agentlessPoliciesService: jest.Mocked<AgentlessPoliciesService>;
   let agentService: jest.Mocked<AgentService>;
   let logger: MockedLogger;
   let service: AgentlessConnectorsInfraService;
@@ -94,7 +81,7 @@ describe('AgentlessConnectorsInfraService', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     packagePolicyService = createPackagePolicyServiceMock();
-    agentPolicyInterface = createMockAgentPolicyService();
+    agentlessPoliciesService = createMockAgentlessPoliciesService();
     agentService = createMockAgentService();
     logger = loggerMock.create();
 
@@ -102,7 +89,7 @@ describe('AgentlessConnectorsInfraService', () => {
       soClient,
       esClient,
       packagePolicyService,
-      agentPolicyInterface,
+      agentlessPoliciesService,
       agentService,
       logger
     );
@@ -451,7 +438,7 @@ describe('AgentlessConnectorsInfraService', () => {
       }
     });
 
-    test('Does not swallow an error if agent policy creation failed', async () => {
+    test('Does not swallow an error if agent with package policies creation failed', async () => {
       const connector = {
         id: '000000001',
         name: 'something',
@@ -460,7 +447,7 @@ describe('AgentlessConnectorsInfraService', () => {
       };
       const errorMessage = 'Failed to create an agent policy hehe';
 
-      (createAgentPolicyWithPackages as jest.Mock).mockImplementationOnce(() => {
+      agentlessPoliciesService.createAgentlessPolicy.mockImplementationOnce(() => {
         throw new Error(errorMessage);
       });
 
@@ -472,29 +459,7 @@ describe('AgentlessConnectorsInfraService', () => {
       }
     });
 
-    test('Does not swallow an error if package policy creation failed', async () => {
-      const connector = {
-        id: '000000001',
-        name: 'something',
-        service_type: 'github',
-        is_deleted: false,
-      };
-      const errorMessage = 'Failed to create a package policy hehe';
-
-      agentPolicyInterface.create.mockResolvedValue(agentPolicy);
-      packagePolicyService.create.mockImplementation(() => {
-        throw new Error(errorMessage);
-      });
-
-      try {
-        await service.deployConnector(connector);
-        expect(true).toBe(false);
-      } catch (e) {
-        expect(e.message).toEqual(errorMessage);
-      }
-    });
-
-    test('Returns a created package policy when all goes well', async () => {
+    test('Returns a created agent policy when all goes well', async () => {
       const connector = {
         id: '000000001',
         name: 'something',
@@ -502,14 +467,13 @@ describe('AgentlessConnectorsInfraService', () => {
         is_deleted: false,
       };
 
-      agentPolicyInterface.create.mockResolvedValue(agentPolicy);
-      packagePolicyService.create.mockResolvedValue(sharepointOnlinePackagePolicy);
+      agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(agentPolicy);
 
       const result = await service.deployConnector(connector);
-      expect(result).toBe(sharepointOnlinePackagePolicy);
+      expect(result).toBe(agentPolicy);
     });
 
-    test('passes supports_agentless flag and global tags correctly to agent policy creation and package policy creation', async () => {
+    test('call agentlessPoliciesService.createAgentlessPolicy with correct params', async () => {
       const testConnector = {
         id: '000000005',
         name: 'Test Agentless Connector',
@@ -518,27 +482,32 @@ describe('AgentlessConnectorsInfraService', () => {
       };
 
       const fakeAgentPolicy = { id: 'agent-policy-005' } as AgentPolicy;
-      const fakePackagePolicy = {
-        id: 'package-policy-005',
-        policy_ids: ['agent-policy-005'],
-      } as PackagePolicy;
-
-      agentPolicyInterface.create.mockResolvedValue(fakeAgentPolicy);
-      packagePolicyService.create.mockResolvedValue(fakePackagePolicy);
+      agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(fakeAgentPolicy);
 
       const result = await service.deployConnector(testConnector);
 
-      expect(createAgentPolicyWithPackages).toHaveBeenCalled();
-
-      expect(packagePolicyService.create).toHaveBeenCalledWith(
-        soClient,
-        esClient,
+      expect(agentlessPoliciesService.createAgentlessPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
-          supports_agentless: true,
-        }),
-        { force: true }
+          description: '',
+          enabled: true,
+          inputs: {
+            'github-connectors-py': {
+              enabled: true,
+              streams: {},
+              vars: {
+                connector_id: '000000005',
+                connector_name: 'Test Agentless Connector',
+              },
+            },
+          },
+          policy_template: 'github',
+          name: 'github connector 000000005',
+          namespace: '',
+          package: { name: 'elastic_connectors', title: 'Elastic Connectors', version: '0.0.5' },
+        })
       );
-      expect(result).toBe(fakePackagePolicy);
+
+      expect(result).toBe(fakeAgentPolicy);
     });
   });
   describe('removeDeployment', () => {
@@ -567,7 +536,7 @@ describe('AgentlessConnectorsInfraService', () => {
 
       await service.removeDeployment(packagePolicyId);
 
-      expect(agentPolicyInterface.delete).toBeCalledWith(soClient, esClient, agentPolicyId);
+      expect(agentlessPoliciesService.deleteAgentlessPolicy).toBeCalledWith(agentPolicyId);
       expect(packagePolicyService.delete).toBeCalledWith(soClient, esClient, [packagePolicyId]);
     });
 
@@ -576,7 +545,7 @@ describe('AgentlessConnectorsInfraService', () => {
 
       const errorMessage = 'Failed to create a package policy hehe';
 
-      agentPolicyInterface.delete.mockImplementation(() => {
+      agentlessPoliciesService.deleteAgentlessPolicy.mockImplementation(() => {
         throw new Error(errorMessage);
       });
 

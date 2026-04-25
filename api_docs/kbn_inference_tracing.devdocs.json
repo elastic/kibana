@@ -29,6 +29,8 @@
           "BaseInferenceSpanProcessor"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -63,6 +67,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+                "lineNumber": 18,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -84,6 +90,8 @@
               "ReadableSpan"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -98,6 +106,8 @@
                   "ReadableSpan"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+                "lineNumber": 51,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -127,6 +137,8 @@
           "BaseInferenceSpanProcessor"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -141,6 +153,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -161,6 +175,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+                "lineNumber": 37,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -182,6 +198,8 @@
               "ReadableSpan"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -196,6 +214,8 @@
                   "ReadableSpan"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+                "lineNumber": 77,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -210,12 +230,83 @@
     "functions": [
       {
         "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.withActiveInferenceSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withActiveInferenceSpan",
+        "description": [],
+        "signature": [
+          "WithActiveSpan"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_active_inference_span.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withActiveInferenceSpan.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 29,
+            "columnNumber": 7,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withActiveInferenceSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 29,
+            "columnNumber": 21,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-tracing",
+                "id": "def-server.withActiveInferenceSpan.$2.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "span",
+                "description": [],
+                "signature": [
+                  "Span",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+                "lineNumber": 29,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
         "id": "def-server.withChatCompleteSpan",
         "type": "Function",
         "tags": [],
         "label": "withChatCompleteSpan",
         "description": [
-          "\nWrapper around {@link withInferenceSpan} that sets the right attributes for a chat operation span."
+          "\nWrapper around {@link withActiveInferenceSpan} that sets the right attributes for a chat operation span."
         ],
         "signature": [
           "(options: InferenceGenerationOptions, cb: (span?: ",
@@ -223,6 +314,8 @@
           " | undefined) => T) => T"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+        "lineNumber": 161,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -237,6 +330,8 @@
               "InferenceGenerationOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -254,6 +349,8 @@
               " | undefined) => T"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -291,6 +388,8 @@
           "<ChatCompleteCompositeResponseOptions>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+        "lineNumber": 171,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -305,6 +404,8 @@
               "InferenceGenerationOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -330,6 +431,8 @@
               "<ChatCompleteCompositeResponseOptions>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -345,28 +448,40 @@
         "tags": [],
         "label": "withExecuteToolSpan",
         "description": [
-          "\nWrapper around {@link withInferenceSpan} that sets the right attributes for a execute_tool operation span."
+          "\nWrapper around {@link withActiveInferenceSpan} that sets the right attributes for a execute_tool operation span."
         ],
         "signature": [
-          "(options: string | { name: string; description?: string | undefined; toolCallId?: string | undefined; input?: unknown; }, cb: (span?: ",
+          "(toolName: string, options: ",
+          {
+            "pluginId": "@kbn/tracing-utils",
+            "scope": "common",
+            "docId": "kibKbnTracingUtilsPluginApi",
+            "section": "def-common.WithActiveSpanOptions",
+            "text": "WithActiveSpanOptions"
+          },
+          " & { tool: { description?: string | undefined; toolCallId?: string | undefined; input?: unknown; }; }, cb: (span?: ",
           "Span",
           " | undefined) => T) => T"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/inference-tracing",
             "id": "def-server.withExecuteToolSpan.$1",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
-            "label": "options",
+            "label": "toolName",
             "description": [],
             "signature": [
-              "string | { name: string; description?: string | undefined; toolCallId?: string | undefined; input?: unknown; }"
+              "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -374,6 +489,30 @@
           {
             "parentPluginId": "@kbn/inference-tracing",
             "id": "def-server.withExecuteToolSpan.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tracing-utils",
+                "scope": "common",
+                "docId": "kibKbnTracingUtilsPluginApi",
+                "section": "def-common.WithActiveSpanOptions",
+                "text": "WithActiveSpanOptions"
+              },
+              " & { tool: { description?: string | undefined; toolCallId?: string | undefined; input?: unknown; }; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withExecuteToolSpan.$3",
             "type": "Function",
             "tags": [],
             "label": "cb",
@@ -384,6 +523,8 @@
               " | undefined) => T"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -394,54 +535,35 @@
       },
       {
         "parentPluginId": "@kbn/inference-tracing",
-        "id": "def-server.withInferenceSpan",
+        "id": "def-server.withInferenceContext",
         "type": "Function",
         "tags": [],
-        "label": "withInferenceSpan",
+        "label": "withInferenceContext",
         "description": [
-          "\nWraps a callback in an active span. If the callback returns an Observable\nor Promise, it will set the span status to the appropriate value when the\nasync operation completes."
+          "\nCreates an active \"inference\"-scoped context. Every span created in this\ncontext will be exported via the inference exporters. This allows us to export\na subset of spans to external systems like Phoenix."
         ],
         "signature": [
-          "(options: string | ({ name: string; } & ",
-          "GenAISemConvAttributes",
-          "), cb: (span?: ",
-          "Span",
-          " | undefined) => T) => T"
+          "<T>(fn: () => T) => T"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_span.ts",
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_context.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/inference-tracing",
-            "id": "def-server.withInferenceSpan.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "string | ({ name: string; } & ",
-              "GenAISemConvAttributes",
-              ")"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_span.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/inference-tracing",
-            "id": "def-server.withInferenceSpan.$2",
+            "id": "def-server.withInferenceContext.$1",
             "type": "Function",
             "tags": [],
-            "label": "cb",
+            "label": "fn",
             "description": [],
             "signature": [
-              "(span?: ",
-              "Span",
-              " | undefined) => T"
+              "() => T"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_span.ts",
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_context.ts",
+            "lineNumber": 16,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -461,6 +583,8 @@
         "label": "ElasticGenAIAttributes",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -473,6 +597,8 @@
         "label": "GenAISemanticConventions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -481,15 +607,19 @@
     "misc": [
       {
         "parentPluginId": "@kbn/inference-tracing",
-        "id": "def-server.InferenceSpanAttributes",
-        "type": "Type",
+        "id": "def-server.EVAL_RUN_ID_BAGGAGE_KEY",
+        "type": "string",
         "tags": [],
-        "label": "InferenceSpanAttributes",
-        "description": [],
-        "signature": [
-          "GenAISemConvAttributes"
+        "label": "EVAL_RUN_ID_BAGGAGE_KEY",
+        "description": [
+          "\nW3C baggage key used by offline eval runs to tag all inference spans with the current eval run id.\n\nThis is intended to be set by clients (e.g. Scout/evals test runner) via the `baggage` HTTP header,\nand then propagated through tracing context."
         ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_span.ts",
+        "signature": [
+          "\"kibana.evals.run_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/baggage.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

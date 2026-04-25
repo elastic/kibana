@@ -6,17 +6,10 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { AnalyticsServiceStart } from '@kbn/core/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import {
-  ClickMetric,
-  CountMetric,
-  EventMetric,
-  FieldType,
-  TrackedApplicationClick,
-  TrackedSavedObjectClick,
-  TrackUiMetricFn,
-} from '../types';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { TrackedApplicationClick, TrackedSavedObjectClick, TrackUiMetricFn } from '../types';
+import { ClickMetric, CountMetric, EventMetric, FieldType } from '../types';
 
 export class EventReporter {
   private reportEvent: AnalyticsServiceStart['reportEvent'];

@@ -5,20 +5,45 @@
  * 2.0.
  */
 
-import { DocumentationProduct } from '@kbn/product-doc-common';
-
-export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
+export enum InstallationStatus {
+  Installed = 'installed',
+  Uninstalled = 'uninstalled',
+  Installing = 'installing',
+  Error = 'error',
+}
 
 export interface StatusResponse {
   status: InstallationStatus;
   indexName?: string;
+  dashboardId?: string;
+  taskId?: string;
+  error?: string;
 }
 
-export interface InstallResponse {
+export interface SampleDataResponse {
   status: InstallationStatus;
+  error?: string;
+}
+
+export interface InstalledResponse extends SampleDataResponse {
+  status: InstallationStatus.Installed;
   indexName: string;
+  dashboardId: string;
+}
+
+export interface InstallingResponse extends SampleDataResponse {
+  status: InstallationStatus.Installing;
+  taskId: string;
+}
+
+export interface SampleDataInstallState {
+  status: InstallationStatus;
+  indexName?: string;
+  dashboardId?: string;
+  taskId?: string;
+  error?: string;
 }
 
 export enum DatasetSampleType {
-  elasticsearch = DocumentationProduct.elasticsearch,
+  elasticsearch = 'elasticsearch_documentation',
 }

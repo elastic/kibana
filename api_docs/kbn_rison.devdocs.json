@@ -26,7 +26,7 @@
         "tags": [],
         "label": "decode",
         "description": [
-          "\nparse a rison string into a javascript structure."
+          "\nParse a RISON string into a JavaScript structure.\n"
         ],
         "signature": [
           "(rison: string) => ",
@@ -39,6 +39,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,17 +50,23 @@
             "type": "string",
             "tags": [],
             "label": "rison",
-            "description": [],
+            "description": [
+              "- The RISON-encoded string to decode."
+            ],
             "signature": [
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 65,
+            "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The decoded JavaScript value as a {@link RisonValue }."
+        ],
         "initialIsOpen": false
       },
       {
@@ -68,7 +76,7 @@
         "tags": [],
         "label": "decodeArray",
         "description": [
-          "\nparse an a-rison string into a javascript structure.\n\nthis simply adds array markup around the string before parsing."
+          "\nParse an A-RISON string (a RISON array without surrounding parentheses)\ninto a JavaScript array. This prepends array markup before passing to the\nstandard RISON decoder.\n"
         ],
         "signature": [
           "(rison: string) => ",
@@ -82,6 +90,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,17 +101,23 @@
             "type": "string",
             "tags": [],
             "label": "rison",
-            "description": [],
+            "description": [
+              "- The A-RISON-encoded string to decode."
+            ],
             "signature": [
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 104,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The decoded array of {@link RisonValue } elements."
+        ],
         "initialIsOpen": false
       },
       {
@@ -111,12 +127,14 @@
         "tags": [],
         "label": "encode",
         "description": [
-          "\nrison-encode a javascript structure"
+          "\nRISON-encode a JavaScript value, throwing if the value cannot be encoded.\nFor values of unknown encodability, prefer {@link encodeUnknown}.\n"
         ],
         "signature": [
           "(obj: any) => string"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,17 +144,23 @@
             "type": "Any",
             "tags": [],
             "label": "obj",
-            "description": [],
+            "description": [
+              "- The JavaScript value to encode. Typed as `any` because RISON"
+            ],
             "signature": [
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 49,
+            "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The RISON-encoded string."
+        ],
         "initialIsOpen": false
       },
       {
@@ -146,12 +170,14 @@
         "tags": [],
         "label": "encodeArray",
         "description": [
-          "\nrison-encode a javascript array without surrounding parens"
+          "\nRISON-encode a JavaScript array using A-RISON format (without surrounding\nparentheses), suitable for use in URL array parameters.\n"
         ],
         "signature": [
           "(array: any[]) => any"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -161,17 +187,23 @@
             "type": "Array",
             "tags": [],
             "label": "array",
-            "description": [],
+            "description": [
+              "- The array to encode. Typed as `any[]` because the array"
+            ],
             "signature": [
               "any[]"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 92,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The A-RISON-encoded string."
+        ],
         "initialIsOpen": false
       },
       {
@@ -180,11 +212,15 @@
         "type": "Function",
         "tags": [],
         "label": "encodeUnknown",
-        "description": [],
+        "description": [
+          "\nRISON-encode a JavaScript value, returning `undefined` when the value cannot\nbe represented in RISON (e.g. functions, symbols, or circular references).\nUse {@link encode} when the input is expected to always be encodable.\n"
+        ],
         "signature": [
           "(obj: any) => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,17 +230,23 @@
             "type": "Any",
             "tags": [],
             "label": "obj",
-            "description": [],
+            "description": [
+              "- The value to encode. Typed as `any` because this function is"
+            ],
             "signature": [
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 36,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The RISON-encoded string, or `undefined` if the value is not encodable."
+        ],
         "initialIsOpen": false
       },
       {
@@ -214,7 +256,7 @@
         "tags": [],
         "label": "safeDecode",
         "description": [
-          "\nsafely parse a rison string into a javascript structure, never throws"
+          "\nParse a RISON string into a JavaScript structure, returning `null` instead\nof throwing when the input is invalid.\n"
         ],
         "signature": [
           "(rison: string) => ",
@@ -227,6 +269,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -236,17 +280,23 @@
             "type": "string",
             "tags": [],
             "label": "rison",
-            "description": [],
+            "description": [
+              "- The RISON-encoded string to decode."
+            ],
             "signature": [
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 76,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The decoded {@link RisonValue }, or `null` if the string is not valid RISON."
+        ],
         "initialIsOpen": false
       }
     ],
@@ -259,7 +309,9 @@
         "type": "Type",
         "tags": [],
         "label": "RisonValue",
-        "description": [],
+        "description": [
+          "\nAny value that can be represented in RISON — a superset of JSON primitives\nthat also supports nested objects and arrays."
+        ],
         "signature": [
           "string | number | boolean | ",
           {
@@ -280,6 +332,8 @@
           "; } | null"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

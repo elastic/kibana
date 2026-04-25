@@ -7,7 +7,7 @@
 
 import { SPACES } from '../../common/lib/spaces';
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   importTestSuiteFactory,
   importTestCaseFailures,
@@ -120,12 +120,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   return { group1, group2, group3, group4, refOrigins };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
-  const { addTests, createTestDefinitions } = importTestSuiteFactory(es, esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = importTestSuiteFactory(context);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     const singleRequest = true;
     if (createNewCopies) {

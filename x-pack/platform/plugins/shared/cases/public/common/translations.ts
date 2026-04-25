@@ -29,6 +29,41 @@ export const COPY_ID_ACTION_SUCCESS = i18n.translate('xpack.cases.caseView.copyI
   defaultMessage: 'Copied case ID to clipboard',
 });
 
+export const APPLY_TEMPLATE_ACTION_LABEL = i18n.translate(
+  'xpack.cases.caseView.applyTemplateAction',
+  {
+    defaultMessage: 'Apply template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.title',
+  {
+    defaultMessage: 'Apply template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.templateLabel',
+  {
+    defaultMessage: 'Template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.templatePlaceholder',
+  {
+    defaultMessage: 'Select a template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_APPLY = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.apply',
+  {
+    defaultMessage: 'Apply',
+  }
+);
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
@@ -281,6 +316,34 @@ export const SYNC_ALERTS_HELP = i18n.translate('xpack.cases.components.create.sy
   defaultMessage: 'Enabling this option will sync the alert statuses with the case status.',
 });
 
+export const EXTRACT_OBSERVABLES_SWITCH_LABEL_ON = i18n.translate(
+  'xpack.cases.settings.extractObservablesSwitchLabelOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_SWITCH_LABEL_OFF = i18n.translate(
+  'xpack.cases.settings.extractObservablesSwitchLabelOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
+  'xpack.cases.settings.extractObservablesLabel',
+  {
+    defaultMessage: 'Extract observables',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_HELP = i18n.translate(
+  'xpack.cases.components.create.extractObservablesHelpText',
+  {
+    defaultMessage: 'Enabling this option will extract observables from the alert automatically.',
+  }
+);
+
 export const ALERT = i18n.translate('xpack.cases.common.alertLabel', {
   defaultMessage: 'Alert',
 });
@@ -291,6 +354,10 @@ export const ALERTS = i18n.translate('xpack.cases.common.alertsLabel', {
 
 export const ALERT_ADDED_TO_CASE = i18n.translate('xpack.cases.common.alertAddedToCase', {
   defaultMessage: 'added to case',
+});
+
+export const EVENTS = i18n.translate('xpack.cases.common.eventsLabel', {
+  defaultMessage: 'Events',
 });
 
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
@@ -335,7 +402,22 @@ export const CASE_ALERT_SUCCESS_TOAST = (title: string, quantity: number = 1) =>
 export const CASE_ALERT_SUCCESS_SYNC_TEXT = i18n.translate(
   'xpack.cases.actions.caseAlertSuccessSyncText',
   {
-    defaultMessage: 'The alert statuses are synched with the case status.',
+    defaultMessage: "Alert statuses were synced with the case's status.",
+  }
+);
+
+export const CASE_ALERT_SUCCESS_OBSERVABLES_TEXT = i18n.translate(
+  'xpack.cases.actions.caseAlertSuccessObservablesText',
+  {
+    defaultMessage: 'Observables were extracted and added to the case.',
+  }
+);
+
+export const CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT = i18n.translate(
+  'xpack.cases.actions.caseAlertSuccessSyncAndExtractText',
+  {
+    defaultMessage:
+      "Alert statuses were synced with the case's status and observables were extracted and added to the case.",
   }
 );
 

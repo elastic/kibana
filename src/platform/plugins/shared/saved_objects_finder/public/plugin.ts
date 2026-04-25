@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin } from '@kbn/core/public';
+import type { Plugin } from '@kbn/core/public';
 
 export class SavedObjectsFinderPublicPlugin implements Plugin<{}, {}, object, {}> {
   public setup() {

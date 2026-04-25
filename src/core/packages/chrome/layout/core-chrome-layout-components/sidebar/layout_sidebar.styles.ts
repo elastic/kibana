@@ -8,18 +8,18 @@
  */
 
 import { css } from '@emotion/react';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 const root = css`
-  position: sticky;
   grid-area: sidebar;
-  align-self: start;
   display: flex;
-  gap: 12px;
   flex-direction: column;
-  align-items: center;
-  height: 100%;
-  width: var(--kbn-layout--sidebar-width);
-  z-index: var(--kbn-layout--aboveFlyoutLevel);
+  height: calc(
+    100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
+  );
+  width: calc(100% - ${layoutVar('application.marginRight')});
+  z-index: ${layoutLevels.sidebar};
+  min-height: 0; // to allow flex children to shrink properly
 `;
 
 export const styles = {

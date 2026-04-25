@@ -10,7 +10,8 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type {
@@ -19,13 +20,14 @@ import type {
   StatusCheckType,
   InstructionsType,
 } from '../../../services/tutorials/types';
-import { TutorialsCategory as TutorialCategoryType } from '../../../../common/constants';
+import type { TutorialsCategory as TutorialCategoryType } from '../../../../common/constants';
 import type { CustomStatusCheckCallback } from '../../../services/tutorials/tutorial_service';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
-import { getServices, HomeKibanaServices } from '../../kibana_services';
+import type { HomeKibanaServices } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',

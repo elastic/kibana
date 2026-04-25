@@ -113,7 +113,7 @@ export async function unenrollBatch(
     await updateActionsForForceUnenroll(esClient, soClient, agentIds, actionId, total);
   } else {
     // Create unenroll action for each agent
-    await createAgentAction(esClient, {
+    await createAgentAction(esClient, soClient, {
       id: actionId,
       agents: agentIds,
       created_at: now,
@@ -144,7 +144,7 @@ export async function updateActionsForForceUnenroll(
 ) {
   // creating an action doc so that force unenroll shows up in activity
   const currentSpaceId = getCurrentNamespace(soClient);
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     agents: agentIds,
     created_at: new Date().toISOString(),

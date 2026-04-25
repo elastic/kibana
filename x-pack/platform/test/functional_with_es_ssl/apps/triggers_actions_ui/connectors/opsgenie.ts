@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ObjectRemover } from '../../../lib/object_remover';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { createSlackConnectorAndObjectRemover, getConnectorByName } from './utils';
 
@@ -294,7 +294,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'connector', 'actions');
 
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
       });
 
       beforeEach(async () => {
@@ -307,50 +307,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should default to the create alert action', async () => {
-        await find.clickByButtonText('Message');
         await testSubjects.existOrFail('messageInput');
 
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
       });
 
       it('should default to the close alert action when setting the run when to recovered', async () => {
-        await find.clickByButtonText('Settings');
         await testSubjects.click('ruleActionsSettingsSelectActionGroup');
         await testSubjects.click('addNewActionConnectorActionGroup-recovered');
 
-        await find.clickByButtonText('Message');
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
         await testSubjects.existOrFail('noteTextArea');
         await testSubjects.missingOrFail('messageInput');
       });
 
       it('should not preserve the alias when switching run when to recover', async () => {
-        await find.clickByButtonText('Message');
         await testSubjects.setValue('aliasInput', 'an alias');
 
-        await find.clickByButtonText('Settings');
         await testSubjects.click('ruleActionsSettingsSelectActionGroup');
         await testSubjects.click('addNewActionConnectorActionGroup-recovered');
 
-        await find.clickByButtonText('Message');
         await testSubjects.missingOrFail('messageInput');
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
       });
 
       it('should not preserve the alias when switching run when to threshold met', async () => {
-        await find.clickByButtonText('Settings');
         await testSubjects.click('ruleActionsSettingsSelectActionGroup');
         await testSubjects.click('addNewActionConnectorActionGroup-recovered');
 
-        await find.clickByButtonText('Message');
         await testSubjects.missingOrFail('messageInput');
         await testSubjects.setValue('aliasInput', 'an alias');
 
-        await find.clickByButtonText('Settings');
         await testSubjects.click('ruleActionsSettingsSelectActionGroup');
         await testSubjects.click('addNewActionConnectorActionGroup-threshold met');
 
-        await find.clickByButtonText('Message');
         await testSubjects.exists('messageInput');
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
       });
@@ -374,7 +364,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('ruleActionsConnectorsModal');
       await find.clickByButtonText(name);
 
-      await find.clickByButtonText('Settings');
       await rules.common.setNotifyThrottleInput();
     };
 

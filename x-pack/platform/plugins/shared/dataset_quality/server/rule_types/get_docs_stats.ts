@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { fetchEsQuery } from './fetch_es_query';
 
 export interface DocStat {

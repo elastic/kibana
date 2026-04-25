@@ -21,11 +21,13 @@ import {
   EuiSplitPanel,
 } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
 import { Instruction } from './instruction';
 import { Content } from './content';
-import { INSTRUCTION_VARIANT, getDisplayText } from '../../..';
+import type { INSTRUCTION_VARIANT } from '../../..';
+import { getDisplayText } from '../../..';
 import * as StatusCheckStates from './status_check_states';
 import type {
   InstructionSetType,

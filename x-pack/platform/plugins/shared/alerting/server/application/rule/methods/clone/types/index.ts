@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './clone_rule_params';
+export type * from './clone_rule_params';

@@ -8,7 +8,7 @@
  */
 
 import { setTlsConfigMock } from './http_server.test.mocks';
-import { Server } from 'http';
+import type { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
 import { omit } from 'lodash';
@@ -25,12 +25,13 @@ import type {
 } from '@kbn/core-http-server';
 import { Router, type RouterOptions } from '@kbn/core-http-router-server-internal';
 import { createServer } from '@kbn/server-http-tools';
-import { HttpConfig } from './http_config';
+import type { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
-import { of, Observable, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 
@@ -1886,6 +1887,7 @@ describe('setup contract', () => {
           options: {
             app: {
               access: 'public',
+              excludeFromRateLimiter: true,
               security: {
                 authz: {
                   enabled: false,
@@ -2137,7 +2139,7 @@ test('exposes authentication details of incoming request to a route handler', as
       path: '/foo',
       validate: false,
       security: {
-        authc: { enabled: 'optional' },
+        authc: { enabled: 'optional', reason: 'test' },
         authz: { enabled: false, reason: 'test' },
       },
     },
@@ -2179,9 +2181,118 @@ test('exposes authentication details of incoming request to a route handler', as
         tags: [],
         timeout: {},
         security: {
-          authc: { enabled: 'optional' },
+          authc: { enabled: 'optional', reason: 'test' },
           authz: { enabled: false, reason: 'test' },
         },
       },
     });
+});
+
+test('properly treats minimal authentication as required', async () => {
+  const { registerRouter, registerAuth, server: innerServer } = await server.setup({ config$ });
+
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/',
+      validate: false,
+      security: {
+        authc: { enabled: 'minimal', reason: 'test' },
+        authz: { enabled: false, reason: 'test' },
+      },
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
+
+  // mocking to have `authRegistered` filed set to true
+  registerAuth((req, res, auth) => auth.authenticated({ state: { alpha: 'beta' } }));
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200, {
+      method: 'get',
+      path: '/',
+      routePath: '/',
+      options: {
+        authRequired: true,
+        xsrfRequired: false,
+        access: 'internal',
+        tags: [],
+        timeout: {},
+        security: {
+          authc: { enabled: 'minimal', reason: 'test' },
+          authz: { enabled: false, reason: 'test' },
+        },
+      },
+    });
+});
+
+test('includes Server-Timing header with custom events', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/timing-test',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => {
+      // Use timing API
+      const timer = req.serverTiming.start('test-operation', 'Test operation');
+      timer.end();
+      req.serverTiming.measure('manual-metric', 42.5, 'Manual measurement');
+
+      return res.ok({ body: 'ok' });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup({
+    config$: of({ ...config, serverTiming: true }),
+  });
+  registerRouter(router);
+  await server.start();
+
+  const response = await supertest(innerServer.listener).get('/foo/timing-test').expect(200);
+
+  // Verify Server-Timing header exists and contains expected metrics
+  expect(response.headers['server-timing']).toBeDefined();
+  const headerValue = response.headers['server-timing'];
+  expect(headerValue).toMatch(
+    /app-total;dur=[\d.]+;desc="Application Server Processing Time \(Total\)"/
+  );
+  expect(headerValue).toMatch(/test-operation;dur=[\d.]+;desc="Test operation"/);
+  expect(headerValue).toContain('manual-metric;dur=42.50;desc="Manual measurement"');
+});
+
+test('does not set Server-Timing header when serverTiming is disabled', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: 'ok' });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup({
+    config$: of({ ...config, serverTiming: false }),
+  });
+  registerRouter(router);
+  await server.start();
+
+  const response = await supertest(innerServer.listener).get('/foo/').expect(200);
+
+  expect(response.headers['server-timing']).toBeUndefined();
 });

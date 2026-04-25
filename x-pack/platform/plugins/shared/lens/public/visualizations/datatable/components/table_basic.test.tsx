@@ -11,17 +11,17 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { faker } from '@faker-js/faker';
 import { act } from 'react-dom/test-utils';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
-import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
-import { DatatableRenderProps } from './types';
-import { PaletteOutput } from '@kbn/coloring';
+import { LENS_EDIT_PAGESIZE_ACTION } from '@kbn/lens-common';
+import type { DatatableRenderProps } from './types';
+import type { PaletteOutput } from '@kbn/coloring';
 import { getTransposeId } from '@kbn/transpose-utils';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { DataGridDensity } from '@kbn/unified-data-table';
 
@@ -135,7 +135,6 @@ describe('DatatableComponent', () => {
       }),
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
-      renderMode: 'edit' as const,
       interactive: true,
       syncColors: false,
       renderComplete,
@@ -183,8 +182,8 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it should render hide, reset, and sort actions on header even when it is in read only mode', async () => {
-    renderDatatableComponent({ renderMode: 'view' });
+  test('it should render hide, reset, and sort actions on header', async () => {
+    renderDatatableComponent();
     await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-a'));
     const actionPopover = screen.getByRole('dialog');
     const actions = within(actionPopover)
@@ -306,7 +305,7 @@ describe('DatatableComponent', () => {
     renderDatatableComponent({
       data: {
         ...data,
-        rows: [{ a: undefined, b: undefined, c: undefined }],
+        rows: [],
       },
     });
     expect(screen.getByTestId('lnsVisualizationContainer')).toHaveTextContent('No results found');
@@ -349,6 +348,60 @@ describe('DatatableComponent', () => {
       'data-euiicon-type',
       'sortDown'
     );
+  });
+
+  test('it sorts rows ascending by the specified string column', () => {
+    data.rows = [
+      { a: 'banana', b: 1588024800000, c: 2 },
+      { a: 'apple', b: 1588024800001, c: 1 },
+      { a: 'cherry', b: 1588024800002, c: 3 },
+    ];
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'a',
+        sortingDirection: 'asc',
+      },
+    });
+    const cells = screen.queryAllByRole('gridcell').map((cell) => cell.textContent);
+    expect(cells).toEqual([
+      'apple',
+      '1588024800001',
+      '1',
+      'banana',
+      '1588024800000',
+      '2',
+      'cherry',
+      '1588024800002',
+      '3',
+    ]);
+  });
+
+  test('it sorts rows descending by the specified string column', () => {
+    data.rows = [
+      { a: 'banana', b: 1588024800000, c: 2 },
+      { a: 'apple', b: 1588024800001, c: 1 },
+      { a: 'cherry', b: 1588024800002, c: 3 },
+    ];
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'a',
+        sortingDirection: 'desc',
+      },
+    });
+    const cells = screen.queryAllByRole('gridcell').map((cell) => cell.textContent);
+    expect(cells).toEqual([
+      'cherry',
+      '1588024800002',
+      '3',
+      'banana',
+      '1588024800000',
+      '2',
+      'apple',
+      '1588024800001',
+      '1',
+    ]);
   });
 
   test('it does not render a hidden column', () => {
@@ -816,6 +869,61 @@ describe('DatatableComponent', () => {
         },
       });
       expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
+    });
+  });
+
+  describe('row numbers', () => {
+    it('should show row numbers when enabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+      });
+
+      const rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells).toHaveLength(1);
+      expect(rowNumberCells[0]).toHaveTextContent('1');
+    });
+
+    it('should not show row numbers when disabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: false,
+        },
+      });
+
+      expect(screen.queryByRole('gridcell', { name: '' })).not.toBeInTheDocument();
+    });
+
+    it('should show correct row numbers with pagination', async () => {
+      const rowNumbers = 13;
+      const pageSize = 4;
+      data.rows = new Array(rowNumbers).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+
+      args.pageSize = pageSize;
+
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+        data,
+      });
+
+      // Page 1
+      let rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
+
+      // Page 2
+      await userEvent.click(screen.getByRole('link', { name: `Page 2 of 4` }));
+      rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
     });
   });
 });

@@ -7,21 +7,22 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import moment from 'moment';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
-import { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
+import type { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { useKibana } from '../../hooks/use_kibana';
 
 const CATEGORY_MAP = {
@@ -49,6 +50,8 @@ export function KnowledgeBaseCategoryFlyout({
   category: KnowledgeBaseEntryCategory;
   onClose: () => void;
 }) {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
 
@@ -107,10 +110,14 @@ export function KnowledgeBaseCategoryFlyout({
     CATEGORY_MAP[category.categoryKey as unknown as keyof typeof CATEGORY_MAP]?.description;
 
   return (
-    <EuiFlyout onClose={onClose} data-test-subj="knowledgeBaseCategoryFlyout">
+    <EuiFlyout
+      onClose={onClose}
+      data-test-subj="knowledgeBaseCategoryFlyout"
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>{capitalize(category.categoryKey)}</h2>
+          <h2 id={flyoutTitleId}>{capitalize(category.categoryKey)}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

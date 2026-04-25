@@ -14,11 +14,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useMount from 'react-use/lib/useMount';
 
 import type { Query } from '@kbn/es-query';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FilterRow } from './filter';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 const generateId = htmlIdGenerator();
 
@@ -101,7 +101,7 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
         />
       ))}
       <EuiButton
-        iconType="plusInCircle"
+        iconType="plusCircle"
         fill={true}
         fullWidth={true}
         onClick={onAddFilter}

@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
+import type { Locations } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('tcp normalizers', () => {
   describe('normalize push monitors', () => {
@@ -53,6 +54,7 @@ describe('tcp normalizers', () => {
         'service.name': 'test service',
         'ssl.supported_protocols': ['TLSv1.2', 'TLSv1.3'],
         hash: testHash,
+        maintenanceWindows: ['mw-1'],
       },
       {
         locations: ['us_central'],
@@ -63,6 +65,7 @@ describe('tcp normalizers', () => {
         schedule: 1,
         tags: 'tag1,tag2',
         privateLocations: ['Germany'],
+        maintenanceWindows: ['mw-2'],
         service: {
           name: 'test service',
         },
@@ -155,6 +158,7 @@ describe('tcp normalizers', () => {
             id: '',
             urls: '',
             hash: testHash,
+            maintenance_windows: ['mw-1'],
           },
           unsupportedKeys: [],
         },
@@ -215,6 +219,7 @@ describe('tcp normalizers', () => {
             id: '',
             urls: '',
             hash: testHash,
+            maintenance_windows: ['mw-2'],
           },
           unsupportedKeys: [],
         },
@@ -288,6 +293,7 @@ describe('tcp normalizers', () => {
             id: '',
             urls: '',
             hash: testHash,
+            maintenance_windows: [],
           },
           unsupportedKeys: ['ports', 'unsupportedKey.nestedUnsupportedKey'],
         },
@@ -361,6 +367,7 @@ describe('tcp normalizers', () => {
             id: '',
             urls: '',
             hash: testHash,
+            maintenance_windows: ['mw-1'],
           },
           unsupportedKeys: [],
         },
@@ -421,6 +428,7 @@ describe('tcp normalizers', () => {
             id: '',
             urls: '',
             hash: testHash,
+            maintenance_windows: ['mw-2'],
           },
           unsupportedKeys: [],
         },
@@ -494,6 +502,7 @@ describe('tcp normalizers', () => {
             id: '',
             urls: '',
             hash: testHash,
+            maintenance_windows: [],
           },
           unsupportedKeys: ['ports', 'unsupportedKey.nestedUnsupportedKey'],
         },

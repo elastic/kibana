@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginPackageManifest } from '@kbn/repo-packages';
+import type { PluginPackageManifest } from '@kbn/repo-packages';
 import { PluginType } from '@kbn/core-base-common';
 import { pluginManifestFromPluginPackage } from './plugin_manifest_from_plugin_package';
 

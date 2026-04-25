@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCode, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   RowControlColumn,
   RowControlComponent,
   RowControlProps,

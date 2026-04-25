@@ -30,6 +30,8 @@
           "({ alertStart, alertEnd, color, id }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_active_time_range_annotation.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "Props"
             ],
             "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_active_time_range_annotation.tsx",
+            "lineNumber": 26,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           "({ alertStart, color, dateFormat, id }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_annotation.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +83,8 @@
               "Props"
             ],
             "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_annotation.tsx",
+            "lineNumber": 28,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,6 +104,8 @@
           "({ threshold, color, id }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_threshold_annotation.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -110,6 +120,8 @@
               "Props"
             ],
             "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_threshold_annotation.tsx",
+            "lineNumber": 25,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -129,6 +141,8 @@
           "({ color, id, threshold }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_threshold_time_range_rect.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -143,6 +157,8 @@
               "Props"
             ],
             "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_threshold_time_range_rect.tsx",
+            "lineNumber": 25,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -165,6 +181,8 @@
           "UseAlertsHistory"
         ],
         "path": "x-pack/solutions/observability/packages/alert-details/src/hooks/use_alerts_history.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,6 +197,8 @@
               "Props"
             ],
             "path": "x-pack/solutions/observability/packages/alert-details/src/hooks/use_alerts_history.ts",
+            "lineNumber": 51,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

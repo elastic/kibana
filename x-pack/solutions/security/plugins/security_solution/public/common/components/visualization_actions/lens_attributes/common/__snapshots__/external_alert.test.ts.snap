@@ -209,7 +209,9 @@ Object {
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "column-top-value-id-generated-uuid",
+          "splitAccessors": Array [
+            "column-top-value-id-generated-uuid",
+          ],
           "xAccessor": "column-timestamp-id-generated-uuid",
         },
       ],

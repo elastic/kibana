@@ -7,7 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 
-import {
+import type {
   FieldsMetadataServiceSetup,
   FieldsMetadataServiceStart,
 } from './services/fields_metadata/types';
@@ -22,6 +22,7 @@ export type FieldsMetadataPluginStartServicesAccessor =
 export interface FieldsMetadataServerSetup {
   registerIntegrationFieldsExtractor: FieldsMetadataServiceSetup['registerIntegrationFieldsExtractor'];
   registerIntegrationListExtractor: FieldsMetadataServiceSetup['registerIntegrationListExtractor'];
+  registerStreamsFieldsExtractor: FieldsMetadataServiceSetup['registerStreamsFieldsExtractor'];
 }
 
 export interface FieldsMetadataServerStart {

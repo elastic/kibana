@@ -9,9 +9,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-import { FormData, FormHook } from '../types';
+import type { FormData, FormHook } from '../types';
 import { unflattenObject } from '../lib';
-import { useFormDataContext, Context } from '../form_data_context';
+import type { Context } from '../form_data_context';
+import { useFormDataContext } from '../form_data_context';
 
 interface Options<I> {
   watch?: string | string[];

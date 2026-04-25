@@ -10,6 +10,7 @@
 import { getForceNowFromUrl } from './get_force_now_from_url';
 const originalLocation = window.location;
 afterAll(() => {
+  // @ts-ignore
   window.location = originalLocation;
 });
 

@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { RouteDependencies } from '../../../types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),

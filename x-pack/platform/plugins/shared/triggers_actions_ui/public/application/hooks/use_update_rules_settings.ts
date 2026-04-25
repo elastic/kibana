@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { RulesSettingsProperties } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { updateFlappingSettings } from '../lib/rule_api/update_flapping_settings';

@@ -12,7 +12,7 @@ import { microsoftDefenderMock } from '../../../actions/clients/microsoft/defend
 import type { AgentStatusClientOptions } from '../lib/base_agent_status_client';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import { responseActionsClientMock } from '../../../actions/clients/mocks';
-import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import { SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('../../../actions/pending_actions_summary', () => {

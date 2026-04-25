@@ -8,12 +8,12 @@
 import { MessageRole } from '@kbn/inference-common';
 import { RCA_OBSERVE_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
-import { ObservationToolMessage, RootCauseAnalysisContext } from '../../types';
+import type { ObservationToolMessage, RootCauseAnalysisContext } from '../../types';
 import { formatEntity } from '../../util/format_entity';
 import { getPreviouslyInvestigatedEntities } from '../../util/get_previously_investigated_entities';
 import { stringifySummaries } from '../../util/stringify_summaries';
 import { toBlockquote } from '../../util/to_blockquote';
-import { EntityInvestigation } from '../investigate_entity/types';
+import type { EntityInvestigation } from '../investigate_entity/types';
 
 const INITIAL_OBSERVATION_TASK_GUIDE = `Your current task is to write observations based on the initial context. You
 should acknowledge the context briefly, and mention key observations from the
@@ -195,10 +195,13 @@ function getObserveInvestigationsPrompts({
   };
 }
 
-export interface ObservationStepSummary {
+// make sure this is a `type` and not an `interface` so it matches
+// the ToolData shape
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ObservationStepSummary = {
   investigations: EntityInvestigation[];
   content: string;
-}
+};
 
 export function observeInvestigationResults({
   rcaContext,

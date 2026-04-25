@@ -12,6 +12,8 @@
         "label": "CustomBrandingSetup",
         "description": [],
         "path": "src/core/packages/custom-branding/browser/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,6 +31,8 @@
               ">"
             ],
             "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -44,6 +48,8 @@
               "<boolean>"
             ],
             "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -58,6 +64,8 @@
         "label": "CustomBrandingSetupDeps",
         "description": [],
         "path": "src/core/packages/custom-branding/browser/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -72,6 +80,8 @@
               "InternalInjectedMetadataSetup"
             ],
             "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -86,6 +96,8 @@
         "label": "CustomBrandingStart",
         "description": [],
         "path": "src/core/packages/custom-branding/browser/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -103,6 +115,8 @@
               ">"
             ],
             "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -118,6 +132,8 @@
               "<boolean>"
             ],
             "path": "src/core/packages/custom-branding/browser/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

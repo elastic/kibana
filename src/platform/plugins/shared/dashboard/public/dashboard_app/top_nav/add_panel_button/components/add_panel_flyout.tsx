@@ -27,8 +27,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DashboardApi } from '../../../../dashboard_api/types';
-import { MenuItem, MenuItemGroup } from '../types';
+import type { DashboardApi } from '../../../../dashboard_api/types';
+import type { MenuItem, MenuItemGroup } from '../types';
 import { getMenuItemGroups } from '../get_menu_item_groups';
 import { Groups } from './groups';
 

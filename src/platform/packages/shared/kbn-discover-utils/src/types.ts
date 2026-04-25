@@ -18,7 +18,7 @@ export type {
   RowControlRowProps,
 } from './components/custom_control_columns/types';
 export type * from './components/app_menu/types';
-export { AppMenuActionId, AppMenuActionType } from './components/app_menu/types';
+export { AppMenuActionId } from './components/app_menu/types';
 
 type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
 
@@ -61,30 +61,53 @@ export type DataTableColumnsMeta = Record<
   }
 >;
 
+import type { ReactNode } from 'react';
+
 type FormattedHitPair = readonly [
   fieldDisplayName: string,
-  formattedValue: string,
+  formattedValue: ReactNode,
   fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
 ];
 
 /**
- * Pairs array for each field in the hit
+ * Pairs array for each field in the hit where values are ReactNodes
  */
 export type FormattedHit = FormattedHitPair[];
 
 export interface LogDocumentOverview
   extends LogResourceFields,
     LogStackTraceFields,
-    LogCloudFields {
+    LogCloudFields,
+    LogOtelStackTraceFields,
+    Partial<ApmErrorLogFields>,
+    Partial<OtelExceptionLogFields> {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
+  'body.text'?: string;
   'error.message'?: string;
   'event.original'?: string;
   'trace.id'?: string;
+  'transaction.id'?: string;
+  'span.id'?: string;
   'log.file.path'?: string;
   'data_stream.namespace': string;
   'data_stream.dataset': string;
+  'exception.message'?: string;
+}
+
+export interface ApmErrorLogFields {
+  'processor.event': string;
+  'error.log.level'?: string;
+  'error.exception.type'?: string;
+  'error.exception.message'?: string;
+  'error.culprit'?: string;
+  'error.grouping_name'?: string;
+}
+
+export interface OtelExceptionLogFields {
+  event_name: string; // OTEL-specific field
+  'exception.type'?: string;
 }
 
 export interface LogResourceFields {
@@ -105,6 +128,12 @@ export interface LogStackTraceFields {
   'error.log.stacktrace'?: string;
 }
 
+export interface LogOtelStackTraceFields {
+  'attributes.exception.stacktrace'?: string;
+  'attributes.exception.type'?: string;
+  'attributes.exception.message'?: string;
+}
+
 export interface LogCloudFields {
   'cloud.provider'?: string;
   'cloud.region'?: string;
@@ -113,21 +142,17 @@ export interface LogCloudFields {
   'cloud.instance.id'?: string;
 }
 
-export interface TransactionDocumentOverview
+export interface TraceDocumentOverview
   extends TraceFields,
-    ServiceFields,
-    TransactionFields,
-    UserAgentFields {}
-
-export interface SpanDocumentOverview
-  extends TraceFields,
-    ServiceFields,
-    SpanFields,
-    UserAgentFields {
-  'transaction.id'?: string;
-  'transaction.name'?: string;
+    Partial<ServiceFields>,
+    Partial<SpanFields>,
+    Partial<UserAgentFields>,
+    Partial<TransactionFields> {
   duration?: number;
   kind?: string;
+  'resource.attributes.telemetry.sdk.language'?: string;
+  'links.trace_id'?: string;
+  'links.span_id'?: string;
 }
 
 export interface TraceFields {
@@ -159,6 +184,8 @@ export interface SpanFields {
   'span.type': string;
   'span.subtype': string;
   'span.destination.service.resource': string;
+  'span.links.span.id'?: string;
+  'span.links.trace.id'?: string;
 }
 
 export interface UserAgentFields {

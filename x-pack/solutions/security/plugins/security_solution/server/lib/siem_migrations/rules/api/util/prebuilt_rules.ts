@@ -99,7 +99,7 @@ export const getPrebuiltRulesForMigration = async (
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<Record<string, PrebuiltRulesResults>> => {
   const options = { filters: { prebuilt: true } };
-  const batches = ruleMigrationsClient.data.rules.searchBatches(migrationId, options);
+  const batches = ruleMigrationsClient.data.items.searchBatches(migrationId, options);
 
   const rulesIds = new Set<string>();
   let results = await batches.next();

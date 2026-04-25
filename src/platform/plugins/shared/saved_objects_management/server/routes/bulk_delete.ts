@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { v1 } from '../../common';
 
 export const registerBulkDeleteRoute = (router: IRouter) => {
@@ -26,7 +26,8 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
           schema.object({
             type: schema.string(),
             id: schema.string(),
-          })
+          }),
+          { maxSize: 10_000 }
         ),
       },
     },

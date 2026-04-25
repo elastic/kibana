@@ -31,7 +31,7 @@ describe('Policy form SettingLockedCard component', () => {
     };
   });
 
-  it('should render with expected content', () => {
+  it('should render with expected content using default platinum license', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveTextContent(
@@ -43,6 +43,40 @@ describe('Policy form SettingLockedCard component', () => {
           'cloud deployment' +
           '(external, opens in a new tab or window) ' +
           'on AWS, GCP, or Azure.Platinum'
+      )
+    );
+  });
+
+  it('should render with platinum license when explicitly specified', () => {
+    formProps.licenseType = 'platinum';
+    const { getByTestId } = render();
+
+    expect(getByTestId('test')).toHaveTextContent(
+      exactMatchText(
+        'Malware locked' +
+          'Upgrade to Elastic Platinum' +
+          'To turn on this protection, you must upgrade your license to Platinum, start a free 30-day ' +
+          'trial, or spin up a ' +
+          'cloud deployment' +
+          '(external, opens in a new tab or window) ' +
+          'on AWS, GCP, or Azure.Platinum'
+      )
+    );
+  });
+
+  it('should render with enterprise license when specified', () => {
+    formProps.licenseType = 'enterprise';
+    const { getByTestId } = render();
+
+    expect(getByTestId('test')).toHaveTextContent(
+      exactMatchText(
+        'Malware locked' +
+          'Upgrade to Elastic Enterprise' +
+          'To turn on this protection, you must upgrade your license to Enterprise, start a free 30-day ' +
+          'trial, or spin up a ' +
+          'cloud deployment' +
+          '(external, opens in a new tab or window) ' +
+          'on AWS, GCP, or Azure.Enterprise'
       )
     );
   });

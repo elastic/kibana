@@ -13,6 +13,8 @@ import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
@@ -76,6 +78,7 @@ const FormattedFieldValueComponent: React.FC<{
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
+  data?: TimelineNonEcsData[];
 }> = ({
   asPlainText,
   Component,
@@ -95,7 +98,10 @@ const FormattedFieldValueComponent: React.FC<{
   truncate = true,
   value,
   linkValue,
+  data,
 }) => {
+  const euidApi = useEntityStoreEuidApi();
+
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
@@ -130,6 +136,8 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
     return <Duration fieldName={fieldName} value={`${value}`} />;
   } else if (fieldName === EntityTypeToIdentifierField.host) {
+    const entityId =
+      data && euidApi?.euid ? euidApi.euid.getEuidFromTimelineNonEcsData('host', data) : undefined;
     return (
       <HostName
         Component={Component}
@@ -138,9 +146,12 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityId={entityId}
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.user) {
+    const entityId =
+      data && euidApi?.euid ? euidApi.euid.getEuidFromTimelineNonEcsData('user', data) : undefined;
     return (
       <UserName
         Component={Component}
@@ -149,9 +160,14 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityId={entityId}
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.service) {
+    const entityId =
+      data && euidApi?.euid
+        ? euidApi.euid.getEuidFromTimelineNonEcsData('service', data)
+        : undefined;
     return (
       <ServiceName
         Component={Component}
@@ -160,6 +176,7 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityId={entityId}
       />
     );
   } else if (fieldFormat === BYTES_FORMAT) {
@@ -189,7 +206,7 @@ const FormattedFieldValueComponent: React.FC<{
         value={value}
         onClick={onClick}
         onClickAriaLabel={onClickAriaLabel}
-        iconType={isButton ? 'arrowDown' : undefined}
+        iconType={isButton ? 'chevronSingleDown' : undefined}
         iconSide={isButton ? 'right' : undefined}
       />
     );
@@ -239,7 +256,9 @@ const FormattedFieldValueComponent: React.FC<{
             </EuiFlexGroup>
           }
         >
-          <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
+          <span tabIndex={0} data-test-subj={`formatted-field-${fieldName}`}>
+            {value}
+          </span>
         </EuiToolTip>
       </TruncatableText>
     ) : (

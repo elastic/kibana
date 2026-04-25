@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, FilterMeta, FilterStateStore } from './types';
+import { FilterStateStore } from '@kbn/es-query-constants';
+import type { Filter, FilterMeta } from './types';
 
 export const buildEmptyFilter = (isPinned: boolean, index?: string): Filter => {
   const meta: FilterMeta = {

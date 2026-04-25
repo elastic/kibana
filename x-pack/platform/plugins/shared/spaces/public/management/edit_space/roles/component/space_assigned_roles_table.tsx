@@ -311,7 +311,7 @@ export const SpaceAssignedRolesTable = ({
         <>
           {!isReadOnly && (
             <EuiFlexItem grow={false} color="primary">
-              <EuiButton iconType="plusInCircle" onClick={onClickAssignNewRole}>
+              <EuiButton iconType="plusCircle" onClick={onClickAssignNewRole}>
                 {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign', {
                   defaultMessage: 'Assign new roles',
                 })}
@@ -369,11 +369,15 @@ export const SpaceAssignedRolesTable = ({
                       isOpen={isBulkActionContextOpen}
                       closePopover={setBulkActionContextOpen.bind(null, false)}
                       anchorPosition="downCenter"
+                      aria-label={i18n.translate(
+                        'xpack.spaces.management.spaceDetails.rolesTable.bulkActionsPopoverAriaLabel',
+                        { defaultMessage: 'Bulk actions' }
+                      )}
                       button={
                         <EuiButtonEmpty
                           size="s"
                           iconSide="right"
-                          iconType="arrowDown"
+                          iconType="chevronSingleDown"
                           disabled={!selectedRoles.length}
                           data-test-subj="bulkActionsContextMenuOpener"
                           onClick={setBulkActionContextOpen.bind(null, true)}
@@ -421,7 +425,7 @@ export const SpaceAssignedRolesTable = ({
                         size: 's',
                         ...(Boolean(selectedRoles.length)
                           ? {
-                              iconType: 'crossInCircle',
+                              iconType: 'crossCircle',
                               onClick: setSelectedRoles.bind(null, []),
                               children: i18n.translate(
                                 'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
@@ -515,6 +519,13 @@ export const SpaceAssignedRolesTable = ({
           rowProps={getRowProps}
           cellProps={getCellProps}
           selection={selection}
+          tableCaption={i18n.translate(
+            'xpack.spaces.management.spaceDetails.rolesTable.tableCaption',
+            {
+              defaultMessage: 'Roles assigned to {spaceName}',
+              values: { spaceName: currentSpace.name },
+            }
+          )}
           pagination={{
             pageSize: pagination.size,
             pageIndex: pagination.index,

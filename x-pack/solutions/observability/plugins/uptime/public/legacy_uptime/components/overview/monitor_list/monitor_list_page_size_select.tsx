@@ -8,7 +8,8 @@
 import { EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUrlParams, UpdateUrlParams } from '../../../hooks';
+import type { UpdateUrlParams } from '../../../hooks';
+import { useUrlParams } from '../../../hooks';
 
 interface PopoverButtonProps {
   setIsOpen: (isOpen: boolean) => any;
@@ -19,7 +20,7 @@ const PopoverButton: React.FC<PopoverButtonProps> = ({ setIsOpen, size }) => (
   <EuiButtonEmpty
     color="text"
     data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"
-    iconType="arrowDown"
+    iconType="chevronSingleDown"
     iconSide="right"
     onClick={() => setIsOpen(true)}
   >

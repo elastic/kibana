@@ -1100,6 +1100,7 @@ Object {
   "template": Object {
     "aliases": Object {
       ".alerts-security.alerts-space-id": Object {
+        "is_hidden": true,
         "is_write_index": false,
       },
     },

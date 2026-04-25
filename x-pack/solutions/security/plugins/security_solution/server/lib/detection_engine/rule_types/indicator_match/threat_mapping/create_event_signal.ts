@@ -9,7 +9,7 @@ import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constant
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
-import type { CreateEventSignalOptions, ThreatListItem } from './types';
+import type { CreateEventSignalOptions } from './types';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
@@ -21,11 +21,10 @@ import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_aft
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import { FAILED_CREATE_QUERY_MAX_CLAUSE, MANY_NESTED_CLAUSES_ERR } from './utils';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
-import { validateCompleteThreatMatches } from './validate_complete_threat_matches';
+import { createSearchAfterReturnType } from '../../utils/utils';
 
 export const createEventSignal = async ({
   sharedParams,
-  currentResult,
   currentEventList,
   eventsTelemetry,
   filters,
@@ -52,9 +51,8 @@ export const createEventSignal = async ({
     sharedParams.completeRule.ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH;
 
   let signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap | undefined;
-  let threatList: ThreatListItem[] | undefined;
   try {
-    const result = await getSignalIdToMatchedQueriesMap({
+    signalIdToMatchedQueriesMap = await getSignalIdToMatchedQueriesMap({
       services,
       sharedParams,
       signals: currentEventList,
@@ -65,8 +63,6 @@ export const createEventSignal = async ({
       threatIndexFields,
       threatIndicatorPath,
     });
-    signalIdToMatchedQueriesMap = result.signalIdToMatchedQueriesMap;
-    threatList = result.threatList;
   } catch (exc) {
     // we receive an error if the event list count < threat list count
     // which puts us into the create_event_signal which differs from create threat signal
@@ -76,25 +72,17 @@ export const createEventSignal = async ({
       exc.message.includes(MANY_NESTED_CLAUSES_ERR) ||
       exc.message.includes(FAILED_CREATE_QUERY_MAX_CLAUSE)
     ) {
-      currentResult.errors.push(exc.message);
-      return currentResult;
+      const result = createSearchAfterReturnType();
+      result.errors.push(exc.message);
+      return result;
     } else {
       throw exc;
     }
   }
 
-  const { matchedEvents, skippedIds } = validateCompleteThreatMatches(
-    signalIdToMatchedQueriesMap,
-    threatMapping
-  );
-
-  if (skippedIds.length > 0) {
-    ruleExecutionLogger.debug(`Skipping not matched documents: ${skippedIds.join(', ')}`);
-  }
-
-  const ids = Array.from(matchedEvents.keys());
+  const ids = Array.from(signalIdToMatchedQueriesMap.keys());
   if (ids.length === 0) {
-    return currentResult;
+    return createSearchAfterReturnType();
   }
   const indexFilter = {
     query: {
@@ -119,12 +107,12 @@ export const createEventSignal = async ({
     loadFields: true,
   });
 
-  ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
+  ruleExecutionLogger.debug(`Matched events found: ${ids?.length}`);
 
   const enrichment = threatEnrichmentFactory({
-    signalIdToMatchedQueriesMap: matchedEvents,
+    signalIdToMatchedQueriesMap,
     threatIndicatorPath,
-    matchedThreats: threatList,
+    threatMappings: threatMapping,
   });
 
   let createResult: SearchAfterAndBulkCreateReturnType;
@@ -151,12 +139,12 @@ export const createEventSignal = async ({
   } else {
     createResult = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);
   }
-  ruleExecutionLogger.debug(
-    `${
+  ruleExecutionLogger.trace(
+    `Match checks completed\n${
       currentEventList.length
-    } items have completed match checks and the total times to search were ${
+    } items have completed match checks. Search times (ms): ${
       createResult.searchAfterTimes.length !== 0 ? createResult.searchAfterTimes : '(unknown) '
-    }ms`
+    }.`
   );
   return createResult;
 };

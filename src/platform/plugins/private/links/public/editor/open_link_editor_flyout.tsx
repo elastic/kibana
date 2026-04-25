@@ -13,7 +13,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { coreServices } from '../services/kibana_services';
 import { LinkEditor } from '../components/editor/link_editor';
 import { focusMainFlyout } from './links_editor_tools';
-import { ResolvedLink } from '../types';
+import type { ResolvedLink } from '../types';
 
 export interface LinksEditorProps {
   link?: ResolvedLink;
@@ -21,12 +21,6 @@ export interface LinksEditorProps {
   mainFlyoutId: string;
   ref: React.RefObject<HTMLDivElement>;
 }
-
-/**
- * This editor has no context about other links, so it cannot determine order; order will be determined
- * by the **caller** (i.e. the panel editor, which contains the context about **all links**)
- */
-export type UnorderedLink = Omit<ResolvedLink, 'order'>;
 
 /**
  * @throws in case user cancels
@@ -50,8 +44,8 @@ export async function openLinkEditorFlyout({
     });
   };
 
-  return new Promise<UnorderedLink | undefined>((resolve) => {
-    const onSave = async (newLink: UnorderedLink) => {
+  return new Promise<ResolvedLink | undefined>((resolve) => {
+    const onSave = async (newLink: ResolvedLink) => {
       resolve(newLink);
       await unmountFlyout();
     };

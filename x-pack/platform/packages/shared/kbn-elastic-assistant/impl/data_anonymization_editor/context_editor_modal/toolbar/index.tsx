@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
-import { HandleRowChecked } from '../../context_editor/selection/types';
+import type { HandleRowChecked } from '../../context_editor/selection/types';
 import { SELECTED_FIELDS } from '../../context_editor/translations';
 import { BulkActions } from '../../context_editor/bulk_actions';
 

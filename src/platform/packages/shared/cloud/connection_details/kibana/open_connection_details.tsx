@@ -8,10 +8,11 @@
  */
 
 import * as React from 'react';
-import ReactDOM from 'react-dom';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import * as conn from '..';
+
+const FLYOUT_ID = 'connectionDetailsModalFlyout';
+const FLYOUT_HEADER_ID = 'connectionDetailsModalTitle';
 
 export interface OpenConnectionDetailsParams {
   props: conn.KibanaConnectionDetailsProviderProps;
@@ -27,24 +28,22 @@ export interface OpenConnectionDetailsParams {
 }
 
 export const openConnectionDetails = async ({ props, start }: OpenConnectionDetailsParams) => {
-  const mount = (element: HTMLElement) => {
-    const reactElement = (
-      <KibanaRenderContextProvider {...start.core}>
-        <conn.KibanaConnectionDetailsProvider
-          {...props}
-          onNavigation={() => {
-            flyoutRef?.close();
-          }}
-        >
-          <conn.ConnectionDetailsFlyoutContent />
-        </conn.KibanaConnectionDetailsProvider>
-      </KibanaRenderContextProvider>
-    );
-    ReactDOM.render(reactElement, element);
+  const FlyoutContent = () => (
+    <conn.KibanaConnectionDetailsProvider
+      {...props}
+      onNavigation={() => {
+        flyoutRef?.close();
+      }}
+    >
+      <conn.ConnectionDetailsFlyoutContent headerId={FLYOUT_HEADER_ID} />
+    </conn.KibanaConnectionDetailsProvider>
+  );
 
-    return () => ReactDOM.unmountComponentAtNode(element);
-  };
-  const flyoutRef = start.core.overlays.openFlyout(mount, { size: 's' });
+  const flyoutRef = start.core.overlays.openSystemFlyout(<FlyoutContent />, {
+    id: FLYOUT_ID,
+    ['aria-labelledby']: FLYOUT_HEADER_ID,
+    size: 's',
+  });
 
   return flyoutRef;
 };

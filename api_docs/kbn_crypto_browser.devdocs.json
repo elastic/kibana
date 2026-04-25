@@ -26,6 +26,8 @@
         "label": "Sha256",
         "description": [],
         "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -63,6 +67,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -77,6 +83,8 @@
                   "string | Buffer"
                 ],
                 "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+                "lineNumber": 106,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -92,6 +100,8 @@
                   "BufferEncoding | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+                "lineNumber": 106,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -110,6 +120,8 @@
               "(encoding: BufferEncoding) => string"
             ],
             "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -124,6 +136,8 @@
                   "BufferEncoding"
                 ],
                 "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+                "lineNumber": 137,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -142,6 +156,8 @@
               "(M: Buffer) => void"
             ],
             "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -156,6 +172,8 @@
                   "Buffer"
                 ],
                 "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+                "lineNumber": 162,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -174,6 +192,8 @@
               "() => Buffer"
             ],
             "path": "src/platform/packages/shared/kbn-crypto-browser/src/sha256.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

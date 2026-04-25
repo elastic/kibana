@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { type DataView } from '@kbn/data-views-plugin/public';
 
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 import { useDataViewSpec } from './use_data_view_spec';
 import { useDataView } from './use_data_view';
 
@@ -28,18 +28,18 @@ describe('useDataViewSpec', () => {
 
   it('should return correct dataView from the store, based on the provided scope', () => {
     const wrapper = renderHook((scope) => useDataViewSpec(scope), {
-      initialProps: DataViewManagerScopeName.default,
+      initialProps: PageScope.default,
     });
 
-    expect(jest.mocked(useDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.default);
+    expect(jest.mocked(useDataView)).toHaveBeenCalledWith(PageScope.default);
 
     expect(wrapper.result.current).toMatchObject({
       status: expect.any(String),
       dataViewSpec: expect.objectContaining({ id: expect.any(String) }),
     });
 
-    wrapper.rerender(DataViewManagerScopeName.timeline);
-    expect(jest.mocked(useDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.timeline);
+    wrapper.rerender(PageScope.timeline);
+    expect(jest.mocked(useDataView)).toHaveBeenCalledWith(PageScope.timeline);
 
     expect(wrapper.result.current).toMatchObject({
       status: expect.any(String),

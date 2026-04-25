@@ -125,10 +125,10 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.latestAttachments.length).to.be(1);
 
         const attachment = response.latestAttachments[0];
-        expect(attachment.type).to.eql('user');
+        expect(attachment.type).to.eql('comment');
         // just to make TS happy
-        if (attachment.type === 'user') {
-          expect(attachment.comment).to.eql('this is an edited comment');
+        if (attachment.type === 'comment' && 'data' in attachment) {
+          expect(attachment.data?.content).to.eql('this is an edited comment');
         }
         expect(attachment.id).to.eql(response.userActions[1].comment_id);
       });
@@ -563,7 +563,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: theCase.id,
                 version: theCase.version,
-                settings: { syncAlerts: false },
+                settings: { syncAlerts: false, extractObservables: false },
               },
             ],
           },
@@ -585,7 +585,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(settingsUserAction.type).to.eql('settings');
         expect(settingsUserAction.action).to.eql('update');
-        expect(settingsUserAction.payload).to.eql({ settings: { syncAlerts: false } });
+        expect(settingsUserAction.payload).to.eql({
+          settings: { syncAlerts: false, extractObservables: false },
+        });
       });
 
       it('retrieves only the severity user actions', async () => {

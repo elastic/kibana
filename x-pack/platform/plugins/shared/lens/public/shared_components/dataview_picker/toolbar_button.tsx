@@ -7,14 +7,8 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import {
-  EuiButton,
-  PropsOf,
-  EuiButtonProps,
-  type UseEuiTheme,
-  euiFontSize,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { PropsOf, EuiButtonProps } from '@elastic/eui';
+import { EuiButton, type UseEuiTheme, euiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 const groupPositionToClassMap = {
@@ -78,7 +72,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
       className={classes}
       iconSide="right"
       css={toolbarButtonStyles(euiThemeContext)}
-      iconType={hasArrow ? 'arrowDown' : ''}
+      iconType={hasArrow ? 'chevronSingleDown' : ''}
       color="text"
       contentProps={{
         className: 'kbnToolbarButton__content',

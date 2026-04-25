@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { transparentize } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
@@ -43,7 +43,7 @@ export const useStyles = ({
 
     const children: CSSObject = {
       position: 'relative',
-      color: colors.ghost,
+      color: colors.textGhost,
       marginLeft: size.base,
       paddingLeft: size.s,
       borderLeft: border.editable,

@@ -8,5 +8,5 @@
  */
 
 export * from './cm_services';
+export type * from './types';
 export * from './transform_utils';
-export * from './types';

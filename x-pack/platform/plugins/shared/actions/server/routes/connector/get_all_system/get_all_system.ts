@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
+import type { GetAllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
@@ -34,7 +34,8 @@ export const getAllConnectorsIncludingSystemRoute = (
           includeSystemActions: true,
         });
 
-        const responseBody: AllConnectorsResponseV1[] = transformGetAllConnectorsResponseV1(result);
+        const responseBody: GetAllConnectorsResponseV1 =
+          transformGetAllConnectorsResponseV1(result);
         return res.ok({ body: responseBody });
       })
     )

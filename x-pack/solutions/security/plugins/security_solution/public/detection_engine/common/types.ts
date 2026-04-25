@@ -11,8 +11,6 @@ import type {
   RiskScoreMapping,
   Severity,
   SeverityMapping,
-  ThreatIndex,
-  ThreatMapping,
   Threats,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -48,6 +46,8 @@ import type {
   SetupGuide,
   ThresholdAlertSuppression,
   TimestampOverride,
+  ThreatIndex,
+  ThreatMapping,
 } from '../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../common/api/detection_engine';
 import type { EqlOptions } from '../../../common/search_strategy';

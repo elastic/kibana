@@ -179,6 +179,7 @@ export function AgentExplorer() {
               })}
               start={start}
               end={end}
+              compressed
               dataTestSubj="agentExplorerServiceNameSelect"
             />
           </EuiFlexItem>
@@ -202,6 +203,7 @@ export function AgentExplorer() {
               )}
               start={start}
               end={end}
+              compressed
               dataTestSubj="agentExplorerAgentLanguageSelect"
             />
           </EuiFlexItem>

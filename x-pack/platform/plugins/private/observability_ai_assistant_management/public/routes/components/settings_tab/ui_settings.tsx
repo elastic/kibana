@@ -10,14 +10,13 @@ import {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
-  aiAssistantPreferredAIAssistantType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
-import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
+import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
 import { useEditableSettings } from '../../../hooks/use_editable_settings';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -36,7 +35,6 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     aiAnonymizationSettings,
     aiAssistantSimulatedFunctionCalling,
     ...(knowledgeBase.status.value?.enabled ? [aiAssistantSearchConnectorIndexPattern] : []),
-    ...(config.visibilityEnabled ? [aiAssistantPreferredAIAssistantType] : []),
   ];
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =

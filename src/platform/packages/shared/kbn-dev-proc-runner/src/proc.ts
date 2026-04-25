@@ -17,7 +17,7 @@ import * as Rx from 'rxjs';
 import { tap, share, take, mergeMap, map, ignoreElements, filter } from 'rxjs';
 import chalk from 'chalk';
 import treeKill from 'tree-kill';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createFailError } from '@kbn/dev-cli-errors';
 
@@ -33,6 +33,8 @@ export interface ProcOptions {
   env?: Record<string, string | undefined>;
   stdin?: string;
   writeLogsToPath?: string;
+  /** When provided, each output line (ANSI-stripped) is pushed to this array. */
+  captureOutputLines?: string[];
 }
 
 async function withTimeout(
@@ -134,6 +136,10 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   ).pipe(
     tap({
       next(line) {
+        if (options.captureOutputLines) {
+          options.captureOutputLines.push(stripAnsi(line));
+        }
+
         if (stdioTarget) {
           stdioTarget.write(stripAnsi(line) + '\n');
         } else {

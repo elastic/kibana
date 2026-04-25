@@ -8,7 +8,7 @@
  */
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

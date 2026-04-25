@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind, MyImageMetadata } from '../common';
-import { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { MyImageMetadata } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind } from '../common';
+import type { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
 
 export class FilesExamplePlugin
   implements Plugin<unknown, unknown, FilesExamplePluginsSetup, FilesExamplePluginsStart>

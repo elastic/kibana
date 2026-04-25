@@ -61,7 +61,8 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
     end: number,
     analyzer: CategorizationAnalyzer,
     runtimeMappings: RuntimeMappings | undefined,
-    indicesOptions: estypes.IndicesOptions | undefined
+    indicesOptions: estypes.IndicesOptions | undefined,
+    projectRouting: string | undefined
   ): Promise<{ examples: CategoryFieldExample[]; error?: Error }> {
     if (timeField !== undefined) {
       const range = {
@@ -73,16 +74,20 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
           },
         },
       };
-      if (query.bool === undefined) {
-        query.bool = {};
-      }
-      if (query.bool.filter === undefined) {
-        query.bool.filter = range;
+      if (!query || typeof query !== 'object') {
+        query = { bool: { filter: range } };
       } else {
-        if (Array.isArray(query.bool.filter)) {
-          query.bool.filter.push(range);
+        if (query.bool === undefined) {
+          query.bool = {};
+        }
+        if (query.bool.filter === undefined) {
+          query.bool.filter = range;
         } else {
-          query.bool.filter.range = range;
+          if (Array.isArray(query.bool.filter)) {
+            query.bool.filter.push(range);
+          } else {
+            query.bool.filter = [query.bool.filter, range] as estypes.QueryDslBoolQuery['filter'];
+          }
         }
       }
     }
@@ -96,6 +101,7 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
         sort: ['_doc'],
         ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
         ...(indicesOptions ?? {}),
+        ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
       },
       { maxRetries: 0 }
     );
@@ -114,8 +120,6 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
     const allExamples = tempExamples.filter(
       (example: string | null | undefined) => example !== undefined && example !== null
     );
-
-    validationResults.createMedianMessageLengthResult(allExamples);
 
     try {
       const examplesWithTokens = await getTokens(CHUNK_SIZE, allExamples, analyzer);
@@ -207,6 +211,7 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
     analyzer: CategorizationAnalyzer,
     runtimeMappings: RuntimeMappings | undefined,
     indicesOptions: estypes.IndicesOptions | undefined,
+    projectRouting: string | undefined,
     includeExamples = true
   ) {
     const resp = await categorizationExamples(
@@ -219,7 +224,8 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
       end,
       analyzer,
       runtimeMappings,
-      indicesOptions
+      indicesOptions,
+      projectRouting
     );
 
     const { examples } = resp;

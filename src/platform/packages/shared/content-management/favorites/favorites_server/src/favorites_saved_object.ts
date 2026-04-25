@@ -20,6 +20,7 @@ export interface FavoritesSavedObjectAttributes {
 const schemaV1 = schema.object({
   userId: schema.string(),
   type: schema.string(), // object type, e.g. dashboard
+  // codeql[js/kibana/unbounded-array-in-schema] saved object schema — not route input
   favoriteIds: schema.arrayOf(schema.string()),
 });
 

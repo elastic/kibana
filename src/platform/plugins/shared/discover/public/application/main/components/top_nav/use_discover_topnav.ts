@@ -8,66 +8,129 @@
  */
 
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { useDiscoverCustomization } from '../../../../customizations';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 import { useInspector } from '../../hooks/use_inspector';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import {
-  useSavedSearch,
-  useSavedSearchHasChanged,
-} from '../../state_management/discover_state_provider';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
-import { useAdHocDataViews, useCurrentDataView } from '../../state_management/redux';
+import {
+  useAdHocDataViews,
+  useCurrentDataView,
+  useInternalStateSelector,
+} from '../../state_management/redux';
+import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
+import type { DiscoverCustomizationContext } from '../../../../customizations';
+import type { DiscoverServices } from '../../../../build_services';
 
-export const useDiscoverTopNav = ({
-  stateContainer,
+/** Standalone Discover with tabs: Inspect is on the tab menu, not the top nav. */
+export const isDiscoverInspectorInTabMenu = (
+  services: DiscoverServices,
+  customizationContext: DiscoverCustomizationContext
+) =>
+  !services.embeddableEditor.isByValueEditor() && customizationContext.displayMode === 'standalone';
+
+const useDiscoverTopNavShared = ({
+  persistedDiscoverSession,
 }: {
-  stateContainer: DiscoverStateContainer;
+  persistedDiscoverSession: DiscoverSession | undefined;
 }) => {
   const services = useDiscoverServices();
-  const topNavCustomization = useDiscoverCustomization('top_nav');
-  const hasSavedSearchChanges = useObservable(stateContainer.savedSearchState.getHasChanged$());
-  const hasUnsavedChanges = Boolean(
-    hasSavedSearchChanges && stateContainer.savedSearchState.getId()
-  );
+  const hasUnsavedChanges = useInternalStateSelector((state) => state.hasUnsavedChanges);
+  const isMobile = useIsWithinBreakpoints(['xs']);
 
   const topNavBadges = useMemo(
     () =>
       getTopNavBadges({
-        stateContainer,
+        isMobile,
+        isManaged: Boolean(persistedDiscoverSession?.managed),
         services,
-        hasUnsavedChanges,
-        topNavCustomization,
       }),
-    [stateContainer, services, hasUnsavedChanges, topNavCustomization]
+    [services, isMobile, persistedDiscoverSession?.managed]
   );
-  const savedSearchId = useSavedSearch().id;
-  const savedSearchHasChanged = useSavedSearchHasChanged();
-  const shouldShowESQLToDataViewTransitionModal = !savedSearchId || savedSearchHasChanged;
+
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
-  const onOpenInspector = useInspector({
-    inspector: services.inspector,
-    stateContainer,
+  const hasShareIntegration = useHasShareIntegration(services);
+
+  return {
+    services,
+    dataView,
+    adHocDataViews,
+    hasUnsavedChanges,
+    isEsqlMode,
+    hasShareIntegration,
+    topNavBadges,
+  };
+};
+
+/** Embedded / by-value: top nav shows Inspect; mounts {@link useInspector}. */
+export const useDiscoverTopNavWithInspector = ({
+  onOpenSaveModal,
+  onOpenSaveAsModal,
+  persistedDiscoverSession,
+}: {
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
+  persistedDiscoverSession: DiscoverSession | undefined;
+}) => {
+  const shared = useDiscoverTopNavShared({
+    persistedDiscoverSession,
   });
+  const onOpenInspector = useInspector({ inspector: shared.services.inspector });
 
   const topNavMenu = useTopNavLinks({
-    dataView,
-    services,
-    state: stateContainer,
+    dataView: shared.dataView,
+    services: shared.services,
     onOpenInspector,
-    isEsqlMode,
-    adHocDataViews,
-    topNavCustomization,
-    shouldShowESQLToDataViewTransitionModal,
+    hasUnsavedChanges: shared.hasUnsavedChanges,
+    isEsqlMode: shared.isEsqlMode,
+    adHocDataViews: shared.adHocDataViews,
+    hasShareIntegration: shared.hasShareIntegration,
+    persistedDiscoverSession,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
   });
 
   return {
     topNavMenu,
-    topNavBadges,
+    topNavBadges: shared.topNavBadges,
   };
 };
+
+/** Standalone tabbed Discover: Inspect is on the tab menu only — do not mount {@link useInspector}. */
+export const useDiscoverTopNavWithoutInspector = ({
+  onOpenSaveModal,
+  onOpenSaveAsModal,
+  persistedDiscoverSession,
+}: {
+  persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
+}) => {
+  const shared = useDiscoverTopNavShared({
+    persistedDiscoverSession,
+  });
+
+  const topNavMenu = useTopNavLinks({
+    dataView: shared.dataView,
+    services: shared.services,
+    onOpenInspector: undefined,
+    hasUnsavedChanges: shared.hasUnsavedChanges,
+    isEsqlMode: shared.isEsqlMode,
+    adHocDataViews: shared.adHocDataViews,
+    hasShareIntegration: shared.hasShareIntegration,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
+    persistedDiscoverSession,
+  });
+
+  return {
+    topNavMenu,
+    topNavBadges: shared.topNavBadges,
+  };
+};
+
+export type DiscoverTopNavHookResult = ReturnType<typeof useDiscoverTopNavWithInspector>;

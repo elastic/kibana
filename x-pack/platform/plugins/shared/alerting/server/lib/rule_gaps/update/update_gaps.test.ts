@@ -18,6 +18,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { processAllRuleGaps } from '../process_all_rule_gaps';
 import { updateGapsBatch } from './update_gaps_batch';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
+import { backfillInitiator } from '../../../../common/constants';
 
 jest.mock('../process_all_rule_gaps');
 jest.mock('./update_gaps_batch');
@@ -33,8 +34,10 @@ describe('updateGaps', () => {
   const processAllRuleGapsMock = processAllRuleGaps as jest.Mock;
   const updateGapsBatchMock = updateGapsBatch as jest.Mock;
 
+  const ruleId = 'test-rule-id';
   const gaps = [
     new Gap({
+      ruleId,
       range: {
         gte: '2024-01-01T00:00:00.000Z',
         lte: '2024-01-01T01:00:00.000Z',
@@ -48,10 +51,15 @@ describe('updateGaps', () => {
       status: adHocRunStatus.COMPLETE,
     },
   ];
-  const ruleId = 'test-rule-id';
+
+  let processGapsBatchResult = {};
+
   beforeEach(() => {
     jest.resetAllMocks();
-    processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) => processGapsBatch(gaps));
+    processAllRuleGapsMock.mockImplementation(async ({ processGapsBatch }) => {
+      processGapsBatchResult = await processGapsBatch(gaps);
+      return processGapsBatchResult;
+    });
   });
 
   describe('updateGaps', () => {
@@ -68,12 +76,13 @@ describe('updateGaps', () => {
         actionsClient: mockActionsClient,
         backfillSchedule,
         shouldRefetchAllBackfills: true,
+        initiator: backfillInitiator.USER,
       });
 
       expect(processAllRuleGapsMock).toHaveBeenCalledWith({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
-        ruleId: 'test-rule-id',
+        ruleIds: ['test-rule-id'],
         start: '2024-01-01T00:00:00.000Z',
         end: '2024-01-01T01:00:00.000Z',
         processGapsBatch: expect.any(Function),
@@ -90,6 +99,7 @@ describe('updateGaps', () => {
         ruleId,
         eventLogClient: mockEventLogClient,
         alertingEventLogger: expect.any(AlertingEventLogger),
+        initiator: backfillInitiator.USER,
       });
     });
 
@@ -107,6 +117,7 @@ describe('updateGaps', () => {
         gaps,
         backfillSchedule,
         shouldRefetchAllBackfills: true,
+        initiator: backfillInitiator.USER,
       });
       expect(processAllRuleGapsMock).not.toHaveBeenCalled();
       expect(updateGapsBatchMock).toHaveBeenCalledWith({
@@ -120,6 +131,7 @@ describe('updateGaps', () => {
         ruleId,
         eventLogClient: mockEventLogClient,
         alertingEventLogger: expect.any(AlertingEventLogger),
+        initiator: backfillInitiator.USER,
       });
     });
 
@@ -138,11 +150,20 @@ describe('updateGaps', () => {
         gaps,
         backfillSchedule,
         shouldRefetchAllBackfills: true,
+        initiator: backfillInitiator.USER,
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to update gaps for rule test-rule-id from: 2024-01-01T00:00:00.000Z to: 2024-01-01T01:00:00.000Z: Some gaps failed to update'
       );
+    });
+
+    describe('processGapsBatch function', () => {
+      it('should return a record with the count of processed gaps per rule', () => {
+        expect(processGapsBatchResult).toEqual({
+          [ruleId]: 1,
+        });
+      });
     });
   });
 });

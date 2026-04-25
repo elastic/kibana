@@ -7,14 +7,8 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  EuiLink,
-  EuiButton,
-  EuiButtonProps,
-  EuiButtonEmptyProps,
-  EuiLinkAnchorProps,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import type { EuiButtonProps, EuiButtonEmptyProps, EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { letBrowserHandleEvent } from './link_events';
 
@@ -56,7 +50,7 @@ type TEuiReactRouterButtonEmptyProps = EuiButtonEmptyProps & IEuiReactRouterProp
 
 export const ReactRouterEuiLink: React.FC<TEuiReactRouterLinkProps> = ({ to, ...rest }) => (
   <ReactRouterHelperForEui to={to}>
-    <EuiLink data-test-subj="syntheticsReactRouterEuiLinkLink" {...rest} />
+    <EuiLink data-test-subj="syntheticsReactRouterEuiLink" {...rest} />
   </ReactRouterHelperForEui>
 );
 

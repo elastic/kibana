@@ -14,7 +14,7 @@ import {
   packetbeatNoResults,
   packetbeatWithSomeErrors,
 } from '../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { DataQualityCheckResult, PatternRollup } from '../../../types';
+import type { DataQualityCheckResult, PatternRollup } from '../../../types';
 import {
   getErrorSummaries,
   getErrorSummariesForRollup,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags, test } from '@kbn/scout';
+import { tags, test } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import {
   VISIBLE_CHROME,
   HIDDEN_CHROME,
@@ -16,7 +17,7 @@ import {
 test.describe(
   'Maps',
   {
-    tag: tags.DEPLOYMENT_AGNOSTIC,
+    tag: tags.deploymentAgnostic,
   },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {

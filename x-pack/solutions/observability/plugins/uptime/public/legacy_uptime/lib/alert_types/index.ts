@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
 import { initTlsLegacyAlertType } from './tls_legacy';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 import { initDurationAnomalyAlertType } from './duration_anomaly';
 
 export type AlertTypeInitializer<TAlertTypeModel = ObservabilityRuleTypeModel> = (dependencies: {

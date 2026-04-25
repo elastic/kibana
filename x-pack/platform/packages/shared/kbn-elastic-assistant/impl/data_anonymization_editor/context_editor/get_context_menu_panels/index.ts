@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import * as i18n from '../translations';
 import type { BatchUpdateListItem } from '../types';
@@ -84,7 +84,7 @@ export const getContextMenuPanels = ({
         },
         {
           disabled: disableAnonymize,
-          icon: 'eyeClosed',
+          icon: 'eyeSlash',
           name: i18n.ANONYMIZE,
           onClick: () => {
             closePopover();

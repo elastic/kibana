@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { DataView } from '@kbn/data-plugin/common';
 
 import { useKibana } from '../lib/kibana';
@@ -44,7 +44,7 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
         try {
           dataView = await dataViews.createAndSave({
             title: 'logs-osquery_manager.result*',
-            timeFieldName: '@timestamp',
+            timeFieldName: 'event.ingested',
           });
           // eslint-disable-next-line no-empty
         } catch (e) {}
@@ -54,7 +54,7 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
         try {
           dataView = await dataViews.create({
             title: 'logs-osquery_manager.result*',
-            timeFieldName: '@timestamp',
+            timeFieldName: 'event.ingested',
           });
           // eslint-disable-next-line no-empty
         } catch (e) {}

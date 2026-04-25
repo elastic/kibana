@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { useNavigation } from '../../common/lib/kibana';
 import { ConfigurationTabs } from '../constants';
 import * as i18n from '../translations';
+import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 
 const CONFIGURATION_TABS = [
   {
@@ -33,6 +34,15 @@ const CONFIGURATION_TABS = [
 export const ConfigurationsTabs = React.memo(() => {
   const { navigateTo } = useNavigation();
   const params: { tab: ConfigurationTabs } = useParams();
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+
+  const filteredTabs = useMemo(
+    () =>
+      CONFIGURATION_TABS.filter(
+        (tab) => !isAgentChatExperienceEnabled || tab.tabId !== ConfigurationTabs.aiSettings
+      ),
+    [isAgentChatExperienceEnabled]
+  );
 
   const onSelectedTabChanged = useCallback(
     (deepLinkId: SecurityPageName) => {
@@ -43,7 +53,7 @@ export const ConfigurationsTabs = React.memo(() => {
 
   return (
     <EuiTabs size="m" bottomBorder>
-      {CONFIGURATION_TABS.map((tab) => (
+      {filteredTabs.map((tab) => (
         <EuiTab
           key={tab.deepLinkId}
           onClick={() => onSelectedTabChanged(tab.deepLinkId)}

@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/embedded-lens-example-plugin",
   "owner": "@elastic/kibana-visualizations",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "embeddedLensExample",
     "server": false,

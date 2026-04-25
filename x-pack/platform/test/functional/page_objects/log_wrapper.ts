@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
 function isPromise<T>(value: unknown): value is Promise<T> {

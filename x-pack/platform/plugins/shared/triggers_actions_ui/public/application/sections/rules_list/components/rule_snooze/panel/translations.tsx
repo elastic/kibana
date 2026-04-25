@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SnoozeUnit } from './constants';
+import type { SnoozeUnit } from './constants';
 
 export const MINUTES = i18n.translate('xpack.triggersActionsUI.sections.rulesList.minutesLabel', {
   defaultMessage: 'minutes',

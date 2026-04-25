@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 export const getAuthenticationAPIKey = (request: KibanaRequest) => {
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);

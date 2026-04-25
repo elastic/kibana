@@ -10,22 +10,22 @@
 import React from 'react';
 import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { Filter } from '@kbn/es-query';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { VisualizationContainer } from '@kbn/visualizations-common';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
-import { RangeControl } from './control/range_control_factory';
-import { ListControl } from './control/list_control_factory';
-import { InputControlVisDependencies } from './plugin';
-import { InputControlVisParams } from './types';
+import type { RangeControl } from './control/range_control_factory';
+import type { ListControl } from './control/list_control_factory';
+import type { InputControlVisDependencies } from './plugin';
+import type { InputControlVisParams } from './types';
 
 export type InputControlVisControllerType = ReturnType<typeof createInputControlVisController>;
 

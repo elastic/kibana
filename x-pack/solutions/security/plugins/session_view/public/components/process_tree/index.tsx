@@ -15,7 +15,7 @@ import type { AlertStatusEventEntityIdMap, Process, ProcessEventsPage } from '..
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 import { PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
-import { SessionViewTelemetryKey } from '../../types';
+import type { SessionViewTelemetryKey } from '../../types';
 
 type FetchFunction = () => void;
 
@@ -57,7 +57,7 @@ export interface ProcessTreeDeps {
 
   // a map for alerts with updated status and process.entity_id
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
-  onShowAlertDetails: (alertUuid: string) => void;
+  onShowAlertDetails: (alertId: string, alertIndex: string) => void;
   onJumpToOutput: (entityId: string) => void;
   showTimestamp?: boolean;
   verboseMode?: boolean;

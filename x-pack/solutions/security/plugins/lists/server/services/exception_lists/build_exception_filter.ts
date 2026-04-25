@@ -7,7 +7,7 @@
 
 import agent from 'elastic-apm-node';
 import { chunk } from 'lodash/fp';
-import {
+import type {
   CreateExceptionListItemSchema,
   Entry,
   EntryExists,
@@ -19,6 +19,8 @@ import {
   ExceptionListItemSchema,
   OsTypeArray,
   Type,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   entriesExists,
   entriesList,
   entriesMatch,

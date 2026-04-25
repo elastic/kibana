@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import pLimit from 'p-limit';
-import { RelatedEntityFromSearchResults } from '.';
+import type { RelatedEntityFromSearchResults } from '.';
 import {
   RCA_PROMPT_DEPENDENCIES,
   RCA_PROMPT_ENTITIES,
   RCA_SYSTEM_PROMPT_BASE,
 } from '../../prompts';
-import { RootCauseAnalysisContext } from '../../types';
+import type { RootCauseAnalysisContext } from '../../types';
 import { formatEntity } from '../../util/format_entity';
 import { getPreviouslyInvestigatedEntities } from '../../util/get_previously_investigated_entities';
 import { toBlockquote } from '../../util/to_blockquote';
@@ -136,7 +136,9 @@ export async function extractRelatedEntities({
     })
   );
 
-  const foundEntityIds = foundEntities.map(({ entity: foundEntity }) => stringify(foundEntity));
+  const foundEntityIds = foundEntities.map(({ entity: foundEntity }) =>
+    stableStringify(foundEntity)
+  );
 
   const relatedEntities = allEvents
     .flat()
@@ -150,7 +152,7 @@ export async function extractRelatedEntities({
       });
     })
     .filter((item) => {
-      return foundEntityIds.includes(stringify(item.entity));
+      return foundEntityIds.includes(stableStringify(item.entity));
     });
 
   return {

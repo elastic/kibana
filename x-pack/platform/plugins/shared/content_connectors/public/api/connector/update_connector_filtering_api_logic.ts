@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { FilteringRules } from '@kbn/search-connectors';
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { createApiLogic } from '../api_logic/create_api_logic';
 
 export interface PutConnectorFilteringArgs {

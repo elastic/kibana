@@ -81,7 +81,7 @@ export const PolicyResponseArtifactItem = memo(({ artifact }: PolicyResponseArti
           <EuiFlexItem grow={false}>
             <StyledShaValue data-test-subj="endpointPolicyResponseArtifactSha256">
               <EuiToolTip position="top" content={artifact.sha256}>
-                <>{truncate(artifact.sha256, { length: 12 })}</>
+                <span tabIndex={0}>{truncate(artifact.sha256, { length: 12 })}</span>
               </EuiToolTip>
             </StyledShaValue>
           </EuiFlexItem>
@@ -95,7 +95,7 @@ export const PolicyResponseArtifactItem = memo(({ artifact }: PolicyResponseArti
                 <EuiIcon
                   size="m"
                   color="primary"
-                  type="copyClipboard"
+                  type="copy"
                   onClick={copy}
                   data-test-subj="endpointPolicyResponseArtifactCopyButton"
                 />

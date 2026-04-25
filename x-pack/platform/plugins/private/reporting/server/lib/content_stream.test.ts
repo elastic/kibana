@@ -25,12 +25,14 @@ describe('ContentStream', () => {
       {
         id: 'something',
         index: 'somewhere',
+        created_at: '2023-01-01T10:00:00.000Z',
       },
       { encoding: 'raw' }
     );
     base64Stream = new ContentStream(client, logger, {
       id: 'something',
       index: 'somewhere',
+      created_at: '2023-01-01T10:00:00.000Z',
     });
 
     client.search.mockResponse(
@@ -298,7 +300,7 @@ describe('ContentStream', () => {
           index: '.kibana-reporting',
           op_type: 'create',
           document: {
-            '@timestamp': '1970-01-01T00:00:00.000Z',
+            '@timestamp': '2023-01-01T10:00:00.000Z',
             parent_id: 'something',
             output: {
               content: '34',
@@ -314,7 +316,7 @@ describe('ContentStream', () => {
           index: '.kibana-reporting',
           op_type: 'create',
           document: {
-            '@timestamp': '1970-01-01T00:00:00.000Z',
+            '@timestamp': '2023-01-01T10:00:00.000Z',
             parent_id: 'something',
             output: {
               content: '56',
@@ -345,7 +347,7 @@ describe('ContentStream', () => {
           op_type: 'create',
           document: {
             parent_id: 'something',
-            '@timestamp': '1970-01-01T00:00:00.000Z',
+            '@timestamp': '2023-01-01T10:00:00.000Z',
             output: {
               content: Buffer.from('456').toString('base64'),
               chunk: 1,
@@ -361,7 +363,7 @@ describe('ContentStream', () => {
           op_type: 'create',
           document: {
             parent_id: 'something',
-            '@timestamp': '1970-01-01T00:00:00.000Z',
+            '@timestamp': '2023-01-01T10:00:00.000Z',
             output: {
               content: Buffer.from('78').toString('base64'),
               chunk: 2,

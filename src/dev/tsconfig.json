@@ -1,20 +1,22 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
   "include": [
     "**/*.js",
     "**/*.ts",
+    "**/*.mjs",
+    "**/*.cjs",
     "../../typings/**/*"
   ],
   "exclude": [
     "target/**/*",
-    "packages/**/*"
+    "packages/**/*",
+    "type_check_validation_loader.js"
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../tsconfig.json" },
     "@kbn/screenshotting-plugin",
     "@kbn/test",
     "@kbn/dev-cli-runner",
@@ -29,7 +31,6 @@
     "@kbn/dev-utils",
     "@kbn/utils",
     "@kbn/optimizer",
-    "@kbn/bazel-runner",
     "@kbn/peggy",
     "@kbn/babel-transform",
     "@kbn/import-resolver",
@@ -48,5 +49,9 @@
     "@kbn/code-owners",
     "@kbn/projects-solutions-groups",
     "@kbn/dot-text",
+    "@kbn/yarn-lock-validator",
+    "@kbn/sort-package-json",
+    "@kbn/babel-register",
+    "@kbn/dev-validation-runner",
   ]
 }

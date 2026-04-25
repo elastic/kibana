@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import dateMath, { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
+import dateMath from '@kbn/datemath';
 import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
 import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
 

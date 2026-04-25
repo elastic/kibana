@@ -6,19 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiComboBoxOptionOption,
-  EuiIcon,
-  EuiSpacer,
-  EuiToolTip,
-  useEuiPaddingSize,
-} from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiToolTip, useEuiPaddingSize } from '@elastic/eui';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
-import { FieldConflictsInfo, getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
+import type { FieldConflictsInfo } from '@kbn/securitysolution-list-utils';
+import { getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 import * as i18n from '../translations';
-import {
+import type {
   ComboBoxFields,
   DataViewField,
   FieldBaseProps,
@@ -195,7 +191,7 @@ export const useEsField = ({
           content={labelTooltipText}
           position="bottom"
         >
-          <>{label}</>
+          <span>{label}</span>
         </EuiToolTip>
       );
     }
@@ -233,7 +229,6 @@ export const useEsField = ({
             {label}
             <EuiIcon
               data-test-subj="mappingConflictsWarningIcon"
-              tabIndex={0}
               type="warning"
               title={i18n.FIELD_CONFLICT_INDICES_WARNING_TITLE}
               size="s"

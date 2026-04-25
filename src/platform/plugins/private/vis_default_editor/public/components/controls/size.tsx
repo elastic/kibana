@@ -12,7 +12,7 @@ import { isUndefined } from 'lodash';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 export interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {
   iconTip?: React.ReactNode;

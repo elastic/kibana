@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { MachineLearningJobIdReadOnly } from './machine_learning_job_id';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import { GET_MODULES_QUERY_KEY } from '../../../../../../../../common/components/ml_popover/hooks/use_fetch_modules_query';
@@ -24,7 +24,7 @@ const mockedModulesData = [
     id: 'security_auth',
     jobs: [
       {
-        id: 'auth_high_count_logon_events',
+        id: 'auth_high_count_logon_events_ea',
         config: {
           groups: [],
           custom_settings: {
@@ -57,7 +57,7 @@ function MockMlData({ children }: { children: React.ReactNode }) {
 export const Default = () => (
   <ThreeWayDiffStorybookProviders>
     <MockMlData>
-      <MachineLearningJobIdReadOnly machineLearningJobId="auth_high_count_logon_events" />
+      <MachineLearningJobIdReadOnly machineLearningJobId="auth_high_count_logon_events_ea" />
     </MockMlData>
   </ThreeWayDiffStorybookProviders>
 );

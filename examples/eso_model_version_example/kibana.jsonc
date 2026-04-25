@@ -3,11 +3,20 @@
   "id": "@kbn/eso-model-version-example",
   "owner": "@elastic/kibana-security",
   "description": "ESO Model Version Example",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "esoModelVersionExample",
     "server": true,
     "browser": true,
-    "requiredBundles": ["kibanaReact"],
-    "requiredPlugins": ["developerExamples", "security", "spaces", "encryptedSavedObjects"]
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "requiredPlugins": [
+      "developerExamples",
+      "security",
+      "spaces",
+      "encryptedSavedObjects"
+    ]
   }
 }

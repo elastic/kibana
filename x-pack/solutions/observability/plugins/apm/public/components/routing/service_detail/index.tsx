@@ -155,7 +155,8 @@ export const serviceDetailRoute = {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
-            hidden: true,
+            showTimeComparison: true,
+            showTransactionTypeSelector: true,
           },
         }),
         params: t.partial({
@@ -192,15 +193,23 @@ export const serviceDetailRoute = {
             element: <TransactionDetails />,
             params: t.type({
               query: t.intersection([
-                t.type({
-                  transactionName: t.string,
-                  comparisonEnabled: toBooleanRt,
-                  showCriticalPath: toBooleanRt,
-                }),
+                t.intersection([
+                  t.type({
+                    comparisonEnabled: toBooleanRt,
+                    showCriticalPath: toBooleanRt,
+                  }),
+                  t.partial({ transactionName: t.string }),
+                ]),
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
                   flyoutDetailTab: t.string,
+                  sampleRangeTo: toNumberRt,
+                  sampleRangeFrom: toNumberRt,
+                  page: toNumberRt,
+                  pageSize: toNumberRt,
+                  sortField: t.string,
+                  sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
                 }),
                 offsetRt,
               ]),
@@ -316,11 +325,11 @@ export const serviceDetailRoute = {
       '/services/{serviceName}/service-map': page({
         tab: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {
-          defaultMessage: 'Service Map',
+          defaultMessage: 'Service map',
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
-          hidden: true,
+          showTimeComparison: true,
         },
       }),
       '/services/{serviceName}/logs': page({
@@ -343,9 +352,6 @@ export const serviceDetailRoute = {
             defaultMessage: 'Infrastructure',
           }),
           element: <InfraOverview />,
-          searchBarOptions: {
-            showUnifiedSearchBar: false,
-          },
         }),
         params: t.partial({
           query: t.partial({
@@ -365,7 +371,7 @@ export const serviceDetailRoute = {
           }),
           element: <AlertsOverview />,
           searchBarOptions: {
-            hidden: true,
+            showUnifiedSearchBar: false,
           },
         }),
         params: t.partial({

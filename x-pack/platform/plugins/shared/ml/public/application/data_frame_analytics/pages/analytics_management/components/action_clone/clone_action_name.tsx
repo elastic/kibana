@@ -502,7 +502,7 @@ export const CloneActionName: FC<CloneActionNameProps> = ({ isDisabled }) => {
           defaultMessage: 'You do not have permission to clone analytics jobs.',
         })}
       >
-        <>{cloneActionNameText}</>
+        <span tabIndex={0}>{cloneActionNameText}</span>
       </EuiToolTip>
     );
   }

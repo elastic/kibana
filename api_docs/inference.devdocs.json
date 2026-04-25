@@ -2,7 +2,81 @@
   "id": "inference",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "inference",
+        "id": "def-public.getDefaultConnector",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultConnector",
+        "description": [],
+        "signature": [
+          "({ connectors, }: { connectors: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
+          "[]; }) => ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-public.getDefaultConnector.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  connectors,\n}",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+            "lineNumber": 13,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inference",
+                "id": "def-public.getDefaultConnector.$1.connectors",
+                "type": "Array",
+                "tags": [],
+                "label": "connectors",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.InferenceConnector",
+                    "text": "InferenceConnector"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+                "lineNumber": 14,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -15,6 +89,8 @@
       "label": "InferencePublicSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +105,8 @@
       "label": "InferencePublicStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -59,6 +137,8 @@
             "<TOptions>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+          "lineNumber": 21,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -74,6 +154,8 @@
                 "TOptions"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+              "lineNumber": 79,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -110,6 +192,8 @@
             "<TId, TOutputSchema, TStream>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+          "lineNumber": 22,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -132,6 +216,8 @@
                 "<TId, TOutputSchema, TStream>"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/api.ts",
+              "lineNumber": 58,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -156,6 +242,8 @@
             "[]>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+          "lineNumber": 23,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -176,6 +264,8 @@
         "label": "EsqlDocumentBase",
         "description": [],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,6 +288,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -214,6 +306,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -228,6 +322,8 @@
                   "EsqlDocData"
                 ],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -237,17 +333,46 @@
           },
           {
             "parentPluginId": "inference",
-            "id": "def-server.EsqlDocumentBase.getSystemMessage",
+            "id": "def-server.EsqlDocumentBase.getPrompts",
             "type": "Function",
             "tags": [],
+            "label": "getPrompts",
+            "description": [],
+            "signature": [
+              "() => ",
+              "EsqlPrompts"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.EsqlDocumentBase.getSystemMessage",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
             "label": "getSystemMessage",
             "description": [],
             "signature": [
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
-            "deprecated": false,
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/ai-tools",
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -259,11 +384,13 @@
             "label": "getDocumentation",
             "description": [],
             "signature": [
-              "(rawKeywords: string[], { generateMissingKeywordDoc, addSuggestions, addOverview, resolveAliases, }?: ",
+              "(rawKeywords: string[], { generateMissingKeywordDoc, addSuggestions, resolveAliases, }?: ",
               "GetDocsOptions",
               ") => Record<string, string>"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -278,6 +405,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -287,12 +416,14 @@
                 "id": "def-server.EsqlDocumentBase.getDocumentation.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      generateMissingKeywordDoc = true,\n      addSuggestions = true,\n      addOverview = true,\n      resolveAliases = true,\n    }",
+                "label": "{\n      generateMissingKeywordDoc = true,\n      addSuggestions = true,\n      resolveAliases = true,\n    }",
                 "description": [],
                 "signature": [
                   "GetDocsOptions"
                 ],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -313,7 +444,7 @@
         "label": "naturalLanguageToEsql",
         "description": [],
         "signature": [
-          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}: ",
+          "(options: ",
           "NlToEsqlTaskParams",
           "<TToolOptions>) => ",
           "Observable",
@@ -322,6 +453,88 @@
           "<TToolOptions>>"
         ],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.naturalLanguageToEsql.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "NlToEsqlTaskParams",
+              "<TToolOptions>"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.naturalLanguageToEsql",
+        "type": "Function",
+        "tags": [],
+        "label": "naturalLanguageToEsql",
+        "description": [],
+        "signature": [
+          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}: ",
+          "NlToEsqlTaskParams",
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>>) => ",
+          "Observable",
+          "<",
+          "NlToEsqlTaskEvent",
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>>>"
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -334,9 +547,29 @@
             "description": [],
             "signature": [
               "NlToEsqlTaskParams",
-              "<TToolOptions>"
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<",
+              "ToolDefinitions",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string>>>"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+            "lineNumber": 23,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -355,25 +588,13 @@
         "signature": [
           "({\n  query,\n  client,\n}: { query: string; client: ",
           "ElasticsearchClient",
-          "; }) => Promise<{ columns?: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[] | undefined; rows?: ",
-          {
-            "pluginId": "@kbn/es-types",
-            "scope": "common",
-            "docId": "kibKbnEsTypesPluginApi",
-            "section": "def-common.ESQLRow",
-            "text": "ESQLRow"
-          },
-          "[] | undefined; error?: Error | undefined; errorMessages?: string[] | undefined; }>"
+          "; }) => Promise<",
+          "QueryValidateRunOutput",
+          ">"
         ],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -385,6 +606,8 @@
             "label": "{\n  query,\n  client,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
+            "lineNumber": 27,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -396,6 +619,8 @@
                 "label": "query",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -407,7 +632,11 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
+                  "default",
+                  "; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -487,39 +716,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; helpers: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
-                  "; search: { <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
-                  "default",
-                  "; child: (opts: ",
-                  "ClientOptions",
-                  ") => ",
+                  "; helpers: ",
                   "default",
                   "; asyncSearch: ",
                   "default",
@@ -546,25 +745,25 @@
                   " | undefined): Promise<",
                   "BulkResponse",
                   ">; }; capabilities: { (this: That, params?: ",
-                  "TODO",
+                  "CapabilitiesRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
-                  "TODO",
+                  "CapabilitiesResponse",
                   ">; (this: That, params?: ",
-                  "TODO",
+                  "CapabilitiesRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
-                  "TODO",
+                  "CapabilitiesResponse",
                   ", unknown>>; (this: That, params?: ",
-                  "TODO",
+                  "CapabilitiesRequest",
                   " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
-                  "TODO",
+                  "CapabilitiesResponse",
                   ">; }; cat: ",
                   "default",
                   "; ccr: ",
@@ -917,27 +1116,27 @@
                   "InfoResponse",
                   ">; }; ingest: ",
                   "default",
-                  "; knnSearch: { (this: That, params?: ",
-                  "TODO",
-                  " | undefined, options?: ",
+                  "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+                  "KnnSearchRequest",
+                  ", options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
-                  "TODO",
-                  ">; (this: That, params?: ",
-                  "TODO",
-                  " | undefined, options?: ",
+                  "KnnSearchResponse",
+                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+                  "KnnSearchRequest",
+                  ", options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
-                  "TODO",
-                  ", unknown>>; (this: That, params?: ",
-                  "TODO",
-                  " | undefined, options?: ",
+                  "KnnSearchResponse",
+                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "KnnSearchRequest",
+                  ", options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
-                  "TODO",
-                  ">; }; license: ",
+                  "KnnSearchResponse",
+                  "<TDocument>>; }; license: ",
                   "default",
                   "; logstash: ",
                   "default",
@@ -1076,6 +1275,8 @@
                   " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; profiling: ",
+                  "default",
+                  "; project: ",
                   "default",
                   "; putScript: { (this: That, params: ",
                   "PutScriptRequest",
@@ -1227,6 +1428,32 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ScrollResponse",
+                  "<TDocument, TAggregations>>; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "SearchResponse",
                   "<TDocument, TAggregations>>; }; searchApplication: ",
                   "default",
                   "; searchMvt: { (this: That, params: ",
@@ -1298,6 +1525,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -1394,6 +1623,8 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1404,7 +1635,98 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.InferenceEndpoint",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceEndpoint",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/inference/server/util/get_inference_endpoints.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.InferenceEndpoint.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/inference/server/util/get_inference_endpoints.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.InferenceEndpoint.taskType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "taskType",
+            "description": [],
+            "signature": [
+              "\"completion\" | \"sparse_embedding\" | \"text_embedding\" | \"rerank\" | \"chat_completion\""
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/util/get_inference_endpoints.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.InferenceEndpoint.service",
+            "type": "string",
+            "tags": [],
+            "label": "service",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/inference/server/util/get_inference_endpoints.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.InferenceEndpoint.serviceSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "serviceSettings",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/util/get_inference_endpoints.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.InferenceEndpoint.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ display?: { name?: string | undefined; creator?: string | undefined; } | undefined; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/util/get_inference_endpoints.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -1418,6 +1740,8 @@
         "\nSetup contract of the inference plugin."
       ],
       "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+      "lineNumber": 52,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1434,6 +1758,8 @@
         "\nStart contract of the inference plugin, exposing APIs to interact with LLMs."
       ],
       "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+      "lineNumber": 88,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1469,6 +1795,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 92,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1483,6 +1811,8 @@
                 "T"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 124,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1513,6 +1843,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 127,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1527,12 +1859,521 @@
                 "CreateChatModelOptions"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 141,
+              "columnNumber": 18,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getConnectorList",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectorList",
+          "description": [
+            "\nReturns a list of all available inference connectors.\n"
+          ],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            "[]>"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 143,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorList.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "- The Kibana request to scope the operation to"
+              ],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 149,
+              "columnNumber": 22,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to an array of inference connectors"
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getDefaultConnector",
+          "type": "Function",
+          "tags": [],
+          "label": "getDefaultConnector",
+          "description": [
+            "\nRetrieves the default inference connector configured for the system.\n"
+          ],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 151,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getDefaultConnector.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "- The Kibana request to scope the operation to"
+              ],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 157,
+              "columnNumber": 25,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to the default inference connector"
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getConnectorById",
+          "type": "Function",
+          "tags": [
+            "throws"
+          ],
+          "label": "getConnectorById",
+          "description": [
+            "\nRetrieves a specific inference connector by its ID.\n"
+          ],
+          "signature": [
+            "(id: string, request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 159,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorById.$1",
+              "type": "string",
+              "tags": [],
+              "label": "id",
+              "description": [
+                "- The unique identifier of the connector to retrieve"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 167,
+              "columnNumber": 22,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorById.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [
+                "- The Kibana request to scope the operation to"
+              ],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 167,
+              "columnNumber": 34,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to the requested inference connector"
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getClientWithoutRequest",
+          "type": "Function",
+          "tags": [],
+          "label": "getClientWithoutRequest",
+          "description": [
+            "\nCreates an {@link InferenceClient} using pre-scoped services instead of a\n{@link KibanaRequest}. This is useful for background tasks (e.g. alerting rule\nexecutors) that have scoped clients but no HTTP request context.\n\nNote: anonymization features are not available on clients created this way.\n"
+          ],
+          "signature": [
+            "(actionsClient: ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.PublicMethodsOf",
+              "text": "PublicMethodsOf"
+            },
+            "<",
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.ActionsClient",
+              "text": "ActionsClient"
+            },
+            ">, esClient: ",
+            "ElasticsearchClient",
+            ") => ",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceClient",
+              "text": "InferenceClient"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 169,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getClientWithoutRequest.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "actionsClient",
+              "description": [
+                "- A pre-scoped actions client"
+              ],
+              "signature": [
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "common",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-common.PublicMethodsOf",
+                  "text": "PublicMethodsOf"
+                },
+                "<",
+                {
+                  "pluginId": "actions",
+                  "scope": "server",
+                  "docId": "kibActionsPluginApi",
+                  "section": "def-server.ActionsClient",
+                  "text": "ActionsClient"
+                },
+                ">"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 180,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getClientWithoutRequest.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "esClient",
+              "description": [
+                "- A pre-scoped Elasticsearch client"
+              ],
+              "signature": [
+                "ElasticsearchClient"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 181,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getConnectorByIdWithoutClientRequest",
+          "type": "Function",
+          "tags": [
+            "throws"
+          ],
+          "label": "getConnectorByIdWithoutClientRequest",
+          "description": [
+            "\nRetrieves a specific inference connector by its ID, using pre-scoped services\ninstead of a {@link KibanaRequest}. This is useful for background tasks (e.g.\nalerting rule executors) that have scoped clients but no HTTP request.\n"
+          ],
+          "signature": [
+            "(id: string, actionsClient: ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.PublicMethodsOf",
+              "text": "PublicMethodsOf"
+            },
+            "<",
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.ActionsClient",
+              "text": "ActionsClient"
+            },
+            ">, esClient: ",
+            "ElasticsearchClient",
+            ") => Promise<",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 184,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorByIdWithoutClientRequest.$1",
+              "type": "string",
+              "tags": [],
+              "label": "id",
+              "description": [
+                "- The unique identifier of the connector to retrieve"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 196,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorByIdWithoutClientRequest.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "actionsClient",
+              "description": [
+                "- A pre-scoped actions client"
+              ],
+              "signature": [
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "common",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-common.PublicMethodsOf",
+                  "text": "PublicMethodsOf"
+                },
+                "<",
+                {
+                  "pluginId": "actions",
+                  "scope": "server",
+                  "docId": "kibActionsPluginApi",
+                  "section": "def-server.ActionsClient",
+                  "text": "ActionsClient"
+                },
+                ">"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 197,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getConnectorByIdWithoutClientRequest.$3",
+              "type": "Object",
+              "tags": [],
+              "label": "esClient",
+              "description": [
+                "- A pre-scoped Elasticsearch client"
+              ],
+              "signature": [
+                "ElasticsearchClient"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 198,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to the requested inference connector"
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getInferenceEndpoints",
+          "type": "Function",
+          "tags": [],
+          "label": "getInferenceEndpoints",
+          "description": [
+            "\nLists available Elasticsearch inference endpoints, optionally filtered by task type.\n"
+          ],
+          "signature": [
+            "(taskType?: ",
+            "InferenceTaskType",
+            " | undefined) => Promise<",
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.InferenceEndpoint",
+              "text": "InferenceEndpoint"
+            },
+            "[]>"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 201,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getInferenceEndpoints.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "taskType",
+              "description": [
+                "- Optional task type to filter by (e.g. 'chat_completion')"
+              ],
+              "signature": [
+                "InferenceTaskType",
+                " | undefined"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 207,
+              "columnNumber": 27,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to an array of inference endpoints"
+          ]
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getInferenceEndpointById",
+          "type": "Function",
+          "tags": [
+            "throws"
+          ],
+          "label": "getInferenceEndpointById",
+          "description": [
+            "\nRetrieves a specific Elasticsearch inference endpoint by its ID.\n"
+          ],
+          "signature": [
+            "(inferenceId: string) => Promise<",
+            {
+              "pluginId": "inference",
+              "scope": "server",
+              "docId": "kibInferencePluginApi",
+              "section": "def-server.InferenceEndpoint",
+              "text": "InferenceEndpoint"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 209,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getInferenceEndpointById.$1",
+              "type": "string",
+              "tags": [],
+              "label": "inferenceId",
+              "description": [
+                "- The unique identifier of the inference endpoint"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 216,
+              "columnNumber": 30,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "A promise that resolves to the inference endpoint metadata"
+          ]
         }
       ],
       "lifecycle": "start",
@@ -1555,6 +2396,8 @@
           "(query: string) => { input: string; output: string; isCorrection: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/correct_esql_query.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1569,6 +2412,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/correct_esql_query.ts",
+            "lineNumber": 18,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1603,6 +2448,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/output/create_output_api.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1623,6 +2470,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/output/create_output_api.ts",
+            "lineNumber": 27,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1657,9 +2506,9 @@
           },
           "<string, ",
           "AugmentedRequired",
-          "<{ [x: string]: string | number | boolean | ",
+          "<{ [x: string]: string | number | boolean | unknown[] | ",
           "AugmentedRequired",
-          "<any, never> | FromToolSchemaArray<ToolSchemaTypeArray> | undefined; }, never> | undefined>> | ",
+          "<any, never> | undefined; }, never> | undefined>> | ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1672,6 +2521,8 @@
           " | undefined>"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/output/create_output_api.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1692,6 +2543,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/output/create_output_api.ts",
+            "lineNumber": 29,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1718,6 +2571,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1732,6 +2587,8 @@
               "RestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+            "lineNumber": 21,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1758,6 +2615,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1772,6 +2631,8 @@
               "BoundRestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+            "lineNumber": 22,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1806,6 +2667,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1820,6 +2683,8 @@
               "RestOptions | BoundRestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1839,6 +2704,8 @@
           "() => string"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/utils/generate_fake_tool_call_id.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1856,6 +2723,8 @@
           "(query: string) => { name: string | undefined; command: string; }[]"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/non_ast/correct_common_esql_mistakes.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1870,6 +2739,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/non_ast/correct_common_esql_mistakes.ts",
+            "lineNumber": 86,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1888,6 +2759,8 @@
         "label": "GetConnectorsResponseBody",
         "description": [],
         "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1909,6 +2782,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1943,9 +2818,21 @@
             "section": "def-common.ToolOptions",
             "text": "ToolOptions"
           },
-          "<string>"
+          "<",
+          "ToolDefinitions",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolChoice",
+            "text": "ToolChoice"
+          },
+          "<string>>"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1976,14 +2863,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>, \"input\">; prevMessages?: ",
+          "ToolDefinitions",
+          " | undefined>[]>, \"input\">; prevMessages?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1994,6 +2875,8 @@
           "[] | undefined; input?: unknown; }"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

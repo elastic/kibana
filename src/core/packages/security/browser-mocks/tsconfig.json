@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -19,5 +19,6 @@
     "@kbn/core-security-browser",
     "@kbn/core-security-browser-internal",
     "@kbn/core-security-common",
+    "@kbn/lazy-object",
   ]
 }

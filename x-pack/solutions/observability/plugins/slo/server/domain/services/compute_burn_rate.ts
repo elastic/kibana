@@ -6,7 +6,7 @@
  */
 
 import { toHighPrecision } from '../../utils/number';
-import { SLODefinition } from '../models';
+import type { SLODefinition } from '../models';
 
 /**
  * A Burn Rate is computed with the sliValue retrieved from a specific lookback period

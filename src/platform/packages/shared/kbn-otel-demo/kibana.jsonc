@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/otel-demo",
+  "owner": "@elastic/obs-onboarding-team",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}
+

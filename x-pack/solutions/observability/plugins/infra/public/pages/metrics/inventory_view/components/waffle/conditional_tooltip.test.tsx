@@ -15,6 +15,7 @@ jest.mock('../../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({ sourceId: 'default' }),
 }));
 
+jest.mock('../../../../../containers/plugin_config_context');
 jest.mock('../../hooks/use_snaphot');
 import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
@@ -35,6 +36,7 @@ const NODE: InfraWaffleMapNode = {
 };
 
 const mockedUseWaffleOptionsContextReturnValue = {
+  preferredSchema: 'ecs' as const,
   metric: {
     type: 'cpu',
     field: 'host.cpuV2.pct',
@@ -130,13 +132,6 @@ describe('ConditionalToolTip', () => {
     const tooltip = screen.getByTestId('conditionalTooltipContent-host-01');
     expect(tooltip).toBeInTheDocument();
 
-    const expectedQuery = JSON.stringify({
-      bool: {
-        filter: {
-          match_phrase: { 'host.name': 'host-01' },
-        },
-      },
-    });
     const expectedMetrics = [
       { type: 'cpuV2' },
       { type: 'memory' },
@@ -161,14 +156,16 @@ describe('ConditionalToolTip', () => {
     ];
 
     expect(mockedUseSnapshot).toHaveBeenCalledWith({
-      filterQuery: expectedQuery,
+      kuery: '"host.name": host-01',
       metrics: expectedMetrics,
       groupBy: [],
       nodeType: 'host',
       sourceId: 'default',
+      includeTimeseries: true,
       currentTime,
       accountId: '',
       region: '',
+      schema: 'ecs',
     } as UseSnapshotRequest);
 
     expect(tooltip).toMatchSnapshot();

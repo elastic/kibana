@@ -12,7 +12,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
-import { FtrProviderContext } from 'x-pack/test/api_integration/ftr_provider_context';
 
 {{#each sources}}
 {{#if generationContext.operations}}
@@ -26,6 +25,8 @@ import type {
 } from '{{generatedPath}}';
 {{/if}}
 {{/each}}
+
+import type { FtrProviderContext } from 'x-pack/platform/test/api_integration/ftr_provider_context';
 
 export interface ClientOptions {
   kbnClient: KbnClient;

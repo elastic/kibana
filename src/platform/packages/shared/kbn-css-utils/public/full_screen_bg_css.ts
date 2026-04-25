@@ -11,7 +11,8 @@
 
 import { useMemo } from 'react';
 import { css, keyframes } from '@emotion/react';
-import { COLOR_MODES_STANDARD, UseEuiTheme, euiCanAnimate, useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, euiCanAnimate, useEuiTheme } from '@elastic/eui';
 import bg_top_branded from './images/bg_top_branded.svg';
 import bg_top_branded_dark from './images/bg_top_branded_dark.svg';
 import bg_bottom_branded from './images/bg_bottom_branded.svg';

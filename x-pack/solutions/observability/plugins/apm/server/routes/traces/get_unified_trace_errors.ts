@@ -6,20 +6,9 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import {
-  ERROR_MESSAGE,
-  EXCEPTION_MESSAGE,
-  EXCEPTION_TYPE,
-  PROCESSOR_EVENT,
-  SPAN_ID,
-  STATUS_CODE,
-  TRACE_ID,
-} from '../../../common/es_fields/apm';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { getApmTraceError } from './get_trace_items';
+import { getUnprocessedOtelErrors } from './get_unprocessed_otel_errors';
 
 export interface UnifiedTraceErrors {
   apmErrors: Awaited<ReturnType<typeof getApmTraceError>>;
@@ -29,87 +18,29 @@ export interface UnifiedTraceErrors {
 
 export async function getUnifiedTraceErrors({
   apmEventClient,
-  end,
-  start,
+  logsClient,
   traceId,
+  docId,
+  start,
+  end,
 }: {
   apmEventClient: APMEventClient;
+  logsClient: LogsClient;
   traceId: string;
+  docId?: string;
   start: number;
   end: number;
 }): Promise<UnifiedTraceErrors> {
-  const [apmErrors, unprocessedOtelError] = await Promise.all([
-    getApmTraceError({ apmEventClient, traceId, start, end }),
-    getUnprocessedOtelErrors({ apmEventClient, traceId, start, end }),
+  const commonParams = { traceId, docId, start, end };
+
+  const [apmErrors, unprocessedOtelErrors] = await Promise.all([
+    getApmTraceError({ apmEventClient, ...commonParams }),
+    getUnprocessedOtelErrors({ logsClient, ...commonParams }),
   ]);
 
   return {
     apmErrors,
-    unprocessedOtelErrors: unprocessedOtelError,
-    totalErrors: apmErrors.length + unprocessedOtelError.length,
+    unprocessedOtelErrors,
+    totalErrors: apmErrors.length + unprocessedOtelErrors.length,
   };
-}
-
-export const optionalFields = asMutableArray([
-  SPAN_ID,
-  ERROR_MESSAGE,
-  EXCEPTION_TYPE,
-  EXCEPTION_MESSAGE,
-] as const);
-
-async function getUnprocessedOtelErrors({
-  apmEventClient,
-  end,
-  start,
-  traceId,
-}: {
-  apmEventClient: APMEventClient;
-  traceId: string;
-  start: number;
-  end: number;
-}) {
-  const response = await apmEventClient.search(
-    'get_unprocessed_errors_docs',
-    {
-      apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction, ProcessorEvent.error] },
-      track_total_hits: false,
-      size: 1000,
-      query: {
-        bool: {
-          must: [
-            {
-              bool: {
-                filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
-                must_not: existsQuery(PROCESSOR_EVENT),
-                should: [
-                  ...termQuery(STATUS_CODE, 'Error'),
-                  ...existsQuery(ERROR_MESSAGE),
-                  ...existsQuery(EXCEPTION_TYPE),
-                  ...existsQuery(EXCEPTION_MESSAGE),
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
-      fields: optionalFields,
-    },
-    { skipProcessorEventFilter: true }
-  );
-
-  return response.hits.hits.map((hit) => {
-    const event = unflattenKnownApmEventFields(hit.fields);
-
-    return {
-      id: event.span?.id,
-      error: {
-        message: event.error?.message,
-        exception: {
-          type: event.exception?.type,
-          message: event.exception?.message,
-        },
-      },
-    };
-  });
 }

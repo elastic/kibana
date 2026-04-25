@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import {
   VALID_TOKEN_COUNT,
-  MEDIAN_LINE_LENGTH_LIMIT,
   NULL_COUNT_PERCENT_LIMIT,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
   CATEGORY_EXAMPLES_ERROR_LIMIT,
@@ -16,7 +15,6 @@ import {
   VALIDATION_RESULT,
 } from '../common/constants/categorization';
 import type { FieldExampleCheck, CategoryFieldExample } from '../common/types/categories';
-import { getMedianStringLength } from './util';
 
 export class ValidationResults {
   private _results: FieldExampleCheck[] = [];
@@ -84,25 +82,6 @@ export class ValidationResults {
         id: VALIDATION_RESULT.TOKEN_COUNT,
         valid,
         message,
-      });
-    }
-  }
-
-  public createMedianMessageLengthResult(examples: string[]) {
-    const median = getMedianStringLength(examples);
-
-    if (median > MEDIAN_LINE_LENGTH_LIMIT) {
-      this._results.push({
-        id: VALIDATION_RESULT.MEDIAN_LINE_LENGTH,
-        valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
-        message: i18n.translate(
-          'xpack.ml.models.jobService.categorization.messages.medianLineLength',
-          {
-            defaultMessage:
-              'The median length for the field values analyzed is over {medianLimit} characters.',
-            values: { medianLimit: MEDIAN_LINE_LENGTH_LIMIT },
-          }
-        ),
       });
     }
   }

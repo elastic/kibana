@@ -38,7 +38,7 @@ export const CsvUploadManageDataSource = ({
     <>
       <EuiFlexGroup alignItems="flexStart" direction="column">
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiIcon size="l" type="importAction" />
+          <EuiIcon size="l" type="download" />
           <EuiText>
             <h1>
               <FormattedMessage
@@ -52,11 +52,12 @@ export const CsvUploadManageDataSource = ({
           <p>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.file.text"
-              defaultMessage="CSV file exported from your user management tool. Only one file can be added as a data source, and privileged users previously uploaded through CSV will be overwritten."
+              defaultMessage="Import a CSV file exported from your user management tool. Uploading a new file will overwrite any users added from a previous file."
             />
           </p>
           {isError && (
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.file.retrievalError"
@@ -89,7 +90,7 @@ export const CsvUploadManageDataSource = ({
           disabled={isError || isLoading}
           onClick={showImportFileModal}
           fullWidth={false}
-          iconType="plusInCircle"
+          iconType="plusCircle"
         >
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.text"

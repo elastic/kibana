@@ -7,6 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
@@ -16,7 +18,12 @@ import type {
 } from '../../constants';
 import type { CloudConnectors, ValueOf } from '..';
 
-import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
+import type {
+  PackageSpecManifest,
+  PackageSpecIcon,
+  PackageSpecCategory,
+  RegistryVarGroup,
+} from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -26,6 +33,7 @@ export enum InstallStatus {
   installing = 'installing',
   reinstalling = 'reinstalling',
   uninstalling = 'uninstalling',
+  rollingBack = 'rolling_back',
 }
 
 export interface DefaultPackagesInstallationError {
@@ -62,6 +70,8 @@ export enum KibanaAssetType {
   securityAIPrompt = 'security_ai_prompt',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
+  alertingRuleTemplate = 'alerting_rule_template',
+  sloTemplate = 'slo_template',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -81,9 +91,12 @@ export enum KibanaSavedObjectType {
   securityAIPrompt = 'security-ai-prompt',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
+  alertingRuleTemplate = 'alerting_rule_template',
+  sloTemplate = 'slo_template',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
+  alert = 'alert',
 }
 
 export enum ElasticsearchAssetType {
@@ -95,7 +108,10 @@ export enum ElasticsearchAssetType {
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
   transform = 'transform',
   mlModel = 'ml_model',
+  knowledgeBase = 'knowledge_base',
+  esqlView = 'esql_view',
 }
+
 export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType,
   ElasticsearchAssetType.index
@@ -225,6 +241,13 @@ export interface ConfigurationLink {
   type: Action | NextStep;
   content?: string;
 }
+export interface DeprecationInfo {
+  description: string;
+  since?: string;
+  replaced_by?: Partial<
+    Record<'package' | 'policyTemplate' | 'input' | 'dataStream' | 'variable', string>
+  >;
+}
 
 export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
@@ -237,6 +260,7 @@ export enum RegistryPolicyTemplateKeys {
   vars = 'vars',
   input = 'input',
   template_path = 'template_path',
+  template_paths = 'template_paths',
   name = 'name',
   title = 'title',
   description = 'description',
@@ -244,6 +268,11 @@ export enum RegistryPolicyTemplateKeys {
   screenshots = 'screenshots',
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
+  fips_compatible = 'fips_compatible',
+  dynamic_signal_types = 'dynamic_signal_types',
+  var_groups = 'var_groups',
+  deprecated = 'deprecated',
+  sections = 'sections',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -254,6 +283,8 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
   [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
+  [RegistryPolicyTemplateKeys.fips_compatible]?: boolean | undefined;
+  [RegistryPolicyTemplateKeys.deprecated]?: DeprecationInfo;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -263,11 +294,15 @@ export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
 }
 
 export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
-  [RegistryPolicyTemplateKeys.type]: string;
+  [RegistryPolicyTemplateKeys.type]?: string;
   [RegistryPolicyTemplateKeys.input]: string;
-  [RegistryPolicyTemplateKeys.template_path]: string;
+  [RegistryPolicyTemplateKeys.template_path]?: string;
+  [RegistryPolicyTemplateKeys.template_paths]?: string[];
   [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
+  [RegistryPolicyTemplateKeys.var_groups]?: RegistryVarGroup[];
+  [RegistryPolicyTemplateKeys.sections]?: RegistrySection[];
+  [RegistryPolicyTemplateKeys.dynamic_signal_types]?: boolean;
 }
 
 export type RegistryPolicyTemplate =
@@ -275,29 +310,50 @@ export type RegistryPolicyTemplate =
   | RegistryPolicyInputOnlyTemplate;
 
 export enum RegistryInputKeys {
+  name = 'name',
   type = 'type',
   title = 'title',
   description = 'description',
   template_path = 'template_path',
+  template_paths = 'template_paths',
   condition = 'condition',
   input_group = 'input_group',
   required_vars = 'required_vars',
   vars = 'vars',
+  var_groups = 'var_groups',
   deployment_modes = 'deployment_modes',
+  hide_in_var_group_options = 'hide_in_var_group_options',
+  deprecated = 'deprecated',
+  migrate_from = 'migrate_from',
+  dynamic_signal_types = 'dynamic_signal_types',
+  show_divider = 'show_divider',
+  sections = 'sections',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
 
 export interface RegistryInput {
+  /** Optional unique name within the policy template. When present, used as the discriminator for stream matching and keying instead of `type`. */
+  [RegistryInputKeys.name]?: string;
   [RegistryInputKeys.type]: string;
   [RegistryInputKeys.title]: string;
   [RegistryInputKeys.description]: string;
   [RegistryInputKeys.template_path]?: string;
+  [RegistryInputKeys.template_paths]?: string[];
   [RegistryInputKeys.condition]?: string;
   [RegistryInputKeys.input_group]?: RegistryInputGroup;
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
+  [RegistryInputKeys.var_groups]?: RegistryVarGroup[];
   [RegistryInputKeys.deployment_modes]?: string[];
+  [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
+  [RegistryInputKeys.deprecated]?: DeprecationInfo;
+  [RegistryInputKeys.migrate_from]?: string;
+  /** When true the data stream signal type (logs/metrics/traces) is determined at runtime by the agent. Valid for OTel collector inputs in composable integrations. */
+  [RegistryInputKeys.dynamic_signal_types]?: boolean;
+  /** When false, suppresses the automatic horizontal divider rendered after the input-level config section. Defaults to true. */
+  [RegistryInputKeys.show_divider]?: boolean;
+  [RegistryInputKeys.sections]?: RegistrySection[];
 }
 
 export enum RegistryStreamKeys {
@@ -308,6 +364,12 @@ export enum RegistryStreamKeys {
   required_vars = 'required_vars',
   vars = 'vars',
   template_path = 'template_path',
+  template_paths = 'template_paths',
+  ingestion_method = 'ingestion_method',
+  var_groups = 'var_groups',
+  deprecated = 'deprecated',
+  migrate_from = 'migrate_from',
+  sections = 'sections',
 }
 
 export interface RegistryStream {
@@ -317,7 +379,13 @@ export interface RegistryStream {
   [RegistryStreamKeys.enabled]?: boolean;
   [RegistryStreamKeys.required_vars]?: RegistryRequiredVars;
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
-  [RegistryStreamKeys.template_path]: string;
+  [RegistryStreamKeys.template_path]?: string;
+  [RegistryStreamKeys.template_paths]?: string[];
+  [RegistryStreamKeys.ingestion_method]?: string;
+  [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
+  [RegistryStreamKeys.deprecated]?: DeprecationInfo;
+  [RegistryStreamKeys.migrate_from]?: string;
+  [RegistryStreamKeys.sections]?: RegistrySection[];
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
@@ -344,6 +412,7 @@ export type RegistrySearchResult = Pick<
   | 'policy_templates'
   | 'categories'
   | 'discovery'
+  | 'deprecated'
 >;
 
 // from /categories
@@ -427,6 +496,13 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
 }
 
+export type InputOnlyRegistryDataStream = Omit<
+  Pick<RegistryDataStream, RegistryDataStreamKeys>,
+  RegistryDataStreamKeys.type
+> & {
+  [RegistryDataStreamKeys.type]?: string;
+};
+
 export interface RegistryAgent {
   privileges?: { root?: boolean };
 }
@@ -482,7 +558,15 @@ export type RegistryVarType =
   | 'text'
   | 'yaml'
   | 'string'
-  | 'textarea';
+  | 'textarea'
+  | 'duration'
+  | 'url';
+
+export interface RegistrySection {
+  name: string;
+  title: string;
+  description?: string;
+}
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -497,6 +581,11 @@ export enum RegistryVarsEntryKeys {
   secret = 'secret',
   hide_in_deployment_modes = 'hide_in_deployment_modes',
   full_width = 'full_width',
+  min_duration = 'min_duration',
+  max_duration = 'max_duration',
+  url_allowed_schemes = 'url_allowed_schemes',
+  deprecated = 'deprecated',
+  section = 'section',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -520,6 +609,11 @@ export interface RegistryVarsEntry {
   };
   [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
   [RegistryVarsEntryKeys.full_width]?: boolean;
+  [RegistryVarsEntryKeys.min_duration]?: string;
+  [RegistryVarsEntryKeys.max_duration]?: string;
+  [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
+  [RegistryVarsEntryKeys.deprecated]?: DeprecationInfo;
+  [RegistryVarsEntryKeys.section]?: string;
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -549,7 +643,6 @@ export type InstallationInfo = {
   | 'es_index_patterns'
   | 'install_version'
   | 'install_started_at'
-  | 'keep_policies_up_to_date'
   | 'internal'
   | 'removable'
 >;
@@ -634,9 +727,13 @@ export interface CustomAssetFailedAttempt extends FailedAttempt {
 }
 
 export enum INSTALL_STATES {
+  RESOLVE_DEPENDENCIES = 'resolve_dependencies',
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
+  INSTALL_PRECHECK = 'install_precheck',
+  INSTALL_ESQL_VIEWS = 'install_esql_views',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
+  CREATE_ALERTING_ASSETS = 'create_alerting_assets',
   INSTALL_ML_MODEL = 'install_ml_model',
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
   REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',
@@ -644,6 +741,7 @@ export enum INSTALL_STATES {
   INSTALL_TRANSFORMS = 'install_transforms',
   DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
+  SAVE_KNOWLEDGE_BASE = 'save_knowledge_base',
   RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
   UPDATE_SO = 'update_so',
 }
@@ -662,6 +760,11 @@ export interface StateContext<T> {
   [key: string]: any;
   latestExecutedState?: LatestExecutedState<T>;
 }
+
+export type PackageDependencies = { name: string; version: string }[];
+
+/** Packages (name, version) that have this package as a dependency */
+export type IsDependencyOf = PackageDependencies;
 
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
@@ -688,10 +791,25 @@ export interface Installation {
   latest_executed_state?: InstallLatestExecutedState;
   latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
   previous_version?: string | null;
+  rolled_back?: boolean;
+  is_rollback_ttl_expired?: boolean;
+  pending_upgrade_review?: {
+    target_version: string;
+    reason: 'deprecated';
+    created_at: string;
+    deprecation_details?: DeprecationInfo;
+    action?: 'accepted' | 'declined' | 'pending';
+  };
+  dependencies?: PackageDependencies | null;
+  /** Packages (name, version) that have this package as a dependency */
+  is_dependency_of?: IsDependencyOf | null;
+  /** Whether the package was installed as a dependency (not manually by a user) */
+  installed_as_dependency?: boolean;
 }
 
 export interface PackageUsageStats {
   agent_policy_count: number;
+  package_policy_count: number;
 }
 
 export type Installable<T> =
@@ -731,6 +849,7 @@ export interface KibanaAssetReference {
   id: string;
   originId?: string;
   type: KibanaSavedObjectType;
+  deferred?: boolean;
 }
 export interface EsAssetReference {
   id: string;
@@ -766,6 +885,22 @@ export interface IndexTemplate {
   composed_of: string[];
   ignore_missing_component_templates?: string[];
   _meta: object;
+
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
+}
+
+export interface IngestPipelineWithDateFields extends IngestPipeline {
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
 }
 
 export interface ESAssetMetadata {
@@ -794,3 +929,43 @@ export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
 }
+
+export interface KnowledgeBaseItem {
+  fileName: string;
+  content: string;
+  path?: string;
+  installed_at?: string;
+  version?: string;
+}
+
+export interface PackageKnowledgeBase {
+  package: {
+    name: string;
+  };
+
+  items: KnowledgeBaseItem[];
+}
+
+// Experimental support for Otel integrations
+export interface OTelCollectorConfig {
+  extensions?: Record<OTelCollectorComponentID, any>;
+  receivers?: Record<OTelCollectorComponentID, any>;
+  processors?: Record<OTelCollectorComponentID, any>;
+  connectors?: Record<OTelCollectorComponentID, any>;
+  exporters?: Record<OTelCollectorComponentID, any>;
+  service?: {
+    extensions?: OTelCollectorComponentID[];
+    pipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>;
+  };
+}
+
+export interface OTelCollectorPipeline {
+  receivers?: OTelCollectorComponentID[];
+  processors?: OTelCollectorComponentID[];
+  exporters?: OTelCollectorComponentID[];
+}
+
+export type OTelCollectorComponentID = string;
+
+export type OTelCollectorPipelineGroup = 'logs' | 'metrics' | 'traces';
+export type OTelCollectorPipelineID = OTelCollectorPipelineGroup | string;

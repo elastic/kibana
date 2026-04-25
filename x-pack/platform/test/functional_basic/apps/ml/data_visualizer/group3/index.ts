@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -28,22 +28,17 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
       await ml.testResources.deleteDataViewByTitle('ft_module_sample_ecommerce');
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
+      );
 
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    // The data visualizer should work the same as with a trial license, except the missing create actions
-    // That's why the 'basic' version of 'index_data_visualizer_actions_panel' is loaded here
     loadTestFile(
       require.resolve(
-        '../../../../../functional/apps/ml/data_visualizer/index_data_visualizer_grid_in_discover'
-      )
-    );
-    loadTestFile(
-      require.resolve(
-        '../../../../../functional/apps/ml/data_visualizer/index_data_visualizer_grid_in_discover_basic'
+        '../../../../../functional/apps/ml/data_visualizer/group3/index_data_visualizer_grid_in_discover_basic'
       )
     );
     loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));

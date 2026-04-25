@@ -22,7 +22,7 @@ import { UpsertViewModal } from './upsert_modal';
 
 interface Props<TSingleSavedViewState extends SavedViewItem, TViewState>
   extends SavedViewState<TSingleSavedViewState> {
-  viewState: TViewState & BasicAttributes;
+  viewState?: TViewState & BasicAttributes;
   onCreateView: SavedViewOperations<TSingleSavedViewState>['createView'];
   onDeleteView: SavedViewOperations<TSingleSavedViewState>['deleteViewById'];
   onUpdateView: SavedViewOperations<TSingleSavedViewState>['updateViewById'];
@@ -108,10 +108,13 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
         data-test-subj="savedViews-popover"
         button={
           <EuiButton
+            size="s"
             onClick={togglePopoverAndLoad}
-            data-test-subj="savedViews-openPopover"
+            data-test-subj={`savedViews-openPopover-${
+              isFetchingCurrentView ? 'loading' : 'loaded'
+            }`}
             buttonRef={openPopoverButtonRef}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             color="text"
             isLoading={isFetchingCurrentView}

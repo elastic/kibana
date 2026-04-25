@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useConversationList } from './use_conversation_list';
 

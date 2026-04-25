@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import {
+import type {
   BoundPromptAPI,
   ChatCompleteResponse,
   ChatCompletionEvent,
+  Prompt,
   PromptOptions,
   ToolOptionsOfPrompt,
   UnboundPromptOptions,
 } from '@kbn/inference-common';
-import { PromptRequestBody } from '@kbn/inference-plugin/common';
+import type { PromptRequestBody } from '@kbn/inference-plugin/common';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { defer, from, throwError } from 'rxjs';
 import { combineSignal } from './combine_signal';
-import { InferenceCliClientOptions } from './types';
+import type { InferenceCliClientOptions } from './types';
 
 export function createPrompt(options: InferenceCliClientOptions): BoundPromptAPI;
 
 export function createPrompt({ connector, kibanaClient, signal }: InferenceCliClientOptions) {
-  return <TPromptOptions extends PromptOptions>(options: UnboundPromptOptions<TPromptOptions>) => {
+  return <TPrompt extends Prompt, TPromptOptions extends PromptOptions<TPrompt>>(
+    options: UnboundPromptOptions<TPrompt>
+  ) => {
     const {
       abortSignal,
       maxRetries,

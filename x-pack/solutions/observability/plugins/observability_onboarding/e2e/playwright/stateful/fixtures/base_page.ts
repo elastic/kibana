@@ -17,11 +17,14 @@ import { OtelKubernetesOverviewDashboardPage } from '../pom/pages/otel_kubernete
 import { OtelHostFlowPage } from '../pom/pages/otel_host_flow.page';
 import { HostsOverviewPage } from '../pom/pages/hosts_overview.page';
 import { FirehoseFlowPage } from '../pom/pages/firehose_flow.page';
+import { FleetAgentsOverviewPage } from '../pom/pages/fleet_agents_overview.page';
+import { WiredStreamsSelector } from '../pom/components/wired_streams_selector.component';
 
 export const test = base.extend<{
   headerBar: HeaderBar;
   spaceSelector: SpaceSelector;
   onboardingHomePage: OnboardingHomePage;
+  wiredStreamsSelector: WiredStreamsSelector;
   autoDetectFlowPage: AutoDetectFlowPage;
   kubernetesEAFlowPage: KubernetesEAFlowPage;
   otelKubernetesFlowPage: OtelKubernetesFlowPage;
@@ -30,6 +33,7 @@ export const test = base.extend<{
   otelHostFlowPage: OtelHostFlowPage;
   hostsOverviewPage: HostsOverviewPage;
   firehoseFlowPage: FirehoseFlowPage;
+  fleetAgentsOverviewPage: FleetAgentsOverviewPage;
 }>({
   headerBar: async ({ page }, use) => {
     await use(new HeaderBar(page));
@@ -41,6 +45,10 @@ export const test = base.extend<{
 
   onboardingHomePage: async ({ page }, use) => {
     await use(new OnboardingHomePage(page));
+  },
+
+  wiredStreamsSelector: async ({ page }, use) => {
+    await use(new WiredStreamsSelector(page));
   },
 
   autoDetectFlowPage: async ({ page }, use) => {
@@ -73,5 +81,9 @@ export const test = base.extend<{
 
   firehoseFlowPage: async ({ page }, use) => {
     await use(new FirehoseFlowPage(page));
+  },
+
+  fleetAgentsOverviewPage: async ({ page }, use) => {
+    await use(new FleetAgentsOverviewPage(page));
   },
 });

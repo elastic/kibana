@@ -34,8 +34,11 @@ import type {
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
-import { KIBANA_SYSTEM_USERNAME, SAVED_OBJECT_TYPES } from '../../common/constants';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -44,6 +47,7 @@ import {
   ConnectorMappingsService,
   AttachmentService,
   AlertService,
+  TemplatesService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -51,9 +55,12 @@ import type { CasesClient } from '.';
 import { createCasesClient } from '.';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
+import type { ConfigType } from '../config';
+import { getSavedObjectsTypes } from '../../common';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -68,8 +75,16 @@ interface CasesClientFactoryArgs {
   ruleRegistry: RuleRegistryPluginStartContract;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   filesPluginStart: FilesStart;
+  usageCounter?: IUsageCounter;
+  config: ConfigType;
+  closeReasonValidator?: (
+    closeReason: string,
+    owner: string,
+    request: KibanaRequest
+  ) => Promise<boolean>;
 }
 
 /**
@@ -126,7 +141,7 @@ export class CasesClientFactory {
     });
 
     const unsecuredSavedObjectsClient = savedObjectsService.getScopedClient(request, {
-      includedHiddenTypes: SAVED_OBJECT_TYPES,
+      includedHiddenTypes: getSavedObjectsTypes(this.options.config),
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
       excludedExtensions: [SECURITY_EXTENSION_ID],
@@ -142,11 +157,16 @@ export class CasesClientFactory {
       request,
       auditLogger,
       alertsClient,
+      auth,
     });
 
     const userInfo = await this.getUserInfo(request);
 
     const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
+    const { closeReasonValidator } = this.options;
+    const boundCloseReasonValidator = closeReasonValidator
+      ? (closeReason: string, owner: string) => closeReasonValidator(closeReason, owner, request)
+      : undefined;
 
     return createCasesClient({
       services,
@@ -158,12 +178,16 @@ export class CasesClientFactory {
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry: this.options.unifiedAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
       spaceId:
         this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       savedObjectsSerializer,
       fileService,
+      usageCounter: this.options.usageCounter,
+      config: this.options.config,
+      closeReasonValidator: boundCloseReasonValidator,
     });
   }
 
@@ -180,6 +204,7 @@ export class CasesClientFactory {
     request,
     auditLogger,
     alertsClient,
+    auth,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
@@ -187,6 +212,7 @@ export class CasesClientFactory {
     request: KibanaRequest;
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
+    auth: PublicMethodsOf<Authorization>;
   }): CasesServices {
     this.validateInitialization();
 
@@ -194,6 +220,18 @@ export class CasesClientFactory {
       log: this.logger,
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
+      config: this.options.config,
+    });
+
+    const spaceId =
+      this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const namespace = spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING;
+
+    const templatesService = new TemplatesService({
+      unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
+      esClient,
+      namespace,
     });
 
     const caseService = new CasesService({
@@ -222,6 +260,7 @@ export class CasesClientFactory {
     });
 
     return {
+      templatesService,
       alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
@@ -232,6 +271,7 @@ export class CasesClientFactory {
         unsecuredSavedObjectsClient,
         savedObjectsSerializer,
         auditLogger,
+        isCasesAttachmentsEnabled: this.options.config.attachments?.enabled === true,
       }),
       attachmentService,
       licensingService,

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { extractUniqTermsMap, sortPredicateByType } from './sort_predicate';
-import { ChartTypes, PartitionVisParams } from '../../../common/types';
-import { ArrayEntry } from '@elastic/charts';
+import type { PartitionVisParams } from '../../../common/types';
+import { ChartTypes } from '../../../common/types';
+import type { ArrayEntry } from '@elastic/charts';
 
 describe('#extractUniqTermsMap', () => {
   it('should extract map', () => {

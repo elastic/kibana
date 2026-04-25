@@ -21,6 +21,7 @@ export const MonitorAsyncError = () => {
   return syncErrors && syncErrors.length > 0 && !isDismissed ? (
     <>
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.synthetics.monitorManagement.monitorSync.failure.title"

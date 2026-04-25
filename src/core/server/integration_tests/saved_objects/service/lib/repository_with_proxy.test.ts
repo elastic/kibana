@@ -13,7 +13,7 @@ import { URL } from 'url';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import {
   createRootWithCorePlugins,
   createTestServers,
@@ -140,11 +140,9 @@ describe('404s from proxies', () => {
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-      await hapiServer.stop({ timeout: 1000 });
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await hapiServer?.stop({ timeout: 1000 });
+    await esServer?.stop();
   });
 
   describe('requests when a proxy relays request/responses with the correct product header', () => {

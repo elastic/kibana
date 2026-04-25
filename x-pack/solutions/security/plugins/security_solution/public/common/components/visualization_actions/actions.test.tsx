@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { EuiContextMenu } from '@elastic/eui';
-
 import { fireEvent, render, waitFor } from '@testing-library/react';
-
 import { getDnsTopDomainsLensAttributes } from './lens_attributes/network/dns_top_domains';
 import { VisualizationActions } from './actions';
 import { TestProviders } from '../../mock';
-
 import type { VisualizationActionsProps } from './types';
 import * as useLensAttributesModule from './use_lens_attributes';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../data_view_manager/constants';
 
 jest.mock('./use_actions');
 
@@ -64,7 +62,7 @@ describe('VisualizationActions', () => {
         extraOptions: props.extraOptions,
         getLensAttributes: props.getLensAttributes,
         lensAttributes: props.lensAttributes,
-        scopeId: SourcererScopeName.default,
+        scopeId: PageScope.default,
         stackByField: props.stackByField,
         title: '',
       })

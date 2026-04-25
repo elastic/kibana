@@ -19,9 +19,18 @@ import type {
 } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 
-import type { Case, CaseStatuses, User } from '../../../common/types/domain';
+import type {
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
+} from '@kbn/core-saved-objects-api-server';
+import type {
+  Case,
+  CaseStatuses,
+  User,
+  AttachmentAttributesV2,
+} from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -43,6 +52,7 @@ import {
   transformAttributesToESModel,
   transformUpdateResponseToExternalModel,
   transformFindResponseToExternalModel,
+  transformESModelToCase,
 } from './transform';
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
@@ -75,8 +85,13 @@ import type {
   GetCategoryArgs,
   BulkCreateCasesArgs,
 } from './types';
-import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
+import {
+  DEFAULT_ATTACHMENT_SEARCH_FIELDS,
+  constructSearchQuery,
+  convertFindQueryParams,
+  mergeSearchQuery,
+} from './utils';
 
 const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
@@ -166,6 +181,44 @@ export class CasesService {
     return result.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
   }
 
+  public async getCaseIdsByAttachmentSearch(
+    namespaces: string[],
+    search?: string,
+    searchFields?: string[]
+  ): Promise<string[]> {
+    const attachmentSearchFields = searchFields?.filter((field) =>
+      DEFAULT_ATTACHMENT_SEARCH_FIELDS.includes(field)
+    );
+    if (!search || !attachmentSearchFields?.length) {
+      return [];
+    }
+
+    const response = await this.searchCases({
+      type: [CASE_COMMENT_SAVED_OBJECT],
+      namespaces,
+      query: {
+        bool: {
+          should: [
+            ...attachmentSearchFields.map((field) => ({
+              // use match instead of term to support non-keyword search for fields like comments
+              match: {
+                [field]: search,
+              },
+            })),
+          ],
+        },
+      },
+    });
+
+    const references = response?.hits?.hits?.map((hit) => hit?._source?.references).flat();
+    if (!references) {
+      return [];
+    }
+    return references
+      .filter((ref) => ref?.type === 'cases' && ref?.id !== undefined)
+      .map((ref) => ref?.id ?? '');
+  }
+
   /**
    * Returns a map of all cases.
    */
@@ -187,7 +240,11 @@ export class CasesService {
 
     const casesWithComments = new Map<string, Case>();
     for (const [id, caseInfo] of casesMap.entries()) {
-      const { alerts, userComments } = commentTotals.get(id) ?? { alerts: 0, userComments: 0 };
+      const { alerts, userComments, events } = commentTotals.get(id) ?? {
+        alerts: 0,
+        userComments: 0,
+        events: 0,
+      };
 
       casesWithComments.set(
         id,
@@ -195,6 +252,7 @@ export class CasesService {
           savedObject: caseInfo,
           totalComment: userComments,
           totalAlerts: alerts,
+          totalEvents: events,
         })
       );
     }
@@ -204,6 +262,81 @@ export class CasesService {
       page: cases.page,
       perPage: cases.per_page,
       total: cases.total,
+    };
+  }
+
+  /**
+   * Returns a map of all cases.
+   */
+  public async searchCasesGroupedByID({
+    caseOptions,
+    namespaces,
+  }: {
+    caseOptions: SavedObjectFindOptionsKueryNode;
+    namespaces: string[];
+  }): Promise<CasesMapWithPageInfo> {
+    const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
+      namespaces,
+      caseOptions.search,
+      caseOptions.searchFields
+    );
+    const searchQuery = constructSearchQuery({
+      search: caseOptions.search,
+      searchFields: caseOptions.searchFields,
+      caseIds: caseIdsByAttachmentSearch,
+    });
+
+    const filterQuery = caseOptions.filter ? toElasticsearchQuery(caseOptions.filter) : undefined;
+    const query = mergeSearchQuery(searchQuery, filterQuery);
+
+    const cases = await this.searchCases({
+      type: [CASE_SAVED_OBJECT],
+      namespaces,
+      query,
+      ...convertFindQueryParams(caseOptions),
+    });
+
+    const casesMap = cases?.hits?.hits?.reduce((accMap, caseInfo) => {
+      // Extract UUID from _id format: "cases:uuid"
+      if (caseInfo._id && caseInfo._id.startsWith(`${CASE_SAVED_OBJECT}:`)) {
+        const caseId = caseInfo._id.split(':')[1];
+        const caseData = caseInfo._source?.cases;
+        if (caseData) {
+          accMap.set(caseId, transformESModelToCase(caseId, caseData, caseInfo));
+        }
+      }
+      return accMap;
+    }, new Map<string, Case>());
+
+    // TODO: imported cases do not populate stats when importing
+    // Remove once https://github.com/elastic/kibana/issues/245939 is fixed
+    const commentTotals = await this.attachmentService.getter.getCaseAttatchmentStats({
+      caseIds: Array.from(casesMap.keys()),
+    });
+
+    const casesWithComments = new Map<string, Case>();
+    for (const [id, caseInfo] of casesMap.entries()) {
+      const { alerts, userComments, events } = commentTotals.get(id) ?? {
+        alerts: 0,
+        userComments: 0,
+        events: 0,
+      };
+
+      casesWithComments.set(id, {
+        ...caseInfo,
+        totalComment: userComments,
+        totalAlerts: alerts,
+        totalEvents: events,
+      });
+    }
+    const total =
+      typeof cases.hits.total === 'object' ? cases.hits.total.value ?? 0 : cases.hits.total ?? 0;
+
+    return {
+      casesMap: casesWithComments,
+      page: caseOptions.page ?? 1,
+      perPage: caseOptions.perPage ?? DEFAULT_PER_PAGE,
+      total,
     };
   }
 
@@ -383,6 +516,29 @@ export class CasesService {
     }
   }
 
+  public async searchCases({
+    type,
+    namespaces,
+    query,
+    ...options
+  }: SavedObjectsSearchOptions): Promise<SavedObjectsSearchResponse> {
+    try {
+      this.log.debug(`Attempting to search cases`);
+      const cases = await this.unsecuredSavedObjectsClient.search({
+        type,
+        namespaces,
+        query,
+        seq_no_primary_term: true,
+        ...options,
+      });
+
+      return cases;
+    } catch (error) {
+      this.log.error(`Error on search cases: ${error}`);
+      throw error;
+    }
+  }
+
   private asArray(id: string | string[] | undefined): string[] {
     if (id === undefined) {
       return [];
@@ -398,7 +554,8 @@ export class CasesService {
   private async getAllComments({
     id,
     options,
-  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
+    mode = 'legacy',
+  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
@@ -407,6 +564,7 @@ export class CasesService {
             sortField: defaultSortField,
             ...options,
           },
+          mode,
         });
       }
 
@@ -417,6 +575,7 @@ export class CasesService {
           sortField: defaultSortField,
           ...options,
         },
+        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -433,7 +592,8 @@ export class CasesService {
   public async getAllCaseComments({
     id,
     options,
-  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
+    mode = 'legacy',
+  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
       if (refs.length <= 0) {
@@ -454,6 +614,7 @@ export class CasesService {
           filter: options?.filter,
           ...options,
         },
+        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);
@@ -596,6 +757,7 @@ export class CasesService {
 
       transformedAttributes.attributes.total_alerts = 0;
       transformedAttributes.attributes.total_comments = 0;
+      transformedAttributes.attributes.total_events = 0;
 
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -628,6 +790,7 @@ export class CasesService {
 
         transformedAttributes.total_alerts = 0;
         transformedAttributes.total_comments = 0;
+        transformedAttributes.total_events = 0;
 
         return {
           type: CASE_SAVED_OBJECT,

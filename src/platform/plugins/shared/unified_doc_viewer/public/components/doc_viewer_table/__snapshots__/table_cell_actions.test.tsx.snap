@@ -11,10 +11,19 @@ Array [
         "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
-          "displayName": "message",
-          "filterable": false,
+          "conflictDescriptions": undefined,
+          "count": 0,
+          "customDescription": undefined,
+          "customLabel": undefined,
+          "defaultFormatter": undefined,
+          "esTypes": undefined,
+          "lang": undefined,
           "name": "message",
+          "readFromDocValues": false,
+          "script": undefined,
           "scripted": false,
+          "searchable": false,
+          "subType": undefined,
           "type": "string",
         },
         "displayNameOverride": undefined,
@@ -40,10 +49,19 @@ Array [
         "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
-          "displayName": "message",
-          "filterable": false,
+          "conflictDescriptions": undefined,
+          "count": 0,
+          "customDescription": undefined,
+          "customLabel": undefined,
+          "defaultFormatter": undefined,
+          "esTypes": undefined,
+          "lang": undefined,
           "name": "message",
+          "readFromDocValues": false,
+          "script": undefined,
           "scripted": false,
+          "searchable": false,
+          "subType": undefined,
           "type": "string",
         },
         "displayNameOverride": undefined,
@@ -62,16 +80,159 @@ Array [
         "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
-          "displayName": "message",
-          "filterable": false,
+          "conflictDescriptions": undefined,
+          "count": 0,
+          "customDescription": undefined,
+          "customLabel": undefined,
+          "defaultFormatter": undefined,
+          "esTypes": undefined,
+          "lang": undefined,
           "name": "message",
+          "readFromDocValues": false,
+          "script": undefined,
           "scripted": false,
+          "searchable": false,
+          "subType": undefined,
           "type": "string",
         },
         "displayNameOverride": undefined,
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
+      }
+    }
+  />,
+]
+`;
+
+exports[`TableActions getFieldValueCellActions should render correctly for hideFilteringOnComputedColumns set to true 1`] = `
+Array [
+  <FilterIn
+    Component={[Function]}
+    hideFilteringOnComputedColumns={true}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "isComputedColumn": true,
+          "kbnFieldType": KbnFieldType {
+            "esTypes": Array [
+              "string",
+              "text",
+              "match_only_text",
+              "keyword",
+              "version",
+              "_type",
+              "_id",
+            ],
+            "filterable": true,
+            "name": "string",
+            "sortable": true,
+          },
+          "spec": Object {
+            "aggregatable": false,
+            "name": "message",
+            "scripted": false,
+            "searchable": false,
+            "shortDotsEnable": false,
+            "type": "string",
+          },
+        },
+        "displayNameOverride": undefined,
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+  <FilterOut
+    Component={[Function]}
+    hideFilteringOnComputedColumns={true}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "isComputedColumn": true,
+          "kbnFieldType": KbnFieldType {
+            "esTypes": Array [
+              "string",
+              "text",
+              "match_only_text",
+              "keyword",
+              "version",
+              "_type",
+              "_id",
+            ],
+            "filterable": true,
+            "name": "string",
+            "sortable": true,
+          },
+          "spec": Object {
+            "aggregatable": false,
+            "name": "message",
+            "scripted": false,
+            "searchable": false,
+            "shortDotsEnable": false,
+            "type": "string",
+          },
+        },
+        "displayNameOverride": undefined,
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+  <Copy
+    Component={[Function]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "isComputedColumn": true,
+          "kbnFieldType": KbnFieldType {
+            "esTypes": Array [
+              "string",
+              "text",
+              "match_only_text",
+              "keyword",
+              "version",
+              "_type",
+              "_id",
+            ],
+            "filterable": true,
+            "name": "string",
+            "sortable": true,
+          },
+          "spec": Object {
+            "aggregatable": false,
+            "name": "message",
+            "scripted": false,
+            "searchable": false,
+            "shortDotsEnable": false,
+            "type": "string",
+          },
+        },
+        "displayNameOverride": undefined,
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+    toasts={
+      Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
       }
     }
   />,
@@ -87,10 +248,19 @@ Array [
         "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
-          "displayName": "message",
-          "filterable": false,
+          "conflictDescriptions": undefined,
+          "count": 0,
+          "customDescription": undefined,
+          "customLabel": undefined,
+          "defaultFormatter": undefined,
+          "esTypes": undefined,
+          "lang": undefined,
           "name": "message",
+          "readFromDocValues": false,
+          "script": undefined,
           "scripted": false,
+          "searchable": false,
+          "subType": undefined,
           "type": "string",
         },
         "displayNameOverride": undefined,
@@ -126,10 +296,19 @@ Array [
         "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
-          "displayName": "message",
-          "filterable": false,
+          "conflictDescriptions": undefined,
+          "count": 0,
+          "customDescription": undefined,
+          "customLabel": undefined,
+          "defaultFormatter": undefined,
+          "esTypes": undefined,
+          "lang": undefined,
           "name": "message",
+          "readFromDocValues": false,
+          "script": undefined,
           "scripted": false,
+          "searchable": false,
+          "subType": undefined,
           "type": "string",
         },
         "displayNameOverride": undefined,
@@ -148,10 +327,19 @@ Array [
         "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
-          "displayName": "message",
-          "filterable": false,
+          "conflictDescriptions": undefined,
+          "count": 0,
+          "customDescription": undefined,
+          "customLabel": undefined,
+          "defaultFormatter": undefined,
+          "esTypes": undefined,
+          "lang": undefined,
           "name": "message",
+          "readFromDocValues": false,
+          "script": undefined,
           "scripted": false,
+          "searchable": false,
+          "subType": undefined,
           "type": "string",
         },
         "displayNameOverride": undefined,
@@ -168,10 +356,19 @@ Array [
         "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
-          "displayName": "message",
-          "filterable": false,
+          "conflictDescriptions": undefined,
+          "count": 0,
+          "customDescription": undefined,
+          "customLabel": undefined,
+          "defaultFormatter": undefined,
+          "esTypes": undefined,
+          "lang": undefined,
           "name": "message",
+          "readFromDocValues": false,
+          "script": undefined,
           "scripted": false,
+          "searchable": false,
+          "subType": undefined,
           "type": "string",
         },
         "displayNameOverride": undefined,

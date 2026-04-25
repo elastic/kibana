@@ -17,8 +17,8 @@ import type {
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { Required, ValuesType } from 'utility-types';
-import { DedotObject } from '@kbn/utility-types';
+import type { Required, ValuesType } from 'utility-types';
+import type { DedotObject } from '@kbn/utility-types';
 import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 
@@ -111,25 +111,34 @@ export interface TracedElasticsearchClient {
   client: ElasticsearchClient;
 }
 
+const unwrapEsResponse = <T extends Promise<{ body?: any }>>(
+  responsePromise: T
+): Promise<Awaited<T> extends { body: infer TBody } ? TBody : Awaited<T>> => {
+  return responsePromise.then((res) => ('body' in res ? res.body : res));
+};
+
 export function createTracedEsClient({
   client,
+  abortSignal,
   logger,
   plugin,
   labels,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
+  abortSignal?: AbortSignal;
   plugin?: string;
   labels?: Record<string, string>;
 }): TracedElasticsearchClient {
   // wraps the ES calls in a named APM span for better analysis
   // (otherwise it would just eg be a _search span)
-  const callWithLogger = <T>(
+  const callWithLogger = <T extends { body?: any }>(
     operationName: string,
-    request: Record<string, any>,
-    callback: () => Promise<T>
-  ) => {
-    logger.debug(() => `Request (${operationName}):\n${JSON.stringify(request)}`);
+    params: Record<string, any>,
+    callback: (requestOpts: { signal?: AbortSignal; meta: true }) => Promise<T>
+  ): Promise<T extends { body: infer TBody } ? TBody : T> => {
+    logger.debug(() => `Request (${operationName}):\n${JSON.stringify(params)}`);
+
     return withSpan(
       {
         name: operationName,
@@ -138,7 +147,11 @@ export function createTracedEsClient({
           ...(plugin ? { plugin } : {}),
         },
       },
-      callback,
+      () => {
+        const promise = callback({ signal: abortSignal, meta: true });
+
+        return unwrapEsResponse(promise);
+      },
       logger
     ).then((response) => {
       logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
@@ -149,10 +162,8 @@ export function createTracedEsClient({
   return {
     client,
     fieldCaps(operationName, parameters) {
-      return callWithLogger(operationName, parameters, () => {
-        return client.fieldCaps({
-          ...parameters,
-        });
+      return callWithLogger(operationName, parameters, (requestOpts) => {
+        return client.fieldCaps(parameters, requestOpts);
       });
     },
     esql(
@@ -160,56 +171,54 @@ export function createTracedEsClient({
       parameters: ObservabilityEsQueryRequest,
       options?: EsqlOptions
     ): Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>> {
-      return callWithLogger(operationName, parameters, () => {
+      return callWithLogger(operationName, parameters, (requestOpts) => {
         return client.esql
           .query(
             { ...parameters },
             {
-              querystring: {
-                drop_null_columns: true,
-              },
+              querystring: { drop_null_columns: true },
+              ...requestOpts,
             }
           )
           .then((response) => {
-            const esqlResponse = response as unknown as UnparsedEsqlResponseOf<EsqlOutput>;
-
             const transform = options?.transform ?? 'none';
 
             if (transform === 'none') {
-              return esqlResponse;
+              return response;
             }
 
-            const parsedResponse = { hits: esqlResultToPlainObjects(esqlResponse) };
+            const rawEsqlResponse = response.body as unknown as UnparsedEsqlResponseOf<EsqlOutput>;
+            const hits = esqlResultToPlainObjects(rawEsqlResponse);
 
             if (transform === 'plain') {
-              return parsedResponse;
+              return { ...response, body: { hits } };
             }
 
-            return {
-              hits: parsedResponse.hits.map((hit) => unflattenObject(hit)),
-            };
-          }) as Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>>;
+            return { ...response, body: { hits: hits.map((hit) => unflattenObject(hit)) } };
+          }) as Promise<{ body: InferEsqlResponseOf<EsqlOutput, EsqlOptions> }>;
       });
     },
     search<TDocument = unknown, TSearchRequest extends SearchRequest = SearchRequest>(
       operationName: string,
       parameters: SearchRequest
     ) {
-      return callWithLogger(operationName, parameters, () => {
-        return client.search<TDocument>(parameters) as unknown as Promise<
-          InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
-        >;
+      return callWithLogger(operationName, parameters, (requestOpts) => {
+        return client.search<TDocument>(parameters, requestOpts) as unknown as Promise<{
+          body: InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>;
+        }>;
       });
     },
     msearch<TDocument = unknown, TSearchRequest extends MsearchRequest = MsearchRequest>(
       operationName: string,
       parameters: TSearchRequest
     ) {
-      return callWithLogger(operationName, parameters, () => {
-        return client.msearch<TDocument>(parameters) as unknown as Promise<{
-          responses: Array<
-            InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
-          >;
+      return callWithLogger(operationName, parameters, (requestOpts) => {
+        return client.msearch<TDocument>(parameters, requestOpts) as unknown as Promise<{
+          body: {
+            responses: Array<
+              InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
+            >;
+          };
         }>;
       });
     },

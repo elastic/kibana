@@ -45,6 +45,7 @@ export const convertMigrationCustomRuleToSecurityRulePayload = (
     enabled,
     severity: rule.severity as Severity,
     risk_score: rule.risk_score,
+    threat: rule.threat ?? [],
     ...DEFAULT_TRANSLATION_FIELDS,
   };
 };

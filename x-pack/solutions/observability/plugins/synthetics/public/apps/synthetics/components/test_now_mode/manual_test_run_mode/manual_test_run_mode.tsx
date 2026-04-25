@@ -7,10 +7,10 @@
 
 import React, { Fragment } from 'react';
 import { useRunOnceErrors } from '../hooks/use_run_once_errors';
-import { ManualTestRun } from '../../../state/manual_test_runs';
+import type { ManualTestRun } from '../../../state/manual_test_runs';
 import { BrowserTestRunResult } from './browser_test_results';
 import { SimpleTestResults } from './simple_test_results';
-import { Locations } from '../../../../../../common/runtime_types';
+import type { Locations } from '../../../../../../common/runtime_types';
 import { useMonitorById } from '../../../hooks/use_monitor_by_id';
 
 export function ManualTestRunMode({

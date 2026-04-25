@@ -6,13 +6,46 @@
  */
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import {
-  DOCUMENT_TYPE_ALERT,
-  DOCUMENT_TYPE_EVENT,
-} from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import type { EsQuery, GraphEdge, OriginEventId } from './types';
+import { fetchEvents } from './fetch_events_graph';
+import { fetchEntities, fetchEntityRelationships } from './fetch_entity_relationships_graph';
+import type {
+  EsQuery,
+  EntityId,
+  OriginEventId,
+  EventEdge,
+  RelationshipEdge,
+  EntityRecord,
+} from './types';
 
+export interface FetchGraphParams {
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  start: string | number;
+  end: string | number;
+  originEventIds: OriginEventId[];
+  showUnknownTarget: boolean;
+  indexPatterns: string[];
+  spaceId: string;
+  esQuery?: EsQuery;
+  entityIds?: EntityId[];
+  pinnedIds?: string[];
+}
+
+export interface FetchGraphResult {
+  events: EventEdge[];
+  relationships: RelationshipEdge[];
+  entities: EntityRecord[];
+}
+
+const emptyEventsResult: EsqlToRecords<EventEdge> = { columns: [], records: [] };
+const emptyRelationshipsResult: EsqlToRecords<RelationshipEdge> = { columns: [], records: [] };
+const emptyEntitiesResult: EsqlToRecords<EntityRecord> = { columns: [], records: [] };
+
+/**
+ * Fetches graph data including both events and entity relationships.
+ * Orchestrates parallel fetching of events from logs/alerts and relationships from entity store.
+ */
 export const fetchGraph = async ({
   esClient,
   logger,
@@ -20,115 +53,82 @@ export const fetchGraph = async ({
   end,
   originEventIds,
   showUnknownTarget,
+  indexPatterns,
+  spaceId,
   esQuery,
-}: {
-  esClient: IScopedClusterClient;
-  logger: Logger;
-  start: string | number;
-  end: string | number;
-  originEventIds: OriginEventId[];
-  showUnknownTarget: boolean;
-  esQuery?: EsQuery;
-}): Promise<EsqlToRecords<GraphEdge>> => {
-  const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
-  const query = `FROM logs-* METADATA _id, _index
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
-// Origin event and alerts allow us to identify the start position of graph traversal
-| EVAL isOrigin = ${
-    originEventIds.length > 0
-      ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
-      : 'false'
-  }
-| EVAL isOriginAlert = isOrigin AND ${
-    originAlertIds.length > 0
-      ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
-      : 'false'
-  }
-// Aggregate document's data for popover expansion and metadata enhancements
-// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
-// but it flattens the data and we lose the structure
-| EVAL docType = CASE (_index LIKE "*.alerts-security.alerts-*", "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
-| EVAL docData = CONCAT("{",
-    "\\"id\\":\\"", _id, "\\"",
-    ",\\"type\\":\\"", docType, "\\"",
-    ",\\"index\\":\\"", _index, "\\"",
-  "}")
-| STATS badge = COUNT(*),
-  docs = VALUES(docData),
-  ips = VALUES(related.ip),
-  // hosts = VALUES(related.hosts),
-  users = VALUES(related.user)
-    BY actorIds = actor.entity.id,
-      action = event.action,
-      targetIds = target.entity.id,
-      isOrigin,
-      isOriginAlert
-| LIMIT 1000
-| SORT isOrigin DESC, action`;
+  entityIds,
+  pinnedIds,
+}: FetchGraphParams): Promise<FetchGraphResult> => {
+  // Only fetch events when originEventIds or esQuery are provided
+  const hasOriginEventIds = originEventIds.length > 0;
+  const hasEsQuery =
+    !!esQuery?.bool.filter?.length ||
+    !!esQuery?.bool.must?.length ||
+    !!esQuery?.bool.should?.length ||
+    !!esQuery?.bool.must_not?.length;
 
-  logger.trace(`Executing query [${query}]`);
+  const eventsPromise =
+    hasOriginEventIds || hasEsQuery
+      ? fetchEvents({
+          esClient,
+          logger,
+          start,
+          end,
+          originEventIds,
+          showUnknownTarget,
+          indexPatterns,
+          spaceId,
+          esQuery,
+          pinnedIds,
+        }).catch((error) => {
+          logger.error(`Failed to fetch events: ${error.message}`);
+          throw error;
+        })
+      : Promise.resolve(emptyEventsResult);
 
-  const eventIds = originEventIds.map((originEventId) => originEventId.id);
-  return await esClient.asCurrentUser.helpers
-    .esql({
-      columnar: false,
-      filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
-      query,
-      // @ts-ignore - types are not up to date
-      params: [
-        ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
-        ...originEventIds
-          .filter((originEventId) => originEventId.isAlert)
-          .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
-      ],
-    })
-    .toRecords<GraphEdge>();
+  // Optionally fetch relationships in parallel when entityIds are provided
+  const hasEntityIds = entityIds && entityIds.length > 0;
+
+  const relationshipsPromise = hasEntityIds
+    ? fetchEntityRelationships({
+        esClient,
+        logger,
+        entityIds,
+        spaceId,
+      }).catch((error) => {
+        logger.error(`Failed to fetch entity relationships: ${error.message}`);
+        throw error;
+      })
+    : Promise.resolve(emptyRelationshipsResult);
+
+  // We fetch the entities just in case they don't have any relationships. We would still like to see them in the graph.
+  // These entities suppose to be pinned anyway. So there's no worry that they might be part of a group.
+  const entitiesPromise = hasEntityIds
+    ? fetchEntities({
+        esClient,
+        logger,
+        entityIds,
+        spaceId,
+      }).catch((error) => {
+        logger.error(`Failed to fetch entities: ${error.message}`);
+        throw error;
+      })
+    : Promise.resolve(emptyEntitiesResult);
+
+  // Wait for all in parallel
+  const [eventsResult, relationshipsResult, entitiesResult] = await Promise.all([
+    eventsPromise,
+    relationshipsPromise,
+    entitiesPromise,
+  ]);
+
+  logger.trace(
+    `Fetched [events: ${eventsResult.records.length}] [relationships: ${relationshipsResult.records.length}]`
+  );
+
+  return {
+    events: eventsResult.records,
+    relationships: relationshipsResult.records,
+    entities: entitiesResult.records,
+  };
 };
-
-const buildDslFilter = (
-  eventIds: string[],
-  showUnknownTarget: boolean,
-  start: string | number,
-  end: string | number,
-  esQuery?: EsQuery
-) => ({
-  bool: {
-    filter: [
-      {
-        range: {
-          '@timestamp': {
-            gte: start,
-            lte: end,
-          },
-        },
-      },
-      ...(showUnknownTarget
-        ? []
-        : [
-            {
-              exists: {
-                field: 'target.entity.id',
-              },
-            },
-          ]),
-      {
-        bool: {
-          should: [
-            ...(esQuery?.bool.filter?.length ||
-            esQuery?.bool.must?.length ||
-            esQuery?.bool.should?.length ||
-            esQuery?.bool.must_not?.length
-              ? [esQuery]
-              : []),
-            {
-              terms: {
-                'event.id': eventIds,
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    ],
-  },
-});

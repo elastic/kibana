@@ -17,7 +17,9 @@ import {
 } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { CoreStart } from '@kbn/core/public';
+import type { ObservabilityPublicPluginsStart } from '../plugin';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
@@ -27,8 +29,11 @@ import type {
 import type { MetricExpression } from '../components/custom_threshold/types';
 import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
 import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
-import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { validateCustomThreshold } from '../components/custom_threshold/components/validation';
+import { getDescriptionFields } from './custom_threshold_description_fields';
+import { createCustomThresholdRuleExpression } from '../components/custom_threshold/custom_threshold_rule_expression_factory';
+
 const thresholdDefaultActionMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultActionMessage',
   {
@@ -60,6 +65,7 @@ const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedRef
 export const registerObservabilityRuleTypes = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   uiSettings: IUiSettingsClient,
+  getStartServices: () => Promise<[CoreStart, ObservabilityPublicPluginsStart, unknown]>,
   logsLocator?: LocatorPublic<DiscoverAppLocatorParams>
 ) => {
   const validateCustomThresholdWithUiSettings = ({
@@ -82,9 +88,7 @@ export const registerObservabilityRuleTypes = (
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.customThreshold}`;
     },
-    ruleParamsExpression: lazy(
-      () => import('../components/custom_threshold/custom_threshold_rule_expression')
-    ),
+    ruleParamsExpression: createCustomThresholdRuleExpression(getStartServices),
     validate: validateCustomThresholdWithUiSettings,
     defaultActionMessage: thresholdDefaultActionMessage,
     defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
@@ -120,5 +124,6 @@ export const registerObservabilityRuleTypes = (
         )
     ),
     priority: 110,
+    getDescriptionFields,
   });
 };

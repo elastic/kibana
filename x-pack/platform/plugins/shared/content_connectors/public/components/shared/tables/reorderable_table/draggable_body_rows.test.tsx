@@ -11,7 +11,6 @@ import { shallow } from 'enzyme';
 
 import { EuiDragDropContext } from '@elastic/eui';
 
-import { BodyRows } from './body_rows';
 import { DraggableBodyRows } from './draggable_body_rows';
 
 describe('DraggableBodyRows', () => {
@@ -29,12 +28,7 @@ describe('DraggableBodyRows', () => {
     );
 
     expect(wrapper.find(EuiDragDropContext).exists()).toBe(true);
-
-    const bodyRows = wrapper.find(BodyRows);
-    expect(bodyRows.props()).toEqual({
-      items,
-      renderItem,
-    });
+    expect(wrapper.find('[role="rowgroup"]').exists()).toBe(true);
   });
 
   it('will call the provided onReorder function whenever items are reordered', () => {

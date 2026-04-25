@@ -9,17 +9,20 @@
 
 import { css } from '@emotion/react';
 import classNames from 'classnames';
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
-import {
+import type {
   EuiAvatarProps,
-  EuiCollapsibleNavGroup,
-  EuiFlyout,
   EuiFlyoutProps,
-  EuiPanel,
-  EuiSideNav,
   EuiSideNavItemType,
   EuiSideNavProps,
+} from '@elastic/eui';
+import {
+  EuiCollapsibleNavGroup,
+  EuiFlyout,
+  EuiPanel,
+  EuiSideNav,
   EuiSpacer,
   EuiTitle,
   htmlIdGenerator,
@@ -28,7 +31,6 @@ import {
   useEuiTheme,
   useEuiThemeCSSVariables,
   EuiPageSidebar,
-  useEuiOverflowScroll,
   useEuiMinBreakpoint,
   euiCanAnimate,
 } from '@elastic/eui';
@@ -76,6 +78,11 @@ export type SolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items' | 
    * If false, forces all breakpoint versions into the open state without the ability to hide.
    */
   canBeCollapsed?: boolean;
+  /**
+   * Optional content to render at the bottom of the nav, pinned below the scrollable nav items.
+   * Hidden when the nav is collapsed.
+   */
+  footer?: React.ReactNode;
 };
 
 const FLYOUT_SIZE = 248;
@@ -106,6 +113,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   name,
   onCollapse,
   canBeCollapsed = true,
+  footer,
   ...rest
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -220,11 +228,10 @@ export const SolutionNav: FC<SolutionNavProps> = ({
       display: flex;
       flex-direction: column;
 
-      ${useEuiOverflowScroll('y')};
-
       ${useEuiMinBreakpoint('m')} {
         width: ${FLYOUT_SIZE_CSS};
         padding: ${euiTheme.size.l};
+        height: 100%;
       }
     `,
     solutionNavHidden: css`
@@ -235,7 +242,29 @@ export const SolutionNav: FC<SolutionNavProps> = ({
         transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
       }
     `,
+    solutionNavScrollable: css`
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      margin-right: -${euiTheme.size.l};
+      padding-right: ${euiTheme.size.l};
+    `,
+    solutionNavFooter: css`
+      flex-shrink: 0;
+      margin-top: auto;
+    `,
   };
+
+  const footerContent = footer && (
+    <div css={styles.solutionNavFooter} data-test-subj="solutionNavFooter">
+      {footer}
+    </div>
+  );
+
+  const solutionNavContent = sideNavContent && (
+    <div css={styles.solutionNavScrollable}>{sideNavContent}</div>
+  );
+
   return (
     <>
       {isSmallerBreakpoint && (
@@ -251,7 +280,8 @@ export const SolutionNav: FC<SolutionNavProps> = ({
           initialIsOpen={false}
         >
           <EuiPanel color="transparent" paddingSize="s">
-            {sideNavContent}
+            {solutionNavContent}
+            {footerContent}
           </EuiPanel>
         </EuiCollapsibleNavGroup>
       )}
@@ -265,6 +295,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
               side="left"
               size={FLYOUT_SIZE}
               closeButtonPosition={closeFlyoutButtonPosition}
+              aria-labelledby={headingID}
               css={css`
                 // Put the page background color in the flyout version too
                 background-color: ${euiTheme.colors.backgroundBasePlain};
@@ -274,6 +305,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
                 }
               `}
               hideCloseButton={!canBeCollapsed}
+              session="never"
             >
               <EuiPageSidebar
                 className={sideNavClasses}
@@ -282,7 +314,8 @@ export const SolutionNav: FC<SolutionNavProps> = ({
               >
                 {titleText}
                 <EuiSpacer size="l" />
-                {sideNavContent}
+                {solutionNavContent}
+                {footerContent}
               </EuiPageSidebar>
             </EuiFlyout>
           )}
@@ -299,7 +332,8 @@ export const SolutionNav: FC<SolutionNavProps> = ({
           >
             {titleText}
             <EuiSpacer size="l" />
-            {sideNavContent}
+            {solutionNavContent}
+            {footerContent}
           </div>
           {canBeCollapsed && (
             <SolutionNavCollapseButton isCollapsed={!isOpenOnDesktop} onClick={onCollapse} />

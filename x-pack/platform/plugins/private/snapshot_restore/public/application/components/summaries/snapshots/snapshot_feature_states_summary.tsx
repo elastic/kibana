@@ -13,7 +13,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { SnapshotConfig } from '../../../../../common/types';
+import type { SnapshotConfig } from '../../../../../common/types';
 import { CollapsibleFeatureStatesList } from '../../collapsible_lists';
 
 export const SnapshotFeatureStatesSummary: React.FunctionComponent<SnapshotConfig> = ({

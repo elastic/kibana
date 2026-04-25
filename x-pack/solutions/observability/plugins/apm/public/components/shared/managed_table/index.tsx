@@ -6,20 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  RIGHT_ALIGNMENT,
+  type EuiBasicTableColumn,
+} from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
+import type { EuiTableRowCellProps, EuiTableActionsColumnType } from '@elastic/eui';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
   getItemsFilteredBySearchQuery,
   TableSearchBar,
 } from '../table_search_bar/table_search_bar';
+import type { ActionGroups } from '../actions_context_menu';
+import { ActionsContextMenu } from '../actions_context_menu';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -37,13 +47,16 @@ export interface TableOptions<T> {
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T extends object> {
   name: ReactNode;
-  actions?: Array<Record<string, unknown>>;
+  actions?: EuiTableActionsColumnType<T>['actions'];
   field?: string;
   dataType?: string;
   align?: string;
+  className?: string;
   width?: string;
+  minWidth?: string;
+  maxWidth?: string;
   sortable?: boolean;
-  truncateText?: boolean;
+  truncateText?: EuiTableRowCellProps['truncateText'];
   nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
   render?: (value: any, item: T) => unknown;
 }
@@ -57,7 +70,89 @@ export interface TableSearchBar<T> {
   techPreview?: boolean;
 }
 
+export interface TableActionSubItem<T> {
+  id: string;
+  name: string;
+  onClick?: (item: T) => void;
+  href?: (item: T) => string | undefined;
+  icon?: string;
+}
+
+export interface TableAction<T> {
+  id: string;
+  name: string;
+  onClick?: (item: T) => void;
+  href?: (item: T) => string | undefined;
+  icon?: string;
+  items?: Array<TableActionSubItem<T>>;
+}
+
+export interface TableActionGroup<T> {
+  id: string;
+  groupLabel?: string;
+  actions: Array<TableAction<T>>;
+}
+
+export type TableActions<T> = Array<TableActionGroup<T>>;
+
+function resolveTableActions<T>(actions: TableActions<T>, item: T): ActionGroups {
+  return actions.map((group) => ({
+    id: group.id,
+    groupLabel: group.groupLabel,
+    actions: group.actions.map((action) => ({
+      id: action.id,
+      name: action.name,
+      icon: action.icon,
+      onClick: action.onClick ? () => action.onClick!(item) : undefined,
+      href: action.href ? action.href(item) : undefined,
+      items: action.items?.map((subItem) => ({
+        id: subItem.id,
+        name: subItem.name,
+        icon: subItem.icon,
+        onClick: subItem.onClick ? () => subItem.onClick!(item) : undefined,
+        href: subItem.href ? subItem.href(item) : undefined,
+      })),
+    })),
+  }));
+}
+
+function ActionsCell<T extends object>({
+  item,
+  actions,
+  disabled = false,
+}: {
+  item: T;
+  actions: TableActions<T>;
+  disabled?: boolean;
+}) {
+  const resolvedActions = useMemo(() => resolveTableActions(actions, item), [actions, item]);
+
+  return (
+    <ActionsContextMenu
+      id="managed-table-actions"
+      actions={resolvedActions}
+      dataTestSubjPrefix="apmManagedTableActionsMenu"
+      button={
+        <EuiButtonIcon
+          data-test-subj="apmManagedTableActionsCellButton"
+          aria-label={i18n.translate('xpack.apm.managedTable.actionsAriaLabel', {
+            defaultMessage: 'Actions',
+          })}
+          iconType="boxesVertical"
+          color="text"
+          isDisabled={disabled}
+        />
+      }
+    />
+  );
+}
+
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+
+const managedTableTableWrapperCss = css`
+  min-inline-size: 0;
+  inline-size: 100%;
+`;
 
 function defaultSortFn<T>(items: T[], sortField: keyof T, sortDirection: SortDirection) {
   return orderBy(items, sortField, sortDirection) as T[];
@@ -103,6 +198,15 @@ function UnoptimizedManagedTable<T extends object>(props: {
   tableLayout?: 'auto' | 'fixed';
   tableSearchBar?: TableSearchBar<T>;
   saveTableOptionsToUrl?: boolean;
+
+  tableCaption?: string;
+
+  actions?: TableActions<T>;
+  isActionsDisabled?: (item: T) => boolean;
+
+  rowProps?: (item: T) => Record<string, unknown>;
+
+  'data-test-subj'?: string;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
@@ -144,10 +248,38 @@ function UnoptimizedManagedTable<T extends object>(props: {
       isEnabled: false,
       fieldsToSearch: [],
       maxCountExceeded: false,
-      placeholder: 'Search...',
+      placeholder: i18n.translate('xpack.apm.managedTable.searchPlaceholder', {
+        defaultMessage: 'Search...',
+      }),
       onChangeSearchQuery: () => {},
     },
+    actions,
+    isActionsDisabled,
   } = props;
+
+  const columnsWithActions = useMemo(() => {
+    if (!actions || actions.length === 0) {
+      return columns;
+    }
+
+    const actionsColumn: ITableColumn<T> = {
+      name: i18n.translate('xpack.apm.managedTable.actionsColumnName', {
+        defaultMessage: 'Actions',
+      }),
+      width: '4.5em',
+      minWidth: '4.5em',
+      align: RIGHT_ALIGNMENT,
+      render: (item: T) => (
+        <ActionsCell
+          item={item}
+          actions={actions}
+          disabled={isActionsDisabled ? isActionsDisabled(item) : false}
+        />
+      ),
+    };
+
+    return [...columns, actionsColumn];
+  }, [columns, actions, isActionsDisabled]);
 
   const {
     urlParams: {
@@ -175,10 +307,13 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // update table options state when url params change
   useEffect(() => {
     // Prevent updates while data is loading, as this cause pagination issues when observability:apmProgressiveLoading is enabled
-    if (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading) {
+    if (
+      (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading) &&
+      saveTableOptionsToUrl
+    ) {
       setTableOptions(getStateFromUrl());
     }
-  }, [getStateFromUrl, progressiveLoadingQuality, isLoading]);
+  }, [getStateFromUrl, progressiveLoadingQuality, isLoading, saveTableOptionsToUrl]);
 
   // Clean up searchQuery when fast filter is toggled off
   useEffect(() => {
@@ -295,7 +430,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      direction="column"
+      responsive={false}
+      data-test-subj={props['data-test-subj']}
+    >
       {tableSearchBar.isEnabled ? (
         <EuiFlexItem>
           <TableSearchBar
@@ -303,34 +443,41 @@ function UnoptimizedManagedTable<T extends object>(props: {
             searchQuery={searchQuery}
             onChangeSearchQuery={onChangeSearchQuery}
             techPreview={tableSearchBar.techPreview}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem>
-        <EuiBasicTable<T>
-          loading={isLoading}
-          tableLayout={tableLayout}
-          error={
-            error
-              ? i18n.translate('xpack.apm.managedTable.errorMessage', {
-                  defaultMessage: 'Failed to fetch',
-                })
-              : ''
-          }
-          noItemsMessage={
-            isLoading
-              ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
-                  defaultMessage: 'Loading…',
-                })
-              : noItemsMessage
-          }
-          items={renderedItems}
-          columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
-          rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
-          sorting={sorting}
-          onChange={onTableChange}
-          {...(paginationProps ? { pagination: paginationProps } : {})}
-        />
+        <div css={managedTableTableWrapperCss}>
+          <EuiBasicTable<T>
+            loading={isLoading}
+            tableLayout={tableLayout}
+            error={
+              error
+                ? i18n.translate('xpack.apm.managedTable.errorMessage', {
+                    defaultMessage: 'Failed to fetch',
+                  })
+                : ''
+            }
+            noItemsMessage={
+              isLoading
+                ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+                    defaultMessage: 'Loading…',
+                  })
+                : noItemsMessage
+            }
+            items={renderedItems}
+            columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
+            rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
+            sorting={sorting}
+            onChange={onTableChange}
+            tableCaption={props.tableCaption}
+            rowProps={props.rowProps}
+            scrollableInline
+            responsiveBreakpoint={false}
+            {...(paginationProps ? { pagination: paginationProps } : {})}
+          />
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

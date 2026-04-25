@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppStateUrl } from '../discover_app_state_container';
-import { cleanupUrlState } from './cleanup_url_state';
+import { type AppStateUrl, cleanupUrlState } from './cleanup_url_state';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DataSourceType } from '../../../../../common/data_sources';
 

@@ -23,6 +23,8 @@
         "label": "metricsServiceMock",
         "description": [],
         "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "() => jest.Mocked<MetricsServiceContract>"
             ],
             "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
               ">"
             ],
             "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -73,6 +79,8 @@
               ">"
             ],
             "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -91,6 +99,8 @@
               ">"
             ],
             "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -109,6 +119,8 @@
               ">"
             ],
             "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -126,6 +138,8 @@
               "EventLoopDelaysMonitor"
             ],
             "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -142,6 +156,8 @@
         "label": "sampleEsClientMetrics",
         "description": [],
         "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,6 +169,8 @@
             "label": "totalActiveSockets",
             "description": [],
             "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -164,6 +182,8 @@
             "label": "totalIdleSockets",
             "description": [],
             "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,6 +195,8 @@
             "label": "totalQueuedRequests",
             "description": [],
             "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

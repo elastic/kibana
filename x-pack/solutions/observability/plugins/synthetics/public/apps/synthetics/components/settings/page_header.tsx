@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { EuiPageHeaderProps } from '@elastic/eui';
+import type { useHistory } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
+import type { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
+import { useSyntheticsSettingsContext } from '../../contexts';
 
 export type SettingsTabId =
   | 'data-retention'
   | 'params'
   | 'alerting'
   | 'private-locations'
-  | 'api-keys';
+  | 'api-keys'
+  | 'advanced'
+  | 'remote-clusters';
 
 export const getSettingsPageHeader = (
   history: ReturnType<typeof useHistory>,
@@ -23,6 +27,7 @@ export const getSettingsPageHeader = (
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
   const match = useRouteMatch<{ tabId: SettingsTabId }>(SYNTHETICS_SETTINGS_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+  const { isServerless, isCCSEnabled } = useSyntheticsSettingsContext(); // eslint-disable-line react-hooks/rules-of-hooks
 
   if (!match) {
     return {};
@@ -75,6 +80,24 @@ export const getSettingsPageHeader = (
         isSelected: tabId === 'api-keys',
         href: replaceTab('api-keys'),
       },
+      {
+        label: i18n.translate('xpack.synthetics.settingsTabs.advanced', {
+          defaultMessage: 'Advanced',
+        }),
+        isSelected: tabId === 'advanced',
+        href: replaceTab('advanced'),
+      },
+      ...(!isServerless && isCCSEnabled
+        ? [
+            {
+              label: i18n.translate('xpack.synthetics.settingsTabs.remoteClusters', {
+                defaultMessage: 'Remote Clusters',
+              }),
+              isSelected: tabId === 'remote-clusters',
+              href: replaceTab('remote-clusters'),
+            },
+          ]
+        : []),
     ],
   };
 };

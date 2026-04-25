@@ -19,8 +19,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DetailViewProps } from './types';
-import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
+import type { DetailViewProps } from './types';
+import type { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
 
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {
@@ -45,11 +45,13 @@ const StatRow = ({ stat }: { stat: RequestDetailsStatRow }) => {
               content={stat.description}
             />
           ) : (
-            <EuiIcon type="empty" />
+            <EuiIcon type="empty" aria-hidden={true} />
           )}
         </span>
       </EuiTableRowCell>
-      <EuiTableRowCell>{stat.value}</EuiTableRowCell>
+      <EuiTableRowCell data-test-subj={`inspector.statistics.${stat.id}`}>
+        {stat.value}
+      </EuiTableRowCell>
     </EuiTableRow>
   );
 };

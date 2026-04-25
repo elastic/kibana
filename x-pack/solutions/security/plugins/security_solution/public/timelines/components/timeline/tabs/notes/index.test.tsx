@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import NotesTabContentComponent, { FETCH_NOTES_ERROR, NO_NOTES } from '.';
 import { render } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../../common/mock';
@@ -21,7 +20,6 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import type { State } from '../../../../../common/store';
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../../common/components/user_privileges');
 
 const mockAddError = jest.fn();
@@ -70,24 +68,10 @@ const mockGlobalStateWithUnSavedTimeline: State = {
 describe('NotesTabContentComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useUserPrivileges as jest.Mock).mockReturnValue({
       notesPrivileges: { crud: true },
       timelinePrivileges: { crud: true },
     });
-  });
-
-  it('should show the old note system', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <NotesTabContentComponent timelineId={TimelineId.test} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('old-notes-screen')).toBeInTheDocument();
-    expect(queryByTestId('new-notes-screen')).not.toBeInTheDocument();
   });
 
   it('should show the new note system', () => {

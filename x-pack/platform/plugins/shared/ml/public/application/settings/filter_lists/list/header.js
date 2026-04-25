@@ -25,15 +25,20 @@ import {
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { MlPageHeader } from '../../../components/page_header';
+import { PageTitle } from '../../../components/page_title';
 
 function FilterListsHeaderUI({ totalCount, refreshFilterLists, kibana }) {
   const docsUrl = kibana.services.docLinks.links.ml.customRules;
   return (
     <React.Fragment>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
-          defaultMessage="Filter Lists"
+        <PageTitle
+          title={
+            <FormattedMessage
+              id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
+              defaultMessage="Filter Lists"
+            />
+          }
         />
       </MlPageHeader>
 

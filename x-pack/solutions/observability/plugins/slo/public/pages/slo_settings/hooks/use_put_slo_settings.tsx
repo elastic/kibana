@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { PutSLOSettingsParams, PutSLOSettingsResponse } from '@kbn/slo-schema';
-import { useMutation } from '@tanstack/react-query';
-import { paths } from '../../../../common/locators/paths';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useMutation } from '@kbn/react-query';
+import type {
+  PutServerlessSLOSettingsParams,
+  PutSLOSettingsParams,
+  PutSLOSettingsResponse,
+} from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { useKibana } from '../../../hooks/use_kibana';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -23,7 +27,11 @@ export function usePutSloSettings() {
   } = useKibana().services;
   const { sloClient } = usePluginContext();
 
-  return useMutation<PutSLOSettingsResponse, ServerError, { settings: PutSLOSettingsParams }>(
+  return useMutation<
+    PutSLOSettingsResponse,
+    ServerError,
+    { settings: PutSLOSettingsParams | PutServerlessSLOSettingsParams }
+  >(
     ['putSloSettings'],
     ({ settings }) => {
       return sloClient.fetch(`PUT /internal/slo/settings`, {

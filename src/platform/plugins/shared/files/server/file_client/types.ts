@@ -8,9 +8,9 @@
  */
 
 import type { File, FileShareJSONWithToken, UpdatableFileMetadata } from '../../common/types';
-import { CreateFileArgs } from '../file_service';
-import { FileShareServiceStart } from '../file_share_service';
-import { FileMetadataClient } from './file_metadata_client';
+import type { CreateFileArgs } from '../file_service';
+import type { FileShareServiceStart } from '../file_share_service';
+import type { FileMetadataClient } from './file_metadata_client';
 
 export type P1<F extends (...args: any[]) => any> = Parameters<F>[0];
 

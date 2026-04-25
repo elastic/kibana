@@ -1,8 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/ai-assistant-management-plugin",
-  "owner": ["@elastic/obs-ai-assistant"],
-  // This should probably be platform. While the code owner is currently observability, the package is a platform AI assistant selector.
+  "owner": [
+    "@elastic/appex-ai-infra"
+  ],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -14,12 +15,14 @@
     ],
     "requiredPlugins": [
       "management",
+      "licensing"
     ],
     "optionalPlugins": [
       "home",
       "serverless",
       "features",
-      "cloud"
+      "cloud",
+      "spaces"
     ],
     "requiredBundles": [
       "kibanaReact"

@@ -12,12 +12,12 @@ import chalk from 'chalk';
 import { mergeDocuments } from './bundler/merge_documents';
 import { logger } from './logger';
 import { createBlankOpenApiDocument } from './bundler/merge_documents/create_blank_oas_document';
-import { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
+import type { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { writeDocuments } from './utils/write_documents';
 import { resolveGlobs } from './utils/resolve_globs';
 import { bundleDocument } from './bundler/bundle_document';
 import { withNamespaceComponentsProcessor } from './bundler/processor_sets';
-import { PrototypeDocument } from './prototype_document';
+import type { PrototypeDocument } from './prototype_document';
 import { validatePrototypeDocument } from './validate_prototype_document';
 
 export interface MergerConfig {

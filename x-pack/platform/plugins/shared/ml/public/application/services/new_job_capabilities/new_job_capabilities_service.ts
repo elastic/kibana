@@ -62,6 +62,7 @@ export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
         dataView.getIndexPattern(),
         dataView.type === DataViewType.ROLLUP
       );
+
       const { fields: allFields, aggs } = createObjects(resp, dataView.getIndexPattern());
 
       if (this._includeEventRateField === true) {
@@ -81,7 +82,6 @@ export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       // keyword fields over text fields.
       // e.g. if foo.keyword and foo exist, don't add foo to the list.
       this._fields = fields;
-      this.removeCounterFields();
       // set the category fields to contain fields which have been filtered to prefer text fields.
       this._catFields = catFields;
       this._dateFields = dateFields;

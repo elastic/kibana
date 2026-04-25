@@ -19,15 +19,15 @@ export const mount =
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
 
-    const defaultDataView = await plugins.data.indexPatterns.getDefault();
-    const { formula } = await plugins.lens.stateHelperApi();
+    const defaultDataView = await plugins.data.dataViews.getDefault();
 
     const reactElement = (
       <KibanaRenderContextProvider {...core}>
         {defaultDataView && defaultDataView.isTimeBased() ? (
-          <App core={core} plugins={plugins} defaultDataView={defaultDataView} formula={formula} />
+          <App core={core} plugins={plugins} defaultDataView={defaultDataView} />
         ) : (
           <EuiCallOut
+            announceOnMount
             title="Please define a default index pattern to use this demo"
             color="danger"
             iconType="warning"

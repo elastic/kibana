@@ -8,13 +8,8 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiDataGridControlColumn,
-  EuiIconTip,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiIconTip, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { FieldRow } from './field_row';
@@ -52,7 +47,7 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onToggl
         <EuiButtonIcon
           data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
           iconSize="m"
-          iconType={isPinned ? 'pinFilled' : 'pin'}
+          iconType={isPinned ? 'pinFill' : 'pin'}
           color="text"
           aria-label={label}
           onClick={() => {

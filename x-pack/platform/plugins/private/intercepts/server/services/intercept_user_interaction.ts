@@ -6,11 +6,11 @@
  */
 
 import assert from 'assert';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import {
   type CoreSetup,
   type CoreStart,
   type Logger,
-  RequestHandlerContext,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
@@ -26,8 +26,6 @@ export class InterceptUserInteractionService {
   private savedObjectRef = interceptInteractionUserRecordSavedObject;
 
   setup(core: CoreSetup, logger: Logger) {
-    core.savedObjects.registerType(this.savedObjectRef);
-
     const router = core.http.createRouter<RequestHandlerContext>();
 
     router.get(

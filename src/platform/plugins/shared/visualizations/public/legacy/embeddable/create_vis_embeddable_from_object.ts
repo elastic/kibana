@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Vis } from '../../types';
+import type { Vis } from '../../types';
 import type {
   VisualizeInput,
   VisualizeEmbeddable,
@@ -17,7 +17,7 @@ import type {
 import { getHttp, getTimeFilter, getCapabilities } from '../../services';
 import { urlFor } from '../..';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
-import { AttributeService } from './attribute_service';
+import type { AttributeService } from './attribute_service';
 import { ErrorEmbeddable } from './error_embeddable';
 
 /** @deprecated

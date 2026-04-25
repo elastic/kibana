@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export interface IndexSizeEntry {
+  index: string;
+  sizeInBytes: number;
+}
+
 export enum SYNTHETICS_API_URLS {
   // public apis
   SYNTHETICS_MONITORS = '/api/synthetics/monitors',
@@ -15,6 +20,8 @@ export enum SYNTHETICS_API_URLS {
   TEST_NOW_MONITOR = '/api/synthetics/monitor/test',
 
   // Service end points
+  SYNTHETICS_MONITOR_RESET = '/internal/synthetics/monitors/{monitorId}/_reset',
+  SYNTHETICS_MONITORS_BULK_RESET = '/internal/synthetics/monitors/_bulk_reset',
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITOR_INSPECT = '/internal/synthetics/service/monitor/inspect',
@@ -23,6 +30,11 @@ export enum SYNTHETICS_API_URLS {
   SERVICE_ALLOWED = '/internal/synthetics/service/allowed',
   SYNTHETICS_PROJECT_APIKEY = '/internal/synthetics/service/api_key',
   SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',
+  SYNTHETICS_MONITORS_HEALTH = '/internal/synthetics/monitors/_health',
+  SYNTHETICS_MONITOR_HEALTH = '/internal/synthetics/monitors/{monitorId}/_health',
+  PRIVATE_LOCATIONS_CLEANUP = `/internal/synthetics/private_locations/_cleanup`,
+  SYNC_GLOBAL_PARAMS = `/internal/synthetics/sync_global_params`,
+  SYNC_GLOBAL_PARAMS_SETTINGS = `/internal/synthetics/sync_global_params/_settings`,
 
   PINGS = '/internal/synthetics/pings',
   MONITOR_STATUS_HEATMAP = '/internal/synthetics/ping_heatmap',
@@ -37,11 +49,11 @@ export enum SYNTHETICS_API_URLS {
   JOURNEY = `/internal/synthetics/journey/{checkGroup}`,
   SYNTHETICS_SUCCESSFUL_CHECK = `/internal/synthetics/synthetics/check/success`,
   JOURNEY_SCREENSHOT_BLOCKS = `/internal/synthetics/journey/screenshot/block`,
-  JOURNEY_FAILED_STEPS = `/internal/synthetics/journeys/failed_steps`,
   NETWORK_EVENTS = `/internal/synthetics/network_events`,
   JOURNEY_SCREENSHOT = `/internal/synthetics/journey/screenshot/{checkGroup}/{stepIndex}`,
   DELETE_PACKAGE_POLICY = `/internal/synthetics/monitor/policy/{packagePolicyId}`,
   FILTERS = '/internal/synthetics/monitor/filters',
+  TRIGGER_TASK_RUN = '/internal/synthetics/trigger_task_run/{taskType}',
 
   CERTS = '/internal/synthetics/certs',
 

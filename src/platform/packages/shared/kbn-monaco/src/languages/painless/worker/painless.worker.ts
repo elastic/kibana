@@ -13,7 +13,7 @@
 import '@babel/runtime/regenerator';
 // @ts-ignore
 import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
-import { monaco } from '../../../monaco_imports';
+import type { monaco } from '../../../monaco_imports';
 import { PainlessWorker } from './painless_worker';
 
 self.onmessage = () => {

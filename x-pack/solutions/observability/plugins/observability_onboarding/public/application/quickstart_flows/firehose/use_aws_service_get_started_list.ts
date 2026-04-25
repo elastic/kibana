@@ -10,8 +10,8 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
-import { AWSIndexName } from '../../../../common/aws_firehose';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import type { AWSIndexName } from '../../../../common/aws_firehose';
+import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 export interface AWSServiceGetStartedConfig {
   id: string;
@@ -79,7 +79,7 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
     (dataset: string, name: string) => ({
       id: `logs-explorer-${dataset}`,
       title: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreDataTitle', {
-        defaultMessage: 'See {name} data in Logs Explorer',
+        defaultMessage: 'See {name} data in Logs explorer',
         values: { name },
       }),
       label: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreDataLabel', {

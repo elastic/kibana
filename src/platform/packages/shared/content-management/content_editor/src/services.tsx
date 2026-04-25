@@ -13,13 +13,13 @@ import {
   UserProfilesProvider,
   useUserProfilesServices,
 } from '@kbn/content-management-user-profiles';
-import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, useQueryClient } from '@kbn/react-query';
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -45,9 +45,9 @@ export interface Theme {
  * Abstract external services for this component.
  */
 export interface Services {
-  openFlyout(node: ReactNode, options?: OverlayFlyoutOpenOptions): OverlayRef;
+  openSystemFlyout(node: ReactNode, options?: OverlaySystemFlyoutOpenOptions): OverlayRef;
   notifyError: NotifyFn;
-  TagList?: FC<{ references: SavedObjectsReference[] }>;
+  TagList?: FC<{ tagIds: string[] }>;
   TagSelector?: React.FC<TagSelectorProps>;
 }
 
@@ -80,7 +80,10 @@ export interface ContentEditorKibanaDependencies {
   /** CoreStart contract */
   core: ContentEditorStartServices & {
     overlays: {
-      openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+      openSystemFlyout(
+        content: React.ReactElement,
+        options?: OverlaySystemFlyoutOpenOptions
+      ): OverlayRef;
     };
     notifications: {
       toasts: {
@@ -127,14 +130,15 @@ export const ContentEditorKibanaProvider: FC<
 > = ({ children, ...services }) => {
   const { core, savedObjectsTagging } = services;
   const { overlays, notifications, rendering } = core;
-  const { openFlyout: coreOpenFlyout } = overlays;
+  const { openSystemFlyout: coreOpenFlyout } = overlays;
 
   const TagList = useMemo(() => {
-    const Comp: Services['TagList'] = ({ references }) => {
+    const Comp: Services['TagList'] = ({ tagIds }) => {
       if (!savedObjectsTagging?.ui.components.TagList) {
         return null;
       }
       const PluginTagList = savedObjectsTagging.ui.components.TagList;
+      const references = tagIds.map((id) => ({ type: 'tag', id, name: `tag-${id}` }));
       return <PluginTagList object={{ references }} />;
     };
 
@@ -144,24 +148,21 @@ export const ContentEditorKibanaProvider: FC<
   const userProfilesServices = useUserProfilesServices();
   const queryClient = useQueryClient();
 
-  const openFlyout = useCallback(
-    (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
+  const openSystemFlyout = useCallback(
+    (node: ReactNode, options: OverlaySystemFlyoutOpenOptions) => {
       return coreOpenFlyout(
-        toMountPoint(
-          <QueryClientProvider client={queryClient}>
-            <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>
-          </QueryClientProvider>,
-          rendering
-        ),
+        <QueryClientProvider client={queryClient}>
+          <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>
+        </QueryClientProvider>,
         options
       );
     },
-    [coreOpenFlyout, rendering, userProfilesServices, queryClient]
+    [coreOpenFlyout, userProfilesServices, queryClient]
   );
 
   return (
     <ContentEditorProvider
-      openFlyout={openFlyout}
+      openSystemFlyout={openSystemFlyout}
       notifyError={(title, text) => {
         notifications.toasts.addDanger({ title: toMountPoint(title, rendering), text });
       }}

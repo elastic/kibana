@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import type { SimpleSavedObject } from '@kbn/core/public';
-
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type IndexPatternSavedObjectAttributes = { title: string };
-
-export type IndexPatternSavedObject = Pick<
-  SimpleSavedObject<IndexPatternSavedObjectAttributes>,
-  'type' | 'id' | 'attributes' | '_version'
->;

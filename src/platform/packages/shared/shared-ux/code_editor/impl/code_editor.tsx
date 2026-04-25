@@ -7,20 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   htmlIdGenerator,
   EuiToolTip,
   keys,
-  EuiButtonIcon,
-  EuiOverlayMask,
-  EuiI18n,
-  EuiFocusTrap,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-  UseEuiTheme,
 } from '@elastic/eui';
 import {
   monaco,
@@ -29,19 +23,26 @@ import {
 } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css, Interpolation, Theme } from '@emotion/react';
+import type { Interpolation, Theme } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
 } from './react_monaco_editor';
-import { remeasureFonts } from './remeasure_fonts';
-import { useContextMenuUtils } from './use_context_menu_utils';
-import type { ContextMenuAction } from './use_context_menu_utils';
-
-import { PlaceholderWidget } from './placeholder_widget';
+import { remeasureFonts } from './utils/remeasure_fonts';
+import {
+  type ContextMenuAction,
+  useCopy,
+  useContextMenuUtils,
+  useFullScreen,
+  usePlaceholder,
+  useFitToContent,
+  ReBroadcastMouseDownEvents,
+} from './mods';
 import { styles } from './editor.styles';
 
-export interface CodeEditorProps {
+export interface CodeEditorProps
+  extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
 
@@ -86,6 +87,13 @@ export interface CodeEditorProps {
   hoverProvider?: monaco.languages.HoverProvider;
 
   /**
+   * Inline completions provider for inline suggestions
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.InlineCompletionsProvider.html
+   */
+  inlineCompletionsProvider?: monaco.languages.InlineCompletionsProvider;
+
+  /**
    * Language config provider for bracket
    * Documentation for the provider can be found here:
    * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html
@@ -98,6 +106,13 @@ export interface CodeEditorProps {
    * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CodeActionProvider.html
    */
   codeActions?: monaco.languages.CodeActionProvider;
+
+  /**
+   * Document highlight provider for highlighting all occurrences of a symbol
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.DocumentHighlightProvider.html
+   */
+  documentHighlightProvider?: monaco.languages.DocumentHighlightProvider;
 
   /**
    * Function called before the editor is mounted in the view
@@ -131,6 +146,11 @@ export interface CodeEditorProps {
    * Accessible name for the editor. (Defaults to "Code editor")
    */
   'aria-label'?: string;
+
+  /**
+   * ID of the element that describes the editor.
+   */
+  'aria-describedby'?: string;
 
   isCopyable?: boolean;
   allowFullScreen?: boolean;
@@ -182,6 +202,12 @@ export interface CodeEditorProps {
   htmlId?: string;
 
   /**
+   * Enables clickable links in the editor. URLs will be underlined and can be opened
+   * in a new tab using Cmd/Ctrl+Click. Disabled by default.
+   */
+  links?: boolean;
+
+  /**
    * Callbacks for when editor is focused/blurred
    */
   onFocus?: () => void;
@@ -203,12 +229,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   suggestionProvider,
   signatureProvider,
   hoverProvider,
+  inlineCompletionsProvider,
   placeholder,
   languageConfiguration,
   codeActions,
+  documentHighlightProvider,
   'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
+  'aria-describedby': ariaDescribedBy,
   isCopyable = false,
   allowFullScreen = false,
   readOnlyMessage = i18n.translate('sharedUXPackages.codeEditor.readOnlyMessage', {
@@ -217,13 +246,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   fitToContent,
   accessibilityOverlayEnabled = true,
   enableFindAction,
-  dataTestSubj,
+  dataTestSubj = 'kibanaCodeEditor',
   classNameCss,
   enableCustomContextMenu = false,
   customContextMenuActions = [],
   htmlId,
+  links = false,
   onFocus,
   onBlur,
+  overflowWidgetsContainerZIndexOverride,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -273,8 +304,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   );
 
   const onKeydownMonaco = useCallback(
-    (ev: monaco.IKeyboardEvent) => {
+    (ev: monaco.IKeyboardEvent, editor: monaco.editor.IStandaloneCodeEditor) => {
       if (ev.keyCode === monaco.KeyCode.Escape) {
+        const inspectTokensWidget = editor?.getContribution(
+          'editor.contrib.inspectTokens'
+          // @ts-expect-errors -- "_widget" is not part of the TS interface but does exist
+        )?._widget;
+        // If the inspect tokens widget is open then we want to let monaco handle ESCAPE for it,
+        // otherwise widget will not close.
+        if (inspectTokensWidget) return;
         // If the autocompletion context menu is open then we want to let ESCAPE close it but
         // **not** exit out of editing mode.
         if (!isSuggestionMenuOpen.current) {
@@ -376,7 +414,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               codeEditorAriaLabel: ariaLabel,
             },
           })}
-          data-test-subj={`codeEditorHint codeEditorHint--${isHintActive ? 'active' : 'inactive'}`}
+          data-test-subj="codeEditorHint"
+          data-code-hint-status={isHintActive ? 'active' : 'inactive'}
         />
       </EuiToolTip>
     );
@@ -418,12 +457,20 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           monaco.languages.registerHoverProvider(languageId, hoverProvider);
         }
 
+        if (inlineCompletionsProvider) {
+          monaco.languages.registerInlineCompletionsProvider(languageId, inlineCompletionsProvider);
+        }
+
         if (languageConfiguration) {
           monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
         }
 
         if (codeActions) {
           monaco.languages.registerCodeActionProvider(languageId, codeActions);
+        }
+
+        if (documentHighlightProvider) {
+          monaco.languages.registerDocumentHighlightProvider(languageId, documentHighlightProvider);
         }
       });
 
@@ -440,7 +487,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       suggestionProvider,
       signatureProvider,
       hoverProvider,
+      inlineCompletionsProvider,
       codeActions,
+      documentHighlightProvider,
       languageConfiguration,
       enableFindAction,
     ]
@@ -469,7 +518,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         textboxMutationObserver.current.observe(textbox, { attributes: true });
       }
 
-      editor.onKeyDown(onKeydownMonaco);
+      editor.onKeyDown((ev: monaco.IKeyboardEvent) => {
+        onKeydownMonaco(ev, editor);
+      });
       editor.onDidBlurEditorText(onBlurMonaco);
 
       const messageContribution = editor.getContribution('editor.contrib.messageController');
@@ -526,6 +577,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       editorWillUnmount?.();
 
+      // Clear the stored editor reference before it gets disposed, to avoid downstream
+      // effects/hooks attempting to call into a disposed editor instance.
+      setEditor(null);
+
       const model = editor.getModel();
       model?.dispose();
     },
@@ -538,6 +593,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    // apply aria described by on editor element
+    if (_editor && ariaDescribedBy) {
+      _editor
+        .getDomNode()
+        ?.querySelector('textarea[aria-roledescription="editor"]')
+        ?.setAttribute('aria-describedby', ariaDescribedBy);
+    }
+  }, [_editor, ariaDescribedBy]);
+
   useFitToContent({ editor: _editor, fitToContent, isFullScreen });
   usePlaceholder({ placeholder, euiTheme, editor: _editor, value });
 
@@ -549,13 +614,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <div
-      css={[styles.container, classNameCss]}
+      css={styles.container}
       onKeyDown={onKeyDown}
-      data-test-subj={dataTestSubj ?? 'kibanaCodeEditor'}
+      data-test-subj={dataTestSubj}
       className="kibanaCodeEditor"
     >
+      <Global styles={classNameCss} />
       {accessibilityOverlayEnabled && renderPrompt()}
-
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
           <div
@@ -575,7 +640,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </EuiFlexGroup>
           </div>
         ) : null}
-        <UseBug177756ReBroadcastMouseDown>
+        <ReBroadcastMouseDownEvents>
           {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
           <MonacoEditor
             theme={theme}
@@ -587,6 +652,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             editorWillMount={_editorWillMount}
             editorDidMount={_editorDidMount}
             editorWillUnmount={_editorWillUnmount}
+            overflowWidgetsContainerZIndexOverride={overflowWidgetsContainerZIndexOverride}
             options={{
               padding: allowFullScreen || isCopyable ? { top: 24 } : {},
               renderLineHighlight: 'none',
@@ -612,216 +678,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
               'bracketPairColorization.enabled': false,
               ...options,
+              // Explicit links prop always takes precedence over any value passed in options
+              links,
+              // Explicit not possible to override because of the way the suggestion widget is rendered in a separate container
+              fixedOverflowWidgets: true,
             }}
           />
-        </UseBug177756ReBroadcastMouseDown>
+        </ReBroadcastMouseDownEvents>
       </FullScreenDisplay>
-    </div>
-  );
-};
-
-/**
- * Fullscreen logic
- */
-
-const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const { euiTheme } = useEuiTheme();
-
-  const toggleFullScreen = () => {
-    setIsFullScreen(!isFullScreen);
-  };
-
-  const onKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === keys.ESCAPE) {
-      event.preventDefault();
-      event.stopPropagation();
-      setIsFullScreen(false);
-    }
-  }, []);
-
-  const FullScreenButton: React.FC = () => {
-    if (!allowFullScreen) return null;
-    return (
-      <EuiI18n
-        tokens={['euiCodeBlock.fullscreenCollapse', 'euiCodeBlock.fullscreenExpand']}
-        defaults={['Collapse', 'Expand']}
-      >
-        {([fullscreenCollapse, fullscreenExpand]: string[]) => (
-          <EuiButtonIcon
-            onClick={toggleFullScreen}
-            iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
-            color="text"
-            aria-label={isFullScreen ? fullscreenCollapse : fullscreenExpand}
-            size="xs"
-          />
-        )}
-      </EuiI18n>
-    );
-  };
-
-  const FullScreenDisplay = useMemo(
-    () =>
-      ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
-        if (!isFullScreen) return <>{children}</>;
-
-        return (
-          <EuiOverlayMask>
-            <EuiFocusTrap clickOutsideDisables={true}>
-              <div css={styles.fullscreenContainer(euiTheme)}>{children}</div>
-            </EuiFocusTrap>
-          </EuiOverlayMask>
-        );
-      },
-    [isFullScreen, euiTheme]
-  );
-
-  return {
-    FullScreenButton,
-    FullScreenDisplay,
-    onKeyDown,
-    isFullScreen,
-    setIsFullScreen,
-  };
-};
-
-const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) => {
-  const showCopyButton = isCopyable && value;
-
-  const CopyButton = () => {
-    if (!showCopyButton) return null;
-
-    return (
-      <div className="euiCodeBlock__copyButton">
-        <EuiI18n token="euiCodeBlock.copyButton" default="Copy">
-          {(copyButton: string) => (
-            <EuiCopy textToCopy={value}>
-              {(copy) => (
-                <EuiButtonIcon
-                  onClick={copy}
-                  iconType="copyClipboard"
-                  color="text"
-                  aria-label={copyButton}
-                  size="xs"
-                />
-              )}
-            </EuiCopy>
-          )}
-        </EuiI18n>
-      </div>
-    );
-  };
-
-  return { showCopyButton, CopyButton };
-};
-
-const usePlaceholder = ({
-  placeholder,
-  euiTheme,
-  editor,
-  value,
-}: {
-  placeholder: string | undefined;
-  euiTheme: UseEuiTheme['euiTheme'];
-  editor: monaco.editor.IStandaloneCodeEditor | null;
-  value: string;
-}) => {
-  useEffect(() => {
-    if (!placeholder || !editor) return;
-
-    let placeholderWidget: PlaceholderWidget | null = null;
-
-    const addPlaceholder = () => {
-      if (!placeholderWidget) {
-        placeholderWidget = new PlaceholderWidget(placeholder, euiTheme, editor);
-      }
-    };
-
-    const removePlaceholder = () => {
-      if (placeholderWidget) {
-        placeholderWidget.dispose();
-        placeholderWidget = null;
-      }
-    };
-
-    if (!value) {
-      addPlaceholder();
-    }
-
-    const onDidChangeContent = editor.getModel()?.onDidChangeContent(() => {
-      if (!editor.getModel()?.getValue()) {
-        addPlaceholder();
-      } else {
-        removePlaceholder();
-      }
-    });
-
-    return () => {
-      onDidChangeContent?.dispose();
-      removePlaceholder();
-    };
-  }, [placeholder, value, euiTheme, editor]);
-};
-
-const useFitToContent = ({
-  editor,
-  fitToContent,
-  isFullScreen,
-}: {
-  editor: monaco.editor.IStandaloneCodeEditor | null;
-  isFullScreen: boolean;
-  fitToContent?: { minLines?: number; maxLines?: number };
-}) => {
-  const isFitToContent = !!fitToContent;
-  const minLines = fitToContent?.minLines;
-  const maxLines = fitToContent?.maxLines;
-  useEffect(() => {
-    if (!editor) return;
-    if (isFullScreen) return;
-    if (!isFitToContent) return;
-
-    const updateHeight = () => {
-      const contentHeight = editor.getContentHeight();
-      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-      const minHeight = (minLines ?? 1) * lineHeight;
-      let maxHeight = maxLines ? maxLines * lineHeight : contentHeight;
-      maxHeight = Math.max(minHeight, maxHeight);
-      editor.layout({
-        height: Math.min(maxHeight, Math.max(minHeight, contentHeight)),
-        width: editor.getLayoutInfo().width,
-      });
-    };
-    updateHeight();
-    const disposable = editor.onDidContentSizeChange(updateHeight);
-    return () => {
-      disposable.dispose();
-      editor.layout(); // reset the layout that was controlled by the fitToContent
-    };
-  }, [editor, isFitToContent, minLines, maxLines, isFullScreen]);
-};
-
-const UseBug177756ReBroadcastMouseDown: FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [$codeWrapper, setCodeWrapper] = React.useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const rebroadcastEvent = (event: MouseEvent) => {
-      // rebroadcast mouse event to accommodate integration with other parts of the codebase
-      // especially that the monaco it self does prevent default for mouse events
-      if ($codeWrapper?.contains(event.target as Node) && event.defaultPrevented) {
-        $codeWrapper.dispatchEvent(new MouseEvent(event.type, event));
-      }
-    };
-
-    if ($codeWrapper) {
-      $codeWrapper.addEventListener('mousedown', rebroadcastEvent);
-
-      return () => $codeWrapper.removeEventListener('mousedown', rebroadcastEvent);
-    }
-  }, [$codeWrapper]);
-
-  return (
-    <div ref={setCodeWrapper} style={{ display: 'contents' }}>
-      {children}
     </div>
   );
 };

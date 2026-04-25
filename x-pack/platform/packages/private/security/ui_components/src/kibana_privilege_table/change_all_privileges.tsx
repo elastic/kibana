@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './change_all_privileges.scss';
-
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -15,6 +13,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -42,7 +41,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
     switch (privilege) {
       case 'all':
         return {
-          icon: 'documentEdit',
+          icon: 'pencil',
           label: i18n.translate(
             'xpack.security.management.editRole.changeAllPrivileges.allSelectionLabel',
             {
@@ -52,7 +51,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
         };
       case 'read':
         return {
-          icon: 'glasses',
+          icon: 'readOnly',
           label: i18n.translate(
             'xpack.security.management.editRole.changeAllPrivileges.readSelectionLabel',
             {
@@ -79,7 +78,9 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
     const button = (
       <EuiLink
         onClick={this.onButtonClick}
-        className={'secPrivilegeFeatureChangeAllLink'}
+        css={({ euiTheme }) => css`
+          margin-left: ${euiTheme.size.s};
+        `}
         data-test-subj="changeAllPrivilegesButton"
       >
         <EuiText size="xs">
@@ -87,7 +88,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
             id="xpack.security.management.editRole.changeAllPrivilegesLink"
             defaultMessage="Bulk actions"
           />{' '}
-          <EuiIcon size="s" type="arrowDown" />
+          <EuiIcon size="s" type="chevronSingleDown" />
         </EuiText>
       </EuiLink>
     );
@@ -118,7 +119,6 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
           this.onSelectPrivilege(NO_PRIVILEGE_VALUE);
         }}
         disabled={this.props.disabled}
-        // @ts-expect-error leaving this here so that when https://github.com/elastic/eui/issues/8123 is fixed we remove this comment
         css={({ euiTheme }) => ({ color: euiTheme.colors.danger })}
       >
         {this.getPrivilegeCopy(NO_PRIVILEGE_VALUE).label}
@@ -133,6 +133,12 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate(
+          'xpack.security.management.editRole.changeAllPrivileges.popoverAriaLabel',
+          {
+            defaultMessage: 'Bulk actions',
+          }
+        )}
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>

@@ -11,8 +11,8 @@ import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 import { calculateRate } from '../calculate_rate';
 import { getDiffCalculation } from './_beats_stats';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 
 interface Beat {
   uuid?: string;

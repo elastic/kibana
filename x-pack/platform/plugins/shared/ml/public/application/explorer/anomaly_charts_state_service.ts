@@ -124,4 +124,12 @@ export class AnomalyChartsStateService extends StateService {
   public setShowCharts(update: boolean) {
     this._anomalyExplorerUrlStateService.updateUrlState({ mlShowCharts: update });
   }
+
+  public isChartsDataLoading$(): Observable<boolean> {
+    return this._isChartsDataLoading$.asObservable();
+  }
+
+  public isChartsDataLoading(): boolean {
+    return this._isChartsDataLoading$.getValue();
+  }
 }

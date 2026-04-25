@@ -207,6 +207,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
     if (!isLogFeatureAvailable) {
       return (
         <EuiCallOut
+          announceOnMount
           size="m"
           color="warning"
           title={

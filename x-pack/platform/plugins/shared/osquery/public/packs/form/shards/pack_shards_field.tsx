@@ -75,12 +75,23 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
   useEffect(() => {
     registerRoot('shards', {
       validate: () => {
-        const nonEmptyErrors = reject(shardsArrayState.error, isEmpty) as InternalFieldErrors[];
+        const errors = shardsArrayState.error as InternalFieldErrors[] | undefined;
+        if (!errors || !Array.isArray(errors)) {
+          return true;
+        }
+
+        const shardsData = formValue.shardsArray ?? [];
+        const errorsForFilledRows = errors.filter((_, index) => {
+          const shard = shardsData[index];
+
+          return shard?.policy?.key;
+        });
+        const nonEmptyErrors = reject(errorsForFilledRows, isEmpty) as InternalFieldErrors[];
 
         return !nonEmptyErrors.length;
       },
     });
-  }, [shardsArrayState.error, errorsRoot, registerRoot]);
+  }, [shardsArrayState.error, errorsRoot, registerRoot, formValue.shardsArray]);
 
   useEffect(() => {
     const subscription = watch((data, payload) => {
@@ -103,6 +114,7 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
     if (shardsArrayState.isDirty && !deepEqual(parsedShards, rootShards)) {
       setValueRoot('shards', parsedShards, {
         shouldTouch: true,
+        shouldDirty: true,
       });
     }
   }, [setValueRoot, formValue, shardsArrayState.isDirty, rootShards, resetField, setValue]);

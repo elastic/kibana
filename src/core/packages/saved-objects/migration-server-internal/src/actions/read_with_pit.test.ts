@@ -51,6 +51,42 @@ describe('readWithPit', () => {
     );
   });
 
+  it('returns a refreshed pit id when ES returns pit_id', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({ pit_id: 'refreshed_pit_id', hits: { hits: [] } })
+    );
+
+    const result = await readWithPit({
+      client,
+      pitId: 'pitId',
+      query: { match_all: {} },
+      batchSize: 10_000,
+    })();
+
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right.pitId).toBe('refreshed_pit_id');
+    }
+  });
+
+  it('keeps the previous pit id when ES does not return pit_id', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({ hits: { hits: [] } })
+    );
+
+    const result = await readWithPit({
+      client,
+      pitId: 'pitId',
+      query: { match_all: {} },
+      batchSize: 10_000,
+    })();
+
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right.pitId).toBe('pitId');
+    }
+  });
+
   it('returns left es_response_too_large when client throws RequestAbortedError', async () => {
     // Create a mock client that rejects all methods with a RequestAbortedError
     // response.
@@ -120,7 +156,16 @@ describe('readWithPit', () => {
     // response.
     const retryableError = new EsErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
-        body: { error: { type: 'search_phase_execution_exception' } },
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            caused_by: {
+              type: 'search_phase_execution_exception',
+              reason:
+                'Search rejected due to missing shards [.kibana]. Consider using `allow_partial_search_results` setting to bypass this error.',
+            },
+          },
+        },
       })
     );
     const client = elasticsearchClientMock.createInternalClient(
@@ -153,11 +198,11 @@ describe('readWithPit', () => {
   });
 
   it('throws if neither handler can retry', async () => {
-    // Create a mock client that rejects all methods with a 502 status code
+    // Create a mock client that rejects all methods with a 500 status code
     // response.
     const retryableError = new EsErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
-        statusCode: 502,
+        statusCode: 500,
         body: { error: { type: 'es_type', reason: 'es_reason' } },
       })
     );
@@ -178,7 +223,7 @@ describe('readWithPit', () => {
       batchSize: 10_000,
     });
 
-    // Should throw because both handlers can't retry 502 responses
+    // Should throw because both handlers can't retry 500 responses
     await expect(task()).rejects.toThrow();
     expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
     expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);

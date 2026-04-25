@@ -33,6 +33,7 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,
   });
+  const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const propertyActions = useMemo(() => {
     const showTrashIcon = permissions.delete && !hideDefaultActions;
@@ -56,13 +57,18 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
 
   return (
     <>
-      <UserActionPropertyActions isLoading={isLoading} propertyActions={propertyActions} />
+      <UserActionPropertyActions
+        isLoading={isLoading}
+        propertyActions={propertyActions}
+        buttonRef={buttonRef}
+      />
       {showDeletionModal ? (
         <DeleteAttachmentConfirmationModal
           title={i18n.DELETE_ATTACHMENT}
           confirmButtonText={i18n.DELETE}
           onCancel={onCancel}
           onConfirm={onConfirm}
+          focusButtonRef={buttonRef}
         />
       ) : null}
     </>

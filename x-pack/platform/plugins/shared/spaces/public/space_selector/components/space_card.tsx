@@ -12,6 +12,7 @@ import React, { lazy, Suspense } from 'react';
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
+import { SpaceSolutionBadge } from '../../space_solution_badge';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
@@ -40,6 +41,7 @@ export const SpaceCard = (props: Props) => {
       icon={renderSpaceAvatar(space)}
       title={space.name}
       description={renderSpaceDescription(space)}
+      footer={renderSpaceFooter(space)}
       href={addSpaceIdToPath(serverBasePath, space.id, ENTER_SPACE_PATH)}
     />
   );
@@ -67,4 +69,12 @@ function renderSpaceDescription(space: Space) {
       {description}
     </EuiTextColor>
   );
+}
+
+function renderSpaceFooter(space: Space) {
+  if (!space.solution) {
+    return undefined;
+  }
+
+  return <SpaceSolutionBadge solution={space.solution} />;
 }

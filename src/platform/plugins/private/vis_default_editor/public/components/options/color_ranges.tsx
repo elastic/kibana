@@ -12,7 +12,8 @@ import { last } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { RangeValues, RangesParamEditor } from '../controls/ranges';
+import type { RangeValues } from '../controls/ranges';
+import { RangesParamEditor } from '../controls/ranges';
 
 export type SetColorRangeValue = (paramName: string, value: RangeValues[]) => void;
 

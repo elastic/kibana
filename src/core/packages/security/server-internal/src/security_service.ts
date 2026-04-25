@@ -10,19 +10,15 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
-import { Observable, Subscription } from 'rxjs';
-import { Config } from '@kbn/config';
+import type { Observable, Subscription } from 'rxjs';
+import type { Config } from '@kbn/config';
 import { isFipsEnabled, checkFipsConfig } from './fips/fips';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import {
-  getDefaultSecurityImplementation,
-  convertSecurityApi,
-  SecurityServiceConfigType,
-  PKCS12ConfigType,
-} from './utils';
+import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
+import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
@@ -50,7 +46,7 @@ export class SecurityService
 
   public setup(): InternalSecurityServiceSetup {
     const config = this.getConfig();
-    const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
+    const securityConfig: SecurityServiceConfigType | undefined = config.get(['xpack', 'security']);
     const elasticsearchConfig: PKCS12ConfigType = config.get(['elasticsearch']);
     const serverConfig: PKCS12ConfigType = config.get(['server']);
 
@@ -66,6 +62,9 @@ export class SecurityService
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
       },
+      uiam: securityConfig?.uiam?.enabled
+        ? Object.freeze({ sharedSecret: securityConfig.uiam.sharedSecret })
+        : null,
     };
   }
 

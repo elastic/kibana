@@ -8,12 +8,14 @@
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { SearchHomepagePage } from './components/search_homepage';
+import { SearchHomepagePage } from './components/search_homepage/search_homepage';
 
-export const HomepageRouter = () => (
-  <Routes>
-    <Route>
-      <SearchHomepagePage />
-    </Route>
-  </Routes>
-);
+export const HomepageRouter = () => {
+  return (
+    <Routes>
+      <Route>
+        <SearchHomepagePage />
+      </Route>
+    </Routes>
+  );
+};

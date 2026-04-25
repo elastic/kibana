@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type {
   OriginalColumn,
   MapToColumnsExpressionFunction,

@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Mixed } from 'io-ts';
+import type { Mixed } from 'io-ts';
 import { useLogicalAndFields } from '../../constants/filters_fields_with_logical_and';
 
 const useLogicalAndFileLiteral = useLogicalAndFields.map((f) => t.literal(f)) as unknown as [
@@ -24,6 +24,7 @@ const FetchMonitorQueryArgsCommon = {
   projects: t.array(t.string),
   schedules: t.array(t.string),
   monitorQueryIds: t.array(t.string),
+  configIds: t.array(t.string),
   sortField: t.string,
   sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
   showFromAllSpaces: t.boolean,

@@ -12,8 +12,10 @@ import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { ColorSchemas } from '@kbn/charts-plugin/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { HeatmapTypeProps, HeatmapVisParams } from '../types';
+import { AxisType, ScaleType } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
 
@@ -23,7 +25,7 @@ export const getHeatmapVisTypeDefinition = ({
 }: HeatmapTypeProps): VisTypeDefinition<HeatmapVisParams> => ({
   name: 'heatmap',
   title: i18n.translate('visTypeHeatmap.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
-  icon: 'heatmap',
+  icon: 'chartHeatmap',
   description: i18n.translate('visTypeHeatmap.heatmap.heatmapDescription', {
     defaultMessage: 'Display values as colors in a matrix.',
   }),

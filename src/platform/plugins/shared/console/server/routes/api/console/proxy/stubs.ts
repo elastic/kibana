@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
 import { Readable } from 'stream';
 
 export function createResponseStub(response?: string) {

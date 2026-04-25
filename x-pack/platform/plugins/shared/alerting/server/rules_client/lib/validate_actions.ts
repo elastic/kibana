@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { ConnectorType } from '@kbn/actions-plugin/server';
 import { validateHours } from '../../routes/lib/validate_hours';
 import type { RawRule } from '../../types';
 import { RuleNotifyWhen } from '../../types';
@@ -20,6 +21,9 @@ export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'sch
   actions: NormalizedAlertAction[];
   systemActions?: NormalizedSystemAction[];
 };
+
+const isWorkflowsOnlyConnectorType = ({ supportedFeatureIds }: ConnectorType): boolean =>
+  supportedFeatureIds?.length === 1 && supportedFeatureIds[0] === 'workflows';
 
 export async function validateActions(
   context: RulesClientContext,
@@ -93,6 +97,22 @@ export async function validateActions(
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.endpointSecurityConnector', {
         defaultMessage: 'Endpoint security connectors cannot be used as alerting actions',
+      })
+    );
+  }
+
+  // short term solution that will be addressed in https://github.com/elastic/response-ops-team/issues/486
+  const workflowsConnectorTypeIds = new Set(
+    allConnectorTypes.filter(isWorkflowsOnlyConnectorType).map((type) => type.id)
+  );
+  const workflowsActionTypeIds = actionResults
+    .map((result) => result.actionTypeId)
+    .filter((id) => workflowsConnectorTypeIds.has(id));
+
+  if (workflowsActionTypeIds.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.workflowsConnector', {
+        defaultMessage: 'This type of connector cannot be used as alerting actions',
       })
     );
   }

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -22,7 +22,8 @@
     "@kbn/logging-mocks",
     "@kbn/config-mocks",
     "@kbn/config",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/tracing-utils"
   ],
   "exclude": [
     "target/**/*",

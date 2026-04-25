@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { FilterBy } from '../../../utils/get_formula_by_filter';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';

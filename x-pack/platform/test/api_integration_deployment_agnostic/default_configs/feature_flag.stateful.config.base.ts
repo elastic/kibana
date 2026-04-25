@@ -12,19 +12,21 @@ import {
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import {
-  fleetPackageRegistryDockerImage,
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
-  FtrConfigProviderContext,
   defineDockerServersConfig,
+  packageRegistryDocker,
+  dockerRegistryPort,
 } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
-import { DeploymentAgnosticCommonServices, services } from '../services';
+import type { DeploymentAgnosticCommonServices } from '../services';
+import { services } from '../services';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 import { updateKbnServerArguments } from './helpers';
 
@@ -44,21 +46,11 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
     // if config is executed on CI or locally
     const isRunOnCI = process.env.CI;
 
-    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
     let kbnServerArgs: string[] = [];
 
     if (options.kbnServerArgs) {
       kbnServerArgs = await updateKbnServerArguments(options.kbnServerArgs);
     }
-
-    /**
-     * This is used by CI to set the docker registry port
-     * you can also define this environment variable locally when running tests which
-     * will spin up a local docker package registry locally for you
-     * if this is defined it takes precedence over the `packageRegistryOverride` variable
-     */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const xPackAPITestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
@@ -90,15 +82,7 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
       servers,
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: fleetPackageRegistryDockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
-        },
+        registry: packageRegistryDocker,
       }),
       testFiles: options.testFiles,
       security: { disableTestUser: true },
@@ -138,7 +122,7 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
           // if the config is run locally, explicitly enable mock-idp-plugin for UI role selector
-          ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
+          ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
           `--plugin-path=${samlIdPPlugin}`,

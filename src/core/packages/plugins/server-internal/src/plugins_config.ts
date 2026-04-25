@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type Type, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema, type Type } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { Env } from '@kbn/config';
+import type { Env } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 import { KIBANA_GROUPS, type KibanaGroup } from '@kbn/projects-solutions-groups';
@@ -21,7 +22,7 @@ const configSchema = schema.object({
   /**
    * Defines an array of directories where another plugin should be loaded from.
    */
-  paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  paths: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
   /**
    * Defines an array of groups to include when loading plugins.
    * Plugins from all groups will be taken into account if the parameter is not provided.
@@ -32,7 +33,8 @@ const configSchema = schema.object({
         KIBANA_GROUPS.map((groupName) => schema.literal(groupName)) as [
           Type<KibanaGroup> // This cast is needed because it's different to Type<T>[] :sight:
         ]
-      )
+      ),
+      { maxSize: 50 }
     )
   ),
   /**

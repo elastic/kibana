@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { registerFetchRoute } from './register_fetch_route';
 import { registerAddPolicyRoute } from './register_add_policy_route';
 

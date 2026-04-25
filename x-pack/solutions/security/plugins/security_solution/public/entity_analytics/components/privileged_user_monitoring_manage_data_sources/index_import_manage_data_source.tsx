@@ -19,8 +19,9 @@ export const IndexImportManageDataSource = ({
   setAddDataSourceResult: (result: AddDataSourceResult) => void;
 }) => {
   const [isIndexModalOpen, { on: showIndexModal, off: hideIndexModal }] = useBoolean(false);
-  const { data: datasources = [], isFetching, refetch } = useFetchMonitoredIndices();
-  const monitoredDataSource = datasources[0];
+  const { data, isFetching, refetch } = useFetchMonitoredIndices();
+  const sources = data?.sources ?? [];
+  const monitoredDataSource = sources[0];
   const monitoredIndices = monitoredDataSource?.indexPattern
     ? monitoredDataSource.indexPattern.split(',')
     : [];
@@ -49,7 +50,10 @@ export const IndexImportManageDataSource = ({
           <p>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.infoText"
-              defaultMessage="One or more indices containing the user.name field. All user names in the indices, specified in the user.name field, will be defined as privileged users."
+              defaultMessage="Select one or more indices containing the {field} field. All users specified in the {field} field will be defined as privileged users."
+              values={{
+                field: <code>{'user.name'}</code>,
+              }}
             />
           </p>
 
@@ -70,7 +74,7 @@ export const IndexImportManageDataSource = ({
             )}
           </h4>
         </EuiText>
-        <EuiButton fullWidth={false} iconType="plusInCircle" onClick={showIndexModal}>
+        <EuiButton fullWidth={false} iconType="plusCircle" onClick={showIndexModal}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.btnText"
             defaultMessage="Select index"

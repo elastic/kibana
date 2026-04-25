@@ -84,7 +84,7 @@ export const translatedEntryNested = t.exact(
   })
 );
 
-const translatedEntriesOfDescendantOf = t.type({
+const translatedEntriesOfProcessDescendants = t.type({
   type: t.string,
   entries: t.array(
     t.union([
@@ -95,18 +95,40 @@ const translatedEntriesOfDescendantOf = t.type({
     ])
   ),
 });
-export type TranslatedEntriesOfDescendantOf = t.TypeOf<typeof translatedEntriesOfDescendantOf>;
+export type TranslatedEntriesOfProcessDescendants = t.TypeOf<
+  typeof translatedEntriesOfProcessDescendants
+>;
 
 export const translatedEntryDescendantOf = t.exact(
   t.type({
     operator,
     type: t.keyof({ descendent_of: null }),
     value: t.type({
-      entries: t.array(translatedEntriesOfDescendantOf),
+      entries: t.array(translatedEntriesOfProcessDescendants),
     }),
   })
 );
 export type TranslatedEntryDescendantOf = t.TypeOf<typeof translatedEntryDescendantOf>;
+
+export const translatedEntriesOfTrustDescendants = t.union([
+  translatedEntryNested,
+  translatedEntryMatch,
+  translatedEntryMatchWildcard,
+  translatedEntryMatchAny,
+]);
+export type TranslatedEntriesOfTrustDescendants = t.TypeOf<
+  typeof translatedEntriesOfTrustDescendants
+>;
+
+export const translatedEntryTrustDescendants = t.exact(
+  t.type({
+    type: t.string,
+    trust_descendants: t.boolean,
+    entries: t.array(translatedEntriesOfTrustDescendants),
+  })
+);
+
+export type TranslatedEntryTrustDescendants = t.TypeOf<typeof translatedEntryTrustDescendants>;
 
 export const translatedEntry = t.union([
   translatedEntryNested,
@@ -123,12 +145,15 @@ export const translatedPerformantEntries = t.array(
 
 export type TranslatedPerformantEntries = t.TypeOf<typeof translatedPerformantEntries>;
 
-export const translatedExceptionListItem = t.exact(
-  t.type({
-    type: t.string,
-    entries: t.array(translatedEntry),
-  })
-);
+export const translatedExceptionListItem = t.union([
+  translatedEntryTrustDescendants,
+  t.exact(
+    t.type({
+      type: t.string,
+      entries: t.array(translatedEntry),
+    })
+  ),
+]);
 export type TranslatedExceptionListItem = t.TypeOf<typeof translatedExceptionListItem>;
 
 export const wrappedTranslatedExceptionList = t.exact(

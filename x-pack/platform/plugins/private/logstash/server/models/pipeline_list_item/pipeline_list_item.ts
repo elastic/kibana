@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { PipelineListItemOptions } from '../../types';
+import type { PipelineListItemOptions } from '../../types';
 
 export class PipelineListItem {
   public readonly id: string;

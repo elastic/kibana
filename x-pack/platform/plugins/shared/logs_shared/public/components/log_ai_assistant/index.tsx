@@ -6,8 +6,8 @@
  */
 import React, { useMemo } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
-import { LogAIAssistantDocument, LogAIAssistantProps } from './log_ai_assistant';
+import type { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
+import type { LogAIAssistantDocument, LogAIAssistantProps } from './log_ai_assistant';
 
 export const LogAIAssistant = dynamic(() => import('./log_ai_assistant'));
 

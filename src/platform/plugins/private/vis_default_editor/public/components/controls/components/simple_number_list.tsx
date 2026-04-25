@@ -12,8 +12,9 @@ import { isArray } from 'lodash';
 import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EMPTY_STRING, getInitModelList, getRange, parse } from './number_list/utils';
-import { NumberRow, NumberRowModel } from './number_list/number_row';
-import { AggParamEditorProps } from '../../agg_param_props';
+import type { NumberRowModel } from './number_list/number_row';
+import { NumberRow } from './number_list/number_row';
+import type { AggParamEditorProps } from '../../agg_param_props';
 
 const generateId = htmlIdGenerator();
 
@@ -115,7 +116,7 @@ function SimpleNumberList({
         ))}
         <EuiSpacer size="s" />
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
+          <EuiButtonEmpty iconType="plusCircle" onClick={onAdd} size="xs">
             <FormattedMessage
               id="visDefaultEditor.controls.includeExclude.addUnitButtonLabel"
               defaultMessage="Add value"

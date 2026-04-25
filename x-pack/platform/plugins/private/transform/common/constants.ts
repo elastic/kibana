@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 import type { TransformHealthTests } from './types/alerting';
 
@@ -140,6 +140,19 @@ export const TRANSFORM_HEALTH_LABEL = {
   }),
   red: i18n.translate('xpack.transform.transformHealth.redLabel', {
     defaultMessage: 'Unavailable',
+  }),
+} as const;
+
+/**
+ * Used in the Health filter options (EuiSelectable) where the option `name`
+ * becomes the DOM `title` attribute and is announced by some screen readers.
+ */
+export const TRANSFORM_HEALTH_STATUS_COLOR_LABEL: Record<TransformHealthStatus, string> = {
+  green: TRANSFORM_HEALTH_STATUS.green,
+  yellow: TRANSFORM_HEALTH_STATUS.yellow,
+  red: TRANSFORM_HEALTH_STATUS.red,
+  unknown: i18n.translate('xpack.transform.transformHealth.unknownColorLabel', {
+    defaultMessage: 'grey',
   }),
 } as const;
 

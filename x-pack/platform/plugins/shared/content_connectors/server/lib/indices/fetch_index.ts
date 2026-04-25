@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { fetchConnectorByIndexName, FetchIndexResult } from '@kbn/search-connectors';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { FetchIndexResult } from '@kbn/search-connectors';
+import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 export async function fetchIndex(
   client: ElasticsearchClient,

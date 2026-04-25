@@ -36,6 +36,8 @@ export const SECURITY_SERVERLESS_ROLE_NAMES = Object.freeze({
   endpoint_policy_manager: 'endpoint_policy_manager',
 });
 
+// TODO: Add support for serverless projects with different tiers
+// ref https://github.com/elastic/kibana/pull/229919
 export const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
   // --------------------------------------
   // Set of roles used in serverless

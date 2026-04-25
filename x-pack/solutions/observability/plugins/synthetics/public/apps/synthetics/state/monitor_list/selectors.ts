@@ -7,9 +7,9 @@
 
 import { createSelector } from 'reselect';
 
-import { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
-import { SyntheticsAppState } from '../root_reducer';
-import { MonitorFilterState } from './models';
+import type { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
+import type { SyntheticsAppState } from '../root_reducer';
+import type { MonitorFilterState } from './models';
 
 export const selectMonitorListState = (state: SyntheticsAppState) => state.monitorList;
 export const selectEncryptedSyntheticsSavedMonitors = createSelector(

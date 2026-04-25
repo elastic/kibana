@@ -7,21 +7,30 @@
 
 import {
   ENTITY_LATEST,
+  ENTITY_HISTORY,
+  ENTITY_RESET,
   ENTITY_SCHEMA_VERSION_V1,
+  ENTITY_UPDATES,
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
+
+/** Schema version for Entity Store v2 indices (matches entity_store plugin). */
+const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
 import { uniq } from 'lodash/fp';
 import type { AppClient } from '../../../../types';
 import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
-import { type EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+import { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from '../saved_object';
+import { getEntityUpdatesDataStreamName } from '../elasticsearch_assets/updates_entity_data_stream';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 
 export const buildIndexPatterns = async (
   space: string,
   appClient: AppClient,
-  dataViewsService: DataViewsService
+  dataViewsService: DataViewsService,
+  onlyForType?: EntityTypeOpenAPI
 ) => {
   const { alertsIndex, securitySolutionDataViewIndices } = await getSecuritySolutionIndices(
     appClient,
@@ -29,9 +38,22 @@ export const buildIndexPatterns = async (
   );
   return [
     ...securitySolutionDataViewIndices.filter((item) => item !== alertsIndex),
+    ...(onlyForType === 'user' ? [getPrivilegedMonitorUsersIndex(space)] : []),
     getAssetCriticalityIndex(space),
     getRiskScoreLatestIndex(space),
   ];
+};
+
+export const buildIndexPatternsByEngine = async (
+  space: string,
+  entityType: EntityTypeOpenAPI,
+  appClient: AppClient,
+  dataViewsService: DataViewsService
+) => {
+  const patterns = await buildIndexPatterns(space, appClient, dataViewsService, entityType);
+  patterns.push(getEntitiesResetIndexName(entityType, space).concat('*'));
+  patterns.push(...getEntityUpdatesIndexPatterns(space, entityType));
+  return patterns;
 };
 
 const getSecuritySolutionIndices = async (
@@ -66,6 +88,68 @@ export const getEntitiesIndexName = (entityType: EntityTypeOpenAPI, namespace: s
     dataset: ENTITY_LATEST,
     definitionId: buildEntityDefinitionId(entityType, namespace),
   });
+
+/** Returns the Entity Store v2 latest index name. Uses unified index (security_${namespace}) for v2. */
+export const getEntitiesIndexNameV2 = (_entityType: EntityTypeOpenAPI, namespace: string) =>
+  entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_LATEST,
+    definitionId: `security_${namespace}`,
+  });
+
+/** Returns the Entity Store v2 updates data stream name. Single unified stream per namespace. */
+export const getEntityUpdatesDataStreamNameV2 = (namespace: string) =>
+  entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_UPDATES,
+    definitionId: `security_${namespace}`,
+  });
+
+export function getEntitiesSnapshotIndexName(
+  entityType: EntityTypeOpenAPI,
+  snapshotDate: Date,
+  namespace: string
+) {
+  const snapshotId = `${snapshotDate.toISOString().split('T')[0]}.${buildEntityDefinitionId(
+    entityType,
+    namespace
+  )}`;
+  return entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: ENTITY_HISTORY,
+    definitionId: snapshotId,
+  });
+}
+
+export function getEntitiesSnapshotIndexPattern(entityType: EntityTypeOpenAPI, namespace: string) {
+  const snapshotId = `*.${buildEntityDefinitionId(entityType, namespace)}`;
+  return entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: ENTITY_HISTORY,
+    definitionId: snapshotId,
+  });
+}
+
+export function getEntitiesResetIndexName(entityType: EntityTypeOpenAPI, namespace: string) {
+  return entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: ENTITY_RESET,
+    definitionId: buildEntityDefinitionId(entityType, namespace),
+  });
+}
+
+export const getEntityUpdatesIndexPatterns = (
+  space: string,
+  onlyForType?: EntityTypeOpenAPI
+): string[] => {
+  const types = onlyForType ? [onlyForType] : Object.values(EntityTypeOpenAPI.enum);
+  const patterns = [];
+  for (let i = 0; i < types.length; i++) {
+    const index = getEntityUpdatesDataStreamName(types[i], space);
+    patterns.push(`${index}*`);
+  }
+  return patterns;
+};
 
 export const buildEntityDefinitionId = (entityType: EntityTypeOpenAPI, space: string) => {
   return `security_${entityType}_${space}`;

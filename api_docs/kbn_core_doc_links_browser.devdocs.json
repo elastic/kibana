@@ -12,6 +12,8 @@
         "label": "DocLinksStart",
         "description": [],
         "path": "src/core/packages/doc-links/browser/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "DOC_LINK_VERSION",
             "description": [],
             "path": "src/core/packages/doc-links/browser/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -34,6 +38,8 @@
             "label": "ELASTIC_WEBSITE_URL",
             "description": [],
             "path": "src/core/packages/doc-links/browser/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -54,6 +60,8 @@
               }
             ],
             "path": "src/core/packages/doc-links/browser/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

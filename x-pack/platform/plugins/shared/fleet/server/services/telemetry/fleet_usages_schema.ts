@@ -138,6 +138,7 @@ export const fleetAgentsSchema: RootSchema<any> = {
         _meta: {
           description:
             'Boolean field, indicates if remote sync integrations feature is enabled on the remote elasticsearch output',
+          optional: true,
         },
       },
     },
@@ -190,6 +191,26 @@ export const fleetAgentsSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'How many agents have this upgrade details',
+        },
+      },
+    },
+  },
+  agents_on_version_specific_policies_per_version: {
+    _meta: {
+      description: 'Agents enrolled in version-specific policies, grouped by agent version',
+      optional: true,
+    },
+    properties: {
+      agent_version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Agent version',
+        },
+      },
+      count: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents on version-specific policies running this version',
         },
       },
     },
@@ -382,6 +403,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
       _meta: { description: 'Agent counts enrolled per agent policy.' },
     },
   },
+  packages_with_agent_version_conditions: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Packages with agent version conditions' },
+    },
+  },
   fleet_server_config: {
     properties: {
       policies: {
@@ -419,6 +447,12 @@ export const fleetUsagesSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'Number of agent policies using another space than the default one',
+        },
+      },
+      count_with_agent_version_conditions: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agent policies using packages with agent version conditions',
         },
       },
       avg_number_global_data_tags_per_policy: {
@@ -515,6 +549,20 @@ export const fleetUsagesSchema: RootSchema<any> = {
   deployment_id: {
     type: 'keyword',
     _meta: { description: 'id of the deployment', optional: true },
+  },
+  modified_ilms: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'list of managed ILMs modified by users' },
+    },
+  },
+  agent_upgrade_rollbacks: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of agent upgrade rollback actions (type:UPGRADE, data.rollback:true) in the last 1 hour',
+    },
   },
 };
 

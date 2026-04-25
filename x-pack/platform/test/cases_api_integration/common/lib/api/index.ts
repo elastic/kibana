@@ -6,58 +6,60 @@
  */
 
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/elasticsearch';
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, estypes, TransportResult } from '@elastic/elasticsearch';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 
 import type SuperTest from 'supertest';
 import {
-  CASES_INTERNAL_URL,
-  CASES_URL,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_REPORTERS_URL,
   CASE_SAVED_OBJECT,
   CASE_TAGS_URL,
   CASE_USER_ACTION_SAVED_OBJECT,
+  CASES_INTERNAL_URL,
+  CASES_URL,
   INTERNAL_CASE_METRICS_URL,
-  INTERNAL_GET_CASE_CATEGORIES_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
-import type { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
+import type {
+  CaseMetricsFeature,
+  CasesMetricsResponse,
+  SingleCaseMetricsResponse,
+} from '@kbn/cases-plugin/common';
 import type { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
 import type {
-  ConnectorMappingsAttributes,
   Case,
+  CaseCustomField,
   Cases,
   CaseStatuses,
-  CaseCustomField,
+  ConnectorMappingsAttributes,
 } from '@kbn/cases-plugin/common/types/domain';
 import type {
   AddObservableRequest,
-  UpdateObservableRequest,
-  AlertResponse,
   CaseResolveResponse,
   CasesBulkGetResponse,
   CasesFindResponse,
   CasesPatchRequest,
+  CasesSimilarResponse,
+  CaseWithUpdateSummary,
   CustomFieldPutRequest,
+  DocumentResponse,
   GetRelatedCasesByAlertResponse,
   SimilarCasesSearchRequest,
-  CasesSimilarResponse,
+  UpdateObservableRequest,
   UserActionFindRequest,
   UserActionInternalFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
   getCaseCreateObservableUrl,
-  getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseFindUserActionsUrl,
+  getCaseUpdateObservableUrl,
 } from '@kbn/cases-plugin/common/api';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
@@ -72,6 +74,7 @@ export * from './omit';
 export * from './configuration';
 export * from './files';
 export * from './telemetry';
+export * from './observables';
 
 export { getSpaceUrlPrefix } from './helpers';
 
@@ -145,8 +148,10 @@ export const deleteAllCaseItems = async (es: Client) => {
     deleteCasesByESQuery(es),
     deleteCasesUserActions(es),
     deleteComments(es),
+    deleteUnifiedAttachments(es),
     deleteConfiguration(es),
     deleteMappings(es),
+    deleteTemplates(es),
   ]);
 };
 
@@ -183,6 +188,17 @@ export const deleteComments = async (es: Client): Promise<void> => {
   });
 };
 
+export const deleteUnifiedAttachments = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    q: 'type:cases-attachments',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
+};
+
 export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -198,6 +214,17 @@ export const deleteMappings = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-connector-mappings',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteTemplates = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    q: 'type:cases-templates',
     wait_for_completion: true,
     refresh: true,
     body: {},
@@ -381,7 +408,11 @@ export const updateCase = async ({
     .send(params)
     .expect(expectedHttpCode);
 
-  return cases;
+  if (expectedHttpCode !== 200) {
+    return cases;
+  }
+  // Remove stats from the patch case response
+  return cases.map(({ updateSummary, ...rest }: CaseWithUpdateSummary) => rest);
 };
 
 export const getCase = async ({
@@ -596,7 +627,7 @@ export const getAlertsAttachedToCase = async ({
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<AlertResponse> => {
+}): Promise<DocumentResponse> => {
   const { body: theCase } = await supertest
     .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/alerts`)
     .auth(auth.user.username, auth.user.password)
@@ -906,17 +937,21 @@ export const findInternalCaseUserActions = async ({
 };
 
 export const deleteAllCaseAnalyticsItems = async (es: Client) => {
-  await Promise.all([
-    deleteCasesAnalytics(es),
-    deleteAttachmentsAnalytics(es),
-    deleteCommentsAnalytics(es),
-    deleteActivityAnalytics(es),
-  ]);
+  try {
+    await Promise.all([
+      deleteCasesAnalytics(es),
+      deleteAttachmentsAnalytics(es),
+      deleteCommentsAnalytics(es),
+      deleteActivityAnalytics(es),
+    ]);
+  } catch (_) {
+    // ignore errors, indexes might not exist yet
+  }
 };
 
 export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.internal.cases',
+    index: ['.internal.cases.securitysolution-default', '.internal.cases.securitysolution-space1'],
     query: { match_all: {} },
     wait_for_completion: true,
     refresh: true,
@@ -926,7 +961,10 @@ export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
 
 export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.internal.cases-attachments',
+    index: [
+      '.internal.cases-attachments.securitysolution-default',
+      '.internal.cases-attachments.securitysolution-space1',
+    ],
     query: { match_all: {} },
     wait_for_completion: true,
     refresh: true,
@@ -936,7 +974,10 @@ export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
 
 export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.internal.cases-comments',
+    index: [
+      '.internal.cases-comments.securitysolution-default',
+      '.internal.cases-comments.securitysolution-space1',
+    ],
     query: { match_all: {} },
     wait_for_completion: true,
     refresh: true,
@@ -946,7 +987,10 @@ export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
 
 export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.internal.cases-activity',
+    index: [
+      '.internal.cases-activity.securitysolution-default',
+      '.internal.cases-activity.securitysolution-space1',
+    ],
     query: { match_all: {} },
     wait_for_completion: true,
     refresh: true,

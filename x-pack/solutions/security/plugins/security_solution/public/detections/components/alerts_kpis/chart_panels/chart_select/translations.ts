@@ -18,10 +18,6 @@ export const TREEMAP = i18n.translate(
   }
 );
 
-export const CHARTS = i18n.translate('xpack.securitySolution.components.chartSelect.chartsOption', {
-  defaultMessage: 'Charts',
-});
-
 export const COUNTS = i18n.translate(
   'xpack.securitySolution.components.chartSelect.tableOptionTitle',
   {

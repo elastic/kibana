@@ -7,16 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { apm } from '@elastic/apm-rum';
 
 import { getErrorBoundaryLabels } from '../../lib';
-import type { KibanaErrorBoundaryServices } from '../../types';
 import { useErrorBoundary } from '../services';
 import { SectionFatalPrompt, SectionRecoverablePrompt } from './message_components';
+import {
+  BaseErrorBoundary,
+  type BaseErrorBoundaryState,
+  type BaseErrorBoundaryProps,
+} from './base_error_boundary';
 
 interface SectionErrorBoundaryProps {
   sectionName: string;
+  /** How many times to retry remounting before showing error (default: 0, no retries) */
+  maxRetries?: number;
+}
+
+interface SectionErrorBoundaryState extends BaseErrorBoundaryState {
+  /** How many times we've retried */
+  retryCount?: number;
 }
 
 /**
@@ -30,6 +41,13 @@ interface SectionErrorBoundaryProps {
  * If it is acceptable to assume the risk of allowing users to interact with a UI that
  * has an error state, then using `KibanaSectionErrorBoundary` may be an acceptable alternative,
  * but this must be judged on a case-by-case basis.
+ *
+ * @example
+ * ```tsx
+ * <KibanaSectionErrorBoundary sectionName="Dashboard" maxRetries={3}>
+ *   <MySection />
+ * </KibanaSectionErrorBoundary>
+ * ```
  */
 export const KibanaSectionErrorBoundary = (
   props: React.PropsWithChildren<SectionErrorBoundaryProps>
@@ -38,22 +56,11 @@ export const KibanaSectionErrorBoundary = (
   return <SectionErrorBoundaryInternal {...props} services={services} />;
 };
 
-interface ErrorBoundaryState {
-  error: null | Error;
-  errorInfo: null | Partial<React.ErrorInfo>;
-  componentName: null | string;
-  isFatal: null | boolean;
-}
-
-interface ServiceContext {
-  services: KibanaErrorBoundaryServices;
-}
-
-class SectionErrorBoundaryInternal extends React.Component<
-  React.PropsWithChildren<SectionErrorBoundaryProps> & ServiceContext,
-  ErrorBoundaryState
+class SectionErrorBoundaryInternal extends BaseErrorBoundary<
+  React.PropsWithChildren<SectionErrorBoundaryProps> & BaseErrorBoundaryProps,
+  SectionErrorBoundaryState
 > {
-  constructor(props: SectionErrorBoundaryProps & ServiceContext) {
+  constructor(props: SectionErrorBoundaryProps & BaseErrorBoundaryProps) {
     super(props);
 
     this.state = {
@@ -61,26 +68,51 @@ class SectionErrorBoundaryInternal extends React.Component<
       errorInfo: null,
       componentName: null,
       isFatal: null,
+      retryCount: 0,
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     apm.captureError(error, {
       labels: getErrorBoundaryLabels('SectionFatalReactError'),
     });
     console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
     console.error(error); // eslint-disable-line no-console
 
-    const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
-    this.setState({ error, errorInfo, componentName: name, isFatal });
+    // Enqueue the error instead of registering it immediately
+    const enqueuedError = this.props.services.errorService.enqueueError(error, errorInfo);
+    const { id: errorId, isFatal, name } = enqueuedError;
+
+    this.setState((prevState) => {
+      const nextRetryCount = (prevState.retryCount ?? 0) + 1;
+
+      return {
+        error,
+        errorInfo,
+        componentName: name,
+        isFatal,
+        errorId,
+        retryCount: nextRetryCount,
+      };
+    });
   }
 
   render() {
-    if (!this.state.error) {
+    const { error, retryCount = 0 } = this.state;
+    const { maxRetries = 0 } = this.props;
+    const hasRetriesRemaining = retryCount <= maxRetries && error !== null;
+
+    // If there are retries remaining, remount children with fresh state
+    if (hasRetriesRemaining) {
+      return <Fragment key={retryCount}>{this.props.children}</Fragment>;
+    }
+
+    // Once retries are exhausted or no error, show normal children or error prompt
+    if (!error) {
       return this.props.children;
     }
 
-    const { error, errorInfo, componentName, isFatal } = this.state;
+    const { errorInfo, componentName, isFatal } = this.state;
 
     if (isFatal) {
       return (

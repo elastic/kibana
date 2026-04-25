@@ -15,13 +15,6 @@ export const ADD_TO_LISTS_DESCRIPTION = i18n.translate(
   }
 );
 
-export const VIEW_LIST_DETAIL_ACTION = i18n.translate(
-  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsTableSelection.viewListDetailActionLabel',
-  {
-    defaultMessage: 'View list detail',
-  }
-);
-
 export const REFERENCES_FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsTableSelection.referencesFetchError',
   {

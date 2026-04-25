@@ -18,7 +18,6 @@ import {
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { infraSourceConfigurationSavedObjectName } from '../saved_objects/infra_saved_objects';
 
 const logsRuleTypes = [
@@ -44,7 +43,6 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
     }),
     order: 700,
     category: DEFAULT_APP_CATEGORIES.observability,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
     catalogue: ['infralogging', 'logs'],
     management: {
@@ -63,6 +61,9 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
         alerting: {
           rule: {
             all: logsAlertingFeatures,
+            enable: logsAlertingFeatures,
+            manual_run: logsAlertingFeatures,
+            manage_rule_settings: logsAlertingFeatures,
           },
           alert: {
             all: logsAlertingFeatures,

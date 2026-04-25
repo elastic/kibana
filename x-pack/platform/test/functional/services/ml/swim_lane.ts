@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
-import { DebugState } from '@elastic/charts';
-import { DebugStateAxis } from '@elastic/charts/dist/state/types';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ProvidedType } from '@kbn/test';
+import type { DebugState } from '@elastic/charts';
+import type { DebugStateAxis } from '@elastic/charts/dist/state/types';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 type HeatmapDebugState = Required<Pick<DebugState, 'heatmap' | 'axes' | 'legend'>>;
 

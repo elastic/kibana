@@ -33,7 +33,13 @@ export interface AlertsGroupingAggregation {
     sum_other_doc_count?: number;
     buckets?: GenericBuckets[];
   };
-  signalRuleIdSubAggregation?: {
+  relatedIntegrationSubAggregation?: {
     buckets?: GenericBuckets[];
+  };
+  attacks?: {
+    doc_count?: number;
+  };
+  attackRelatedAlerts?: {
+    doc_count?: number;
   };
 }

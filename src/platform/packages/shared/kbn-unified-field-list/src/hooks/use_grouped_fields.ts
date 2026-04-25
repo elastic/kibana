@@ -14,12 +14,12 @@ import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { type UseNewFieldsParams, useNewFields } from './use_new_fields';
+import type { FieldsGroupNames, AdditionalFieldGroups } from '../types';
 import {
   type FieldListGroups,
   type FieldsGroup,
   type FieldListItem,
   type OverrideFieldGroupDetails,
-  FieldsGroupNames,
   ExistenceFetchStatus,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
@@ -44,6 +44,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
+  additionalFieldGroups?: AdditionalFieldGroups;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -71,6 +72,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   onSelectedFieldFilter,
   getNewFieldsBySpec,
+  additionalFieldGroups,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -138,7 +140,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     const sortedFields = [...(allFieldsModified || [])].sort(sortFields);
 
     const groupedFields = {
-      ...getDefaultFieldGroups(),
+      ...getDefaultFieldGroups<T>(),
       ...groupBy(sortedFields, (field) => {
         if (!sortedSelectedFields && onSelectedFieldFilter && onSelectedFieldFilter(field)) {
           selectedFields.push(field);
@@ -183,7 +185,33 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           .slice(0, popularFieldsLimit)
       : [];
 
+    let recommendedFields: T[] = [];
+
+    if (additionalFieldGroups?.recommendedFields?.length) {
+      const recommendedFieldNamesSet = new Set(additionalFieldGroups.recommendedFields);
+      recommendedFields = groupedFields.availableFields.filter((field) =>
+        recommendedFieldNamesSet.has(field.name)
+      );
+    }
+
     let fieldGroupDefinitions: FieldListGroups<T> = {
+      ...(recommendedFields.length > 0
+        ? {
+            RecommendedFields: {
+              fields: recommendedFields,
+              fieldCount: recommendedFields.length,
+              isAffectedByGlobalFilter: true,
+              isAffectedByTimeFilter: true,
+              isInitiallyOpen: true,
+              showInAccordion: true,
+              hideDetails: false,
+              hideIfEmpty: true,
+              title: i18n.translate('unifiedFieldList.useGroupedFields.recommendedFieldsLabel', {
+                defaultMessage: 'Recommended fields',
+              }),
+            },
+          }
+        : {}),
       SpecialFields: {
         fields: groupedFields.specialFields,
         fieldCount: groupedFields.specialFields.length,
@@ -348,6 +376,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     isAffectedByTimeFilter,
     popularFieldsLimit,
     sortedSelectedFields,
+    additionalFieldGroups,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
@@ -423,13 +452,13 @@ function hasFieldDataByDefault(): boolean {
   return true;
 }
 
-function getDefaultFieldGroups() {
+function getDefaultFieldGroups<T extends FieldListItem>() {
   return {
-    specialFields: [],
-    availableFields: [],
-    emptyFields: [],
-    metaFields: [],
-    unmappedFields: [],
-    skippedFields: [],
+    specialFields: [] as T[],
+    availableFields: [] as T[],
+    emptyFields: [] as T[],
+    metaFields: [] as T[],
+    unmappedFields: [] as T[],
+    skippedFields: [] as T[],
   };
 }

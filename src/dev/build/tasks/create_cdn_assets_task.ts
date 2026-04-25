@@ -19,7 +19,8 @@ import { i18n, i18nLoader } from '@kbn/i18n';
 import del from 'del';
 import globby from 'globby';
 
-import { mkdirp, compressTar, Task, copyAll, write } from '../lib';
+import type { Task } from '../lib';
+import { mkdirp, compressTar, copyAll, write } from '../lib';
 
 export const CreateCdnAssets: Task = {
   description: 'Creating CDN assets',
@@ -99,16 +100,15 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/core-apps-server-internal/assets'),
       resolve(assets, buildSha, 'ui')
     );
+    await copyAll(
+      resolve(buildSource, 'node_modules/@elastic/charts/dist'),
+      resolve(assets, buildSha, 'ui', 'charts')
+    );
 
     await compressTar({
       source: assets,
       destination: config.resolveFromTarget(`kibana-${buildVersion}-cdn-assets.tar.gz`),
-      archiverOptions: {
-        gzip: true,
-        gzipOptions: {
-          level: 9,
-        },
-      },
+      gzipLevel: 6,
       createRootDirectory: true,
       rootDirectoryName: `kibana-${buildVersion}-cdn-assets`,
     });

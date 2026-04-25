@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { ReactElement, ReactNode } from 'react';
+import type { IconType, EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
 
 /** @public */
 export interface ChromeBadge {
@@ -18,8 +18,22 @@ export interface ChromeBadge {
 }
 
 /** @public */
+export type ChromeBreadcrumbsBadge = EuiBadgeProps & {
+  badgeText: string;
+  toolTipProps?: Partial<EuiToolTipProps>;
+  renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
+};
+
+/**
+ * @example
+ * ```tsx
+ * chrome.setHeaderBanner({ content: <MyBanner /> });
+ * ```
+ *
+ * @public
+ */
 export interface ChromeUserBanner {
-  content: MountPoint<HTMLDivElement>;
+  content: ReactNode;
 }
 
 /** @public */

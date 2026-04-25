@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FINAL_SUMMARY_KQL } from './single_metric_config';
-import { ColumnFilter, ConfigProps, SeriesConfig } from '../../types';
+import type { ColumnFilter, ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
   OPERATION_COLUMN,

@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { loadAiConnectors } from '../../../../../../common/utils/connectors/ai_connectors';
+import { loadConnectors } from '@kbn/inference-connectors';
+import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../../../../../../../common/siem_migrations/constants';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { getConnectorsAuthz } from '../../common/connectors/authz';
 import type { AIConnectorCardMetadata } from './types';
 
 export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
   AIConnectorCardMetadata
-> = async ({ http, application, siemMigrations }) => {
+> = async ({ http, application, siemMigrations, settings }) => {
   let isComplete = false;
   const authz = getConnectorsAuthz(application.capabilities);
 
@@ -20,7 +20,11 @@ export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
     return { isComplete, metadata: { connectors: [], ...authz } };
   }
 
-  const aiConnectors = await loadAiConnectors(http);
+  const aiConnectors = await loadConnectors({
+    http,
+    featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
+    settings,
+  });
 
   const storedConnectorId = siemMigrations.rules.connectorIdStorage.get();
   if (storedConnectorId) {

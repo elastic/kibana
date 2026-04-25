@@ -14,3 +14,10 @@ export {
   type AvailableConnector,
   type AvailableConnectorWithId,
 } from './src/connectors';
+export {
+  DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE,
+  FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV,
+  parseFtrGenAiLlmSampleSize,
+  takeRandomLlmSample,
+  type FtrGenAiLlmSampleSize,
+} from './src/random_llm_sample';

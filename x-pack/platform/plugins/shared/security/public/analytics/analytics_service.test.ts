@@ -166,6 +166,30 @@ describe('AnalyticsService', () => {
     expect(localStorage.getItem(AnalyticsService.AuthTypeInfoStorageKey)).toBeNull();
   });
 
+  it('does not report authentication type if the page is anonymous', async () => {
+    const mockCore = coreMock.createStart();
+    mockCore.http.post.mockResolvedValue({ signature: 'some-signature', timestamp: 1234 });
+    mockCore.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+    const authc = authenticationMock.createSetup();
+    authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
+
+    const { analytics, http } = coreMock.createSetup();
+
+    analyticsService.setup({
+      authc,
+      analytics,
+      http,
+      securityLicense: licenseMock.create({ allowLogin: true }),
+    });
+    analyticsService.start({ http: mockCore.http });
+
+    await nextTick();
+
+    expect(mockCore.http.post).not.toHaveBeenCalled();
+    expect(localStorage.getItem(AnalyticsService.AuthTypeInfoStorageKey)).toBeNull();
+  });
+
   it('does not alter stored authentication type if reporting attempt fails', async () => {
     const mockCore = coreMock.createStart();
     mockCore.http.post.mockRejectedValue(new Error('Oh no!'));

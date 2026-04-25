@@ -35,7 +35,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
 }
 
 .c2 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -79,7 +79,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
 
   .c5 .euiPagination::before {
     bottom: 0;
-    color: #515761;
+    color: #1D2A3E;
     content: '\\2026';
     font-size: 14px;
     padding: 5px 8px;
@@ -137,7 +137,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -201,287 +201,295 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
       class="euiBasicTable c3"
       data-test-subj="paginated-basic-table"
     >
-      <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
-        id="__table_generated-id"
-        tabindex="-1"
+      <div
+        class="emotion-euiContainerCSS"
       >
-        <caption
-          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Country_0"
-              role="columnheader"
-              scope="col"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-              >
-                <span
-                  class="eui-textTruncate"
-                  title="Country"
-                >
-                  Country
-                </span>
-              </div>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.network.bytes_in_1"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Bytes in"
-                    >
-                      Bytes in
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="descending"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.network.bytes_out_2"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              >
-                <button
-                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Bytes out"
-                    >
-                      Bytes out
-                    </span>
-                    <span
-                      class="euiTableSortIcon"
-                      data-euiicon-type="sortDown"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.source.flows_3"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Flows"
-                    >
-                      Flows
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.source.source_ips_4"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Source IPs"
-                    >
-                      Source IPs
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
         >
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-          >
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Country_0"
+                role="columnheader"
+                scope="col"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Country"
+                  >
+                    Country
+                  </span>
+                </div>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.network.bytes_in_1"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
-                  data-test-subj="country-flag"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  🇩🇪
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Bytes in"
+                      >
+                        Bytes in
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
                 </span>
-                 Germany
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                3.6GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                1GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                12,345
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                55
-              </div>
-            </td>
-          </tr>
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-          >
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="descending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.network.bytes_out_2"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
-                  data-test-subj="country-flag"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  🇺🇸
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Bytes out"
+                      >
+                        Bytes out
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortDown"
+                      />
+                    </div>
+                  </button>
                 </span>
-                 United States of America
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.source.flows_3"
+                role="columnheader"
+                scope="col"
               >
-                3.6GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Flows"
+                      >
+                        Flows
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.source.source_ips_4"
+                role="columnheader"
+                scope="col"
               >
-                1GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Source IPs"
+                      >
+                        Source IPs
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
+          >
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
               >
-                12,345
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    data-test-subj="country-flag"
+                  >
+                    🇩🇪
+                  </span>
+                   Germany
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  3.6GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  1GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12,345
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  55
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
               >
-                55
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    data-test-subj="country-flag"
+                  >
+                    🇺🇸
+                  </span>
+                   United States of America
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  3.6GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  1GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12,345
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  55
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div
-      class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -499,13 +507,13 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
               >
                 Rows per page: 10
               </span>
               <span
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </button>
@@ -515,6 +523,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
         class="euiFlexItem c5 emotion-euiFlexItem-growZero"
       >
         <nav
+          aria-label="Table pagination"
           class="euiPagination emotion-euiPagination"
           data-test-subj="numberedPagination"
         >
@@ -537,7 +546,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowLeft"
+              data-euiicon-type="chevronSingleLeft"
             />
           </button>
           <ul
@@ -558,7 +567,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     1
                   </span>
@@ -578,7 +587,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     2
                   </span>
@@ -598,7 +607,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     3
                   </span>
@@ -618,7 +627,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     4
                   </span>
@@ -638,7 +647,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     5
                   </span>
@@ -657,7 +666,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </nav>
@@ -702,7 +711,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
 }
 
 .c2 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -746,7 +755,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
 
   .c5 .euiPagination::before {
     bottom: 0;
-    color: #515761;
+    color: #1D2A3E;
     content: '\\2026';
     font-size: 14px;
     padding: 5px 8px;
@@ -804,7 +813,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -868,338 +877,347 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
       class="euiBasicTable c3"
       data-test-subj="paginated-basic-table"
     >
-      <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
-        id="__table_generated-id"
-        tabindex="-1"
+      <div
+        class="emotion-euiContainerCSS"
       >
-        <caption
-          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Country_0"
-              role="columnheader"
-              scope="col"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-              >
-                <span
-                  class="eui-textTruncate"
-                  title="Country"
-                >
-                  Country
-                </span>
-              </div>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.network.bytes_in_1"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Bytes in"
-                    >
-                      Bytes in
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="descending"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.network.bytes_out_2"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              >
-                <button
-                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Bytes out"
-                    >
-                      Bytes out
-                    </span>
-                    <span
-                      class="euiTableSortIcon"
-                      data-euiicon-type="sortDown"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.source.flows_3"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Flows"
-                    >
-                      Flows
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.source.source_ips_4"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Source IPs"
-                    >
-                      Source IPs
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.source.destination_ips_5"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Destination IPs"
-                    >
-                      Destination IPs
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
         >
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-          >
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Country_0"
+                role="columnheader"
+                scope="col"
+                style="width: 20%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Country"
+                  >
+                    Country
+                  </span>
+                </div>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.network.bytes_in_1"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
-                  data-test-subj="country-flag"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  🇩🇪
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Bytes in"
+                      >
+                        Bytes in
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
                 </span>
-                 Germany
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                3.6GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                1GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                12,345
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                55
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-              >
-                12
-              </div>
-            </td>
-          </tr>
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-          >
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              style="width: 20%;"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="descending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.network.bytes_out_2"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
-                  data-test-subj="country-flag"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  🇺🇸
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Bytes out"
+                      >
+                        Bytes out
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortDown"
+                      />
+                    </div>
+                  </button>
                 </span>
-                 United States of America
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.source.flows_3"
+                role="columnheader"
+                scope="col"
               >
-                3.6GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Flows"
+                      >
+                        Flows
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.source.source_ips_4"
+                role="columnheader"
+                scope="col"
               >
-                1GB
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Source IPs"
+                      >
+                        Source IPs
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_node.source.destination_ips_5"
+                role="columnheader"
+                scope="col"
               >
-                12,345
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Destination IPs"
+                      >
+                        Destination IPs
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
+          >
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
               >
-                55
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    data-test-subj="country-flag"
+                  >
+                    🇩🇪
+                  </span>
+                   Germany
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  3.6GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  1GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12,345
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  55
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                style="width: 20%;"
               >
-                12
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="css-purdnl-FlagWrapper e1v8vkkw0"
+                    data-test-subj="country-flag"
+                  >
+                    🇺🇸
+                  </span>
+                   United States of America
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  3.6GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  1GB
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12,345
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  55
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  12
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div
-      class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1217,13 +1235,13 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
               >
                 Rows per page: 10
               </span>
               <span
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </button>
@@ -1233,6 +1251,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
         class="euiFlexItem c5 emotion-euiFlexItem-growZero"
       >
         <nav
+          aria-label="Table pagination"
           class="euiPagination emotion-euiPagination"
           data-test-subj="numberedPagination"
         >
@@ -1255,7 +1274,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowLeft"
+              data-euiicon-type="chevronSingleLeft"
             />
           </button>
           <ul
@@ -1276,7 +1295,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     1
                   </span>
@@ -1296,7 +1315,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     2
                   </span>
@@ -1316,7 +1335,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     3
                   </span>
@@ -1336,7 +1355,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     4
                   </span>
@@ -1356,7 +1375,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     5
                   </span>
@@ -1375,7 +1394,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </nav>

@@ -16,7 +16,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'cleanup.log');
 const asyncUnlink = Util.promisify(Fs.unlink);
@@ -66,12 +66,8 @@ describe('starting with `migration.skip: true` when indices are up to date', () 
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('starts and display the correct service status', async () => {

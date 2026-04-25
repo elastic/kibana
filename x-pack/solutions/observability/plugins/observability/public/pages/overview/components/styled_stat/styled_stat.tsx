@@ -8,7 +8,7 @@
 import styled from 'styled-components';
 import { EuiStat } from '@elastic/eui';
 import React from 'react';
-import { EuiStatProps } from '@elastic/eui/src/components/stat/stat';
+import type { EuiStatProps } from '@elastic/eui/src/components/stat/stat';
 
 const Stat = styled(EuiStat)`
   .euiStat__title {

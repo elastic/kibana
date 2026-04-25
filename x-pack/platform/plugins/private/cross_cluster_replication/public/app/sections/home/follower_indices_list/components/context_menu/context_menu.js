@@ -30,6 +30,7 @@ export class ContextMenu extends PureComponent {
     anchorPosition: PropTypes.string,
     label: PropTypes.node,
     followerIndices: PropTypes.array.isRequired,
+    isPollingStatus: PropTypes.bool,
   };
 
   state = {
@@ -54,12 +55,12 @@ export class ContextMenu extends PureComponent {
   };
 
   render() {
-    const { followerIndices } = this.props;
+    const { followerIndices, isPollingStatus = false } = this.props;
     const followerIndicesLength = followerIndices.length;
     const followerIndexNames = followerIndices.map((index) => index.name);
     const {
       iconSide = 'right',
-      iconType = 'arrowDown',
+      iconType = 'chevronSingleDown',
       anchorPosition = 'rightUp',
       label = (
         <FormattedMessage
@@ -122,7 +123,7 @@ export class ContextMenu extends PureComponent {
             </FollowerIndexPauseProvider>
           ) : null}
 
-          {pausedFollowerIndexNames.length ? (
+          {pausedFollowerIndexNames.length && !isPollingStatus ? (
             <FollowerIndexResumeProvider onConfirm={this.closePopover}>
               {(resumeFollowerIndex) => (
                 <EuiContextMenuItem
@@ -158,7 +159,7 @@ export class ContextMenu extends PureComponent {
           <FollowerIndexUnfollowProvider onConfirm={this.closePopover}>
             {(unfollowLeaderIndex) => (
               <EuiContextMenuItem
-                icon="indexFlush"
+                icon="chartThreshold"
                 onClick={() => unfollowLeaderIndex(followerIndexNames)}
                 data-test-subj="unfollowButton"
               >

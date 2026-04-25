@@ -13,19 +13,18 @@ import {
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
+import type { InputFormat, OutputFormat } from '../../../application/components/lib/durations';
 import {
   durationInputOptions,
   durationOutputOptions,
-  InputFormat,
   inputFormats,
-  OutputFormat,
   outputFormats,
 } from '../../../application/components/lib/durations';
-import { MaxColumn as BaseMaxColumn } from '@kbn/visualizations-plugin/common';
-import { Metric } from '../../../../common/types';
+import type { MaxColumn as BaseMaxColumn } from '@kbn/visualizations-plugin/common';
+import type { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
 import { createColumn, excludeMetaFromColumn, getFormat, isColumnWithMeta } from './column';
-import { MaxColumn } from './types';
+import type { MaxColumn } from './types';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 
 describe('getFormat', () => {

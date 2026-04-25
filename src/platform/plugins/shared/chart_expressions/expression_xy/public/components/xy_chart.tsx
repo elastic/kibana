@@ -9,6 +9,18 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
+import type {
+  ElementClickListener,
+  BrushEndListener,
+  XYBrushEvent,
+  LegendPositionConfig,
+  DisplayValueStyle,
+  RecursivePartial,
+  AxisStyle,
+  XYChartElementEvent,
+  XYChartSeriesIdentifier,
+  SettingsProps,
+} from '@elastic/charts';
 import {
   Chart,
   Settings,
@@ -17,48 +29,39 @@ import {
   VerticalAlignment,
   HorizontalAlignment,
   LayoutDirection,
-  ElementClickListener,
-  BrushEndListener,
-  XYBrushEvent,
-  LegendPositionConfig,
-  DisplayValueStyle,
-  RecursivePartial,
-  AxisStyle,
   TooltipType,
   Placement,
   Direction,
-  XYChartElementEvent,
   Tooltip,
-  XYChartSeriesIdentifier,
-  SettingsProps,
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { PaletteRegistry } from '@kbn/coloring';
-import { RenderMode } from '@kbn/expressions-plugin/common';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { useKbnPalettes } from '@kbn/palettes';
-import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { ESQL_TABLE_TYPE, MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
-import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
-import {
-  getAccessorByDimension,
-  getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
+import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import type { PersistedState } from '@kbn/visualizations-common';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
-} from '@kbn/visualizations-plugin/common/constants';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
+  getLegendLayout,
+  getAccessorByDimension,
+  getColumnByAccessor,
+  getOverridesFor,
+} from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
+import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type {
   FilterEvent,
   BrushEvent,
@@ -74,10 +77,10 @@ import type {
   XYChartProps,
   AxisExtentConfigResult,
 } from '../../common/types';
+import type { AxisConfiguration, GroupsConfiguration, Series } from '../helpers';
 import {
   isHorizontalChart,
   getDataLayers,
-  AxisConfiguration,
   getAxisPosition,
   getFormattedTablesByLayers,
   getLayersFormats,
@@ -87,10 +90,8 @@ import {
   getReferenceLayers,
   isDataLayer,
   getAxesConfiguration,
-  GroupsConfiguration,
   getLinesCausedPaddings,
   validateExtent,
-  Series,
   getOriginalAxisPosition,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
@@ -102,7 +103,7 @@ import {
   getReferenceLinesFormattersMap,
 } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
-import { CommonXYLayerConfig } from '../../common/types';
+import type { CommonXYLayerConfig } from '../../common/types';
 import { SplitChart } from './split_chart';
 import {
   Annotations,
@@ -130,6 +131,7 @@ declare global {
 }
 
 const MULTILAYER_TIME_AXIS_TICKLINE_PADDING = 4;
+const DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT = 1000;
 
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -452,7 +454,8 @@ export function XYChart({
     annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
     formatFactory,
-    timeFormat
+    timeFormat,
+    darkMode
   );
 
   const visualConfigs = [
@@ -753,11 +756,8 @@ export function XYChart({
     formatFactory
   );
 
-  // ES|QL charts are allowed to create filters only when the unified search bar query is ES|QL (e.g. in Discover)
-  const applicationQuery = data.query.queryString.getQuery();
-  const canCreateFilters =
-    !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
   // ES|QL charts are allowed to create alert rules only in dashboards
+  const applicationQuery = data.query.queryString.getQuery();
   const canCreateAlerts =
     isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
 
@@ -850,9 +850,15 @@ export function XYChart({
               debugState={window._echDebugStateFlag ?? false}
               showLegend={showLegend}
               legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+              legendLayout={getLegendLayout({
+                isInside: legend.isInside,
+                position: legend.position,
+                layout: legend.layout,
+              })}
               legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendValues={isHistogramViz ? legend.legendStats : []}
               legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
+              legendActionOnHover={interactive}
               theme={[
                 {
                   barSeriesStyle: {
@@ -862,7 +868,15 @@ export function XYChart({
                     color: undefined, // removes background for embeddables
                   },
                   legend: {
-                    labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+                    labelOptions: legend.shouldTruncate
+                      ? {
+                          maxLines: legend?.maxLines ?? 1,
+                          widthLimit: DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT,
+                        }
+                      : {
+                          maxLines: 0,
+                          widthLimit: 0,
+                        },
                   },
                   // if not title or labels are shown for axes, add some padding if required by reference line markers
                   chartMargins: {
@@ -890,7 +904,7 @@ export function XYChart({
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
               onElementClick={interactive ? clickHandler : undefined}
               legendAction={
-                interactive && canCreateFilters
+                interactive
                   ? getLegendAction(
                       dataLayers,
                       onClickValue,
@@ -1079,8 +1093,18 @@ function getLegendTitle(
   if (typeof title === 'string' && title.length > 0) {
     return title;
   }
-  return layer?.splitAccessors?.[0]
-    ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
+
+  const splitAccessorNames =
+    layer?.splitAccessors?.reduce<string[]>((acc, accessor) => {
+      const column = layer?.table.columns.find((c) => c.id === accessor);
+      if (column?.name) {
+        acc.push(column.name);
+      }
+      return acc;
+    }, []) ?? [];
+
+  return splitAccessorNames.length > 0
+    ? splitAccessorNames.join(MULTI_FIELD_KEY_SEPARATOR)
     : defaultLegendTitle;
 }
 

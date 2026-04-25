@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButtonGroup, IconType } from '@elastic/eui';
-import { OverviewView } from '../../../../../state';
+import type { IconType } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
+import type { OverviewView } from '../../../../../state';
 import { useViewButtons } from './hooks/use_view_buttons';
 import { CARD_VIEW_LABEL, COMPACT_VIEW_LABEL, VIEW_LEGEND } from './labels';
 import { useOverviewStatus } from '../../../hooks/use_overview_status';
@@ -19,7 +20,7 @@ const toggleButtonsIcons: Array<{ id: OverviewView; iconType: IconType; label: s
   },
   {
     id: 'compactView',
-    iconType: 'tableDensityCompact',
+    iconType: 'tableDensityHigh',
     label: COMPACT_VIEW_LABEL,
   },
 ];

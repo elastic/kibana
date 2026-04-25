@@ -8,8 +8,8 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { TimeRange } from '../../query';
-import { ExpressionFunctionKibanaTimerange } from './timerange';
+import type { TimeRange } from '../../query';
+import type { ExpressionFunctionKibanaTimerange } from './timerange';
 
 export const timerangeToAst = (timerange: TimeRange) => {
   return buildExpression([

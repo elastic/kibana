@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
+  OpenPointInTimeResponse,
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import type { ComplianceDashboardData } from '../../../common/types_old';
-import { KeyDocCount } from './compliance_dashboard';
+import type { KeyDocCount } from './compliance_dashboard';
 
 export interface FailedFindingsQueryResult {
   aggs_by_resource_type: Aggregation<PostureStatsBucket>;
@@ -112,14 +113,18 @@ export const getPostureStatsFromAggs = (
 export const getGroupedFindingsEvaluation = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string,
+  pit: OpenPointInTimeResponse,
   runtimeMappings: MappingRuntimeFields,
   logger: Logger
 ): Promise<ComplianceDashboardData['groupedFindingsEvaluation']> => {
   try {
     const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
-      getRisksEsQuery(query, pitId, runtimeMappings)
+      getRisksEsQuery(query, pit.id, runtimeMappings)
     );
+
+    if (resourceTypesQueryResult.pit_id) {
+      pit.id = resourceTypesQueryResult.pit_id;
+    }
 
     const ruleSections = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
     if (!Array.isArray(ruleSections)) {

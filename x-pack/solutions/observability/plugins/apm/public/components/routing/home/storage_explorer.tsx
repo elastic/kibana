@@ -8,15 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
-import { EuiLink } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ApmMainTemplate } from '../templates/apm_main_template';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { Breadcrumb } from '../../app/breadcrumb';
 import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
 } from '../../../../common/storage_explorer_types';
-import { getStorageExplorerFeedbackHref } from '../../app/storage_explorer/get_storage_explorer_links';
 
 const StorageExplorer = dynamic(() =>
   import('../../app/storage_explorer').then((mod) => ({ default: mod.StorageExplorer }))
@@ -27,28 +26,17 @@ export const storageExplorer = {
     element: (
       <Breadcrumb
         title={i18n.translate('xpack.apm.views.storageExplorer.title', {
-          defaultMessage: 'Storage Explorer',
+          defaultMessage: 'Storage explorer',
         })}
         href="/storage-explorer"
       >
         <ApmMainTemplate
-          environmentFilter={false}
+          searchBar={<SearchBar />}
           pageHeader={{
             alignItems: 'center',
             pageTitle: i18n.translate('xpack.apm.views.storageExplorer.title', {
-              defaultMessage: 'Storage Explorer',
+              defaultMessage: 'Storage explorer',
             }),
-            rightSideItems: [
-              <EuiLink
-                data-test-subj="apmGiveFeedbackLink"
-                href={getStorageExplorerFeedbackHref()}
-                target="_blank"
-              >
-                {i18n.translate('xpack.apm.views.storageExplorer.giveFeedback', {
-                  defaultMessage: 'Give feedback',
-                })}
-              </EuiLink>,
-            ],
           }}
         >
           <StorageExplorer />

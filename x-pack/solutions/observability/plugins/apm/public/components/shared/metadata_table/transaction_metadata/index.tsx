@@ -17,13 +17,19 @@ interface Props {
 }
 
 export function TransactionMetadata({ transaction }: Props) {
+  const transactionId = transaction.transaction?.id;
+
   const { data: transactionEvent, status } = useFetcher(
     (callApmApi) => {
+      if (!transactionId) {
+        return;
+      }
+
       return callApmApi('GET /internal/apm/event_metadata/{processorEvent}/{id}', {
         params: {
           path: {
             processorEvent: ProcessorEvent.transaction,
-            id: transaction.transaction.id,
+            id: transactionId,
           },
           query: {
             start: transaction['@timestamp'],
@@ -32,7 +38,7 @@ export function TransactionMetadata({ transaction }: Props) {
         },
       });
     },
-    [transaction]
+    [transaction, transactionId]
   );
 
   const sections = useMemo(

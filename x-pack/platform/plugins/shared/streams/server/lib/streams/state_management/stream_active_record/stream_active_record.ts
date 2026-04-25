@@ -102,6 +102,7 @@ export abstract class StreamActiveRecord<
       startingState
     );
     this._changeStatus = changeStatus;
+
     return cascadingChanges;
   }
 
@@ -132,7 +133,10 @@ export abstract class StreamActiveRecord<
 
       return { isValid: true, errors: [] };
     } catch (error) {
-      return { isValid: false, errors: [error] };
+      return {
+        isValid: false,
+        errors: [error instanceof Error ? error : new Error(String(error))],
+      };
     }
   }
 
@@ -151,7 +155,7 @@ export abstract class StreamActiveRecord<
       if (startingStateStream) {
         return this.doDetermineUpdateActions(desiredState, startingState, startingStateStream);
       } else {
-        return this.doDetermineCreateActions();
+        return this.doDetermineCreateActions(desiredState);
       }
     } else if (this.changeStatus === 'deleted') {
       return this.doDetermineDeleteActions();
@@ -208,7 +212,7 @@ export abstract class StreamActiveRecord<
     startingState: State
   ): Promise<ValidationResult>;
 
-  protected abstract doDetermineCreateActions(): Promise<ElasticsearchAction[]>;
+  protected abstract doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]>;
   protected abstract doDetermineUpdateActions(
     desiredState: State,
     startingState: State,

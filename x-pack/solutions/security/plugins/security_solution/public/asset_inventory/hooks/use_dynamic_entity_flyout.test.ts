@@ -59,6 +59,7 @@ describe('useDynamicEntityFlyout', () => {
     act(() => {
       result.current.openDynamicFlyout({
         entityDocId: '123',
+        entityId: '123',
         entityType: 'container',
         scopeId: 'scope1',
         contextId: 'context1',
@@ -68,7 +69,13 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: GenericEntityPanelKey,
-        params: { entityDocId: '123', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          entityDocId: '123',
+          entityId: '123',
+          scopeId: 'scope1',
+          contextId: 'context1',
+          isEngineMetadataExist: true,
+        },
       },
     });
   });
@@ -82,6 +89,7 @@ describe('useDynamicEntityFlyout', () => {
       result.current.openDynamicFlyout({
         entityType: 'user',
         entityName: 'testUser',
+        entityId: '123',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -90,7 +98,12 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UserPanelKey,
-        params: { userName: 'testUser', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          userName: 'testUser',
+          entityId: '123',
+          scopeId: 'scope1',
+          contextId: 'context1',
+        },
       },
     });
   });
@@ -104,6 +117,7 @@ describe('useDynamicEntityFlyout', () => {
       result.current.openDynamicFlyout({
         entityType: 'host',
         entityName: 'testHost',
+        entityId: '123',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -112,7 +126,12 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: HostPanelKey,
-        params: { hostName: 'testHost', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          hostName: 'testHost',
+          entityId: '123',
+          scopeId: 'scope1',
+          contextId: 'context1',
+        },
       },
     });
   });
@@ -126,6 +145,7 @@ describe('useDynamicEntityFlyout', () => {
       result.current.openDynamicFlyout({
         entityType: 'service',
         entityName: 'testService',
+        entityId: '123',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -134,7 +154,12 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: ServicePanelKey,
-        params: { serviceName: 'testService', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          serviceName: 'testService',
+          entityId: '123',
+          scopeId: 'scope1',
+          contextId: 'context1',
+        },
       },
     });
   });
@@ -145,7 +170,7 @@ describe('useDynamicEntityFlyout', () => {
     );
 
     act(() => {
-      result.current.openDynamicFlyout({ entityType: 'user' });
+      result.current.openDynamicFlyout({ entityType: 'user', entityId: '123' });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalled();

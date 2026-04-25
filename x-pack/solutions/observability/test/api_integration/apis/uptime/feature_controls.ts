@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { API_URLS } from '@kbn/uptime-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {

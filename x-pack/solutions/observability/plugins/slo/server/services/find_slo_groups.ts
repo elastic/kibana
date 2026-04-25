@@ -4,20 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  FindSLOGroupsParams,
-  FindSLOGroupsResponse,
-  findSLOGroupsResponseSchema,
-  Pagination,
-  sloGroupWithSummaryResponseSchema,
-} from '@kbn/slo-schema';
-import { getSummaryIndices, getSloSettings } from './slo_settings';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
+import { findSLOGroupsResponseSchema, sloGroupWithSummaryResponseSchema } from '@kbn/slo-schema';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
+import type { SLOSettings } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
+import { getSummaryIndices } from './utils/get_summary_indices';
+import { excludeStaleSummaryFilter } from './utils/summary_stale_filter';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -39,7 +36,7 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
 export class FindSLOGroups {
   constructor(
     private scopedClusterClient: IScopedClusterClient,
-    private soClient: SavedObjectsClientContract,
+    private settings: SLOSettings,
     private logger: Logger,
     private spaceId: string
   ) {}
@@ -52,8 +49,10 @@ export class FindSLOGroups {
     const filters = params.filters ?? '';
     const parsedFilters = parseStringFilters(filters, this.logger);
 
-    const settings = await getSloSettings(this.soClient);
-    const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
+    const { indices } = await getSummaryIndices(
+      this.scopedClusterClient.asInternalUser,
+      this.settings
+    );
 
     const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 
@@ -64,6 +63,11 @@ export class FindSLOGroups {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
+            ...excludeStaleSummaryFilter({
+              settings: this.settings,
+              kqlFilter: kqlQuery,
+              forceExclude: true,
+            }),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],

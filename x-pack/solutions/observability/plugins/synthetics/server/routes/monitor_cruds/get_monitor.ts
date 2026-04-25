@@ -6,9 +6,10 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
-import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';

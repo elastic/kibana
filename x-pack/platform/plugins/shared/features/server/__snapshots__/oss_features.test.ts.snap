@@ -38,7 +38,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -54,7 +54,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "replacedBy": Array [
                   Object {
                     "feature": "discover_v2",
@@ -107,7 +107,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -123,7 +123,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "savedObject": Object {
                   "all": Array [
                     "search-session",
@@ -242,7 +242,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -258,7 +258,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "replacedBy": Array [
                   Object {
                     "feature": "dashboard_v2",
@@ -311,7 +311,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -327,7 +327,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "savedObject": Object {
                   "all": Array [
                     "search-session",
@@ -413,7 +413,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -429,7 +429,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "replacedBy": Array [
                   Object {
                     "feature": "discover_v2",
@@ -522,7 +522,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -538,7 +538,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "savedObject": Object {
                   "all": Array [
                     "search-session",
@@ -763,7 +763,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -779,7 +779,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "replacedBy": Array [
                   Object {
                     "feature": "dashboard_v2",
@@ -903,7 +903,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -919,7 +919,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "savedObject": Object {
                   "all": Array [
                     "search-session",
@@ -1026,6 +1026,9 @@ exports[`buildOSSFeatures with a basic license returns the advancedSettings feat
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "manage_advanced_settings",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1084,6 +1087,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1151,6 +1157,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "markdown",
           "query",
           "url",
           "search-session",
@@ -1235,6 +1242,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
           "query",
         ],
       },
@@ -1258,6 +1266,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1293,6 +1304,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "markdown",
           "url",
           "search-session",
         ],
@@ -1344,6 +1356,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
         ],
       },
       "ui": Array [
@@ -1420,6 +1433,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1574,6 +1590,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1925,6 +1944,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2080,6 +2102,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2160,6 +2185,9 @@ exports[`buildOSSFeatures with a enterprise license returns the advancedSettings
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "manage_advanced_settings",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -2218,6 +2246,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2285,6 +2316,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "markdown",
           "query",
           "url",
           "search-session",
@@ -2369,6 +2401,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
           "query",
         ],
       },
@@ -2392,6 +2425,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2427,6 +2463,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "markdown",
           "url",
           "search-session",
         ],
@@ -2478,6 +2515,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
         ],
       },
       "ui": Array [
@@ -2554,6 +2592,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2708,6 +2749,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -3059,6 +3103,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -3214,6 +3261,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manage_rule_settings": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },

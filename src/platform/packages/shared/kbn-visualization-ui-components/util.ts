@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField, isNestedField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { IconSet } from './components';
 import type { SharedSetOfIcons } from './types';

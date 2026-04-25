@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ReservedPrivilegesSet } from '@kbn/core/server';
-import { RouteOptions } from '.';
+import type { RouteOptions } from '.';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { persistTokenCloudData } from '../cloud_data';
 

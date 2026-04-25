@@ -13,16 +13,15 @@ import { useActions, useValues } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { Connector, SyncJobsTable } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { SyncJobsTable } from '@kbn/search-connectors';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { hasDocumentLevelSecurityFeature } from '../../../utils/connector_helpers';
 
 import { SyncJobsViewLogic } from './sync_jobs_view_logic';
-import {
-  AccessControlIndexSelector,
-  AccessControlSelectorOption,
-} from '../access_control_index_selector/access_control_index_selector';
+import type { AccessControlSelectorOption } from '../access_control_index_selector/access_control_index_selector';
+import { AccessControlIndexSelector } from '../access_control_index_selector/access_control_index_selector';
 
 export interface SyncJobsProps {
   connector: Connector;

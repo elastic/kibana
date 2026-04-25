@@ -33,10 +33,10 @@ import {
   setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess,
 } from '../../../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
+import type { WithAuditName } from '@kbn/core-saved-objects-server';
 import {
   type ISavedObjectsSecurityExtension,
   SavedObjectsErrorHelpers,
-  WithAuditName,
 } from '@kbn/core-saved-objects-server';
 
 const SPACES = ['default', 'another-space'];

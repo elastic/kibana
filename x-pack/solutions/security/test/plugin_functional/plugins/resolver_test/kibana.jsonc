@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/resolver-test-plugin",
   "owner": "@elastic/security-solution",
+  "group": "security",
+  "visibility": "private",
   "plugin": {
     "id": "resolverTest",
     "server": false,
@@ -14,7 +16,8 @@
       "securitySolution"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "kibanaUtils"
     ]
   }
 }

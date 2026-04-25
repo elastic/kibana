@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import {
-  type Filter,
-  buildFilter,
-  FILTERS,
-  FilterStateStore,
-  compareFilters,
-  FilterCompareOptions,
-} from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterCompareOptions } from '@kbn/es-query';
+import { type Filter, buildFilter, FILTERS, FilterStateStore, compareFilters } from '@kbn/es-query';
 import type { Serializable } from '@kbn/utility-types';
 
 const compareOptions: FilterCompareOptions = {

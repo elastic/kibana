@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EnhancedGenerateContentResponse } from '@google/generative-ai';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { BaseMessage, UsageMetadata } from '@langchain/core/messages';
-import { ChatGenerationChunk } from '@langchain/core/outputs';
+import type { EnhancedGenerateContentResponse } from '@google/generative-ai';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { BaseMessage, UsageMetadata } from '@langchain/core/messages';
+import type { ChatGenerationChunk } from '@langchain/core/outputs';
 import { ChatVertexAI } from '@langchain/google-vertexai';
 import { get } from 'lodash/fp';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
-import { Logger } from '@kbn/logging';
-import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { GeminiPartText, GeminiRequest } from '@langchain/google-common/dist/types';
+import type { Logger } from '@kbn/logging';
+import type { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import type { GeminiPartText, GeminiRequest } from '@langchain/google-common/dist/types';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import {
   convertResponseBadFinishReasonToErrorMsg,

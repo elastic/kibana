@@ -508,7 +508,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: theCase.id,
                 version: theCase.version,
-                settings: { syncAlerts: false },
+                settings: { syncAlerts: false, extractObservables: false },
               },
             ],
           },
@@ -529,7 +529,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(settingsUserAction.type).to.eql('settings');
         expect(settingsUserAction.action).to.eql('update');
-        expect(settingsUserAction.payload).to.eql({ settings: { syncAlerts: false } });
+        expect(settingsUserAction.payload).to.eql({
+          settings: { syncAlerts: false, extractObservables: false },
+        });
       });
 
       it('retrieves only the severity user actions', async () => {

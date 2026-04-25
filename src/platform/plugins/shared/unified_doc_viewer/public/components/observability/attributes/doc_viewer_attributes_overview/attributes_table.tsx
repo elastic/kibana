@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
+import type { EuiDataGridProps } from '@elastic/eui';
+import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
@@ -18,7 +19,7 @@ import {
   getFieldCellActions,
   getFieldValueCellActions,
 } from '../../../doc_viewer_table/table_cell_actions';
-import { AttributeField } from './attributes_overview';
+import type { AttributeField } from './attributes_overview';
 
 interface AttributesTableProps
   extends Pick<
@@ -77,8 +78,8 @@ export const AttributesTable = ({
   );
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
-    [rows, filter, onToggleColumn, isEsqlMode]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn, columns }),
+    [rows, filter, onToggleColumn, isEsqlMode, columns]
   );
   const fieldValueCellActions = useMemo(
     () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
@@ -120,6 +121,7 @@ export const AttributesTable = ({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={false}
+          isESQLMode={isEsqlMode}
         />
       )}
       columnVisibility={{
@@ -134,7 +136,7 @@ export const AttributesTable = ({
         cellPadding: 'm',
         fontSize: 's',
       }}
-      rowHeightsOptions={{ defaultHeight: 'auto' }}
+      rowHeightsOptions={{ defaultHeight: { lineCount: 1 } }}
       inMemory={{ level: 'enhancements' }}
       toolbarVisibility={false}
     />

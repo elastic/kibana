@@ -23,7 +23,9 @@
           "text": "NoDataPagePublicSetup"
         }
       ],
-      "path": "src/platform/plugins/private/no_data_page/public/types.ts",
+      "path": "src/platform/plugins/shared/no_data_page/public/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

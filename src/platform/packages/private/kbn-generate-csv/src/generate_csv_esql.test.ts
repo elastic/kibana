@@ -19,7 +19,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { IScopedSearchClient } from '@kbn/data-plugin/server';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
@@ -29,7 +29,8 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../constants';
-import { CsvESQLGenerator, JobParamsCsvESQL } from './generate_csv_esql';
+import type { JobParamsCsvESQL } from './generate_csv_esql';
+import { CsvESQLGenerator } from './generate_csv_esql';
 import moment from 'moment';
 
 const createMockJob = (params: JobParamsCsvESQL): JobParamsCsvESQL => ({
@@ -37,6 +38,8 @@ const createMockJob = (params: JobParamsCsvESQL): JobParamsCsvESQL => ({
 });
 
 const mockTaskInstanceFields = { startedAt: null, retryAt: null };
+
+const jobId = 'mock-job-id';
 
 describe('CsvESQLGenerator', () => {
   let mockEsClient: IScopedClusterClient;
@@ -96,6 +99,7 @@ describe('CsvESQLGenerator', () => {
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s', strategy: 'pit' },
       maxConcurrentShardRequests: 5,
+      maxRows: 500,
     };
 
     mockLogger = loggingSystemMock.createLogger();
@@ -113,7 +117,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchInlineSnapshot(`
@@ -145,7 +150,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchInlineSnapshot(`
@@ -173,7 +179,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(csvResult.max_size_reached).toBe(false);
@@ -203,7 +210,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(csvResult.max_size_reached).toBe(true);
@@ -296,7 +304,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(timeFromNowInMs);
@@ -308,7 +317,7 @@ describe('CsvESQLGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { filter: undefined, locale: 'en', query: '' } },
+        { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',
           transport: {
@@ -372,7 +381,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(requestDuration);
@@ -386,7 +396,7 @@ describe('CsvESQLGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { filter: undefined, locale: 'en', query: '' } },
+        { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',
           transport: {
@@ -420,7 +430,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -455,7 +466,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -481,7 +493,8 @@ describe('CsvESQLGenerator', () => {
               },
             },
             locale: 'en',
-            query: query.esql,
+            query: 'FROM kibana_sample_data_logs | LIMIT 10 | LIMIT 500',
+            time_zone: 'America/New_York',
           },
         },
         {
@@ -520,7 +533,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -554,7 +568,48 @@ describe('CsvESQLGenerator', () => {
               }),
             ]),
             locale: 'en',
-            query: query.esql,
+            query: `${query.esql} | LIMIT 500`,
+            time_zone: 'America/New_York',
+          },
+        },
+        {
+          strategy: 'esql',
+          transport: {
+            requestTimeout: '30s',
+          },
+          abortSignal: expect.any(AbortSignal),
+        }
+      );
+    });
+
+    it('adds maxRows limit to the query', async () => {
+      const query = {
+        esql: 'FROM custom-metrics',
+      };
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        {
+          params: {
+            filter: undefined,
+            locale: 'en',
+            query: 'FROM custom-metrics | LIMIT 500',
+            time_zone: 'America/New_York',
           },
         },
         {
@@ -588,7 +643,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -618,7 +674,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -639,6 +696,7 @@ describe('CsvESQLGenerator', () => {
         useByteOrderMarkEncoding: false,
         scroll: { size: 500, duration: '30s', strategy: 'pit' },
         maxConcurrentShardRequests: 5,
+        maxRows: 500,
       };
       mockSearchResponse({
         columns: [{ name: 'message', type: 'string' }],
@@ -656,7 +714,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -685,7 +744,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
       Object {
@@ -722,7 +782,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const { error_code: errorCode, warnings } = await generateCsv.generateData();
@@ -737,6 +798,11 @@ describe('CsvESQLGenerator', () => {
         Array [
           Array [
             [ResponseError: Response Error],
+            Object {
+              "tags": Array [
+                "mock-job-id",
+              ],
+            },
           ],
         ]
       `);

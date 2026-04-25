@@ -17,7 +17,6 @@ export enum INSTRUCTION_VARIANT {
   JAVA = 'java',
   DOTNET = 'dotnet',
   PHP = 'php',
-  OPEN_TELEMETRY = 'openTelemetry',
 }
 
 export interface Instruction {
@@ -36,7 +35,6 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.JAVA]: 'Java',
   [INSTRUCTION_VARIANT.DOTNET]: '.NET',
   [INSTRUCTION_VARIANT.PHP]: 'PHP',
-  [INSTRUCTION_VARIANT.OPEN_TELEMETRY]: 'OpenTelemetry',
 };
 
 export function getDisplayText(id: INSTRUCTION_VARIANT) {
@@ -60,7 +58,6 @@ export type AgentApiDetails = AgentApiKey & {
 export interface AgentInstructions {
   baseUrl: string;
   apmServerUrl: string;
-  otlpManagedServiceUrl: string;
   apiKeyDetails?: AgentApiDetails;
   secretToken?: string;
   checkAgentStatus: () => void;

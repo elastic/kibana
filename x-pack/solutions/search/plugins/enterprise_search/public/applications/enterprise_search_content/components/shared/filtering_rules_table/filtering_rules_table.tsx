@@ -7,17 +7,13 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiCode } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiCode } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  filteringPolicyToText,
-  filteringRuleToText,
-  FilteringRule,
-  FilteringPolicy,
-  FilteringRuleRule,
-} from '@kbn/search-connectors';
+import type { FilteringRule, FilteringPolicy, FilteringRuleRule } from '@kbn/search-connectors';
+import { filteringPolicyToText, filteringRuleToText } from '@kbn/search-connectors';
 
 interface FilteringRulesTableProps {
   filteringRules: FilteringRule[];
@@ -72,6 +68,12 @@ export const FilteringRulesTable: React.FC<FilteringRulesTableProps> = ({
     <EuiBasicTable
       columns={columns}
       items={filteringRules.sort(({ order }, { order: secondOrder }) => order - secondOrder)}
+      tableCaption={i18n.translate(
+        'xpack.enterpriseSearch.content.index.filtering.rulesTableCaption',
+        {
+          defaultMessage: 'Filtering rules',
+        }
+      )}
     />
   );
 };

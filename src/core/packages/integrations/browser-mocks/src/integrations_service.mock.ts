@@ -9,15 +9,17 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IntegrationsService } from '@kbn/core-integrations-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type IntegrationsServiceContract = PublicMethodsOf<IntegrationsService>;
 export type IntegrationsServiceMock = jest.Mocked<IntegrationsServiceContract>;
 
-const createMock = (): IntegrationsServiceMock => ({
-  setup: jest.fn(),
-  start: jest.fn(),
-  stop: jest.fn(),
-});
+const createMock = (): IntegrationsServiceMock =>
+  lazyObject({
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  });
 
 export const integrationsServiceMock = {
   create: createMock,

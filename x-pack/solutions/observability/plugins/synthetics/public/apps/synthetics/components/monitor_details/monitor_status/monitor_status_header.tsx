@@ -17,7 +17,7 @@ import { stringifyUrlParams } from '../../../utils/url_params';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 import * as labels from './labels';
-import { MonitorStatusPanelProps } from './monitor_status_data';
+import type { MonitorStatusPanelProps } from './monitor_status_data';
 
 export const MonitorStatusHeader = ({
   from,
@@ -75,7 +75,7 @@ export const MonitorStatusHeader = ({
           href={viewDetailsUrl}
           data-test-subj="monitorStatusChartViewHistoryButton"
           size="xs"
-          iconType="list"
+          iconType="listBullet"
         >
           {labels.VIEW_HISTORY_LABEL}
         </EuiButtonEmpty>

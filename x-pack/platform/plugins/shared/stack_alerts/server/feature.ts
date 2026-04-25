@@ -16,7 +16,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID as ElasticsearchQuery } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containment';
 
@@ -76,7 +75,6 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   }),
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -91,6 +89,9 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       alerting: {
         rule: {
           all: alertingFeatures,
+          enable: alertingFeatures,
+          manual_run: alertingFeatures,
+          manage_rule_settings: alertingFeatures,
         },
         alert: {
           all: alertingFeatures,

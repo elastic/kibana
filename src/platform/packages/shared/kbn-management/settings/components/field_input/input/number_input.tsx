@@ -8,13 +8,14 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
+import type { EuiFieldNumberProps } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
-import { OnInputChangeFn } from '@kbn/management-settings-types';
-import { InputProps } from '../types';
+import type { OnInputChangeFn } from '@kbn/management-settings-types';
+import type { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { useServices } from '../services';
 

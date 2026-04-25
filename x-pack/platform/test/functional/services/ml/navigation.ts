@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningNavigationProvider({
   getService,
@@ -72,9 +72,9 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToAlertsAndAction() {
-      await PageObjects.common.navigateToApp('triggersActions');
+      await PageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
-      await testSubjects.existOrFail('rulesList');
+      await testSubjects.existOrFail('rulesListSection');
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {

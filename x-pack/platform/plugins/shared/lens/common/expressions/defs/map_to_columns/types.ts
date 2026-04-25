@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { DataType } from '@kbn/lens-common';
 
 export type OriginalColumn = {
   id: string;
   label: string;
   variable?: string;
   format?: SerializedFieldFormat;
+  dataType?: DataType;
+  customLabel?: boolean;
 } & (
   | { operationType: 'date_histogram'; sourceField: string; interval: number }
   | { operationType: string; sourceField?: string; interval: never }

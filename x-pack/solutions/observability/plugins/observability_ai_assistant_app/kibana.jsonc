@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-app-plugin",
-  "owner": ["@elastic/obs-ai-assistant"],
+  "owner": ["@elastic/obs-ai-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -29,10 +29,11 @@
       "inference",
       "logsDataAccess",
       "spaces",
-      "llmTasks"
+      "llmTasks",
+      "searchInferenceEndpoints"
     ],
-    "optionalPlugins": ["cloud"],
-    "requiredBundles": ["kibanaReact", "esqlDataGrid"],
+    "optionalPlugins": ["cloud", "agentBuilder"],
+    "requiredBundles": ["kibanaReact", "esqlDataGrid", "esUiShared"],
     "extraPublicDirs": []
   }
 }

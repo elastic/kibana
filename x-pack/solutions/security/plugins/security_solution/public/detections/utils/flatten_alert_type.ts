@@ -14,7 +14,7 @@ const nonFlattenedFormatParamsFields = ['related_integrations', 'threat_mapping'
 
 /**
  * Returns true if the field is related to kibana.alert.rule.parameters.
- * This code is similar to x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts and once
+ * This code is similar to x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts and once
  * the Security Solution and Timelines plugins are merged we should probably share the code.
  */
 const isRuleParametersFieldOrSubfield = (
@@ -32,8 +32,8 @@ const isRuleParametersFieldOrSubfield = (
 
 /**
  * Recursive function that processes all the fields from an Alert and returns a flattened object as a Record<string, string[]>.
- * This is used in the AI for SOC alert summary page, in the getPromptContext when passing data to the assistant.
- * The logic is similar to x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts but for an Alert type.
+ * This is used in EASE alert summary page, in the getPromptContext when passing data to the assistant.
+ * The logic is similar to x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts but for an Alert type.
  */
 export const flattenAlertType = (
   /**

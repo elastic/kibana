@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type {
+  ContentClient,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getEventAnnotationService } from './service';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
-import { EventAnnotationGroupSavedObjectAttributes } from '../../common';
-import { EventAnnotationGroupSavedObject } from '../../common/content_management';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import type { EventAnnotationGroupSavedObjectAttributes } from '../../common';
+import type { EventAnnotationGroupSavedObject } from '../../common/content_management';
 
 const annotationGroupResolveMocks = {
   nonExistingGroup: {
@@ -170,7 +173,7 @@ describe('Event Annotation Service', () => {
                 isHidden: [false],
                 time: ['2022'],
                 label: ['Hello'],
-                color: ['#f04e98'],
+                color: ['auto'],
                 lineWidth: [1],
                 lineStyle: ['solid'],
                 icon: ['triangle'],
@@ -208,7 +211,7 @@ describe('Event Annotation Service', () => {
                 time: ['2021'],
                 endTime: ['2022'],
                 label: ['Hello'],
-                color: ['#F04E981A'],
+                color: ['auto'],
                 outside: [false],
               },
             },
@@ -242,7 +245,7 @@ describe('Event Annotation Service', () => {
                 isHidden: [false],
                 timeField: ['@timestamp'],
                 label: ['Hello'],
-                color: ['#f04e98'],
+                color: ['auto'],
                 lineWidth: [1],
                 lineStyle: ['solid'],
                 icon: ['triangle'],
@@ -263,6 +266,43 @@ describe('Event Annotation Service', () => {
                   },
                 ],
                 extraFields: [],
+              },
+            },
+          ],
+        },
+      ]);
+    });
+    it('should preserve explicit annotation colors', () => {
+      expect(
+        eventAnnotationService.toExpression([
+          {
+            id: 'myEvent',
+            type: 'manual',
+            key: {
+              type: 'point_in_time',
+              timestamp: '2022',
+            },
+            label: 'Hello',
+            color: '#123456',
+          },
+        ])
+      ).toEqual([
+        {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'manual_point_event_annotation',
+              arguments: {
+                id: ['myEvent'],
+                isHidden: [false],
+                time: ['2022'],
+                label: ['Hello'],
+                color: ['#123456'],
+                lineWidth: [1],
+                lineStyle: ['solid'],
+                icon: ['triangle'],
+                textVisibility: [false],
               },
             },
           ],
@@ -314,7 +354,7 @@ describe('Event Annotation Service', () => {
                 isHidden: [false],
                 time: ['2022'],
                 label: ['Hello'],
-                color: ['#f04e98'],
+                color: ['auto'],
                 lineWidth: [1],
                 lineStyle: ['solid'],
                 icon: ['triangle'],
@@ -335,7 +375,7 @@ describe('Event Annotation Service', () => {
                 time: ['2021'],
                 endTime: ['2022'],
                 label: ['Hello Range'],
-                color: ['#F04E981A'],
+                color: ['auto'],
                 outside: [false],
               },
             },
@@ -352,7 +392,7 @@ describe('Event Annotation Service', () => {
                 isHidden: [false],
                 timeField: ['@timestamp'],
                 label: ['Hello'],
-                color: ['#f04e98'],
+                color: ['auto'],
                 lineWidth: [1],
                 lineStyle: ['solid'],
                 icon: ['triangle'],
@@ -415,7 +455,7 @@ describe('Event Annotation Service', () => {
                   isHidden: [false],
                   timeField: ['@timestamp'],
                   label: ['Hello'],
-                  color: ['#f04e98'],
+                  color: ['auto'],
                   lineWidth: [1],
                   lineStyle: ['solid'],
                   icon: ['triangle'],
@@ -571,6 +611,36 @@ describe('Event Annotation Service', () => {
         },
       });
     });
+
+    it('persists auto for annotation colors when no custom color is set', async () => {
+      await eventAnnotationService.createAnnotationGroup({
+        title: 'newGroupTitle',
+        description: 'my description',
+        tags: [],
+        indexPatternId: 'ipid',
+        ignoreGlobalFilters: false,
+        annotations: [
+          {
+            id: 'annotation1',
+            type: 'manual',
+            key: { type: 'point_in_time', timestamp: '2022-03-18T08:25:00.000Z' },
+            label: 'Event',
+          },
+        ],
+      });
+
+      expect(contentClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            annotations: [
+              expect.objectContaining({
+                color: 'auto',
+              }),
+            ],
+          }),
+        })
+      );
+    });
   });
   describe('updateAnnotationGroup', () => {
     it('updates annotation group attributes', async () => {
@@ -605,6 +675,39 @@ describe('Event Annotation Service', () => {
           ],
         },
       });
+    });
+
+    it('persists auto for updated annotation colors when no custom color is set', async () => {
+      await eventAnnotationService.updateAnnotationGroup(
+        {
+          title: 'newTitle',
+          description: '',
+          tags: [],
+          indexPatternId: 'newId',
+          ignoreGlobalFilters: false,
+          annotations: [
+            {
+              id: 'annotation1',
+              type: 'manual',
+              key: { type: 'point_in_time', timestamp: '2022-03-18T08:25:00.000Z' },
+              label: 'Event',
+            },
+          ],
+        },
+        'multiAnnotations'
+      );
+
+      expect(contentClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            annotations: [
+              expect.objectContaining({
+                color: 'auto',
+              }),
+            ],
+          }),
+        })
+      );
     });
   });
 });

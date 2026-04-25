@@ -12,9 +12,10 @@ import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search_types';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
+import type { Observable } from 'rxjs';
+import type { ProjectRouting } from '@kbn/es-query';
+import type { IEsSearchRequest, IEsSearchResponse } from './es_search_types';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -63,7 +64,7 @@ export interface ISearchOptions {
   /**
    * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
    */
-  strategy?: string;
+  strategy?: string | symbol;
 
   /**
    * Request the legacy format for the total number of hits. If sending `rest_total_hits_as_int` to
@@ -93,11 +94,10 @@ export interface ISearchOptions {
   isRestore?: boolean;
 
   /**
-   * By default, when polling, we don't retrieve the results of the search request (until it is complete). (For async
-   * search, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to
-   * `true` will request the search results, regardless of whether or not the search is complete.
+   * By default, when polling, we don't retrieve the results of the search request (until it is complete).
+   * setting this to `true` will request the search results, regardless of whether or not the search is complete.
    */
-  retrieveResults?: boolean;
+  returnIntermediateResults?: boolean;
 
   /**
    * Represents a meta-information about a Kibana entity intitating a saerch request.
@@ -119,6 +119,16 @@ export interface ISearchOptions {
    * When set es results are streamed back to the caller without any parsing of the content.
    */
   stream?: boolean;
+
+  /**
+   * A hash of the request params. This is attached automatically by the search interceptor. It is used to link this request with a search session.
+   */
+  requestHash?: string;
+
+  /**
+   * Project routing configuration for cross-project search (CPS).
+   */
+  projectRouting?: ProjectRouting;
 }
 
 /**
@@ -133,7 +143,8 @@ export type ISearchOptionsSerializable = Pick<
   | 'isStored'
   | 'isSearchStored'
   | 'isRestore'
-  | 'retrieveResults'
+  | 'returnIntermediateResults'
   | 'executionContext'
   | 'stream'
+  | 'projectRouting'
 >;

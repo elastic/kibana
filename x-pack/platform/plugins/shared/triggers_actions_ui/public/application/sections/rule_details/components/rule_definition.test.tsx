@@ -5,15 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { screen, render } from '@testing-library/react';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { nextTick } from '@kbn/test-jest-helpers';
 import { RuleDefinition } from './rule_definition';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
+import type { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import * as capabilities from '../../../lib/capabilities';
 
 jest.mock('./rule_actions', () => ({
   RuleActions: () => {
@@ -33,9 +32,8 @@ jest.mock('../../../lib/capabilities', () => ({
   hasManageApiKeysCapability: jest.fn(() => true),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  useGetRuleTypesPermissions: jest.fn(),
-}));
+
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks');
 const { useGetRuleTypesPermissions } = jest.requireMock('@kbn/alerts-ui-shared/src/common/hooks');
 
 const mockedRuleTypeIndex = new Map(
@@ -88,29 +86,23 @@ const mockedRuleTypeIndex = new Map(
   })
 );
 
-interface SetupProps {
-  ruleOverwrite?: any;
-}
-
 describe('Rule Definition', () => {
-  let wrapper: ReactWrapper;
-  async function setup({ ruleOverwrite }: SetupProps = {}) {
-    const actionTypeRegistry = actionTypeRegistryMock.create();
-    const ruleTypeRegistry = ruleTypeRegistryMock.create();
-    const mockedRule = mockRule(ruleOverwrite);
-    jest.mock('../../../lib/capabilities', () => ({
-      hasAllPrivilege: jest.fn(() => true),
-      hasSaveRulesCapability: jest.fn(() => true),
-      hasExecuteActionsCapability: jest.fn(() => true),
-      hasManageApiKeysCapability: jest.fn(() => true),
-    }));
+  let actionTypeRegistry: ReturnType<typeof actionTypeRegistryMock.create>;
+  let ruleTypeRegistry: ReturnType<typeof ruleTypeRegistryMock.create>;
+  let ruleTypeR: RuleTypeModel;
+
+  beforeEach(() => {
+    actionTypeRegistry = actionTypeRegistryMock.create();
+    ruleTypeRegistry = ruleTypeRegistryMock.create();
+
     ruleTypeRegistry.has.mockImplementation((id) => {
       if (id === 'siem_rule' || id === 'attack-discovery') {
         return false;
       }
       return true;
     });
-    const ruleTypeR: RuleTypeModel = {
+
+    ruleTypeR = {
       id: 'my-rule-type',
       iconClass: 'test',
       description: 'Rule when testing',
@@ -121,12 +113,14 @@ describe('Rule Definition', () => {
       ruleParamsExpression: jest.fn(),
       requiresAppContext: false,
     };
+
     ruleTypeRegistry.get.mockImplementation((id) => {
       if (id === 'siem_rule' || id === 'attack-discovery') {
         throw new Error('error');
       }
       return ruleTypeR;
     });
+
     actionTypeRegistry.list.mockReturnValue([
       { id: '.server-log', iconClass: 'logsApp' },
       { id: '.slack', iconClass: 'logoSlack' },
@@ -134,100 +128,160 @@ describe('Rule Definition', () => {
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
 
-    useGetRuleTypesPermissions.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
+    useGetRuleTypesPermissions.mockReturnValue({
+      ruleTypesState: { data: mockedRuleTypeIndex },
+    });
+  });
 
-    wrapper = mount(
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders rule definition ', async () => {
+    render(
       <QueryClientProvider client={new QueryClient()}>
         <RuleDefinition
-          rule={mockedRule}
+          rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
           ruleTypeRegistry={ruleTypeRegistry}
         />
       </QueryClientProvider>
     );
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-  }
-
-  beforeEach(async () => await setup());
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('renders rule definition ', async () => {
-    expect(wrapper.find('[data-test-subj="ruleSummaryRuleDefinition"]')).toBeTruthy();
+    const ruleDefinition = screen.getByTestId('ruleSummaryRuleDefinition');
+    expect(ruleDefinition).toBeInTheDocument();
   });
 
   it('show rule type name from "useGetRuleTypesPermissions"', async () => {
-    expect(useGetRuleTypesPermissions).toHaveBeenCalledTimes(2);
-    const ruleType = wrapper.find('[data-test-subj="ruleSummaryRuleType"]');
-    expect(ruleType).toBeTruthy();
-    expect(ruleType.find('div.euiText').text()).toEqual(
-      mockedRuleTypeIndex.get(mockRule().ruleTypeId)?.name
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleDefinition
+          rule={mockRule()}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
     );
+
+    expect(useGetRuleTypesPermissions).toHaveBeenCalled();
+    const ruleType = screen.getByTestId('ruleSummaryRuleType');
+    expect(ruleType).toBeInTheDocument();
+    expect(ruleType).toHaveTextContent(mockedRuleTypeIndex.get(mockRule().ruleTypeId)?.name || '');
   });
 
   it('show rule type description "', async () => {
-    const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
-    expect(ruleDescription).toBeTruthy();
-    expect(ruleDescription.find('div.euiText').text()).toEqual('Rule when testing');
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleDefinition
+          rule={mockRule()}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
+    );
+    const ruleDescription = screen.getByTestId('ruleSummaryRuleDescription');
+    expect(ruleDescription).toBeInTheDocument();
+    expect(ruleDescription).toHaveTextContent('Rule when testing');
   });
 
   it('show SIEM rule type description "', async () => {
-    await setup({
-      ruleOverwrite: {
-        consumer: 'siem',
-        ruleTypeId: 'siem_rule',
-      },
-    });
-    const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
-    expect(ruleDescription).toBeTruthy();
-    expect(ruleDescription.find('div.euiText').text()).toEqual('Security detection rule');
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleDefinition
+          rule={mockRule({ consumer: 'siem', ruleTypeId: 'siem_rule' })}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
+    );
+    const ruleDescription = screen.getByTestId('ruleSummaryRuleDescription');
+    expect(ruleDescription).toBeInTheDocument();
+    expect(ruleDescription).toHaveTextContent('Security detection rule');
   });
 
   it('show Attack Discovery rule type description "', async () => {
-    await setup({
-      ruleOverwrite: {
-        consumer: 'siem',
-        ruleTypeId: 'attack-discovery',
-      },
-    });
-    const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
-    expect(ruleDescription).toBeTruthy();
-    expect(ruleDescription.find('div.euiText').text()).toEqual('Attack Discovery rule');
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleDefinition
+          rule={mockRule({ consumer: 'siem', ruleTypeId: 'attack-discovery' })}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
+    );
+    const ruleDescription = screen.getByTestId('ruleSummaryRuleDescription');
+    expect(ruleDescription).toBeInTheDocument();
+    expect(ruleDescription).toHaveTextContent('Attack Discovery rule');
   });
 
   it('show rule conditions only if the rule allows multiple conditions', async () => {
-    const ruleConditions = wrapper.find('[data-test-subj="ruleSummaryRuleConditions"]');
-    expect(ruleConditions).toBeTruthy();
-    expect(ruleConditions.find('div.euiText').text()).toEqual('1 condition');
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleDefinition
+          rule={mockRule()}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
+    );
+    const ruleCondition = screen.getByTestId('ruleSummaryRuleConditions');
+    expect(ruleCondition).toBeInTheDocument();
+    expect(ruleCondition).toHaveTextContent('1 condition');
   });
 
   it('show rule interval with human readable value', async () => {
-    const ruleInterval = wrapper.find('[data-test-subj="ruleSummaryRuleInterval"]');
-    expect(ruleInterval).toBeTruthy();
-    expect(ruleInterval.find('div.euiText').text()).toEqual('1 sec');
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleDefinition
+          rule={mockRule()}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
+    );
+    const ruleInterval = screen.getByTestId('ruleSummaryRuleInterval');
+    expect(ruleInterval).toBeInTheDocument();
+    expect(ruleInterval).toHaveTextContent('1 sec');
   });
 
   it('show edit button when user has permissions', async () => {
-    const editButton = wrapper.find('[data-test-subj="ruleDetailsEditButton"]');
-    expect(editButton).toBeTruthy();
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleDefinition
+          rule={mockRule()}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
+    );
+    const editButton = screen.getByTestId('ruleDetailsEditButton');
+    expect(editButton).toBeInTheDocument();
   });
 
   it('hide edit button when user DOES NOT have permissions', async () => {
-    jest.mock('../../../lib/capabilities', () => ({
-      hasAllPrivilege: jest.fn(() => false),
-      hasSaveRulesCapability: jest.fn(() => true),
-      hasExecuteActionsCapability: jest.fn(() => true),
-      hasManageApiKeysCapability: jest.fn(() => true),
-    }));
-    const editButton = wrapper.find('[data-test-subj="ruleDetailsEditButton"]');
-    expect(editButton).toMatchObject({});
+    (capabilities.hasAllPrivilege as jest.Mock).mockReturnValue(false);
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleDefinition
+          rule={mockRule()}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
+    );
+    const editButton = screen.queryByTestId('ruleDetailsEditButton');
+    expect(editButton).toBeNull();
   });
 });
+
 function mockRule(overwrite = {}): Rule {
   return {
     id: '1',

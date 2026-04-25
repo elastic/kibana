@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { MonitoringClusterStackProductUsage } from '../types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { MonitoringClusterStackProductUsage } from '../types';
 import { fetchESUsage } from './fetch_es_usage';
-import { MonitoringConfig } from '../../../config';
+import type { MonitoringConfig } from '../../../config';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,

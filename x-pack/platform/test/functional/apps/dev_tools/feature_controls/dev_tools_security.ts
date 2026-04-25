@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Dev Tools navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Dev Tools']);
+        expect(navLinks.map((link) => link.text)).to.contain('Dev Tools');
       });
 
       describe('console', () => {
@@ -147,7 +147,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`shows 'Dev Tools' navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dev Tools']);
+        expect(navLinks).to.eql(['Dev Tools', 'Workflows']);
       });
 
       describe('console', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const DEFAULT_SIZE = 3;
+export const DEFAULT_SIZE = 9;
 // Elasticsearch limit
 export const MAXIMUM_MAX_DOC_COUNT = 100;
 export const DEFAULT_MAX_DOC_COUNT = 1;

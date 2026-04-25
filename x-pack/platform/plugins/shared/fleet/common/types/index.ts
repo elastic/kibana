@@ -59,6 +59,7 @@ export interface FleetConfigType {
   agentIdVerificationEnabled?: boolean;
   eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
+  experimentalFeatures?: { [k: string]: boolean };
   enableManagedLogsAndMetricsDataviews?: boolean;
   packageVerification?: {
     gpgKeyPath?: string;
@@ -66,6 +67,11 @@ export interface FleetConfigType {
   setup?: {
     agentPolicySchemaUpgradeBatchSize?: number;
     uninstallTokenVerificationBatchSize?: number;
+  };
+  startupOptimization?: {
+    deferPackageBumpInstallVersion?: boolean;
+    maxConcurrentPackageOperations?: number;
+    packageUpgradeBatchSize?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
@@ -104,9 +110,25 @@ export interface FleetConfigType {
   autoInstallContentPackages?: {
     taskInterval?: string;
   };
+  agentStatusChange?: {
+    taskInterval?: string;
+  };
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
+  integrationRollbackTTL?: string;
+  installIntegrationsKnowledge?: boolean;
+  fleetPolicyRevisionsCleanup?: {
+    maxRevisions: number;
+    interval: string;
+    maxPoliciesPerRun: number;
+  };
+  versionSpecificPolicyAssignment?: {
+    taskInterval?: string;
+  };
+  unenrollInactiveAgents?: {
+    taskInterval?: string;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

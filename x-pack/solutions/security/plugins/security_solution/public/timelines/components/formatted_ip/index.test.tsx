@@ -24,26 +24,17 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../common/lib/kibana/kibana_react', () => {
-  return {
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          getUrlForApp: jest.fn(),
-          navigateToApp: jest.fn(),
-        },
+jest.mock('../../../common/lib/kibana/kibana_react', () => ({
+  ...jest.requireActual('../../../common/lib/kibana/kibana_react'),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        getUrlForApp: jest.fn(),
+        navigateToApp: jest.fn(),
       },
-    }),
-  };
-});
-
-jest.mock('../../../common/components/drag_and_drop/draggable_wrapper', () => {
-  const original = jest.requireActual('../../../common/components/drag_and_drop/draggable_wrapper');
-  return {
-    ...original,
-    DraggableWrapper: () => <div data-test-subj="DraggableWrapper" />,
-  };
-});
+    },
+  }),
+}));
 
 jest.mock('../../store');
 

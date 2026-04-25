@@ -7,10 +7,11 @@
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import React from 'react';
-import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../hooks/use_fetch_alert_detail';
+import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { useFindProximalAlerts } from './hooks/use_find_proximal_alerts';
-import { ConfigSchema } from '../../plugin';
-import { Subset } from '../../typings';
+import type { ConfigSchema } from '../../plugin';
+import type { Subset } from '../../typings';
 import { render } from '../../utils/test_helper';
 import { alertDetail } from './mock/alert';
 import { ProximalAlertsCallout } from './proximal_alerts_callout';

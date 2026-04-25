@@ -32,6 +32,8 @@
           "({\n  children,\n  storage,\n  storageKeys,\n}: React.PropsWithChildren<StorageContextProviderProps<K>>) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "React.PropsWithChildren<StorageContextProviderProps<K>>"
             ],
             "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
+            "lineNumber": 85,
+            "columnNumber": 83,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
           "(key: K, initValue: T | undefined) => [T | undefined extends undefined ? T | undefined : Exclude<T, undefined>, (value: T) => void]"
         ],
         "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
+        "lineNumber": 161,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,6 +87,8 @@
               "K"
             ],
             "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,6 +104,8 @@
               "T | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

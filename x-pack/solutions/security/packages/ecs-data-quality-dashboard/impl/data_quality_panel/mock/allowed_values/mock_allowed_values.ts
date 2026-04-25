@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AllowedValue } from '../../types';
+import type { AllowedValue } from '../../types';
 
 export const mockAllowedValues: AllowedValue[] = [
   {

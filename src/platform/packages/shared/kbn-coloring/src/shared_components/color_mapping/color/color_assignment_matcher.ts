@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RawValue, deserializeField } from '@kbn/data-plugin/common';
-import { ColorMapping } from '../config';
+import type { RawValue } from '@kbn/data-plugin/common';
+import { deserializeField } from '@kbn/data-plugin/common';
+import type { ColorMapping } from '../config';
 import { getValueKey } from './utils';
 
 type AssignmentMatchCount = [assignmentIndex: number, matchCount: number];

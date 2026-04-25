@@ -10,7 +10,7 @@ import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { getIndexPatterns, getLogstashDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
-import { LegacyRequest, PipelineVersion } from '../../types';
+import type { LegacyRequest, PipelineVersion } from '../../types';
 import { mergePipelineVersions } from './merge_pipeline_versions';
 
 const createScopedAgg = (pipelineId: string, maxBucketSize: number) => {

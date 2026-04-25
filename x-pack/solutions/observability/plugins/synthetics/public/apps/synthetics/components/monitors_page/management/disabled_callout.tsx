@@ -24,7 +24,7 @@ export const DisabledCallout = ({ total }: { total?: number }) => {
   const disabledCallout =
     !canEnable && showDisableCallout && !loading ? (
       <>
-        <EuiCallOut title={labels.CALLOUT_MANAGEMENT_DISABLED} color="warning">
+        <EuiCallOut announceOnMount title={labels.CALLOUT_MANAGEMENT_DISABLED} color="warning">
           <p>{labels.CALLOUT_MANAGEMENT_DESCRIPTION}</p>
           <p>
             {labels.CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
@@ -43,7 +43,7 @@ export const DisabledCallout = ({ total }: { total?: number }) => {
 
   const disAllowedCallout = !isServiceAllowed ? (
     <>
-      <EuiCallOut title={ACCOUNT_BLOCKED} color="warning">
+      <EuiCallOut announceOnMount title={ACCOUNT_BLOCKED} color="warning">
         <p>{SERVICE_NOT_ALLOWED}</p>
       </EuiCallOut>
       <EuiSpacer size="m" />

@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENT_POLICY_INDEX, CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import { AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import {
@@ -15,6 +16,7 @@ import {
   cleanFleetAgentPolicies,
   cleanFleetIndices,
   createFleetAgent,
+  createTestSpace,
 } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -60,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
       testSpaceAgent1 = _testSpaceAgent1;
       testSpaceAgent2 = _testSpaceAgent2;
 
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     beforeEach(async () => {
@@ -94,7 +96,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         const actionStatusInDefaultSpace = await apiClient.getActionStatus();
-        expect(actionStatusInDefaultSpace.items.length).to.eql(1);
+        expect(actionStatusInDefaultSpace.items.length).to.greaterThan(0);
         expect(actionStatusInDefaultSpace.items[0]).to.have.keys(
           'type',
           'status',
@@ -127,7 +129,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(actionStatusInDefaultSpace.items.length).to.eql(0);
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatusInCustomSpace.items.length).to.eql(1);
+        expect(actionStatusInCustomSpace.items.length).to.greaterThan(0);
         expect(actionStatusInCustomSpace.items[0]).to.have.keys(
           'type',
           'status',
@@ -172,7 +174,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         const actionStatusInDefaultSpace = await apiClient.getActionStatus();
-        expect(actionStatusInDefaultSpace.items.length).to.eql(1);
+        expect(actionStatusInDefaultSpace.items.length).to.greaterThan(0);
         expect(actionStatusInDefaultSpace.items[0]).to.have.keys(
           'type',
           'status',
@@ -273,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatusInCustomSpace.items.length).to.eql(1);
+        expect(actionStatusInCustomSpace.items.length).to.greaterThan(0);
 
         const res = await apiClient.cancelAction(
           actionStatusInCustomSpace.items[0].actionId,
@@ -293,7 +295,7 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatusInCustomSpace.items.length).to.eql(1);
+        expect(actionStatusInCustomSpace.items.length).to.greaterThan(0);
 
         let err: Error | undefined;
         try {

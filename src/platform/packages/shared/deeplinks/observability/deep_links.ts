@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   APM_APP_ID,
   LOGS_APP_ID,
   METRICS_APP_ID,
@@ -23,6 +23,7 @@ import {
   OBLT_PROFILING_APP_ID,
   INVENTORY_APP_ID,
   STREAMS_APP_ID,
+  INGEST_HUB_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -40,6 +41,7 @@ type ObltUxApp = typeof OBLT_UX_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 type InventoryApp = typeof INVENTORY_APP_ID;
 type StreamsApp = typeof STREAMS_APP_ID;
+type IngestHubApp = typeof INGEST_HUB_APP_ID;
 
 export type AppId =
   | LogsApp
@@ -56,7 +58,8 @@ export type AppId =
   | ObltUxApp
   | ObltProfilingApp
   | InventoryApp
-  | StreamsApp;
+  | StreamsApp
+  | IngestHubApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 

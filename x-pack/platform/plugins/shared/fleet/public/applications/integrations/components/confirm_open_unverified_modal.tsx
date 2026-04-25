@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, EuiLink, useGeneratedHtmlId } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
@@ -18,8 +18,12 @@ export const ConfirmOpenUnverifiedModal: React.FC<{
   pkgName: string;
   docLinks: DocLinksStart;
 }> = ({ onCancel, onConfirm, pkgName, docLinks }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={
         <span className="eui-textBreakWord">
           <FormattedMessage

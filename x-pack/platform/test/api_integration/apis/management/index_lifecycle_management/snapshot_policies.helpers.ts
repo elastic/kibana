@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_BASE_PATH, SNAPSHOT_REPOSITORY_NAME } from './constants';
 
 export const registerSnapshotPoliciesHelpers = (getService: FtrProviderContext['getService']) => {

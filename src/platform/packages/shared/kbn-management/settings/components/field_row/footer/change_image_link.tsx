@@ -12,7 +12,11 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import type {
+  FieldDefinition,
+  SettingType,
+  UnsavedFieldChange,
+} from '@kbn/management-settings-types';
 import { hasUnsavedChange } from '@kbn/management-settings-utilities';
 
 export const DATA_TEST_SUBJ_CHANGE_LINK_PREFIX = 'management-settings-change-image';

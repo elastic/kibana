@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Capabilities } from '@kbn/core/public';
-import { IconType } from '@elastic/eui';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import type { Capabilities } from '@kbn/core/public';
+import type { IconType } from '@elastic/eui';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 
 /** @public */
 export type FeatureCatalogueCategory = 'admin' | 'data' | 'other';

@@ -8,7 +8,10 @@ import type { useGrouping } from '@kbn/grouping';
 import type { ParsedGroupingAggregation } from '@kbn/grouping/src';
 import type { Filter } from '@kbn/es-query';
 import React from 'react';
-import { css } from '@emotion/react';
+import {
+  GroupWrapper as BaseGroupWrapper,
+  GroupWrapperLoading as BaseGroupWrapperLoading,
+} from '@kbn/cloud-security-posture';
 import { TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from '../../constants';
 
 interface AssetInventoryGroupingProps<T> {
@@ -25,6 +28,11 @@ interface AssetInventoryGroupingProps<T> {
   groupSelectorComponent?: JSX.Element;
 }
 
+const ASSET_INVENTORY_TEST_SUBJECTS = {
+  grouping: TEST_SUBJ_GROUPING,
+  groupingLoading: TEST_SUBJ_GROUPING_LOADING,
+};
+
 /**
  * This component is used to render the loading state of the AssetInventoryGrouping component
  * It's used to avoid the flickering of the table when the data is loading
@@ -34,23 +42,11 @@ export const GroupWrapperLoading = <T,>({
   pageSize,
 }: Pick<AssetInventoryGroupingProps<T>, 'grouping' | 'pageSize'>) => {
   return (
-    <div data-test-subj={TEST_SUBJ_GROUPING_LOADING}>
-      {grouping.getGrouping({
-        activePage: 0,
-        data: {
-          groupsCount: { value: 1 },
-          unitsCount: { value: 1 },
-        },
-        groupingLevel: 0,
-        inspectButton: undefined,
-        isLoading: true,
-        itemsPerPage: pageSize,
-        renderChildComponent: () => <></>,
-        onGroupClose: () => {},
-        selectedGroup: '',
-        takeActionItems: () => [],
-      })}
-    </div>
+    <BaseGroupWrapperLoading
+      grouping={grouping}
+      pageSize={pageSize}
+      testSubjects={ASSET_INVENTORY_TEST_SUBJECTS}
+    />
   );
 };
 
@@ -67,54 +63,20 @@ export const GroupWrapper = <T,>({
   groupingLevel = 0,
   groupSelectorComponent,
 }: AssetInventoryGroupingProps<T>) => {
-  if (!data || isFetching) {
-    return <GroupWrapperLoading grouping={grouping} pageSize={pageSize} />;
-  }
-
   return (
-    <div
-      data-test-subj={TEST_SUBJ_GROUPING}
-      css={css`
-        position: relative;
-      `}
-    >
-      {groupSelectorComponent && (
-        <div
-          css={css`
-            position: absolute;
-            right: 0;
-            top: 16px;
-          `}
-        >
-          {groupSelectorComponent}
-        </div>
-      )}
-      <div
-        css={
-          groupSelectorComponent
-            ? css`
-                && [data-test-subj='alerts-table-group-selector'] {
-                  display: none;
-                }
-              `
-            : undefined
-        }
-      >
-        {grouping.getGrouping({
-          activePage: activePageIndex,
-          data,
-          groupingLevel,
-          selectedGroup,
-          inspectButton: undefined,
-          isLoading: isFetching,
-          itemsPerPage: pageSize,
-          onChangeGroupsItemsPerPage,
-          onChangeGroupsPage,
-          renderChildComponent,
-          onGroupClose: () => {},
-          takeActionItems: () => [],
-        })}
-      </div>
-    </div>
+    <BaseGroupWrapper
+      data={data}
+      renderChildComponent={renderChildComponent}
+      grouping={grouping}
+      activePageIndex={activePageIndex}
+      isFetching={isFetching}
+      pageSize={pageSize}
+      onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
+      onChangeGroupsPage={onChangeGroupsPage}
+      selectedGroup={selectedGroup}
+      groupingLevel={groupingLevel}
+      groupSelectorComponent={groupSelectorComponent}
+      testSubjects={ASSET_INVENTORY_TEST_SUBJECTS}
+    />
   );
 };

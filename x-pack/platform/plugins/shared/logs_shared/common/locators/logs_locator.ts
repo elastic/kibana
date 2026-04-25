@@ -8,8 +8,8 @@
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import { LocatorDefinition } from '@kbn/share-plugin/common';
-import { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import type { LocatorDefinition } from '@kbn/share-plugin/common';
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 
 /**
  * Locator used to link to all log sources in Discover.
@@ -28,12 +28,25 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     private readonly deps: {
       locators: LocatorClient;
       getLogSourcesService(): Promise<LogsDataAccessPluginStart['services']['logSourcesService']>;
+      getIsEsqlDefault(): Promise<boolean>;
     }
   ) {}
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
     const discoverAppLocator =
       this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
+
+    const isEsqlDefault = await this.deps.getIsEsqlDefault();
+
+    if (isEsqlDefault && !params.query) {
+      const logSourcesService = await this.deps.getLogSourcesService();
+      const flattenedLogSources = await logSourcesService.getFlattenedLogSources();
+
+      return discoverAppLocator.getLocation({
+        ...params,
+        query: { esql: `FROM ${flattenedLogSources}` },
+      });
+    }
 
     return discoverAppLocator.getLocation({
       dataViewId: ALL_LOGS_DATA_VIEW_ID,

@@ -10,7 +10,7 @@ import { useCallback, useEffect } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import useMount from 'react-use/lib/useMount';
 import type { TimeRange } from '@kbn/es-query';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 
 export const useKibanaTimefilterTime = ({

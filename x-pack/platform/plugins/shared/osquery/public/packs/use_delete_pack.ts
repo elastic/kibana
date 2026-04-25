@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
-import { PACKS_ID } from './constants';
+import { PACKS_ID, PACK_USERS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseDeletePackProps {
@@ -31,7 +32,7 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
 
   return useMutation(
     () =>
-      http.delete(`/api/osquery/packs/${packId}`, {
+      http.delete(buildPath('/api/osquery/packs/{packId}', { packId }), {
         version: API_VERSIONS.public.v1,
       }),
     {
@@ -43,6 +44,7 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
       },
       onSuccess: () => {
         queryClient.invalidateQueries([PACKS_ID]);
+        queryClient.invalidateQueries([PACK_USERS_ID]);
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
         }

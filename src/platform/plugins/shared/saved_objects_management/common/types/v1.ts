@@ -63,6 +63,8 @@ export interface SavedObjectRelation {
   type: string;
   relationship: SavedObjectRelationKind;
   meta: SavedObjectMetadata;
+  managed: boolean;
+  references: SavedObjectReference[];
 }
 
 /**

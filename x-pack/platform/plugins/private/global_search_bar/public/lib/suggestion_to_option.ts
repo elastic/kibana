@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
-import { SearchSuggestion } from '../suggestions';
+import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
+import type { SearchSuggestion } from '../suggestions';
 
 export const suggestionToOption = (
   suggestion: SearchSuggestion

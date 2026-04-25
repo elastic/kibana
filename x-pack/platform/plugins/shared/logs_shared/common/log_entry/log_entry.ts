@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimeKey } from '@kbn/io-ts-utils';
+import type { TimeKey } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { jsonArrayRT } from '../typed_json';
 import { logEntryCursorRT } from './log_entry_cursor';

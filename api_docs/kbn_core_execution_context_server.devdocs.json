@@ -20,6 +20,8 @@
         "label": "ExecutionContextSetup",
         "description": [],
         "path": "src/core/packages/execution-context/server/src/contracts.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               " | undefined, fn: (...args: any[]) => R) => R"
             ],
             "path": "src/core/packages/execution-context/server/src/contracts.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -53,6 +57,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/execution-context/server/src/contracts.ts",
+                "lineNumber": 22,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -68,6 +74,8 @@
                   "(...args: any[]) => R"
                 ],
                 "path": "src/core/packages/execution-context/server/src/contracts.ts",
+                "lineNumber": 22,
+                "columnNumber": 63,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -87,6 +95,8 @@
               "Labels"
             ],
             "path": "src/core/packages/execution-context/server/src/contracts.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -103,6 +113,8 @@
         "label": "IExecutionContextContainer",
         "description": [],
         "path": "src/core/packages/execution-context/server/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,6 +129,8 @@
               "() => string"
             ],
             "path": "src/core/packages/execution-context/server/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -135,6 +149,8 @@
               ">"
             ],
             "path": "src/core/packages/execution-context/server/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -157,6 +173,8 @@
           "ExecutionContextSetup"
         ],
         "path": "src/core/packages/execution-context/server/src/contracts.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

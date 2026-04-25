@@ -6,7 +6,7 @@
  */
 
 import { mergeProjection } from '../../../common/utils/merge_projection';
-import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import {
   TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_DURATION,

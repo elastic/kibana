@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { Method, AxiosRequestConfig } from 'axios';
+import type { Method, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 export interface CiStatsClientConfig {
   baseUrl?: string;
@@ -50,6 +51,7 @@ export interface TestGroupRunOrderResponse {
       names: string[];
     }>;
     tooLong?: Array<{ config: string; durationMin: number }>;
+    tooLongMin?: number;
     namesWithoutDurations: string[];
   }>;
 }
@@ -163,13 +165,17 @@ export class CiStatsClient {
           jobName: string;
         }
     >;
+    durationPercentile?: number;
     groups: Array<{
       type: string;
       queue?: string;
       defaultMin?: number;
       maxMin: number;
+      tooLongMin?: number;
       minimumIsolationMin?: number;
       overheadMin?: number;
+      warmupMin?: number;
+      concurrency?: number;
       names: string[];
     }>;
   }) => {

@@ -6,28 +6,28 @@
  */
 
 import type {
-  IndexConnectorTypeId,
+  EmailConnectorTypeId,
+  EsIndexConnectorTypeId,
   JiraConnectorTypeId,
+  OpsgenieConnectorTypeId,
   PagerDutyConnectorTypeId,
   ServerLogConnectorTypeId,
   ServiceNowITSMConnectorTypeId as ServiceNowConnectorTypeId,
-  SlackWebhookConnectorTypeId,
   SlackApiConnectorTypeId,
+  SlackWebhookConnectorTypeId,
   TeamsConnectorTypeId,
   WebhookConnectorTypeId,
-  EmailConnectorTypeId,
-  OpsgenieConnectorTypeId,
-} from '@kbn/stack-connectors-plugin/server/connector_types';
+} from '@kbn/connector-schemas';
 
 import type { ActionConnector as RawActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SlackApiConfig } from '@kbn/stack-connectors-plugin/common/slack_api/types';
+import type { SlackApiConfig } from '@kbn/connector-schemas/slack_api';
 
 export type ActionTypeId =
   | typeof SlackWebhookConnectorTypeId
   | typeof SlackApiConnectorTypeId
   | typeof PagerDutyConnectorTypeId
   | typeof ServerLogConnectorTypeId
-  | typeof IndexConnectorTypeId
+  | typeof EsIndexConnectorTypeId
   | typeof TeamsConnectorTypeId
   | typeof ServiceNowConnectorTypeId
   | typeof JiraConnectorTypeId

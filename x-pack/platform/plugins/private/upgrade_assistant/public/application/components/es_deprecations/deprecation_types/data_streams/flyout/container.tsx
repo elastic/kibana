@@ -19,12 +19,10 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import {
-  DataStreamMigrationStatus,
-  EnrichedDeprecationInfo,
-} from '../../../../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../../../../common/types';
+import { DataStreamMigrationStatus } from '../../../../../../../common/types';
 
-import { MigrationStateContext } from '../context';
+import type { MigrationStateContext } from '../context';
 
 import { DeprecationBadge } from '../../../../shared';
 import {

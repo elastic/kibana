@@ -7,7 +7,7 @@
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -58,6 +58,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+      },
+      globalDefaults: {
+        // Disable tours globally for all tests
+        hideAnnouncements: true,
       },
     },
     // the apps section defines the urls that
@@ -188,22 +192,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         pathname: '/app/observabilityAIAssistant',
       },
       aiAssistantManagementSelection: {
-        pathname: '/app/management/kibana/aiAssistantManagementSelection',
+        pathname: '/app/management/ai/aiAssistantManagementSelection',
       },
       obsAIAssistantManagement: {
-        pathname: '/app/management/kibana/observabilityAiAssistantManagement',
-      },
-      enterpriseSearch: {
-        pathname: '/app/elasticsearch/overview',
-      },
-      elasticsearchStart: {
-        pathname: '/app/elasticsearch/start',
-      },
-      elasticsearchIndices: {
-        pathname: '/app/elasticsearch/indices',
+        pathname: '/app/management/ai/observabilityAiAssistantManagement',
       },
       searchPlayground: {
         pathname: '/app/search_playground',
+      },
+      agentBuilder: {
+        pathname: '/app/agent_builder',
       },
     },
 

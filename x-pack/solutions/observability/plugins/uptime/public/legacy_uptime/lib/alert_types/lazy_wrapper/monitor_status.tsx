@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { store } from '../../../state';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { kibanaService } from '../../../state/kibana_service';
 import { AlertMonitorStatus } from '../../../components/overview/alerts/alerts_containers/alert_monitor_status';
 import { UptimeDataViewContextProvider } from '../../../contexts/uptime_data_view_context';
@@ -31,7 +31,7 @@ export default function MonitorStatusAlert({ core, plugins, params, stackVersion
         <UptimeDataViewContextProvider dataViews={plugins.dataViews}>
           <AlertMonitorStatus
             {...params}
-            autocomplete={plugins.unifiedSearch.autocomplete}
+            autocomplete={plugins.kql.autocomplete}
             stackVersion={stackVersion}
           />
         </UptimeDataViewContextProvider>

@@ -7,30 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import { PersistedState } from '../persisted_state';
+import type { PersistedState } from '../persisted_state';
 import { getAnalytics, getI18n, getOverlays, getTheme, getUserProfile } from '../services';
 import { saveVisualization } from '../utils/saved_visualize_utils';
-import { VisualizeOutputState } from './types';
+import type { SerializedVis } from '../vis';
 
 export const saveToLibrary = async ({
+  description,
+  title,
+  serializedVis,
   uiState,
-  rawState,
-  references,
 }: {
+  description: string | undefined;
+  serializedVis: SerializedVis;
+  title: string;
   uiState: PersistedState;
-  rawState: VisualizeOutputState;
-  references: Reference[];
 }) => {
-  const {
-    savedVis: serializedVis,
-    title,
-    description,
-    getDisplayName,
-    getEsType,
-    managed,
-  } = rawState;
-
   const visSavedObjectAttributes = {
     title,
     description,
@@ -41,16 +33,10 @@ export const saveToLibrary = async ({
       title: serializedVis.title,
     },
     savedSearchId: serializedVis.data.savedSearchId,
-    ...(serializedVis.data.savedSearchRefName
-      ? { savedSearchRefName: String(serializedVis.data.savedSearchRefName) }
-      : {}),
     searchSourceFields: serializedVis.data.searchSource,
     uiStateJSON: uiState.toString(),
     lastSavedTitle: '',
     displayName: title,
-    getDisplayName,
-    getEsType,
-    managed,
   };
 
   const libraryId = await saveVisualization(
@@ -65,7 +51,7 @@ export const saveToLibrary = async ({
       theme: getTheme(),
       userProfile: getUserProfile(),
     },
-    references ?? []
+    []
   );
   return libraryId;
 };

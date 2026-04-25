@@ -24,7 +24,7 @@ import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import type { FieldStatsControlsApi } from './types';
 
 export const initializeFieldStatsControls = (
-  rawState: FieldStatsInitialState,
+  initialState: FieldStatsInitialState,
   uiSettings: IUiSettingsClient
 ) => {
   const isEsqlEnabled = uiSettings.get(ENABLE_ESQL);
@@ -38,7 +38,7 @@ export const initializeFieldStatsControls = (
     dataViewId: undefined,
     query: undefined,
   };
-  const fieldStatsStateManager = initializeStateManager(rawState, defaults);
+  const fieldStatsStateManager = initializeStateManager(initialState, defaults);
 
   const resetData$ = new BehaviorSubject<number>(Date.now());
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);

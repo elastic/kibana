@@ -15,6 +15,8 @@
         "label": "chromeServiceMock",
         "description": [],
         "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
+        "lineNumber": 126,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26,9 +28,41 @@
             "label": "create",
             "description": [],
             "signature": [
-              "() => jest.Mocked<ChromeServiceContract>"
+              "() => jest.Mocked<",
+              "ChromeServiceContract",
+              ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-mocks",
+            "id": "def-public.chromeServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
+              "<",
+              "ChromeSetup",
+              ">"
+            ],
+            "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +89,8 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

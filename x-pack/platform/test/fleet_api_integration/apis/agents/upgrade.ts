@@ -10,7 +10,7 @@ import semver from 'semver';
 import moment from 'moment';
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent, makeSnapshotVersion } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -26,12 +26,12 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_upgrade_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await fleetAndAgents.setup();
     });
 
     beforeEach(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await supertest
         .post(`/api/fleet/agent_download_sources`)
         .set('kbn-xsrf', 'xxxx')
@@ -52,10 +52,10 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
     });
 
     describe('one agent', () => {
@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           overwrite: true,
           attributes: {
-            policy_id: 'fleet-server-policy',
+            policy_ids: ['fleet-server-policy'],
             name: 'Fleet Server',
             package: {
               name: 'fleet_server',
@@ -637,8 +637,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/215025
-    describe.skip('multiple agents', () => {
+    describe('multiple agents', () => {
       const fleetServerVersion = '7.16.0';
 
       beforeEach(async () => {
@@ -655,7 +654,7 @@ export default function (providerContext: FtrProviderContext) {
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           overwrite: true,
           attributes: {
-            policy_id: 'fleet-server-policy',
+            policy_ids: ['fleet-server-policy'],
             name: 'Fleet Server',
             package: {
               name: 'fleet_server',
@@ -999,7 +998,7 @@ export default function (providerContext: FtrProviderContext) {
               await verifyActionResult();
               resolve({});
             }
-          }, 1000);
+          }, 3000);
         }).catch((e) => {
           throw e;
         });

@@ -22,8 +22,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability/locators';
+import type { SpanLinkDetails } from '@kbn/apm-types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import type { SpanLinkDetails } from '../../../../common/span_links';
 import { asDuration } from '../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -40,7 +40,6 @@ export function SpanLinksTable({ items }: Props) {
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
   const [idActionMenuOpen, setIdActionMenuOpen] = useState<string | undefined>();
@@ -120,7 +119,11 @@ export function SpanLinksTable({ items }: Props) {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type={getSpanIcon(details.spanType, details.spanSubtype)} size="l" />
+                <EuiIcon
+                  type={getSpanIcon(details.spanType, details.spanSubtype)}
+                  size="l"
+                  aria-hidden={true}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink
@@ -171,13 +174,16 @@ export function SpanLinksTable({ items }: Props) {
         const id = `${traceId}:${spanId}`;
         return (
           <EuiPopover
+            aria-label={i18n.translate('xpack.apm.spanLinks.table.actions.ariaLabel', {
+              defaultMessage: 'Actions',
+            })}
             button={
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
                 aria-label={i18n.translate('xpack.apm.spanLinks.table.actions.edit.ariaLabel', {
                   defaultMessage: 'Edit',
                 })}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => {
                   setIdActionMenuOpen(id);
                 }}
@@ -271,5 +277,15 @@ export function SpanLinksTable({ items }: Props) {
     },
   ];
 
-  return <EuiInMemoryTable items={items} columns={columns} sorting={true} pagination={true} />;
+  return (
+    <EuiInMemoryTable
+      items={items}
+      columns={columns}
+      sorting={true}
+      pagination={true}
+      tableCaption={i18n.translate('xpack.apm.spanLinks.table.caption', {
+        defaultMessage: 'Span links list',
+      })}
+    />
+  );
 }

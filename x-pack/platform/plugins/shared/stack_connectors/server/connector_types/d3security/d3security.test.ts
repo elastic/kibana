@@ -7,10 +7,9 @@
 
 import { D3SecurityConnector } from './d3security';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { D3_SECURITY_CONNECTOR_ID } from '../../../common/d3security/constants';
+import { CONNECTOR_ID, D3SecurityRunActionResponseSchema } from '@kbn/connector-schemas/d3security';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { D3SecurityRunActionResponseSchema } from '../../../common/d3security/schema';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 describe('D3SecurityConnector', () => {
@@ -34,7 +33,7 @@ describe('D3SecurityConnector', () => {
   describe('D3 Security', () => {
     const connector = new D3SecurityConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: D3_SECURITY_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: { url: 'https://example.com/api' },
       secrets: { token: '123' },
       logger,

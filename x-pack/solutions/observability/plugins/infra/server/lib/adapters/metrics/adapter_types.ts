@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import type {
   NodeDetailsRequest,
@@ -51,7 +51,7 @@ export enum InfraMetricModelMetricType {
 }
 
 export interface InfraMetricModel {
-  id: InventoryMetric;
+  id: InventoryTsvbType;
   requires: string[];
   index_pattern: string | string[];
   interval: string;

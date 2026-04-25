@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { sortBy } from 'lodash';
 import { getInstallationInfo } from '@kbn/test-suites-xpack-platform/fleet_api_integration/apis/package_policy/helper';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import {
   skipIfNoDockerRegistry,
   isDockerRegistryEnabledOrSkipped,
@@ -24,6 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const retry = getService('retry');
 
   const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
     expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
@@ -52,7 +53,8 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('Package Policy - update', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246569
+  describe.skip('Package Policy - update', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let managedAgentPolicyId: string;
@@ -67,7 +69,7 @@ export default function (providerContext: FtrProviderContext) {
     let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
     before(async function () {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
@@ -268,7 +270,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
@@ -401,6 +403,7 @@ export default function (providerContext: FtrProviderContext) {
               enabled: true,
               streams: [],
               config: {
+                artifact_manifest: { value: {} },
                 policy: {
                   value: policyFactory(),
                 },
@@ -1037,22 +1040,31 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const installation = await getInstallationInfo(supertest, 'integration_to_input', '2.0.0');
+        await retry.tryForTime(10000, async () => {
+          const installation = await getInstallationInfo(
+            supertest,
+            'integration_to_input',
+            '2.0.0'
+          );
 
-        expectIdArraysEqual(installation.installed_es, [
-          // assets from version 1.0.0
-          { id: 'logs-integration_to_input.log', type: 'index_template' },
-          { id: 'logs-integration_to_input.log-1.0.0', type: 'ingest_pipeline' },
-          { id: 'logs-integration_to_input.log@custom', type: 'component_template' },
-          { id: 'logs-integration_to_input.log@package', type: 'component_template' },
-          // assets from version 2.0.0 for new package policy
-          { id: 'logs-somedataset-2.0.0', type: 'ingest_pipeline' },
-          { id: 'logs-somedataset', type: 'index_template' },
-          { id: 'logs-somedataset@package', type: 'component_template' },
-          { id: 'logs-somedataset@custom', type: 'component_template' },
-          { id: 'logs@custom', type: 'component_template' },
-          { id: 'integration_to_input@custom', type: 'component_template' },
-        ]);
+          expectIdArraysEqual(
+            installation.installed_es.filter((a: any) => a.type !== 'knowledge_base'),
+            [
+              // assets from version 1.0.0
+              { id: 'logs-integration_to_input.log', type: 'index_template' },
+              { id: 'logs-integration_to_input.log-1.0.0', type: 'ingest_pipeline' },
+              { id: 'logs-integration_to_input.log@custom', type: 'component_template' },
+              { id: 'logs-integration_to_input.log@package', type: 'component_template' },
+              // assets from version 2.0.0 for new package policy
+              { id: 'logs-somedataset-2.0.0', type: 'ingest_pipeline' },
+              { id: 'logs-somedataset', type: 'index_template' },
+              { id: 'logs-somedataset@package', type: 'component_template' },
+              { id: 'logs-somedataset@custom', type: 'component_template' },
+              { id: 'logs@custom', type: 'component_template' },
+              { id: 'integration_to_input@custom', type: 'component_template' },
+            ]
+          );
+        });
 
         const dataset3PkgComponentTemplate = await getComponentTemplate('logs-somedataset@package');
         expect(dataset3PkgComponentTemplate).not.to.be(null);

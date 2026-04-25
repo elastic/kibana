@@ -12,3 +12,6 @@ import { APP_ID } from './constants';
 export const API_ACTION_PREFIX = `${APP_ID}-`;
 
 export const SIEM_MIGRATIONS_API_ACTION_ALL = `${API_ACTION_PREFIX}siemMigrationsAll`;
+export const ATTACK_DISCOVERY_API_ACTION_ALL = `${API_ACTION_PREFIX}attackDiscoveryAll` as const;
+export const ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE =
+  `${API_ACTION_PREFIX}updateAttackDiscoverySchedule` as const;

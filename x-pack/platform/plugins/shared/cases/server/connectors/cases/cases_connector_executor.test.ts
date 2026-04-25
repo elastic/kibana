@@ -10,6 +10,7 @@ import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
   CASE_RULES_SAVED_OBJECT,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -45,7 +46,7 @@ import {
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { CasesConnectorRunParams } from './types';
-import { INITIAL_ORACLE_RECORD_COUNTER, MAX_OPEN_CASES } from './constants';
+import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('./cases_oracle_service');
@@ -78,6 +79,7 @@ describe('CasesConnectorExecutor', () => {
 
   const params: CasesConnectorRunParams = {
     alerts,
+    autoPushCase: null,
     groupedAlerts: null,
     groupingBy,
     owner,
@@ -262,6 +264,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-1",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -288,6 +291,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-2",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -314,6 +318,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-3",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -571,6 +576,7 @@ describe('CasesConnectorExecutor', () => {
                   "id": "mock-id-3",
                   "owner": "cases",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -945,6 +951,7 @@ describe('CasesConnectorExecutor', () => {
                   "id": "mock-id-4",
                   "owner": "cases",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -1194,6 +1201,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservables": false,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1306,6 +1314,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-3",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservables": false,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1380,6 +1389,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservables": false,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1421,7 +1431,10 @@ describe('CasesConnectorExecutor', () => {
           });
 
           casesClientMock.cases.bulkUpdate.mockResolvedValue([
-            { ...cases[0], status: CaseStatuses.open },
+            {
+              ...cases[0],
+              status: CaseStatuses.open,
+            },
           ]);
 
           await connectorExecutor.execute({
@@ -2793,26 +2806,27 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 1. Falling back to one case.`,
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (3) than the maximum number of allowed cases (1). Falling back to one case.`,
           { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });
     });
 
-    describe('hard limits', () => {
-      const allAlerts = Array.from({ length: MAX_OPEN_CASES + 1 }).map((_, index) => ({
-        _id: `alert-id-${index}`,
-        _index: `alert-index-${index}`,
-        'host.name': `host-${index}`,
-      }));
+    describe('effective maximum', () => {
+      const allAlerts = Array.from({ length: MAX_OPEN_CASES_DEFAULT_MAXIMUM + 1 }).map(
+        (_, index) => ({
+          _id: `alert-id-${index}`,
+          _index: `alert-index-${index}`,
+          'host.name': `host-${index}`,
+        })
+      );
 
-      it('generates the oracle keys correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+      it('generates the oracle keys correctly when the total cases to be open is more than the effective maximum', async () => {
         await connectorExecutor.execute({
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 30,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
@@ -2824,13 +2838,12 @@ describe('CasesConnectorExecutor', () => {
         });
       });
 
-      it('generates the case ids correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+      it('generates the case ids correctly when the total cases to be open is more than the effective maximum', async () => {
         await connectorExecutor.execute({
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 30,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
@@ -2843,13 +2856,12 @@ describe('CasesConnectorExecutor', () => {
         });
       });
 
-      it('attach all alerts to the same case when the grouping generates more than MAX_OPEN_CASES', async () => {
+      it('attach all alerts to the same case when the grouping generates more than the effective maximum', async () => {
         await connectorExecutor.execute({
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 30,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
@@ -2875,12 +2887,11 @@ describe('CasesConnectorExecutor', () => {
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 30,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 20. Falling back to one case.`,
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (21) than the maximum number of allowed cases (20). Falling back to one case.`,
           { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });
@@ -3164,6 +3175,7 @@ describe('CasesConnectorExecutor', () => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
+      autoPushCase: null,
     };
 
     describe('run', () => {
@@ -3260,6 +3272,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-1",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -3284,6 +3297,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-2",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -3308,6 +3322,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-3",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -3486,6 +3501,34 @@ describe('CasesConnectorExecutor', () => {
           expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping(casesClientMock);
         });
 
+        it('attaches grouped comments using unified shape when attachments feature flag is enabled', async () => {
+          const connectorExecutorWithFlagOn = new CasesConnectorExecutor({
+            logger: mockLogger,
+            casesOracleService: new CasesOracleServiceMock(),
+            casesService: new CasesServiceMock(),
+            casesClient: casesClientMock,
+            spaceId: 'default',
+            isCasesAttachmentsEnabled: true,
+          });
+
+          await connectorExecutorWithFlagOn.execute(paramsWithGroupedAlerts);
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(
+            1,
+            expect.objectContaining({
+              caseId: 'mock-id-1',
+              attachments: expect.arrayContaining([
+                expect.objectContaining({
+                  type: 'comment',
+                  data: { content: 'comment-1' },
+                  owner: 'securitySolution',
+                }),
+              ]),
+            })
+          );
+        });
+
         it('attaches alerts to reopened cases', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
             cases: [{ ...cases[0], status: CaseStatuses.closed }],
@@ -3493,7 +3536,10 @@ describe('CasesConnectorExecutor', () => {
           });
 
           casesClientMock.cases.bulkUpdate.mockResolvedValue([
-            { ...cases[0], status: CaseStatuses.open },
+            {
+              ...cases[0],
+              status: CaseStatuses.open,
+            },
           ]);
 
           await connectorExecutor.execute({

@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { omit, pick } from 'lodash';
+import {
+  MessageRole,
+  type Message,
+  type Conversation,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import type { Readable } from 'stream';
+import { last, omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
-import {
+import type {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,
   MessageAddEvent,
   StreamingChatResponseEvent,
-  StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
-import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
+import { StreamingChatResponseEventType } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import type { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
+import type { LlmProxy } from '../utils/create_llm_proxy';
+import { createLlmProxy } from '../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   systemMessageSorted,
@@ -27,11 +33,29 @@ import {
   getConversationCreatedEvent,
 } from '../utils/conversation';
 
+interface NonStreamingChatResponse {
+  conversationId: string | undefined;
+  connectorId: string;
+  data?: string;
+}
+
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
+
+  async function getPersistedConversationById(
+    conversationId: string | undefined
+  ): Promise<Conversation | undefined> {
+    const conversations = await observabilityAIAssistantAPIClient.editor({
+      endpoint: 'POST /internal/observability_ai_assistant/conversations',
+    });
+
+    return conversations.body.conversations.find(
+      (conversation) => conversation.conversation.id === conversationId
+    );
+  }
 
   const messages: Message[] = [
     {
@@ -69,7 +93,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      return decodeEvents(response.body).slice(2); // ignore context request/response, we're testing this elsewhere
+      return decodeEvents(response.body as Readable).slice(2); // ignore context request/response, we're testing this elsewhere
     }
 
     before(async () => {
@@ -301,6 +325,100 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
+    describe('when isStream:false and persist:true', () => {
+      let nonStreamingResponse: NonStreamingChatResponse;
+      const assistantResponse = 'Hello from non-streamed flow';
+
+      before(async () => {
+        await clearConversations(es);
+
+        void proxy.interceptTitle('Title for non-streamed conversation');
+        void proxy.interceptWithResponse(assistantResponse);
+
+        const response = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+          params: {
+            body: {
+              messages,
+              connectorId,
+              persist: true,
+              screenContexts: [],
+              scopes: ['observability'],
+              isStream: false,
+            },
+          },
+        });
+
+        expect(response.status).to.be(200);
+
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        nonStreamingResponse = response.body as NonStreamingChatResponse;
+      });
+
+      after(async () => {
+        await clearConversations(es);
+      });
+
+      it('returns the assistant response and conversation metadata', () => {
+        expect(nonStreamingResponse.conversationId).to.be.a('string');
+        expect(nonStreamingResponse.connectorId).to.be(connectorId);
+        expect(nonStreamingResponse.data).to.be(assistantResponse);
+      });
+
+      it('persists the assistant response in the stored conversation', async () => {
+        const persistedConversation = await getPersistedConversationById(
+          nonStreamingResponse.conversationId
+        );
+
+        const lastMessage = last(persistedConversation?.messages)?.message;
+        expect(lastMessage?.role).to.eql(MessageRole.Assistant);
+        expect(lastMessage?.content).to.be(assistantResponse);
+      });
+    });
+
+    describe('when isStream:false and persist:false', () => {
+      let nonStreamingResponse: NonStreamingChatResponse;
+      const assistantResponse = 'Hello from non-streamed flow without persistence';
+
+      before(async () => {
+        void proxy.interceptWithResponse(assistantResponse);
+
+        const response = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+          params: {
+            body: {
+              messages,
+              connectorId,
+              persist: false,
+              screenContexts: [],
+              scopes: ['observability'],
+              isStream: false,
+            },
+          },
+        });
+
+        expect(response.status).to.be(200);
+
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        nonStreamingResponse = response.body as NonStreamingChatResponse;
+      });
+
+      it('returns the assistant response', () => {
+        expect(nonStreamingResponse.conversationId).to.be(undefined);
+        expect(nonStreamingResponse.connectorId).to.be(connectorId);
+        expect(nonStreamingResponse.data).to.be(assistantResponse);
+      });
+
+      it('does not persist the conversation', async () => {
+        const persistedConversation = await getPersistedConversationById(
+          nonStreamingResponse.conversationId
+        );
+        expect(persistedConversation).to.be(undefined);
+      });
+    });
+
     describe('after executing a screen context action', () => {
       let events: StreamingChatResponseEvent[];
 
@@ -401,8 +519,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
-
+        conversationCreatedEvent = getConversationCreatedEvent(createResponse.body as Readable);
         const conversationId = conversationCreatedEvent.conversation.id;
         const fullConversation = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',

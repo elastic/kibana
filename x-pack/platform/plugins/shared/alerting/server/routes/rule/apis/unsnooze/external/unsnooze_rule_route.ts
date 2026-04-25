@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { IRouter } from '@kbn/core/server';
+import { validateInternalRuleType } from '../../../../lib/validate_internal_rule_type';
 import {
   unsnoozeParamsSchema,
   type UnsnoozeParams,
@@ -59,9 +60,17 @@ export const unsnoozeRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
+        const ruleTypes = alertingContext.listTypes();
+
         const { ruleId, scheduleId }: UnsnoozeParams = req.params;
         try {
           const currentRule = await rulesClient.get({ id: ruleId });
+
+          validateInternalRuleType({
+            ruleTypeId: currentRule.alertTypeId,
+            ruleTypes,
+            operationText: 'unsnooze',
+          });
 
           if (!currentRule.snoozeSchedule?.length) {
             throw Boom.badRequest('Rule has no snooze schedules.');

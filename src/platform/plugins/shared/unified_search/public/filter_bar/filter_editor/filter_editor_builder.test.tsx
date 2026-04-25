@@ -8,9 +8,11 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { FilterEditor, FilterEditorProps } from './filter_editor';
+import { fireEvent, render, screen, waitFor, within, act } from '@testing-library/react';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { FilterEditorProps } from './filter_editor';
+import { FilterEditor } from './filter_editor';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -152,12 +154,14 @@ const defaultProps = {
 };
 
 const renderFilterEditor = async (propsOverrides?: Partial<FilterEditorProps>) => {
-  render(<FilterEditor {...defaultProps} {...propsOverrides} />, {
-    wrapper: ({ children }) => (
-      <I18nProvider>
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-      </I18nProvider>
-    ),
+  await act(async () => {
+    render(<FilterEditor {...defaultProps} {...propsOverrides} />, {
+      wrapper: ({ children }) => (
+        <I18nProvider>
+          <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        </I18nProvider>
+      ),
+    });
   });
 
   await waitFor(() => {

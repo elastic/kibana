@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
 export function useBehaviorSubject<T>(o$: BehaviorSubject<T>) {

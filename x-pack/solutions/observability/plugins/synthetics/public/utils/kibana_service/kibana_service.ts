@@ -7,8 +7,8 @@
 
 import type { Observable } from 'rxjs';
 import type { CoreStart, CoreTheme, CoreSetup } from '@kbn/core/public';
-import { AppMountParameters } from '@kbn/core/public';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 import { apiService } from '../api_service/api_service';
 
 class KibanaService {
@@ -19,6 +19,7 @@ class KibanaService {
   public setupPlugins!: ClientPluginsSetup;
   public isDev!: boolean;
   public isServerless!: boolean;
+  public isCCSEnabled!: boolean;
   public appMountParameters!: AppMountParameters;
   public startPlugins!: ClientPluginsStart;
 
@@ -28,12 +29,14 @@ class KibanaService {
     startPlugins,
     isDev,
     isServerless,
+    isCCSEnabled,
   }: {
     coreSetup: CoreSetup;
     coreStart: CoreStart;
     startPlugins: ClientPluginsStart;
     isDev: boolean;
     isServerless: boolean;
+    isCCSEnabled: boolean;
   }) {
     this.coreSetup = coreSetup;
     this.coreStart = coreStart;
@@ -42,6 +45,7 @@ class KibanaService {
     apiService.http = coreStart.http;
     this.isDev = isDev;
     this.isServerless = isServerless;
+    this.isCCSEnabled = isCCSEnabled;
   }
 
   public get toasts() {

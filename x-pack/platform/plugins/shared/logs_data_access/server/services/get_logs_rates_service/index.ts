@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { getLogErrorRate, getLogRatePerMinute } from '../../utils';
 import { LOG_LEVEL } from '../../es_fields';

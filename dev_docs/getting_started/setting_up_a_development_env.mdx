@@ -3,7 +3,7 @@ id: kibDevTutorialSetupDevEnv
 slug: /kibana-dev-docs/getting-started/setup-dev-env
 title: Set up a Development Environment
 description: Learn how to setup a development environment for contributing to the Kibana repository
-date: 2024-08-09
+date: 2026-02-06
 tags: ['kibana', 'onboarding', 'dev', 'architecture', 'setup', 'devcontainer']
 ---
 
@@ -39,12 +39,12 @@ Then, install the latest version of yarn using:
 npm install -g yarn
 ```
 
-If you have Yarn installed, make sure you are using 1.22.19 or later. 2.0 and later are unsupported.
+If you have Yarn installed, make sure you are using 1.22.22.
 
 . If you are using an unsupported Yarn version, run:
 +
 ```sh
-yarn set version 1.22.19
+yarn set version 1.22.22
 ```
 
 Finally, bootstrap Kibana and install all of the remaining dependencies:
@@ -78,6 +78,33 @@ yarn start
 Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html).
 You will find the development server running on (http://localhost:5601) - and you can log in with the `elastic:changeme` credential pair.
 
+## Run in serverless mode
+
+To develop against serverless projects, you need to start both Elasticsearch and Kibana in serverless mode with matching project types.
+
+**Step 1:** Start Elasticsearch in serverless mode (in a separate terminal):
+
+```sh
+# Pick the project type that matches your work
+yarn es serverless --projectType=oblt          
+yarn es serverless --projectType=security 
+yarn es serverless --projectType=es            
+yarn es serverless --projectType=workplaceai  
+```
+
+**Step 2:** Start Kibana in the matching serverless mode:
+
+```sh
+yarn serverless-oblt         
+yarn serverless-security     
+yarn serverless-es           
+yarn serverless-workplace-ai 
+```
+
+**Important:** The Kibana serverless mode must match the ES `--projectType` value. Mismatched modes will cause errors.
+
+Login with `elastic_serverless` / `changeme` (or `system_indices_superuser` / `changeme`).
+
 ## Code away!
 
 You are now ready to start developing. 
@@ -101,7 +128,7 @@ Kibana also supports using a [dev container](https://containers.dev/) which can 
 
 1. Make a copy of [`<repo_root>/.devcontainer/.env.template`](https://github.com/elastic/kibana/blob/main/.devcontainer/.env.template) and rename it to `<repo_root>/.devcontainer/.env`. Edit any values you're interested in.
 1. There are three options for mounting the Kibana repo into the container:
-    - **Local Filesystem**: Clone the repo locally, or use an existing copy, and open it in VS Code. When prompted, select "Reopen in Dev Container". This uses a bind mount, allowing the container to access and modify files directly on your local filesystem. Your git credentials should be automatically mounted in the container as well. Note that Bazel will create symlinks and a cache inside the container file system. So, if switching to working on your local filesystem afterwards, you will need to bootstrap again.
+    - **Local Filesystem**: Clone the repo locally, or use an existing copy, and open it in VS Code. When prompted, select "Reopen in Dev Container". This uses a bind mount, allowing the container to access and modify files directly on your local filesystem. Your git credentials should be automatically mounted in the container as well. 
     - **Docker Repo Volume**: Use the `Dev Containers: Clone Repository in Named Container Volume...` command from the Command Palette (`F1`). This clones the repo into a Docker volume, isolating it from your local filesystem. You will need to configure your git credentials manually in this isolated environment.
     - **Docker PR Volume**: Use the `Dev Containers: Clone GitHub Pull Request in Named Container Volume...` command from the Command Palette (`F1`). This is the same as the previous option, but can be useful for testing a PR in insolation of your local filesystem.
 1. VS Code will then build the container, this will take a few minutes the first time, but subsequent builds will utilize Docker caching and be much faster.

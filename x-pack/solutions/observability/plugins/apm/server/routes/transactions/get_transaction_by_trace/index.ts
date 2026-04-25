@@ -7,7 +7,7 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
@@ -92,7 +92,10 @@ export async function getRootTransactionByTraceId({
 
   const resp = await apmEventClient.search('get_root_transaction_by_trace_id', params);
 
-  const event = unflattenKnownApmEventFields(maybe(resp.hits.hits[0])?.fields, requiredFields);
+  const fields = maybe(resp.hits.hits[0])?.fields;
+
+  const event =
+    fields && accessKnownApmEventFields(fields).requireFields(requiredFields).unflatten();
 
   return {
     transaction: event,

@@ -9,7 +9,8 @@ import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { PlaygroundForm, PlaygroundFormFields } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 import { SelectIndicesFlyout } from '../select_indices_flyout';
 
 export const AddDataSources: React.FC = () => {
@@ -37,7 +38,7 @@ export const AddDataSources: React.FC = () => {
         </EuiButtonEmpty>
       ) : (
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => setShowFlyout(true)}
           data-test-subj="addDataSourcesButton"
         >

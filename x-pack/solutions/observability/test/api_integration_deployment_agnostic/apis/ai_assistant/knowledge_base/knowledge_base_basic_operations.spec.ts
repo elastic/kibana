@@ -60,6 +60,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Knowledge base: Basic operations', function () {
+    // fails/flaky on MKI, see https://github.com/elastic/kibana/issues/233089
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
     });

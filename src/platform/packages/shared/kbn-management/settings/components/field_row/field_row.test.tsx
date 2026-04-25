@@ -10,9 +10,9 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
-import { SettingType } from '@kbn/management-settings-types';
+import type { SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import { KnownTypeToMetadata } from '@kbn/management-settings-types/metadata';
+import type { KnownTypeToMetadata } from '@kbn/management-settings-types/metadata';
 
 import { DATA_TEST_SUBJ_SCREEN_READER_MESSAGE, FieldRow } from './field_row';
 import { wrap } from './mocks';

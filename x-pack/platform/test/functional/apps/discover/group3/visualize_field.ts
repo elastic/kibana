@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { DebugState } from '@elastic/charts';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { DebugState } from '@elastic/charts';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -51,9 +51,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('discover field visualize button', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       );
     });
 
@@ -68,9 +70,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       );
     });
 
@@ -120,7 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const breakdownLabel = await testSubjects.find(
-          'lnsDragDrop_domDraggable_Top 3 values of extension.raw'
+          'lnsDragDrop_domDraggable_Top 9 values of extension.raw'
         );
 
         const lnsWorkspace = await testSubjects.find('lnsWorkspace');
@@ -129,8 +131,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           list.map((elem: WebElementWrapper) => elem.getVisibleText())
         );
 
-        expect(await breakdownLabel.getVisibleText()).to.eql('Top 3 values of extension.raw');
-        expect(values).to.eql(['jpg', 'css', 'png', 'Other']);
+        expect(await breakdownLabel.getVisibleText()).to.eql('Top 9 values of extension.raw');
+        // Shows all 5 extension types (no Other bucket since all values fit within top 9)
+        expect(values).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
       });
     });
 
@@ -158,7 +161,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
-      await discover.chooseLensSuggestion('pie');
+      await discover.chooseLensSuggestion('treemap');
       await header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
@@ -282,10 +285,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization();
       expect(await testSubjects.exists('lnsDataTable')).to.be(true);
 
-      await lens.removeDimension('lnsDatatable_metrics');
-      await lens.removeDimension('lnsDatatable_metrics');
-      await lens.removeDimension('lnsDatatable_metrics');
-      await lens.removeDimension('lnsDatatable_metrics');
+      // Removing all except one columns one
+      let count = 9;
+      while (count-- > 0) {
+        await lens.removeDimension('lnsDatatable_metrics');
+      }
 
       await lens.configureTextBasedLanguagesDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
@@ -297,26 +301,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('lensSuggestionsPanelToggleButton');
       await testSubjects.click('lnsSuggestion-pie');
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
-    });
-
-    it('should default title when saving chart in Discover (even when modal is closed and reopened)', async () => {
-      await discover.selectTextBaseLang();
-      await header.waitUntilLoadingHasFinished();
-      await monacoEditor.setCodeEditorValue(
-        'from logstash-* | stats averageB = avg(bytes) by extension'
-      );
-      await testSubjects.click('querySubmitButton');
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.click('unifiedHistogramSaveVisualization');
-      await header.waitUntilLoadingHasFinished();
-      let title = await testSubjects.getAttribute('savedObjectTitle', 'value');
-      expect(title).to.equal('Bar vertical stacked');
-      await testSubjects.click('saveCancelButton');
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.click('unifiedHistogramSaveVisualization');
-      await header.waitUntilLoadingHasFinished();
-      title = await testSubjects.getAttribute('savedObjectTitle', 'value');
-      expect(title).to.equal('Bar vertical stacked');
     });
   });
 }

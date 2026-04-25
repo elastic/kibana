@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 const DEPRECATED_PACKAGES = [
   'zscaler', // deprecated: https://github.com/elastic/integrations/issues/4947

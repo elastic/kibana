@@ -8,16 +8,16 @@
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import {
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type {
   XYByValueAnnotationLayerConfig,
   XYAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
   XYByReferenceAnnotationLayerConfig,
 } from '../../types';
 import { onSave, SaveModal } from './save_action';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import {
+import type {
   EventAnnotationGroupConfig,
   PointInTimeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
@@ -25,6 +25,8 @@ import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+
+const mockSave = jest.fn();
 
 describe('annotation group save action', () => {
   describe('save modal', () => {
@@ -94,7 +96,7 @@ describe('annotation group save action', () => {
       const wrapper = shallowWithIntl(
         <SaveModal
           domElement={document.createElement('div')}
-          onSave={() => {}}
+          onSave={mockSave}
           savedObjectsTagging={savedObjectsTagging}
           title={title}
           description={description}
@@ -148,7 +150,7 @@ describe('annotation group save action', () => {
           preferredSeriesType: 'area',
           legend: { isVisible: true, position: 'bottom' },
           layers: [{ layerId } as XYAnnotationLayerConfig],
-        } as XYState,
+        } as XYVisualizationState,
         layer: byValueLayer,
         registerLibraryAnnotationGroup: jest.fn(),
         setState: jest.fn(),

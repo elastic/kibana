@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   DataStreamsStatsServiceSetup,
   DataStreamsStatsServiceStartDeps,
   DataStreamsStatsServiceStart,
@@ -17,16 +17,19 @@ export class DataStreamsStatsService {
 
   public setup(): DataStreamsStatsServiceSetup {}
 
-  public start({ http }: DataStreamsStatsServiceStartDeps): DataStreamsStatsServiceStart {
+  public start({
+    http,
+    telemetryClient,
+  }: DataStreamsStatsServiceStartDeps): DataStreamsStatsServiceStart {
     return {
-      getClient: () => this.getClient({ http }),
+      getClient: () => this.getClient({ http, telemetryClient }),
     };
   }
 
-  private async getClient({ http }: DataStreamsStatsServiceStartDeps) {
+  private async getClient({ http, telemetryClient }: DataStreamsStatsServiceStartDeps) {
     if (!this.client) {
       const { DataStreamsStatsClient } = await import('./data_streams_stats_client');
-      const client = new DataStreamsStatsClient(http);
+      const client = new DataStreamsStatsClient(http, telemetryClient);
       this.client = client;
     }
 

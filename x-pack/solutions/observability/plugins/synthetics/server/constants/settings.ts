@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DynamicSettingsAttributes } from '../runtime_types/settings';
+import type { DynamicSettingsAttributes } from '../runtime_types/settings';
 
 export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettingsAttributes = {
   certAgeThreshold: 730,
@@ -16,6 +16,8 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettingsAttributes = {
     cc: [],
     bcc: [],
   },
+  useAllRemoteClusters: false,
+  selectedRemoteClusters: [],
 };
 
 export const DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES: DynamicSettingsAttributes =

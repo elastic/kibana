@@ -10,7 +10,8 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { InferenceConfig, configSchema } from './config';
+import type { InferenceConfig } from './config';
+import { configSchema } from './config';
 import type {
   InferenceServerSetup,
   InferenceServerStart,
@@ -20,6 +21,7 @@ import type {
 import { InferencePlugin } from './plugin';
 
 export type { InferenceServerSetup, InferenceServerStart };
+export type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 export {
   naturalLanguageToEsql,

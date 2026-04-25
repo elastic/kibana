@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
-import type { PolicySecretReference } from './secret';
+import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
+import type { SecretReference } from './secret';
 
 export interface PackagePolicyPackage {
   name: string;
@@ -15,6 +15,7 @@ export interface PackagePolicyPackage {
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   requires_root?: boolean;
   type?: string;
+  fips_compatible?: boolean;
 }
 
 export interface PackagePolicyConfigRecordEntry {
@@ -31,7 +32,7 @@ export interface NewPackagePolicyInputStream {
   keep_enabled?: boolean;
   data_stream: {
     dataset: string;
-    type: string;
+    type?: string;
     elasticsearch?: {
       // TODO: these don't really need to be defined in the package policy schema and could be pulled directly from
       // the package where needed.
@@ -48,7 +49,9 @@ export interface NewPackagePolicyInputStream {
   };
   release?: RegistryRelease;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
+  migrate_from?: string;
 }
 
 export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
@@ -57,14 +60,20 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 }
 
 export interface NewPackagePolicyInput {
+  /** Auto-generated instance identifier for this input within a saved package policy (e.g. `otelcol-nginx-abc123`). Distinct from `name`, which comes from the registry manifest and is used to disambiguate inputs of the same type. */
   id?: string;
+  /** The registry input's `name` field, when set. Used to disambiguate multiple inputs of the same `type` within a policy template. Falls back to `type` when absent. */
+  name?: string;
   type: string;
   policy_template?: string;
   enabled: boolean;
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
+  deprecated?: DeprecationInfo;
+  migrate_from?: string;
 }
 
 export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {
@@ -84,9 +93,12 @@ export interface NewPackagePolicy {
   policy_ids: string[];
   // Nullable to allow user to reset to default outputs
   output_id?: string | null;
+  cloud_connector_id?: string | null;
+  cloud_connector_name?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   elasticsearch?: {
     privileges?: {
       cluster?: string[];
@@ -95,6 +107,7 @@ export interface NewPackagePolicy {
   };
   overrides?: { inputs?: { [key: string]: any } } | null;
   supports_agentless?: boolean | null;
+  supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
 }
 
@@ -110,11 +123,12 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   version?: string;
   agents?: number;
   revision: number;
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   updated_at: string;
   updated_by: string;
   created_at: string;
   created_by: string;
+  package_agent_version_condition?: string;
 }
 
 export type DryRunPackagePolicy = NewPackagePolicy & {

@@ -179,8 +179,8 @@ export const strings = {
       defaultMessage: 'Layout of the chart is horizontal',
     }),
   getSplitAccessorHelp: () =>
-    i18n.translate('expressionXY.dataLayer.splitAccessor.help', {
-      defaultMessage: 'The column to split by',
+    i18n.translate('expressionXY.dataLayer.splitAccessors.help', {
+      defaultMessage: 'The columns to split by',
     }),
   getAccessorsHelp: () =>
     i18n.translate('expressionXY.dataLayer.accessors.help', {

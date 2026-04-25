@@ -13,7 +13,7 @@ import type { Agent } from '../../types';
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
@@ -70,7 +70,7 @@ export async function unenrollAgent(
   }
   const now = new Date().toISOString();
   const currentSpaceId = getCurrentNamespace(soClient);
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: now,
     type: 'UNENROLL',
@@ -103,7 +103,7 @@ export async function unenrollAgents(
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
   const namespaceFilter = await agentsKueryNamespaceFilter(spaceId);
-  const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
+  const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
   const res = await getAgentsByKuery(esClient, soClient, {
     kuery,
     showAgentless: options.showAgentless,

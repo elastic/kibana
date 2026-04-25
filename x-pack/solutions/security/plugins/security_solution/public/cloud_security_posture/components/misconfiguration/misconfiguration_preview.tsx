@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
@@ -19,13 +19,19 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../../utils/build_euid_csp_preview_options';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
+import { useUiSetting } from '../../../common/lib/kibana';
 
 interface MisconfigurationPreviewDistributionBarProps {
   key: string;
@@ -105,21 +111,23 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  value,
-  field,
+  identityFields,
   isPreviewMode,
-  isLinkEnabled,
   openDetailsPanel,
 }: {
-  value: string;
-  field: CloudPostureEntityIdentifier;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
+  identityFields: IdentityFields;
+  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
+  const euidApi = useEntityStoreEuidApi();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    field,
-    value
+    buildEuidCspPreviewOptions(
+      inferEntityTypeFromIdentityFields(identityFields),
+      identityFields,
+      euidApi,
+      { entityStoreV2Enabled }
+    )
   );
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 
@@ -128,32 +136,31 @@ export const MisconfigurationsPreview = ({
   }, []);
   const { euiTheme } = useEuiTheme();
 
-  const goToEntityInsightTab = useCallback(() => {
-    openDetailsPanel({
-      tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-    });
-  }, [openDetailsPanel]);
+  const goToEntityInsightTab = useCallback(
+    () =>
+      openDetailsPanel({
+        tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+        subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+      }),
+    [openDetailsPanel]
+  );
 
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: goToEntityInsightTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
-                defaultMessage="Show all misconfiguration findings"
-              />
-            ),
-          }
-        : undefined,
-    [isLinkEnabled, goToEntityInsightTab]
+    () => ({
+      callback: goToEntityInsightTab,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
+          defaultMessage="Show all misconfiguration findings"
+        />
+      ),
+    }),
+    [goToEntityInsightTab]
   );
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'arrowStart' : '',
+        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'chevronLimitLeft' : '',
         title: (
           <EuiTitle
             css={css`

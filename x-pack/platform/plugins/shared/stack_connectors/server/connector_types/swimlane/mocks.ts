@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ExecutorSubActionPushParams, ExternalService, PushToServiceApiParams } from './types';
+import type {
+  ExecutorSubActionPushParams,
+  PushToServiceApiParams,
+} from '@kbn/connector-schemas/swimlane';
+import type { ExternalService } from './types';
 
 export const applicationFields = [
   {

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UIM_APP_NAME } from '../constants';
 
 export { METRIC_TYPE };
@@ -29,12 +30,9 @@ export function trackUiMetric(metricType: UiCounterMetricType, name: string) {
  * Transparently return provided request Promise, while allowing us to track
  * a successful completion of the request.
  */
-export function trackUserRequest(request: Promise<any>, eventName: string) {
+export async function trackUserRequest<T>(request: Promise<T>, eventName: string): Promise<T> {
   // Only track successful actions.
-  return request.then((response: any) => {
-    trackUiMetric(METRIC_TYPE.COUNT, eventName);
-    // We return the response immediately without waiting for the tracking request to resolve,
-    // to avoid adding additional latency.
-    return response;
-  });
+  const response = await request;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
+  return response;
 }

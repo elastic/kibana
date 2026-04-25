@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiContextMenuItem } from '@elastic/eui';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export function RefreshButton() {
@@ -20,6 +20,19 @@ export function RefreshButton() {
     >
       {REFRESH_LABEL}
     </EuiButton>
+  );
+}
+
+export function RefreshContextItem() {
+  const { refreshApp } = useSyntheticsRefreshContext();
+  return (
+    <EuiContextMenuItem
+      data-test-subj="syntheticsRefreshContextItem"
+      icon="refresh"
+      onClick={() => refreshApp()}
+    >
+      {REFRESH_LABEL}
+    </EuiContextMenuItem>
   );
 }
 

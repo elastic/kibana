@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
-  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
+  const { appMenu, common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'header',
@@ -140,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedFieldList.doesSidebarShowFields()).to.be(true);
       });
 
-      it('should fetch data when a search is saved', async function () {
+      it('should not fetch data when a search is saved', async function () {
         await discover.selectIndexPattern('logstash-*');
 
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
@@ -148,8 +149,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.saveSearch(savedSearchName);
 
-        await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await unifiedFieldList.doesSidebarShowFields()).to.be(true);
+        await retry.waitFor('number of fetches to be 0', waitForFetches(0));
+        expect(await unifiedFieldList.doesSidebarShowFields()).to.be(false);
       });
 
       it('should reset state after opening a saved search and pressing New', async function () {
@@ -159,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
         expect(await unifiedFieldList.doesSidebarShowFields()).to.be(true);
 
-        await testSubjects.click('discoverNewButton');
+        await appMenu.clickMenuItem('discoverNewButton');
         await header.waitUntilLoadingHasFinished();
 
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));

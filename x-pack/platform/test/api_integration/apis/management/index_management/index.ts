@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('index management', () => {
     loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./index_doc_count'));
     loadTestFile(require.resolve('./mapping'));
     loadTestFile(require.resolve('./settings'));
     loadTestFile(require.resolve('./stats'));

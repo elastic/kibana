@@ -15,6 +15,8 @@
           "UiSettingsClientCommon"
         ],
         "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_client.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,6 +31,8 @@
               "any"
             ],
             "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_client.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -43,6 +47,8 @@
                   "UiSettingsClientParams"
                 ],
                 "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_client.ts",
+                "lineNumber": 15,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -61,6 +67,8 @@
               "(key: string, newVal: any) => Promise<boolean>"
             ],
             "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_client.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -75,6 +83,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_client.ts",
+                "lineNumber": 19,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -90,6 +100,8 @@
                   "any"
                 ],
                 "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_client.ts",
+                "lineNumber": 19,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -111,6 +123,8 @@
         "label": "UiSettingsService",
         "description": [],
         "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_service.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,6 +142,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_service.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -142,6 +158,8 @@
                   "UiSettingsServiceDeps"
                 ],
                 "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_service.ts",
+                "lineNumber": 33,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -161,6 +179,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_service.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -177,6 +197,8 @@
               "() => void"
             ],
             "path": "src/core/packages/ui-settings/browser-internal/src/ui_settings_service.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

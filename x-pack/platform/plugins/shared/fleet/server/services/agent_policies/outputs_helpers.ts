@@ -29,14 +29,13 @@ export async function getDataOutputForAgentPolicy(
   soClient: SavedObjectsClientContract,
   agentPolicy: Partial<AgentPolicySOAttributes>
 ) {
-  const dataOutputId =
-    agentPolicy.data_output_id || (await outputService.getDefaultDataOutputId(soClient));
+  const dataOutputId = agentPolicy.data_output_id || (await outputService.getDefaultDataOutputId());
 
   if (!dataOutputId) {
     throw new OutputNotFoundError('No default data output found.');
   }
 
-  return outputService.get(soClient, dataOutputId);
+  return outputService.get(dataOutputId);
 }
 
 /**

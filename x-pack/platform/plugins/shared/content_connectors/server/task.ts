@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup, StartServicesAccessor } from '@kbn/core/server';
+import type { Logger, CoreSetup, StartServicesAccessor } from '@kbn/core/server';
 
 import type {
   ConcreteTaskInstance,
@@ -19,8 +19,8 @@ import type {
 } from './types';
 import { getConnectorsToDeploy, getPoliciesToDelete } from './services';
 
-import { SearchConnectorsConfig } from './config';
-import { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
+import type { SearchConnectorsConfig } from './config';
+import type { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
 
 const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_ID = 'search:agentless-connectors-manager-task';
 const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE = 'search:agentless-connectors-manager';

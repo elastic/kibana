@@ -7,18 +7,13 @@
 
 import { createHash } from 'crypto';
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-
-import {
-  SECURITY_EXTENSION_ID,
-  SPACES_EXTENSION_ID,
-  type SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { SPACES_EXTENSION_ID, type SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
+import { ALL_SPACES_ID } from '../../../../common/constants';
 import { UninstallTokenError } from '../../../../common/errors';
 
 import type { AgentPolicy } from '../../../../common';
@@ -209,11 +204,9 @@ describe('UninstallTokenService', () => {
     appContextService.start(mockContext);
     esoClientMock =
       mockContext.encryptedSavedObjectsStart!.getClient() as jest.Mocked<EncryptedSavedObjectsClient>;
-    soClientMock = appContextService
-      .getSavedObjects()
-      .getScopedClient({} as unknown as KibanaRequest, {
-        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
-      }) as jest.Mocked<SavedObjectsClientContract>;
+    soClientMock = appContextService.getSavedObjects().getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
+    }) as jest.Mocked<SavedObjectsClientContract>;
     agentPolicyService.deployPolicies = jest.fn();
 
     getAgentPoliciesByIDsMock = jest.fn().mockResolvedValue([]);
@@ -319,7 +312,7 @@ describe('UninstallTokenService', () => {
           expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              filter: `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) and (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}")`,
+              filter: `((${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"${ALL_SPACES_ID}")) and (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}")`,
               perPage: SO_SEARCH_LIMIT,
             }
           );
@@ -458,7 +451,7 @@ describe('UninstallTokenService', () => {
 
           expect(soClientMock.createPointInTimeFinder).toHaveBeenCalledWith(
             expect.objectContaining({
-              filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test`,
+              filter: `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"${ALL_SPACES_ID}")`,
             })
           );
         });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SlmPolicyPayload } from '../../../../common/types';
+import type { SlmPolicyPayload } from '../../../../common/types';
 import { textService } from '../text';
 
 export interface PolicyValidation {

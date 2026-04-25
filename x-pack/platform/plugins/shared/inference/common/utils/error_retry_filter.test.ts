@@ -6,6 +6,7 @@
  */
 
 import {
+  createInferenceInternalError,
   createInferenceProviderError,
   createInferenceRequestAbortedError,
 } from '@kbn/inference-common';
@@ -36,8 +37,13 @@ describe('retry filter', () => {
       expect(isRecoverable(error)).toBe(true);
     });
 
-    it('returns false for other kind of inference errors', () => {
+    it('returns true for request aborted error', () => {
       const error = createInferenceRequestAbortedError();
+      expect(isRecoverable(error)).toBe(true);
+    });
+
+    it('returns false for other kind of inference errors', () => {
+      const error = createInferenceInternalError();
       expect(isRecoverable(error)).toBe(false);
     });
 

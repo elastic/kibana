@@ -6,16 +6,14 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { Replacements, ConversationResponse } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
   ChatCompleteProps,
   API_VERSIONS,
-  Message,
-  Replacements,
   transformRawData,
   getAnonymizedValue,
-  ConversationResponse,
   newContentReferencesStore,
   pruneContentReferences,
   ChatCompleteRequestQuery,
@@ -23,20 +21,25 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { v4 as uuidv4 } from 'uuid';
+import { getInferenceConnectorById } from '../../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
   getIsKnowledgeBaseInstalled,
+  getSystemPromptFromPromptId,
+  getSystemPromptFromUserConversation,
   langChainExecute,
   performChecks,
 } from '../helpers';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import type { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { isOpenSourceModel } from '../utils';
-import { ConfigSchema } from '../../config_schema';
+import type { ConfigSchema } from '../../config_schema';
+import type { OnLlmResponse } from '../../lib/langchain/executors/types';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -107,6 +110,8 @@ export const chatCompleteRoute = (
           const anonymizationFieldsDataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
+          const promptsDataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
+
           let messages;
           const existingConversationId = request.body.conversationId;
           const connectorId = request.body.connectorId;
@@ -116,13 +121,16 @@ export const chatCompleteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
+          const threadId = uuidv4();
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
-          const connectors = await actionsClient.getBulk({ ids: [connectorId] });
-          const connector = connectors.length > 0 ? connectors[0] : undefined;
-          actionTypeId = connector?.actionTypeId ?? '.gen-ai';
-          const isOssModel = isOpenSourceModel(connector);
+          const inferenceConnector = await getInferenceConnectorById(
+            inference,
+            request
+          )(connectorId).catch(() => undefined);
+          actionTypeId = inferenceConnector?.type ?? '.inference';
+          const isOssModel = isOpenSourceModel(inferenceConnector);
           const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
           // replacements
@@ -205,15 +213,44 @@ export const chatCompleteRoute = (
             ? existingConversationId ?? newConversation?.id
             : undefined;
 
+          const systemPromptParts: string[] = [];
+
+          if (conversationsDataClient && promptsDataClient && existingConversationId) {
+            const conversationSystemPrompt = await getSystemPromptFromUserConversation({
+              conversationsDataClient,
+              conversationId: existingConversationId,
+              promptsDataClient,
+            });
+
+            if (conversationSystemPrompt) {
+              systemPromptParts.push(conversationSystemPrompt);
+            }
+          }
+
+          if (promptsDataClient && request.body.promptId) {
+            const requestSystemPrompt = await getSystemPromptFromPromptId({
+              promptId: request.body.promptId,
+              promptsDataClient,
+            });
+
+            if (requestSystemPrompt) {
+              systemPromptParts.push(requestSystemPrompt);
+            }
+          }
+
+          const systemPrompt =
+            systemPromptParts.length > 0 ? systemPromptParts.join('\n\n') : undefined;
+
           const contentReferencesStore = newContentReferencesStore({
             disabled: contentReferencesDisabled ?? false,
           });
 
-          const onLlmResponse = async (
-            content: string,
-            traceData: Message['traceData'] = {},
-            isError = false
-          ): Promise<void> => {
+          const onLlmResponse: OnLlmResponse = async ({
+            content,
+            refusal,
+            traceData = {},
+            isError = false,
+          }): Promise<void> => {
             if (conversationId && conversationsDataClient) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
                 content,
@@ -224,6 +261,7 @@ export const chatCompleteRoute = (
                 conversationId,
                 conversationsDataClient,
                 messageContent: prunedContent,
+                messageRefusal: refusal,
                 replacements: latestReplacements,
                 isError,
                 traceData,
@@ -239,6 +277,7 @@ export const chatCompleteRoute = (
               actionsClient,
               actionTypeId,
               connectorId,
+              threadId,
               isOssModel,
               conversationId,
               context: ctx,
@@ -249,20 +288,12 @@ export const chatCompleteRoute = (
               onNewReplacements,
               replacements: latestReplacements,
               contentReferencesStore,
-              request: {
-                ...request,
-                // TODO: clean up after empty tools will be available to use
-                body: {
-                  ...request.body,
-                  replacements: {},
-                  size: 10,
-                  alertsIndexPattern: '.alerts-security.alerts-default',
-                },
-              },
+              request,
               response,
               telemetry,
               responseLanguage: request.body.responseLanguage,
               savedObjectsClient,
+              systemPrompt,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
             }),
             timeout,

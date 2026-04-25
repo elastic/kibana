@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
 import { TreeItem as TreeItemComponent } from './tree_item';
 
@@ -18,9 +20,23 @@ interface Props {
   tree: TreeItem[];
 }
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    esUiTree: css`
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+      position: relative;
+      padding-top: ${euiTheme.size.xs};
+    `,
+  };
+};
+
 export const Tree = ({ tree }: Props) => {
+  const styles = useStyles();
   return (
-    <ul className="esUiTree">
+    <ul css={styles.esUiTree}>
       {tree.map((treeItem, i) => (
         <TreeItemComponent key={i} treeItem={treeItem} />
       ))}

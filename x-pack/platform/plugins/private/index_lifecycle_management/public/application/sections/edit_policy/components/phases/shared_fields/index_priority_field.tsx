@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 

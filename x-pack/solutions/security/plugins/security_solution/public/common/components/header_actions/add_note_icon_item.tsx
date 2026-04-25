@@ -7,7 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import { NotesButton } from '../../../timelines/components/timeline/notes/notes_button';
 import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';
 import { ActionIconItem } from './action_icon_item';
@@ -53,7 +55,8 @@ const VIEW_NOTES_COUNT_TOOLTIP = ({ notesCount }: { notesCount: number }) =>
 interface AddEventNoteActionProps {
   ariaLabel?: string;
   timelineType: TimelineType;
-  toggleShowNotes?: () => void | ((eventId: string) => void);
+  toggleShowNotes?: (eventId?: string, eventData?: DataTableRecord & TimelineItem) => void;
+  eventData?: DataTableRecord & TimelineItem;
   eventId?: string;
   /*
    * Number of notes associated with the event
@@ -65,6 +68,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   ariaLabel,
   timelineType,
   toggleShowNotes,
+  eventData,
   eventId,
   notesCount,
 }) => {
@@ -98,6 +102,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
         timelineType={timelineType}
         toggleShowNotes={toggleShowNotes}
         toolTip={tooltip}
+        eventData={eventData}
         eventId={eventId}
         notesCount={notesCount}
       />

@@ -8,52 +8,46 @@
  */
 
 import { v4 } from 'uuid';
-import type { Reference } from '@kbn/content-management-utils';
 import { type DashboardState, isDashboardSection } from '../../../common';
 import type { DashboardPanel } from '../../../server';
 import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
-  getReferences: (id: string) => Reference[]
+  pinnedPanels: DashboardState['pinned_panels']
 ) {
+  const childState: DashboardChildState = {};
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
+    pinnedPanels: (pinnedPanels ?? []).reduce((prev, panel, index) => {
+      const panelId = panel.id ?? v4();
+      const { width, grow, type, config } = panel;
+      childState[panelId] = config; // push to child state
+      return { ...prev, [panelId]: { type, width, grow, order: index } };
+    }, {}),
   };
-  const childState: DashboardChildState = {};
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
-    const panelId = panel.panelIndex ?? v4();
+    const panelId = panel.id ?? v4();
     layout.panels[panelId] = {
       type: panel.type,
-      gridData: {
-        ...panel.gridData,
+      grid: {
+        ...panel.grid,
         ...(sectionId && { sectionId }),
-        i: panelId,
       },
     };
     childState[panelId] = {
-      rawState: {
-        ...panel.panelConfig,
-      },
-      references: getReferences(panelId),
+      ...panel.config,
     };
   }
 
-  panels.forEach((widget) => {
+  panels?.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const sectionId = widget.gridData.i ?? v4();
-      const { panels: sectionPanels, ...restOfSection } = widget;
-      layout.sections[sectionId] = {
-        collapsed: false,
-        ...restOfSection,
-        gridData: {
-          ...widget.gridData,
-          i: sectionId,
-        },
-      };
-      (sectionPanels as DashboardPanel[]).forEach((panel) => {
+      const { panels: sectionPanels, id, ...restOfSection } = widget;
+      const sectionId = id ?? v4();
+      layout.sections[sectionId] = restOfSection;
+      sectionPanels.forEach((panel) => {
         pushPanel(panel, sectionId);
       });
     } else {

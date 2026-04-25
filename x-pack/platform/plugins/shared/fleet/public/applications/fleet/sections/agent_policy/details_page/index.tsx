@@ -25,6 +25,7 @@ import {
   useFleetStatus,
   useIntraAppState,
   useUrlParams,
+  useAgentlessResources,
 } from '../../../hooks';
 import { Loading, Error, AgentEnrollmentFlyout } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
@@ -42,10 +43,10 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   } = useRouteMatch<{ policyId: string; tabId?: string }>();
   const { getHref } = useLink();
   const { urlParams } = useUrlParams();
-  const showAgentless = urlParams.showAgentless === 'true';
+  const { showAgentless } = useAgentlessResources();
 
   const agentPolicyRequest = useGetOneAgentPolicy(policyId);
-  // If the agent policy is agentless, hide it by default unless `showAgentless` url param is true
+  // If the agent policy is agentless, hide it by default unless showAgentless toggle is enabled
   const agentPolicy =
     agentPolicyRequest.data?.item &&
     (!agentPolicyRequest.data.item.supports_agentless || showAgentless)

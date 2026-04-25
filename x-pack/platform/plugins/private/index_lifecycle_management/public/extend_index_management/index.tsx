@@ -9,9 +9,10 @@ import React from 'react';
 import { get, every, some } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
-import { Index, IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { Index } from '../../common/types';
 
 import { retryLifecycleForIndex } from '../application/services/api';
 import { indexLifecycleTab } from './components/index_lifecycle_summary';
@@ -70,7 +71,7 @@ export const removeLifecyclePolicyActionExtension = ({
         />
       );
     },
-    icon: 'stopFilled',
+    icon: 'stopFill',
     indexNames: [indexNames],
     buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.removeIndexLifecycleActionButtonLabel', {
       defaultMessage: 'Remove lifecycle policy',
@@ -109,7 +110,7 @@ export const addLifecyclePolicyActionExtension = ({
         />
       );
     },
-    icon: 'plusInCircle',
+    icon: 'plusCircle',
     buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.addLifecyclePolicyActionButtonLabel', {
       defaultMessage: 'Add lifecycle policy',
     }),
@@ -171,13 +172,13 @@ export const ilmFilterExtension = (indices: Index[]) => {
         options: [
           {
             value: true,
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.managedLabel', {
+            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.managedLabel', {
               defaultMessage: 'Managed',
             }),
           },
           {
             value: false,
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.unmanagedLabel', {
+            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.unmanagedLabel', {
               defaultMessage: 'Unmanaged',
             }),
           },

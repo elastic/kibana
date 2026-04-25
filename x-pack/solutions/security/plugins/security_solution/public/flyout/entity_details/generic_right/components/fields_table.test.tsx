@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { FieldsTable } from './fields_table';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 const renderWithQueryClient = (ui: React.ReactElement) => {
   const queryClient = new QueryClient();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { APIRoutes } from '../../common/api_routes';
 import { useKibana } from './use_kibana';
 

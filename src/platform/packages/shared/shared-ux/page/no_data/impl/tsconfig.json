@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -7,6 +7,7 @@
       "node",
       "react",
       "@kbn/ambient-ui-types",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -16,11 +17,7 @@
   "kbn_references": [
     "@kbn/shared-ux-card-no-data",
     "@kbn/shared-ux-page-no-data-types",
-    "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-no-data-mocks",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-avatar-solution",
   ],
   "exclude": [
     "target/**/*",

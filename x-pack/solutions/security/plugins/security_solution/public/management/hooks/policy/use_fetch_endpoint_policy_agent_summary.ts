@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { agentRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 

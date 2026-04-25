@@ -8,19 +8,45 @@
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
+  ActionsClient,
 } from '@kbn/actions-plugin/server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { BoundInferenceClient, BoundOptions, InferenceClient } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+/**
+ * Narrow interface for the actions plugin dependency used internally by the
+ * inference plugin. Only the `getActionsClientWithRequest` method is needed,
+ * so consumers don't have to depend on the full {@link ActionsPluginStart}.
+ */
+export interface ActionsClientProvider {
+  getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
+}
+import type {
+  BoundInferenceClient,
+  BoundOptions,
+  InferenceClient,
+  InferenceConnector,
+} from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
+import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
+import type {
+  AnonymizationPluginStart,
+  AnonymizationPluginSetup,
+} from '@kbn/anonymization-plugin/server';
+import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface InferenceSetupDependencies {
   actions: ActionsPluginSetup;
+  anonymization?: AnonymizationPluginSetup;
 }
 
 export interface InferenceStartDependencies {
   actions: ActionsPluginStart;
+  anonymization?: AnonymizationPluginStart;
 }
 
 /**
@@ -36,6 +62,10 @@ export interface InferenceUnboundClientCreateOptions {
    * The request to scope the client to.
    */
   request: KibanaRequest;
+  /**
+   * Callbacks to be used by the client to report lifecycle events.
+   */
+  callbacks?: InferenceCallbacks;
 }
 
 /**
@@ -109,6 +139,81 @@ export interface InferenceServerStart {
    * });
    */
   getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
+
+  /**
+   * Returns a list of all available inference connectors.
+   *
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to an array of inference connectors
+   */
+  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+
+  /**
+   * Retrieves the default inference connector configured for the system.
+   *
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the default inference connector
+   */
+  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Retrieves a specific inference connector by its ID.
+   *
+   * @param id - The unique identifier of the connector to retrieve
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the requested inference connector
+   * @throws Error if the connector with the specified ID does not exist
+   */
+  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Creates an {@link InferenceClient} using pre-scoped services instead of a
+   * {@link KibanaRequest}. This is useful for background tasks (e.g. alerting rule
+   * executors) that have scoped clients but no HTTP request context.
+   *
+   * Note: anonymization features are not available on clients created this way.
+   *
+   * @param actionsClient - A pre-scoped actions client
+   * @param esClient - A pre-scoped Elasticsearch client
+   */
+  getClientWithoutRequest: (
+    actionsClient: PublicMethodsOf<ActionsClient>,
+    esClient: ElasticsearchClient
+  ) => InferenceClient;
+
+  /**
+   * Retrieves a specific inference connector by its ID, using pre-scoped services
+   * instead of a {@link KibanaRequest}. This is useful for background tasks (e.g.
+   * alerting rule executors) that have scoped clients but no HTTP request.
+   *
+   * @param id - The unique identifier of the connector to retrieve
+   * @param actionsClient - A pre-scoped actions client
+   * @param esClient - A pre-scoped Elasticsearch client
+   * @returns A promise that resolves to the requested inference connector
+   * @throws Error if the connector with the specified ID does not exist
+   */
+  getConnectorByIdWithoutClientRequest: (
+    id: string,
+    actionsClient: PublicMethodsOf<ActionsClient>,
+    esClient: ElasticsearchClient
+  ) => Promise<InferenceConnector>;
+
+  /**
+   * Lists available Elasticsearch inference endpoints, optionally filtered by task type.
+   *
+   * @param taskType - Optional task type to filter by (e.g. 'chat_completion')
+   * @returns A promise that resolves to an array of inference endpoints
+   */
+  getInferenceEndpoints: (taskType?: InferenceTaskType) => Promise<InferenceEndpoint[]>;
+
+  /**
+   * Retrieves a specific Elasticsearch inference endpoint by its ID.
+   *
+   * @param inferenceId - The unique identifier of the inference endpoint
+   * @returns A promise that resolves to the inference endpoint metadata
+   * @throws Error if the endpoint does not exist
+   */
+  getInferenceEndpointById: (inferenceId: string) => Promise<InferenceEndpoint>;
 }
 
 /**
@@ -123,6 +228,10 @@ export interface CreateChatModelOptions {
    * The id of the GenAI connector to use.
    */
   connectorId: string;
+  /**
+   * Callback to be used by the client to report lifecycle events.
+   */
+  callbacks?: InferenceCallbacks;
   /**
    * Additional parameters to be passed down to the model constructor.
    */

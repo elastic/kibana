@@ -51,9 +51,47 @@ export const validateKafkaHost = (input: string): string | undefined => {
 const secretRefSchema = schema.oneOf([
   schema.object({
     id: schema.string(),
+    hash: schema.maybe(schema.string()),
   }),
   schema.string(),
 ]);
+
+/**
+ * Shared sub-schemas (extracted to avoid type explosion when variants become named components)
+ */
+
+const OutputSslSchema = schema.object(
+  {
+    certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+    certificate: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+    verification_mode: schema.maybe(
+      schema.oneOf([
+        schema.literal(kafkaVerificationModes.Full),
+        schema.literal(kafkaVerificationModes.None),
+        schema.literal(kafkaVerificationModes.Certificate),
+        schema.literal(kafkaVerificationModes.Strict),
+      ])
+    ),
+  },
+  { meta: { id: 'output_ssl' } }
+);
+
+const OutputShipperSchema = schema.object(
+  {
+    disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
+    disk_queue_path: schema.nullable(schema.string()),
+    disk_queue_max_size: schema.nullable(schema.number()),
+    disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
+    disk_queue_compression_enabled: schema.nullable(schema.boolean()),
+    compression_level: schema.nullable(schema.number()),
+    loadbalance: schema.nullable(schema.boolean()),
+    mem_queue_events: schema.nullable(schema.number()),
+    queue_flush_timeout: schema.nullable(schema.number()),
+    max_batch_bytes: schema.nullable(schema.number()),
+  },
+  { meta: { id: 'output_shipper' } }
+);
 
 /**
  * Base schemas
@@ -69,43 +107,12 @@ const BaseSchema = {
   ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  ssl: schema.maybe(
-    schema.oneOf([
-      schema.literal(null),
-      schema.object({
-        certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
-        certificate: schema.maybe(schema.string()),
-        key: schema.maybe(schema.string()),
-        verification_mode: schema.maybe(
-          schema.oneOf([
-            schema.literal(kafkaVerificationModes.Full),
-            schema.literal(kafkaVerificationModes.None),
-            schema.literal(kafkaVerificationModes.Certificate),
-            schema.literal(kafkaVerificationModes.Strict),
-          ])
-        ),
-      }),
-    ])
-  ),
+  otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  otel_disable_beatsauth: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
+  ssl: schema.maybe(schema.oneOf([schema.literal(null), OutputSslSchema])),
   proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  shipper: schema.maybe(
-    schema.oneOf([
-      schema.literal(null),
-      schema.object({
-        disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
-        disk_queue_path: schema.nullable(schema.string()),
-        disk_queue_max_size: schema.nullable(schema.number()),
-        disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
-        disk_queue_compression_enabled: schema.nullable(schema.boolean()),
-        compression_level: schema.nullable(schema.number()),
-        loadbalance: schema.nullable(schema.boolean()),
-        mem_queue_events: schema.nullable(schema.number()),
-        queue_flush_timeout: schema.nullable(schema.number()),
-        max_batch_bytes: schema.nullable(schema.number()),
-      }),
-    ])
-  ),
-  allow_edit: schema.maybe(schema.arrayOf(schema.string())),
+  shipper: schema.maybe(schema.oneOf([schema.literal(null), OutputShipperSchema])),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
@@ -135,15 +142,19 @@ const PresetSchema = schema.oneOf([
 export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
-  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 }),
   preset: schema.maybe(PresetSchema),
+  write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
 };
 
 const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
-  hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
+  hosts: schema.maybe(
+    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 })
+  ),
   preset: schema.maybe(PresetSchema),
+  write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
 };
 
 /**
@@ -189,14 +200,17 @@ const RemoteElasticSearchUpdateSchema = {
 export const LogstashSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Logstash),
-  hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 }),
+  hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
+    minSize: 1,
+    maxSize: 10,
+  }),
 };
 
 const LogstashUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Logstash)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 })
+    schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1, maxSize: 10 })
   ),
   secrets: schema.maybe(
     schema.object({
@@ -208,7 +222,10 @@ const LogstashUpdateSchema = {
 export const KafkaSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Kafka),
-  hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1 }),
+  hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), {
+    minSize: 1,
+    maxSize: 10,
+  }),
   version: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
   compression: schema.maybe(
@@ -219,12 +236,7 @@ export const KafkaSchema = {
       schema.literal(kafkaCompressionType.None),
     ])
   ),
-  compression_level: schema.conditional(
-    schema.siblingRef('compression'),
-    schema.string({ validate: (val) => (val === kafkaCompressionType.Gzip ? undefined : 'never') }),
-    schema.number(),
-    schema.never()
-  ),
+  compression_level: schema.maybe(schema.number()),
   client_id: schema.maybe(schema.string()),
   auth_type: schema.oneOf([
     schema.literal(kafkaAuthType.None),
@@ -232,36 +244,14 @@ export const KafkaSchema = {
     schema.literal(kafkaAuthType.Ssl),
     schema.literal(kafkaAuthType.Kerberos),
   ]),
-  connection_type: schema.conditional(
-    schema.siblingRef('auth_type'),
-    kafkaAuthType.None,
+  connection_type: schema.maybe(
     schema.oneOf([
       schema.literal(kafkaConnectionType.Plaintext),
       schema.literal(kafkaConnectionType.Encryption),
-    ]),
-    schema.never()
+    ])
   ),
-  username: schema.nullable(
-    schema.conditional(
-      schema.siblingRef('auth_type'),
-      kafkaAuthType.Userpass,
-      schema.string(),
-      schema.never()
-    )
-  ),
-  password: schema.nullable(
-    schema.conditional(
-      schema.siblingRef('secrets.password'),
-      secretRefSchema,
-      schema.never(),
-      schema.conditional(
-        schema.siblingRef('username'),
-        schema.string(),
-        schema.string(),
-        schema.never()
-      )
-    )
-  ),
+  username: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  password: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   sasl: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -290,7 +280,9 @@ export const KafkaSchema = {
   ),
   topic: schema.maybe(schema.string()),
   headers: schema.maybe(
-    schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }))
+    schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
+      maxSize: 100,
+    })
   ),
   timeout: schema.maybe(schema.number()),
   broker_timeout: schema.maybe(schema.number()),
@@ -310,7 +302,7 @@ const KafkaUpdateSchema = {
   ...KafkaSchema,
   type: schema.maybe(schema.literal(outputType.Kafka)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1 })
+    schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1, maxSize: 10 })
   ),
   auth_type: schema.maybe(
     schema.oneOf([
@@ -323,10 +315,23 @@ const KafkaUpdateSchema = {
 };
 
 export const OutputSchema = schema.oneOf([
-  schema.object({ ...ElasticSearchSchema }),
-  schema.object({ ...RemoteElasticSearchSchema }),
-  schema.object({ ...LogstashSchema }),
-  schema.object({ ...KafkaSchema }),
+  schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
+  schema.object({ ...RemoteElasticSearchSchema }, { meta: { id: 'output_remote_elasticsearch' } }),
+  schema.object({ ...LogstashSchema }, { meta: { id: 'output_logstash' } }),
+  schema.object({ ...KafkaSchema }, { meta: { id: 'output_kafka' } }),
+]);
+
+// Separate schema for create operations: uses distinct meta IDs so OAS codegen
+// emits named $ref components instead of inline anyOf members, which the
+// Terraform provider requires to distinguish create vs read types.
+export const NewOutputSchema = schema.oneOf([
+  schema.object({ ...ElasticSearchSchema }, { meta: { id: 'new_output_elasticsearch' } }),
+  schema.object(
+    { ...RemoteElasticSearchSchema },
+    { meta: { id: 'new_output_remote_elasticsearch' } }
+  ),
+  schema.object({ ...LogstashSchema }, { meta: { id: 'new_output_logstash' } }),
+  schema.object({ ...KafkaSchema }, { meta: { id: 'new_output_kafka' } }),
 ]);
 
 export const OutputResponseSchema = schema.object({
@@ -336,8 +341,11 @@ export const OutputResponseSchema = schema.object({
 });
 
 export const UpdateOutputSchema = schema.oneOf([
-  schema.object({ ...ElasticSearchUpdateSchema }),
-  schema.object({ ...RemoteElasticSearchUpdateSchema }),
-  schema.object({ ...LogstashUpdateSchema }),
-  schema.object({ ...KafkaUpdateSchema }),
+  schema.object({ ...ElasticSearchUpdateSchema }, { meta: { id: 'update_output_elasticsearch' } }),
+  schema.object(
+    { ...RemoteElasticSearchUpdateSchema },
+    { meta: { id: 'update_output_remote_elasticsearch' } }
+  ),
+  schema.object({ ...LogstashUpdateSchema }, { meta: { id: 'update_output_logstash' } }),
+  schema.object({ ...KafkaUpdateSchema }, { meta: { id: 'update_output_kafka' } }),
 ]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolDefinition } from '@kbn/inference-common';
+import type { ToolDefinition } from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 
 export function getSystemMessageInstructions({

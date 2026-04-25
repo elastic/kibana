@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import {
+import type { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import type {
   CanLockHoverActions,
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
-  SerializedPanelState,
 } from '@kbn/presentation-publishing';
-import React from 'react';
+import type React from 'react';
+import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
+import type { SerializedDrilldowns } from '../../server';
 
 /**
  * The default embeddable API that all Embeddables must implement.
@@ -44,7 +45,7 @@ export interface BuildEmbeddableProps<
   /**
    * Initial serialized state provided by the parent.
    */
-  initialState: SerializedPanelState<SerializedState>;
+  initialState: SerializedState;
 
   /**
    * A function that adds default & required methods to the passed API registration object.
@@ -60,6 +61,14 @@ export interface BuildEmbeddableProps<
    * An optional parent API.
    */
   parentApi: unknown | undefined;
+
+  /**
+   *
+   */
+  initializeDrilldownsManager(
+    embeddableUuid: string,
+    state: SerializedDrilldowns
+  ): Promise<ReturnType<typeof initializeDrilldownsManager>>;
 }
 
 /**

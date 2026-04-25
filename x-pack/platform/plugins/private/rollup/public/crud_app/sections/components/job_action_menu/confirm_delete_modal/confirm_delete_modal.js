@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 
 export class ConfirmDeleteModal extends Component {
   static propTypes = {
@@ -43,6 +43,8 @@ export class ConfirmDeleteModal extends Component {
 
   render() {
     const { isSingleSelection, jobs, onCancel, onConfirm } = this.props;
+
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
 
     let title;
     let content;
@@ -92,7 +94,9 @@ export class ConfirmDeleteModal extends Component {
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={title}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={onCancel}
         onConfirm={onConfirm}
         cancelButtonText={i18n.translate(

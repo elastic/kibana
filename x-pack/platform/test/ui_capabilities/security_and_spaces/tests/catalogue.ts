@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UnreachableError } from '../../common/lib';
 import { UserAtSpaceScenarios } from '../scenarios';
 
@@ -79,10 +79,10 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const exceptions = [
               'ml_file_data_visualizer',
               'monitoring',
+              'elasticsearchIndexManagement',
               'enterpriseSearchAnalytics',
               'enterpriseSearchApplications',
               'searchPlayground',
-              'searchInferenceEndpoints',
               'searchSynonyms',
               'searchQueryRules',
               'appSearch',

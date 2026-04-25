@@ -8,22 +8,22 @@
  */
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FilesClientResponses } from '@kbn/files-plugin/public';
 
+import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiProvider,
   EuiPageTemplate,
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiButton,
   EuiIcon,
   EuiButtonIcon,
   EuiLink,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { MyFilePicker } from './file_picker';
 import type { MyImageMetadata } from '../../common';
 import type { FileClients } from '../types';
@@ -89,7 +89,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         ) : status === 'AWAITING_UPLOAD' ? (
           <EuiIcon type="clock" aria-label={status} />
         ) : (
-          <EuiIcon color="danger" type="warning" arial-label={status} />
+          <EuiIcon color="danger" type="warning" aria-label={status} />
         ),
     },
     {
@@ -138,6 +138,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>
           <EuiInMemoryTable
+            tableCaption="Files example"
             columns={columns}
             items={items}
             itemId="id"

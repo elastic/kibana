@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatternRollup } from '../../types';
+import type { PatternRollup } from '../../types';
 
 /**
  * This `PatternRollup` containing the following indices:
@@ -25,12 +25,14 @@ export const packetbeatNoResults: PatternRollup = {
       managed: true,
       policy: 'packetbeat',
       phase: 'hot',
+      skip: false,
     },
     '.ds-packetbeat-8.5.3-2023.02.04-000001': {
       index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
       managed: true,
       policy: 'packetbeat',
       phase: 'hot',
+      skip: false,
     },
   },
   ilmExplainPhaseCounts: {
@@ -80,12 +82,14 @@ export const packetbeatWithSomeErrors: PatternRollup = {
       managed: true,
       policy: 'packetbeat',
       phase: 'hot',
+      skip: false,
     },
     '.ds-packetbeat-8.5.3-2023.02.04-000001': {
       index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
       managed: true,
       policy: 'packetbeat',
       phase: 'hot',
+      skip: false,
     },
   },
   ilmExplainPhaseCounts: {
@@ -162,6 +166,7 @@ export const mockPacketbeatPatternRollup: PatternRollup = {
         version: 1,
         modified_date_in_millis: 1675536751205,
       },
+      skip: false,
     },
     '.ds-packetbeat-8.5.3-2023.02.04-000001': {
       index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
@@ -182,6 +187,7 @@ export const mockPacketbeatPatternRollup: PatternRollup = {
         version: 1,
         modified_date_in_millis: 1675536751205,
       },
+      skip: false,
     },
   },
   ilmExplainPhaseCounts: {

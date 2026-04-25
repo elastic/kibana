@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { MetricsUIAggregation } from '../../../types';
 
 export const networkTraffic = (id: string, field: string): MetricsUIAggregation => {
@@ -29,3 +30,79 @@ export const networkTraffic = (id: string, field: string): MetricsUIAggregation 
     },
   };
 };
+
+export const networkTrafficWithInterfaces = (
+  id: string,
+  metricField: string,
+  interfaceField: string
+): MetricsUIAggregation => ({
+  [`${id}_interfaces`]: {
+    terms: { field: interfaceField },
+    aggregations: {
+      [`${id}_interface_max`]: { max: { field: metricField } },
+    },
+  },
+  [`${id}_sum_of_interfaces`]: {
+    sum_bucket: {
+      buckets_path: `${id}_interfaces>${id}_interface_max`,
+    },
+  },
+  [`${id}_deriv`]: {
+    derivative: {
+      buckets_path: `${id}_sum_of_interfaces`,
+      gap_policy: 'skip',
+      unit: '1s',
+    },
+  },
+  [id]: {
+    bucket_script: {
+      buckets_path: { value: `${id}_deriv[normalized_value]` },
+      script: {
+        source: 'params.value > 0.0 ? params.value : 0.0',
+        lang: 'painless',
+      },
+      gap_policy: 'skip',
+    },
+  },
+});
+
+export const networkTrafficWithInterfacesWithFilter = (
+  id: string,
+  metricField: string,
+  interfaceField: string,
+  filter: estypes.QueryDslQueryContainer
+): MetricsUIAggregation => ({
+  [`${id}_dimension`]: {
+    filter,
+    aggs: {
+      [`${id}_interfaces`]: {
+        terms: { field: interfaceField },
+        aggregations: {
+          [`${id}_interface_max`]: { max: { field: metricField } },
+        },
+      },
+      [`${id}_sum_of_interfaces`]: {
+        sum_bucket: {
+          buckets_path: `${id}_interfaces>${id}_interface_max`,
+        },
+      },
+    },
+  },
+  [`${id}_deriv`]: {
+    derivative: {
+      buckets_path: `${id}_dimension>${id}_sum_of_interfaces`,
+      gap_policy: 'skip',
+      unit: '1s',
+    },
+  },
+  [id]: {
+    bucket_script: {
+      buckets_path: { value: `${id}_deriv[normalized_value]` },
+      script: {
+        source: 'params.value > 0.0 ? params.value : 0.0',
+        lang: 'painless',
+      },
+      gap_policy: 'skip',
+    },
+  },
+});

@@ -8,27 +8,27 @@
 import { i18n } from '@kbn/i18n';
 
 export const NO_RULES = i18n.translate(
-  'xpack.securitySolution.ai4soc.configurations.rulesTable.noRules',
+  'xpack.securitySolution.ease.configurations.rulesTable.noRules',
   {
     defaultMessage: 'No rules found',
   }
 );
 
 export const NO_RULES_BODY = i18n.translate(
-  'xpack.securitySolution.ai4soc.configurations.rulesTable.noRulesBody',
+  'xpack.securitySolution.ease.configurations.rulesTable.noRulesBody',
   {
     defaultMessage: 'No rules are currently installed. To get started, add an integration.',
   }
 );
 
 export const INSTALLED_RULES_TAB = i18n.translate(
-  'xpack.securitySolution.ai4soc.configurations.promotionRules.installedRulesTab',
+  'xpack.securitySolution.ease.configurations.promotionRules.installedRulesTab',
   {
     defaultMessage: 'Installed rules',
   }
 );
 export const RULE_MONITORING_TAB = i18n.translate(
-  'xpack.securitySolution.ai4soc.configurations.promotionRules.ruleMonitoringTab',
+  'xpack.securitySolution.ease.configurations.promotionRules.ruleMonitoringTab',
   {
     defaultMessage: 'Rule monitoring',
   }

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDocumentationType } from './types';
+import type { OperationDocumentationType } from './types';
 
 export const PERCENTILE_RANK_ID = 'percentile_rank';
 export const PERCENTILE_RANK_NAME = i18n.translate('lensFormulaDocs.percentileRank', {

@@ -9,27 +9,27 @@ import { getOr } from 'lodash/fp';
 
 import {
   type SavedObjectsClientContract,
-  type SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
+  type SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
-  Note,
   BareNote,
-  PinnedEvent,
-  GetTimelinesResponse,
   ExportTimelineNotFoundError,
-  PageInfoTimeline,
   FavoriteTimelineResponse,
-  SortTimeline,
-  TimelineResponse,
-  TimelineType,
-  TimelineStatus,
+  GetTimelinesResponse,
+  Note,
+  PageInfoTimeline,
+  PinnedEvent,
   ResolvedTimeline,
   SavedTimeline,
   SavedTimelineWithSavedObjectId,
+  SortTimeline,
+  TimelineResponse,
+  TimelineStatus,
+  TimelineType,
 } from '../../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
@@ -47,6 +47,7 @@ export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 
 type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
+const DELETE_TIMELINE_BATCH_SIZE = 10;
 
 export const getTimeline = async (
   request: FrameworkRequest,
@@ -188,11 +189,8 @@ export const getExistingPrepackagedTimelines = async (
 ): Promise<GetTimelinesResponse> => {
   const queryPageInfo =
     countsOnly && pageInfo == null
-      ? {
-          perPage: 1,
-          page: 1,
-        }
-      : { perPage: pageInfo?.pageSize, page: pageInfo?.pageIndex } ?? {};
+      ? { perPage: 1, page: 1 }
+      : { perPage: pageInfo?.pageSize, page: pageInfo?.pageIndex };
   const elasticTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     ...queryPageInfo,
@@ -567,17 +565,23 @@ export const deleteTimeline = async (
   searchIds?: string[]
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
+  const uniqueTimelineIds = [...new Set(timelineIds)];
 
-  await Promise.all([
-    ...timelineIds.map((timelineId) =>
-      Promise.all([
-        savedObjectsClient.delete(timelineSavedObjectType, timelineId),
-        note.deleteNotesByTimelineId(request, timelineId),
-        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
-      ])
-    ),
-    deleteSearchByTimelineId(request, searchIds),
-  ]);
+  for (let index = 0; index < uniqueTimelineIds.length; index += DELETE_TIMELINE_BATCH_SIZE) {
+    const timelineIdsBatch = uniqueTimelineIds.slice(index, index + DELETE_TIMELINE_BATCH_SIZE);
+
+    await Promise.all(
+      timelineIdsBatch.map((timelineId) =>
+        Promise.all([
+          savedObjectsClient.delete(timelineSavedObjectType, timelineId),
+          note.deleteNotesByTimelineId(request, timelineId),
+          pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+        ])
+      )
+    );
+  }
+
+  await deleteSearchByTimelineId(request, searchIds);
 };
 
 export const copyTimeline = async (

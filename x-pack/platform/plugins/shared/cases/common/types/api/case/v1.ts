@@ -22,6 +22,7 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  CASE_EXTENDED_FIELDS,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -33,6 +34,7 @@ import {
   CaseCustomFieldToggleRt,
   CustomFieldTextTypeRt,
   CustomFieldNumberTypeRt,
+  CaseCloseReasonRt,
 } from '../../domain';
 import {
   CaseRt,
@@ -40,6 +42,7 @@ import {
   CaseSeverityRt,
   CasesRt,
   CaseStatusRt,
+  CaseTemplate,
   RelatedCaseRt,
   SimilarCaseRt,
 } from '../../domain/case/v1';
@@ -131,6 +134,12 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      * The alert sync settings
      */
     settings: CaseSettingsRt,
+    template: rt.union([CaseTemplate, rt.null]),
+    [CASE_EXTENDED_FIELDS]: rt.union([rt.undefined, rt.record(rt.string, rt.string)]),
+    /**
+     * The close reason to sync to attached alerts
+     */
+    closeReason: CaseCloseReasonRt,
   })
 );
 
@@ -218,6 +227,8 @@ export const CasePostRequestRt = rt.intersection([
        * The list of custom field values of the case.
        */
       customFields: CaseRequestCustomFieldsRt,
+      template: rt.union([CaseTemplate, rt.null]),
+      [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);
@@ -246,6 +257,7 @@ export const BulkCreateCasesResponseRt = rt.strict({
 export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
   title: null,
+  'incremental_id.text': null,
 });
 
 export const CasesFindRequestSortFieldsRt = rt.keyof({
@@ -258,7 +270,7 @@ export const CasesFindRequestSortFieldsRt = rt.keyof({
   severity: null,
 });
 
-export const CasesFindRequestRt = rt.intersection([
+export const CasesFindRequestBaseFieldsRt = rt.intersection([
   rt.exact(
     rt.partial({
       /**
@@ -326,13 +338,6 @@ export const CasesFindRequestRt = rt.intersection([
        */
       search: rt.string,
       /**
-       * The fields to perform the simple_query_string parsed query against
-       */
-      searchFields: rt.union([
-        rt.array(CasesFindRequestSearchFieldsRt),
-        CasesFindRequestSearchFieldsRt,
-      ]),
-      /**
        * The field to use for sorting the found objects.
        *
        */
@@ -370,7 +375,23 @@ export const CasesFindRequestRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
 ]);
 
-export const CasesSearchRequestRt = rt.intersection([
+export const CasesFindRequestRt = rt.intersection([
+  CasesFindRequestBaseFieldsRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * The fields to perform the simple_query_string parsed query against
+       */
+      searchFields: rt.union([
+        rt.array(CasesFindRequestSearchFieldsRt),
+        CasesFindRequestSearchFieldsRt,
+      ]),
+    })
+  ),
+]);
+
+export const CasesFindRequestWithCustomFieldsRt = rt.intersection([
+  CasesFindRequestRt,
   rt.exact(
     rt.partial({
       /**
@@ -382,7 +403,47 @@ export const CasesSearchRequestRt = rt.intersection([
       ),
     })
   ),
-  CasesFindRequestRt,
+]);
+
+/**
+ * search cases
+ */
+
+export const CasesSearchRequestSearchFieldsRt = rt.keyof({
+  'cases.description': null,
+  'cases.title': null,
+  'cases.incremental_id.text': null,
+  'cases.observables.value': null,
+  'cases.customFields.value': null,
+  'cases-comments.comment': null,
+  'cases-comments.alertId': null,
+  'cases-comments.eventId': null,
+});
+
+export const CasesSearchRequestRt = rt.intersection([
+  CasesFindRequestBaseFieldsRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * custom fields of the case
+       */
+      customFields: rt.record(
+        rt.string,
+        rt.array(rt.union([rt.string, rt.boolean, rt.number, rt.null]))
+      ),
+    })
+  ),
+  rt.exact(
+    rt.partial({
+      /**
+       * The fields to perform the simple_query_string parsed query against.
+       */
+      searchFields: rt.union([
+        rt.array(CasesSearchRequestSearchFieldsRt),
+        CasesSearchRequestSearchFieldsRt,
+      ]),
+    })
+  ),
 ]);
 
 export const CasesFindResponseRt = rt.intersection([
@@ -475,6 +536,17 @@ export const CasesPatchRequestRt = rt.strict({
   }),
 });
 
+export const UpdateSummaryRt = rt.strict({
+  syncedAlertCount: rt.number,
+});
+
+export const CaseWithUpdateSummaryRt = rt.intersection([
+  CaseRt,
+  rt.partial({ updateSummary: UpdateSummaryRt }),
+]);
+
+export const PatchCasesResponseRt = rt.array(CaseWithUpdateSummaryRt);
+
 /**
  * Push case
  */
@@ -532,16 +604,41 @@ export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
 export const SimilarCasesSearchRequestRt = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
 
+export const FindCasesContainingAllDocumentsRequestRt = rt.exact(
+  rt.type({
+    /**
+     * The IDs of the documents to find cases for.
+     */
+    documentIds: rt.union([rt.array(rt.string), rt.undefined]),
+    /**
+     * The IDs of the alerts to find cases for. TODO: remove this in the next serverless release cycle https://github.com/elastic/security-team/issues/14718
+     */
+    alertIds: rt.union([rt.array(rt.string), rt.undefined]),
+    // The IDs of the cases to find alerts for.
+    caseIds: rt.array(rt.string),
+  })
+);
+
+export const FindCasesContainingAllAlertsResponseRt = rt.exact(
+  rt.type({
+    casesWithAllAttachments: rt.array(rt.string),
+  })
+);
+
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesFindRequestWithCustomFields = rt.TypeOf<typeof CasesFindRequestWithCustomFieldsRt>;
 export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
+export type UpdateSummary = rt.TypeOf<typeof UpdateSummaryRt>;
+export type CaseWithUpdateSummary = rt.TypeOf<typeof CaseWithUpdateSummaryRt>;
+export type CasesPatchResponse = rt.TypeOf<typeof PatchCasesResponseRt>;
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type GetTagsResponse = rt.TypeOf<typeof GetTagsResponseRt>;
 export type AllCategoriesFindRequest = rt.TypeOf<typeof AllCategoriesFindRequestRt>;
@@ -557,3 +654,9 @@ export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
 export type SimilarCasesSearchRequest = rt.TypeOf<typeof SimilarCasesSearchRequestRt>;
 export type CasesSimilarResponse = rt.TypeOf<typeof CasesSimilarResponseRt>;
+export type FindCasesContainingAllDocumentsRequest = rt.TypeOf<
+  typeof FindCasesContainingAllDocumentsRequestRt
+>;
+export type FindCasesContainingAllAlertsResponse = rt.TypeOf<
+  typeof FindCasesContainingAllAlertsResponseRt
+>;

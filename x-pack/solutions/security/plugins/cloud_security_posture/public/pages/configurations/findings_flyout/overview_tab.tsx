@@ -30,8 +30,8 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_NAME,
   INTERNAL_FEATURE_FLAGS,
 } from '@kbn/cloud-security-posture-common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,6 +47,7 @@ import { COPY_ARIA_LABEL } from '../../../components/copy_button';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 import { TruncatedCopyableText } from './findings_right/header';
+import { CIS_GCP } from '../../../../common/constants';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -158,7 +159,8 @@ const getDetailsList = (
   data: CspFinding,
   ruleFlyoutLink?: string,
   discoverDataViewLink?: string,
-  euiTheme?: EuiThemeComputed<{}>
+  euiTheme?: EuiThemeComputed<{}>,
+  dataViewName?: string
 ) => [
   {
     title: (
@@ -172,29 +174,34 @@ const getDetailsList = (
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h1>
-              <div
-                css={{
-                  textAlign: 'right',
-                  display: 'flex',
-                  gap: euiTheme?.size.s,
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  marginBottom: euiTheme?.size.xs,
-                }}
-              >
-                <EuiIcon type="expand" color="primary" />
-                <EuiLink href={ruleFlyoutLink} target="_blank" external={false}>
-                  {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails', {
-                    defaultMessage: 'Show rule details',
-                  })}
-                </EuiLink>
-              </div>
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
+        {ruleFlyoutLink && (
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h1>
+                <div
+                  css={{
+                    textAlign: 'right',
+                    display: 'flex',
+                    gap: euiTheme?.size.s,
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    marginBottom: euiTheme?.size.xs,
+                  }}
+                >
+                  <EuiIcon type="maximize" color="primary" />
+                  <EuiLink href={ruleFlyoutLink} target="_blank" external={false}>
+                    {i18n.translate(
+                      'xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails',
+                      {
+                        defaultMessage: 'Show rule details',
+                      }
+                    )}
+                  </EuiLink>
+                </div>
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     ),
     description: data.rule?.description ? (
@@ -226,9 +233,11 @@ const getDetailsList = (
       </EuiTitle>
     ),
     description: discoverDataViewLink ? (
-      <EuiLink href={discoverDataViewLink}>{CDR_MISCONFIGURATIONS_INDEX_PATTERN}</EuiLink>
+      <EuiLink href={discoverDataViewLink}>
+        {dataViewName ?? CDR_MISCONFIGURATIONS_DATA_VIEW_NAME}
+      </EuiLink>
     ) : (
-      CDR_MISCONFIGURATIONS_INDEX_PATTERN
+      dataViewName ?? CDR_MISCONFIGURATIONS_DATA_VIEW_NAME
     ),
   },
 ];
@@ -254,7 +263,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
   },
 ];
 
-const getEvidenceList = ({ result }: CspFinding) =>
+const getEvidenceList = (evidence: object) =>
   [
     {
       title: '',
@@ -267,7 +276,7 @@ const getEvidenceList = ({ result }: CspFinding) =>
             />
           </EuiText>
           <EuiSpacer size={'s'} />
-          <CodeBlock language="json">{JSON.stringify(result?.evidence, null, 2)}</CodeBlock>
+          <CodeBlock language="json">{JSON.stringify(evidence, null, 2)}</CodeBlock>
         </>
       ),
     },
@@ -308,8 +317,7 @@ export const OverviewTab = ({
     [data.data_stream?.dataset, discover.locator, cdrMisconfigurationsDataView.data?.id]
   );
 
-  const hasEvidence = !isEmpty(data.result?.evidence);
-
+  const evidence = getEvaluationEvidence(data);
   const accordions: Accordion[] = useMemo(
     () =>
       [
@@ -319,7 +327,13 @@ export const OverviewTab = ({
             defaultMessage: 'About',
           }),
           id: 'detailsAccordion',
-          listItems: getDetailsList(data, ruleFlyoutLink, discoverDataViewLink, euiTheme),
+          listItems: getDetailsList(
+            data,
+            ruleFlyoutLink,
+            discoverDataViewLink,
+            euiTheme,
+            cdrMisconfigurationsDataView.data?.name
+          ),
         },
         {
           initialIsOpen: true,
@@ -338,17 +352,24 @@ export const OverviewTab = ({
           listItems: getRemediationList(data.rule),
         },
         INTERNAL_FEATURE_FLAGS.showFindingFlyoutEvidence &&
-          hasEvidence && {
+          !isEmpty(evidence) && {
             initialIsOpen: true,
             title: i18n.translate(
               'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
               { defaultMessage: 'Evidence' }
             ),
             id: 'evidenceAccordion',
-            listItems: getEvidenceList(data),
+            listItems: getEvidenceList(evidence),
           },
       ].filter(truthy),
-    [data, discoverDataViewLink, euiTheme, hasEvidence, ruleFlyoutLink]
+    [
+      data,
+      discoverDataViewLink,
+      euiTheme,
+      ruleFlyoutLink,
+      evidence,
+      cdrMisconfigurationsDataView.data?.name,
+    ]
   );
 
   return (
@@ -373,4 +394,12 @@ export const OverviewTab = ({
       ))}
     </>
   );
+};
+
+const getEvaluationEvidence = (data: CspFinding) => {
+  if (data.rule.benchmark?.id === CIS_GCP) {
+    // For CIS GCP, the evidence is the resource.raw field, which may contain a nested 'resource' field
+    return (data.resource?.raw as { resource?: unknown })?.resource || data.resource?.raw;
+  }
+  return data.result?.evidence;
 };

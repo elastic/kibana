@@ -8,7 +8,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiContextMenuItem } from '@elastic/eui';
 
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -42,6 +42,32 @@ export const EditMonitorLink = () => {
         {EDIT_MONITOR}
       </EuiButton>
     </NoPermissionsTooltip>
+  );
+};
+
+export const EditMonitorContextItem = () => {
+  const { basePath } = useSyntheticsSettingsContext();
+  const { monitorId } = useParams<{ monitorId: string }>();
+  const { spaceId } = useGetUrlParams();
+  const canEditSynthetics = useCanEditSynthetics();
+  const isLinkDisabled = !canEditSynthetics;
+  const linkProps = isLinkDisabled
+    ? { disabled: true }
+    : {
+        href:
+          `${basePath}/app/synthetics/edit-monitor/${monitorId}` +
+          (spaceId ? `?spaceId=${spaceId}` : ''),
+      };
+
+  return (
+    <EuiContextMenuItem
+      icon={'pencil'}
+      data-test-subj="syntheticsEditMonitorContextItem"
+      {...linkProps}
+      disabled={isLinkDisabled}
+    >
+      {EDIT_MONITOR}
+    </EuiContextMenuItem>
   );
 };
 

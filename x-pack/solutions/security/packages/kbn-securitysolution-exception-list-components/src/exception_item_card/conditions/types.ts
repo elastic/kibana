@@ -14,7 +14,7 @@ import type {
   EntryNested,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ElementType } from 'react';
+import type { ElementType } from 'react';
 
 export type Entry =
   | EntryExists

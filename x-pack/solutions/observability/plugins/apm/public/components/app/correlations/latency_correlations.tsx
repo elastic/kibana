@@ -28,7 +28,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { css } from '@emotion/react';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
@@ -52,6 +51,9 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
 
 export function FallbackCorrelationBadge() {
   return (
@@ -70,6 +72,24 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   } = useApmPluginContext();
 
   const { euiTheme } = useEuiTheme();
+
+  const { serviceName } = useApmServiceContext();
+
+  const {
+    query: {
+      rangeFrom,
+      rangeTo,
+      kuery,
+      environment,
+      transactionName,
+      transactionType,
+      sampleRangeFrom,
+      sampleRangeTo,
+    },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { progress, response, startFetch, cancelFetch } = useLatencyCorrelations();
   const { overallHistogram, hasData, status } = getOverallHistogram(response, progress.isRunning);
@@ -211,7 +231,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
                 { defaultMessage: 'Filter by {fieldName}', values: { fieldName } }
               ),
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
               onAddFilter({
@@ -230,7 +250,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
                 { defaultMessage: 'Filter out {fieldName}', values: { fieldName } }
               ),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
               onAddFilter({
@@ -278,7 +298,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           h.fieldValue === selectedSignificantTerm.fieldValue
       );
     } else if (pinnedSignificantTerm) {
-      return histogramTerms.find(
+      return histogramTerms?.find(
         (h) =>
           h.fieldName === pinnedSignificantTerm.fieldName &&
           h.fieldValue === pinnedSignificantTerm.fieldValue
@@ -299,13 +319,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">
-      <EuiFlexGroup
-        css={css`
-          min-height: ${MIN_TAB_TITLE_HEIGHT};
-        `}
-        alignItems="center"
-        gutterSize="s"
-      >
+      <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }} alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
@@ -324,6 +338,29 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           <TotalDocCountLabel
             eventType={ProcessorEvent.transaction}
             totalDocCount={response.totalDocCount}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <OpenInDiscover
+            dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton"
+            label={i18n.translate('xpack.apm.latencyCorrelations.openInDiscover', {
+              defaultMessage: 'Open in Discover',
+            })}
+            variant="emptyButton"
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+              sampleRangeFrom,
+              sampleRangeTo,
+              sortDirection: 'DESC',
+            }}
           />
         </EuiFlexItem>
 

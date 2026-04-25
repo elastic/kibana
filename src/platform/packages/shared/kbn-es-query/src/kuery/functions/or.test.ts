@@ -9,12 +9,12 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { DataViewBase } from '../../..';
+import type { DataViewBase } from '../../..';
 
 import * as ast from '../ast';
 
 import * as or from './or';
-import { KqlOrFunctionNode } from './or';
+import type { KqlOrFunctionNode } from './or';
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
@@ -51,9 +51,9 @@ describe('kuery functions', () => {
         const result = or.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect(Object.keys(result).length).toBe(1);
-        expect(result.bool).toHaveProperty('should');
-        expect(result.bool!.should).toEqual(
+        expect(Object.keys(result!).length).toBe(1);
+        expect(result!.bool).toHaveProperty('should');
+        expect(result!.bool!.should).toEqual(
           [childNode1, childNode2].map((childNode) =>
             ast.toElasticsearchQuery(childNode, indexPattern)
           )
@@ -67,7 +67,7 @@ describe('kuery functions', () => {
         ]) as KqlOrFunctionNode;
         const result = or.toElasticsearchQuery(node, indexPattern);
 
-        expect(result.bool).toHaveProperty('minimum_should_match', 1);
+        expect(result!.bool).toHaveProperty('minimum_should_match', 1);
       });
     });
 

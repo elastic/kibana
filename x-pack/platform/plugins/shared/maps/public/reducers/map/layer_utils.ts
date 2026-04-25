@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LayerDescriptor } from '../../../common/descriptor_types';
-import { MapState } from './types';
+import type { LayerDescriptor } from '../../../common/descriptor_types';
+import type { MapState } from './types';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../copy_persistent_state';
 
 export function getLayerIndex(list: LayerDescriptor[], layerId: string): number {
@@ -132,7 +132,7 @@ export function rollbackTrackedLayerState(state: MapState, layerId: string): Map
 
   return {
     ...state,
-    layerList: setLayer(state.layerList, rolledbackLayer),
+    layerList: setLayer(state.layerList, rolledbackLayer as LayerDescriptor),
   };
 }
 

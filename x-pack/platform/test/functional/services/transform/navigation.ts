@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformNavigationProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
@@ -17,7 +17,7 @@ export function TransformNavigationProvider({ getPageObjects, getService }: FtrP
     },
 
     async navigateToRules() {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
       await testSubjects.existOrFail('rulesList');
     },

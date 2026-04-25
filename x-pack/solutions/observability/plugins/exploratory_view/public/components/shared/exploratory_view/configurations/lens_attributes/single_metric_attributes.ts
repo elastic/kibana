@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/public';
+import type {
+  FormulaIndexPatternColumn,
+  CountIndexPatternColumn,
+  MetricState,
+  OperationType,
+  PersistedIndexPatternLayer,
+} from '@kbn/lens-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { Query } from '@kbn/es-query';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Query } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getColorPalette } from '../synthetics/single_metric_config';
 import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
-import { ColumnFilter, MetricOption } from '../../types';
-import { SeriesConfig } from '../../../../..';
-import {
-  buildNumberColumn,
-  LayerConfig,
-  LensAttributes,
-  parseCustomFieldName,
-} from '../lens_attributes';
+import type { ColumnFilter, MetricOption } from '../../types';
+import type { SeriesConfig } from '../../../../..';
+import type { LayerConfig } from '../lens_attributes';
+import { buildNumberColumn, LensAttributes, parseCustomFieldName } from '../lens_attributes';
 
 export class SingleMetricLensAttributes extends LensAttributes {
   columnId: string;
@@ -29,10 +31,9 @@ export class SingleMetricLensAttributes extends LensAttributes {
   constructor(
     layerConfigs: LayerConfig[],
     reportType: string,
-    lensFormulaHelper: FormulaPublicApi,
     dslFilters?: QueryDslQueryContainer[]
   ) {
-    super(layerConfigs, reportType, lensFormulaHelper, dslFilters);
+    super(layerConfigs, reportType, dslFilters);
     this.layers = {};
     this.reportType = reportType;
 
@@ -50,7 +51,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.visualization = this.getMetricState();
   }
 
-  getSingleMetricLayer() {
+  getSingleMetricLayer(): PersistedIndexPatternLayer | undefined {
     const { seriesConfig, selectedMetricField, operationType, dataView, name } =
       this.layerConfigs[0];
 
@@ -71,13 +72,15 @@ export class SingleMetricLensAttributes extends LensAttributes {
       this.metricStateOptions = metricStateOptions;
 
       if (columnType === FORMULA_COLUMN && formula) {
-        return this.getFormulaLayer({
-          formula,
-          label: name ?? columnLabel,
-          dataView,
-          format,
-          filter: columnFilter,
-        });
+        return {
+          ...this.getFormulaLayer({
+            formula,
+            label: name ?? columnLabel,
+            dataView,
+            format,
+            filter: columnFilter,
+          }),
+        };
       }
 
       const getSourceField = () => {
@@ -95,31 +98,42 @@ export class SingleMetricLensAttributes extends LensAttributes {
       const isPercentileColumn = operationType?.includes('th');
 
       if (isPercentileColumn) {
-        return this.getPercentileLayer({
-          sourceField,
-          operationType,
-          seriesConfig,
-          columnLabel,
-          columnFilter,
-        });
+        return {
+          ...this.getPercentileLayer({
+            sourceField,
+            operationType,
+            seriesConfig,
+            columnLabel,
+            columnFilter,
+          }),
+        };
       }
 
       return {
         columns: {
-          [this.columnId]: {
-            ...buildNumberColumn(sourceField),
-            customLabel: true,
-            label: name ?? columnLabel,
-            operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
-            filter: columnFilter,
-            params: {
-              emptyAsNull,
-            },
-          },
+          [this.columnId]:
+            sourceField === RECORDS_FIELD
+              ? ({
+                  ...buildNumberColumn(sourceField),
+                  customLabel: true,
+                  label: name ?? columnLabel,
+                  operationType: 'count',
+                  filter: columnFilter,
+                  params: {
+                    emptyAsNull: Boolean(emptyAsNull),
+                  },
+                } as CountIndexPatternColumn)
+              : {
+                  ...buildNumberColumn(sourceField),
+                  customLabel: true,
+                  label: name ?? columnLabel,
+                  operationType: operationType || 'median',
+                  filter: columnFilter,
+                },
         },
         columnOrder: [this.columnId],
         incompleteColumns: {},
-      };
+      } satisfies PersistedIndexPatternLayer;
     }
   }
 
@@ -136,25 +150,33 @@ export class SingleMetricLensAttributes extends LensAttributes {
     filter?: Query;
     dataView: DataView;
   }) {
-    const layer = this.lensFormulaHelper?.insertOrReplaceFormulaColumn(
-      this.columnId,
-      {
-        formula,
-        label,
-        filter,
-        format:
-          format === 'percent' || !format
-            ? {
-                id: 'percent',
-                params: {
-                  decimals: 3,
-                },
-              }
-            : undefined,
+    const layer = {
+      columnOrder: [this.columnId],
+      columns: {
+        [this.columnId]: {
+          label: label ?? '',
+          customLabel: label != null,
+          dataType: 'number',
+          filter,
+          isBucketed: false,
+          operationType: 'formula',
+          params: {
+            formula,
+            isFormulaBroken: false,
+            format:
+              format === 'percent' || !format
+                ? {
+                    id: 'percent',
+                    params: {
+                      decimals: 3,
+                    },
+                  }
+                : undefined,
+          },
+          references: [],
+        } satisfies FormulaIndexPatternColumn,
       },
-      { columns: {}, columnOrder: [] },
-      dataView
-    );
+    };
 
     return layer!;
   }

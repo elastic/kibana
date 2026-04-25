@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Argv } from 'yargs';
+import type { Argv } from 'yargs';
 import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cli_options';
 
 export enum EvaluateWith {

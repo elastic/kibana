@@ -8,19 +8,19 @@
  */
 
 import { createSeries } from '../__mocks__';
-import { Metric, MetricType } from '../../../../common/types';
+import type { Metric, MetricType } from '../../../../common/types';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { MetricAggregationColumn, ParentPipelineAggColumn } from './parent_pipeline';
 import {
   computeParentPipelineColumns,
   convertMetricAggregationColumnWithoutSpecialParams,
   convertMetricAggregationToColumn,
   convertParentPipelineAggToColumns,
   createParentPipelineAggregationColumn,
-  MetricAggregationColumn,
-  ParentPipelineAggColumn,
 } from './parent_pipeline';
-import { SupportedMetric, SUPPORTED_METRICS } from '../metrics';
-import { ColumnWithMeta, FormulaColumn } from './types';
+import type { SupportedMetric } from '../metrics';
+import { SUPPORTED_METRICS } from '../metrics';
+import type { ColumnWithMeta, FormulaColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { Operations } from '@kbn/visualizations-plugin/common';

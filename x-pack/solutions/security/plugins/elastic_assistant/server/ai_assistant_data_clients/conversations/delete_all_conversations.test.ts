@@ -7,7 +7,8 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DeleteAllConversationsParams, deleteAllConversations } from './delete_all_conversations';
+import type { DeleteAllConversationsParams } from './delete_all_conversations';
+import { deleteAllConversations } from './delete_all_conversations';
 
 export const getDeleteAllConversationsOptionsMock = (): DeleteAllConversationsParams => ({
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,

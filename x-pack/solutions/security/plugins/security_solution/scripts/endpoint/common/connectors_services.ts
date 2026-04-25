@@ -6,7 +6,10 @@
  */
 
 import type { KbnClient } from '@kbn/test';
-import type { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/connector/response';
+import type {
+  GetAllConnectorsResponseV1,
+  ConnectorResponseV1,
+} from '@kbn/actions-plugin/common/routes/connector/response';
 import type { CreateConnectorRequestBodyV1 } from '@kbn/actions-plugin/common/routes/connector/apis/create';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
@@ -17,9 +20,9 @@ import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_a
  */
 export const fetchConnectorsList = async (
   kbnClient: KbnClient
-): Promise<AllConnectorsResponseV1[]> => {
+): Promise<GetAllConnectorsResponseV1> => {
   return kbnClient
-    .request<AllConnectorsResponseV1[]>({
+    .request<GetAllConnectorsResponseV1>({
       path: '/api/actions/connectors',
       method: 'GET',
     })
@@ -35,7 +38,7 @@ export const fetchConnectorsList = async (
 export const fetchConnectorByType = async (
   kbnClient: KbnClient,
   connectorTypeId: string
-): Promise<AllConnectorsResponseV1 | undefined> => {
+): Promise<ConnectorResponseV1 | undefined> => {
   const allConnectors = await fetchConnectorsList(kbnClient);
 
   for (const connector of allConnectors) {

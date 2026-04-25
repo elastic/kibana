@@ -11,7 +11,7 @@ import { IndexImportManageDataSource } from './index_import_manage_data_source';
 import { TestProviders } from '../../../common/mock';
 
 const mockUseFetchMonitoredIndices = jest.fn().mockImplementation(() => ({
-  data: [],
+  data: { sources: [] },
   isFetching: false,
   refetch: jest.fn(),
 }));
@@ -39,9 +39,7 @@ describe('IndexImportManageDataSource', () => {
       wrapper: TestProviders,
     });
 
-    expect(
-      screen.getByText(/One or more indices containing the user\.name field/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Select one or more indices containing the/i)).toBeInTheDocument();
   });
 
   it('shows "No indices added" when there are no indices', () => {
@@ -53,7 +51,7 @@ describe('IndexImportManageDataSource', () => {
 
   it('shows loading spinner when isFetching is true', () => {
     mockUseFetchMonitoredIndices.mockImplementation(() => ({
-      data: [],
+      data: { sources: [] },
       isFetching: true,
       refetch: jest.fn(),
     }));
@@ -66,7 +64,7 @@ describe('IndexImportManageDataSource', () => {
 
   it('shows number of indices when indices exist', () => {
     mockUseFetchMonitoredIndices.mockImplementation(() => ({
-      data: [{ indexPattern: 'foo,bar,baz' }],
+      data: { sources: [{ indexPattern: 'foo,bar,baz' }] },
       isFetching: false,
       refetch: jest.fn(),
     }));
@@ -91,7 +89,7 @@ describe('IndexImportManageDataSource', () => {
     const refetch = jest.fn();
 
     mockUseFetchMonitoredIndices.mockImplementation(() => ({
-      data: [{ indexPattern: 'foo,bar,baz' }],
+      data: { sources: [{ indexPattern: 'foo,bar,baz' }] },
       isFetching: false,
       refetch,
     }));
@@ -100,7 +98,7 @@ describe('IndexImportManageDataSource', () => {
       wrapper: TestProviders,
     });
     fireEvent.click(screen.getByText(/Select index/i));
-    fireEvent.click(screen.getByText('Add privileged users'));
+    fireEvent.click(screen.getByText('Update privileged users'));
     await waitFor(() => {
       expect(setAddDataSourceResult).toHaveBeenCalledWith({ successful: true, userCount: 0 });
       expect(refetch).toHaveBeenCalled();

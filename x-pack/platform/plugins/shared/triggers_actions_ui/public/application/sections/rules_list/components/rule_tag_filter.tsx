@@ -8,13 +8,12 @@
 import React, { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiSelectableProps, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
-  EuiSelectableProps,
-  EuiSelectableOption,
   EuiSpacer,
 } from '@elastic/eui';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
@@ -82,7 +81,7 @@ const RuleTagFilterPopoverButton = memo(
     return (
       <EuiFilterButton
         data-test-subj={buttonDataTestSubj}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isSelected={isSelected}
         hasActiveFilters={selectedTags.length > 0}
         numActiveFilters={selectedTags.length}
@@ -283,6 +282,10 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
         data-test-subj={dataTestSubj}
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.ruleTagFilterPopoverAriaLabel',
+          { defaultMessage: 'Filter by tags' }
+        )}
         button={
           <RuleTagFilterPopoverButton
             isSelected={isPopoverOpen}

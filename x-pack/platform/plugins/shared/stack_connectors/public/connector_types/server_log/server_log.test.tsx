@@ -38,7 +38,7 @@ describe('action params validation', () => {
       level: 'trace',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { message: [] },
     });
   });
@@ -48,7 +48,7 @@ describe('action params validation', () => {
       message: '',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         message: ['Message is required.'],
       },

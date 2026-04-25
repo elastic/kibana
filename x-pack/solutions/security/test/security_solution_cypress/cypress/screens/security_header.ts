@@ -1,0 +1,138 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getDataTestSubjectSelector, getDataTestSubjectSelectorMatch } from '../helpers/common';
+import { GLOBAL_KQL_WRAPPER } from './search_bar';
+
+// main links
+export const DASHBOARDS = '[data-test-subj="solutionSideNavItemLink-dashboards"]';
+
+export const ALERTS = '[data-test-subj="solutionSideNavItemLink-alerts"]';
+
+export const CSP_FINDINGS =
+  '[data-test-subj="solutionSideNavItemLink-cloud_security_posture-findings"]';
+
+export const CASES = '[data-test-subj="solutionSideNavItemLink-cases"]';
+
+export const TIMELINES = '[data-test-subj="solutionSideNavItemLink-timelines"]';
+
+export const EXPLORE = '[data-test-subj="solutionSideNavItemLink-explore"]';
+export const EXPLORE_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-explore"]';
+
+export const RULES_NAV_LINK = '[data-test-subj="solutionSideNavItemLink-rules-landing"]';
+
+export const SETTINGS = '[data-test-subj="solutionSideNavItemLink-administration"]';
+export const SETTINGS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-administration"]';
+
+export const MIGRATIONS_LANDING = '[data-test-subj="solutionSideNavItemLink-siem_migrations"]';
+export const MIGRATIONS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-siem_migrations"]';
+
+// nested links
+export const HOSTS = '[data-test-subj="solutionSideNavPanelLink-hosts"]';
+
+export const ENDPOINTS = '[data-test-subj="solutionSideNavPanelLink-endpoints"]';
+
+export const POLICIES = '[data-test-subj="solutionSideNavPanelLink-policy"]';
+
+/** Unified Artifacts entry (replaces per-type trusted apps, event filters, blocklist, etc.) */
+export const ARTIFACTS = '[data-test-subj="solutionSideNavPanelLink-artifacts"]';
+
+export const RESPONSE_ACTIONS_HISTORY =
+  '[data-test-subj="solutionSideNavPanelLink-response_actions_history"]';
+
+export const CSP_BENCHMARKS =
+  '[data-test-subj="solutionSideNavPanelLink-cloud_security_posture-benchmarks"]';
+
+export const NETWORK = '[data-test-subj="solutionSideNavPanelLink-network"]';
+
+export const USERS = '[data-test-subj="solutionSideNavPanelLink-users"]';
+
+export const INDICATORS = '[data-test-subj="solutionSideNavItemLink-threat_intelligence"]';
+
+export const RULES = '[data-test-subj="solutionSideNavPanelLink-rules"]';
+
+export const EXCEPTIONS = '[data-test-subj="solutionSideNavPanelLink-exceptions"]';
+
+// other
+export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
+
+export const KQL_INPUT_TEXT_AREA = '[data-test-subj="queryInput"]';
+
+export const KQL_INPUT = (dataTestSubj: string = KQL_INPUT_TEXT_AREA) =>
+  `${GLOBAL_KQL_WRAPPER} ${dataTestSubj}`;
+
+export const REFRESH_BUTTON = `[data-test-subj="kbnQueryBar"] [data-test-subj="querySubmitButton"]`;
+
+export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
+
+export const KIBANA_LOADING_ICON = '[data-test-subj="kbnLoadingMessage"]';
+
+// Siem Migrations
+export const TRANSLATED_RULES_PAGE = Cypress.env('IS_SERVERLESS')
+  ? getDataTestSubjectSelectorMatch('nav-item-id-siem_migrations-rules')
+  : getDataTestSubjectSelector('solutionSideNavPanelLink-siem_migrations-rules');
+
+export const LAUNCHPAD_PANEL_BTN = getDataTestSubjectSelector(
+  'solutionSideNavItemLink-securityGroup:launchpad'
+);
+
+export const GET_STARTED_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-get_started'
+);
+export const SIEM_READINESS_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_readiness'
+);
+export const VALUE_REPORTS_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-ai_value'
+);
+export const MANAGE_AUTOMATIC_MIGRATIONS_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-manage'
+);
+
+export const LAUNCHPAD_TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-rules'
+);
+
+// not used anywhere (added in https://github.com/elastic/kibana/pull/238116/files)
+export const TRANSLATED_DASHBOARDS_PAGE = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-dashboards'
+);
+
+export const SOLUTION_SIDE_NAV_PANEL = getDataTestSubjectSelector('solutionSideNavPanel');
+
+// opens the navigation panel for a given nested link
+export const openNavigationPanelFor = (page: string) => {
+  let panel;
+  switch (page) {
+    case HOSTS:
+    case NETWORK:
+    case USERS: {
+      panel = EXPLORE;
+      break;
+    }
+    case RULES:
+    case EXCEPTIONS:
+    case CSP_BENCHMARKS: {
+      panel = RULES_NAV_LINK;
+      break;
+    }
+    case ENDPOINTS:
+    case POLICIES:
+    case ARTIFACTS: {
+      panel = SETTINGS;
+      break;
+    }
+  }
+  if (panel) {
+    openNavigationPanel(panel);
+  }
+};
+
+// opens the navigation panel of a main link
+export const openNavigationPanel = (page: string) => {
+  cy.get(page).click();
+};

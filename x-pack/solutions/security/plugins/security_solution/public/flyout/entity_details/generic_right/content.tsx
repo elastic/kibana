@@ -6,23 +6,31 @@
  */
 
 import React, { useMemo } from 'react';
+import {
+  ASSET_INVENTORY_APP_NAME,
+  ASSET_INVENTORY_CRITICALITY_ASSIGNED_MANUAL,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
 } from '../shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
-import { useExpandSection } from '../../document_details/right/hooks/use_expand_section';
+import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
 import { FieldsTable, usePinnedFields } from './components/fields_table';
-import { ExpandableSection } from '../../document_details/right/components/expandable_section';
+import { ExpandableSection } from '../../../flyout_v2/shared/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
+import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
 const defaultPinnedFields = [
   'entity.name',
@@ -42,21 +50,23 @@ const defaultPinnedFields = [
 interface GenericEntityFlyoutContentProps {
   source: GenericEntityRecord;
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
-  insightsField: CloudPostureEntityIdentifier;
-  insightsValue: string;
+  identityFields: IdentityFields;
+  onAssetCriticalityChange: () => void;
 }
 
 export const GenericEntityFlyoutContent = ({
   source,
   openGenericEntityDetailsPanelByPath,
-  insightsField,
-  insightsValue,
+  identityFields,
+  onAssetCriticalityChange,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
+  const entityDisplayValue = Object.values(identityFields)[0] ?? '';
 
   const fieldsSectionExpandedState = useExpandSection({
-    title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION,
+    title: 'fields',
     defaultValue: true,
+    storageKey: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION,
   });
 
   const { pinnedFields } = usePinnedFields(GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS);
@@ -81,12 +91,25 @@ export const GenericEntityFlyoutContent = ({
 
   return (
     <FlyoutBody>
+      <AssetCriticalityAccordion
+        entity={{
+          name: entityDisplayValue as string,
+          type: EntityType.generic,
+        }}
+        onChange={() => {
+          uiMetricService.trackUiMetric(
+            METRIC_TYPE.CLICK,
+            ASSET_INVENTORY_CRITICALITY_ASSIGNED_MANUAL,
+            ASSET_INVENTORY_APP_NAME
+          );
+          onAssetCriticalityChange();
+        }}
+      />
       <EntityInsight
-        field={insightsField}
-        value={insightsValue}
+        identityFields={identityFields}
         isPreviewMode={false}
-        isLinkEnabled={true}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
+        entityType={EntityType.generic}
       />
       <ExpandableSection
         title={
@@ -97,10 +120,11 @@ export const GenericEntityFlyoutContent = ({
         }
         expanded={fieldsSectionExpandedState}
         localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION}
+        sectionId={'fields'}
       >
         <ExpandablePanel
           header={{
-            iconType: 'arrowStart',
+            iconType: 'chevronLimitLeft',
             title: (
               <EuiTitle
                 css={css`

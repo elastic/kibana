@@ -20,15 +20,6 @@ import {
   ALERT_URL,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-
-import {
-  generateAttackDiscoveryAlertHash,
-  transformToAlertDocuments,
-  transformToBaseAlertDocument,
-} from '.';
-import { mockAttackDiscoveries } from '../../../evaluation/__mocks__/mock_attack_discoveries';
-import { mockAuthenticatedUser } from '../../../../../__mocks__/mock_authenticated_user';
-import { mockCreateAttackDiscoveryAlertsParams } from '../../../../../__mocks__/mock_create_attack_discovery_alerts_params';
 import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
@@ -39,7 +30,16 @@ import {
   ALERT_RISK_SCORE,
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
-} from '../../../schedules/fields/field_names';
+} from '@kbn/elastic-assistant-common';
+
+import {
+  generateAttackDiscoveryAlertHash,
+  transformToAlertDocuments,
+  transformToBaseAlertDocument,
+} from '.';
+import { mockAttackDiscoveries } from '../../../evaluation/__mocks__/mock_attack_discoveries';
+import { mockAuthenticatedUser } from '../../../../../__mocks__/mock_authenticated_user';
+import { mockCreateAttackDiscoveryAlertsParams } from '../../../../../__mocks__/mock_create_attack_discovery_alerts_params';
 
 describe('Transform attack discoveries to alert documents', () => {
   describe('transformToAlertDocuments', () => {
@@ -232,6 +232,48 @@ describe('Transform attack discoveries to alert documents', () => {
       });
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toBeUndefined();
+    });
+
+    it('returns undefined for replacements when replacements is undefined', () => {
+      const params = {
+        ...mockCreateAttackDiscoveryAlertsParams,
+        replacements: undefined,
+      };
+
+      const result = transformToAlertDocuments({
+        ...defaultProps,
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: params,
+        now: mockNow,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toBeUndefined();
+    });
+
+    it('returns undefined for entitySummaryMarkdown_with_replacements when entitySummaryMarkdown is an empty string', () => {
+      const params = {
+        ...mockCreateAttackDiscoveryAlertsParams,
+        attackDiscoveries: [
+          {
+            ...mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0],
+            entitySummaryMarkdown: '',
+          },
+        ],
+      };
+
+      const result = transformToAlertDocuments({
+        ...defaultProps,
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: params,
+        now: mockNow,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]).toEqual(
+        replaceAnonymizedValuesWithOriginalValues({
+          messageContent: '',
+          replacements: params.replacements ?? {},
+        })
+      );
     });
   });
 

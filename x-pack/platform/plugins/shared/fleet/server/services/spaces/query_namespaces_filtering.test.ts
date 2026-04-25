@@ -98,7 +98,7 @@ describe('addNamespaceFilteringToQuery', () => {
           filter: [
             {
               terms: {
-                namespaces: ['mySpace'],
+                namespaces: ['mySpace', '*'],
               },
             },
           ],
@@ -127,7 +127,7 @@ describe('addNamespaceFilteringToQuery', () => {
             },
             {
               terms: {
-                namespaces: ['mySpace'],
+                namespaces: ['mySpace', '*'],
               },
             },
           ],
@@ -153,7 +153,7 @@ describe('addNamespaceFilteringToQuery', () => {
             },
             {
               terms: {
-                namespaces: ['mySpace'],
+                namespaces: ['mySpace', '*'],
               },
             },
           ],
@@ -177,7 +177,7 @@ describe('addNamespaceFilteringToQuery', () => {
                 should: [
                   {
                     terms: {
-                      namespaces: ['default'],
+                      namespaces: ['default', '*'],
                     },
                   },
                   {
@@ -223,7 +223,7 @@ describe('addNamespaceFilteringToQuery', () => {
                 should: [
                   {
                     terms: {
-                      namespaces: ['default'],
+                      namespaces: ['default', '*'],
                     },
                   },
                   {
@@ -266,7 +266,7 @@ describe('addNamespaceFilteringToQuery', () => {
                 should: [
                   {
                     terms: {
-                      namespaces: ['default'],
+                      namespaces: ['default', '*'],
                     },
                   },
                   {

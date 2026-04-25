@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -28,15 +28,19 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
       await ml.testResources.deleteDataViewByTitle('ft_module_sample_ecommerce');
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
+      );
 
       await ml.testResources.resetKibanaTimeZone();
     });
 
     // The file data visualizer should work the same as with a trial license
     loadTestFile(
-      require.resolve('../../../../../functional/apps/ml/data_visualizer/file_data_visualizer')
+      require.resolve(
+        '../../../../../functional/apps/ml/data_visualizer/group2/file_data_visualizer'
+      )
     );
   });
 }

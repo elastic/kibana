@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup, DEFAULT_APP_CATEGORIES, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   AttackDiscoveryScheduleParams,
@@ -13,16 +14,19 @@ import {
 
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';
-import { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleType } from '../types';
+import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleType } from '../types';
 import { attackDiscoveryScheduleExecutor } from './executor';
+import type { ElasticAssistantPluginCoreSetupDependencies } from '../../../../types';
 
 export interface GetAttackDiscoveryScheduleParams {
+  core: ElasticAssistantPluginCoreSetupDependencies;
   logger: Logger;
   publicBaseUrl: string | undefined;
   telemetry: AnalyticsServiceSetup;
 }
 
 export const getAttackDiscoveryScheduleType = ({
+  core,
   logger,
   publicBaseUrl,
   telemetry,
@@ -45,7 +49,10 @@ export const getAttackDiscoveryScheduleType = ({
       },
     },
     schemas: {
-      params: { type: 'zod', schema: AttackDiscoveryScheduleParams },
+      params: {
+        type: 'zod',
+        schema: AttackDiscoveryScheduleParams,
+      },
     },
     actionVariables: {
       context: [{ name: 'server', description: 'the server' }],
@@ -55,7 +62,9 @@ export const getAttackDiscoveryScheduleType = ({
     autoRecoverAlerts: false,
     alerts: ATTACK_DISCOVERY_ALERTS_AAD_CONFIG,
     executor: async (options: AttackDiscoveryExecutorOptions) => {
+      const [, startDeps] = await core.getStartServices();
       return attackDiscoveryScheduleExecutor({
+        inference: startDeps.inference,
         options,
         logger,
         publicBaseUrl,

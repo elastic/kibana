@@ -11,33 +11,48 @@ import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  OnSaveProps,
-  SavedObjectSaveModal,
-  type SaveModalState,
-} from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal, type SaveModalState } from '@kbn/saved-objects-plugin/public';
 
-import { SaveModalDashboardProps } from './types';
+import type { DashboardSavingOption, SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
 import { getPresentationCapabilities } from '../utils/get_presentation_capabilities';
 
-function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
-  const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;
+function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<T>) {
+  const {
+    customModalTitle,
+    documentInfo,
+    tagOptions,
+    objectType,
+    onClose,
+    canSaveByReference,
+    forceSaveByReference,
+    hideDashboardOptions,
+    initialDashboardOption,
+    onCopyOnSaveChangeCb,
+  } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
+  const shouldForceSaveByReference = Boolean(forceSaveByReference && canSaveByReference);
 
   const { canAccessDashboards, canCreateNewDashboards } = useMemo(() => {
     return getPresentationCapabilities();
   }, []);
 
-  // Disable the dashboard options if the user can't access dashboards or if they're read-only
-  const disableDashboardOptions = !canAccessDashboards || !canCreateNewDashboards;
+  // Disable the dashboard options if the user can't access dashboards or if they're read-only or if it's enforced by the hideDashboardOptions prop
+  const disableDashboardOptions =
+    hideDashboardOptions || !canAccessDashboards || !canCreateNewDashboards;
 
-  const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>(
-    documentId || disableDashboardOptions ? null : 'existing'
+  const [dashboardOption, setDashboardOption] = useState<DashboardSavingOption>(
+    documentId || disableDashboardOptions
+      ? null
+      : initialDashboardOption !== undefined
+      ? initialDashboardOption
+      : 'existing'
   );
   const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(
-    canSaveByReference && (!initialCopyOnSave || disableDashboardOptions)
+    (shouldForceSaveByReference || canSaveByReference) &&
+      (!initialCopyOnSave || disableDashboardOptions || initialDashboardOption === null)
   );
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
@@ -54,6 +69,7 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
             setDashboardOption(option);
           }}
           canSaveByReference={canSaveByReference}
+          showAddToLibraryCheckbox={!shouldForceSaveByReference}
           {...{
             copyOnSave,
             documentId,
@@ -73,9 +89,10 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
     }
     setDashboardOption(null);
     setCopyOnSave(newCopyOnSave);
+    onCopyOnSaveChangeCb?.(newCopyOnSave);
   };
 
-  const onModalSave = (onSaveProps: OnSaveProps) => {
+  const onModalSave = async (onSaveProps: OnSaveProps): Promise<void> => {
     let dashboardId = null;
 
     // Don't save with a dashboard ID if we're
@@ -88,7 +105,11 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
       }
     }
 
-    props.onSave({ ...onSaveProps, dashboardId, addToLibrary: isAddToLibrarySelected });
+    await props.onSave({
+      ...onSaveProps,
+      dashboardId,
+      addToLibrary: shouldForceSaveByReference ? true : isAddToLibrarySelected,
+    });
   };
 
   const saveLibraryLabel =
@@ -113,10 +134,15 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
 
   return (
     <SavedObjectSaveModal
+      customModalTitle={customModalTitle}
       onSave={onModalSave}
       title={documentInfo.title}
       showCopyOnSave={documentId ? true : false}
-      options={isAddToLibrarySelected ? tagOptions : undefined} // Show tags when not adding to dashboard
+      options={
+        shouldForceSaveByReference || isAddToLibrarySelected || hideDashboardOptions
+          ? tagOptions
+          : undefined
+      } // Show tags when not adding to dashboard
       description={documentInfo.description}
       showDescription={true}
       mustCopyOnSaveMessage={props.mustCopyOnSaveMessage}

@@ -57,6 +57,18 @@ export const NEXT_URL_QUERY_STRING_PARAMETER = 'next';
 export const SESSION_ERROR_REASON_HEADER = 'kbn-session-error-reason';
 
 /**
+ * Indicates that any authentication optimizations (e.g., minimal authentication mode) should be disabled and the full
+ * authentication information should be made available.
+ */
+export const KIBANA_AUTH_FULL_HEADER = 'kbn-auth-full';
+
+/**
+ * The HTTP header that's supposed to carry the client ES authentication information when needed (e.g.,
+ * UIAM shared secret).
+ */
+export const ES_CLIENT_AUTHENTICATION_HEADER = 'x-client-authentication';
+
+/**
  * Matches valid usernames and role names.
  *
  * - Must contain only letters, numbers, spaces, punctuation and printable symbols.

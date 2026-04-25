@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Doc, EventFunction } from '../../../../../types';
+import type { Doc, EventFunction } from '../../../../../types';
 import { ADMIN_CONSOLE, ADMIN_CONSOLE_HOSTS } from '../../../common/constants';
 
 export const createStartupEvents: EventFunction = (_schedule, timestamp) =>

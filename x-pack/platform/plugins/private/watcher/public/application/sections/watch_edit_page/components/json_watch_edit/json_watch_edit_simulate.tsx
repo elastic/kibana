@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormAppend,
   EuiFormRow,
   EuiLink,
   EuiSelect,
@@ -30,7 +31,7 @@ import { WatchHistoryItem } from '../../../../models/watch_history_item';
 
 import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';
 import { ExecuteDetails } from '../../../../models/execute_details';
-import {
+import type {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
@@ -237,9 +238,7 @@ export const JsonWatchEditSimulate = ({
               min={0}
               data-test-subj="triggeredTimeInput"
               append={
-                <EuiText size="s">
-                  {getTimeUnitLabel(TIME_UNITS.SECOND, triggeredTimeValue)}
-                </EuiText>
+                <EuiFormAppend label={getTimeUnitLabel(TIME_UNITS.SECOND, triggeredTimeValue)} />
               }
               onChange={(e) => {
                 const value = e.target.value;
@@ -331,6 +330,12 @@ export const JsonWatchEditSimulate = ({
             <EuiBasicTable
               items={watchActions}
               itemId="simulateExecutionActionModesTable"
+              tableCaption={i18n.translate(
+                'xpack.watcher.sections.watchEdit.simulate.actionModesTableCaption',
+                {
+                  defaultMessage: 'Action modes for watch execution',
+                }
+              )}
               columns={columns}
             />
           </EuiFormRow>

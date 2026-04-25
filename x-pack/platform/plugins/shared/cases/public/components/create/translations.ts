@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 export * from '../user_profiles/translations';
 
+export const CREATE_CASE_LABEL = i18n.translate('xpack.cases.create.createCaseFlyoutAriaLabel', {
+  defaultMessage: 'Create case',
+});
+
 export const STEP_ONE_TITLE = i18n.translate('xpack.cases.create.stepOneTitle', {
   defaultMessage: 'Select template',
 });
@@ -68,3 +72,28 @@ export const DEFAULT_EMPTY_TEMPLATE_NAME = i18n.translate(
     defaultMessage: 'No template selected',
   }
 );
+
+export const TEMPLATE_SELECT_PLACEHOLDER = i18n.translate(
+  'xpack.cases.create.templateSelectPlaceholder',
+  {
+    defaultMessage: 'Select a template',
+  }
+);
+
+export const TEMPLATE_NOT_SELECTED_TITLE = i18n.translate(
+  'xpack.cases.create.templateNotSelectedTitle',
+  {
+    defaultMessage: 'Template not selected',
+  }
+);
+
+export const TEMPLATE_NOT_SELECTED_DESCRIPTION = i18n.translate(
+  'xpack.cases.create.templateNotSelectedDescription',
+  {
+    defaultMessage: 'Select a template in the first step above to edit extended fields.',
+  }
+);
+
+export const EXTENDED_FIELDS_TITLE = i18n.translate('xpack.cases.create.extendedFieldsTitle', {
+  defaultMessage: 'Extended fields',
+});

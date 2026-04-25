@@ -23,10 +23,16 @@ import {
 
 const baseNavItems = [
   expect.objectContaining({
-    'data-test-subj': 'searchSideNav-Home',
-    href: '/app/elasticsearch/home',
-    id: 'home',
-    items: undefined,
+    id: 'root',
+    items: [
+      expect.objectContaining({
+        'data-test-subj': 'searchSideNav-Home',
+        href: '/app/elasticsearch/home',
+        id: 'home',
+        items: undefined,
+      }),
+    ],
+    name: undefined,
   }),
   {
     'data-test-subj': 'searchSideNav-Build',
@@ -35,7 +41,7 @@ const baseNavItems = [
       {
         'data-test-subj': 'searchSideNav-Indices',
         href: '/app/elasticsearch/index_management',
-        id: 'search_indices',
+        id: 'index_management',
         items: undefined,
         name: 'Index Management',
       },
@@ -47,18 +53,11 @@ const baseNavItems = [
         name: 'Playground',
       },
       {
-        'data-test-subj': 'searchSideNav-Connectors',
-        href: '/app/elasticsearch/content/connectors',
-        id: 'connectors',
-        items: undefined,
-        name: 'Connectors',
-      },
-      {
         'data-test-subj': 'searchSideNav-SearchApplications',
         href: '/app/elasticsearch/applications/search_applications',
         id: 'searchApplications',
         items: undefined,
-        name: 'Search Applications',
+        name: 'Search applications',
       },
     ],
     name: 'Build',
@@ -79,14 +78,7 @@ const baseNavItems = [
         href: '/app/elasticsearch/query_rules',
         id: 'searchQueryRules',
         items: undefined,
-        name: 'Query Rules',
-      },
-      {
-        'data-test-subj': 'searchSideNav-InferenceEndpoints',
-        href: '/app/elasticsearch/relevance/inference_endpoints',
-        id: 'inference_endpoints',
-        items: undefined,
-        name: 'Inference Endpoints',
+        name: 'Query rules',
       },
     ],
     name: 'Relevance',
@@ -104,23 +96,13 @@ const mockNavLinks = [
     url: '/app/elasticsearch/index_management',
   },
   {
-    id: 'enterpriseSearchContent:connectors',
-    title: 'Connectors',
-    url: '/app/elasticsearch/content/connectors',
-  },
-  {
-    id: 'enterpriseSearchContent:webCrawlers',
-    title: 'Web Crawlers',
-    url: '/app/elasticsearch/content/crawlers',
-  },
-  {
     id: 'searchPlayground',
     title: 'Playground',
     url: '/app/search_playground',
   },
   {
     id: 'enterpriseSearchApplications:searchApplications',
-    title: 'Search Applications',
+    title: 'Search applications',
     url: '/app/elasticsearch/applications/search_applications',
   },
   {
@@ -129,18 +111,13 @@ const mockNavLinks = [
     url: '/app/elasticsearch/analytics',
   },
   {
-    id: 'searchInferenceEndpoints:inferenceEndpoints',
-    title: 'Inference Endpoints',
-    url: '/app/elasticsearch/relevance/inference_endpoints',
-  },
-  {
     id: 'searchSynonyms:synonyms',
     title: 'Synonyms',
     url: '/app/elasticsearch/synonyms/',
   },
   {
     id: 'searchQueryRules',
-    title: 'Query Rules',
+    title: 'Query rules',
     url: '/app/elasticsearch/query_rules',
   },
 ];

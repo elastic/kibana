@@ -17,6 +17,7 @@ import type {
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportHook,
 } from '@kbn/core-saved-objects-server';
+import type { AccessControlImportTransformsFactory } from '@kbn/core-saved-objects-server/src/import';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
 
@@ -29,17 +30,20 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
   readonly #importSizeLimit: number;
   readonly #importHooks: Record<string, SavedObjectsImportHook[]>;
   readonly #log: Logger;
+  readonly #createAccessControlImportTransforms?: AccessControlImportTransformsFactory;
 
   constructor({
     savedObjectsClient,
     typeRegistry,
     importSizeLimit,
     logger,
+    createAccessControlImportTransforms,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
     typeRegistry: ISavedObjectTypeRegistry;
     importSizeLimit: number;
     logger: Logger;
+    createAccessControlImportTransforms?: AccessControlImportTransformsFactory;
   }) {
     this.#savedObjectsClient = savedObjectsClient;
     this.#typeRegistry = typeRegistry;
@@ -51,6 +55,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       return hooks;
     }, {} as Record<string, SavedObjectsImportHook[]>);
     this.#log = logger;
+    this.#createAccessControlImportTransforms = createAccessControlImportTransforms;
   }
 
   public import({
@@ -75,6 +80,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       importHooks: this.#importHooks,
       managed,
       log: this.#log,
+      createAccessControlImportTransforms: this.#createAccessControlImportTransforms,
     });
   }
 
@@ -98,6 +104,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
       managed,
+      createAccessControlImportTransforms: this.#createAccessControlImportTransforms,
     });
   }
 }

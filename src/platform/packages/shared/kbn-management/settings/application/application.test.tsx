@@ -23,7 +23,7 @@ import {
 import { DATA_TEST_SUBJ_PREFIX_TAB } from './tab';
 import { DATA_TEST_SUBJ_SETTINGS_CATEGORY } from '@kbn/management-settings-components-field-category/category';
 import { wrap, createSettingsApplicationServicesMock } from './mocks';
-import { SettingsApplicationServices } from './services';
+import type { SettingsApplicationServices } from './services';
 
 const spaceCategories = ['general', 'dashboard', 'notifications'];
 const globalCategories = ['custom branding'];
@@ -84,7 +84,7 @@ describe('Settings application', () => {
   it("doesn't render settings that are not applicable in the current solution", async () => {
     const services: SettingsApplicationServices = createSettingsApplicationServicesMock(
       undefined,
-      'es',
+      ['classic', 'es'],
       'security'
     );
 
@@ -97,7 +97,7 @@ describe('Settings application', () => {
   it('renders settings that are applicable in the current solution', async () => {
     const services: SettingsApplicationServices = createSettingsApplicationServicesMock(
       undefined,
-      'oblt',
+      ['classic', 'oblt'],
       'oblt'
     );
 

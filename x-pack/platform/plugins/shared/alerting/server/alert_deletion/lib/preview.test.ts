@@ -65,11 +65,10 @@ describe('previewTask', () => {
       'space-1'
     );
 
-    expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledWith([
-      'observability',
-      'management',
-      'securitySolution',
-    ]);
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledWith({
+      categories: ['observability', 'management', 'securitySolution'],
+      excludeInternallyManaged: true,
+    });
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({
       index: ['index1', 'index2'],
@@ -97,11 +96,10 @@ describe('previewTask', () => {
       'space-1'
     );
 
-    expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledWith([
-      'observability',
-      'management',
-      'securitySolution',
-    ]);
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledWith({
+      categories: ['observability', 'management', 'securitySolution'],
+      excludeInternallyManaged: true,
+    });
     expect(ruleTypeRegistry.getAllTypes).not.toHaveBeenCalled();
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({
@@ -168,7 +166,10 @@ describe('previewTask', () => {
     );
 
     expect(ruleTypeRegistry.getAllTypes).not.toHaveBeenCalled();
-    expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledWith(['observability']);
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledWith({
+      categories: ['observability'],
+      excludeInternallyManaged: true,
+    });
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({
       index: ['index1', 'index2'],

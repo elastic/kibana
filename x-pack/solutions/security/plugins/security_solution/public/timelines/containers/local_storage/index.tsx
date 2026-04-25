@@ -108,7 +108,7 @@ export const migrateAlertTableStateToTriggerActionsState = (
       return {
         [newKey]: {
           columns: legacyDataTableState[tableKey].columns,
-          sort: legacyDataTableState[tableKey].sort.map((sortCandidate) => ({
+          sort: legacyDataTableState[tableKey].sort?.map((sortCandidate) => ({
             [sortCandidate.columnId]: { order: sortCandidate.sortDirection },
           })),
           visibleColumns: legacyDataTableState[tableKey].columns,

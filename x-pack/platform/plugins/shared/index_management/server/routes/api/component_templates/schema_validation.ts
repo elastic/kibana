@@ -16,7 +16,7 @@ export const componentTemplateSchema = schema.object({
     lifecycle: schema.maybe(
       schema.object({
         enabled: schema.boolean(),
-        data_retention: schema.maybe(schema.string()),
+        data_retention: schema.maybe(schema.string({ maxLength: 1000 })),
       })
     ),
     // Allowing unknowns here to support data stream options that are not yet defined in the schema
@@ -25,7 +25,7 @@ export const componentTemplateSchema = schema.object({
   version: schema.maybe(schema.number()),
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   _kbnMeta: schema.object({
-    usedBy: schema.arrayOf(schema.string()),
+    usedBy: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
     isManaged: schema.boolean(),
   }),
   deprecated: schema.maybe(schema.boolean()),

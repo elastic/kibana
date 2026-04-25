@@ -6,7 +6,7 @@
  */
 
 import { RCA_PROMPT_TIMELINE_GUIDE, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
-import { RootCauseAnalysisContext } from '../../types';
+import type { RootCauseAnalysisContext } from '../../types';
 import { stringifySummaries } from '../../util/stringify_summaries';
 
 const SYSTEM_PROMPT_ADDENDUM = `

@@ -61,8 +61,8 @@ it('rewrites ftr reports with minimal changes', async () => {
     +++ ftr.xml
     @@ -1,53 +1,56 @@
      ‹?xml version="1.0" encoding="utf-8"?›
-     ‹testsuites name="ftr" timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts"›
-       ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts"›
+     ‹testsuites name="ftr" timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/platform/test/api_integration/apis/status/config.ts"›
+       ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/platform/test/api_integration/apis/status/config.ts"›
          ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js" time="154.378" owners="elastic/kibana-presentation"›
     -      ‹system-out›
     -        ‹![CDATA[[00:00:00]       │
@@ -117,7 +117,7 @@ it('rewrites ftr reports with minimal changes', async () => {
            ‹/system-out›
            ‹skipped/›
          ‹/testcase›
-         ‹testcase name="machine learning anomaly detection saved search  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040" owners="elastic/ml-ui"›
+         ‹testcase name="machine learning anomaly detection saved search  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/platform/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040" owners="elastic/ml-ui"›
     -      ‹system-out›‹![CDATA[[00:21:57]         └-: machine learning...]]›‹/system-out›
     -      ‹failure›‹![CDATA[{ NoSuchSessionError: Tried to run command without establishing a connection
     +      ‹system-out›[00:21:57]         └-: machine learning...‹/system-out›

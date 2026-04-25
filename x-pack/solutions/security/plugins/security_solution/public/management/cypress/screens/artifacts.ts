@@ -13,6 +13,7 @@ import type { UserAuthzAccessLevel } from './types';
 
 const artifactPageTopTestSubjPrefix: Readonly<Record<EndpointArtifactPageId, string>> = {
   trustedApps: 'trustedAppsListPage',
+  trustedDevices: 'trustedDevicesList',
   eventFilters: 'EventFiltersListPage',
   hostIsolationExceptions: 'hostIsolationExceptionsListPage',
   blocklist: 'blocklistPage',
@@ -31,7 +32,7 @@ const createSubjectSelector = (selectorSuffix: string, pageId?: EndpointArtifact
 };
 
 export const visitEndpointArtifactPage = (page: EndpointArtifactPageId): Cypress.Chainable => {
-  return cy.visit(pagesById[page]);
+  return cy.visit(pagesById[page].url);
 };
 
 export const getArtifactListEmptyStateAddButton = (

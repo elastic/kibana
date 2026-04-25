@@ -8,14 +8,15 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import { getExpectedVersionProperties } from './utils';
-import { PreflightCheckNamespacesResult } from './helpers';
+import type { PreflightCheckNamespacesResult } from './helpers';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformDeleteParams<T = unknown> {
@@ -48,30 +49,30 @@ export const performDelete = async <T>(
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 
   if (securityExtension) {
-    let name;
+    const nameAttribute = registry.getNameAttribute(type);
 
-    if (securityExtension.includeSavedObjectNames()) {
-      const nameAttribute = registry.getNameAttribute(type);
+    const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+      {
+        index: commonHelper.getIndexForType(type),
+        id: serializer.generateRawId(namespace, type, id),
+        _source_includes: [
+          ...SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+          'accessControl',
+        ],
+      },
+      { ignore: [404], meta: true }
+    );
 
-      const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
-        {
-          index: commonHelper.getIndexForType(type),
-          id: serializer.generateRawId(namespace, type, id),
-          _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
-        },
-        { ignore: [404], meta: true }
-      );
-
-      const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
-
-      name = SavedObjectsUtils.getName(nameAttribute, saveObject);
-    }
-
+    const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
+    const name = securityExtension.includeSavedObjectNames()
+      ? SavedObjectsUtils.getName(nameAttribute, saveObject)
+      : undefined;
+    const accessControl = savedObjectResponse.body._source?.accessControl;
     // we don't need to pass existing namespaces in because we're only concerned with authorizing
     // the current space. This saves us from performing the preflight check if we're unauthorized
     await securityExtension?.authorizeDelete({
       namespace,
-      object: { type, id, name },
+      object: { type, id, name, accessControl },
     });
   }
 

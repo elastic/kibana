@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EmbeddableApiContext, apiHasAppContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { MapsPluginStartDependencies } from '../plugin';
+import type { MapsPluginStartDependencies } from '../plugin';
 import { mapsVisTypeAlias } from '../maps_vis_type_alias';
 
 export function getAddMapPanelAction(deps: MapsPluginStartDependencies) {

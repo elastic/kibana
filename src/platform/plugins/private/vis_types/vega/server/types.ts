@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { SharedGlobalConfig } from '@kbn/core/server';
-import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { Observable } from 'rxjs';
+import type { SharedGlobalConfig } from '@kbn/core/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export type ConfigObservable = Observable<SharedGlobalConfig>;
 

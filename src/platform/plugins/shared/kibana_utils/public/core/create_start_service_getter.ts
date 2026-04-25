@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, StartServicesAccessor } from '@kbn/core/public';
+import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 
 interface StartServices<Plugins = unknown, OwnContract = unknown, Core = CoreStart> {
   plugins: Plugins;

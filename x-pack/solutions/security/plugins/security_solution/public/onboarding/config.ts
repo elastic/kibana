@@ -6,6 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  ALERTS_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { OnboardingTopicId } from './constants';
 import {
   defaultBodyConfig,
@@ -13,7 +18,6 @@ import {
   siemMigrationsBodyConfig,
 } from './components/onboarding_body/body_config';
 import type { TopicConfig } from './types';
-import { SECURITY_FEATURE_ID } from '../../common/constants';
 
 export const onboardingConfig: TopicConfig[] = [
   {
@@ -21,7 +25,7 @@ export const onboardingConfig: TopicConfig[] = [
     title: i18n.translate('xpack.securitySolution.onboarding.topic.default', {
       defaultMessage: 'Set up Security',
     }),
-    capabilitiesRequired: `${SECURITY_FEATURE_ID}.detections`,
+    capabilitiesRequired: [RULES_UI_DETECTIONS_PRIVILEGE, ALERTS_UI_DETECTIONS_PRIVILEGE],
     body: defaultBodyConfig,
   },
   {
@@ -30,7 +34,7 @@ export const onboardingConfig: TopicConfig[] = [
     title: i18n.translate('xpack.securitySolution.onboarding.topic.externalDetections.default', {
       defaultMessage: 'Set up Security',
     }),
-    capabilitiesRequired: `${SECURITY_FEATURE_ID}.external_detections`,
+    capabilitiesRequired: RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE,
     body: defaultExternalDetectionsBodyConfig,
   },
   {
@@ -40,6 +44,11 @@ export const onboardingConfig: TopicConfig[] = [
     }),
     body: siemMigrationsBodyConfig,
     disabledExperimentalFlagRequired: 'siemMigrationsDisabled',
-    capabilitiesRequired: `${SECURITY_FEATURE_ID}.detections`,
+    capabilitiesRequired: [
+      [
+        'securitySolutionSiemMigrations.all',
+        { or: [`dashboard_v2.show`, RULES_UI_DETECTIONS_PRIVILEGE] },
+      ],
+    ],
   },
 ];

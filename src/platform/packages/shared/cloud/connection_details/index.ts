@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
+export type * from './types';
 export { ConnectionDetailsOptsProvider } from './context';
 export { ConnectionDetails } from './connection_details';
 export { ConnectionDetailsFlyoutContent } from './connection_details_flyout_content';

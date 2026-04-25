@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Action, createAction } from '@kbn/ui-actions-plugin/public';
-
-export const SAMPLE_PANEL_LINK = 'samplePanelLink';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import { SAMPLE_PANEL_LINK } from './constants';
 
 export const createSamplePanelLink = (): Action =>
   createAction({

@@ -9,9 +9,9 @@
 
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import React, { useCallback, useMemo } from 'react';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
@@ -23,7 +23,10 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   panelTitle?: string;
   panelDescription?: string;
   setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
-} & Pick<PresentationPanelInternalProps, 'showBadges' | 'getActions' | 'showNotifications'>;
+} & Pick<
+  PresentationPanelInternalProps,
+  'showBadges' | 'getActions' | 'showNotifications' | 'titleHighlight'
+>;
 
 export const PresentationPanelHeader = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
@@ -38,6 +41,7 @@ export const PresentationPanelHeader = <
   setDragHandle,
   showBadges = true,
   showNotifications = true,
+  titleHighlight,
 }: PresentationPanelHeaderProps<ApiType>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -61,13 +65,13 @@ export const PresentationPanelHeader = <
       captionStyles: css`
         .dshLayout--editing &:hover {
           cursor: move;
-          background-color: ${transparentize(euiTheme.colors.warning, 0.2)};
+          background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)};
         }
       `,
       headerStyles: css`
-        height: ${euiTheme.size.l};
+        height: ${euiTheme.size.xl};
         overflow: hidden;
-        line-height: ${euiTheme.size.l};
+        line-height: ${euiTheme.size.xl};
         padding: 0px ${euiTheme.size.s};
 
         display: flex;
@@ -82,7 +86,7 @@ export const PresentationPanelHeader = <
         }
       `,
     };
-  }, [euiTheme.colors.warning, euiTheme.size]);
+  }, [euiTheme.size, euiTheme.colors]);
 
   const showPanelBar =
     (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
@@ -108,6 +112,7 @@ export const PresentationPanelHeader = <
           hideTitle={hideTitle}
           panelTitle={panelTitle}
           panelDescription={panelDescription}
+          titleHighlight={titleHighlight}
         />
         {showBadges && badgeElements}
       </div>

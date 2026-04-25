@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import { Replacements } from '../../schemas';
-import { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { Replacements } from '../../schemas';
+import type { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { getAnonymizedData } from '../get_anonymized_data';
 import { getAnonymizedValues } from '../get_anonymized_values';
 import { getCsvFromData } from '../get_csv_from_data';
 
-export const transformRawData = ({
-  anonymizationFields,
-  currentReplacements,
-  getAnonymizedValue,
-  onNewReplacements,
-  rawData,
-}: {
+interface TransformRawDataParams {
   anonymizationFields?: AnonymizationFieldResponse[];
   currentReplacements: Replacements | undefined;
   getAnonymizedValue: ({
@@ -29,11 +23,40 @@ export const transformRawData = ({
   }) => string;
   onNewReplacements?: (replacements: Replacements) => void;
   rawData: string | Record<string, unknown[]>;
-}): string => {
+}
+
+export const transformRawData = ({
+  anonymizationFields,
+  currentReplacements,
+  getAnonymizedValue,
+  onNewReplacements,
+  rawData,
+}: TransformRawDataParams): string => {
   if (typeof rawData === 'string') {
     return rawData;
   }
 
+  const anonymizedData = transformRawDataToRecord({
+    anonymizationFields,
+    currentReplacements,
+    getAnonymizedValue,
+    onNewReplacements,
+    rawData,
+  });
+
+  return getCsvFromData(anonymizedData);
+};
+
+export const transformRawDataToRecord = ({
+  anonymizationFields,
+  currentReplacements,
+  getAnonymizedValue,
+  onNewReplacements,
+  rawData,
+}: Omit<TransformRawDataParams, 'rawData'> & { rawData: Record<string, unknown[]> }): Record<
+  string,
+  string[]
+> => {
   const anonymizedData = getAnonymizedData({
     anonymizationFields,
     currentReplacements,
@@ -46,5 +69,5 @@ export const transformRawData = ({
     onNewReplacements(anonymizedData.replacements);
   }
 
-  return getCsvFromData(anonymizedData.anonymizedData);
+  return anonymizedData.anonymizedData;
 };

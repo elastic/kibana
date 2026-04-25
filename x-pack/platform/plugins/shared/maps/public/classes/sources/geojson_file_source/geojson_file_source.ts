@@ -5,17 +5,29 @@
  * 2.0.
  */
 
-import { Feature, FeatureCollection } from 'geojson';
-import { AbstractVectorSource, BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
+import type { Feature, FeatureCollection } from 'geojson';
+import type { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
+import { AbstractVectorSource } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
-import {
-  InlineFieldDescriptor,
-  GeojsonFileSourceDescriptor,
-  MapExtent,
-} from '../../../../common/descriptor_types';
-import { IField } from '../../fields/field';
+import type { MapExtent } from '../../../../common/descriptor_types';
+import type { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import { InlineField } from '../../fields/inline_field';
+
+interface InlineFieldDescriptor {
+  name: string;
+  label?: string;
+  type: 'string' | 'number';
+}
+
+interface GeojsonFileSourceDescriptor {
+  __fields?: InlineFieldDescriptor[];
+  __featureCollection: FeatureCollection;
+  areResultsTrimmed: boolean;
+  tooltipContent: string | null;
+  name: string;
+  type: SOURCE_TYPES.GEOJSON_FILE;
+}
 
 function convertToFeatureCollection(
   geoJson: Feature | FeatureCollection | null | undefined

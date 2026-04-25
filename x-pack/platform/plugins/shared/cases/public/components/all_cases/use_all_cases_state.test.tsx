@@ -11,7 +11,12 @@ import { CaseStatuses } from '@kbn/cases-components';
 
 import { TestProviders } from '../../common/mock';
 import { useAllCasesState } from './use_all_cases_state';
-import { DEFAULT_CASES_TABLE_STATE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
+import {
+  DEFAULT_CASES_TABLE_STATE,
+  DEFAULT_FROM_DATE,
+  DEFAULT_TABLE_LIMIT,
+  DEFAULT_TO_DATE,
+} from '../../containers/constants';
 import { SortFieldCase } from '../../containers/types';
 import { stringifyUrlParams } from './utils/stringify_url_params';
 import { CaseSeverity } from '../../../common';
@@ -20,27 +25,52 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
-const mockLocation = { search: '' };
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
-
 jest.mock('../../containers/configure/use_get_case_configuration');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn().mockImplementation(() => {
-    return mockLocation;
-  }),
-  useHistory: jest.fn().mockImplementation(() => ({
-    replace: mockReplace,
-    push: mockPush,
-    location: {
-      search: '',
-    },
-  })),
+}));
+
+jest.mock('react-router-dom-v5-compat', () => ({
+  ...(() => {
+    const ReactActual = jest.requireActual('react');
+    const mockLocation = { search: '' };
+    const mockPush = jest.fn();
+    const mockReplace = jest.fn();
+    const mockNavigationContextValue: { navigator?: unknown } = {
+      navigator: {
+        replace: mockReplace,
+        push: mockPush,
+        location: mockLocation,
+      },
+    };
+    const mockedRouterModule = {
+      ...jest.requireActual('react-router-dom-v5-compat'),
+      __mockLocation: mockLocation,
+      __mockPush: mockPush,
+      __mockReplace: mockReplace,
+      __mockNavigationContextValue: mockNavigationContextValue,
+    };
+    const unsafeNavigationContextKey = 'UNSAFE_NavigationContext';
+    (mockedRouterModule as Record<string, unknown>)[unsafeNavigationContextKey] =
+      ReactActual.createContext(mockNavigationContextValue);
+
+    return mockedRouterModule;
+  })(),
 }));
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+const {
+  __mockLocation: mockLocation,
+  __mockPush: mockPush,
+  __mockReplace: mockReplace,
+  __mockNavigationContextValue: mockNavigationContextValue,
+} = jest.requireMock('react-router-dom-v5-compat') as {
+  __mockLocation: { search: string };
+  __mockPush: jest.Mock;
+  __mockReplace: jest.Mock;
+  __mockNavigationContextValue: { navigator?: unknown };
+};
 
 const LS_KEY = 'securitySolution.cases.list.state';
 
@@ -48,6 +78,11 @@ describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
     localStorage.clear();
     mockLocation.search = '';
+    mockNavigationContextValue.navigator = {
+      replace: mockReplace,
+      push: mockPush,
+      location: mockLocation,
+    };
 
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
@@ -181,7 +216,7 @@ describe('useAllCasesQueryParams', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       search:
-        'cases=(page:1,perPage:10,severity:!(medium),sortField:createdAt,sortOrder:desc,status:!(open))&foo=bar&foo=baz&test=my-test',
+        'cases=(from:now-30d,page:1,perPage:10,severity:!(medium),sortField:createdAt,sortOrder:desc,status:!(open),to:now)&foo=bar&foo=baz&test=my-test',
     });
   });
 
@@ -200,6 +235,8 @@ describe('useAllCasesQueryParams', () => {
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },
+        from: DEFAULT_FROM_DATE,
+        to: DEFAULT_TO_DATE,
       },
       queryParams: {
         page: DEFAULT_CASES_TABLE_STATE.queryParams.page + 10,
@@ -310,7 +347,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockReplace).toHaveBeenCalledWith({
-      search: 'cases=(page:1,perPage:30,sortField:createdAt,sortOrder:desc)',
+      search: 'cases=(from:now-30d,page:1,perPage:30,sortField:createdAt,sortOrder:desc,to:now)',
     });
   });
 
@@ -439,7 +476,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: 'cases=(page:1,perPage:30,sortField:createdAt,sortOrder:desc)',
+      search: 'cases=(from:now-30d,page:1,perPage:30,sortField:createdAt,sortOrder:desc,to:now)',
     });
   });
 
@@ -496,7 +533,8 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: 'cases=(page:1,perPage:10,sortField:createdAt,sortOrder:desc,status:!(closed))',
+      search:
+        'cases=(from:now-30d,page:1,perPage:10,sortField:createdAt,sortOrder:desc,status:!(closed),to:now)',
     });
   });
 
@@ -707,6 +745,30 @@ describe('useAllCasesQueryParams', () => {
   });
 
   describe('Modal', () => {
+    it('does not require router context', () => {
+      mockNavigationContextValue.navigator = undefined;
+
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      expect(result.current.filterOptions).toStrictEqual({
+        ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+        status: [CaseStatuses.closed],
+      });
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+
     it('returns default state with empty URL and local storage', () => {
       const { result } = renderHook(() => useAllCasesState(true), {
         wrapper: ({ children }: React.PropsWithChildren<{}>) => (

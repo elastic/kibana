@@ -61,6 +61,7 @@ const renderCell = (serviceNameField: string, record: DataTableRecord) => {
       fieldFormats={fieldFormatsMock}
       setCellProps={() => {}}
       closePopover={() => {}}
+      columnsMeta={undefined}
     />
   );
 };
@@ -69,6 +70,20 @@ describe('getServiceNameCell', () => {
   it('renders icon if agent name is recognized', () => {
     const record = buildDataTableRecord(
       { fields: { 'service.name': 'test-service', 'agent.name': 'nodejs' } },
+      dataViewMock
+    );
+    renderCell('service.name', record);
+    expect(screen.getByTestId('dataTableCellActionsPopover_service.name')).toBeInTheDocument();
+  });
+
+  it('renders otel icon if otel sdk language is recognized', () => {
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          'service.name': 'test-service',
+          'resource.attributes.telemetry.sdk.language': 'nodejs',
+        },
+      },
       dataViewMock
     );
     renderCell('service.name', record);

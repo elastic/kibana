@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isBoolean } from 'lodash';
@@ -59,7 +60,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
           <EuiButtonIcon
             data-test-subj={`${testSubj}AddBtn`}
             aria-label={props.addTooltip}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={props.onAdd}
           />
         </EuiToolTip>
@@ -95,7 +96,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
       const tooltip = props.isPanelActive
         ? props.deactivatePanelTooltip
         : props.activatePanelTooltip;
-      const iconType = props.isPanelActive ? 'eye' : 'eyeClosed';
+      const iconType = props.isPanelActive ? 'eye' : 'eyeSlash';
 
       activatePanelBtn = (
         <EuiFlexItem grow={false}>

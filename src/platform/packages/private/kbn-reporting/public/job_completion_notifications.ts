@@ -8,7 +8,7 @@
  */
 
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '@kbn/reporting-common';
-import { JobId } from '@kbn/reporting-common/types';
+import type { JobId } from '@kbn/reporting-common/types';
 
 export function jobCompletionNotifications() {
   function getPendingJobIds(): JobId[] {

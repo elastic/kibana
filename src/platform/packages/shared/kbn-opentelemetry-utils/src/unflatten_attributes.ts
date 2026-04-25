@@ -8,7 +8,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { AttributeValue } from '@opentelemetry/api';
+import type { AttributeValue } from '@opentelemetry/api';
 
 /**
  * Unflattens attributes, according to the flattening heuristic

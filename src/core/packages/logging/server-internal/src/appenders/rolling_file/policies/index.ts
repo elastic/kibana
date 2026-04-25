@@ -14,8 +14,8 @@ import type {
   TriggeringPolicyConfig,
   TimeIntervalTriggeringPolicyConfig,
 } from '@kbn/core-logging-server';
-import { TriggeringPolicy } from './policy';
-import { RollingFileContext } from '../rolling_file_context';
+import type { TriggeringPolicy } from './policy';
+import type { RollingFileContext } from '../rolling_file_context';
 import { sizeLimitTriggeringPolicyConfigSchema, SizeLimitTriggeringPolicy } from './size_limit';
 import {
   TimeIntervalTriggeringPolicy,

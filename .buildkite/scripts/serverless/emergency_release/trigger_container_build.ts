@@ -8,7 +8,8 @@
  */
 
 import { execSync } from 'child_process';
-import { BuildkiteClient, BuildkiteTriggerStep } from '#pipeline-utils';
+import type { BuildkiteTriggerStep } from '#pipeline-utils';
+import { BuildkiteClient } from '#pipeline-utils';
 
 const DRY_RUN = !!process.env.DRY_RUN?.match(/^(true|1)$/i);
 const buildkite = new BuildkiteClient();

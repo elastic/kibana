@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { generate } = require('@kbn/openapi-generator');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -32,7 +32,7 @@ const OSQUERY_ROOT = resolve(__dirname, '../..');
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/test/api_integration/services/security_solution_osquery_api.gen.ts'
+        'x-pack/solutions/security/packages/test-api-clients/supertest/osquery.gen.ts'
       ),
     },
   });

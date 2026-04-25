@@ -6,8 +6,9 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { CoreStart, SavedObjectsClient } from '@kbn/core/server';
-import { SearchConnectorsPluginStartDependencies } from '../types';
+import type { CoreStart } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import type { SearchConnectorsPluginStartDependencies } from '../types';
 import { AgentlessConnectorsInfraService } from '.';
 
 export interface AgentlessConnectorsInfraServiceContext {
@@ -29,7 +30,7 @@ export class AgentlessConnectorsInfraServiceFactory {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const savedObjects = coreStart.savedObjects;
 
-    const agentPolicyService = plugins.fleet.agentPolicyService;
+    const agentlessPolicyService = plugins.fleet.agentlessPoliciesService;
     const packagePolicyService = plugins.fleet.packagePolicyService;
     const agentService = plugins.fleet.agentService;
 
@@ -39,7 +40,7 @@ export class AgentlessConnectorsInfraServiceFactory {
       soClient,
       esClient,
       packagePolicyService,
-      agentPolicyService,
+      agentlessPolicyService,
       agentService,
       logger
     );

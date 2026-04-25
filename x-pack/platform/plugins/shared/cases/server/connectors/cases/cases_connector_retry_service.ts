@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import type { BackoffFactory } from '../../common/retry_service/types';
+import type { BackoffFactory } from '@kbn/response-ops-retry-service';
+import { RetryService } from '@kbn/response-ops-retry-service';
 
 import { CasesConnectorError } from './cases_connector_error';
-import { RetryService } from '../../common/retry_service';
 
 export class CasesConnectorRetryService extends RetryService {
   /**

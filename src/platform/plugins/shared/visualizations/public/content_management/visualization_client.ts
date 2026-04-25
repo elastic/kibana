@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchQuery } from '@kbn/content-management-plugin/common';
+import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type {
   VisualizationGetIn,
   VisualizationGetOut,

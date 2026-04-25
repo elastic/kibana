@@ -7,7 +7,7 @@
 
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 import { twoMinute } from '../fixtures/duration';
 import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';

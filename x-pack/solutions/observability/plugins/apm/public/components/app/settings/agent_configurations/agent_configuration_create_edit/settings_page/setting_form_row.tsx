@@ -34,7 +34,7 @@ function FormRow({
 }: {
   setting: SettingDefinition;
   value?: string;
-  onChange: (key: string, value: string) => void;
+  onChange: ({ key, value }: { key: string; value: string }) => void;
 }) {
   switch (setting.type) {
     case 'float':
@@ -44,7 +44,7 @@ function FormRow({
           data-test-subj="apmFormRowFieldText"
           placeholder={setting.placeholder}
           value={value || ''}
-          onChange={(e) => onChange(setting.key, e.target.value)}
+          onChange={(e) => onChange({ key: setting.key, value: e.target.value })}
         />
       );
     }
@@ -57,7 +57,7 @@ function FormRow({
           value={(value as any) || ''}
           min={setting.min}
           max={setting.max}
-          onChange={(e) => onChange(setting.key, e.target.value)}
+          onChange={(e) => onChange({ key: setting.key, value: e.target.value })}
         />
       );
     }
@@ -68,7 +68,7 @@ function FormRow({
           placeholder={setting.placeholder}
           options={setting.options}
           value={value}
-          onChange={(e) => onChange(setting.key, e.target.value)}
+          onChange={(e) => onChange({ key: setting.key, value: e.target.value })}
         />
       );
     }
@@ -82,7 +82,7 @@ function FormRow({
             { text: 'false', value: 'false' },
           ]}
           value={value}
-          onChange={(e) => onChange(setting.key, e.target.value)}
+          onChange={(e) => onChange({ key: setting.key, value: e.target.value })}
         />
       );
     }
@@ -99,13 +99,13 @@ function FormRow({
               placeholder={setting.placeholder}
               value={amount}
               onChange={(e) =>
-                onChange(
-                  setting.key,
-                  amountAndUnitToString({
+                onChange({
+                  key: setting.key,
+                  value: amountAndUnitToString({
                     amount: e.target.value,
                     unit,
-                  })
-                )
+                  }),
+                })
               }
             />
           </EuiFlexItem>
@@ -117,7 +117,10 @@ function FormRow({
               value={unit}
               options={setting.units?.map((text) => ({ text, value: text }))}
               onChange={(e) =>
-                onChange(setting.key, amountAndUnitToString({ amount, unit: e.target.value }))
+                onChange({
+                  key: setting.key,
+                  value: amountAndUnitToString({ amount, unit: e.target.value }),
+                })
               }
             />
           </EuiFlexItem>
@@ -139,7 +142,7 @@ export function SettingFormRow({
   isUnsaved: boolean;
   setting: SettingDefinition;
   value?: string;
-  onChange: (key: string, value: string) => void;
+  onChange: ({ key, value }: { key: string; value: string }) => void;
 }) {
   const { isValid, message } = validateSetting(setting, value);
   const isInvalid = value != null && value !== '' && !isValid;

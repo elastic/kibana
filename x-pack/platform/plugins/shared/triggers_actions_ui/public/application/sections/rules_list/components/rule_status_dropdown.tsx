@@ -25,7 +25,7 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { SnoozePanel } from './rule_snooze';
 import { isRuleSnoozed } from '../../../lib';
-import { Rule, SnoozeSchedule, BulkOperationResponse } from '../../../../types';
+import type { Rule, SnoozeSchedule, BulkOperationResponse } from '../../../../types';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
@@ -188,7 +188,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
             : moment(new Date(rule.isSnoozedUntil!)).format(SNOOZE_END_TIME_FORMAT)
         }
       >
-        <EuiText color="subdued" size="xs">
+        <EuiText tabIndex={0} color="subdued" size="xs">
           {rule.muteAll ? INDEFINITELY : moment(new Date(rule.isSnoozedUntil!)).fromNow(true)}
         </EuiText>
       </EuiToolTip>
@@ -205,11 +205,9 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       data-test-subj="ruleStatusDropdownBadge"
       color={badgeColor}
       iconSide="right"
-      iconType={!isUpdating && isEditable ? 'arrowDown' : undefined}
+      iconType={!isUpdating && isEditable ? 'chevronSingleDown' : undefined}
       onClick={onClickBadge}
-      iconOnClick={onClickBadge}
       onClickAriaLabel={OPEN_MENU_ARIA_LABEL}
-      iconOnClickAriaLabel={OPEN_MENU_ARIA_LABEL}
       isDisabled={isUpdating}
     >
       {badgeMessage}
@@ -237,6 +235,10 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
               panelPaddingSize="s"
               data-test-subj="statusDropdown"
               title={badgeMessage}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.ruleStatusDropdown.popoverAriaLabel',
+                { defaultMessage: 'Rule status' }
+              )}
             >
               <RuleStatusMenu
                 onClosePopover={onClosePopover}

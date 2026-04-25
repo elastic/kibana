@@ -6,11 +6,14 @@
  */
 
 export {
-  SECURITY_FEATURE_ID_V3 as SECURITY_FEATURE_ID,
+  SECURITY_FEATURE_ID_V5 as SECURITY_FEATURE_ID,
   CASES_FEATURE_ID_V3 as CASES_FEATURE_ID,
 } from '@kbn/security-solution-features/constants';
 
 export const PLUGIN_ID = 'elasticAssistant';
+
+export const AI_ASSISTANT_INFERENCE_FEATURE_ID = 'ai_assistant';
+export const ELASTIC_AI_ASSISTANT_INFERENCE_FEATURE_ID = 'elastic_assistant';
 export const PLUGIN_NAME = 'elasticAssistant';
 
 export const BASE_PATH = '/internal/elastic_assistant';

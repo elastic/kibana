@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MouseEvent } from 'react';
-import PropTypes from 'prop-types';
+import type { FunctionComponent, MouseEvent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -69,8 +69,3 @@ export const ElementControls: FunctionComponent<Props> = ({ onDelete, onEdit }) 
     </EuiFlexItem>
   </EuiFlexGroup>
 );
-
-ElementControls.propTypes = {
-  onDelete: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
-};

@@ -7,14 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
+import type { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import type { ESFilter } from '@kbn/es-types';
-import { PersistableFilter } from '@kbn/lens-plugin/common';
+import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
 import { ALL_VALUES_SELECTED } from '../../configurations/constants/url_constants';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { buildPhrasesFilter } from '../../configurations/utils';
-import { SeriesConfig, SeriesUrl } from '../../types';
+import type { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: number;
@@ -67,7 +67,7 @@ export function ReportDefinitionField({
           if (!values.includes(ALL_VALUES_SELECTED)) {
             const valueFilter = buildPhrasesFilter(fieldT, values, dataView)[0];
             if (valueFilter.query) {
-              filtersN.push(valueFilter.query);
+              filtersN.push(valueFilter.query as ESFilter);
             }
           }
         }

@@ -7,15 +7,13 @@
 
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 
+import { ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS } from '../../../management/common/constants';
 import type { NormalizedLink } from '../../links';
 import { useNormalizedAppLinks } from '../../links/links_hooks';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
-
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const useHiddenTimelineRoutes = () => {
   const normalizedLinks = useNormalizedAppLinks();
@@ -23,7 +21,11 @@ const useHiddenTimelineRoutes = () => {
     () =>
       Object.values(normalizedLinks).reduce((acc: string[], link: NormalizedLink) => {
         if (link.hideTimeline) {
-          acc.push(link.path);
+          if (link.id === SecurityPageName.artifacts) {
+            acc.push(...ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS);
+          } else {
+            acc.push(link.path);
+          }
         }
         return acc;
       }, []),
@@ -36,28 +38,16 @@ export const useShowTimelineForGivenPath = () => {
   const { capabilities } = useKibana().services.application;
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
-  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const hiddenTimelineRoutes = useHiddenTimelineRoutes();
-
-  const isTimelineAllowed = useMemo(() => {
-    // NOTE: with new Data View Picker, data view is always defined
-    if (newDataViewPickerEnabled) {
-      return userHasSecuritySolutionVisible;
-    }
-
-    return userHasSecuritySolutionVisible && (indicesExist || dataViewId === null);
-  }, [newDataViewPickerEnabled, userHasSecuritySolutionVisible, indicesExist, dataViewId]);
 
   const getIsTimelineVisible = useCallback(
     (pathname: string) => {
-      if (!isTimelineAllowed) {
+      if (!userHasSecuritySolutionVisible) {
         return false;
       }
       return !hiddenTimelineRoutes.some((route) => matchPath(pathname, route));
     },
-    [isTimelineAllowed, hiddenTimelineRoutes]
+    [userHasSecuritySolutionVisible, hiddenTimelineRoutes]
   );
 
   return getIsTimelineVisible;

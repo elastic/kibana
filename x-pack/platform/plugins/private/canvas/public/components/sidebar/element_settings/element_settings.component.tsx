@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+import type { FunctionComponent } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { Datasource } from '../../datasource';
 // @ts-expect-error unconverted component
 import { FunctionFormList } from '../../function_form_list';
-import { PositionedElement } from '../../../../types';
+import type { PositionedElement } from '../../../../types';
 import { WorkpadFilters } from '../../workpad_filters/workpad_filters';
 import { isExpressionWithFilters } from '../../../lib/filter';
 
@@ -124,8 +124,4 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
       {tabsContent}
     </>
   );
-};
-
-ElementSettings.propTypes = {
-  element: PropTypes.object,
 };

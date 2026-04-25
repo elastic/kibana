@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ItemBuffer, ItemBufferParams } from '../item_buffer';
+import type { ItemBuffer, ItemBufferParams } from '../item_buffer';
 
 export const runItemBufferTests = (
   Buffer: new <Params extends ItemBufferParams<any>>(params: Params) => ItemBuffer<any>

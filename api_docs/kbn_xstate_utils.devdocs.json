@@ -11,9 +11,13 @@
         "label": "createConsoleInspector",
         "description": [],
         "signature": [
-          "() => (inspectionEvent: InspectionEvent) => void"
+          "() => (inspectionEvent: ",
+          "InspectionEvent",
+          ") => void"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/console_inspector.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -41,6 +45,8 @@
           "<TContext, TEvent, TSentEvent>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +61,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,6 +82,8 @@
           "() => boolean | object"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -88,16 +98,18 @@
         "label": "getPlaceholderFor",
         "description": [],
         "signature": [
-          "<ImplementationFactory extends (...factoryArgs: any[]) => any>(_implementationFactory: ImplementationFactory) => ReturnType<ImplementationFactory>"
+          "<ImplementationFactory>(_implementationFactory: ImplementationFactory) => ExtractReturnType<ImplementationFactory>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/xstate-utils",
             "id": "def-public.getPlaceholderFor.$1",
-            "type": "Function",
+            "type": "Uncategorized",
             "tags": [],
             "label": "_implementationFactory",
             "description": [],
@@ -105,6 +117,8 @@
               "ImplementationFactory"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -124,6 +138,8 @@
           "() => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -150,6 +166,8 @@
           "<TContext, TEvent, TSentEvent>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -166,6 +184,8 @@
               "<TSentEvent>"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -179,15 +199,11 @@
             "label": "notify",
             "description": [],
             "signature": [
-              "(eventExpr: ",
-              "Expr",
-              "<TContext, TEvent, TSentEvent | undefined>) => (context: TContext, event: TEvent, meta: ",
-              "ActionMeta",
-              "<TContext, TEvent, ",
-              "BaseActionObject",
-              ">) => void"
+              "(eventExpr: ExpressionFunction<TContext, TEvent, TSentEvent | undefined>) => NotificationAction<TContext, TEvent>"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -199,10 +215,11 @@
                 "label": "eventExpr",
                 "description": [],
                 "signature": [
-                  "Expr",
-                  "<TContext, TEvent, TSentEvent | undefined>"
+                  "ExpressionFunction<TContext, TEvent, TSentEvent | undefined>"
                 ],
                 "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

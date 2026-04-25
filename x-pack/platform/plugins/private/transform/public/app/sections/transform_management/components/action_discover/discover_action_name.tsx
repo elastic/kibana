@@ -86,7 +86,7 @@ export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ dataViewExists
   if (typeof disabledTransformMessage !== 'undefined') {
     return (
       <EuiToolTip position="top" content={disabledTransformMessage}>
-        <span data-test-subj="transformDiscoverActionNameText disabled">
+        <span data-test-subj="transformDiscoverActionNameText disabled" tabIndex={0}>
           {discoverActionNameText}
         </span>
       </EuiToolTip>

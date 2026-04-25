@@ -65,11 +65,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         actionTypeId: {
           type: 'keyword',
         },
+        params: {
+          type: 'flattened',
+        },
         // NO NEED TO BE INDEXED
-        // params: {
-        //   dynamic: false,
-        //   properties: {},
-        // },
         // frequency: {
         //   properties: {
         //     summary: {
@@ -117,6 +116,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     updatedAt: {
       type: 'date',
     },
+    uiamApiKey: {
+      type: 'binary',
+    },
+    // NO NEED TO BE INDEXED
     // NEED TO CHECK WITH KIBANA SECURITY
     // apiKey: {
     //   type: 'binary',
@@ -136,6 +139,18 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     },
     mutedInstanceIds: {
       type: 'keyword',
+    },
+    snoozedInstances: {
+      type: 'nested',
+      properties: {
+        instanceId: {
+          type: 'keyword',
+        },
+        snoozeSnapshot: {
+          type: 'object',
+          dynamic: false,
+        },
+      },
     },
     // NO NEED TO BE INDEXED
     // meta: {
@@ -239,6 +254,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     // flapping: {
     //   index: false,
     //   properties: {
+    //     enabled: {
+    //       type: 'boolean',
+    //     },
     //     lookBackWindow: {
     //       type: 'long',
     //     },

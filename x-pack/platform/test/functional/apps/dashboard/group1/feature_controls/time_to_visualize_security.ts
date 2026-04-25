@@ -6,20 +6,32 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { timeToVisualize, timePicker, dashboard, visEditor, visualize, security, header, lens } =
-    getPageObjects([
-      'timeToVisualize',
-      'timePicker',
-      'dashboard',
-      'visEditor',
-      'visualize',
-      'security',
-      'header',
-      'lens',
-    ]);
+  const {
+    timeToVisualize,
+    timePicker,
+    dashboard,
+    visEditor,
+    visualize,
+    security,
+    header,
+    lens,
+    vegaChart,
+    visChart,
+  } = getPageObjects([
+    'timeToVisualize',
+    'timePicker',
+    'dashboard',
+    'visEditor',
+    'visualize',
+    'security',
+    'header',
+    'lens',
+    'vegaChart',
+    'visChart',
+  ]);
 
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -27,14 +39,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const securityService = getService('security');
-  const find = getService('find');
   const kbnServer = getService('kibanaServer');
 
   describe('dashboard time to visualize security', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kbnServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/security/security.json'
       );
 
       await kbnServer.uiSettings.update({
@@ -83,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await securityService.user.delete('dashboard_write_vis_read_user');
 
       await kbnServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     describe('lens by value works without library save permissions', () => {
@@ -138,8 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('lnsApp_saveButton');
 
-        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
-        expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
+        expect(await testSubjects.exists('add-to-library-checkbox')).to.equal(false);
 
         await timeToVisualize.saveFromModal('New Lens from Modal', {
           addToDashboard: 'new',
@@ -159,9 +171,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('visualize by value works without library save permissions', () => {
-      const originalMarkdownText = 'Original markdown text';
-      const modifiedMarkdownText = 'Modified markdown text';
-
       before(async () => {
         await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
@@ -173,9 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboard.clickNewDashboard();
         await dashboard.waitForRenderComplete();
 
-        await dashboardAddPanel.clickAddMarkdownPanel();
-        await visEditor.setMarkdownTxt(originalMarkdownText);
-        await visEditor.clickGo();
+        await dashboardAddPanel.clickAddCustomVisualization();
 
         await visualize.saveVisualizationAndReturn();
         const newPanelCount = await dashboard.getPanelCount();
@@ -185,13 +192,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('edits to a by value visualize panel are properly applied', async () => {
         await dashboardPanelActions.clickEdit();
         await header.waitUntilLoadingHasFinished();
-        await visEditor.setMarkdownTxt(modifiedMarkdownText);
-        await visEditor.clickGo();
-        await visualize.saveVisualizationAndReturn();
 
+        const { spec, isValid } = await vegaChart.getSpecAsJSON();
+        expect(isValid).to.be(true);
+        // add SVG renderer to read the Y axis labels
+        const updatedSpec = { ...spec, config: { kibana: { renderer: 'svg' } } };
+        await vegaChart.fillSpec(JSON.stringify(updatedSpec, null, 2));
+        await visEditor.clickGo();
+        await visChart.waitForVisualizationRenderingStabilized();
+
+        await visualize.saveVisualizationAndReturn();
         await dashboard.waitForRenderComplete();
-        const markdownText = await testSubjects.find('markdownBody');
-        expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
+        const fullDataLabels = await vegaChart.getYAxisLabels();
+        expect(fullDataLabels[0]).to.eql('0');
 
         const newPanelCount = dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
@@ -214,9 +227,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('visualizeSaveButton');
 
         await visualize.ensureSavePanelOpen();
-        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
-        expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
 
+        expect(await testSubjects.exists('add-to-library-checkbox')).to.equal(false);
         await timeToVisualize.saveFromModal('My New Vis 1', {
           addToDashboard: 'new',
         });

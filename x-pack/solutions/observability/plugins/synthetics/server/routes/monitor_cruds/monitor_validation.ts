@@ -12,8 +12,14 @@ import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { omit, isEmpty } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config_schema';
-import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import type {
+  Locations,
+  MonitorFields,
+  ProjectMonitor,
+  SyntheticsMonitor,
+} from '../../../common/runtime_types';
 import {
   BrowserFieldsCodec,
   CodeEditorMode,
@@ -21,13 +27,9 @@ import {
   FormMonitorType,
   HTTPFieldsCodec,
   ICMPFieldsCodec,
-  Locations,
-  MonitorFields,
   MonitorTypeCodec,
   MonitorTypeEnum,
-  ProjectMonitor,
   ProjectMonitorCodec,
-  SyntheticsMonitor,
   type SyntheticsPrivateLocations,
   TCPFieldsCodec,
 } from '../../../common/runtime_types';
@@ -35,6 +37,7 @@ import {
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
   DEFAULT_FIELDS,
+  HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
 } from '../../../common/constants/monitor_defaults';
 
 type MonitorCodecType =
@@ -158,6 +161,23 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
         }),
         payload: monitorFields,
       };
+    }
+
+    const timeout = monitorFields[ConfigKey.TIMEOUT];
+    if (timeout) {
+      const timeoutSeconds = typeof timeout === 'string' ? parseInt(timeout, 10) : timeout;
+      const hasPrivateLocations = monitorFields.locations?.some((loc) => !loc.isServiceManaged);
+      if (
+        timeoutSeconds < HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS &&
+        hasPrivateLocations
+      ) {
+        return {
+          valid: false,
+          reason: BROWSER_INVALID_TIMEOUT_ERROR,
+          details: BROWSER_INVALID_TIMEOUT_DETAILS(timeoutSeconds),
+          payload: monitorFields,
+        };
+      }
     }
   }
 
@@ -524,3 +544,20 @@ export const LOCATION_REQUIRED_ERROR = i18n.translate(
       'At least one location is required, either elastic managed or private e.g locations: ["us-east"] or private_locations:["test private location"]',
   }
 );
+
+const BROWSER_INVALID_TIMEOUT_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidTimeoutError',
+  {
+    defaultMessage: 'Browser monitor timeout for private locations is invalid',
+  }
+);
+
+const BROWSER_INVALID_TIMEOUT_DETAILS = (timeout: number) =>
+  i18n.translate('xpack.synthetics.server.monitors.invalidTimeoutDetails', {
+    defaultMessage:
+      'Timeout of {timeout} seconds is too low. Browser monitors on private locations require a minimum timeout of {heartbeatTimeoutOverhead} seconds.',
+    values: {
+      timeout,
+      heartbeatTimeoutOverhead: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
+    },
+  });

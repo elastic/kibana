@@ -44,6 +44,7 @@ jest.mock('../../services/app_context', () => ({
     getLogger: jest.fn().mockReturnValue({
       debug: jest.fn(),
     }),
+    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
   },
 }));
 
@@ -59,6 +60,7 @@ jest.mock('../../services/epm/packages/get', () => ({
           version: '0.1.0',
           updated_at: new Date().toISOString(),
           install_status: 'installed',
+          install_source: 'registry',
         },
       },
       {
@@ -67,6 +69,34 @@ jest.mock('../../services/epm/packages/get', () => ({
           version: '0.2.0',
           updated_at: new Date().toISOString(),
           install_status: 'installed',
+          install_source: 'registry',
+        },
+      },
+      {
+        attributes: {
+          name: 'bundled-package',
+          version: '0.1.0',
+          updated_at: new Date().toISOString(),
+          install_status: 'installed',
+          install_source: 'bundled',
+        },
+      },
+      {
+        attributes: {
+          name: 'custom-package-1',
+          version: '0.1.0',
+          updated_at: new Date().toISOString(),
+          install_status: 'installed',
+          install_source: 'upload',
+        },
+      },
+      {
+        attributes: {
+          name: 'custom-package-2',
+          version: '0.1.0',
+          updated_at: new Date().toISOString(),
+          install_status: 'installed',
+          install_source: 'custom',
         },
       },
     ],
@@ -144,7 +174,7 @@ describe('SyncIntegrationsTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
       return taskRunner.run();
     };
 
@@ -196,7 +226,7 @@ describe('SyncIntegrationsTask', () => {
         expect(result).toEqual(getDeleteTaskRunResult());
       });
 
-      it('Should create fleet-synced-integrations doc', async () => {
+      it('Should create fleet-synced-integrations doc for bundled packages and packages installed from registry', async () => {
         mockOutputService.list.mockResolvedValue({
           items: [
             {
@@ -249,12 +279,21 @@ describe('SyncIntegrationsTask', () => {
                   package_version: '0.1.0',
                   updated_at: expect.any(String),
                   install_status: 'installed',
+                  install_source: 'registry',
                 },
                 {
                   package_name: 'package-2',
                   package_version: '0.2.0',
                   updated_at: expect.any(String),
                   install_status: 'installed',
+                  install_source: 'registry',
+                },
+                {
+                  package_name: 'bundled-package',
+                  package_version: '0.1.0',
+                  updated_at: expect.any(String),
+                  install_status: 'installed',
+                  install_source: 'bundled',
                 },
               ],
               remote_es_hosts: [
@@ -332,12 +371,21 @@ describe('SyncIntegrationsTask', () => {
                   package_version: '0.1.0',
                   updated_at: expect.any(String),
                   install_status: 'installed',
+                  install_source: 'registry',
                 },
                 {
                   package_name: 'package-2',
                   package_version: '0.2.0',
                   updated_at: expect.any(String),
                   install_status: 'installed',
+                  install_source: 'registry',
+                },
+                {
+                  package_name: 'bundled-package',
+                  package_version: '0.1.0',
+                  updated_at: expect.any(String),
+                  install_status: 'installed',
+                  install_source: 'bundled',
                 },
               ],
               remote_es_hosts: [
@@ -469,18 +517,21 @@ describe('SyncIntegrationsTask', () => {
                 package_version: '0.1.0',
                 updated_at: new Date().toISOString(),
                 install_status: 'installed',
+                install_source: 'registry',
               },
               {
                 package_name: 'package-2',
                 package_version: '0.2.0',
                 updated_at: new Date().toISOString(),
                 install_status: 'installed',
+                install_source: 'registry',
               },
               {
                 package_name: 'package-3',
                 package_version: '0.3.0',
                 updated_at: new Date().toISOString(),
                 install_status: 'installed',
+                install_source: 'registry',
               },
             ],
             custom_assets: {},
@@ -500,18 +551,28 @@ describe('SyncIntegrationsTask', () => {
                   package_version: '0.1.0',
                   updated_at: expect.any(String),
                   install_status: 'installed',
+                  install_source: 'registry',
                 },
                 {
                   package_name: 'package-2',
                   package_version: '0.2.0',
                   updated_at: expect.any(String),
                   install_status: 'installed',
+                  install_source: 'registry',
+                },
+                {
+                  package_name: 'bundled-package',
+                  package_version: '0.1.0',
+                  updated_at: expect.any(String),
+                  install_status: 'installed',
+                  install_source: 'bundled',
                 },
                 {
                   package_name: 'package-3',
                   package_version: '0.3.0',
                   updated_at: expect.any(String),
                   install_status: 'not_installed',
+                  install_source: 'registry',
                 },
               ],
               remote_es_hosts: [

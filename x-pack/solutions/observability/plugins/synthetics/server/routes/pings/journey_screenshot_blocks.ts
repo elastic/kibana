@@ -8,14 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import { getJourneyScreenshotBlocks } from '../../queries/get_journey_screenshot_blocks';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 
 export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
   validate: {
     body: schema.object({
-      hashes: schema.arrayOf(schema.string()),
+      hashes: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     }),
   },
   writeAccess: false,

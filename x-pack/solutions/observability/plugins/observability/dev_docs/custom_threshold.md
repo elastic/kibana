@@ -33,7 +33,7 @@ Get help with the data forge tool: `node x-pack/scripts/data_forge.js --help`
 ### With synthtrace
 
 > [!TIP]
-> The following commands uses [kbn-apm-synthtrace](../../../../../src/platform/packages/shared/kbn-apm-synthtrace) to generate some data for testing Custom threshold rule.
+> The following commands uses [kbn-synthtrace](../../../../../src/platform/packages/shared/kbn-synthtrace) to generate some data for testing Custom threshold rule.
 
 Basic command to generate APM data for 3 services:
 ```sh

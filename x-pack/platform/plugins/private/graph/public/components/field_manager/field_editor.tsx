@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiPopover,
   EuiFormRow,
@@ -29,9 +30,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
-import { WorkspaceField } from '../../types';
+import type { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
-import { UpdateableFieldProperties } from './field_manager';
+import type { UpdateableFieldProperties } from './field_manager';
 import { isEqual } from '../helpers';
 import { IconRenderer } from '../icon_renderer';
 import { gphFieldBadgeSizeStyles } from '../../styles';
@@ -127,6 +128,10 @@ export function FieldEditor({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.graph.fieldManager.fieldEditorPopoverAriaLabel', {
+        defaultMessage: 'Edit field {fieldName}',
+        values: { fieldName: initialField.name },
+      })}
       id={`graphFieldEditor-${initialField.name}`}
       anchorPosition="downCenter"
       ownFocus
@@ -191,7 +196,7 @@ export function FieldEditor({
                   : i18n.translate('xpack.graph.fieldManager.disableFieldLabel', {
                       defaultMessage: 'Disable field',
                     }),
-                icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeClosed'} size="m" />,
+                icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeSlash'} size="m" />,
                 onClick: toggleDisabledState,
                 toolTipContent: isDisabled
                   ? i18n.translate('xpack.graph.fieldManager.enableFieldTooltipContent', {

@@ -84,4 +84,23 @@ describe('createStatusTimeBins', () => {
       { start: 2000, end: 3000, ups: 4, downs: 5, value: getStatusEffectiveValue(4, 5) },
     ]);
   });
+
+  it('should not include ES bucket that starts at the end boundary of a time bucket', () => {
+    const timeBuckets = [
+      { start: 1000, end: 2000 },
+      { start: 2000, end: 3000 },
+    ];
+
+    const heatmapData = [
+      { key: 1000, key_as_string: '1000', doc_count: 1, up: { value: 1 }, down: { value: 0 } },
+      { key: 2000, key_as_string: '2000', doc_count: 1, up: { value: 1 }, down: { value: 0 } },
+    ];
+
+    const result = createStatusTimeBins(timeBuckets, heatmapData);
+
+    expect(result).toEqual([
+      { start: 1000, end: 2000, ups: 1, downs: 0, value: getStatusEffectiveValue(1, 0) },
+      { start: 2000, end: 3000, ups: 1, downs: 0, value: getStatusEffectiveValue(1, 0) },
+    ]);
+  });
 });

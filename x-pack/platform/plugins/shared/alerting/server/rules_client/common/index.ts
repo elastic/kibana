@@ -7,7 +7,8 @@
 
 export { mapSortField } from './map_sort_field';
 export { validateOperationOnAttributes } from './validate_attributes';
-export { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
+export { type ShouldIncrementRevision, type ParamsModifier } from './bulk_edit';
+export { retryIfBulkEditConflicts } from './bulk_edit/retry_if_bulk_edit_conflicts';
 export { retryIfBulkOperationConflicts } from './retry_if_bulk_operation_conflicts';
 export { applyBulkEditOperation } from './apply_bulk_edit_operation';
 export { buildKueryNodeFilter } from './build_kuery_node_filter';
@@ -23,8 +24,11 @@ export {
   modifyFilterKueryNode,
 } from './mapped_params_utils';
 export {
+  API_KEY_ATTRIBUTES_TO_STRIP,
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
+  addMissingUiamKeyTagIfNeeded,
+  shouldAddMissingUiamKeyTag,
 } from './api_key_as_alert_attributes';
 export {
   injectReferencesIntoActions,

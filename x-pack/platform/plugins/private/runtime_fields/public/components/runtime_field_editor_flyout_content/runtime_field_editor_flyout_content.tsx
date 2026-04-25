@@ -19,14 +19,12 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
-import { RuntimeField } from '../../types';
-import { FormState } from '../runtime_field_form';
-import {
-  RuntimeFieldEditor,
-  Props as RuntimeFieldEditorProps,
-} from '../runtime_field_editor/runtime_field_editor';
+import type { RuntimeField } from '../../types';
+import type { FormState } from '../runtime_field_form';
+import type { Props as RuntimeFieldEditorProps } from '../runtime_field_editor/runtime_field_editor';
+import { RuntimeFieldEditor } from '../runtime_field_editor/runtime_field_editor';
 
 const geti18nTexts = (field?: RuntimeField) => {
   return {
@@ -122,6 +120,7 @@ export const RuntimeFieldEditorFlyoutContent = ({
         {isSubmitted && !isFormValid && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18nTexts.formErrorsCalloutTitle}
               color="danger"
               iconType="cross"

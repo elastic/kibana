@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -34,6 +34,8 @@
     "@kbn/core-http-common",
     "@kbn/core-lifecycle-server-internal",
     "@kbn/cbor",
+    "@kbn/lazy-object",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

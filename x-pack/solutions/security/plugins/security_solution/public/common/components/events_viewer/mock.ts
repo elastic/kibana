@@ -12,6 +12,7 @@ export const mockEventViewerResponse = {
     fakeTotalCount: 100,
   },
   events: [],
+  rawEvents: [],
   inspect: {
     dsl: [],
     response: [],

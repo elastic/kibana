@@ -7,6 +7,8 @@
 
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
   InfraTimerangeInput,
@@ -14,12 +16,10 @@ import type {
 } from '../../../../../common/http_api/snapshot_api';
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
-export interface UseSnapshotRequest
-  extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
-  filterQuery?: string | null | symbol;
+export interface UseSnapshotRequest extends Omit<SnapshotRequest, 'timerange' | 'schema'> {
   currentTime: number;
-  includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
+  schema?: DataSchemaFormat | null;
 }
 
 export function useSnapshot(
@@ -57,21 +57,22 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     accountId = '',
     currentTime,
     dropPartialBuckets = true,
-    filterQuery = '',
+    kuery,
     groupBy = null,
-    includeTimeseries = true,
+    includeTimeseries,
     metrics,
     nodeType,
     overrideCompositeSize,
     region = '',
     sourceId,
     timerange,
+    schema,
   } = args;
 
   return {
     accountId,
     dropPartialBuckets,
-    filterQuery: filterQuery as string,
+    kuery,
     groupBy,
     includeTimeseries,
     metrics,
@@ -79,6 +80,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     sourceId,
     overrideCompositeSize,
     region,
+    schema: schema ?? DEFAULT_SCHEMA,
     timerange: timerange ?? {
       interval: '1m',
       to: currentTime,

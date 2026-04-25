@@ -10,7 +10,7 @@ import React from 'react';
 import { DeleteRulesetModal } from './delete_ruleset_modal';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useDeleteRuleset } from '../../hooks/use_delete_query_rules_ruleset';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('../../hooks/use_delete_query_rules_ruleset', () => ({
   useDeleteRuleset: jest.fn(() => ({

@@ -6,10 +6,10 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import { ConfigType } from '@kbn/screenshotting-server';
-import * as puppeteer from 'puppeteer';
-import { Size } from '../../../common/layout';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import type { ConfigType } from '@kbn/screenshotting-server';
+import type * as puppeteer from 'puppeteer';
+import type { Size } from '../../../common/layout';
 import { PreserveLayout } from '../../layouts/preserve_layout';
 import { HeadlessChromiumDriver } from './driver';
 
@@ -58,6 +58,10 @@ describe('chromium driver', () => {
     };
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('return screenshot with preserve layout option', async () => {
     const driver = new HeadlessChromiumDriver(
       mockScreenshotModeSetup,
@@ -104,5 +108,29 @@ describe('chromium driver', () => {
       ]
     `);
     expect(result).toEqual(Buffer.from(`you won't believe this one weird screenshot`, 'base64'));
+  });
+
+  it('sets the PDF image size', async () => {
+    const driver = new HeadlessChromiumDriver(
+      mockScreenshotModeSetup,
+      mockConfig,
+      mockBasePath,
+      mockPage
+    );
+
+    const layout = new PreserveLayout({} as Size);
+
+    const testSpy = jest.spyOn(layout, 'setPdfImageSize');
+
+    await driver.screenshot({
+      elementPosition: {
+        boundingClientRect: { top: 200, left: 10, height: 10, width: 100 },
+        scroll: { x: 100, y: 300 },
+      },
+      layout,
+    });
+
+    expect(testSpy).toHaveBeenCalledTimes(1);
+    expect(testSpy).toHaveBeenCalledWith({ height: 10, width: 100 });
   });
 });

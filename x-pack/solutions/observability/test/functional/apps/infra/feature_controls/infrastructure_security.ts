@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security', 'header']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('~noDataPage');
+          await testSubjects.existOrFail('kbnNoDataPage');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -83,21 +83,39 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.unload(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
 
         it(`shows Wafflemap`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
+          await PageObjects.common.navigateToUrlWithBrowserHistory(
+            'infraOps',
+            '/inventory',
+            undefined,
+            {
+              ensureCurrentUrl: true,
+              shouldLoginIfPrompted: false,
+            }
+          );
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.tryForTime(30000, async () => {
+            await testSubjects.existOrFail('waffleDatePicker');
           });
-          await retry.try(async () => {
+
+          expect(await testSubjects.exists('waffleMap')).to.be(false);
+
+          await retry.tryForTime(60000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-            await testSubjects.existOrFail('~waffleMap');
+            await PageObjects.infraHome.getWaffleMap();
           });
         });
 
@@ -173,7 +191,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('~noDataPage');
+          await testSubjects.existOrFail('kbnNoDataPage');
         });
 
         it(`shows read-only badge`, async () => {
@@ -183,21 +201,39 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.unload(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
 
         it(`shows Wafflemap`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
+          await PageObjects.common.navigateToUrlWithBrowserHistory(
+            'infraOps',
+            '/inventory',
+            undefined,
+            {
+              ensureCurrentUrl: true,
+              shouldLoginIfPrompted: false,
+            }
+          );
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.tryForTime(30000, async () => {
+            await testSubjects.existOrFail('waffleDatePicker');
           });
-          await retry.try(async () => {
+
+          expect(await testSubjects.exists('waffleMap')).to.be(false);
+
+          await retry.tryForTime(60000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-            await testSubjects.existOrFail('~waffleMap');
+            await PageObjects.infraHome.getWaffleMap();
           });
         });
 
@@ -264,11 +300,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.unload(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
       });
     });
@@ -317,11 +357,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.unload(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
       });
     });

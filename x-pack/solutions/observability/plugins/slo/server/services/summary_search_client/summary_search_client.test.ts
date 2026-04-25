@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Pagination } from '@kbn/slo-schema/src/models/pagination';
+import type { Pagination } from '@kbn/slo-schema/src/models/pagination';
 import { createSLO } from '../fixtures/slo';
 import {
   aHitFromSummaryIndex,
   aHitFromTempSummaryIndex,
   aSummaryDocument,
 } from '../fixtures/summary_search_document';
+import { DEFAULT_SETTINGS } from '../slo_settings_repository';
 import { DefaultSummarySearchClient } from './summary_search_client';
 import type { Sort, SummarySearchClient } from './types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const defaultSort: Sort = {
   field: 'sli_value',
@@ -35,20 +37,11 @@ describe('Summary Search Client', () => {
   beforeEach(() => {
     scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     esClientMock = scopedClusterClient.asCurrentUser as ElasticsearchClientMock;
-    const soClientMock = {
-      getCurrentNamespace: jest.fn().mockReturnValue('default'),
-      get: jest.fn().mockResolvedValue({
-        attributes: {
-          selectedRemoteClusters: [],
-          useAllRemoteClusters: false,
-        },
-      }),
-    } as any;
     service = new DefaultSummarySearchClient(
       scopedClusterClient,
-      soClientMock,
       loggerMock.create(),
-      'default'
+      'default',
+      DEFAULT_SETTINGS
     );
   });
 
@@ -151,7 +144,7 @@ describe('Summary Search Client', () => {
                     {
                       range: {
                         summaryUpdatedAt: {
-                          gte: 'now-2h',
+                          gte: 'now-48h',
                         },
                       },
                     },

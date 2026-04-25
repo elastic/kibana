@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UseLinkPropsOptions, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import type { UseLinkPropsOptions } from '@kbn/observability-shared-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 
 export const createUseRulesLink =
   () =>
   (options: UseLinkPropsOptions = {}) => {
     const linkProps = {
-      app: 'observability',
-      pathname: '/alerts/rules',
+      app: 'rules',
+      pathname: '/',
     };
 
     return useLinkProps(linkProps, options);

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../../../common/types/api';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
 
 export interface Limiter {
   readonly limit: number;
   readonly errorMessage: string;
   countOfItemsWithinCase(caseId: string): Promise<number>;
-  countOfItemsInRequest: (requests: AttachmentRequest[]) => number;
+  countOfItemsInRequest: (requests: Array<AttachmentRequestV2>) => number;
 }

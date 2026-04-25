@@ -14,7 +14,10 @@ import { useEnableAttackDiscoverySchedule } from '../logic/use_enable_schedule';
 import { useDisableAttackDiscoverySchedule } from '../logic/use_disable_schedule';
 import { useDeleteAttackDiscoverySchedule } from '../logic/use_delete_schedule';
 import { mockFindAttackDiscoverySchedules } from '../../../mock/mock_find_attack_discovery_schedules';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 
+jest.mock('../../../../../common/lib/kibana');
 jest.mock('../logic/use_find_schedules');
 jest.mock('../logic/use_enable_schedule');
 jest.mock('../logic/use_disable_schedule');
@@ -39,6 +42,18 @@ const mockUseDeleteAttackDiscoverySchedule =
 describe('SchedulesTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [ATTACK_DISCOVERY_FEATURE_ID]: {
+              updateAttackDiscoverySchedule: true,
+            },
+          },
+        },
+      },
+    });
 
     mockUseFindAttackDiscoverySchedules.mockReturnValue({
       data: mockFindAttackDiscoverySchedules,

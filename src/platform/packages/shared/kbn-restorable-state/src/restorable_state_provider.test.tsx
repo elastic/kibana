@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, useState } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import type { ComponentProps } from 'react';
+import React, { Profiler, useImperativeHandle, useRef, useState } from 'react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createRestorableStateProvider } from './restorable_state_provider';
+import {
+  createRestorableStateProvider,
+  type RestorableStateProviderApi,
+} from './restorable_state_provider';
 
 const mockCustomLocalStorageKey = 'test-restorable-state';
 let mockStoredValue: string | undefined;
@@ -125,6 +129,25 @@ describe('createRestorableStateProvider', () => {
     expect(screen.getAllByTestId('another-message-button')[1]).toHaveTextContent('---');
   });
 
+  it('withRestorableState should preserve the ref of the wrapped component', () => {
+    const { withRestorableState } = createRestorableStateProvider<RestorableState>();
+
+    interface CustomRef {
+      someMethod: () => null;
+    }
+    const ComponentWithRef = React.forwardRef<CustomRef>((props, ref) => {
+      useImperativeHandle(ref, () => ({
+        someMethod: () => null,
+      }));
+      return <div>Hello</div>;
+    });
+
+    const WrappedComponent = withRestorableState(ComponentWithRef);
+    const ref = React.createRef<CustomRef & RestorableStateProviderApi>();
+    render(<WrappedComponent ref={ref} initialState={{}} onInitialStateChange={() => {}} />);
+    expect(ref.current?.someMethod).toBeDefined();
+  });
+
   it('useRestorableRef should work correctly', async () => {
     const { withRestorableState, useRestorableRef } =
       createRestorableStateProvider<RestorableState>();
@@ -227,5 +250,58 @@ describe('createRestorableStateProvider', () => {
     await waitFor(() => {
       expect(mockStoredValue).toBeUndefined();
     });
+  });
+
+  it('batches persistence with the state update', () => {
+    const { withRestorableState, useRestorableState } =
+      createRestorableStateProvider<RestorableState>();
+
+    const renderCounts = {
+      commits: 0,
+      childRenders: 0,
+    };
+
+    const Child = () => {
+      renderCounts.childRenders += 1;
+      const [message, setMessage] = useRestorableState('message', 'Hello');
+
+      return (
+        <button data-test-subj="batched-button" onClick={() => setMessage('Hello World')}>
+          {message}
+        </button>
+      );
+    };
+
+    const WrappedChild = withRestorableState(Child);
+
+    const Harness = () => {
+      const [initialState, setInitialState] = useState<RestorableState | undefined>(undefined);
+      const mountedRef = useRef(false);
+
+      return (
+        <Profiler
+          id="restorable-state"
+          onRender={() => {
+            if (mountedRef.current) {
+              renderCounts.commits += 1;
+            } else {
+              mountedRef.current = true;
+            }
+          }}
+        >
+          <WrappedChild initialState={initialState} onInitialStateChange={setInitialState} />
+        </Profiler>
+      );
+    };
+
+    render(<Harness />);
+
+    expect(renderCounts.childRenders).toBe(1);
+
+    fireEvent.click(screen.getByTestId('batched-button'));
+
+    expect(screen.getByTestId('batched-button')).toHaveTextContent('Hello World');
+    expect(renderCounts.childRenders).toBe(2);
+    expect(renderCounts.commits).toBe(1);
   });
 });

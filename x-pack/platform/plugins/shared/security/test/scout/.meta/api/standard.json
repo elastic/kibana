@@ -1,0 +1,33 @@
+{
+  "sha1": "e6ed860b0525fd1fa532a47bd54797e417822532",
+  "tests": [
+    {
+      "id": "d2014f4df575e52-44c5e30280778f9",
+      "title": "Built-in roles Kibana access validation should have expected Kibana access for all built-in roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
+        "line": 122,
+        "column": 10
+      }
+    },
+    {
+      "id": "d2014f4df575e52-7f69d1210618001",
+      "title": "Built-in roles Kibana access validation should have consistent Kibana application naming",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
+        "line": 152,
+        "column": 10
+      }
+    }
+  ]
+}

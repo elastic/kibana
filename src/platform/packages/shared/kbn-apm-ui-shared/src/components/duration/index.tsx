@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
-import { EuiInlineEditTextSizes } from '@elastic/eui/src/components/inline_edit/inline_edit_text';
+import type { EuiInlineEditTextSizes } from '@elastic/eui/src/components/inline_edit/inline_edit_text';
 import { i18n } from '@kbn/i18n';
 import { asDuration } from '../../utils';
 import { PercentOfParent } from './percent_of_parent';

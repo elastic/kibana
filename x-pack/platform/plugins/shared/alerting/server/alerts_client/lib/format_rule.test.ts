@@ -52,6 +52,8 @@ describe('formatRule', () => {
     expect(
       formatRule({
         rule: {
+          muteAll: false,
+          mutedInstanceIds: [],
           consumer: 'bar',
           executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           id: '1',

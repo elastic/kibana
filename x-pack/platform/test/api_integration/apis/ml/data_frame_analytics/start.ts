@@ -10,8 +10,8 @@ import {
   type DataFrameAnalyticsConfig,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -65,7 +65,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST data_frame/analytics/{analyticsId}/_start', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
+      );
       await ml.testResources.setKibanaTimeZoneToUTC();
       await createJobs(testJobConfigs);
     });

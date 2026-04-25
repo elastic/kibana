@@ -35,6 +35,7 @@ import {
 import {
   isOnlyAgentlessPolicyTemplate,
   isOnlyAgentlessIntegration,
+  isAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { IntegrationCardItem } from '..';
@@ -50,6 +51,8 @@ export interface IntegrationsURLParameters {
   searchString?: string;
   categoryId?: string;
   subCategoryId?: string;
+  onlyAgentless?: boolean;
+  showDeprecated?: boolean;
 }
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
@@ -102,25 +105,20 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
             description,
             icons: icons || restOfPackage.icons,
             categories: uniq(allCategories),
+            ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
           };
         })
       : [];
 
-    let tiles = filterPolicyTemplatesTiles<PackageListItem>(
+    const tiles = filterPolicyTemplatesTiles<PackageListItem>(
       pkg.policy_templates_behavior,
       topPackage,
       integrationsPolicyTemplates
-    );
-
-    // remove tiles that only have data streams of excluded types e.g. aws.ebs, but keep partial matches e.g. aws.cloudfront_logs
-    tiles = tiles.filter((tile) => {
-      return (
-        !tile.integration ||
-        !tile.data_streams ||
-        tile.data_streams.some((dataStream) =>
-          dataStream.dataset.includes(`${tile.name}.${tile.integration}`)
-        )
-      );
+    ).map((tile) => {
+      return {
+        ...tile,
+        supportsAgentless: isAgentlessIntegration(pkg, tile.integration || tile.name),
+      };
     });
 
     return [...acc, ...tiles];
@@ -151,7 +149,7 @@ export const useAvailablePackages = ({
 }: {
   prereleaseIntegrationsEnabled: boolean;
 }) => {
-  const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
+  const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
   const { isAgentlessEnabled } = useAgentless();
 
@@ -160,6 +158,7 @@ export const useAvailablePackages = ({
   const {
     initialSelectedCategory,
     initialSubcategory,
+    initialOnlyAgentless,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     getHref,
@@ -173,6 +172,7 @@ export const useAvailablePackages = ({
     initialSubcategory
   );
   const [searchTerm, setSearchTerm] = useState(searchParam || '');
+  const [onlyAgentlessFilter, setOnlyAgentlessFilter] = useState(initialOnlyAgentless);
 
   const {
     data: eprPackages,
@@ -213,17 +213,34 @@ export const useAvailablePackages = ({
   const cards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
 
-    return eprAndCustomPackages
-      .map((item) => {
-        return mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId });
-      })
-      .sort((a, b) => a.title.localeCompare(b.title));
+    return (
+      eprAndCustomPackages
+        // If only showing agentless integrations, filter out non-agentless ones
+        .filter((item) => {
+          if (isAgentlessEnabled && onlyAgentlessFilter) {
+            return 'supportsAgentless' in item && item.supportsAgentless === true;
+          }
+          return true;
+        })
+        .map((item) => {
+          return mapToCard({
+            getAbsolutePath,
+            getHref,
+            item,
+            addBasePath,
+            packageVerificationKeyId,
+          });
+        })
+        .sort((a, b) => a.title.localeCompare(b.title))
+    );
   }, [
     addBasePath,
     appendCustomIntegrations,
     getAbsolutePath,
     getHref,
     mergedEprPackages,
+    onlyAgentlessFilter,
+    isAgentlessEnabled,
     packageVerificationKeyId,
   ]);
 
@@ -287,6 +304,9 @@ export const useAvailablePackages = ({
     setUrlandReplaceHistory,
     preference,
     setPreference,
+    onlyAgentlessFilter,
+    setOnlyAgentlessFilter,
+    isAgentlessEnabled,
     isLoading:
       isLoadingReplacmentCustomIntegrations ||
       isLoadingAppendCustomIntegrations ||

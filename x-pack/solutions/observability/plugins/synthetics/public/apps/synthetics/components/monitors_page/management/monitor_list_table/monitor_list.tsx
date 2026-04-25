@@ -6,32 +6,27 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  Criteria,
-  EuiBasicTable,
-  EuiTableSortingType,
-  EuiPanel,
-  EuiHorizontalRule,
-  useIsWithinMinBreakpoint,
-} from '@elastic/eui';
+import type { Criteria, EuiTableSortingType } from '@elastic/eui';
+import { EuiBasicTable, EuiPanel, EuiHorizontalRule, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { MonitorListHeader } from './monitor_list_header';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
-import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
-import { MonitorListPageState } from '../../../../state';
-import {
-  ConfigKey,
+import { ResetMonitorModal } from './reset_monitor_modal';
+import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
+import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
+import type { MonitorListPageState } from '../../../../state';
+import type {
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
-  SourceType,
 } from '../../../../../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 
 interface Props {
   pageState: MonitorListPageState;
@@ -58,6 +53,11 @@ export const MonitorList = ({
   const isXl = useIsWithinMinBreakpoint('xxl');
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<string[]>([]);
+  const [monitorPendingReset, setMonitorPendingReset] = useState<{
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  } | null>(null);
+  const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
   const handleOnChange = useCallback(
     ({
@@ -101,6 +101,8 @@ export const MonitorList = ({
     loading,
     overviewStatus,
     setMonitorPendingDeletion,
+    setMonitorPendingReset,
+    isFixableByReset,
   });
 
   const [selectedItems, setSelectedItems] = useState<EncryptedSyntheticsSavedMonitor[]>([]);
@@ -122,16 +124,25 @@ export const MonitorList = ({
 
   return (
     <ContextWrapper>
-      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj={loading ? 'syntheticsMonitorList-loading' : 'syntheticsMonitorList-loaded'}
+      >
         <MonitorListHeader
           recordRangeLabel={recordRangeLabel}
           selectedItems={selectedItems}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
+          setMonitorPendingReset={setMonitorPendingReset}
         />
         <EuiHorizontalRule margin="s" />
         <EuiBasicTable
           aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
             defaultMessage: 'Synthetics monitors list',
+          })}
+          tableCaption={i18n.translate('xpack.synthetics.management.monitorList.caption', {
+            defaultMessage: 'Synthetics monitors',
           })}
           error={error?.body?.message}
           loading={loading}
@@ -146,6 +157,14 @@ export const MonitorList = ({
           selection={selection}
         />
       </EuiPanel>
+      {monitorPendingReset !== null && monitorPendingReset.resetIds.length > 0 && (
+        <ResetMonitorModal
+          configIds={monitorPendingReset.resetIds}
+          skippedMonitors={monitorPendingReset.skippedMonitors}
+          onClose={() => setMonitorPendingReset(null)}
+          resetMonitors={resetMonitors}
+        />
+      )}
       {monitorPendingDeletion.length > 0 && (
         <DeleteMonitor
           configIds={monitorPendingDeletion}

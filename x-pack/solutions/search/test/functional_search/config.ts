@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { resolve } from 'path';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
 /**
  * NOTE: The solution view is currently only available in the cloud environment.
- * This test suite fakes a cloud environement by setting the cloud.id and cloud.base_url
+ * This test suite fakes a cloud environment by setting the cloud.id and cloud.base_url
  */
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -26,7 +27,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Search Solution UI Functional Tests',
     },
-    testFiles: [require.resolve('.')],
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
       serverArgs: [
@@ -38,8 +38,25 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.searchIndices.enabled=true',
+        `--uiSettings.overrides.eisPromotionalTour:enabled=false`,
       ],
+    },
+    testFiles: [require.resolve('.')],
+    screenshots: { directory: resolve(__dirname, '../screenshots') },
+    apps: {
+      ...functionalConfig.get('apps'),
+      searchInferenceEndpoints: {
+        pathname: '/app/management/modelManagement/inference_endpoints',
+      },
+      searchOverview: {
+        pathname: '/app/elasticsearch/overview',
+      },
+      searchHomepage: {
+        pathname: '/app/elasticsearch/home',
+      },
+      searchGettingStarted: {
+        pathname: '/app/elasticsearch/getting_started',
+      },
     },
   };
 }

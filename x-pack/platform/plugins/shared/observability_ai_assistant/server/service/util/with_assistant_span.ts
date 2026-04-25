@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { withSpan, SpanOptions, parseSpanOptions } from '@kbn/apm-utils';
+import type { SpanOptions } from '@kbn/apm-utils';
+import { withSpan, parseSpanOptions } from '@kbn/apm-utils';
 
 export function withAssistantSpan<T>(
   optionsOrName: SpanOptions | string,

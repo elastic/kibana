@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { renderHook, waitFor } from '@testing-library/react';
-import { Cases, CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common';
+import type { Cases } from '@kbn/cases-plugin/common';
+import { CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common';
 import { CaseStatuses } from '@kbn/cases-components';
 import { useCaseLinks } from './use_case_links';
 import { useKibana } from '../../../utils/kibana_react';
@@ -93,6 +94,7 @@ const mockCase: Cases[0] = {
   totalAlerts: 0,
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
   observables: [],
   severity: CaseSeverity.LOW,

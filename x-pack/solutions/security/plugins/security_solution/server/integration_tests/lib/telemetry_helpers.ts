@@ -14,6 +14,7 @@ import type {
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
+  OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -290,26 +291,42 @@ export async function createAgentPolicy(
   const agentPolicyType = await getAgentPolicySavedObjectType();
   await soClient.get<unknown>(agentPolicyType, id).catch(async (e) => {
     try {
-      return await soClient.create<unknown>(agentPolicyType, {}, { id });
+      return await soClient.create<unknown>(
+        agentPolicyType,
+        {
+          name: 'Elastic Cloud agent policy',
+          namespace: 'default',
+        },
+        { id }
+      );
     } catch {
       logger.error(`>> Error searching for agent: ${e}`);
       throw Error(`>> Error searching for agent: ${e}`);
     }
   });
-
-  await packagePolicyService.get(soClient, id).catch(async () => {
-    try {
-      return await packagePolicyService.create(soClient, esClient, packagePolicy, {
-        id,
-        spaceId: 'default',
-        bumpRevision: false,
-        force: true,
+  // sometimes we can get an error from epr, e.g.
+  // 503 Service Temporarily Unavailable' error response from package registry at https://epr.elastic.co/package/endpoint/8.15.1/
+  // in case of error, retry up to 1 min, waiting 10 secs between attempts
+  // more info: https://github.com/elastic/kibana/issues/231535
+  await eventually(
+    async () => {
+      await packagePolicyService.get(soClient, id).catch(async () => {
+        try {
+          return await packagePolicyService.create(soClient, esClient, packagePolicy, {
+            id,
+            spaceId: 'default',
+            bumpRevision: false,
+            force: true,
+          });
+        } catch (e) {
+          logger.error(`>> Error creating package policy: ${e}`);
+          throw Error(`>> Error creating package policy: ${e}`);
+        }
       });
-    } catch (e) {
-      logger.error(`>> Error creating package policy: ${e}`);
-      throw Error(`>> Error creating package policy: ${e}`);
-    }
-  });
+    },
+    60000,
+    10000
+  );
 }
 
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
@@ -325,6 +342,7 @@ export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
   const meta = undefined;
   const user = '';
   const version = 1;
+  const osTypes: OsTypeArray = ['linux'];
   const tags: string[] = [];
   const tieBreaker = '';
 
@@ -337,6 +355,7 @@ export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
     description,
     meta,
     user,
+    osTypes,
     tags,
     tieBreaker,
     type,
@@ -406,6 +425,11 @@ const fakeKibanaRequest = {
   raw: {
     req: {
       url: '/',
+    },
+  },
+  serverTiming: {
+    start: () => {
+      return { end: () => {} };
     },
   },
 } as unknown as KibanaRequest;

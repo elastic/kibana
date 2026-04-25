@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { HOSTS_VIEW_PATH, ML_JOB_IDS } from './constants';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -73,7 +73,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('with anomalies present', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_anomalies');
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_anomalies'
+          );
           // create the ml jobs saved objects
           await Promise.all(
             ML_JOB_IDS.map((id) =>
@@ -91,7 +93,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
         });
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_anomalies');
+          await esArchiver.unload(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_anomalies'
+          );
         });
         it('renders the anomaly table with anomalies', async () => {
           // if the input value is unchanged the save button won't be available

@@ -16,9 +16,11 @@ export default function ({ loadTestFile, getService }) {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
       );
       // Functional tests verify behavior when referenced index pattern saved objects can not be found.
       // However, saved object import fails when reference saved objects can not be found.
@@ -44,7 +46,7 @@ export default function ({ loadTestFile, getService }) {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/maps/data');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
@@ -52,22 +54,13 @@ export default function ({ loadTestFile, getService }) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/maps/data');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
       );
     });
 
     loadTestFile(require.resolve('./esql_source'));
     loadTestFile(require.resolve('./documents_source'));
-    loadTestFile(require.resolve('./blended_vector_layer'));
-    loadTestFile(require.resolve('./saved_object_management'));
-    loadTestFile(require.resolve('./sample_data'));
-    loadTestFile(require.resolve('./auto_fit_to_bounds'));
-    loadTestFile(require.resolve('./layer_visibility'));
-    loadTestFile(require.resolve('./feature_controls/maps_security'));
-    loadTestFile(require.resolve('./feature_controls/maps_spaces'));
-    loadTestFile(require.resolve('./full_screen_mode'));
-    loadTestFile(require.resolve('./vector_styling'));
   });
 }

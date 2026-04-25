@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnalysisTokenFilter, AnalysisStopWords } from '@elastic/elasticsearch/lib/api/types';
+import type { AnalysisTokenFilter, AnalysisStopWords } from '@elastic/elasticsearch/lib/api/types';
 
 interface LanguageDataEntry {
   custom_filter_definitions?: object;

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { ILM_POLICY_NAME } from '@kbn/reporting-common';
 
-import { LocatorPublic, SerializableRecord } from '../../shared_imports';
+import type { LocatorPublic, SerializableRecord } from '../../shared_imports';
 
 interface Props {
   locator: LocatorPublic<SerializableRecord>;
@@ -29,7 +29,7 @@ export const IlmPolicyLink: FunctionComponent<Props> = ({ locator }) => {
     <EuiButtonEmpty
       data-test-subj="ilmPolicyLink"
       size="s"
-      iconType="popout"
+      iconType="external"
       onClick={() => {
         const url = locator.getRedirectUrl({
           page: 'policy_edit',

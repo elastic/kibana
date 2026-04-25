@@ -3,14 +3,15 @@
 exports[`Summary Transform Generator for 'Occurrences' SLO generates the correct transform for a 30days rolling SLO 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
-    "version": 3.5,
+    "version": 3.6,
   },
   "defer_validation": true,
   "description": "Summarise the rollup data of SLO: irrelevant [id: irrelevant, revision: 1].",
   "dest": Object {
-    "index": ".slo-observability.summary-v3.5",
+    "index": ".slo-observability.summary-v3.6",
     "pipeline": ".slo-observability.summary.pipeline-irrelevant-1",
   },
   "frequency": "1m",
@@ -212,7 +213,7 @@ Object {
     "unattended": true,
   },
   "source": Object {
-    "index": ".slo-observability.sli-v3.5*",
+    "index": ".slo-observability.sli-v3.6*",
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -251,14 +252,15 @@ Object {
 exports[`Summary Transform Generator for 'Occurrences' SLO generates the correct transform for a monthly calendar aligned SLO 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
-    "version": 3.5,
+    "version": 3.6,
   },
   "defer_validation": true,
   "description": "Summarise the rollup data of SLO: irrelevant [id: irrelevant, revision: 1].",
   "dest": Object {
-    "index": ".slo-observability.summary-v3.5",
+    "index": ".slo-observability.summary-v3.6",
     "pipeline": ".slo-observability.summary.pipeline-irrelevant-1",
   },
   "frequency": "1m",
@@ -460,7 +462,7 @@ Object {
     "unattended": true,
   },
   "source": Object {
-    "index": ".slo-observability.sli-v3.5*",
+    "index": ".slo-observability.sli-v3.6*",
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -499,14 +501,15 @@ Object {
 exports[`Summary Transform Generator for 'Occurrences' SLO generates the correct transform for a weekly calendar aligned SLO 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
-    "version": 3.5,
+    "version": 3.6,
   },
   "defer_validation": true,
   "description": "Summarise the rollup data of SLO: irrelevant [id: irrelevant, revision: 1].",
   "dest": Object {
-    "index": ".slo-observability.summary-v3.5",
+    "index": ".slo-observability.summary-v3.6",
     "pipeline": ".slo-observability.summary.pipeline-irrelevant-1",
   },
   "frequency": "1m",
@@ -708,7 +711,7 @@ Object {
     "unattended": true,
   },
   "source": Object {
-    "index": ".slo-observability.sli-v3.5*",
+    "index": ".slo-observability.sli-v3.6*",
     "query": Object {
       "bool": Object {
         "filter": Array [

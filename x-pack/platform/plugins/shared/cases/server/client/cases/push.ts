@@ -99,6 +99,10 @@ export interface PushParams {
    * The ID of an external system to push to
    */
   connectorId: string;
+  /**
+   * The type of push
+   */
+  pushType: 'manual' | 'automatic';
 }
 
 /**
@@ -107,7 +111,7 @@ export interface PushParams {
  * @ignore
  */
 export const push = async (
-  { connectorId, caseId }: PushParams,
+  { connectorId, caseId, pushType }: PushParams,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Case> => {
@@ -127,6 +131,7 @@ export const push = async (
     securityStartPlugin,
     spaceId,
     publicBaseUrl,
+    usageCounter,
   } = clientArgs;
 
   try {
@@ -173,6 +178,13 @@ export const push = async (
       throw Boom.failedDependency(
         pushRes.serviceMessage ?? pushRes.message ?? 'Error pushing to service'
       );
+    } else {
+      if (usageCounter) {
+        usageCounter.incrementCounter({
+          counterName: `CasesPush-${pushType}`,
+          incrementBy: 1,
+        });
+      }
     }
 
     /* End of push to external service */
@@ -193,14 +205,12 @@ export const push = async (
       caseService.getAllCaseComments({
         id: caseId,
         options: {
-          fields: [],
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },
       }),
     ]);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email, profile_uid } = user;
     const pushedDate = new Date().toISOString();
     const externalServiceResponse = pushRes.data as ExternalServiceResponse;
@@ -255,7 +265,7 @@ export const push = async (
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
-            attachmentId: comment.id,
+            savedObjectId: comment.id,
             updatedAttributes: {
               pushed_at: pushedDate,
               pushed_by: { username, full_name, email, profile_uid },
@@ -263,6 +273,7 @@ export const push = async (
             version: comment.version,
           })),
         refresh: false,
+        requestWithoutType: true,
       }),
     ]);
 

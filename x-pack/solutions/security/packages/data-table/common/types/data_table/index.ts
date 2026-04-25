@@ -26,6 +26,7 @@ export enum TableId {
   hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
   alertsOnRuleDetailsPage = 'alerts-rules-details-page',
   alertsOnAlertsPage = 'alerts-page',
+  alertsOnAttacksPage = 'attacks-page',
   alertsOnAlertSummaryPage = 'alert-summary-page',
   test = 'table-test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
@@ -45,6 +46,7 @@ export enum TableEntityType {
 
 export const tableEntity: Record<TableId, TableEntityType> = {
   [TableId.alertsOnAlertsPage]: TableEntityType.alert,
+  [TableId.alertsOnAttacksPage]: TableEntityType.alert,
   [TableId.alertsOnAlertSummaryPage]: TableEntityType.alert,
   [TableId.alertsOnCasePage]: TableEntityType.alert,
   [TableId.alertsOnRuleDetailsPage]: TableEntityType.alert,
@@ -67,6 +69,7 @@ const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.hostsPageSessions),
   runtimeTypes.literal(TableId.alertsOnRuleDetailsPage),
   runtimeTypes.literal(TableId.alertsOnAlertsPage),
+  runtimeTypes.literal(TableId.alertsOnAttacksPage),
   runtimeTypes.literal(TableId.alertsOnAlertSummaryPage),
   runtimeTypes.literal(TableId.test),
   runtimeTypes.literal(TableId.rulePreview),

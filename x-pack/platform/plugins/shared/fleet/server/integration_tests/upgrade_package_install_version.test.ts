@@ -7,7 +7,7 @@
 
 import Path from 'path';
 
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import {
@@ -16,8 +16,6 @@ import {
   createRootWithCorePlugins,
   createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
-
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import { upgradePackageInstallVersion } from '../services/setup/upgrade_package_install_version';
 import {
@@ -30,21 +28,6 @@ import type { Installation } from '../types';
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
-
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
 
 const PACKAGES = ['fleet_server', 'system', 'nginx', 'apache'];
 
@@ -154,15 +137,14 @@ describe('Uprade package install version', () => {
     await stopServers();
   });
 
-  describe('with package installed with a previous format install version', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/227351
+  describe.skip('with package installed with a previous format install version', () => {
     let soClient: SavedObjectsClientContract;
 
     const OUTDATED_PACKAGES = ['nginx', 'apache'];
 
     beforeAll(async () => {
-      soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-        excludedExtensions: [SECURITY_EXTENSION_ID],
-      });
+      soClient = kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
 
       const res = await soClient.find<Installation>({
         type: PACKAGES_SAVED_OBJECT_TYPE,

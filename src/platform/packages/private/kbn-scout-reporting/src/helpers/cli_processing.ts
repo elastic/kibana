@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScoutTestTarget } from '@kbn/scout-info';
+
 export const stripRunCommand = (commandArgs: string[]): string => {
   if (!Array.isArray(commandArgs) || commandArgs.length < 3) {
     throw new Error(`Invalid command arguments: must include at least 'npx playwright test'`);
@@ -26,22 +28,59 @@ export const stripRunCommand = (commandArgs: string[]): string => {
   return `npx playwright ${restArgs.join(' ')}`;
 };
 
-export function getRunTarget(argv: string[] = process.argv): string {
-  const tagsToMode: Record<string, string> = {
-    '@ess': 'stateful',
-    '@svlSearch': 'serverless-search',
-    '@svlOblt': 'serverless-oblt',
-    '@svlSecurity': 'serverless-security',
-  };
-
-  const grepIndex = argv.findIndex((arg) => arg === '--grep' || arg.startsWith('--grep='));
-  if (grepIndex !== -1) {
-    const tag = argv[grepIndex].startsWith('--grep=')
-      ? argv[grepIndex].split('=')[1]
-      : argv[grepIndex + 1] || ''; // Look at the next argument if '--grep' is used without `=`
-
-    return tagsToMode[tag] || 'undefined';
+/**
+ * Returns the command line used to run Scout tests.
+ *
+ * When Scout starts Playwright, the Playwright process argv no longer contains the Scout CLI invocation.
+ * In those cases, Scout sets SCOUT_RUN_COMMAND and we prefer it for reporting.
+ */
+export function getRunCommand(argv: string[] = process.argv): string {
+  const scoutRunCommand = process.env.SCOUT_RUN_COMMAND;
+  if (typeof scoutRunCommand === 'string' && scoutRunCommand.trim() !== '') {
+    return scoutRunCommand;
   }
 
-  return 'undefined';
+  try {
+    return stripRunCommand(argv);
+  } catch {
+    // As a last resort, avoid failing reporting; show the raw argv.
+    return Array.isArray(argv) ? argv.join(' ') : '';
+  }
+}
+
+/**
+ * Tries to determine the Scout test target from process attributes.
+ *
+ * @param argv Process argument values
+ *
+ * @return ScoutTestTarget if necessary information was found in process arguments
+ *
+ * This won't return a target if '--grep' is not provided in the command line
+ */
+export function getTestTargetFromProcessArguments(
+  argv: string[] = process.argv
+): ScoutTestTarget | undefined {
+  // Fallback to parsing command line arguments
+  // Try to find --grep argument in different formats
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    let tag;
+
+    // Handle --grep=@tag format
+    if (arg.startsWith('--grep=')) {
+      tag = arg.split('=')[1];
+    }
+    // Handle --grep @tag format
+    else if (arg === '--grep' && i + 1 < argv.length) {
+      tag = argv[i + 1];
+    }
+
+    if (tag) {
+      try {
+        return ScoutTestTarget.fromTag(tag);
+      } catch (e) {
+        // Whatever we found, it's not good.
+      }
+    }
+  }
 }

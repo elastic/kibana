@@ -24,6 +24,7 @@ export interface AnomaliesSearchParams {
   latestMs: number;
   maxRecords?: number;
   exceptionFilter: Filter | undefined;
+  additionalFilters?: Filter[];
 }
 
 export const getAnomalies = async (
@@ -36,6 +37,8 @@ export const getAnomalies = async (
 
 export const buildAnomalyQuery = (params: AnomaliesSearchParams): estypes.SearchRequest => {
   const boolCriteria = buildCriteria(params);
+  const additionalFilters = params.additionalFilters?.map((f) => f?.query || {}) || [];
+
   return {
     size: params.maxRecords || 100,
     query: {
@@ -53,6 +56,7 @@ export const buildAnomalyQuery = (params: AnomaliesSearchParams): estypes.Search
               must: boolCriteria,
             },
           },
+          ...additionalFilters,
         ],
         must_not: params.exceptionFilter?.query,
       },

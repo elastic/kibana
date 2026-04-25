@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { InferenceConnector } from '@kbn/inference-common';
-import { KibanaClient } from '@kbn/kibana-api-cli';
+import type { InferenceConnector } from '@kbn/inference-common';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
 
 export async function getConnectors(kibanaClient: KibanaClient): Promise<InferenceConnector[]> {
   const { connectors } = await kibanaClient.fetch<{

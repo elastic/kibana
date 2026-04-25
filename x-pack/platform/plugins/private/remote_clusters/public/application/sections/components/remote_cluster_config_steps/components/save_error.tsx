@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { RequestError } from '../../../../../types';
+import type { RequestError } from '../../../../../types';
 
 interface Props {
   saveError: RequestError;

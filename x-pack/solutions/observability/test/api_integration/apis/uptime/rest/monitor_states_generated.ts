@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { MonitorSummary } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { MonitorSummary } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/uptime-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -25,10 +25,14 @@ export default function ({ getService }: FtrProviderContext) {
       `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&pageSize=10`;
 
     before('load heartbeat data', () =>
-      getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank')
+      getService('esArchiver').load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+      )
     );
     after('unload heartbeat index', () =>
-      getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/blank')
+      getService('esArchiver').unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+      )
     );
 
     // In this case we don't actually have any monitors to display
@@ -134,7 +138,9 @@ export default function ({ getService }: FtrProviderContext) {
       const downMonitorId = 'down-test-id';
       const mixMonitorId = 'mix-test-id';
       before('generate three monitors with up, down, mix state', async () => {
-        await getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank');
+        await getService('esArchiver').load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+        );
 
         const es = getService('es');
 
@@ -165,7 +171,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after('unload heartbeat index', () =>
-        getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/blank')
+        getService('esArchiver').unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+        )
       );
 
       it('should return all monitor when no status filter', async () => {

@@ -23,8 +23,7 @@ describe('AddFilterButton component', () => {
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={false}
             flush="left"
-            iconType="plusInCircleFilled"
-            isLoading={false}
+            iconType="plusCircle"
             onClick={[Function]}
             size="s"
           >
@@ -33,7 +32,7 @@ describe('AddFilterButton component', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="singlePanel"
         isOpen={false}
         ownFocus={true}
@@ -90,8 +89,7 @@ describe('AddFilterButton component', () => {
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={false}
             flush="left"
-            iconType="plusInCircleFilled"
-            isLoading={false}
+            iconType="plusCircle"
             onClick={[Function]}
             size="s"
           >
@@ -100,7 +98,7 @@ describe('AddFilterButton component', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="singlePanel"
         isOpen={false}
         ownFocus={true}
@@ -144,8 +142,7 @@ describe('AddFilterButton component', () => {
             data-test-subj="uptimeCreateAlertAddFilter"
             disabled={true}
             flush="left"
-            iconType="plusInCircleFilled"
-            isLoading={false}
+            iconType="plusCircle"
             onClick={[Function]}
             size="s"
           >
@@ -154,7 +151,7 @@ describe('AddFilterButton component', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="singlePanel"
         isOpen={false}
         ownFocus={true}

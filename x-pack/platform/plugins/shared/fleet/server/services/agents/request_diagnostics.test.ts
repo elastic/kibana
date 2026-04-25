@@ -12,6 +12,10 @@ import { createAppContextStartContractMock } from '../../mocks';
 import { createClientMock } from './action.mock';
 import { bulkRequestDiagnostics, requestDiagnostics } from './request_diagnostics';
 
+jest.mock('../secrets', () => ({
+  isActionSecretStorageEnabled: jest.fn(),
+}));
+
 describe('requestDiagnostics', () => {
   beforeEach(async () => {
     const { soClient } = createClientMock();

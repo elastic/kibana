@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormatEditorFactory } from '../types';
+import type { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
-import { StringFormatEditorFormatParams } from './string';
+import type { StringFormatEditorFormatParams } from './string';
 
 export type { StringFormatEditor } from './string';
 export const stringFormatEditorFactory: FieldFormatEditorFactory<

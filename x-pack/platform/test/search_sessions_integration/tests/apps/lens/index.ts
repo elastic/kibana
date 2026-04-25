@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -14,7 +14,9 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
   describe('lens search sessions', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });
 

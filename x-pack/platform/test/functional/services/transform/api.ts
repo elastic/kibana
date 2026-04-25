@@ -8,7 +8,8 @@
 import expect from '@kbn/expect';
 
 import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
-import { TransformState, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type { TransformState } from '@kbn/transform-plugin/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
 
 import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
@@ -120,7 +121,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         await this.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
 
         const { body: deleteRspBody, status: deleteRspstatus } = await esSupertest.delete(
-          `/_transform/${transformId}`
+          `/_transform/${transformId}?force=true`
         );
         this.assertResponseStatusCode(200, deleteRspstatus, deleteRspBody);
 

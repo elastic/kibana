@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
+const ARCHIVE = 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat';
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -21,10 +21,14 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
 
     describe('with generated data', () => {
       beforeEach('load heartbeat data', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+        );
       });
       afterEach('unload', async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+        );
       });
 
       loadTestFile(require.resolve('./settings'));

@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
+import type { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         expect(await browser.getCurrentUrl()).to.contain('completed:!f');
 
         // check the checkbox by clicking the label (clicking checkbox directly fails as it is "no intractable")
-        (await find.byCssSelector('label[for="0"]')).click();
+        await find.clickByCssSelector('label[for="0"]');
 
         // wait for react to update dom and checkbox in checked state
         await retry.tryForTime(1000, async () => {
@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         expect(await testSubjects.isChecked('todoCheckbox-0')).to.be(false);
         expect(await browser.getCurrentUrl()).to.contain('completed:!f');
         // check the checkbox by clicking the label (clicking checkbox directly fails as it is "no intractable")
-        (await find.byCssSelector('label[for="0"]')).click();
+        await find.clickByCssSelector('label[for="0"]');
 
         // wait for react to update dom and checkbox in checked state
         await retry.tryForTime(1000, async () => {

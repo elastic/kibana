@@ -15,11 +15,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { VisualizeConstants } from '../../../../common/constants';
 import { createVisEditorsRegistry } from '../../../vis_editors_registry';
 import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
 import type { VisualizeServices } from '../../types';
 import type { TypesStart } from '../../../vis_types';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
 const mockEmbeddableHandlerDestroy = jest.fn();
@@ -86,7 +86,10 @@ describe('useSavedVisInstance', () => {
       ...coreStartMock,
       toastNotifications,
       visEditorsRegistry,
-      stateTransferService: createEmbeddableStateTransferMock(),
+      stateTransferService: {
+        ...createEmbeddableStateTransferMock(),
+        getAppNameFromId: jest.fn(),
+      },
       chrome: { setBreadcrumbs: jest.fn(), docTitle: { change: jest.fn() } },
       history: {
         location: {
@@ -136,10 +139,15 @@ describe('useSavedVisInstance', () => {
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
       await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis', {
+        project: { value: 'Test Vis', absolute: true },
+      });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
-        { originatingAppName: undefined, redirectToOrigin: undefined },
+        expect.objectContaining({
+          originatingAppName: undefined,
+          redirectToOrigin: expect.any(Function),
+        }),
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
@@ -172,10 +180,15 @@ describe('useSavedVisInstance', () => {
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
       await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis', {
+        project: { value: 'Test Vis', absolute: true },
+      });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
-        { originatingAppName: undefined, redirectToOrigin: undefined },
+        expect.objectContaining({
+          originatingAppName: undefined,
+          redirectToOrigin: expect.any(Function),
+        }),
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
@@ -186,6 +199,39 @@ describe('useSavedVisInstance', () => {
         from: 'now-7d/d',
         to: 'now',
       });
+    });
+
+    test('should pass originating app context to breadcrumbs when navigating from another app', async () => {
+      mockServices.stateTransferService.getAppNameFromId = jest.fn().mockReturnValue('Dashboards');
+      const incomingBreadcrumbs = [
+        { text: 'Dashboards', href: '/app/dashboards' },
+        { text: 'My Dashboard', href: '/app/dashboards#/view/abc123' },
+      ];
+
+      const { result } = renderHook(() =>
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          'dashboards',
+          savedVisId,
+          undefined,
+          undefined,
+          incomingBreadcrumbs
+        )
+      );
+
+      result.current.visEditorRef.current = document.createElement('div');
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      expect(getEditBreadcrumbs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          originatingAppName: 'Dashboards',
+          incomingBreadcrumbs,
+          redirectToOrigin: expect.any(Function),
+        }),
+        'Test Vis'
+      );
     });
 
     test('should destroy the editor and the savedVis on unmount if chrome exists', async () => {

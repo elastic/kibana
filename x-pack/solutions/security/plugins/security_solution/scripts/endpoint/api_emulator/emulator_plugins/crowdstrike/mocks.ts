@@ -8,7 +8,7 @@ import type {
   CrowdstrikeBaseApiResponse,
   CrowdstrikeGetAgentOnlineStatusResponse,
   CrowdstrikeGetAgentsResponse,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+} from '@kbn/connector-schemas/crowdstrike';
 import { merge } from 'lodash';
 import { TEST_AGENT_ID, TEST_CID_ID } from './routes/utils';
 

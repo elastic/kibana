@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { extractIndexNameFromBackingIndex } from '../../../common/utils';
-import { DataStreamDocsStat } from '../../../common/api_types';
+import type { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
 import { rangeQuery } from '../../utils/queries';
 
@@ -59,6 +59,7 @@ export async function getAggregatedDatasetPaginatedResults(options: {
       bool,
     },
     aggs: aggs(after),
+    ignore_unavailable: true,
   });
 
   const currResults =

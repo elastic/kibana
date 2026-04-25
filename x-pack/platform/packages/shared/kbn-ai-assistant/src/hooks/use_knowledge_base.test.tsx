@@ -98,7 +98,9 @@ describe('useKnowledgeBase', () => {
   it('shows an error toast on install failure', async () => {
     const error = new Error('setup failed');
 
-    mockCallApi.mockResolvedValueOnce({ kbState: 'NOT_INSTALLED' }).mockRejectedValueOnce(error);
+    mockCallApi
+      .mockResolvedValueOnce({ inferenceModelState: 'NOT_INSTALLED' })
+      .mockRejectedValueOnce(error);
 
     const { result } = renderHook(() => useKnowledgeBase());
 

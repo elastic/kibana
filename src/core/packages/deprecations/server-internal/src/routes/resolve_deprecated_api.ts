@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalDeprecationRouter } from '../internal_types';
 import { buildApiDeprecationId } from '../deprecations';
 

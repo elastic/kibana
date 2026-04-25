@@ -9,13 +9,15 @@ import * as t from 'io-ts';
 import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
 
 import { DefaultCreateCommentsArray } from '../../common/default_create_comments_array';
-import { CreateCommentsArray } from '../../common/create_comment';
-import { Tags, tags } from '../../common/tags';
-import { ItemId } from '../../common/item_id';
-import { EntriesArray } from '../../common/entries';
-import { NamespaceType } from '../../common/default_namespace';
-import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { CreateCommentsArray } from '../../common/create_comment';
+import type { Tags } from '../../common/tags';
+import { tags } from '../../common/tags';
+import type { ItemId } from '../../common/item_id';
+import type { EntriesArray } from '../../common/entries';
+import type { NamespaceType } from '../../common/default_namespace';
+import type { OsTypeArray } from '../../common/os_type';
+import { osTypeArrayOrUndefined } from '../../common/os_type';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { description } from '../../common/description';
 import { list_id } from '../../common/list_id';
 import { name } from '../../common/name';
@@ -23,7 +25,8 @@ import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { meta } from '../../common/meta';
 import { namespace_type } from '../../common/namespace_type';
 import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
-import { ExpireTimeOrUndefined, expireTimeOrUndefined } from '../../common';
+import type { ExpireTimeOrUndefined } from '../../common';
+import { expireTimeOrUndefined } from '../../common';
 
 export const createExceptionListItemSchema = t.intersection([
   t.exact(

@@ -9,7 +9,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { MONITOR_STATUS_ENUM } from '../../../../../../../common/constants/monitor_management';
 import { useMonitorHealthColor } from '../../hooks/use_monitor_health_color';
-import {
+import type {
   OverviewStatusMetaData,
   ServiceLocations,
 } from '../../../../../../../common/runtime_types';

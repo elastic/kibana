@@ -21,6 +21,47 @@
     "functions": [
       {
         "parentPluginId": "@kbn/ai-assistant-common",
+        "id": "def-common.canUserChangeSpaceChatExperience",
+        "type": "Function",
+        "tags": [],
+        "label": "canUserChangeSpaceChatExperience",
+        "description": [
+          "\nReturns true when the user can persist the preferred chat experience UI setting\nfor the space (same conditions as showing an editable chat experience control\non Gen AI Settings)."
+        ],
+        "signature": [
+          "(capabilities: ",
+          "Capabilities",
+          ") => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/can_change_space_chat_experience.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-common",
+            "id": "def-common.canUserChangeSpaceChatExperience.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              "Capabilities"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/common/src/can_change_space_chat_experience.ts",
+            "lineNumber": 15,
+            "columnNumber": 50,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant-common",
         "id": "def-common.filterScopes",
         "type": "Function",
         "tags": [],
@@ -38,6 +79,8 @@
           "[] | undefined) => (value: T) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,6 +102,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -69,7 +114,22 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-common",
+        "id": "def-common.AIChatExperience",
+        "type": "Enum",
+        "tags": [],
+        "label": "AIChatExperience",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/ai_chat_experience.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/ai-assistant-common",
@@ -79,9 +139,11 @@
         "label": "AssistantScope",
         "description": [],
         "signature": [
-          "\"search\" | \"observability\" | \"all\""
+          "\"search\" | \"all\" | \"observability\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

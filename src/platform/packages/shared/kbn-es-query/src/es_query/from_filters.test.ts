@@ -8,9 +8,9 @@
  */
 
 import { buildQueryFromFilters } from './from_filters';
-import { ExistsFilter, Filter, MatchAllFilter } from '../filters';
+import type { ExistsFilter, Filter, MatchAllFilter } from '../filters';
 import { fields } from '../filters/stubs';
-import { DataViewBase } from './types';
+import type { DataViewBase } from './types';
 
 describe('build query', () => {
   const indexPattern: DataViewBase = {

@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
 import { getCustomIconId } from '../../symbol_utils';
 import { ValidatedRange } from '../../../../../components/validated_range';
-import { CustomIcon } from '../../../../../../common/descriptor_types';
+import type { CustomIcon } from '../../../../../../common/descriptor_types';
 import { APP_ID } from '../../../../../../common';
 import { getUsageCollection } from '../../../../../kibana_services';
 
@@ -55,7 +55,7 @@ const strings = {
         {i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
           defaultMessage: 'Alpha threshold',
         })}{' '}
-        <EuiIcon color="subdued" type="question" />
+        <EuiIcon color="subdued" type="question" aria-hidden={true} />
       </>
     </EuiToolTip>
   ),
@@ -91,7 +91,7 @@ const strings = {
         {i18n.translate('xpack.maps.customIconModal.radiusRangeLabel', {
           defaultMessage: 'Radius',
         })}{' '}
-        <EuiIcon color="subdued" type="question" />
+        <EuiIcon color="subdued" type="question" aria-hidden={true} />
       </>
     </EuiToolTip>
   ),
@@ -336,6 +336,7 @@ export class CustomIconModal extends Component<Props, State> {
         maxWidth={700}
         onClose={onCancel}
         initialFocus=".mapsCustomIconForm__image"
+        aria-label={title}
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle component="h3">{title}</EuiModalHeaderTitle>

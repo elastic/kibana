@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { BorderForm } from './border_form';
 import { AppearanceForm } from './appearance_form';
-import { CanvasWorkpad } from '../../../../types';
-import { Arguments as AppearanceArguments } from './appearance_form';
-import { Arguments as BorderArguments } from './border_form';
+import type { CanvasWorkpad } from '../../../../types';
+import type { Arguments as AppearanceArguments } from './appearance_form';
+import type { Arguments as BorderArguments } from './border_form';
 import { ArgTypesStrings } from '../../../../i18n';
 
 export { BorderStyle } from './border_form';
@@ -62,11 +62,3 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({
 );
 
 ExtendedTemplate.displayName = 'ContainerStyleArgExtendedInput';
-
-ExtendedTemplate.propTypes = {
-  getArgValue: PropTypes.func.isRequired,
-  setArgValue: PropTypes.func.isRequired,
-  workpad: PropTypes.shape({
-    colors: PropTypes.array.isRequired,
-  }).isRequired,
-};

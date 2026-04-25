@@ -22,6 +22,7 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiSpacer,
+  getDefaultEuiMarkdownPlugins,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -111,6 +112,11 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
       setReadmeLoading(false);
     });
   }, [packageInfo]);
+
+  // Get markdown plugins without tooltip support
+  const { parsingPlugins, processingPlugins, uiPlugins } = getDefaultEuiMarkdownPlugins({
+    exclude: ['tooltip'], // Exclude tooltip plugin from the editor
+  });
 
   const saveIntegrationEdits = async (updatedReadMe: string | undefined) => {
     setSavingEdits(true);
@@ -226,13 +232,24 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             onChange={setEditedContent}
             readOnly={false}
             height={600}
+            parsingPluginList={parsingPlugins}
+            processingPluginList={processingPlugins}
+            uiPlugins={uiPlugins}
           />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
+            <EuiButtonEmpty
+              onClick={onClose}
+              aria-label={i18n.translate(
+                'xpack.fleet.editIntegrationFlyout.cancelButtonAriaLabel',
+                {
+                  defaultMessage: 'Cancel editing integration',
+                }
+              )}
+            >
               <FormattedMessage
                 id="xpack.fleet.editIntegrationFlyout.cancelButtonLabel"
                 defaultMessage="Cancel"

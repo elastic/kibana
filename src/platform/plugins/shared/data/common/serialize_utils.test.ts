@@ -8,8 +8,8 @@
  */
 
 import { MultiFieldKey, RangeKey } from '.';
-import { SerializedRangeKey } from './search';
-import { SerializedMultiFieldKey } from './search/aggs/buckets/multi_field_key';
+import type { SerializedRangeKey } from './search';
+import type { SerializedMultiFieldKey } from './search/aggs/buckets/multi_field_key';
 import { SerializableType, deserializeField, serializeField } from './serialize_utils';
 
 describe('serializeField/deserializeField', () => {

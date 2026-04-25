@@ -68,7 +68,8 @@ export function getColumns(
   toggleRow,
   filter,
   influencerFilter,
-  sourceIndicesWithGeoFields
+  sourceIndicesWithGeoFields,
+  showAnomalyAlertFlyout
 ) {
   const columns = [
     {
@@ -85,7 +86,7 @@ export function getColumns(
       render: (item) => (
         <EuiButtonIcon
           onClick={() => toggleRow(item)}
-          iconType={itemIdToExpandedRowMap[item.rowId] ? 'arrowDown' : 'arrowRight'}
+          iconType={itemIdToExpandedRowMap[item.rowId] ? 'chevronSingleDown' : 'chevronSingleRight'}
           aria-label={
             itemIdToExpandedRowMap[item.rowId]
               ? i18n.translate('xpack.ml.anomaliesTable.hideDetailsAriaLabel', {
@@ -366,6 +367,7 @@ export function getColumns(
               interval={interval}
               showRuleEditorFlyout={showRuleEditorFlyout}
               sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+              showAnomalyAlertFlyout={showAnomalyAlertFlyout}
             />
           );
         } else {

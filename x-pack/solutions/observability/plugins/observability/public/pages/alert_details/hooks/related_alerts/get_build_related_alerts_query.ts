@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_END,
   ALERT_GROUP,
@@ -18,8 +18,8 @@ import {
 } from '@kbn/rule-data-utils';
 import dedent from 'dedent';
 import moment from 'moment';
-import { ObservabilityFields } from '../../../../../common/utils/alerting/types';
-import { TopAlert } from '../../../../typings/alerts';
+import type { ObservabilityFields } from '../../../../../common/utils/alerting/types';
+import type { TopAlert } from '../../../../typings/alerts';
 
 interface Props {
   alert: TopAlert<ObservabilityFields>;
@@ -29,7 +29,7 @@ interface Props {
 export function getBuildRelatedAlertsQuery({
   alert,
   filterProximal,
-}: Props): QueryDslQueryContainer {
+}: Props): NonNullable<QueryDslQueryContainer> {
   const groups = alert.fields[ALERT_GROUP];
   const shouldGroups: QueryDslQueryContainer[] = [];
   groups?.forEach(({ field, value }) => {

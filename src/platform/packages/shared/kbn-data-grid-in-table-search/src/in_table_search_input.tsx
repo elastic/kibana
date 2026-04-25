@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, FocusEvent, useCallback } from 'react';
+import type { ChangeEvent, FocusEvent } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFieldSearch,
@@ -119,7 +120,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                iconType="arrowUp"
+                iconType="chevronSingleUp"
                 color="text"
                 data-test-subj={BUTTON_PREV_TEST_SUBJ}
                 disabled={areArrowsDisabled}
@@ -131,7 +132,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 color="text"
                 data-test-subj={BUTTON_NEXT_TEST_SUBJ}
                 disabled={areArrowsDisabled}

@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KnowledgeBaseEditUserInstructionFlyout } from './knowledge_base_edit_user_instruction_flyout';
 import { useGetUserInstructions } from '../../hooks/use_get_user_instructions';
 import { useCreateKnowledgeBaseUserInstruction } from '../../hooks/use_create_knowledge_base_user_instruction';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
+import { renderWithI18n } from '@kbn/test-jest-helpers'; // Add this import
+import { fireEvent } from '@testing-library/react';
 jest.mock('../../hooks/use_get_user_instructions');
 jest.mock('../../hooks/use_create_knowledge_base_user_instruction');
 jest.mock('../../hooks/use_delete_knowledge_base_entry');
@@ -62,7 +63,6 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
   });
 
   it('should delete entry when submitting with empty text', async () => {
-    // Set up initial state with an existing instruction
     const existingId = 'test-id';
     useGetUserInstructionsMock.mockReturnValue({
       userInstructions: [
@@ -79,25 +79,17 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
       refetch: getUserInstructionsMock,
     });
 
-    const wrapper = mountWithIntl(<KnowledgeBaseEditUserInstructionFlyout onClose={mockOnClose} />);
+    const { findByRole, findByTestId } = renderWithI18n(
+      <KnowledgeBaseEditUserInstructionFlyout onClose={mockOnClose} />
+    );
 
     // Wait for the component to load and initialize with the existing instruction
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      wrapper.update();
-    });
+    const textarea = (await findByRole('textbox')) as HTMLTextAreaElement;
+    fireEvent.change(textarea, { target: { value: '' } });
 
-    // Clear the instruction
+    const saveButton = await findByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton');
     await act(async () => {
-      const textarea = wrapper.find('textarea').first();
-      textarea.simulate('change', { target: { value: '' } });
-    });
-
-    await act(async () => {
-      const saveButton = wrapper.find(
-        'button[data-test-subj="knowledgeBaseEditManualEntryFlyoutSaveButton"]'
-      );
-      saveButton.simulate('click');
+      fireEvent.click(saveButton);
     });
 
     expect(deleteMock).toHaveBeenCalledWith({
@@ -110,7 +102,6 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
   });
 
   it('should not delete entry when submitting with non-empty text', async () => {
-    // Set up initial state with an existing instruction
     const existingId = 'test-id';
     useGetUserInstructionsMock.mockReturnValue({
       userInstructions: [
@@ -127,32 +118,18 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
       refetch: getUserInstructionsMock,
     });
 
-    const wrapper = mountWithIntl(<KnowledgeBaseEditUserInstructionFlyout onClose={mockOnClose} />);
+    const { findByRole, findByTestId } = renderWithI18n(
+      <KnowledgeBaseEditUserInstructionFlyout onClose={mockOnClose} />
+    );
 
-    // Wait for the component to load
+    const textarea = (await findByRole('textbox')) as HTMLTextAreaElement;
+    fireEvent.change(textarea, { target: { value: 'Updated instruction' } });
+
+    const saveButton = await findByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton');
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      wrapper.update();
+      fireEvent.click(saveButton);
     });
-
-    // Update the text
-    await act(async () => {
-      const textarea = wrapper.find('textarea').first();
-      textarea.simulate('change', { target: { value: 'Updated instruction' } });
-    });
-
-    // Submit the form
-    await act(async () => {
-      const saveButton = wrapper.find(
-        'button[data-test-subj="knowledgeBaseEditManualEntryFlyoutSaveButton"]'
-      );
-      saveButton.simulate('click');
-    });
-
-    // Verify deletion was not called
     expect(deleteMock).not.toHaveBeenCalled();
-
-    // Verify create/update was called with correct params
     expect(createOrUpdateMock).toHaveBeenCalledWith({
       entry: {
         id: existingId,
@@ -160,13 +137,10 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
         public: false,
       },
     });
-
-    // Verify flyout was closed
     expect(mockOnClose).toHaveBeenCalled();
   });
 
   it('should update existing instruction with new text', async () => {
-    // Set up initial state with an existing instruction
     const existingId = 'test-id';
     const originalText = 'Original instruction';
     const updatedText = 'This is the updated instruction text';
@@ -186,33 +160,20 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
       refetch: getUserInstructionsMock,
     });
 
-    const wrapper = mountWithIntl(<KnowledgeBaseEditUserInstructionFlyout onClose={mockOnClose} />);
+    const { findByRole, findByTestId } = renderWithI18n(
+      <KnowledgeBaseEditUserInstructionFlyout onClose={mockOnClose} />
+    );
 
-    // Wait for the component to load and initialize with the existing instruction
+    const textarea = (await findByRole('textbox')) as HTMLTextAreaElement;
+    expect(textarea.value).toBe(originalText);
+
+    fireEvent.change(textarea, { target: { value: updatedText } });
+
+    const saveButton = await findByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton');
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      wrapper.update();
+      fireEvent.click(saveButton);
     });
 
-    // Verify the textarea is initialized with the original text
-    const initialTextarea = wrapper.find('textarea').first();
-    expect(initialTextarea.prop('value')).toBe(originalText);
-
-    // Update the instruction text
-    await act(async () => {
-      const textarea = wrapper.find('textarea').first();
-      textarea.simulate('change', { target: { value: updatedText } });
-    });
-
-    // Submit the form
-    await act(async () => {
-      const saveButton = wrapper.find(
-        'button[data-test-subj="knowledgeBaseEditManualEntryFlyoutSaveButton"]'
-      );
-      saveButton.simulate('click');
-    });
-
-    // Verify the update was called with the correct parameters
     expect(createOrUpdateMock).toHaveBeenCalledWith({
       entry: {
         id: existingId,
@@ -220,11 +181,34 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
         public: false,
       },
     });
-
-    // Verify that delete was not called
     expect(deleteMock).not.toHaveBeenCalled();
-
-    // Verify the flyout was closed
     expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it('save button should be disabled when no text is entered and no user instruction was previously saved', async () => {
+    useGetUserInstructionsMock.mockReturnValue({
+      userInstructions: [],
+      isLoading: false,
+      isRefetching: false,
+      isSuccess: true,
+      isError: false,
+      refetch: getUserInstructionsMock,
+    });
+
+    const { findByTestId } = renderWithI18n(
+      <KnowledgeBaseEditUserInstructionFlyout onClose={mockOnClose} />
+    );
+
+    const saveButton = (await findByTestId(
+      'knowledgeBaseEditManualEntryFlyoutSaveButton'
+    )) as HTMLButtonElement;
+    await act(async () => {
+      fireEvent.click(saveButton);
+      expect(saveButton.disabled).toBe(true);
+    });
+
+    expect(deleteMock).not.toHaveBeenCalled();
+    expect(createOrUpdateMock).not.toHaveBeenCalled();
+    expect(mockOnClose).not.toHaveBeenCalled();
   });
 });

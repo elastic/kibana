@@ -8,7 +8,7 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { migrate712 } from './migrations/to_v7_12_0';
 import { SCHEMA_SEARCH_TELEMETRY_V8_8_0 } from './schemas/search_telemetry';
 

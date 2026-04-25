@@ -13,7 +13,6 @@ import React from 'react';
 
 import { AccordionTitle } from './accordion_title';
 import * as i18n from './translations';
-import { useKibanaFeatureFlags } from '../../../../../use_kibana_feature_flags';
 
 const AVATAR_SIZE = 24; // px
 
@@ -33,7 +32,6 @@ const AccordionButtonComponent: React.FC<Props> = ({
   title,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   return (
     <EuiFlexGroup
@@ -59,14 +57,10 @@ const AccordionButtonComponent: React.FC<Props> = ({
           data-test-subj="assistantAvatarContainer"
         >
           <EuiToolTip
-            content={
-              attackDiscoveryAlertsEnabled && connectorName != null ? connectorName : undefined
-            }
+            content={connectorName != null ? connectorName : undefined}
             data-test-subj="connectorTooltip"
             position="right"
-            title={
-              attackDiscoveryAlertsEnabled && connectorName != null ? i18n.AI_CONNECTOR : undefined
-            }
+            title={connectorName != null ? i18n.AI_CONNECTOR : undefined}
           >
             <AssistantIcon
               css={css`

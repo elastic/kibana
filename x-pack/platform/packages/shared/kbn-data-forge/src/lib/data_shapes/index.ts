@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { random } from 'lodash';
 
-import { Point, TransitionMethod } from '../../types';
+import type { Point, TransitionMethod } from '../../types';
 import { createExponentialFunction } from './create_exponetial_function';
 import { createLinearFunction } from './create_linear_function';
 import { createSineFunction } from './create_sine_function';

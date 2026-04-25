@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
 
 import { AgentDetailsIntegration } from './agent_details_integration';
@@ -16,7 +17,8 @@ export const AgentDetailsIntegrations: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
   linkToLogs?: boolean;
-}> = memo(({ agent, agentPolicy, linkToLogs = true }) => {
+  outputs?: OutputsForAgentPolicy;
+}> = memo(({ agent, agentPolicy, outputs, linkToLogs = true }) => {
   if (!agentPolicy || !agentPolicy.package_policies) {
     return null;
   }
@@ -33,6 +35,7 @@ export const AgentDetailsIntegrations: React.FunctionComponent<{
               agentPolicy={agentPolicy}
               packagePolicy={packagePolicy}
               linkToLogs={linkToLogs}
+              outputs={outputs}
               data-test-subj={`${testSubj}-accordion`}
             />
           </EuiFlexItem>

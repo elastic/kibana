@@ -7,16 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { Writable } from '@kbn/utility-types';
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoLineSource, geoLineTitle, REQUIRES_GOLD_LICENSE_MSG } from './es_geo_line_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
+import type { LayerWizard, RenderWizardArguments } from '../../layers';
 import {
   LAYER_WIZARD_CATEGORY,
   STYLE_TYPE,
   VECTOR_STYLES,
   WIZARD_ID,
 } from '../../../../common/constants';
-import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
+import type {
+  ESGeoLineSourceDescriptor,
+  VectorLayerDescriptor,
+} from '../../../../common/descriptor_types';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import { getIsGoldPlus } from '../../../licensed_features';
@@ -51,7 +55,7 @@ export const geoLineLayerWizardConfig: LayerWizard = {
             },
           },
         }),
-      });
+      }) as Writable<VectorLayerDescriptor>;
       layerDescriptor.alpha = 1;
       previewLayers([layerDescriptor]);
     };

@@ -10,22 +10,25 @@
 import { EOL, hostname } from 'node:os';
 import url, { URL } from 'node:url';
 import type { Duration } from 'moment';
-import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { IHttpConfig, SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/server-http-tools';
+import type { ByteSizeValue, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { IHttpConfig } from '@kbn/server-http-tools';
+import { SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
 import type { HttpProtocol, ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
-import { CspConfig, CspConfigType } from './csp';
-import { ExternalUrlConfig } from './external_url';
+import type { CspConfigType } from './csp';
+import { CspConfig } from './csp';
+import type { ExternalUrlConfig } from './external_url';
 import {
   parseRawSecurityResponseHeadersConfig,
   securityResponseHeadersSchema,
 } from './security_response_headers_config';
 import { CdnConfig } from './cdn_config';
-import { PermissionsPolicyConfigType } from './permissions_policy';
+import type { PermissionsPolicyConfigType } from './permissions_policy';
 import { type RateLimiterConfig, rateLimiterConfigSchema } from './rate_limiter';
 
 const SECOND = 1000;
@@ -95,7 +98,7 @@ const configSchema = schema.object(
         allowCredentials: schema.boolean({ defaultValue: false }),
         allowOrigin: schema.oneOf(
           [
-            schema.arrayOf(hostURISchema, { minSize: 1 }),
+            schema.arrayOf(hostURISchema, { minSize: 1, maxSize: 100 }),
             schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
           ],
           {
@@ -135,7 +138,7 @@ const configSchema = schema.object(
         defaultValue: 'http1',
       })
     ),
-    prototypeHardening: schema.boolean({ defaultValue: false }),
+    prototypeHardening: schema.boolean({ defaultValue: true }),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,
@@ -171,7 +174,7 @@ const configSchema = schema.object(
           schema.string({
             hostname: true,
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         )
       ),
     }),
@@ -184,9 +187,13 @@ const configSchema = schema.object(
       disableProtection: schema.boolean({ defaultValue: false }),
       allowlist: schema.arrayOf(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
-        { defaultValue: [] }
+        { defaultValue: [], maxSize: 100 }
       ),
     }),
+    excludeRoutes: schema.arrayOf(
+      schema.string({ validate: match(/^\//, 'must start with a slash') }),
+      { defaultValue: [], maxSize: 100 }
+    ),
     eluMonitor: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       logging: schema.object({
@@ -206,7 +213,7 @@ const configSchema = schema.object(
     requestId: schema.object(
       {
         allowFromAnyIp: schema.boolean({ defaultValue: false }),
-        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [] }),
+        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [], maxSize: 100 }),
       },
       {
         validate(value) {
@@ -249,10 +256,28 @@ const configSchema = schema.object(
 
       /** This should not be configurable in serverless */
       useVersionResolutionStrategyForInternalPaths: offeringBasedSchema({
-        traditional: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        traditional: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
         serverless: schema.never(),
       }),
     }),
+
+    serverTiming: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      /** In dev mode: allow true/false, default to true */
+      schema.boolean({ defaultValue: true }),
+      /** In production: only allow false, default to false */
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
+
+    serverTimingElasticsearch: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      /** In dev mode: allow true/false, default to true */
+      schema.boolean({ defaultValue: true }),
+      /** In production: only allow false, default to false */
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
   },
   {
     validate: (rawConfig) => {
@@ -358,6 +383,7 @@ export class HttpConfig implements IHttpConfig {
   public prototypeHardening: boolean;
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
+  public excludeRoutes: string[];
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public versioned: {
     versionResolution: HandlerResolutionStrategy;
@@ -367,6 +393,8 @@ export class HttpConfig implements IHttpConfig {
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
   public rateLimiter: RateLimiterConfig;
+  public serverTiming: boolean;
+  public serverTimingElasticsearch: boolean;
 
   public eluMonitor: IHttpEluMonitorConfig;
 
@@ -413,9 +441,12 @@ export class HttpConfig implements IHttpConfig {
     this.prototypeHardening = rawHttpConfig.prototypeHardening;
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
+    this.excludeRoutes = rawHttpConfig.excludeRoutes;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
     this.rateLimiter = rawHttpConfig.rateLimiter;
+    this.serverTiming = rawHttpConfig.serverTiming;
+    this.serverTimingElasticsearch = rawHttpConfig.serverTimingElasticsearch;
 
     // defaults to `true` if not set through config.
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis;

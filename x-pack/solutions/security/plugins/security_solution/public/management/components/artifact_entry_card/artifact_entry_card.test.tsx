@@ -323,7 +323,6 @@ describe.each([
     });
 
     beforeEach(() => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
       authzMock = appTestContext.getUserPrivilegesMockSetter(mockUserPrivileges);
       authzMock.set({ canManageGlobalArtifacts: false });
       (item as ExceptionListItemSchema).tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
@@ -331,15 +330,6 @@ describe.each([
 
     afterEach(() => {
       authzMock.reset();
-    });
-
-    it('should render menu if feature flag is disabled', () => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: false });
-      render({ actions });
-
-      expect(
-        (renderResult.getByTestId('testCard-header-actions-button') as HTMLButtonElement).disabled
-      ).toBe(false);
     });
 
     it('should disable card actions menu for global artifacts when user does not have global artifact privilege', () => {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiTableSortingType,
   EuiLink,
   EuiText,
   EuiHealth,
@@ -29,7 +29,7 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hoo
 import { useKibana } from '../../../common/lib/kibana';
 import { getRuleHealthColor } from '../../../common/lib/rule_status_helpers';
 import { useLoadRulesQuery } from '../../hooks/use_load_rules_query';
-import { Pagination, Rule, ActionConnector } from '../../../types';
+import type { Pagination, Rule, ActionConnector } from '../../../types';
 import { DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE } from '../../constants';
 import { rulesLastRunOutcomeTranslationMapping } from '../rules_list/translations';
 import { NoPermissionPrompt } from '../../components/prompts/no_permission_prompt';
@@ -248,6 +248,10 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
       <EuiFlexItem>
         <EuiBasicTable
           data-test-subj="connectorRulesList"
+          tableCaption={i18n.translate(
+            'xpack.triggersActionsUI.sections.connectorRulesList.tableCaption',
+            { defaultMessage: 'Connector rules' }
+          )}
           loading={isLoading}
           items={rulesState.data}
           columns={columns}

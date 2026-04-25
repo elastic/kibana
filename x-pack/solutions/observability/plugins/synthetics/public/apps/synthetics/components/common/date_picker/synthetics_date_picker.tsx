@@ -8,7 +8,7 @@
 import React, { useContext, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useUrlParams } from '../../../hooks';
 import { CLIENT_DEFAULTS } from '../../../../../../common/constants';
 import { SyntheticsSettingsContext, SyntheticsRefreshContext } from '../../../contexts';

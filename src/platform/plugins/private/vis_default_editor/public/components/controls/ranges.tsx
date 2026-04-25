@@ -20,7 +20,7 @@ import {
   EuiButtonEmpty,
   EuiFormRow,
   EuiToolTip,
-  EuiText,
+  EuiFormPrepend,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -195,7 +195,7 @@ function RangesParamEditor({
                     isInvalid={!isFromValid}
                     prepend={
                       <EuiToolTip content={gteTooltipContent}>
-                        <EuiText size="s">{gtePrependLabel}</EuiText>
+                        <EuiFormPrepend label={gtePrependLabel} tabIndex={0} />
                       </EuiToolTip>
                     }
                   />
@@ -217,7 +217,7 @@ function RangesParamEditor({
                     isInvalid={!isToValid}
                     prepend={
                       <EuiToolTip content={ltTooltipContent}>
-                        <EuiText size="s">{ltPrependLabel}</EuiText>
+                        <EuiFormPrepend label={ltPrependLabel} tabIndex={0} />
                       </EuiToolTip>
                     }
                   />
@@ -244,7 +244,7 @@ function RangesParamEditor({
         <EuiFlexItem>
           <EuiButtonEmpty
             data-test-subj={`${dataTestSubj}__addRangeButton`}
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={onAddRange}
             size="xs"
           >

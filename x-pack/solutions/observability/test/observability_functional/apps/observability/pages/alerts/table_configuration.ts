@@ -17,8 +17,9 @@ import {
   ALERT_STATUS,
   ALERT_INSTANCE_ID,
   TAGS,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   describe('Observability alerts table configuration', function () {
@@ -32,13 +33,21 @@ export default ({ getService }: FtrProviderContext) => {
     const retry = getService('retry');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
     });
 
     it('renders correctly with a pre-existing persisted configuration', async () => {
@@ -65,6 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
         ALERT_EVALUATION_VALUE,
         ALERT_EVALUATION_THRESHOLD,
         TAGS,
+        ALERT_WORKFLOW_TAGS,
         ALERT_REASON,
       ]) {
         expect(await testSubjects.exists(`dataGridHeaderCell-${colId}`)).to.be(true);

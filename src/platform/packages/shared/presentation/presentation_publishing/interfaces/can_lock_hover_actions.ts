@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishingSubject } from '../publishing_subject';
+import type { PublishingSubject } from '../publishing_subject';
 
 /**
  * This API can lock hover actions

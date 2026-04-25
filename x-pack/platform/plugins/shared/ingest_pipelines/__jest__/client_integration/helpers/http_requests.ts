@@ -12,7 +12,7 @@ type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
 export interface ResponseError {
   statusCode: number;
   message: string | Error;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
   error?: string | Error;
 }
 
@@ -62,6 +62,18 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${API_BASE_PATH}/${encodeURIComponent(pipelineName)}`, response, error);
 
+  const setLoadPipelineTreeResponse = (
+    pipelineName: string,
+    response?: object,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/structure_tree/${encodeURIComponent(pipelineName)}`,
+      response,
+      error
+    );
+
   const setDeletePipelineResponse = (
     pipelineName: string,
     response?: object,
@@ -89,6 +101,7 @@ const registerHttpRequestMockHelpers = (
   return {
     setLoadPipelinesResponse,
     setLoadPipelineResponse,
+    setLoadPipelineTreeResponse,
     setDeletePipelineResponse,
     setCreatePipelineResponse,
     setParseCsvResponse,

@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 
 import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
 import type { CreateCaseParams } from '../cases/create';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlAnomalyCharts } from './anomaly_charts';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlAnomalyCharts } from './anomaly_charts';
 
 export function MachineLearningAnomalyExplorerProvider(
   { getPageObject, getService }: FtrProviderContext,
@@ -94,6 +94,10 @@ export function MachineLearningAnomalyExplorerProvider(
 
     async assertSwimlaneViewByExists() {
       await testSubjects.existOrFail('mlAnomalyExplorerSwimlaneViewBy');
+    },
+
+    async assertFeedbackButtonExists() {
+      await testSubjects.existOrFail('mlFeatureFeedbackButton');
     },
 
     async assertAnnotationsPanelExists(state: string) {

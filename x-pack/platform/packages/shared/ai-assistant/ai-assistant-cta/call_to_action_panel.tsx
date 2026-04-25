@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiCard,
-  IconType,
   EuiIcon,
   EuiText,
   type EuiPanelProps,

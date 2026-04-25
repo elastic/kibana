@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, security } = getPageObjects(['dashboard', 'security']);
@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         disabledFeatures: [],
       });
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/custom_space',
         { space: customSpace }
       );
 
@@ -80,31 +80,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await securityService.role.delete(ROLE);
 
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/custom_space',
         { space: customSpace }
       );
     });
 
     it('can favorite and unfavorite a dashboard', async () => {
-      await testSubjects.exists('tabbedTableFilter');
+      await testSubjects.exists('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
-      await testSubjects.click('favoriteTab');
+
+      await testSubjects.click('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 0, 1000);
-      await testSubjects.click('allTab');
+
+      await testSubjects.click('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
+
       await testSubjects.moveMouseTo('~dashboardListingTitleLink-A-Dashboard');
       await testSubjects.click('favoriteButton');
       await listingTable.expectItemsCount('dashboard', 1);
-      await testSubjects.click('favoriteTab');
+
+      await testSubjects.click('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
 
       await browser.refresh(); // make sure the favorite state is persisted and filter state is preserved
-      await testSubjects.exists('tabbedTableFilter');
 
       await listingTable.expectItemsCount('dashboard', 1);
       await testSubjects.click('unfavoriteButton');
       await listingTable.expectItemsCount('dashboard', 0, 1000);
-      await testSubjects.click('allTab');
+      await testSubjects.click('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
     });
 
@@ -121,7 +124,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         },
       });
-      await testSubjects.exists('tabbedTableFilter');
       await listingTable.expectItemsCount('dashboard', 1);
     });
   });

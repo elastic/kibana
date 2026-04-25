@@ -10,10 +10,20 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+
+const DEFAULT_CLOSE_REASONS = new Set([
+  'false_positive',
+  'duplicate',
+  'true_positive',
+  'benign_positive',
+  'automated_closure',
+  'other',
+]);
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
+  cases: CasesServerSetup;
 }
 
 export interface FixtureStartDeps {
@@ -23,8 +33,11 @@ export interface FixtureStartDeps {
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
-    const { features } = deps;
+    const { features, cases } = deps;
     this.registerFeatures(features);
+    cases.registerCloseReasonValidator('securitySolutionFixture', async (closeReason) =>
+      DEFAULT_CLOSE_REASONS.has(closeReason)
+    );
   }
 
   public start() {}
@@ -37,7 +50,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'SecuritySolutionFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       cases: ['securitySolutionFixture'],
       privileges: {
         all: {
@@ -184,6 +196,29 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             },
           ],
         },
+        {
+          name: 'Manage templates',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_manage_templates',
+                  name: 'Manage case templates',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    manageTemplates: ['securitySolutionFixture'],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 
@@ -192,7 +227,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'TestDisabledFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       // testDisabledFixture is disabled in space1
       cases: ['testDisabledFixture'],
       privileges: {

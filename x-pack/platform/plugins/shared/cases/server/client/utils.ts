@@ -33,6 +33,7 @@ import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   AttachmentType,
+  EventAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
@@ -52,18 +53,29 @@ import {
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isUnifiedAttachmentRequest,
+  isUnifiedReferenceAttachmentRequest,
+  isUnifiedValueAttachmentRequest,
+  isLegacyAttachmentRequest,
+  isLegacyCommentAttachment,
 } from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlert,
-  isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   assertUnreachable,
+  isCommentRequestTypeEvent,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
+import type { UnifiedAttachmentPayload } from '../../common/types/domain/attachment/v2';
+import type {
+  AttachmentRequest,
+  AttachmentRequestV2,
+  CasesFindRequestSortFields,
+} from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
 
@@ -72,7 +84,7 @@ export const decodeCommentRequest = (
   comment: AttachmentRequest,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
-  if (isCommentRequestTypeUser(comment)) {
+  if (isLegacyCommentAttachment(comment)) {
     decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
     decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
@@ -121,6 +133,8 @@ export const decodeCommentRequest = (
         )} indices: ${JSON.stringify(indices)}`
       );
     }
+  } else if (isCommentRequestTypeEvent(comment)) {
+    decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
@@ -150,6 +164,73 @@ const decodeExternalReferenceAttachment = (
     const attachmentType = externalRefRegistry.get(attachment.externalReferenceAttachmentTypeId);
 
     attachmentType.schemaValidator?.(metadata);
+  }
+};
+
+/**
+ * Decode and validate unified value attachment payload.
+ * Validates the data structure using the schema validator from the registry.
+ */
+const decodeUnifiedValueAttachment = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (!unifiedRegistry.has(attachment.type)) {
+    throw badRequest(
+      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
+    );
+  }
+
+  const attachmentType = unifiedRegistry.get(attachment.type);
+  if (attachmentType.schemaValidator) {
+    attachmentType.schemaValidator(attachment.data);
+  }
+};
+
+/**
+ * Decode and validate unified reference attachment payload.
+ * Validates the metadata using the schema validator from the registry.
+ */
+const decodeUnifiedReferenceAttachment = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (!unifiedRegistry.has(attachment.type)) {
+    throw badRequest(
+      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
+    );
+  }
+
+  const attachmentType = unifiedRegistry.get(attachment.type);
+  if (attachmentType.schemaValidator) {
+    attachmentType.schemaValidator(attachment.metadata ?? null);
+  }
+};
+
+export const decodeUnifiedCommentRequest = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (isUnifiedValueAttachmentRequest(attachment)) {
+    decodeUnifiedValueAttachment(attachment, unifiedRegistry);
+  } else if (isUnifiedReferenceAttachmentRequest(attachment)) {
+    decodeUnifiedReferenceAttachment(attachment, unifiedRegistry);
+  } else {
+    assertUnreachable(attachment);
+  }
+};
+
+export const decodeCommentRequestV2 = (
+  attachment: AttachmentRequestV2,
+  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (isLegacyAttachmentRequest(attachment)) {
+    decodeCommentRequest(attachment, externalRefRegistry);
+  } else if (isUnifiedAttachmentRequest(attachment)) {
+    decodeUnifiedCommentRequest(attachment, unifiedRegistry);
+  } else {
+    assertUnreachable(attachment);
   }
 };
 
@@ -419,6 +500,34 @@ export const buildCustomFieldsFilter = ({
   return nodeBuilder.and([...customFieldsFilter]);
 };
 
+/**
+ * Helper function to remove .attributes from field paths in a KueryNode AST.
+ * This is used when searchType is 'search' to convert find-style filters to search-style filters.
+ */
+export const removeAttributesFromFilter = (node: KueryNode): KueryNode => {
+  // Create a deep copy to avoid mutating the original
+  const modifiedNode = structuredClone(node);
+
+  const traverse = (ast: KueryNode): void => {
+    // Handle literal nodes with string values (field paths)
+    if (ast.type === 'literal' && typeof ast.value === 'string') {
+      ast.value = ast.value.replace(/\.attributes\./g, '.');
+    }
+
+    // Recursively traverse all arguments
+    if (ast.arguments && Array.isArray(ast.arguments)) {
+      ast.arguments.forEach((arg) => {
+        if (arg) {
+          traverse(arg);
+        }
+      });
+    }
+  };
+
+  traverse(modifiedNode);
+  return modifiedNode;
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -433,8 +542,10 @@ export const constructQueryOptions = ({
   category,
   customFields,
   customFieldsConfiguration,
+  searchType = 'find',
 }: CasesSearchParams & {
   customFieldsConfiguration?: CustomFieldsConfiguration;
+  searchType?: 'find' | 'search';
 }): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
@@ -459,8 +570,14 @@ export const constructQueryOptions = ({
     customFieldsFilter,
   ]);
 
+  const combinedFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);
+  const finalFilter =
+    searchType === 'search' && combinedFilter
+      ? removeAttributesFromFilter(combinedFilter)
+      : combinedFilter;
+
   return {
-    filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
+    filter: finalFilter,
     sortField: sortByField,
   };
 };
@@ -535,8 +652,8 @@ export const getCaseToUpdate = (
         if (arraysDifference(value, currentValue)) {
           acc[key] = value;
         }
-      } else if (isPlainObject(currentValue) && isPlainObject(value)) {
-        if (!deepEqual(currentValue, value)) {
+      } else if (isPlainObject(value)) {
+        if (currentValue === undefined || !deepEqual(currentValue, value)) {
           acc[key] = value;
         }
       } else if (currentValue !== undefined && value !== currentValue) {

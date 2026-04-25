@@ -7,18 +7,11 @@
 import { renderHook } from '@testing-library/react';
 import { getRiskSeverityColors, useRiskSeverityColors } from './risk_color_palette';
 import { useEuiTheme } from '@elastic/eui';
-import { getMockEuiAmsterdamTheme, getMockEuiBorealisTheme } from './__mocks__/severity_colors';
+import { getMockEuiBorealisTheme } from './__mocks__/severity_colors';
 
 jest.mock('@elastic/eui', () => ({
   useEuiTheme: jest.fn(),
 }));
-
-const EXPECTED_SEVERITY_COLOR_AMSTERDAM = {
-  low: '#54B399',
-  medium: '#F1D86F',
-  high: '#FF7E62',
-  critical: '#bd271e',
-};
 
 const EXPECTED_SEVERITY_COLOR_BOREALIS = {
   low: '#54B399',
@@ -29,11 +22,6 @@ const EXPECTED_SEVERITY_COLOR_BOREALIS = {
 
 describe('risk_color_palette', () => {
   const scenarios = [
-    {
-      mockEuiTheme: getMockEuiAmsterdamTheme(),
-      themeName: 'Amsterdam',
-      expected: EXPECTED_SEVERITY_COLOR_AMSTERDAM,
-    },
     {
       mockEuiTheme: getMockEuiBorealisTheme(),
       themeName: 'Borealis',

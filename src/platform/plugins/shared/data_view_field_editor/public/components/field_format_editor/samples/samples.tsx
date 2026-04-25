@@ -14,7 +14,7 @@ import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Sample } from '../types';
+import type { Sample } from '../types';
 
 interface FormatEditorSamplesProps {
   samples: Sample[];
@@ -72,6 +72,9 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
           compressed={true}
           items={samples}
           columns={columns}
+          tableCaption={i18n.translate('indexPatternFieldEditor.samples.tableCaption', {
+            defaultMessage: 'Sample input and output values',
+          })}
         />
       </EuiFormRow>
     ) : null;

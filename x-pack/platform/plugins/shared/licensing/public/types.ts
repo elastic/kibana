@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { ILicense } from '../common/types';
-import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
+import type { ILicense } from '@kbn/licensing-types';
+import type { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 /** @public */
 export interface LicensingPluginSetup {

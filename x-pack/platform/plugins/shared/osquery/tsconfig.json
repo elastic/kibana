@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,15 +9,15 @@
     "common/**/*",
     "public/**/*",
     "scripts/**/*",
-    "scripts/**/**.json",
+    "scripts/**/*.json",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
     // ECS and Osquery schema files
-    "public/common/schemas/*/**.json"
+    "public/common/schemas/*/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -44,7 +44,6 @@
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/timelines-plugin",
     "@kbn/spaces-plugin",
     "@kbn/i18n",
     "@kbn/rison",
@@ -65,7 +64,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/licensing-plugin",
-    "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/monaco",
     "@kbn/io-ts-utils",
@@ -82,6 +80,21 @@
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",
     "@kbn/spaces-utils",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/setup-node-env",
+    "@kbn/react-query",
+    "@kbn/react-kibana-mount",
+    "@kbn/tooling-log",
+    "@kbn/user-profile-components",
+    "@kbn/unified-data-table",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/discover-utils",
+    "@kbn/cell-actions",
+    "@kbn/ui-actions-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-chrome-browser",
+    "@kbn/scout",
+    "@kbn/core-http-browser"
   ]
 }

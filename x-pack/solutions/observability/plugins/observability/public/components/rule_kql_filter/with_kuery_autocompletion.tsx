@@ -6,24 +6,19 @@
  */
 
 import React from 'react';
-import { DataViewBase } from '@kbn/es-query';
-import {
-  withKibana,
-  KibanaReactContextValue,
-  KibanaServices,
-} from '@kbn/kibana-react-plugin/public';
+import type { DataViewBase } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { InfraClientStartDeps, RendererFunction } from '../custom_threshold/types';
+import type { KqlPluginStart, QuerySuggestion } from '@kbn/kql/public';
+import type { RendererFunction } from '../custom_threshold/types';
 
 export interface WithKueryAutocompletionLifecycleProps {
-  kibana: KibanaReactContextValue<InfraClientStartDeps & KibanaServices>;
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: QuerySuggestion[];
   }>;
   indexPattern: DataViewBase;
+  kql: KqlPluginStart;
 }
 
 interface WithKueryAutocompletionLifecycleState {
@@ -61,10 +56,9 @@ class WithKueryAutocompletionComponent extends React.Component<
     maxSuggestions?: number,
     transformSuggestions?: (s: QuerySuggestion[]) => QuerySuggestion[]
   ) => {
-    const { indexPattern } = this.props;
+    const { indexPattern, kql } = this.props;
     const language = 'kuery';
-    const hasQuerySuggestions =
-      this.props.kibana.services.unifiedSearch.autocomplete.hasQuerySuggestions(language);
+    const hasQuerySuggestions = kql.autocomplete.hasQuerySuggestions(language);
 
     if (!hasQuerySuggestions) {
       return;
@@ -79,7 +73,7 @@ class WithKueryAutocompletionComponent extends React.Component<
     });
 
     const suggestions =
-      (await this.props.kibana.services.unifiedSearch.autocomplete.getQuerySuggestions({
+      (await kql.autocomplete.getQuerySuggestions({
         language,
         query: expression,
         selectionStart: cursorPosition,
@@ -108,9 +102,7 @@ class WithKueryAutocompletionComponent extends React.Component<
   };
 }
 
-export const WithKueryAutocompletion = withKibana<WithKueryAutocompletionLifecycleProps>(
-  WithKueryAutocompletionComponent
-);
+export const WithKueryAutocompletion = WithKueryAutocompletionComponent;
 
 // eslint-disable-next-line import/no-default-export
 export default WithKueryAutocompletion;

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './monitoring_entity_source';
-export * from './list';
+export { registerMonitoringEntitySourceRoutes } from './register_monitoring_entity_source_routes';

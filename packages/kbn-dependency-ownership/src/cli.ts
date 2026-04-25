@@ -13,7 +13,8 @@ import nodePath from 'path';
 
 import fs from 'fs';
 
-import { DependenciesByOwner, identifyDependencyOwnership } from './dependency_ownership';
+import type { DependenciesByOwner } from './dependency_ownership';
+import { identifyDependencyOwnership } from './dependency_ownership';
 
 interface CLIArgs {
   dependency?: string;
@@ -46,8 +47,11 @@ export async function identifyDependencyOwnershipCLI() {
 
       const result = identifyDependencyOwnership({ dependency, owner, missingOwner });
       if (failIfUnowned) {
-        const { prodDependencies = [] as string[], devDependencies = [] as string[] } =
-          result as DependenciesByOwner;
+        const {
+          prodDependencies = [] as string[],
+          devDependencies = [] as string[],
+          invalidRenovateRules = [] as string[],
+        } = result as DependenciesByOwner;
 
         const uncoveredDependencies = [...prodDependencies, ...devDependencies];
         if (uncoveredDependencies.length > 0) {
@@ -56,9 +60,17 @@ export async function identifyDependencyOwnershipCLI() {
           throw createFailError(
             `Found ${uncoveredDependencies.length} dependencies without an owner. Please update \`renovate.json\` to include these dependencies.\nVisit https://docs.elastic.dev/kibana-dev-docs/third-party-dependencies#dependency-ownership for more information.`
           );
-        } else {
-          log.success('All dependencies have an owner');
         }
+
+        if (invalidRenovateRules.length > 0) {
+          log.write('Invalid renovate rules:');
+          log.write(invalidRenovateRules.map((rule) => ` - ${rule}`).join('\n'));
+          throw createFailError(
+            `Found ${invalidRenovateRules.length} invalid renovate rules. Please update \`renovate.json\` to fix these errors.\nVisit https://docs.elastic.dev/kibana-dev-docs/third-party-dependencies#dependency-ownership for more information.`
+          );
+        }
+
+        log.success('All dependencies have an owner');
       }
 
       if (outputPath) {

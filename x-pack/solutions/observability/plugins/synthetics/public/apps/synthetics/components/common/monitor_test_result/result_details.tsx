@@ -14,7 +14,7 @@ import { ThresholdIndicator } from '../components/thershold_indicator';
 import { useNetworkTimings } from '../../step_details_page/hooks/use_network_timings';
 import { useNetworkTimingsPrevious24Hours } from '../../step_details_page/hooks/use_network_timings_prev';
 import { formatMillisecond } from '../../step_details_page/common/network_data/data_formatting';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { parseBadgeStatus, StatusBadge } from './status_badge';
 import { useStepPrevMetrics } from '../../step_details_page/hooks/use_step_prev_metrics';
 

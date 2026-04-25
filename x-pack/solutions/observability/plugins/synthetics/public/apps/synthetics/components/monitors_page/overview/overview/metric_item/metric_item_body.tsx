@@ -12,27 +12,37 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { LocationsBadge } from './locations_badge';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
 import * as labels from '../../../management/monitor_list_table/labels';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
 export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   const tags = monitor.tags;
   const history = useHistory();
 
+  const typeBadge = (
+    <MonitorTypeBadge
+      monitorType={monitor.type}
+      ariaLabel={labels.getFilterForTypeMessage(monitor.type)}
+      onClick={() => {
+        history.push({
+          search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
+        });
+      }}
+    />
+  );
+  if (tags.length === 0) {
+    return (
+      <>
+        <EuiSpacer size="xs" />
+        {typeBadge}
+      </>
+    );
+  }
+
   return (
     <>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <MonitorTypeBadge
-            monitorType={monitor.type}
-            ariaLabel={labels.getFilterForTypeMessage(monitor.type)}
-            onClick={() => {
-              history.push({
-                search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
-              });
-            }}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>
         {monitor?.locations?.length > 1 && (
           <EuiFlexItem>
             <LocationsBadge monitor={monitor} />

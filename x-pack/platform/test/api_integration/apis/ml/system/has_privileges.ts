@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 import { USER } from '../../../services/ml/security_common';
 
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe("ML's _has_privileges", () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote_small');
     });
     after(async () => {
       await ml.api.setUpgradeMode(false);

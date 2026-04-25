@@ -7,8 +7,10 @@
 
 import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { SampleDataIngestPluginStart, SampleDataIngestPluginSetup } from './types';
+import type { SampleDataIngestPluginStart, SampleDataIngestPluginSetup } from './types';
 import { InstallationService } from './services/installation';
+import { isSampleIndex } from './services/utils';
+import { MINIMUM_LICENSE_TYPE } from '../common';
 
 export class SampleDataIngestPlugin
   implements Plugin<SampleDataIngestPluginSetup, SampleDataIngestPluginStart>
@@ -28,6 +30,8 @@ export class SampleDataIngestPlugin
     return {
       getStatus: () => installationService.getInstallationStatus(),
       install: () => installationService.install(),
+      isSampleIndex,
+      minimumLicenseType: MINIMUM_LICENSE_TYPE,
     };
   }
 }

@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MONITOR_STATUS_ENUM } from '../../../../../../common/constants/monitor_management';
-import {
+import type {
   EncryptedSyntheticsMonitor,
   OverviewStatusMetaData,
 } from '../../../../../../common/runtime_types';

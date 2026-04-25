@@ -11,7 +11,11 @@ import styled from 'styled-components';
 
 import type { DataViewBase } from '@kbn/es-query';
 import { getFormattedEntries, getUpdatedEntriesOnDelete } from './helpers';
-import type { FormattedEntry, ThreatMapEntries, Entry } from './types';
+import type { FormattedEntry } from './types';
+import type {
+  ThreatMapping,
+  ThreatMappingEntry,
+} from '../../../../common/api/detection_engine/model/rule_schema';
 import { EntryItem } from './entry_item';
 import { EntryDeleteButtonComponent } from './entry_delete_button';
 import { AndBadgeComponent } from './and_badge';
@@ -22,14 +26,14 @@ const MyOverflowContainer = styled(EuiFlexItem)`
 `;
 
 interface ListItemProps {
-  listItem: ThreatMapEntries;
+  listItem: ThreatMapping[number];
   listItemIndex: number;
   indexPattern: DataViewBase;
   threatIndexPatterns: DataViewBase;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
-  onDeleteEntryItem: (item: ThreatMapEntries, index: number) => void;
-  onChangeEntryItem: (item: ThreatMapEntries, index: number) => void;
+  onDeleteEntryItem: (item: ThreatMapping[number], index: number) => void;
+  onChangeEntryItem: (item: ThreatMapping[number], index: number) => void;
 }
 
 export const ListItemComponent = React.memo<ListItemProps>(
@@ -44,13 +48,13 @@ export const ListItemComponent = React.memo<ListItemProps>(
     onChangeEntryItem,
   }) => {
     const handleEntryChange = useCallback(
-      (entry: Entry, entryIndex: number): void => {
-        const updatedEntries: Entry[] = [
+      (entry: ThreatMappingEntry, entryIndex: number): void => {
+        const updatedEntries: ThreatMappingEntry[] = [
           ...listItem.entries.slice(0, entryIndex),
           { ...entry },
           ...listItem.entries.slice(entryIndex + 1),
         ];
-        const updatedEntryItem: ThreatMapEntries = {
+        const updatedEntryItem: ThreatMapping[number] = {
           ...listItem,
           entries: updatedEntries,
         };
@@ -96,6 +100,7 @@ export const ListItemComponent = React.memo<ListItemProps>(
                         indexPattern={indexPattern}
                         showLabel={listItemIndex === 0 && index === 0}
                         onChange={handleEntryChange}
+                        doesNotMatchDisabled={listItem.entries.length === 1}
                       />
                     </MyOverflowContainer>
                     <EntryDeleteButtonComponent

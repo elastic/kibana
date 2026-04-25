@@ -1,6 +1,6 @@
 # RIGHT
 
-Returns a substring by extracting a specified number of characters from the right side of a string.
+The RIGHT function returns a substring by extracting a specified number of characters from the end (right side) of a string.
 
 ## Syntax
 
@@ -8,22 +8,20 @@ Returns a substring by extracting a specified number of characters from the righ
 
 ### Parameters
 
-#### `string`
+#### string
 
-The string from which to return a substring.
+The string from which the substring will be extracted.
 
-#### `length`
+#### length
 
-The number of characters to return.
+The number of characters to return from the right end of the string.
 
 ## Examples
+
+Extracts the last three characters from the `last_name` column for each employee.
 
 ```esql
 FROM employees
 | KEEP last_name
 | EVAL right = RIGHT(last_name, 3)
-| SORT last_name ASC
-| LIMIT 5
 ```
-
-Extracts the last three characters from the `last_name` column, sorts the results alphabetically, and limits the output to the first five rows.

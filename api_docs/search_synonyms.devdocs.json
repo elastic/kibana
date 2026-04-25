@@ -23,6 +23,8 @@
       "label": "SearchSynonymsPluginSetup",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_synonyms/common/types.ts",
+      "lineNumber": 9,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -37,6 +39,8 @@
       "label": "SearchSynonymsPluginStart",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_synonyms/common/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -61,6 +65,8 @@
           "\"searchSynonyms\""
         ],
         "path": "x-pack/solutions/search/plugins/search_synonyms/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -76,6 +82,8 @@
           "\"Synonyms\""
         ],
         "path": "x-pack/solutions/search/plugins/search_synonyms/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -88,6 +96,8 @@
         "label": "PLUGIN_TITLE",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_synonyms/common/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

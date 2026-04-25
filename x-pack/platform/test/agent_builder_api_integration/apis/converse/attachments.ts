@@ -1,0 +1,212 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
+import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
+import { setupAgentDirectAnswer } from '../../utils/proxy_scenario';
+import {
+  createLlmProxyActionConnector,
+  deleteActionConnector,
+} from '../../utils/llm_proxy/llm_proxy_action_connector';
+import { createAgentBuilderApiClient, type ExecutionMode } from '../../utils/agent_builder_client';
+
+export function createAttachmentsTests(executionMode: ExecutionMode) {
+  return function ({ getService }: AgentBuilderApiFtrProviderContext) {
+    const supertest = getService('supertest');
+
+    const log = getService('log');
+    const agentBuilderApiClient = createAgentBuilderApiClient(supertest, { executionMode });
+
+    const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
+    const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
+
+    describe(`[${executionMode}] attachments`, function () {
+      let llmProxy: LlmProxy;
+      let connectorId: string;
+
+      before(async () => {
+        llmProxy = await createLlmProxy(log);
+        connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
+      });
+
+      afterEach(() => {
+        llmProxy?.clear();
+      });
+
+      after(async () => {
+        llmProxy.close();
+        await deleteActionConnector(getService, { actionId: connectorId });
+      });
+
+      it('returns an error when the attachment type is unknown', async () => {
+        const body: any = await agentBuilderApiClient.converse({
+          input: 'Hello AgentBuilder',
+          attachments: [
+            {
+              type: 'unknown',
+              data: { foo: 'bar' },
+            },
+          ],
+          connector_id: connectorId,
+        });
+
+        expect(body.statusCode).to.eql(400);
+        expect(body.message).to.contain('Unknown attachment type');
+      });
+
+      it('returns an error when the attachment validation fails', async () => {
+        const body: any = await agentBuilderApiClient.converse({
+          input: 'Hello AgentBuilder',
+          attachments: [
+            {
+              type: 'text',
+              data: {},
+            },
+          ],
+          connector_id: connectorId,
+        });
+
+        expect(body.statusCode).to.eql(400);
+        expect(body.message).to.contain('Attachment validation failed');
+      });
+
+      describe('Converse attachment payload: data vs origin', () => {
+        it('accepts data-only: forwards attachment content to the LLM', async () => {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            title: MOCKED_LLM_TITLE,
+            response: MOCKED_LLM_RESPONSE,
+          });
+
+          await agentBuilderApiClient.converse({
+            input: 'Hello AgentBuilder',
+            attachments: [
+              {
+                type: 'text',
+                data: {
+                  content: 'some text content',
+                },
+              },
+            ],
+            connector_id: connectorId,
+          });
+
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          const firstAgentRequest = llmProxy.interceptedRequests.find(
+            (request) => request.matchingInterceptorName === 'handover-to-answer'
+          )!.requestBody;
+
+          // Attachments are injected via conversation-level presentation, not legacy per-round fields.
+          const allMessageContent = firstAgentRequest.messages
+            .map((m: any) => String(m.content ?? ''))
+            .join('\n');
+          expect(allMessageContent).to.contain('some text content');
+        });
+
+        it('rejects attachment with neither data nor origin', async () => {
+          const body: any = await agentBuilderApiClient.converse({
+            input: 'Hello AgentBuilder',
+            attachments: [
+              {
+                type: 'text',
+              },
+            ],
+            connector_id: connectorId,
+          });
+
+          expect(body.statusCode).to.eql(400);
+          expect(body.message).to.contain('either data or origin');
+        });
+
+        it('rejects origin-only when the type does not implement resolve (e.g. text)', async () => {
+          const body: any = await agentBuilderApiClient.converse({
+            input: 'Hello AgentBuilder',
+            attachments: [
+              {
+                type: 'text',
+                origin: 'some-origin-id',
+              },
+            ],
+            connector_id: connectorId,
+          });
+
+          expect(body.statusCode).to.eql(400);
+          expect(body.message).to.contain('does not support resolving from origin');
+        });
+
+        it('accepts data and origin together and uses inline data for the model', async () => {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            title: MOCKED_LLM_TITLE,
+            response: MOCKED_LLM_RESPONSE,
+          });
+
+          await agentBuilderApiClient.converse({
+            input: 'Hello AgentBuilder',
+            attachments: [
+              {
+                type: 'text',
+                origin: 'ignored-origin-id',
+                data: {
+                  content: 'inline-payload-for-model',
+                },
+              },
+            ],
+            connector_id: connectorId,
+          });
+
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          const firstAgentRequest = llmProxy.interceptedRequests.find(
+            (request) => request.matchingInterceptorName === 'handover-to-answer'
+          )!.requestBody;
+
+          const allMessageContent = firstAgentRequest.messages
+            .map((m: any) => String(m.content ?? ''))
+            .join('\n');
+          expect(allMessageContent).to.contain('inline-payload-for-model');
+        });
+      });
+
+      it('persists the attachment in the conversation', async () => {
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: MOCKED_LLM_TITLE,
+          response: MOCKED_LLM_RESPONSE,
+        });
+
+        const response = await agentBuilderApiClient.converse({
+          input: 'Hello AgentBuilder',
+          attachments: [
+            {
+              type: 'text',
+              data: {
+                content: 'some text content',
+              },
+            },
+          ],
+          connector_id: connectorId,
+        });
+
+        const conversation = await agentBuilderApiClient.getConversation(response.conversation_id);
+
+        expect(conversation.rounds.length).to.eql(1);
+        // Legacy per-round attachments are stripped; attachments are stored at the conversation level.
+        expect(conversation.rounds[0].input.attachments ?? []).to.eql([]);
+
+        expect(conversation.attachments).to.have.length(1);
+        expect(conversation.attachments?.[0].type).to.eql('text');
+        expect(conversation.attachments?.[0].current_version).to.eql(1);
+        expect(conversation.attachments?.[0].versions[0].data).to.eql({
+          content: 'some text content',
+        });
+      });
+    });
+  };
+}

@@ -14,6 +14,7 @@ import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { getLatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { useApmIndexSettingsContext } from '../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -30,6 +31,7 @@ import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getComparisonEnabled } from '../time_comparison/get_comparison_enabled';
+import { useTransactionActions } from './get_transaction_actions';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -98,6 +100,7 @@ export function TransactionsTable({
   const { isLarge } = useBreakpoints();
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
+  const { indexSettings = [] } = useApmIndexSettingsContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
@@ -151,7 +154,7 @@ export function TransactionsTable({
 
   const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(apmEnableTableSearchBar, true);
 
   const tableSearchBar: TableSearchBar<ApiResponse['transactionGroups'][0]> = useMemo(() => {
     return {
@@ -164,6 +167,15 @@ export function TransactionsTable({
       }),
     };
   }, [isTableSearchBarEnabled, mainStatistics.maxCountExceeded, setSearchQueryDebounced]);
+
+  const transactionRowActions = useTransactionActions({
+    kuery,
+    serviceName,
+    environment,
+    rangeFrom: query.rangeFrom,
+    rangeTo: query.rangeTo,
+    indexSettings,
+  });
 
   useEffect(() => {
     return setScreenContext?.({
@@ -182,6 +194,10 @@ export function TransactionsTable({
     });
   }, [setScreenContext, mainStatistics]);
 
+  const title = i18n.translate('xpack.apm.transactionsTable.title', {
+    defaultMessage: 'Transactions',
+  });
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="transactionsGroupTable">
       {!hideTitle && (
@@ -189,11 +205,7 @@ export function TransactionsTable({
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate('xpack.apm.transactionsTable.title', {
-                    defaultMessage: 'Transactions',
-                  })}
-                </h2>
+                <h2>{title}</h2>
               </EuiTitle>
             </EuiFlexItem>
             {!hideViewTransactionsLink && (
@@ -217,6 +229,7 @@ export function TransactionsTable({
       {showMaxTransactionGroupsExceededWarning && mainStatistics.maxCountExceeded && (
         <EuiFlexItem>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.apm.transactionsCallout.cardinalityWarning.title', {
               defaultMessage:
                 'Number of transaction groups exceed the allowed maximum(1,000) that are displayed.',
@@ -261,6 +274,9 @@ export function TransactionsTable({
             showPerPageOptions={showPerPageOptions}
             saveTableOptionsToUrl={saveTableOptionsToUrl}
             onChangeRenderedItems={setRenderedItems}
+            tableCaption={title}
+            actions={transactionRowActions}
+            tableLayout="auto"
           />
         </OverviewTableContainer>
       </EuiFlexItem>

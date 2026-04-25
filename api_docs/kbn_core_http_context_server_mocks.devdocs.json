@@ -44,6 +44,8 @@
           "IContextContainer"
         ],
         "path": "src/core/packages/http/context-server-mocks/src/context_container.mock.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -58,6 +60,8 @@
         "label": "contextMock",
         "description": [],
         "path": "src/core/packages/http/context-server-mocks/src/context_container.mock.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -73,6 +77,8 @@
               "ContextContainerMock"
             ],
             "path": "src/core/packages/http/context-server-mocks/src/context_container.mock.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -88,6 +94,8 @@
                   "any"
                 ],
                 "path": "src/core/packages/http/context-server-mocks/src/context_container.mock.ts",
+                "lineNumber": 19,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -104,6 +112,8 @@
         "label": "contextServiceMock",
         "description": [],
         "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -118,6 +128,8 @@
               "() => jest.Mocked<ContextServiceContract>"
             ],
             "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -136,6 +148,8 @@
               ">"
             ],
             "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -151,6 +165,8 @@
                   "{}"
                 ],
                 "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
+                "lineNumber": 19,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -169,6 +185,8 @@
               ">"
             ],
             "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -184,6 +202,8 @@
                   "{}"
                 ],
                 "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
+                "lineNumber": 26,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }

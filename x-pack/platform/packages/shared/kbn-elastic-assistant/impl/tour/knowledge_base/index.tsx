@@ -11,9 +11,11 @@
  * */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
+import type { EuiTourStepProps } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KNOWLEDGE_BASE_TAB } from '../../assistant/settings/const';
 import { useAssistantContext } from '../../..';
 import { VideoToast } from './video_toast';
@@ -39,7 +41,7 @@ const navigateToKnowledgeBasePage = (
     });
   }
   return navigateToApp('management', {
-    path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+    path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
   });
 };
 
@@ -52,6 +54,9 @@ const KnowledgeBaseTourComp: React.FC<{
   const tourStorageKey = useTourStorageKey(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE);
   const [tourState, setTourState] = useLocalStorage<TourState>(tourStorageKey, tourConfig);
 
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications?.tours.isEnabled() ?? true;
+
   const advanceToVideoStep = useCallback(
     () =>
       setTourState((prev = tourConfig) => ({
@@ -62,10 +67,10 @@ const KnowledgeBaseTourComp: React.FC<{
   );
 
   useEffect(() => {
-    if (tourState?.isTourActive && isKbSettingsPage) {
+    if (tourState?.isTourActive && isKbSettingsPage && isTourEnabled) {
       advanceToVideoStep();
     }
-  }, [advanceToVideoStep, isKbSettingsPage, tourState?.isTourActive]);
+  }, [advanceToVideoStep, isKbSettingsPage, tourState?.isTourActive, isTourEnabled]);
 
   const finishTour = useCallback(
     () =>
@@ -123,7 +128,7 @@ const KnowledgeBaseTourComp: React.FC<{
     return () => clearTimeout(timer);
   }, []);
 
-  if (isTestAutomation || !tourState?.isTourActive) {
+  if (isTestAutomation || !tourState?.isTourActive || !isTourEnabled) {
     return children ?? null;
   }
 

@@ -10,18 +10,13 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
-import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiBreadcrumb, EuiSearchBarProps } from '@elastic/eui';
+import { EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
@@ -47,11 +42,13 @@ export const EventDetail = memo(function EventDetail({
   id,
   nodeID,
   eventCategory: eventType,
+  renderCellActions,
 }: {
   id: string;
   nodeID: string;
   /** The event type to show in the breadcrumbs */
   eventCategory: string;
+  renderCellActions: CellActionRenderer;
 }) {
   const isEventLoading = useSelector((state: State) =>
     selectors.isCurrentRelatedEventLoading(state.analyzer[id])
@@ -80,6 +77,7 @@ export const EventDetail = memo(function EventDetail({
       event={event}
       processEvent={processEvent}
       eventType={eventType}
+      renderCellActions={renderCellActions}
     />
   ) : (
     <PanelContentError id={id} translatedErrorMessage={eventDetailRequestError} />
@@ -97,6 +95,7 @@ const EventDetailContents = memo(function ({
   event,
   eventType,
   processEvent,
+  renderCellActions,
 }: {
   id: string;
   nodeID: string;
@@ -106,6 +105,7 @@ const EventDetailContents = memo(function ({
    */
   eventType: string;
   processEvent: SafeResolverEvent | undefined;
+  renderCellActions: CellActionRenderer;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
   const formattedDate =
@@ -152,7 +152,7 @@ const EventDetailContents = memo(function ({
         </GeneratedText>
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
-      <EventDetailFields event={event} id={id} />
+      <EventDetailFields event={event} id={id} renderCellActions={renderCellActions} />
     </div>
   );
 });
@@ -162,7 +162,15 @@ interface EventDetailsTableView {
   description: string;
 }
 
-function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string }) {
+function EventDetailFields({
+  event,
+  id,
+  renderCellActions,
+}: {
+  event: SafeResolverEvent;
+  id: string;
+  renderCellActions: CellActionRenderer;
+}) {
   const descriptions = useMemo(() => {
     const returnValue: EventDetailsTableView[] = [];
     const expandedEventObject: object = expandDottedObject(event);
@@ -213,21 +221,12 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
         />
       ),
       render(data: EventDetailsTableView) {
-        return (
-          <SecurityCellActions
-            data={{
-              field: data.title,
-              value: data.description,
-            }}
-            visibleCellActions={5}
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
-            mode={CellActionsMode.HOVER_DOWN}
-            sourcererScopeId={getSourcererScopeId(id)}
-            metadata={{ scopeId: id }}
-          >
-            {data.description}
-          </SecurityCellActions>
-        );
+        return renderCellActions({
+          field: data.title,
+          value: data.description,
+          children: data.description,
+          scopeId: id,
+        });
       },
     },
   ];
@@ -238,6 +237,12 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
       search={search}
       pagination={true}
       sorting
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.endpoint.resolver.panel.eventDetail.eventFieldsCaption',
+        {
+          defaultMessage: 'Event fields',
+        }
+      )}
     />
   );
 }

@@ -11,8 +11,7 @@ import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 function assertHas(actual: unknown, expected: object) {
   expect(pick(actual, Object.keys(expected))).eql(expected);
@@ -29,12 +28,9 @@ export default function ({ getService }: FtrProviderContext) {
       key: 'test',
       value: 'test',
     };
-    const testPrivateLocations = new PrivateLocationTestService(getService);
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     before(async () => {
-      await testPrivateLocations.installSyntheticsPackage();
-
       await kServer.savedObjects.clean({ types: [syntheticsParamType] });
     });
 

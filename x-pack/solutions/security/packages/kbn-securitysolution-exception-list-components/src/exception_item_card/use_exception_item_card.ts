@@ -6,15 +6,15 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
 
-import {
+import type {
   CommentsArray,
   ExceptionListItemSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
-import { ExceptionListItemIdentifiers } from '../types';
+import type { ExceptionListItemIdentifiers } from '../types';
 
 interface UseExceptionItemCardProps {
   exceptionItem: ExceptionListItemSchema;
@@ -60,7 +60,7 @@ export const useExceptionItemCard = ({
     () => [
       {
         key: 'edit',
-        icon: 'controlsHorizontal',
+        icon: 'controls',
         label: editActionLabel || i18n.exceptionItemCardEditButton(listType),
         onClick: handleEdit,
       },

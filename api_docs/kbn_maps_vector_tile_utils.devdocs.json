@@ -30,6 +30,8 @@
           "(params: Record<string, string | number | boolean | object | null | undefined>) => string"
         ],
         "path": "x-pack/platform/packages/private/maps/vector_tile_utils/src/get_tile_url_params.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "Record<string, string | number | boolean | object | null | undefined>"
             ],
             "path": "x-pack/platform/packages/private/maps/vector_tile_utils/src/get_tile_url_params.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

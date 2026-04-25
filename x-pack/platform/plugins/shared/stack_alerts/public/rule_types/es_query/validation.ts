@@ -14,11 +14,7 @@ import {
   builtInGroupByTypes,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import {
-  MAX_SELECTABLE_SOURCE_FIELDS,
-  MAX_SELECTABLE_GROUP_BY_TERMS,
-  MAX_HITS_FOR_GROUP_BY,
-} from '../../../common/constants';
+import { MAX_SELECTABLE_GROUP_BY_TERMS, MAX_HITS_FOR_GROUP_BY } from '../../../common/constants';
 import {
   ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
@@ -43,7 +39,6 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: bool
     groupBy,
     termSize,
     termField,
-    sourceFields,
   } = ruleParams;
   const errors: typeof COMMON_EXPRESSION_ERRORS = defaultsDeep({}, COMMON_EXPRESSION_ERRORS);
 
@@ -174,19 +169,6 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: bool
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.invalidSizeRangeText', {
         defaultMessage: 'Size must be between 0 and {max, number}.',
         values: { max: maxSize },
-      })
-    );
-  }
-
-  if (
-    sourceFields &&
-    Array.isArray(sourceFields) &&
-    sourceFields.length > MAX_SELECTABLE_SOURCE_FIELDS
-  ) {
-    errors.sourceFields.push(
-      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.sourceFields', {
-        defaultMessage: `Cannot select more than {max} fields`,
-        values: { max: MAX_SELECTABLE_SOURCE_FIELDS },
       })
     );
   }

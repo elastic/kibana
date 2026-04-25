@@ -107,6 +107,7 @@ export const EventSchema = schema.maybe(
         task: schema.maybe(
           schema.object({
             id: ecsString(),
+            type: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsStringOrNumber(),
           })
@@ -164,6 +165,13 @@ export const EventSchema = schema.maybe(
                     unfilled_duration_ms: ecsStringOrNumber(),
                     in_progress_duration_ms: ecsStringOrNumber(),
                     deleted: ecsBoolean(),
+                    updated_at: ecsDate(),
+                    failed_auto_fill_attempts: ecsStringOrNumber(),
+                    reason: schema.maybe(
+                      schema.object({
+                        type: ecsString(),
+                      })
+                    ),
                   })
                 ),
                 execution: schema.maybe(
@@ -196,6 +204,12 @@ export const EventSchema = schema.maybe(
                         total_search_duration_ms: ecsStringOrNumber(),
                         execution_gap_duration_s: ecsStringOrNumber(),
                         gap_range: ecsDateRange(),
+                        gap_reason: schema.maybe(
+                          schema.object({
+                            type: ecsString(),
+                          })
+                        ),
+                        matched_indices_count: ecsStringOrNumber(),
                         frozen_indices_queried_count: ecsStringOrNumber(),
                         rule_type_run_duration_ms: ecsStringOrNumber(),
                         process_alerts_duration_ms: ecsStringOrNumber(),
@@ -206,6 +220,9 @@ export const EventSchema = schema.maybe(
                         prepare_rule_duration_ms: ecsStringOrNumber(),
                         total_run_duration_ms: ecsStringOrNumber(),
                         total_enrichment_duration_ms: ecsStringOrNumber(),
+                        update_alerts_duration_ms: ecsStringOrNumber(),
+                        alerts_candidate_count: ecsStringOrNumber(),
+                        alerts_suppressed_count: ecsStringOrNumber(),
                       })
                     ),
                   })
@@ -263,6 +280,38 @@ export const EventSchema = schema.maybe(
           schema.object({
             id: ecsString(),
             name: ecsString(),
+          })
+        ),
+        gap_auto_fill: schema.maybe(
+          schema.object({
+            execution: schema.maybe(
+              schema.object({
+                status: ecsString(),
+                start: ecsDate(),
+                end: ecsDate(),
+                duration_ms: ecsStringOrNumber(),
+                rule_ids: ecsStringMulti(),
+                task_params: schema.maybe(
+                  schema.object({
+                    name: ecsString(),
+                    num_retries: ecsStringOrNumber(),
+                    gap_fill_range: ecsString(),
+                    interval: ecsString(),
+                    max_backfills: ecsStringOrNumber(),
+                  })
+                ),
+                results: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      rule_id: ecsString(),
+                      processed_gaps: ecsStringOrNumber(),
+                      status: ecsString(),
+                      error: ecsString(),
+                    })
+                  )
+                ),
+              })
+            ),
           })
         ),
       })

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository } from '@kbn/core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
 // @ts-ignore
 import mapSavedObjects from '../../common/telemetry/test_resources/sample_map_saved_objects.json';
 import { findMaps } from './find_maps';

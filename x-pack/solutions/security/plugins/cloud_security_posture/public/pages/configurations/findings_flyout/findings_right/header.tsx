@@ -19,7 +19,7 @@ import {
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
-import { CspFinding } from '@kbn/cloud-security-posture-common';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { BenchmarkIcons } from '../findings_flyout';
 
 export interface FindingsMisconfigurationFlyoutHeaderProps {

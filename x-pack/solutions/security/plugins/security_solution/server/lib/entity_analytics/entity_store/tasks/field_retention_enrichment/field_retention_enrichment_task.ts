@@ -18,10 +18,8 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import { getEnabledEntityTypes } from '../../../../../../common/entity_analytics/utils';
-import {
-  EngineComponentResourceEnum,
-  EntityType,
-} from '../../../../../../common/api/entity_analytics/entity_store';
+import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
+import { EngineComponentResourceEnum } from '../../../../../../common/api/entity_analytics/entity_store';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -32,11 +30,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
 import { executeFieldRetentionEnrichPolicy } from '../../elasticsearch_assets';
 
-import { getEntitiesIndexName } from '../../utils';
-import {
-  FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
-  ENTITY_STORE_USAGE_EVENT,
-} from '../../../../telemetry/event_based/events';
+import { FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT } from '../../../../telemetry/event_based/events';
 import { VERSIONS_BY_ENTITY_TYPE } from '../../entity_definitions/constants';
 import { entityStoreTaskDebugLogFactory, entityStoreTaskLogFactory } from '../utils';
 import { getApiKeyManager } from '../../auth/api_key';
@@ -49,7 +43,6 @@ type ExecuteEnrichPolicy = (
   namespace: string,
   entityType: EntityType
 ) => ReturnType<typeof executeFieldRetentionEnrichPolicy>;
-type GetStoreSize = (index: string | string[]) => Promise<number>;
 
 export const registerEntityStoreFieldRetentionEnrichTask = ({
   getStartServices,
@@ -85,14 +78,6 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
     });
   };
 
-  const getStoreSize: GetStoreSize = async (index) => {
-    const [coreStart] = await getStartServices();
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-    const { count } = await esClient.count({ index });
-    return count;
-  };
-
   const getEnabledEntityTypesForNamespace = async (namespace: string) => {
     const [core, { security, encryptedSavedObjects }] = await getStartServices();
 
@@ -110,7 +95,7 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
       logger.info(
         `[Entity Store] No API key found, returning all entity types as enabled in ${namespace} namespace`
       );
-      return Object.values(EntityType);
+      return getEnabledEntityTypes(true);
     }
 
     const { soClient } = await apiKeyManager.getClientFromApiKey(apiKey);
@@ -131,7 +116,6 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
       createTaskRunner: createEntityStoreFieldRetentionEnrichTaskRunnerFactory({
         logger,
         telemetry,
-        getStoreSize,
         executeEnrichPolicy,
         getEnabledEntityTypesForNamespace,
       }),
@@ -197,7 +181,6 @@ export const removeEntityStoreFieldRetentionEnrichTask = async ({
 
 export const runEntityStoreFieldRetentionEnrichTask = async ({
   executeEnrichPolicy,
-  getStoreSize,
   isCancelled,
   logger,
   taskInstance,
@@ -207,7 +190,6 @@ export const runEntityStoreFieldRetentionEnrichTask = async ({
   logger: Logger;
   isCancelled: () => boolean;
   executeEnrichPolicy: ExecuteEnrichPolicy;
-  getStoreSize: GetStoreSize;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
   getEnabledEntityTypesForNamespace: (namespace: string) => Promise<EntityType[]>;
@@ -261,13 +243,6 @@ export const runEntityStoreFieldRetentionEnrichTask = async ({
       interval: taskInstance.schedule?.interval,
     });
 
-    // Track entity store usage
-    const indices = entityTypes.map((entityType) =>
-      getEntitiesIndexName(entityType, state.namespace)
-    );
-    const storeSize = await getStoreSize(indices);
-    telemetry.reportEvent(ENTITY_STORE_USAGE_EVENT.eventType, { storeSize });
-
     return {
       state: updatedState,
     };
@@ -282,13 +257,11 @@ const createEntityStoreFieldRetentionEnrichTaskRunnerFactory =
     logger,
     telemetry,
     executeEnrichPolicy,
-    getStoreSize,
     getEnabledEntityTypesForNamespace,
   }: {
     logger: Logger;
     telemetry: AnalyticsServiceSetup;
     executeEnrichPolicy: ExecuteEnrichPolicy;
-    getStoreSize: GetStoreSize;
     getEnabledEntityTypesForNamespace: (namespace: string) => Promise<EntityType[]>;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
@@ -298,7 +271,6 @@ const createEntityStoreFieldRetentionEnrichTaskRunnerFactory =
       run: async () =>
         runEntityStoreFieldRetentionEnrichTask({
           executeEnrichPolicy,
-          getStoreSize,
           isCancelled,
           logger,
           taskInstance,

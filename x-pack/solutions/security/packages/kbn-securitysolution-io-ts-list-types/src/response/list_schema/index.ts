@@ -8,9 +8,7 @@
 import * as t from 'io-ts';
 import { version } from '@kbn/securitysolution-io-ts-types';
 import { _versionOrUndefined } from '../../common/underscore_version';
-import { deserializerOrUndefined } from '../../common/deserializer';
 import { metaOrUndefined } from '../../common/meta';
-import { serializerOrUndefined } from '../../common/serializer';
 import { created_at } from '../../common/created_at';
 import { timestampOrUndefined } from '../../common/timestamp';
 import { created_by } from '../../common/created_by';
@@ -30,12 +28,10 @@ export const listSchema = t.exact(
     created_at,
     created_by,
     description,
-    deserializer: deserializerOrUndefined,
     id,
     immutable,
     meta: metaOrUndefined,
     name,
-    serializer: serializerOrUndefined,
     tie_breaker_id,
     type,
     updated_at,

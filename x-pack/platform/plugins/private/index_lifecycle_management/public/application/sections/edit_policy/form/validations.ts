@@ -7,18 +7,18 @@
 import { i18n } from '@kbn/i18n';
 
 import moment from 'moment';
-import {
-  fieldValidators,
-  ValidationFunc,
-  ValidationConfig,
-  ValidationError,
-} from '../../../../shared_imports';
+import type { ValidationFunc, ValidationConfig, ValidationError } from '../../../../shared_imports';
+import { fieldValidators } from '../../../../shared_imports';
 
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
 import { i18nTexts } from '../i18n_texts';
-import { PhaseWithDownsample, PhaseWithTiming, PolicyFromES } from '../../../../../common/types';
-import { FormInternal } from '../types';
+import type {
+  PhaseWithDownsample,
+  PhaseWithTiming,
+  PolicyFromES,
+} from '../../../../../common/types';
+import type { FormInternal } from '../types';
 
 const { numberGreaterThanField, containsCharsField, emptyField, startsWithField } = fieldValidators;
 
@@ -57,6 +57,8 @@ export const ifExistsNumberNonNegative = createIfNumberExistsValidator({
  * the rollover threshold values not being set (e.g., age and doc count)
  */
 export const ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE = 'ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE';
+
+export const DATA_PHASE_REQUIRED_VALIDATION_CODE = 'DATA_PHASE_REQUIRED_VALIDATION_CODE';
 
 const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
 
@@ -99,6 +101,39 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
       fields[rolloverFieldPath]?.clearErrors(ROLLOVER_VALUE_REQUIRED_VALIDATION_CODE);
     });
   }
+};
+
+export const dataPhaseEnabledPaths = [
+  '_meta.hot.enabled',
+  '_meta.warm.enabled',
+  '_meta.cold.enabled',
+  '_meta.frozen.enabled',
+] as const;
+
+export const atLeastOneDataPhaseEnabled: ValidationFunc = ({ form }) => {
+  const fields = form.getFields();
+  const formData = form.getFormData() as FormInternal;
+  const meta = formData?._meta;
+
+  const hotEnabled = fields['_meta.hot.enabled']?.value ?? meta?.hot?.enabled ?? true;
+  const warmEnabled = fields['_meta.warm.enabled']?.value ?? meta?.warm?.enabled ?? false;
+  const coldEnabled = fields['_meta.cold.enabled']?.value ?? meta?.cold?.enabled ?? false;
+  const frozenEnabled = fields['_meta.frozen.enabled']?.value ?? meta?.frozen?.enabled ?? false;
+
+  const someDataPhaseIsEnabled = Boolean(hotEnabled || warmEnabled || coldEnabled || frozenEnabled);
+
+  if (!someDataPhaseIsEnabled) {
+    return {
+      code: DATA_PHASE_REQUIRED_VALIDATION_CODE,
+      message: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataPhaseRequiredError', {
+        defaultMessage: 'At least one data phase must be enabled.',
+      }),
+    };
+  }
+
+  dataPhaseEnabledPaths.forEach((enabledPath) => {
+    fields[enabledPath]?.clearErrors(DATA_PHASE_REQUIRED_VALIDATION_CODE);
+  });
 };
 
 export const createPolicyNameValidations = ({

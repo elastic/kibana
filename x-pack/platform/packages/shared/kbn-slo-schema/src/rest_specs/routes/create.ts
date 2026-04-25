@@ -31,6 +31,9 @@ const createSLOParamsSchema = t.type({
       tags: tagsSchema,
       groupBy: allOrAnyStringOrArray,
       revision: t.number,
+      artifacts: t.partial({
+        dashboards: t.array(t.type({ id: t.string })),
+      }),
     }),
   ]),
 });

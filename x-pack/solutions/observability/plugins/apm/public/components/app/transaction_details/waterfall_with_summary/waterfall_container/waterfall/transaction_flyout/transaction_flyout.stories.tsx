@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, dedot } from '@kbn/apm-synthtrace-client';
+import { apm, dedot } from '@kbn/synthtrace-client';
 import type { StoryFn } from '@storybook/react';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
@@ -60,7 +60,7 @@ export default {
       const coreMock = {
         http: {
           get: async (): Promise<TransactionDetailsApiReturnType> => {
-            return dedot(data.transactionEvent, {}) as Transaction;
+            return dedot(data.transactionEvent, {}) as unknown as Transaction;
           },
         },
       };

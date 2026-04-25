@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InheritedFtrProviderContext } from '../ftr_provider_context';
+import type { InheritedFtrProviderContext } from '../ftr_provider_context';
 
 export async function getApmSynthtraceEsClient(context: InheritedFtrProviderContext) {
   const synthtraceClient = context.getService('synthtrace');

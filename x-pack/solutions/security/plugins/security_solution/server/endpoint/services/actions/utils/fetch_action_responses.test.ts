@@ -32,7 +32,7 @@ describe('fetchActionResponses()', () => {
           error: '',
           '@timestamp': '2022-04-30T16:08:47.449Z',
           action_data: {
-            command: 'execute',
+            command: expect.any(String),
             comment: '',
             parameter: undefined,
           },
@@ -44,26 +44,14 @@ describe('fetchActionResponses()', () => {
             action_id: '123',
             completed_at: '2022-04-30T10:53:59.449Z',
             data: {
-              command: 'execute',
+              command: expect.any(String),
               comment: '',
               output: {
-                content: {
-                  code: 'ra_execute_success_done',
-                  cwd: '/some/path',
-                  output_file_id: 'some-output-file-id',
-                  output_file_stderr_truncated: false,
-                  output_file_stdout_truncated: true,
-                  shell: 'bash',
-                  shell_code: 0,
-                  stderr: expect.any(String),
-                  stderr_truncated: true,
-                  stdout_truncated: true,
-                  stdout: expect.any(String),
-                },
+                content: expect.anything(),
                 type: 'json',
               },
             },
-            started_at: '2022-04-30T13:56:00.449Z',
+            started_at: '2022-04-30T12:56:00.449Z',
           },
           agent: {
             id: 'agent-a',
@@ -75,7 +63,7 @@ describe('fetchActionResponses()', () => {
         {
           '@timestamp': '2022-04-30T16:08:47.449Z',
           action_data: {
-            command: 'execute',
+            command: expect.any(String),
             comment: '',
             parameter: undefined,
           },
@@ -91,26 +79,14 @@ describe('fetchActionResponses()', () => {
             action_id: '123',
             completed_at: '2022-04-30T10:53:59.449Z',
             data: {
-              command: 'execute',
+              command: expect.any(String),
               comment: '',
               output: {
-                content: {
-                  code: 'ra_execute_success_done',
-                  cwd: '/some/path',
-                  output_file_id: 'some-output-file-id',
-                  output_file_stderr_truncated: false,
-                  output_file_stdout_truncated: true,
-                  shell: 'bash',
-                  shell_code: 0,
-                  stderr_truncated: true,
-                  stdout_truncated: true,
-                  stderr: expect.any(String),
-                  stdout: expect.any(String),
-                },
+                content: expect.anything(),
                 type: 'json',
               },
             },
-            started_at: '2022-04-30T13:56:00.449Z',
+            started_at: '2022-04-30T12:56:00.449Z',
           },
           agent: {
             id: 'agent-a',

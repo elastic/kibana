@@ -7,8 +7,9 @@
 
 import { of, throwError } from 'rxjs';
 import supertest from 'supertest';
-import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
-import { GlobalSearchResult, GlobalSearchBatchedResults } from '../../../common/types';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import type { GlobalSearchResult, GlobalSearchBatchedResults } from '../../../common/types';
 import { GlobalSearchFindError } from '../../../common/errors';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalFindRoute } from '../find';
@@ -118,6 +119,35 @@ describe('POST /internal/global_search/find', () => {
       expect.objectContaining({
         message: 'invalid-license-message',
         statusCode: 403,
+      })
+    );
+  });
+
+  it('allows requests with max length options.preference string', async () => {
+    const longPreference = 'a'.repeat(64); // maxLength is 64
+
+    const response = await supertest(server.listener)
+      .post('/internal/global_search/find')
+      .send({ params: { term: 'search' }, options: { preference: longPreference } })
+      .expect(200);
+
+    expect(response.body).toEqual({});
+  });
+
+  it('disallows requests with large options.preference string', async () => {
+    const longPreference = 'a'.repeat(65); // maxLength is 64
+
+    const response = await supertest(server.listener)
+      .post('/internal/global_search/find')
+      .send({ params: { term: 'search' }, options: { preference: longPreference } })
+      .expect(400);
+
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        error: 'Bad Request',
+        message:
+          '[request body.options.preference]: value has length [65] but it must have a maximum length of [64].',
+        statusCode: 400,
       })
     );
   });

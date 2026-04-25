@@ -14,7 +14,8 @@ import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TestLog } from './log';
-import { CliDevMode, SomeCliArgs } from './cli_dev_mode';
+import type { SomeCliArgs } from './cli_dev_mode';
+import { CliDevMode } from './cli_dev_mode';
 import type { CliDevConfig } from './config';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
@@ -104,6 +105,7 @@ it('passes correct args to sub-classes', () => {
           "mapLogLine": [Function],
           "script": <absolute path>/scripts/kibana,
           "watcher": Watcher {
+            "optimizerShouldRestart$": [MockFunction],
             "serverShouldRestart$": [MockFunction],
           },
         },
@@ -218,6 +220,7 @@ describe('#start()/#stop()', () => {
       watcherRun$ = new Rx.Subject();
       return {
         run$: watcherRun$,
+        optimizerShouldRestart$: jest.fn(() => Rx.NEVER),
       };
     });
     DevServer.mockImplementation(() => {

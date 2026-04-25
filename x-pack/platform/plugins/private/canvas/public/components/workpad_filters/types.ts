@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '../../../types';
+import type { Filter } from '../../../types';
 
 export interface FiltersGroup {
   name: string | null;

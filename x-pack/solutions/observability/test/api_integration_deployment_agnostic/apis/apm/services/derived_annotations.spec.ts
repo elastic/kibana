@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function annotationApiTests({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -134,9 +134,12 @@ export default function annotationApiTests({ getService }: DeploymentAgnosticFtr
       });
 
       after(async () => {
-        await es.indices.delete({
-          index: indexName,
-        });
+        const indexExists = await es.indices.exists({ index: indexName });
+        if (indexExists) {
+          await es.indices.delete({
+            index: indexName,
+          });
+        }
         await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 

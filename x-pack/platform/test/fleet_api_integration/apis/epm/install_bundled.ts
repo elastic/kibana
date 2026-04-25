@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { BUNDLED_PACKAGE_DIR } from '../../config.base';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const BUNDLED_PACKAGE_FIXTURES_DIR = path.join(

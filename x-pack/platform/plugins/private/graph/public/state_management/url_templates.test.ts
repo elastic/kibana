@@ -8,7 +8,7 @@
 import { urlTemplatesReducer, saveTemplate, loadTemplates } from './url_templates';
 import { requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
-import { UrlTemplate } from '../types';
+import type { UrlTemplate } from '../types';
 
 describe('url_templates', () => {
   const addBasePath = (url: string) => `/test/s/custom/${url}`;

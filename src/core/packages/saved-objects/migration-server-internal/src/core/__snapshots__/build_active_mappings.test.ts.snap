@@ -7,6 +7,14 @@ Object {
     "aaa": Object {
       "type": "text",
     },
+    "accessControl": Object {
+      "dynamic": "false",
+      "properties": Object {
+        "owner": Object {
+          "type": "keyword",
+        },
+      },
+    },
     "bbb": Object {
       "type": "long",
     },
@@ -65,6 +73,14 @@ exports[`buildActiveMappings handles the \`dynamic\` property of types 1`] = `
 Object {
   "dynamic": "strict",
   "properties": Object {
+    "accessControl": Object {
+      "dynamic": "false",
+      "properties": Object {
+        "owner": Object {
+          "type": "keyword",
+        },
+      },
+    },
     "coreMigrationVersion": Object {
       "type": "keyword",
     },

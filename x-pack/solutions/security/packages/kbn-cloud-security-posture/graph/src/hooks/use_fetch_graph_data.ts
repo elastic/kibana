@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import type {
   GraphRequest,
   GraphResponse,
@@ -61,6 +61,10 @@ export interface UseFetchGraphDataResult {
    */
   isError: boolean;
   /**
+   * The error object if an error occurred during the query.
+   */
+  error: unknown;
+  /**
    * The data returned from the query.
    */
   data?: GraphResponse;
@@ -81,26 +85,31 @@ export const useFetchGraphData = ({
   options,
 }: UseFetchGraphDataParams): UseFetchGraphDataResult => {
   const queryClient = useQueryClient();
-  const { esQuery, originEventIds, start, end } = req.query;
+  const { esQuery, originEventIds, entityIds, start, end, pinnedIds } = req.query;
   const {
     services: { http },
   } = useKibana();
   const QUERY_KEY = useMemo(
-    () => ['useFetchGraphData', originEventIds, start, end, esQuery],
-    [end, esQuery, originEventIds, start]
+    () => ['useFetchGraphData', originEventIds, entityIds, start, end, esQuery, pinnedIds],
+    [end, entityIds, esQuery, originEventIds, start, pinnedIds]
   );
 
-  const { isLoading, isError, data, isFetching } = useQuery<GraphResponse>(
+  const { isLoading, isError, data, isFetching, error } = useQuery<GraphResponse>(
     QUERY_KEY,
-    () => {
+    async () => {
       if (!http) {
         return Promise.reject(new Error('Http service is not available'));
       }
 
-      return http.post<GraphResponse>(EVENT_GRAPH_VISUALIZATION_API, {
-        version: '1',
-        body: JSON.stringify(req),
-      });
+      try {
+        return await http.post<GraphResponse>(EVENT_GRAPH_VISUALIZATION_API, {
+          version: '1',
+          body: JSON.stringify(req),
+        });
+      } catch (err) {
+        // extract error message in case its not under err.message
+        throw new Error(err.body?.message ?? err.message);
+      }
     },
     {
       enabled: options?.enabled ?? true,
@@ -114,6 +123,7 @@ export const useFetchGraphData = ({
     isFetching,
     isError,
     data,
+    error,
     refresh: () => {
       queryClient.invalidateQueries(QUERY_KEY);
     },

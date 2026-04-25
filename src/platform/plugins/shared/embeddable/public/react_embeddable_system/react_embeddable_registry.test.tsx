@@ -8,10 +8,10 @@
  */
 
 import {
-  registerReactEmbeddableFactory,
+  registerEmbeddablePublicDefinition,
   getReactEmbeddableFactory,
 } from './react_embeddable_registry';
-import { EmbeddableFactory } from './types';
+import type { EmbeddableFactory } from './types';
 
 describe('embeddable registry', () => {
   const getTestEmbeddableFactory = () =>
@@ -26,9 +26,13 @@ describe('embeddable registry', () => {
     );
   });
 
+  it('throws an error if type is not lower case', () => {
+    expect(() => registerEmbeddablePublicDefinition('FOO_BAR', getTestEmbeddableFactory)).toThrow();
+  });
+
   it('can register and get an embeddable factory', () => {
     const returnedFactory = getTestEmbeddableFactory();
-    registerReactEmbeddableFactory('test', getTestEmbeddableFactory);
+    registerEmbeddablePublicDefinition('test', getTestEmbeddableFactory);
     expect(getReactEmbeddableFactory('test')).toEqual(returnedFactory);
   });
 });

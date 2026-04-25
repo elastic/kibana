@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { Integration } from '../../../../../common/api/detection_engine/fleet_integrations';
 import { fleetIntegrationsApi } from '../../../fleet_integrations';

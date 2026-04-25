@@ -11,9 +11,9 @@ import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { AddFilter, Table, Header, DeleteFilterConfirmationModal } from './components';
-import { SourceFiltersTableFilter } from './types';
+import type { SourceFiltersTableFilter } from './types';
 
 export interface SourceFiltersTableProps {
   indexPattern: DataView;

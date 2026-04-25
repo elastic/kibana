@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IndexMap } from './core';
+import type { IndexMap } from './core';
 
 export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
   '.kibana': {
@@ -62,21 +62,6 @@ export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
             type: 'keyword',
           },
         },
-      },
-      'guided-onboarding-guide-state': {
-        dynamic: false,
-        properties: {
-          guideId: {
-            type: 'keyword',
-          },
-          isActive: {
-            type: 'boolean',
-          },
-        },
-      },
-      'guided-onboarding-plugin-state': {
-        dynamic: false,
-        properties: {},
       },
       'ui-metric': {
         properties: {

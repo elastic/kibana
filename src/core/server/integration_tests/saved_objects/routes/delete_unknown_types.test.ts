@@ -10,8 +10,9 @@
 import supertest from 'supertest';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { SetupServerReturn, setupServer } from '@kbn/core-test-helpers-test-utils';
-import { SavedObjectsType } from '../../..';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import type { SavedObjectsType } from '../../..';
 import {
   registerDeleteUnknownTypesRoute,
   type InternalSavedObjectsRequestHandlerContext,
@@ -19,7 +20,6 @@ import {
 
 describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () => {
   const kibanaVersion = '8.0.0';
-  const kibanaIndex = '.kibana';
 
   let server: SetupServerReturn['server'];
   let createRouter: SetupServerReturn['createRouter'];
@@ -44,7 +44,6 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
     );
     registerDeleteUnknownTypesRoute(router, {
       kibanaVersion,
-      kibanaIndex,
     });
 
     await server.start();
@@ -71,11 +70,21 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
 
     expect(elasticsearchClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(1);
     expect(elasticsearchClient.asInternalUser.deleteByQuery).toHaveBeenCalledWith({
-      index: ['known-type-index_8.0.0'],
+      ignore_unavailable: true,
+      index: [
+        '.kibana_8.0.0',
+        '.kibana_task_manager_8.0.0',
+        '.kibana_alerting_cases_8.0.0',
+        '.kibana_ingest_8.0.0',
+        '.kibana_security_solution_8.0.0',
+        '.kibana_analytics_8.0.0',
+        '.kibana_usage_counters_8.0.0',
+        '.kibana_search_solution_8.0.0',
+      ],
       wait_for_completion: false,
       query: {
         bool: {
-          must_not: expect.any(Array),
+          must_not: [{ term: { type: 'known-type' } }],
         },
       },
     });

@@ -39,6 +39,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-data-view-validation/src/validation.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +57,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-data-view-validation/src/validation.ts",
+            "lineNumber": 39,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -75,6 +79,8 @@
         "label": "ValidationErrors",
         "description": [],
         "path": "src/platform/packages/shared/kbn-data-view-validation/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,6 +95,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-data-view-validation/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -103,6 +111,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-data-view-validation/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -125,6 +135,8 @@
           "\"CONTAINS_SPACES\""
         ],
         "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -142,6 +154,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -159,6 +173,8 @@
           "\"ILLEGAL_CHARACTERS\""
         ],
         "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -176,6 +192,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

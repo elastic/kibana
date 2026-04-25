@@ -8,7 +8,7 @@
  */
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 
 export const [getUISettings, setUISettings] =
   createGetterSetter<CoreSetup['uiSettings']>('core.uiSettings');

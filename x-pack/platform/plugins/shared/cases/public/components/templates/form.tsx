@@ -65,6 +65,7 @@ const FormComponent: React.FC<Props> = ({
         connectors={connectors}
         currentConfiguration={currentConfiguration}
         isEditMode={isEditMode}
+        initialValue={initialValue}
       />
     </Form>
   );

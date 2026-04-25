@@ -38,6 +38,8 @@
           ", never, never>"
         ],
         "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,6 +55,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,6 +71,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -82,6 +88,8 @@
                   "<object>"
                 ],
                 "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+                "lineNumber": 62,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -107,11 +115,11 @@
                 "section": "def-public.InspectorViewDescription",
                 "text": "InspectorViewDescription"
               },
-              ") => void; __LEGACY: { views: ",
-              "InspectorViewRegistry",
-              "; }; }"
+              ") => void; }"
             ],
             "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -127,6 +135,8 @@
                   "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+                "lineNumber": 64,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -170,11 +180,13 @@
                 "section": "def-public.InspectorOptions",
                 "text": "InspectorOptions"
               },
-              " | undefined) => ",
+              " | undefined, parentApi?: unknown) => ",
               "OverlayRef",
               "; }"
             ],
             "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -189,6 +201,8 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+                "lineNumber": 74,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -204,6 +218,8 @@
                   "InspectorPluginStartDeps"
                 ],
                 "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+                "lineNumber": 74,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -222,6 +238,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -254,6 +272,8 @@
           "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -268,6 +288,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -297,6 +319,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -313,6 +337,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -330,6 +356,8 @@
                   "RequestParams"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -340,13 +368,13 @@
                 "type": "number",
                 "tags": [],
                 "label": "startTime",
-                "description": [
-                  "Set an optional start time for the request"
-                ],
+                "description": [],
                 "signature": [
                   "number"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 47,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -391,6 +419,8 @@
               ">) => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -413,6 +443,8 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 64,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -444,6 +476,8 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 65,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -462,6 +496,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -478,6 +514,8 @@
               "(id: string) => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -492,6 +530,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 76,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -518,9 +558,55 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.RequestAdapter.getRequestsSince",
+            "type": "Function",
+            "tags": [],
+            "label": "getRequestsSince",
+            "description": [],
+            "signature": [
+              "(time: number) => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              "[]"
+            ],
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestAdapter.getRequestsSince.$1",
+                "type": "number",
+                "tags": [],
+                "label": "time",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 89,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -550,6 +636,8 @@
               "][]"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -568,6 +656,8 @@
           "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -582,6 +672,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -602,6 +694,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 23,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -617,6 +711,8 @@
                   "() => void"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 23,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -642,6 +738,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -656,6 +754,8 @@
                   "object"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 28,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -689,6 +789,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -709,6 +811,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 34,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -737,6 +841,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -757,6 +863,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 56,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -772,6 +880,8 @@
                   "Response"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 56,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -792,6 +902,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -806,6 +918,8 @@
                   "Response"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 63,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -826,6 +940,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -840,6 +956,8 @@
                   "Response"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 67,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -870,6 +988,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/inspector/public/adapters/has_inspector_adapters.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -884,6 +1004,8 @@
               "unknown"
             ],
             "path": "src/platform/plugins/shared/inspector/public/adapters/has_inspector_adapters.ts",
+            "lineNumber": 16,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -904,6 +1026,8 @@
           "\nThe interface that the adapters used to open an inspector have to fullfill."
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -925,6 +1049,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -939,6 +1065,8 @@
               "[key: string]:  any"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -953,6 +1081,8 @@
         "label": "HasInspectorAdapters",
         "description": [],
         "path": "src/platform/plugins/shared/inspector/public/adapters/has_inspector_adapters.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -975,6 +1105,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/public/adapters/has_inspector_adapters.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -989,6 +1121,7 @@
         "type": "Interface",
         "tags": [
           "property",
+          "property",
           "property"
         ],
         "label": "InspectorOptions",
@@ -996,6 +1129,8 @@
           "\nOptions that can be specified when opening the inspector."
         ],
         "path": "src/platform/plugins/shared/inspector/public/types.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1010,6 +1145,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1024,20 +1161,26 @@
               "unknown"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
-            "id": "def-public.InspectorOptions.flyoutType",
+            "id": "def-public.InspectorOptions.flyoutProps",
             "type": "CompoundType",
             "tags": [],
-            "label": "flyoutType",
+            "label": "flyoutProps",
             "description": [],
             "signature": [
-              "\"push\" | \"overlay\" | undefined"
+              "(Partial<",
+              "OverlayFlyoutOpenOptions",
+              "> & { triggerId?: string | undefined; focusedPanelId?: string | undefined; }) | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1056,6 +1199,8 @@
           "\nAn object describing an inspector view."
         ],
         "path": "src/platform/plugins/shared/inspector/public/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1102,6 +1247,8 @@
               ">>"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1116,6 +1263,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1130,6 +1279,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1152,6 +1303,8 @@
               ") => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1172,6 +1325,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/inspector/public/types.ts",
+                "lineNumber": 50,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1187,6 +1342,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1213,6 +1370,8 @@
           "<TAdapters>"
         ],
         "path": "src/platform/plugins/shared/inspector/public/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1229,6 +1388,8 @@
               "TAdapters"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1242,6 +1403,8 @@
               "\nThe title that the inspector is currently using e.g. a visualization name."
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1258,6 +1421,8 @@
               "unknown"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1283,6 +1448,8 @@
           "RequestParams"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1294,6 +1461,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1305,6 +1474,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1319,6 +1490,8 @@
               "object | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,6 +1507,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1345,6 +1520,8 @@
             "label": "startTime",
             "description": [],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1366,6 +1543,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1386,6 +1565,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1400,6 +1581,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1414,6 +1597,8 @@
         "label": "RequestStatistic",
         "description": [],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1425,6 +1610,8 @@
             "label": "label",
             "description": [],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1439,6 +1626,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1453,6 +1642,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1467,6 +1658,8 @@
         "label": "RequestStatistics",
         "description": [],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1488,6 +1681,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1506,6 +1701,8 @@
           "\nThe status a request can have."
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1523,6 +1720,8 @@
           "OverlayRef"
         ],
         "path": "src/platform/plugins/shared/inspector/public/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1537,6 +1736,8 @@
       "label": "Setup",
       "description": [],
       "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+      "lineNumber": 24,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1559,6 +1760,8 @@
             ") => void"
           ],
           "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+          "lineNumber": 25,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1580,26 +1783,12 @@
                 }
               ],
               "path": "src/platform/plugins/shared/inspector/public/view_registry.ts",
+              "lineNumber": 34,
+              "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false
             }
           ]
-        },
-        {
-          "parentPluginId": "inspector",
-          "id": "def-public.Setup.__LEGACY",
-          "type": "Object",
-          "tags": [],
-          "label": "__LEGACY",
-          "description": [],
-          "signature": [
-            "{ views: ",
-            "InspectorViewRegistry",
-            "; }"
-          ],
-          "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
-          "deprecated": false,
-          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1613,6 +1802,8 @@
       "label": "Start",
       "description": [],
       "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1637,6 +1828,8 @@
             " | undefined) => boolean"
           ],
           "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+          "lineNumber": 29,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1647,7 +1840,7 @@
               "tags": [],
               "label": "adapters",
               "description": [
-                "- An object of adapters. This should be the same\nyou would pass into `open`."
+                "- An object of adapters. This should be the same"
               ],
               "signature": [
                 {
@@ -1660,6 +1853,8 @@
                 " | undefined"
               ],
               "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+              "lineNumber": 37,
+              "columnNumber": 17,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -1698,10 +1893,12 @@
               "section": "def-public.InspectorOptions",
               "text": "InspectorOptions"
             },
-            " | undefined) => ",
+            " | undefined, parentApi?: unknown) => ",
             "OverlayRef"
           ],
           "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1712,7 +1909,7 @@
               "tags": [],
               "label": "adapters",
               "description": [
-                "- An object of adapters for which you want to show\nthe inspector panel."
+                "- An object of adapters for which you want to show"
               ],
               "signature": [
                 {
@@ -1724,6 +1921,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+              "lineNumber": 52,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1748,9 +1947,30 @@
                 " | undefined"
               ],
               "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+              "lineNumber": 52,
+              "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
+            },
+            {
+              "parentPluginId": "inspector",
+              "id": "def-public.Start.open.$3",
+              "type": "Unknown",
+              "tags": [],
+              "label": "parentApi",
+              "description": [
+                "- Optional parent api for trackingOverlays."
+              ],
+              "signature": [
+                "unknown"
+              ],
+              "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+              "lineNumber": 52,
+              "columnNumber": 58,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
             }
           ],
           "returnComment": [
@@ -1796,6 +2016,8 @@
           "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1810,6 +2032,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1839,6 +2063,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1855,6 +2081,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1872,6 +2100,8 @@
                   "RequestParams"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1882,13 +2112,13 @@
                 "type": "number",
                 "tags": [],
                 "label": "startTime",
-                "description": [
-                  "Set an optional start time for the request"
-                ],
+                "description": [],
                 "signature": [
                   "number"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 47,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1933,6 +2163,8 @@
               ">) => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1955,6 +2187,8 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 64,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1986,6 +2220,8 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 65,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2004,6 +2240,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2020,6 +2258,8 @@
               "(id: string) => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2034,6 +2274,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 76,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2060,9 +2302,55 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestAdapter.getRequestsSince",
+            "type": "Function",
+            "tags": [],
+            "label": "getRequestsSince",
+            "description": [],
+            "signature": [
+              "(time: number) => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              "[]"
+            ],
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestAdapter.getRequestsSince.$1",
+                "type": "number",
+                "tags": [],
+                "label": "time",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "lineNumber": 89,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -2092,6 +2380,8 @@
               "][]"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2110,6 +2400,8 @@
           "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2124,6 +2416,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2144,6 +2438,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 23,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2159,6 +2455,8 @@
                   "() => void"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 23,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2184,6 +2482,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2198,6 +2498,8 @@
                   "object"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 28,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2231,6 +2533,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2251,6 +2555,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 34,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2279,6 +2585,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2299,6 +2607,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 56,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2314,6 +2624,8 @@
                   "Response"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 56,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2334,6 +2646,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2348,6 +2662,8 @@
                   "Response"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 63,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2368,6 +2684,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2382,6 +2700,8 @@
                   "Response"
                 ],
                 "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
+                "lineNumber": 67,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2405,6 +2725,8 @@
           "\nThe interface that the adapters used to open an inspector have to fullfill."
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2426,6 +2748,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2440,6 +2764,8 @@
               "[key: string]:  any"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2465,6 +2791,8 @@
           "RequestParams"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2476,6 +2804,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2487,6 +2817,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2501,6 +2833,8 @@
               "object | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2516,6 +2850,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2527,6 +2863,8 @@
             "label": "startTime",
             "description": [],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2548,6 +2886,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2568,6 +2908,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2582,6 +2924,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2596,6 +2940,8 @@
         "label": "RequestStatistic",
         "description": [],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2607,6 +2953,8 @@
             "label": "label",
             "description": [],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2621,6 +2969,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2635,6 +2985,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2649,6 +3001,8 @@
         "label": "RequestStatistics",
         "description": [],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2670,6 +3024,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2688,6 +3044,8 @@
           "\nThe status a request can have."
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

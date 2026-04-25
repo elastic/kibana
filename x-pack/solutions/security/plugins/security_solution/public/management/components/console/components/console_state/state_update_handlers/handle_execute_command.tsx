@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
 import { executionTranslations } from './translations';
@@ -74,6 +76,7 @@ const updateStateWithNewCommandHistoryItem = (
     payload: {
       command: newHistoryItem.command.input,
       display: newHistoryItem.command.inputDisplay,
+      argState: newHistoryItem.command.argState ?? {},
     },
   });
 
@@ -161,6 +164,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     input: parsedInput.input,
     inputDisplay: fullInputText,
     args: parsedInput,
+    argState: enteredCommand?.argState,
     commandDefinition,
   };
   const requiredArgs = getRequiredArguments(commandDefinition.args);
@@ -337,7 +341,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   dataValidationError = executionTranslations.mustHaveValue(argName);
                 } else if (
                   argDefinition.mustHaveValue === 'non-empty-string' &&
-                  argValue.trim().length === 0
+                  (argValue ?? '').trim().length === 0
                 ) {
                   dataValidationError = executionTranslations.mustHaveValue(argName);
                 }
@@ -468,7 +472,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         createCommandHistoryEntry(
           cloneCommandDefinitionWithNewRenderComponent(command, ValidationError),
           createCommandExecutionState({
-            errorMessage: validationResult,
+            errorMessage: <ConsoleCodeBlock>{validationResult}</ConsoleCodeBlock>,
           }),
           false
         )

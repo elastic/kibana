@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactNode, ChangeEvent, FormEvent, MouseEvent } from 'react';
-import { Subject, Subscription } from './lib';
+import type { ReactNode, ChangeEvent, FormEvent, MouseEvent } from 'react';
+import type { Subject, Subscription } from './lib';
 
 // This type will convert all optional property to required ones
 // Comes from https://github.com/microsoft/TypeScript/issues/15012#issuecomment-365453623
@@ -215,7 +215,7 @@ export interface FieldHook<T = unknown, I = T> {
 
 export interface FieldConfig<T = unknown, FormType extends FormData = FormData, I = T> {
   readonly label?: string;
-  readonly labelAppend?: string | ReactNode;
+  readonly labelAppend?: string | ReactNode | (() => ReactNode);
   readonly helpText?: string | ReactNode | (() => ReactNode);
   readonly type?: string;
   readonly defaultValue?: T;

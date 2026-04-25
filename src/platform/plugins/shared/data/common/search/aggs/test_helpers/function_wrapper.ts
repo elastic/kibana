@@ -8,7 +8,7 @@
  */
 
 import { mapValues } from 'lodash';
-import {
+import type {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
   ExecutionContext,

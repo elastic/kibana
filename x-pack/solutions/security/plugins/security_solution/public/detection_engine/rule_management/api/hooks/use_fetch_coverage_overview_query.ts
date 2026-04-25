@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import * as i18n from '../../../rule_management_ui/pages/coverage_overview/translations';
 import type { CoverageOverviewFilter } from '../../../../../common/api/detection_engine';

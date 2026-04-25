@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { buildQueryFilter, Filter } from '@kbn/es-query';
+import { buildQueryFilter } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
 import { maxBy, minBy } from 'lodash';
-import type { TimeRange } from '@kbn/es-query';
-import { ExpressionValueFilter } from '../../types';
+import type { TimeRange, Filter } from '@kbn/es-query';
+import type { ExpressionValueFilter } from '../../types';
 // @ts-expect-error untyped local
 import { buildBoolArray } from './build_bool_array';
 

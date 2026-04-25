@@ -46,4 +46,17 @@ export class EventLogClientService implements IEventLogClientService {
       request,
     });
   }
+
+  getClientWithRequestInSpace(request: KibanaRequest, spaceId: string) {
+    return new EventLogClient({
+      esContext: this.esContext,
+      savedObjectGetter: this.savedObjectProviderRegistry.getProvidersClientWithRequestInSpace(
+        request,
+        spaceId
+      ),
+      spacesService: this.spacesService,
+      request,
+      spaceId,
+    });
+  }
 }

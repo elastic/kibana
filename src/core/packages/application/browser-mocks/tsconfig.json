@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -19,6 +19,7 @@
     "@kbn/core-capabilities-browser-mocks",
     "@kbn/core-theme-browser-mocks",
     "@kbn/utility-types",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

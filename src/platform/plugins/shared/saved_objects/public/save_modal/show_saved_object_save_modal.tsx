@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { getRendering } from '../kibana_services';
@@ -25,13 +26,19 @@ function isSuccess(result: SaveResult): result is { id?: string } {
   return 'id' in result;
 }
 
-interface MinimalSaveModalProps {
+/**
+ * Minimum props expected for model components passed to `showSaveModal`
+ */
+export interface ShowSaveModalMinimalSaveModalProps {
   onSave: (...args: any[]) => Promise<SaveResult>;
   onClose: () => void;
 }
 
+/**
+ * @deprecated legacy modal display mechanism
+ */
 export function showSaveModal(
-  saveModal: React.ReactElement<MinimalSaveModalProps>,
+  saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>,
   Wrapper?: FC<PropsWithChildren<unknown>>
 ) {
   // initialize variable that will hold reference for unmount
@@ -50,13 +57,18 @@ export function showSaveModal(
 
       const onSave = saveModal.props.onSave;
 
-      const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
-        const response = await onSave(...args);
-        // close modal if we either hit an error or the saved object got an id
-        if (Boolean(isSuccess(response) ? response.id : response.error)) {
+      const onSaveConfirmed: ShowSaveModalMinimalSaveModalProps['onSave'] = async (...args) => {
+        try {
+          const response = await onSave(...args);
+          // close modal if we either hit an error or the saved object got an id
+          if (Boolean(isSuccess(response) ? response.id : response.error)) {
+            closeModal();
+          }
+          return response;
+        } catch (error) {
           closeModal();
+          return { error };
         }
-        return response;
       };
 
       const augmentedElement = React.cloneElement(saveModal, {

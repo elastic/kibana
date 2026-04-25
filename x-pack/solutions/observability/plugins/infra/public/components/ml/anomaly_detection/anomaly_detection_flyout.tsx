@@ -8,6 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import { EuiHeaderLink, EuiFlyout } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { FlyoutHome } from './flyout_home';
 import { JobSetupScreen } from './job_setup_screen';
@@ -54,12 +55,7 @@ export const AnomalyDetectionFlyout = ({
 
   return (
     <>
-      <EuiHeaderLink
-        color="primary"
-        iconType="machineLearningApp"
-        onClick={openFlyout}
-        data-test-subj="openAnomalyFlyoutButton"
-      >
+      <EuiHeaderLink color="primary" onClick={openFlyout} data-test-subj="openAnomalyFlyoutButton">
         <FormattedMessage
           id="xpack.infra.ml.anomalyDetectionButton"
           defaultMessage="Anomaly detection"
@@ -68,15 +64,21 @@ export const AnomalyDetectionFlyout = ({
       {showFlyout && (
         <MetricHostsModuleProvider
           indexPattern={metricsView?.indices ?? ''}
-          sourceId={'default'}
+          sourceId="default"
           spaceId={space.id}
         >
           <MetricK8sModuleProvider
             indexPattern={metricsView?.indices ?? ''}
-            sourceId={'default'}
+            sourceId="default"
             spaceId={space.id}
           >
-            <EuiFlyout onClose={closeFlyout} data-test-subj="loadMLFlyout">
+            <EuiFlyout
+              onClose={closeFlyout}
+              data-test-subj="loadMLFlyout"
+              aria-label={i18n.translate('xpack.infra.ml.anomalyDetectionFlyoutAriaLabel', {
+                defaultMessage: 'Anomaly detection flyout',
+              })}
+            >
               {screenName === 'home' && (
                 <FlyoutHome
                   hasSetupCapabilities={hasInfraMLSetupCapabilities}

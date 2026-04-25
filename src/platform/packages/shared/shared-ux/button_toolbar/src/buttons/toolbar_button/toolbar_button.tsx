@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonIcon, useEuiTheme, IconType } from '@elastic/eui';
-import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
+import type { IconType } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
 import { ToolbarButtonStyles, fontWeightDefinitions } from './toolbar_button.styles';
 
@@ -132,7 +133,7 @@ const ToolbarStandardButton = ({
     ? { color: 'primary', fill: true }
     : { color: 'text' };
 
-  const icon = iconType ?? (hasArrow ? 'arrowDown' : '');
+  const icon = iconType ?? (hasArrow ? 'chevronSingleDown' : '');
 
   return (
     <EuiButton

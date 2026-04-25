@@ -18,10 +18,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
-import { ClusterPayload, serializeCluster } from '../../../../../../common/lib';
-import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
+import type { ClusterPayload } from '../../../../../../common/lib';
+import { serializeCluster } from '../../../../../../common/lib';
+import type { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 
 interface Props {
   close: () => void;
@@ -41,11 +43,13 @@ export class RequestFlyout extends PureComponent<Props> {
     );
     const request = `${endpoint}\n${payload}`;
 
+    const flyoutTitleId = htmlIdGenerator()('requestFlyoutTitle');
+
     return (
-      <EuiFlyout maxWidth={480} onClose={close}>
+      <EuiFlyout maxWidth={480} onClose={close} aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader>
           <EuiTitle data-test-subj="remoteClusterRequestFlyoutTitle">
-            <h2>
+            <h2 id={flyoutTitleId}>
               {name ? (
                 <FormattedMessage
                   id="xpack.remoteClusters.requestFlyout.namedTitle"

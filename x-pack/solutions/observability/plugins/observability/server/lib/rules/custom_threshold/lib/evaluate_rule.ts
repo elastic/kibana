@@ -8,18 +8,19 @@
 import moment from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { EsQueryConfig } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
-import {
-  Aggregators,
+import type {
   CustomMetricExpressionParams,
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
-import { AdditionalContext } from '../utils';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
+import type { AdditionalContext } from '../utils';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
-import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
+import type { MissingGroupsRecord } from './check_missing_group';
+import { checkMissingGroups } from './check_missing_group';
 
 export interface EvaluatedRuleParams {
   criteria: CustomMetricExpressionParams[];
@@ -41,6 +42,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   esClient: ElasticsearchClient,
   params: Params,
   dataView: string,
+  dataViewDefinition: DataViewBase | undefined,
   timeFieldName: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
@@ -75,6 +77,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         timeFieldName,
         groupBy,
         searchConfiguration,
+        dataViewDefinition,
         esQueryConfig,
         compositeSize,
         alertOnGroupDisappear,
@@ -91,6 +94,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         timeFieldName,
         groupBy,
         searchConfiguration,
+        dataViewDefinition,
         logger,
         calculatedTimerange,
         esQueryConfig,

@@ -13,15 +13,13 @@ import {
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 
-import {
-  FindAnonymizationFieldsRequestQuery,
-  FindAnonymizationFieldsResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { FindAnonymizationFieldsRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import _ from 'lodash';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import type { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { performChecks } from '../helpers';
 

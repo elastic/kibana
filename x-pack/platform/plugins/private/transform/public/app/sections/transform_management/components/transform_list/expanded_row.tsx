@@ -6,9 +6,9 @@
  */
 
 import React, { type FC } from 'react';
-import { css } from '@emotion/react';
 
 import { EuiTabbedContent } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { stringHash } from '@kbn/ml-string-hash';
@@ -16,6 +16,16 @@ import { stringHash } from '@kbn/ml-string-hash';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import type { TransformListRow } from '../../../../common';
+
+const styles = {
+  tabbedContent: css`
+    width: 100%;
+
+    .euiTable {
+      background-color: transparent;
+    }
+  `,
+};
 
 import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
@@ -111,13 +121,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       initialSelectedTab={tabs[0]}
       onTabClick={() => {}}
       expand={false}
-      css={css`
-        width: 100%;
-
-        .euiTable {
-          background-color: transparent;
-        }
-      `}
+      css={styles.tabbedContent}
       data-test-subj="transformExpandedRowTabbedContent"
     />
   );

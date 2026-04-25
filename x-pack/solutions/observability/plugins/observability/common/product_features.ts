@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PricingProductFeature } from '@kbn/core-pricing-common';
+import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
 /**
  * Tiered features

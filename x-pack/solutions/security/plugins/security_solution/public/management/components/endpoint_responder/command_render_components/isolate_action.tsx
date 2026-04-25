@@ -6,16 +6,12 @@
  */
 
 import { memo, useMemo } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from '../types';
 import { useSendIsolateEndpointRequest } from '../../../hooks/response_actions/use_send_isolate_endpoint_request';
 
 export const IsolateActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
-    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-      'responseActionsSentinelOneV1Enabled'
-    );
     const isolateHostApi = useSendIsolateEndpointRequest();
 
     const actionRequestBody = useMemo(() => {
@@ -24,12 +20,12 @@ export const IsolateActionResult = memo<ActionRequestComponentProps>(
 
       return endpointId
         ? {
-            agent_type: isSentinelOneV1Enabled ? agentType : undefined,
+            agent_type: agentType,
             endpoint_ids: [endpointId],
             comment,
           }
         : undefined;
-    }, [command.args.args?.comment, command.commandDefinition?.meta, isSentinelOneV1Enabled]);
+    }, [command.args.args?.comment, command.commandDefinition?.meta]);
 
     return useConsoleActionSubmitter({
       ResultComponent,

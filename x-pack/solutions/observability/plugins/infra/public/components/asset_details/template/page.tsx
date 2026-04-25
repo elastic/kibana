@@ -7,31 +7,36 @@
 
 import React, { useEffect } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { capitalize } from 'lodash';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
+import { useHostAttachmentConfig } from '../hooks/use_host_attachment_config';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
-import { PageTitleWithPopover } from '../header/page_title_with_popover';
+import { HostHeaderTitle } from '../header/host_header_title';
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
-  const { loading } = useAssetDetailsRenderPropsContext();
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
-  const { entity } = useAssetDetailsRenderPropsContext();
+  const { entity, loading, schema } = useAssetDetailsRenderPropsContext();
   const trackOnlyOnce = React.useRef(false);
   const { activeTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
+
+  // Configure agent builder global flyout with the host attachment
+  useHostAttachmentConfig();
 
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
   const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(entity.type);
@@ -42,6 +47,9 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     },
     {
       text: entity.name,
+    },
+    {
+      text: capitalize(activeTabId),
     },
   ]);
 
@@ -55,6 +63,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
         assetType: entity.type,
         tabId: activeTabId,
+        schema_selected: schema || DEFAULT_SCHEMA,
       };
 
       telemetry.reportAssetDetailsPageViewed(
@@ -67,7 +76,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       );
       trackOnlyOnce.current = true;
     }
-  }, [activeTabId, entity.type, metadata, metadataLoading, telemetry]);
+  }, [activeTabId, entity.type, metadata, metadataLoading, telemetry, schema]);
 
   return (
     <InfraPageTemplate
@@ -77,7 +86,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />
         ) : entity.type === 'host' ? (
-          <PageTitleWithPopover name={entity.name} />
+          <HostHeaderTitle title={entity.name} schema={schema} />
         ) : (
           entity.name
         ),
@@ -87,6 +96,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={entity.type}
+      data-schema-selected={schema}
     >
       <Content />
     </InfraPageTemplate>

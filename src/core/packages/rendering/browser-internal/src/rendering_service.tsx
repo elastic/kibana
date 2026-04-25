@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, pairwise, startWith } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -23,16 +22,17 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
-import {
-  LayoutService,
-  LayoutFeatureFlag,
-  LAYOUT_FEATURE_FLAG_KEY,
-  LAYOUT_DEBUG_FEATURE_FLAG_KEY,
-} from '@kbn/core-chrome-layout';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
+import type { LayoutService } from '@kbn/core-chrome-layout';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
-import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
+import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
+import type { CoreEnv } from '@kbn/core-base-browser-internal';
+import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -40,6 +40,8 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
+  chrome: InternalChromeStart;
+  coreEnv: CoreEnv;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -47,6 +49,9 @@ export interface RenderingServiceRenderCoreDeps {
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   featureFlags: FeatureFlagsStart;
+  http: InternalHttpStart;
+  docLinks: DocLinksStart;
+  customBranding: CustomBrandingStart;
 }
 
 export interface RenderingServiceInternalStart extends IRenderingService {
@@ -60,7 +65,7 @@ export interface RenderingServiceInternalStart extends IRenderingService {
  * Renders all Core UI in a single React tree.
  *
  * @internalRemarks Currently this only renders Chrome UI. Notifications and
- * Overlays UI should be moved here as well.
+ * Overlays UI should be moved here as well (https://github.com/elastic/kibana/issues/247820).
  *
  * @internal
  */
@@ -87,69 +92,60 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { chrome, featureFlags } = renderCoreDeps;
-    const layoutType = featureFlags.getStringValue<LayoutFeatureFlag>(
-      LAYOUT_FEATURE_FLAG_KEY,
-      'legacy-fixed'
-    );
-    const debugLayout = featureFlags.getBooleanValue(LAYOUT_DEBUG_FEATURE_FLAG_KEY, false);
-
     const startServices = this.contextDeps.getValue()!;
 
-    const body = document.querySelector('body')!;
-    chrome
-      .getBodyClasses$()
-      .pipe(startWith<string[]>([]), pairwise())
-      .subscribe(([previousClasses, newClasses]) => {
-        body.classList.remove(...previousClasses);
-        body.classList.add(...newClasses);
-      });
-
-    const layout: LayoutService =
-      layoutType === 'grid'
-        ? new GridLayout(renderCoreDeps, { debug: debugLayout })
-        : new LegacyFixedLayout(renderCoreDeps);
+    const layout: LayoutService = new GridLayout(renderCoreDeps);
 
     const Layout = layout.getComponent();
 
-    ReactDOM.render(
+    const element = (
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
+        <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
-      </KibanaRootContextProvider>,
-      targetDomElement
+      </KibanaRootContextProvider>
     );
+
+    if (startServices.coreEnv.isCoreRenderingInReactConcurrentMode) {
+      createRoot(targetDomElement).render(element);
+    } else {
+      ReactDOM.render(element, targetDomElement);
+    }
   }
+
+  // Memoized context wrapper component to prevent recreation on each addContext call
+  private readonly ContextWrapper = React.memo<{ children: React.ReactNode }>(({ children }) => {
+    /**
+     * The dependencies are captured using BehaviorSubject, because we assume that Kibana plugins' start
+     * methods could be called before the CoreStart services are completely settled internally. If this
+     * assumption is wrong, the available dependencies are given as the initial value to `useObservable`, and
+     * there is no unnecessary re-render.
+     */
+    const deps = useObservable(this.contextDeps, this.contextDeps.getValue());
+
+    if (!deps) {
+      return <EuiLoadingSpinner size="s" />;
+    }
+
+    return (
+      <KibanaRenderContextProvider
+        analytics={deps.analytics}
+        executionContext={deps.executionContext}
+        i18n={deps.i18n}
+        theme={deps.theme}
+        userProfile={deps.userProfile}
+        coreEnv={deps.coreEnv}
+        chrome={deps.chrome}
+      >
+        {children}
+      </KibanaRenderContextProvider>
+    );
+  });
 
   /**
    * @public
    */
   public addContext(element: React.ReactNode): React.ReactElement<string> {
-    const Component: React.FC = () => {
-      /**
-       * The dependencies are captured using BehaviorSubject, because we assume that Kibana plugins' start
-       * methods could be called before the CoreStart services are completely settled internally. If this
-       * assumption is wrong, the available dependencies are given as the initial value to `useObservable`, and
-       * there is no unnecessary re-render.
-       */
-      const deps = useObservable(this.contextDeps, this.contextDeps.getValue());
-
-      if (!deps) {
-        return <EuiLoadingSpinner size="s" />;
-      }
-
-      return (
-        <KibanaRenderContextProvider
-          analytics={deps.analytics}
-          executionContext={deps.executionContext}
-          i18n={deps.i18n}
-          theme={deps.theme}
-          userProfile={deps.userProfile}
-        >
-          {element}
-        </KibanaRenderContextProvider>
-      );
-    };
-
-    return <Component />;
+    const { ContextWrapper } = this;
+    return <ContextWrapper>{element}</ContextWrapper>;
   }
 }

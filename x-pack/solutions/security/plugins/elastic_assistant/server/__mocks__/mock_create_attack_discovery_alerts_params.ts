@@ -401,6 +401,7 @@ export const mockCreateAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsP
     },
   ],
   connectorName: 'Claude 3.7 Sonnet',
+  enableFieldRendering: true,
   generationUuid: 'bb848edc-975c-4f38-ba88-f6e03a23a41c',
   replacements: {
     'c8db5601-e6fd-44b4-b645-21855715ce0a': '5psx2nlvzs',
@@ -450,4 +451,5 @@ export const mockCreateAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsP
     'af5c33f5-ebf0-486c-ba74-8ef9535e5c66': 'fge8acmng2',
     '077c4701-48c5-4cce-adee-cef0dff53350': 'Host-m1pewb1koa',
   },
+  withReplacements: false,
 };

@@ -6,9 +6,10 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { RiskScoresPreviewResponse } from '../../../../../common/api/entity_analytics';
 import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics';
@@ -22,6 +23,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { buildRiskScoreServiceForRequest } from './helpers';
+import { calculateScoresWithESQLV2 } from './calculate_scores_v2';
 
 export const riskScorePreviewRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -50,6 +52,9 @@ export const riskScorePreviewRoute = (
         const coreContext = await context.core;
         const soClient = coreContext.savedObjects.client;
         const securityConfig = await securityContext.getConfig();
+        const v2PreviewEnabled =
+          Boolean(securityConfig.experimentalFeatures.entityAnalyticsEntityStoreV2) &&
+          (await coreContext.uiSettings.client.get<boolean>(FF_ENABLE_ENTITY_STORE_V2));
 
         const riskScoreService = buildRiskScoreServiceForRequest(
           securityContext,
@@ -68,6 +73,7 @@ export const riskScorePreviewRoute = (
           weights,
           exclude_alert_statuses: excludedStatuses,
           exclude_alert_tags: excludedTags,
+          filters: customFilters,
         } = request.body;
 
         const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
@@ -88,21 +94,45 @@ export const riskScorePreviewRoute = (
           const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
           const excludeAlertStatuses = excludedStatuses || ['closed'];
           const excludeAlertTags = excludedTags || [];
-
-          const result = await riskScoreService.calculateScores({
-            afterKeys,
-            debug,
-            filter,
-            identifierType: identifierType as EntityType,
-            index,
-            pageSize,
-            range,
-            runtimeMappings,
-            weights,
-            alertSampleSizePerShard,
-            excludeAlertStatuses,
-            excludeAlertTags,
-          });
+          const filters = customFilters || [];
+          if (v2PreviewEnabled && debug === true) {
+            logger.warn('Risk score preview debug mode is unsupported in v2 preview path');
+          }
+          const result = v2PreviewEnabled
+            ? await calculateScoresWithESQLV2({
+                afterKeys,
+                filter,
+                identifierType: identifierType as EntityType,
+                index,
+                pageSize,
+                range,
+                runtimeMappings,
+                weights,
+                alertSampleSizePerShard,
+                excludeAlertStatuses,
+                excludeAlertTags,
+                filters,
+                esClient: coreContext.elasticsearch.client.asCurrentUser,
+                logger,
+                crudClient: securityContext.getEntityStoreUpdateClient(),
+                soClient,
+                namespace: securityContext.getSpaceId(),
+              })
+            : await riskScoreService.calculateScores({
+                afterKeys,
+                debug,
+                filter,
+                identifierType: identifierType as EntityType,
+                index,
+                pageSize,
+                range,
+                runtimeMappings,
+                weights,
+                alertSampleSizePerShard,
+                excludeAlertStatuses,
+                excludeAlertTags,
+                filters,
+              });
 
           securityContext.getAuditLogger()?.log({
             message: 'User triggered custom manual scoring',
@@ -116,6 +146,20 @@ export const riskScorePreviewRoute = (
 
           return response.ok({ body: result });
         } catch (e) {
+          // If the error is related to a non-existent index, return empty scores instead of an error
+          if (e instanceof Error && e.message && e.message.includes('index_not_found_exception')) {
+            return response.ok({
+              body: {
+                after_keys: {},
+                scores: {
+                  host: [],
+                  user: [],
+                  service: [],
+                },
+              },
+            });
+          }
+
           const error = transformError(e);
 
           return siemResponse.error({

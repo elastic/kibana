@@ -8,6 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nStrings = {
+  alertDetections: {
+    title: i18n.translate('securitySolutionPackages.navLinks.alertDetections', {
+      defaultMessage: 'Detections',
+    }),
+    views: {
+      title: i18n.translate('securitySolutionPackages.navLinks.rules.views', {
+        defaultMessage: 'Views',
+      }),
+    },
+  },
   rules: {
     title: i18n.translate('securitySolutionPackages.navLinks.rules', {
       defaultMessage: 'Rules',
@@ -48,6 +58,11 @@ export const i18nStrings = {
         defaultMessage: 'Endpoints',
       }),
     },
+    artifacts: {
+      title: i18n.translate('securitySolutionPackages.navLinks.assets.artifacts', {
+        defaultMessage: 'Artifacts',
+      }),
+    },
     integrationsCallout: {
       title: i18n.translate('securitySolutionPackages.navLinks.assets.integrationsCallout.title', {
         defaultMessage: 'Integrations',
@@ -60,6 +75,16 @@ export const i18nStrings = {
         { defaultMessage: 'Browse integrations' }
       ),
     },
+  },
+  clusterPerformance: {
+    title: i18n.translate('securitySolutionPackages.navLinks.clusterPerformance', {
+      defaultMessage: 'Cluster performance',
+    }),
+  },
+  projectPerformance: {
+    title: i18n.translate('securitySolutionPackages.navLinks.projectPerformance', {
+      defaultMessage: 'Project performance',
+    }),
   },
   ml: {
     title: i18n.translate('securitySolutionPackages.navLinks.ml', {
@@ -84,6 +109,12 @@ export const i18nStrings = {
       jobs: i18n.translate('securitySolutionPackages.navLinks.ml.anomalyDetection.jobs', {
         defaultMessage: 'Jobs',
       }),
+      manageJobs: i18n.translate(
+        'securitySolutionPackages.navLinks.ml.anomalyDetection.manageJobs',
+        {
+          defaultMessage: 'Manage jobs',
+        }
+      ),
       anomalyExplorer: i18n.translate(
         'securitySolutionPackages.navLinks.ml.anomalyDetection.anomalyExplorer',
         { defaultMessage: 'Anomaly explorer' }
@@ -143,6 +174,11 @@ export const i18nStrings = {
       ),
     },
   },
+  modelManagement: {
+    title: i18n.translate('securitySolutionPackages.navLinks.modelManagement', {
+      defaultMessage: 'Model Management',
+    }),
+  },
   entityRiskScore: i18n.translate('securitySolutionPackages.navLinks.entityRiskScore', {
     defaultMessage: 'Entity risk score',
   }),
@@ -185,9 +221,6 @@ export const i18nStrings = {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.access', {
         defaultMessage: 'Access',
       }),
-      usersAndRoles: i18n.translate('securitySolutionPackages.navLinks.mngt.usersAndRoles', {
-        defaultMessage: 'Manage organization members',
-      }),
     },
     alertsAndInsights: {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.alertsAndInsights', {
@@ -214,9 +247,101 @@ export const i18nStrings = {
         defaultMessage: 'Stack',
       }),
     },
+    ai: {
+      title: i18n.translate('securitySolutionPackages.navLinks.mngt.ai', {
+        defaultMessage: 'AI',
+      }),
+    },
     other: {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.other', {
         defaultMessage: 'Other',
+      }),
+    },
+  },
+  launchPad: {
+    title: i18n.translate('securitySolutionPackages.navLinks.launchPad', {
+      defaultMessage: 'Launchpad',
+    }),
+    migrations: {
+      title: i18n.translate('securitySolutionPackages.navLinks.launchPad.migrations', {
+        defaultMessage: 'Migrations',
+      }),
+    },
+  },
+  // also used in sidenav v2
+  // for serverless tiers (EASE (search_ai_lake|ai_soc_engine) | essential | complete)
+  ingestAndManageData: {
+    title: i18n.translate('securitySolutionPackages.navLinks.dataManagement', {
+      defaultMessage: 'Data management',
+    }),
+    ingestAndIntegrations: {
+      title: i18n.translate(
+        'securitySolutionPackages.navLinks.ingestAndManageData.ingestAndIntegrations',
+        {
+          defaultMessage: 'Ingest and Integrations',
+        }
+      ),
+    },
+    indicesAndDataStreams: {
+      title: i18n.translate(
+        'securitySolutionPackages.navLinks.ingestAndManageData.indicesAndDataStreams',
+        {
+          defaultMessage: 'Indices and data streams',
+        }
+      ),
+    },
+  },
+  // rename this key to stackManagement once we switch to v2 completely
+  // also used in sidenav v2 for
+  // serverless tiers (EASE (search_ai_lake|ai_soc_engine) | essential | complete)
+  stackManagementV2: {
+    title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.title', {
+      defaultMessage: 'Stack Management',
+    }),
+    home: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.home', {
+        defaultMessage: 'Home',
+      }),
+    },
+    serverlessTitle: i18n.translate(
+      'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
+      { defaultMessage: 'Admin and Settings' }
+    ),
+    organization: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.organization', {
+        defaultMessage: 'Organization',
+      }),
+    },
+    alertsAndInsights: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.alertsInsights', {
+        defaultMessage: 'Alerts and Insights',
+      }),
+    },
+    security: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.security', {
+        defaultMessage: 'Security',
+      }),
+    },
+    data: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.data', {
+        defaultMessage: 'Data',
+      }),
+    },
+    kibana: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.kibana', {
+        defaultMessage: 'Kibana',
+      }),
+    },
+    v2AlertingPreview: {
+      title: i18n.translate(
+        'securitySolutionPackages.navLinks.stackManagement_v2.v2AlertingPreview',
+        { defaultMessage: 'V2 Alerting Preview' }
+      ),
+    },
+    // serverless only
+    access: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.access', {
+        defaultMessage: 'Access',
       }),
     },
   },

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties, useLayoutEffect } from 'react';
+import type { CSSProperties } from 'react';
+import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { UseEuiTheme, euiTextTruncate } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
@@ -23,6 +25,17 @@ interface MetricVisValueProps {
   autoScale?: boolean;
   renderComplete?: () => void;
 }
+
+const ELASTIC_UI_NUMERIC_FONT_FAMILY = "'Elastic UI Numeric'";
+
+const prependNumericFontFamily = (style: CSSProperties): CSSProperties => {
+  const { fontFamily } = style;
+  if (!fontFamily || typeof fontFamily !== 'string') return style;
+
+  return fontFamily.includes(ELASTIC_UI_NUMERIC_FONT_FAMILY)
+    ? style
+    : { ...style, fontFamily: `${ELASTIC_UI_NUMERIC_FONT_FAMILY}, ${fontFamily}` };
+};
 
 export const MetricVisValue = (props: MetricVisValueProps) => {
   const { style, metric, onFilter, labelConfig, colorFullBackground, autoScale } = props;
@@ -49,7 +62,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
         className="legacyMtrVis__value"
         css={styles.legacyMtrVisValue}
         style={{
-          ...(style.spec as CSSProperties),
+          ...prependNumericFontFamily(style.spec as CSSProperties),
           ...(metric.color ? { color: metric.color } : {}),
         }}
         /*
@@ -66,7 +79,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
         <div
           data-test-subj="metric_label"
           style={{
-            ...(labelConfig.style.spec as CSSProperties),
+            ...prependNumericFontFamily(labelConfig.style.spec as CSSProperties),
             order: labelConfig.position === 'top' ? -1 : 2,
           }}
         >

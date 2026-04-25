@@ -8,7 +8,7 @@
 import React from 'react';
 import DateMath from '@kbn/datemath';
 import { DurationChartComponent } from './duration_chart';
-import { MonitorDurationResult } from '../../../../../common/types';
+import type { MonitorDurationResult } from '../../../../../common/types';
 import { render } from '../../../lib/helper/rtl_helpers';
 
 describe('MonitorCharts component', () => {

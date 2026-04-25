@@ -50,6 +50,18 @@ export const MAX_CASES = (maxCases: number) =>
       'The results were capped at {maxCases} to maintain performance. Try limiting your search to reduce the results.',
   });
 
+export const SHOW_ALL_CASES = i18n.translate('xpack.cases.caseTable.showAllCases', {
+  defaultMessage: 'Show all cases',
+});
+
+export const LAST_30_DAYS = i18n.translate('xpack.cases.caseTable.last30Days', {
+  defaultMessage: 'Last 30 days',
+});
+
+export const CUSTOM_QUICK_SELECT_PANEL = i18n.translate('xpack.cases.caseTable.customQuickSelect', {
+  defaultMessage: 'Custom quick select',
+});
+
 export const DISMISS = i18n.translate('xpack.cases.caseTable.dismiss', {
   defaultMessage: 'Dismiss',
 });
@@ -94,6 +106,12 @@ export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
 
 export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
   defaultMessage: 'Select',
+});
+
+export const ALREADY_ATTACHED = i18n.translate('xpack.cases.caseTable.alreadyAttached', {
+  defaultMessage: 'Added',
+  description:
+    'In this context, "Added" is letting the user know that all of their selected alerts were previously added to the case in question, and the "Add to case" button is disabled',
 });
 
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
@@ -229,3 +247,87 @@ export const OPTIONS = (totalCount: number) =>
 export const MORE_FILTERS_LABEL = i18n.translate('xpack.cases.tableFilters.moreFiltersLabel', {
   defaultMessage: 'More',
 });
+
+export const CLOSE_CASE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.title',
+  {
+    defaultMessage: 'Select alert close reason',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reasonLabel',
+  {
+    defaultMessage: 'Reason for closing',
+  }
+);
+
+export const CLOSE_CASE_MODAL_CONFIRM = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.confirmButtonLabel',
+  {
+    defaultMessage: 'Confirm and close case',
+  }
+);
+
+export const CLOSE_CASE_MODAL_CLOSE_BUTTON = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.closeButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reasonSearchPlaceholder',
+  {
+    defaultMessage: 'Reason for closing attached alerts',
+  }
+);
+
+export const CLOSE_CASE_MODAL_DISCLAIMER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.disclaimer',
+  {
+    defaultMessage: 'Alerts already closed will not be updated',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_CLOSE_WITHOUT_REASON = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.closeWithoutReason',
+  {
+    defaultMessage: 'Close without reason',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_DUPLICATE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.duplicate',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_FALSE_POSITIVE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.falsePositive',
+  {
+    defaultMessage: 'False Positive',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_TRUE_POSITIVE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.truePositive',
+  {
+    defaultMessage: 'True positive',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_BENIGN_POSITIVE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.benignPositive',
+  {
+    defaultMessage: 'Benign positive',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_OTHER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.other',
+  {
+    defaultMessage: 'Other',
+  }
+);

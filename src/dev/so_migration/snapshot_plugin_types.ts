@@ -16,7 +16,7 @@ import { extractMigrationInfo, getMigrationHash } from '@kbn/core-test-helpers-s
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { mkdirp } from '../build/lib';
 import type { MigrationSnapshot, MigrationInfoRecord, MigrationSnapshotMeta } from './types';
@@ -75,7 +75,23 @@ async function startServers() {
   });
 
   const esServer = await startES();
-  const kibanaRoot = createRootWithCorePlugins({}, { oss: false });
+  const kibanaRoot = createRootWithCorePlugins(
+    {
+      plugins: {
+        // Must enable all plugins to ensure the snapshot includes SO types from every plugin,
+        // matching the configuration used in the 'Check changes in Saved Objects' CI step.
+        forceEnableAllPlugins: true,
+      },
+      node: {
+        roles: ['ui'],
+      },
+    },
+    {
+      oss: false,
+      // Running in 'dev' mode prevents plugins (e.g. cloud-experiments) from failing due to missing config.
+      dev: true,
+    }
+  );
   await kibanaRoot.preboot();
   await kibanaRoot.setup();
   const coreStart = await kibanaRoot.start();

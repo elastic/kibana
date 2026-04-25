@@ -6,9 +6,9 @@
  */
 
 import React, { Suspense } from 'react';
-import { ActionType } from '@kbn/actions-plugin/common';
+import type { ActionType } from '@kbn/actions-plugin/common';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import {
+import type {
   ActionConnector,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -21,6 +21,8 @@ interface Props {
   onSelectActionType: (actionType: ActionType) => void;
   selectedActionType: ActionType | null;
   actionTypeSelectorInline?: boolean;
+  isMissingConnectorPrivileges?: boolean;
+  missingPrivilegesTooltip?: string;
 }
 export const AddConnectorModal: React.FC<Props> = React.memo(
   ({
@@ -31,6 +33,8 @@ export const AddConnectorModal: React.FC<Props> = React.memo(
     onSelectActionType,
     selectedActionType,
     actionTypeSelectorInline = false,
+    isMissingConnectorPrivileges = false,
+    missingPrivilegesTooltip,
   }) => (
     <>
       <Suspense fallback={null}>
@@ -40,6 +44,8 @@ export const AddConnectorModal: React.FC<Props> = React.memo(
           onClose={onClose}
           onSelect={onSelectActionType}
           actionTypeSelectorInline={actionTypeSelectorInline}
+          isMissingConnectorPrivileges={isMissingConnectorPrivileges}
+          missingPrivilegesTooltip={missingPrivilegesTooltip}
         />
       </Suspense>
       {selectedActionType && (

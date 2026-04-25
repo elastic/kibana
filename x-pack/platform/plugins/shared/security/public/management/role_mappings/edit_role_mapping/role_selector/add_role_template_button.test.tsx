@@ -23,6 +23,7 @@ describe('AddRoleTemplateButton', () => {
 
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiCallOut
+        announceOnMount={true}
         color="danger"
         iconType="warning"
         title={

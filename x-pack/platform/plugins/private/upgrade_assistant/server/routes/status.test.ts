@@ -16,7 +16,6 @@ import { getKibanaUpgradeStatus } from '../lib/kibana_status';
 import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
 import { getRecentEsDeprecationLogs } from '../lib/es_deprecation_logging_apis';
 import type { FeatureSet } from '../../common/types';
-import { versionService } from '../lib/version';
 import { getMockVersionInfo } from '../lib/__fixtures__/version';
 
 const { currentVersion, nextMajor } = getMockVersionInfo();
@@ -29,8 +28,8 @@ const defaultApiResponseProperties = {
   },
   kibanaApiDeprecations: undefined,
 };
-jest.mock('../lib/es_version_precheck', () => ({
-  versionCheckHandlerWrapper: (a: any) => a,
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
+  versionCheckHandlerWrapper: () => (a: any) => a,
 }));
 
 jest.mock('../lib/es_deprecations_status', () => ({
@@ -113,10 +112,6 @@ const systemIndicesNoMigrationResponse = {
 };
 
 describe('Status API', () => {
-  beforeAll(() => {
-    versionService.setup('8.17.0');
-  });
-
   describe('GET /api/upgrade_assistant/status for major upgrade', () => {
     const registerRoutes = (featureSetOverrides: Partial<FeatureSet> = {}) => {
       const mockRouter = createMockRouter();

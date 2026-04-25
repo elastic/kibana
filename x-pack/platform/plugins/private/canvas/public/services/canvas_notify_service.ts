@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 
-import { ToastInputFields } from '@kbn/core/public';
+import type { ToastInputFields } from '@kbn/core/public';
 import { formatMsg } from '../lib/format_msg';
 import { coreServices } from './kibana_services';
 

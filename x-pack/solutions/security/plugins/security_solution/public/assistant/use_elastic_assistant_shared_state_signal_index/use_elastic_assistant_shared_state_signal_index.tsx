@@ -17,6 +17,6 @@ export const useElasticAssistantSharedStateSignalIndex = () => {
     if (!signalIndexName) {
       return elasticAssistantSharedState.signalIndex.setSignalIndex(undefined);
     }
-    return elasticAssistantSharedState.signalIndex.setSignalIndex(signalIndexName);
+    elasticAssistantSharedState.signalIndex.setSignalIndex(signalIndexName); // setSignalIndex returns a function to unset the signal index. We don't unset the signal index here so that the signal index is present when the assistant is invoked outside of the security solution.
   }, [signalIndexName, elasticAssistantSharedState]);
 };

@@ -21,12 +21,19 @@ export type {
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
+  ClassicActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
-  SSLSettings,
+  ConnectorLifecycleListener,
+  ConnectorLifecyclePostCreateParams,
+  ConnectorLifecyclePostDeleteParams,
 } from './types';
 
-export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
+export type {
+  ConnectorWithExtraFindData as FindActionResult,
+  Connector,
+  ConnectorType,
+} from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
@@ -53,6 +60,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     // recipient_allowlist is not exposed because it may contain sensitive information
     email: { domain_allowlist: true, recipient_allowlist: false, services: { enabled: true } },
     webhook: { ssl: { pfx: { enabled: true } } },
+    ears: { enabled: true },
   },
 };
 

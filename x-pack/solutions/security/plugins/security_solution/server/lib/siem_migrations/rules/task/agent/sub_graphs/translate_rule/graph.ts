@@ -7,6 +7,7 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
+import type { OriginalRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
@@ -17,9 +18,6 @@ import { getValidationNode } from './nodes/validation';
 import { translateRuleState } from './state';
 import type { TranslateRuleGraphParams, TranslateRuleState } from './types';
 import { migrateRuleConfigSchema } from '../../state';
-
-// How many times we will try to self-heal when validation fails, to prevent infinite graph recursions
-const MAX_VALIDATION_ITERATIONS = 3;
 
 export function getTranslateRuleGraph({
   model,
@@ -33,7 +31,7 @@ export function getTranslateRuleGraph({
     logger,
   });
   const translationResultNode = getTranslationResultNode();
-  const inlineQueryNode = getInlineQueryNode({ model, logger });
+  const inlineQueryNode = getInlineQueryNode({ model, logger, telemetryClient });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
@@ -75,22 +73,36 @@ export function getTranslateRuleGraph({
 }
 
 const translatableRouter = (state: TranslateRuleState) => {
-  if (!state.inline_query) {
+  if (
+    (state.original_rule.vendor === 'splunk' && !state.inline_query) ||
+    (state.original_rule.vendor === 'qradar' && !state.nl_query)
+  ) {
     return 'translationResult';
   }
   return 'retrieveIntegrations';
 };
 
 const validationRouter = (state: TranslateRuleState) => {
-  if (
-    state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
-    !isEmpty(state.validation_errors?.esql_errors)
-  ) {
+  if (state.validation_errors.retries_left > 0 && !isEmpty(state.validation_errors?.esql_errors)) {
     return 'fixQueryErrors';
   }
+  if (state.original_rule.vendor === 'qradar') {
+    // we do not need ecs mapping for qradar rules
+    return 'translationResult';
+  }
+
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }
 
   return 'translationResult';
 };
+
+export function getVendorRouter(vendor: OriginalRule['vendor']) {
+  return function qradarConditionalEdge(state: TranslateRuleState): string {
+    if (state.original_rule.vendor === vendor) {
+      return `is_${vendor}`;
+    }
+    return `is_not_${vendor}`;
+  };
+}

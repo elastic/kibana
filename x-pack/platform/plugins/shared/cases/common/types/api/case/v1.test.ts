@@ -6,6 +6,7 @@
  */
 
 import {
+  CASE_EXTENDED_FIELDS,
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -89,6 +90,7 @@ const basicCase: Case = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
+  totalEvents: 0,
   updated_at: '2020-02-20T15:02:57.995Z',
   updated_by: {
     full_name: 'Leslie Knope',
@@ -98,6 +100,7 @@ const basicCase: Case = {
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
@@ -134,6 +137,7 @@ const basicCase: Case = {
       description: null,
     },
   ],
+  total_observables: 1,
   incremental_id: 123,
 };
 
@@ -150,6 +154,7 @@ describe('CasePostRequestRt', () => {
     },
     settings: {
       syncAlerts: true,
+      extractObservables: undefined,
     },
     owner: 'cases',
     severity: CaseSeverity.LOW,
@@ -324,6 +329,38 @@ describe('CasePostRequestRt', () => {
     expect(PathReporter.report(CasePostRequestRt.decode(rest))).toContain('No errors!');
   });
 
+  it('accepts optional template and extended_fields', () => {
+    const request = {
+      ...defaultRequest,
+      template: { id: 'template-id', version: 1 },
+      [CASE_EXTENDED_FIELDS]: { field1: 'foo' },
+    };
+
+    const query = CasePostRequestRt.decode(request);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: request,
+    });
+  });
+
+  it('removes unknown attributes from template', () => {
+    const request = {
+      ...defaultRequest,
+      template: { id: 'template-id', version: 1, foo: 'bar' },
+    };
+
+    const query = CasePostRequestRt.decode(request);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: {
+        ...defaultRequest,
+        template: { id: 'template-id', version: 1 },
+      },
+    });
+  });
+
   it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
     expect(
       PathReporter.report(
@@ -411,7 +448,7 @@ describe('CasesFindRequestRt', () => {
     page: '1',
     perPage: '10',
     search: 'search text',
-    searchFields: ['title', 'description'],
+    searchFields: ['title', 'description', 'incremental_id.text'],
     to: '1w',
     sortOrder: 'desc',
     sortField: 'createdAt',
@@ -533,7 +570,16 @@ describe('CasesSearchRequestRt', () => {
     page: '1',
     perPage: '10',
     search: 'search text',
-    searchFields: ['title', 'description'],
+    searchFields: [
+      'cases.title',
+      'cases.description',
+      'cases.incremental_id.text',
+      'cases.observables.value',
+      'cases.customFields.value',
+      'cases-comments.comment',
+      'cases-comments.alertId',
+      'cases-comments.eventId',
+    ],
     to: '1w',
     sortOrder: 'desc',
     sortField: 'createdAt',

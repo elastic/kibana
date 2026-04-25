@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
 
-spaceTest.describe('Discover app - errors', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Discover app - errors', { tag: tags.stateful.all }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.INVALID_SCRIPTED_FIELD);

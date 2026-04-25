@@ -37,6 +37,7 @@ export interface CaseConnectorsRegistry {
 
 export interface ConnectorFieldsProps {
   connector: CaseActionConnector;
+  isInSidebarForm?: boolean;
 }
 
 export interface ConnectorFieldsPreviewProps<TFields> {

@@ -23,6 +23,10 @@ import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import { convertSavedObjectToSavedNote } from '../../../saved_object/notes/saved_object';
 import { convertSavedObjectToSavedPinnedEvent } from '../../../saved_object/pinned_events';
 import { convertSavedObjectToSavedTimeline } from '../../../saved_object/timelines/convert_saved_object_to_savedtimeline';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('../../../saved_object/timelines/convert_saved_object_to_savedtimeline', () => {
   return {
@@ -45,7 +49,14 @@ jest.mock('../../../saved_object/pinned_events', () => {
 });
 describe('export timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
+
+  const registerRoute = (overrides?: Partial<ReturnType<typeof createMockConfig>>) => {
+    const routeConfig = { ...createMockConfig(), ...overrides };
+    exportTimelinesRoute(server.router, routeConfig);
+    return routeConfig;
+  };
 
   beforeEach(() => {
     server = serverMock.create();
@@ -57,11 +68,16 @@ describe('export timelines', () => {
     (convertSavedObjectToSavedPinnedEvent as unknown as jest.Mock).mockReturnValue(
       mockPinnedEvents()
     );
-    exportTimelinesRoute(server.router, createMockConfig());
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {
     test('returns 200 when finding selected timelines', async () => {
+      registerRoute();
       const response = await server.inject(
         getExportTimelinesRequest(),
         requestContextMock.convertContext(context)
@@ -70,6 +86,7 @@ describe('export timelines', () => {
     });
 
     test('catch error when status search throws error', async () => {
+      registerRoute();
       clients.savedObjectsClient.bulkGet.mockReset();
       clients.savedObjectsClient.bulkGet.mockRejectedValue(new Error('Test error'));
       const response = await server.inject(
@@ -82,10 +99,56 @@ describe('export timelines', () => {
         status_code: 500,
       });
     });
+
+    test('returns 400 when requested ids exceed export size limit', async () => {
+      const config = registerRoute({ maxTimelineImportExportSize: 1 });
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: TIMELINE_EXPORT_URL,
+          query: {
+            file_name: 'mock_export_timeline.ndjson',
+          },
+          body: {
+            ids: ['id-1', 'id-2'],
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: `Can't export more than ${config.maxTimelineImportExportSize} timelines`,
+        status_code: 400,
+      });
+    });
+
+    test('deduplicates ids before applying export size limit', async () => {
+      registerRoute({ maxTimelineImportExportSize: 1 });
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: TIMELINE_EXPORT_URL,
+          query: {
+            file_name: 'mock_export_timeline.ndjson',
+          },
+          body: {
+            ids: ['f0e58720-57b6-11ea-b88d-3f1a31716be8', 'f0e58720-57b6-11ea-b88d-3f1a31716be8'],
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(clients.savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'f0e58720-57b6-11ea-b88d-3f1a31716be8', type: 'siem-ui-timeline' },
+      ]);
+    });
   });
 
   describe('request validation', () => {
     test('return validation error for request body', async () => {
+      registerRoute();
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,
@@ -93,10 +156,13 @@ describe('export timelines', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest.mock.calls[0][0]).toEqual('file_name: Required');
+      expect(result.badRequest.mock.calls[0][0]).toEqual(
+        'file_name: Invalid input: expected string, received undefined'
+      );
     });
 
     test('return validation error for request params', async () => {
+      registerRoute();
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,
@@ -105,7 +171,9 @@ describe('export timelines', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest.mock.calls[0][0]).toEqual('ids: Expected array, received string');
+      expect(result.badRequest.mock.calls[0][0]).toEqual(
+        'ids: Invalid input: expected array, received string'
+      );
     });
   });
 });

@@ -11,6 +11,7 @@ import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { ContextWithProfileId } from '../profile_service';
 import type {
   DataSourceContext,
@@ -49,6 +50,16 @@ export interface GetProfilesOptions {
   record?: DataTableRecord;
 }
 
+/**
+ * Result returned from data source profile resolution.
+ */
+export interface ResolveDataSourceProfileResult {
+  /**
+   * Whether the resolved data source profile differs from the previously active profile.
+   */
+  didProfileChange: boolean;
+}
+
 export class ScopedProfilesManager {
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
 
@@ -76,18 +87,21 @@ export class ScopedProfilesManager {
   /**
    * Resolves the data source context profile
    * @param params The data source profile provider parameters
+   * @param onBeforeChange An optional callback to be invoked before changing the context
    */
   public async resolveDataSourceProfile(
-    params: Omit<DataSourceProfileProviderParams, 'rootContext'>
-  ) {
+    params: Omit<DataSourceProfileProviderParams, 'rootContext'>,
+    onBeforeChange?: () => void
+  ): Promise<ResolveDataSourceProfileResult> {
     const serializedParams = serializeDataSourceProfileParams(params);
+    const isFirstResolution = this.prevDataSourceProfileParams === undefined;
 
     if (isEqual(this.prevDataSourceProfileParams, serializedParams)) {
-      return;
+      return { didProfileChange: false };
     }
 
     const abortController = new AbortController();
-    this.dataSourceProfileAbortController?.abort();
+    this.dataSourceProfileAbortController?.abort(AbortReason.REPLACED);
     this.dataSourceProfileAbortController = abortController;
 
     let context = this.dataSourceProfileService.defaultContext;
@@ -102,12 +116,18 @@ export class ScopedProfilesManager {
     }
 
     if (abortController.signal.aborted) {
-      return;
+      return { didProfileChange: false };
     }
 
+    const didProfileChange =
+      isFirstResolution || this.dataSourceContext$.getValue().profileId !== context.profileId;
+
+    onBeforeChange?.();
     this.trackActiveProfiles(this.rootContext$.getValue().profileId, context.profileId);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
+
+    return { didProfileChange };
   }
 
   /**

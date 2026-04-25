@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { isObjectLike, isEmpty } from 'lodash';
+import { isEmpty, isObjectLike } from 'lodash';
+import type { Agent } from 'agent-base';
 import type {
-  AxiosInstance,
-  Method,
-  AxiosResponse,
-  AxiosRequestConfig,
   AxiosHeaderValue,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+  Method,
 } from 'axios';
-import { AxiosHeaders } from 'axios';
+import { AxiosHeaders, isAxiosError } from 'axios';
 import type { Logger } from '@kbn/core/server';
+import type { ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorUsageCollector, SSLSettings } from '../types';
+import type { ConnectorUsageCollector } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
+import { createAndThrowUserError } from './create_and_throw_user_error';
+import { getBeforeRedirectFn } from './before_redirect';
 
 export const request = async <T = unknown>({
   axios,
@@ -29,8 +34,10 @@ export const request = async <T = unknown>({
   configurationUtilities,
   headers,
   sslOverrides,
+  proxyOverrides,
   timeout,
   connectorUsageCollector,
+  keepAlive,
   ...config
 }: {
   axios: AxiosInstance;
@@ -42,8 +49,16 @@ export const request = async <T = unknown>({
   headers?: Record<string, AxiosHeaderValue>;
   timeout?: number;
   sslOverrides?: SSLSettings;
+  proxyOverrides?: ProxySettings;
   connectorUsageCollector?: ConnectorUsageCollector;
+  /**
+   *  keep-alive is only supported for https connections or proxied http connections
+   *  It will be ignored for non-proxied http connections, this issue is tracked in https://github.com/elastic/kibana/issues/252991
+   **/
+  keepAlive?: boolean;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
+  configurationUtilities.ensureUriAllowed(url);
+
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
       `Do not use "baseURL" in the creation of your axios instance because you will mostly break proxy`
@@ -53,12 +68,24 @@ export const request = async <T = unknown>({
     configurationUtilities,
     logger,
     url,
-    sslOverrides
+    sslOverrides,
+    proxyOverrides
   );
-  const { maxContentLength, timeout: settingsTimeout } =
+
+  if (keepAlive) {
+    if (httpsAgent) {
+      httpsAgent.options.keepAlive = keepAlive;
+    }
+    if (httpAgent) {
+      (httpAgent as Agent).options.keepAlive = keepAlive;
+    }
+  }
+
+  const { maxContentLength: defaultMaxContentLength, timeout: settingsTimeout } =
     configurationUtilities.getResponseSettings();
 
-  const { auth, ...restConfig } = config;
+  const { auth, maxContentLength: callerMaxContentLength, ...restConfig } = config;
+  const maxContentLength = callerMaxContentLength || defaultMaxContentLength;
 
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: auth?.username,
@@ -78,6 +105,7 @@ export const request = async <T = unknown>({
       proxy: false,
       maxContentLength,
       timeout: Math.max(settingsTimeout, timeout ?? 0),
+      beforeRedirect: getBeforeRedirectFn(configurationUtilities),
     });
 
     if (connectorUsageCollector) {
@@ -88,6 +116,9 @@ export const request = async <T = unknown>({
   } catch (error) {
     if (connectorUsageCollector) {
       connectorUsageCollector.addRequestBodyBytes(error, data);
+    }
+    if (isAxiosError(error)) {
+      createAndThrowUserError(error);
     }
     throw error;
   }
@@ -207,3 +238,9 @@ export const createAxiosResponse = (res: Partial<AxiosResponse>): AxiosResponse 
   },
   ...res,
 });
+
+export interface AxiosErrorWithRetry {
+  config: InternalAxiosRequestConfig & { _retry?: boolean };
+  response?: { status: number };
+  message: string;
+}

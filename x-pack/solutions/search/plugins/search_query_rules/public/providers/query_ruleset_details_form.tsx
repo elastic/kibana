@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { FormProvider, useForm } from 'react-hook-form';
-import { QueryRuleEditorForm } from '../types';
+import type { QueryRuleEditorForm } from '../types';
 import { queryRulesetDetailFormResolver } from '../utils/query_ruleset_detail_form_resolver';
 
 interface QueryRulesetDetailFormProvider {
@@ -24,7 +24,7 @@ export const QueryRulesetDetailsForm: React.FC<
       mode: 'create',
       rulesetId: '',
       ruleId: '',
-      criteria: [],
+      criteria: [{ type: 'exact', metadata: '', values: [] }],
       type: 'pinned',
       actions: { docs: [], ids: [] },
     },

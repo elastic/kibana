@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Synthetics API Tests', () => {
+    // Run Fleet setup + synthetics package install exactly once for the whole
+    // suite. The underlying helper is idempotent, so every per-file
+    // `installSyntheticsPackage()` call (if any remain) becomes a cheap GET.
+    // This removes ~7 redundant uninstall/reinstall cycles per CI run, which
+    // were a source of 502 / "backend closed connection" flakes against Fleet.
     before(async () => {
       await esDeleteAllIndices('heartbeat*');
       await esDeleteAllIndices('synthetics*');
+      const privateLocationService = new PrivateLocationTestService(getService);
+      await privateLocationService.installSyntheticsPackage();
     });
 
     loadTestFile(require.resolve('./synthetics_api_security'));
@@ -23,8 +31,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./add_monitor_private_location'));
     loadTestFile(require.resolve('./edit_monitor'));
     loadTestFile(require.resolve('./sync_global_params'));
+    loadTestFile(require.resolve('./sync_global_params_spaces'));
     loadTestFile(require.resolve('./add_edit_params'));
     loadTestFile(require.resolve('./private_location_apis'));
     loadTestFile(require.resolve('./list_monitors'));
+    loadTestFile(require.resolve('./sync_maintenance_windows'));
+    loadTestFile(require.resolve('./sync_maintenance_windows_non_default_space'));
   });
 }

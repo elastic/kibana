@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
+import type { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { LensStoreDeps } from '..';
+import type { LensStoreDeps } from '@kbn/lens-common';
 import { loadInitial as loadInitialAction } from '..';
 import { loadInitial } from './load_initial';
 import { readFromStorage } from '../../settings_storage';

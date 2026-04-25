@@ -49,26 +49,19 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
+import { isOnlyAgentlessIntegration } from '../../../../../../../common/services/agentless_policy_helper';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import {
-  useGetPackageInfoByKeyQuery,
-  useLink,
-  useAgentPolicyContext,
-  useIsGuidedOnboardingActive,
-} from '../../../../hooks';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import {
-  Error,
-  Loading,
-  HeaderReleaseBadge,
-  WithGuidedOnboardingTour,
-} from '../../../../components';
+import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
-
+import { SideBarColumn } from '../../components/side_bar_column';
 import { PermissionsError } from '../../../../layouts';
+
+import { wrapTitleWithDeprecated } from '../../components/utils';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
@@ -76,7 +69,7 @@ import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
   BackLink,
-  IntegrationAgentPolicyCount,
+  IntegrationPolicyCount,
   UpdateIcon,
   IconPanel,
   LoadingIconPanel,
@@ -84,6 +77,7 @@ import {
   AddIntegrationButton,
   EditIntegrationButton,
 } from './components';
+import { ALERTING_ASSET_TYPES, AlertingPage } from './alerting';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -95,11 +89,13 @@ import { Configs } from './configs';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
 import { EditIntegrationFlyout } from './components/edit_integration_flyout';
+import { ErrorIconPanel } from './components/icon_panel';
 
 export type DetailViewPanelName =
   | 'overview'
   | 'policies'
   | 'assets'
+  | 'alerting'
   | 'settings'
   | 'custom'
   | 'api-reference'
@@ -141,7 +137,7 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -169,7 +165,6 @@ export function Detail() {
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
   const agentPolicyIdFromContext = getAgentPolicyId();
-  const isOverviewPage = panel === 'overview';
   // edit readme state
 
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -262,7 +257,6 @@ export function Detail() {
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUserQuery();
-  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
@@ -295,6 +289,14 @@ export function Detail() {
     !HIDDEN_API_REFERENCE_PACKAGES.includes(pkgName) &&
     packageInfo &&
     hasDocumentation({ packageInfo, integration });
+
+  const { enableIntegrationInactivityAlerting } = ExperimentalFeaturesService.get();
+  const hasArchiveAlertingAssets = Object.keys(packageInfo?.assets?.kibana ?? {}).some((type) =>
+    (ALERTING_ASSET_TYPES as string[]).includes(type)
+  );
+  const showAlertingTab =
+    hasArchiveAlertingAssets ||
+    (isInstalled && packageInfo?.type === 'integration' && enableIntegrationInactivityAlerting);
 
   // Track install status state
   useEffect(() => {
@@ -356,7 +358,9 @@ export function Detail() {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="l">
             <FlexItemWithMaxHeight grow={false}>
-              {isLoading || !packageInfo ? (
+              {packageInfoError ? (
+                <ErrorIconPanel />
+              ) : isLoading || !packageInfo ? (
                 <LoadingIconPanel />
               ) : (
                 <IconPanel
@@ -368,46 +372,50 @@ export function Detail() {
               )}
             </FlexItemWithMaxHeight>
             <FlexItemWithMinWidth grow={true}>
-              <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiText>
-                    {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                    <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="xs">
-                    {packageInfo?.type === 'content' ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="default">
-                          {i18n.translate('xpack.fleet.epm.contentPackageBadgeLabel', {
-                            defaultMessage: 'Content only',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    ) : (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="default">
-                          {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
-                            defaultMessage: 'Elastic Agent',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    )}
-                    {packageInfo?.release && packageInfo.release !== 'ga' ? (
-                      <EuiFlexItem grow={false}>
-                        <HeaderReleaseBadge release={getPackageReleaseLabel(packageInfo.version)} />
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              {packageInfo ? (
+                <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                      <h1>{wrapTitleWithDeprecated({ packageInfo, integrationInfo })}</h1>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="xs">
+                      {packageInfo?.type === 'content' ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="default">
+                            {i18n.translate('xpack.fleet.epm.contentPackageBadgeLabel', {
+                              defaultMessage: 'Content only',
+                            })}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ) : (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="default">
+                            {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
+                              defaultMessage: 'Elastic Agent',
+                            })}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                      {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                        <EuiFlexItem grow={false}>
+                          <HeaderReleaseBadge
+                            release={getPackageReleaseLabel(packageInfo.version)}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : null}
             </FlexItemWithMinWidth>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams]
+    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams, packageInfoError]
   );
 
   const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {
@@ -424,16 +432,26 @@ export function Detail() {
         hash,
       });
 
+      const agentlessStatus = getAgentlessStatusForPackage(
+        packageInfo ?? undefined,
+        integration ?? undefined
+      );
+
+      const isAgentlessByDefault =
+        agentlessStatus.isAgentless &&
+        (isOnlyAgentlessIntegration(packageInfo ?? undefined, integration ?? undefined) ||
+          agentlessStatus.isDefaultDeploymentMode);
+
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
         isCloud,
         isFirstTimeAgentUser,
-        isGuidedOnboardingActive,
         pkgkey,
-        isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
-        isAgentlessDefault,
+        prerelease,
+        isAgentlessIntegration: agentlessStatus.isAgentless,
+        isAgentlessByDefault,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -458,35 +476,33 @@ export function Detail() {
       services.application.navigateToApp(...navigateOptions);
     },
     [
-      agentPolicyIdFromContext,
-      hash,
       history,
+      pathname,
+      search,
+      hash,
+      agentPolicyIdFromContext,
       integration,
-      isAgentlessIntegration,
-      isAgentlessDefault,
       isCloud,
       isFirstTimeAgentUser,
-      isGuidedOnboardingActive,
+      pkgkey,
+      prerelease,
+      getAgentlessStatusForPackage,
+      packageInfo,
       returnAppId,
       returnPath,
-      packageInfo,
-      pathname,
-      pkgkey,
-      search,
       services.application,
     ]
   );
 
   const showVersionSelect = useMemo(
     () =>
-      prereleaseIntegrationsEnabled &&
       latestGAVersion &&
       latestPrereleaseVersion &&
       latestGAVersion !== latestPrereleaseVersion &&
       (!packageInfo?.version ||
         packageInfo.version === latestGAVersion ||
         packageInfo.version === latestPrereleaseVersion),
-    [prereleaseIntegrationsEnabled, latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
+    [latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
   );
 
   const versionOptions = useMemo(
@@ -535,6 +551,7 @@ export function Detail() {
                           prepend={versionLabel}
                           options={versionOptions}
                           value={packageInfo.version}
+                          aria-label={versionLabel}
                           onChange={(event) =>
                             onVersionChange(event.target.value, packageInfo.name)
                           }
@@ -555,11 +572,11 @@ export function Detail() {
                 ? [
                     { isDivider: true },
                     {
-                      label: i18n.translate('xpack.fleet.epm.usedByLabel', {
-                        defaultMessage: 'Agent policies',
+                      label: i18n.translate('xpack.fleet.epm.policiesCountLabel', {
+                        defaultMessage: 'Policies',
                       }),
-                      'data-test-subj': 'agentPolicyCount',
-                      content: <IntegrationAgentPolicyCount packageName={packageInfo.name} />,
+                      'data-test-subj': 'policyCount',
+                      content: <IntegrationPolicyCount packageName={packageInfo.name} />,
                     },
                   ]
                 : []),
@@ -571,37 +588,33 @@ export function Detail() {
                     { isDivider: true },
                     {
                       content: (
-                        <WithGuidedOnboardingTour
-                          packageKey={pkgkey}
-                          tourType={'addIntegrationButton'}
-                          isTourVisible={isOverviewPage && isGuidedOnboardingActive}
-                          tourOffset={10}
-                        >
-                          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-                            {isCustomPackage && (
-                              <EuiFlexItem grow={false}>
-                                <EditIntegrationButton
-                                  handleEditIntegrationClick={handleEditIntegrationClick}
-                                />
-                              </EuiFlexItem>
-                            )}
+                        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+                          {isCustomPackage && (
                             <EuiFlexItem grow={false}>
-                              <AddIntegrationButton
-                                userCanInstallPackages={userCanInstallPackages}
-                                href={getHref('add_integration_to_policy', {
-                                  pkgkey,
-                                  ...(integration ? { integration } : {}),
-                                  ...(agentPolicyIdFromContext
-                                    ? { agentPolicyId: agentPolicyIdFromContext }
-                                    : {}),
-                                })}
-                                missingSecurityConfiguration={missingSecurityConfiguration}
-                                packageName={integrationInfo?.title || packageInfo.title}
-                                onClick={handleAddIntegrationPolicyClick}
+                              <EditIntegrationButton
+                                handleEditIntegrationClick={handleEditIntegrationClick}
                               />
                             </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </WithGuidedOnboardingTour>
+                          )}
+                          <EuiFlexItem grow={false}>
+                            <AddIntegrationButton
+                              userCanInstallPackages={userCanInstallPackages}
+                              href={getHref('add_integration_to_policy', {
+                                pkgkey,
+                                ...(integration ? { integration } : {}),
+                                ...(agentPolicyIdFromContext
+                                  ? { agentPolicyId: agentPolicyIdFromContext }
+                                  : {}),
+                              })}
+                              missingSecurityConfiguration={missingSecurityConfiguration}
+                              packageName={wrapTitleWithDeprecated({
+                                packageInfo,
+                                integrationInfo,
+                              })}
+                              onClick={handleAddIntegrationPolicyClick}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       ),
                     },
                   ]),
@@ -624,24 +637,22 @@ export function Detail() {
       ) : undefined,
     [
       packageInfo,
-      updateAvailable,
-      isInstalled,
-      pkgkey,
-      isOverviewPage,
-      isGuidedOnboardingActive,
-      userCanInstallPackages,
-      getHref,
-      integration,
-      agentPolicyIdFromContext,
-      missingSecurityConfiguration,
-      integrationInfo?.title,
-      handleAddIntegrationPolicyClick,
-      onVersionChange,
       showVersionSelect,
       versionLabel,
       versionOptions,
-      handleEditIntegrationClick,
+      updateAvailable,
+      isInstalled,
       isCustomPackage,
+      handleEditIntegrationClick,
+      userCanInstallPackages,
+      getHref,
+      pkgkey,
+      integration,
+      agentPolicyIdFromContext,
+      missingSecurityConfiguration,
+      integrationInfo,
+      handleAddIntegrationPolicyClick,
+      onVersionChange,
     ]
   );
 
@@ -705,6 +716,21 @@ export function Detail() {
         isSelected: panel === 'assets',
         'data-test-subj': `tab-assets`,
         href: getHref('integration_details_assets', pathValues),
+      });
+    }
+
+    if (isInstalled && showAlertingTab) {
+      tabs.push({
+        id: 'alerting',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.packageAlertingLinkText"
+            defaultMessage="Alerting"
+          />
+        ),
+        isSelected: panel === 'alerting',
+        'data-test-subj': `tab-alerting`,
+        href: getHref('integration_details_alerting', pathValues),
       });
     }
 
@@ -784,11 +810,13 @@ export function Detail() {
     showCustomTab,
     showDocumentationTab,
     numOfDeferredInstallations,
+    showAlertingTab,
   ]);
 
   const securityCallout = missingSecurityConfiguration ? (
     <>
       <EuiCallOut
+        announceOnMount
         color="warning"
         iconType="lock"
         title={
@@ -831,18 +859,23 @@ export function Detail() {
       `}
     >
       {integrationInfo || packageInfo ? (
-        <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
+        <Breadcrumbs packageTitle={wrapTitleWithDeprecated({ packageInfo, integrationInfo })} />
       ) : null}
       {packageInfoError ? (
-        <Error
-          title={
-            <FormattedMessage
-              id="xpack.fleet.epm.loadingIntegrationErrorTitle"
-              defaultMessage="Error loading integration details"
+        <EuiFlexGroup alignItems="flexStart">
+          <SideBarColumn grow={1} />
+          <EuiFlexItem>
+            <Error
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.epm.loadingIntegrationErrorTitle"
+                  defaultMessage="Error loading integration details"
+                />
+              }
+              error={packageInfoError.message}
             />
-          }
-          error={packageInfoError.message}
-        />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : isLoading || !packageInfo ? (
         <Loading />
       ) : (
@@ -860,10 +893,14 @@ export function Detail() {
               packageMetadata={packageInfoData?.metadata}
               startServices={services}
               isCustomPackage={isCustomPackage}
+              integrationInfo={integrationInfo}
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_alerting}>
+            <AlertingPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
             <Configs packageInfo={packageInfo} />
@@ -890,7 +927,11 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          integrationName={packageInfo?.title || 'Integration'}
+          integrationName={wrapTitleWithDeprecated({
+            packageInfo,
+            integrationInfo,
+            defaultTitle: 'Integration',
+          })}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}

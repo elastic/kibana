@@ -26,6 +26,8 @@
         "label": "KbnCbor",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cbor/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "(data: unknown) => any"
             ],
             "path": "src/platform/packages/shared/kbn-cbor/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,6 +58,8 @@
                   "unknown"
                 ],
                 "path": "src/platform/packages/shared/kbn-cbor/index.ts",
+                "lineNumber": 16,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -72,6 +78,8 @@
               "(uint8: any) => any"
             ],
             "path": "src/platform/packages/shared/kbn-cbor/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,6 +94,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-cbor/index.ts",
+                "lineNumber": 20,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -109,6 +119,8 @@
           "(uint8: any) => any"
         ],
         "path": "src/platform/packages/shared/kbn-cbor/index.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -124,6 +136,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-cbor/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -141,6 +155,8 @@
           "(data: unknown) => any"
         ],
         "path": "src/platform/packages/shared/kbn-cbor/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -156,6 +172,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-cbor/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
           }

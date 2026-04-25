@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -46,6 +48,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Get Fleet Server hosts`,
+      description: `List all Fleet Server hosts.`,
       options: {
         tags: ['oas-tag:Fleet Server hosts'],
       },
@@ -53,13 +56,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_fleet_server_hosts.yaml'),
+        },
         validate: {
           request: GetAllFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListResponseSchema(FleetServerHostSchema),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -76,6 +84,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Create a Fleet Server host`,
+      description: `Create a new Fleet Server host.`,
       options: {
         tags: ['oas-tag:Fleet Server hosts'],
       },
@@ -83,13 +92,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_fleet_server_host.yaml'),
+        },
         validate: {
           request: PostFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetServerHostResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -114,13 +128,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_fleet_server_host.yaml'),
+        },
         validate: {
           request: GetOneFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetServerHostResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -145,16 +164,21 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_fleet_server_host.yaml'),
+        },
         validate: {
           request: GetOneFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   id: schema.string(),
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -179,13 +203,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_fleet_server_host.yaml'),
+        },
         validate: {
           request: PutFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetServerHostResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

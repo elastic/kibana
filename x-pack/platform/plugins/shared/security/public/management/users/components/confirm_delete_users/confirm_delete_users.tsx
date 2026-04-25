@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
 import type { NotificationsStart } from '@kbn/core/public';
@@ -37,9 +37,14 @@ export class ConfirmDeleteUsers extends Component<Props, unknown> {
           defaultMessage: 'Delete user {userLength}',
           values: { userLength: usersToDelete[0] },
         });
+
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={title}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={onCancel}
         onConfirm={this.deleteUsers}
         cancelButtonText={i18n.translate(

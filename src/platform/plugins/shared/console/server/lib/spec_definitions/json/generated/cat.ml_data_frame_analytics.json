@@ -6,11 +6,6 @@
       ],
       "help": "__flag__",
       "v": "__flag__",
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
-      "allow_no_match": "__flag__",
       "bytes": [
         "b",
         "kb",
@@ -19,6 +14,20 @@
         "tb",
         "pb"
       ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
       "h": [
         "assignment_explanation",
         "create_time",
@@ -54,15 +63,6 @@
         "state",
         "type",
         "version"
-      ],
-      "time": [
-        "nanos",
-        "micros",
-        "ms",
-        "s",
-        "m",
-        "h",
-        "d"
       ]
     },
     "methods": [
@@ -73,6 +73,7 @@
       "_cat/ml/data_frame/analytics/{id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-data-frame-analytics",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-ml-data-frame-analytics",
     "availability": {
       "stack": true,
       "serverless": true

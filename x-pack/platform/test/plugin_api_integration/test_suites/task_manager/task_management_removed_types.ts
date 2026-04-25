@@ -8,35 +8,9 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
-
-export interface RawDoc {
-  _id: string;
-  _source: any;
-  _type?: string;
-}
-export interface SearchResults {
-  hits: {
-    hits: RawDoc[];
-  };
-}
-
-type DeprecatedConcreteTaskInstance = Omit<ConcreteTaskInstance, 'schedule'> & {
-  interval: string;
-};
-
-type SerializedConcreteTaskInstance<State = string, Params = string> = Omit<
-  ConcreteTaskInstance,
-  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
-> & {
-  state: State;
-  params: Params;
-  scheduledAt: string;
-  startedAt: string | null;
-  retryAt: string | null;
-  runAt: string;
-};
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { SerializedConcreteTaskInstance } from './test_utils';
+import { scheduleTask } from './test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -49,28 +23,19 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('not registered task types', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/task_manager_removed_types');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/task_manager_removed_types');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_removed_types');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/task_manager_removed_types'
+      );
     });
 
     afterEach(async () => {
       // clean up after each test
       return await request.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
-
-    function scheduleTask(
-      task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
-    ): Promise<SerializedConcreteTaskInstance> {
-      return request
-        .post('/api/sample_tasks/schedule')
-        .set('kbn-xsrf', 'xxx')
-        .send({ task })
-        .expect(200)
-        .then((response: { body: SerializedConcreteTaskInstance }) => response.body);
-    }
 
     function currentTasks<State = unknown, Params = unknown>(): Promise<{
       docs: Array<SerializedConcreteTaskInstance<State, Params>>;
@@ -83,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should successfully schedule registered tasks, not claim unregistered tasks and mark removed task types as unrecognized', async () => {
       const testStart = new Date();
-      const scheduledTask = await scheduleTask({
+      const scheduledTask = await scheduleTask(request, {
         taskType: 'sampleTask',
         schedule: { interval: `1s` },
         params: {},

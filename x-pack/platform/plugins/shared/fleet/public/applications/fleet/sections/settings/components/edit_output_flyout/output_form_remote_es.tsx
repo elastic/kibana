@@ -46,7 +46,7 @@ export interface IsConvertedToSecret {
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
-  const { docLinks, cloud } = useStartServices();
+  const { docLinks } = useStartServices();
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState<IsConvertedToSecret>({
     serviceToken: false,
@@ -54,8 +54,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     sslKey: false,
   });
   const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
-  const enableSyncIntegrations =
-    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
+  const enableSyncIntegrations = enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
 
   const [isRemoteClusterInstructionsOpen, setIsRemoteClusterInstructionsOpen] =
     React.useState(false);
@@ -131,7 +130,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             defaultMessage: 'Specify host URL',
           }
         )}
-        {...inputs.elasticsearchUrlInput.props}
+        {...inputs.remoteElasticsearchUrlInput.props}
         isUrl
       />
       <EuiSpacer size="m" />
@@ -260,6 +259,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               </EuiFormRow>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 iconType="info"
                 title={
                   <FormattedMessage
@@ -292,7 +292,11 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                       defaultMessage="To sync integrations from this cluster, the remote Elasticsearch output needs additional configuration. {documentationLink}."
                       values={{
                         documentationLink: (
-                          <EuiLink external={true} href={docLinks.links.fleet.remoteESOoutput}>
+                          <EuiLink
+                            external={true}
+                            target="_blank"
+                            href={docLinks.links.fleet.remoteESOoutput}
+                          >
                             <FormattedMessage
                               id="xpack.fleet.settings.remoteClusterConfiguration.documentationLink"
                               defaultMessage="Learn more"
@@ -423,6 +427,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
 
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyCalloutText"

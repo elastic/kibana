@@ -32,14 +32,35 @@ const DownloadSourceBaseSchema = {
   ),
   ssl: schema.maybe(
     schema.object({
-      certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+      certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
     })
   ),
+  auth: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.object({
+        username: schema.maybe(schema.string()),
+        password: schema.maybe(schema.string()),
+        api_key: schema.maybe(schema.string()),
+        headers: schema.maybe(
+          schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
+            maxSize: 100,
+          })
+        ),
+      }),
+    ])
+  ),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      auth: schema.maybe(
+        schema.object({
+          password: schema.maybe(secretRefSchema),
+          api_key: schema.maybe(secretRefSchema),
+        })
+      ),
     })
   ),
 };

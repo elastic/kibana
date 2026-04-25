@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
-import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
-import { ChromeStart } from '@kbn/core/public';
-import { CoreStart } from '@kbn/core/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import {
-  fieldsReducer,
-  FieldsState,
-  syncNodeStyleSaga,
-  syncFieldsSaga,
-  updateSaveButtonSaga,
-} from './fields';
-import { UrlTemplatesState, urlTemplatesReducer, syncTemplatesSaga } from './url_templates';
-import {
-  AdvancedSettingsState,
-  advancedSettingsReducer,
-  syncSettingsSaga,
-} from './advanced_settings';
-import { DatasourceState, datasourceReducer } from './datasource';
+import type { SagaMiddleware } from 'redux-saga';
+import createSagaMiddleware from 'redux-saga';
+import type { Store, AnyAction, Dispatch } from 'redux';
+import { combineReducers, createStore, applyMiddleware } from 'redux';
+import type { ChromeStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { FieldsState } from './fields';
+import { fieldsReducer, syncNodeStyleSaga, syncFieldsSaga, updateSaveButtonSaga } from './fields';
+import type { UrlTemplatesState } from './url_templates';
+import { urlTemplatesReducer, syncTemplatesSaga } from './url_templates';
+import type { AdvancedSettingsState } from './advanced_settings';
+import { advancedSettingsReducer, syncSettingsSaga } from './advanced_settings';
+import type { DatasourceState } from './datasource';
+import { datasourceReducer } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
-import { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
+import type { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
-import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
-import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer, WorkspaceState } from './workspace';
+import type { MetaDataState } from './meta_data';
+import { metaDataReducer, syncBreadcrumbSaga } from './meta_data';
+import type { WorkspaceState } from './workspace';
+import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer } from './workspace';
 
 export interface GraphState {
   fields: FieldsState;

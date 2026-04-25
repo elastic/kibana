@@ -10,10 +10,19 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'discover',
+    'header',
+    'home',
+    'timePicker',
+  ]);
 
-  describe('Browser apps', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/258554
+  describe.skip('Browser apps', () => {
     let logs: Ecs[];
+    let discoverSessionFirstTabId = '';
     const retry = getService('retry');
 
     const logContains = async ({
@@ -88,6 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               page: 'app',
               id: 'new',
               description: 'fetch documents',
+              space: 'default',
             }),
           });
         });
@@ -103,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               page: 'app',
               id: 'new',
               description: 'fetch chart data and total hits',
+              space: 'default',
               child: {
                 type: 'lens',
                 name: 'lnsXY',
@@ -118,6 +129,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('dashboard app', () => {
       before(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.waitForDiscoverAppOnScreen();
+        await PageObjects.discover.loadSavedSearch('[Flights] Flight Log');
+        await PageObjects.discover.waitUntilTabIsLoaded();
+        discoverSessionFirstTabId = (await PageObjects.discover.getFirstTabId()) ?? '';
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
         await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
@@ -189,6 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
+                space: 'default',
                 child: {
                   type: 'lens',
                   name: 'lnsXY',
@@ -219,6 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
+                space: 'default',
                 child: {
                   type: 'lens',
                   name: 'lnsMetric',
@@ -251,6 +269,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
+                space: 'default',
                 child: {
                   type: 'lens',
                   name: 'lnsDatatable',
@@ -281,6 +300,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
+                space: 'default',
                 child: {
                   type: 'lens',
                   name: 'lnsPie',
@@ -298,7 +318,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId('search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'),
+            predicate: checkHttpRequestId(
+              'discover_session:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'
+            ),
           });
         });
 
@@ -312,12 +334,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               page: 'app',
               id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
               description: '[Flights] Global Flight Dashboard',
+              space: 'default',
               child: {
-                type: 'search',
+                type: 'discover_session',
                 name: 'discover',
                 id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
                 description: '[Flights] Flight Log',
-                url: '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d',
+                url: `/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d?_tab=(tabId:'${discoverSessionFirstTabId}')`,
               },
             }),
           });

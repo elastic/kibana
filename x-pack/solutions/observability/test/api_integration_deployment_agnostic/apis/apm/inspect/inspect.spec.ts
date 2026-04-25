@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../constants/archiver';
 import archives_metadata from '../constants/archives_metadata';
 

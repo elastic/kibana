@@ -10,11 +10,11 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 
-import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
-import { ExecutionContextSearch } from '@kbn/es-query';
-import { Datatable, ExpressionType } from '../expression_types';
-import { TablesAdapter } from '../util/tables_adapter';
-import { ExpressionsInspectorAdapter } from '../util';
+import type { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { ExecutionContextSearch } from '@kbn/es-query';
+import type { Datatable, ExpressionType } from '../expression_types';
+import type { TablesAdapter } from '../util/tables_adapter';
+import type { ExpressionsInspectorAdapter } from '../util';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;

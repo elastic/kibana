@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 import { get } from 'lodash';
 
+import type { EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFieldNumber,
-  EuiFieldNumberProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiText,
   EuiIconTip,
+  EuiFormAppend,
 } from '@elastic/eui';
 
-import { PhaseWithTiming } from '../../../../../../../../common/types';
+import type { PhaseWithTiming } from '../../../../../../../../common/types';
 import { getFieldValidityAndErrorMessage, useFormData } from '../../../../../../../shared_imports';
 import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
 import { getPhaseMinAgeInMilliseconds } from '../../../../lib';
@@ -34,6 +36,7 @@ interface Props {
 export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {
   const minAgeValuePath = `phases.${phase}.min_age`;
   const minAgeUnitPath = `_meta.${phase}.minAgeUnit`;
+  const errorId = `${phase}-minAgeError`;
 
   const { isUsingRollover } = useConfiguration();
   const globalFields = useGlobalFields();
@@ -71,7 +74,13 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
         return (
-          <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
+          <EuiFormRow
+            fullWidth
+            isInvalid={isInvalid}
+            error={
+              isInvalid && errorMessage ? <span id={errorId}>{errorMessage}</span> : errorMessage
+            }
+          >
             <EuiFlexGroup
               gutterSize={'s'}
               alignItems={'center'}
@@ -90,6 +99,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                       style={{ minWidth: 50 }}
                       compressed
                       aria-label={getTimingLabelForPhase(phase)}
+                      aria-describedby={isInvalid ? errorId : undefined}
                       isInvalid={isInvalid}
                       value={field.value as EuiFieldNumberProps['value']}
                       onChange={field.onChange}
@@ -111,13 +121,15 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                               type="info"
                               aria-label={i18nTexts.editPolicy.rolloverToolTipDescription}
                               content={i18nTexts.editPolicy.rolloverToolTipDescription}
+                              disableScreenReaderOutput
                             />
                           </>
                         );
-                        const selectAppendValue: Array<string | React.ReactElement> =
-                          isUsingRollover
-                            ? [i18nTexts.editPolicy.minAgeUnitFieldSuffix, icon]
-                            : [i18nTexts.editPolicy.minAgeUnitFieldSuffix];
+                        const selectAppendValue = (
+                          <EuiFormAppend label={i18nTexts.editPolicy.minAgeUnitFieldSuffix}>
+                            {isUsingRollover ? icon : undefined}
+                          </EuiFormAppend>
+                        );
                         const unitValue = unitField.value as string;
 
                         let unitOptions = timeUnits;
@@ -138,6 +150,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             append={selectAppendValue}
                             data-test-subj={`${phase}-selectedMinimumAgeUnits`}
                             aria-label={getUnitsAriaLabelForPhase(phase)}
+                            aria-describedby={isInvalid ? errorId : undefined}
                             options={unitOptions}
                           />
                         );

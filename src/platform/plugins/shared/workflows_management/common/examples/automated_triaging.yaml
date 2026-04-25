@@ -1,0 +1,145 @@
+version: '1'
+name: 🔒 AD - Automated Triaging
+description: A workflow to automatically process attack discoveries, create cases, analyze with AI, and execute remediation steps
+enabled: true
+tags:
+  - Example
+  - Agentic Workflow
+  - SOC Agent
+triggers:
+  - type: alert
+steps:
+  - name: for_each_discovery
+    type: foreach
+    foreach: '{{event.alerts}}'
+    steps:
+      - name: create_case
+        type: kibana.createCase
+        with:
+          owner: securitySolution
+          title: '[Attack Discovery] {{foreach.item.attack_discovery.title_with_replacements}}'
+          description: |
+            ## Attack Summary
+            {{foreach.item.attack_discovery.summary_markdown_with_replacements}}
+            ## Detailed Analysis
+            {{foreach.item.attack_discovery.details_markdown_with_replacements}}
+            ## Affected Entities
+            {{foreach.item.attack_discovery.entity_summary_markdown_with_replacements}}
+            ## Investigation Context
+            - **Discovery ID:** {{foreach.item.uuid}}
+            - **Detection Time:** {{foreach.item.start}}
+            - **Alert Count:** {{foreach.item.attack_discovery.alerts_context_count}}
+            - **Risk Score:** {{foreach.item.alert.risk_score}}
+            - **Rule:** {{foreach.item.rule.name}}
+
+            ## View Full Discovery
+
+            {{foreach.item.url}}
+          tags:
+            - '{{foreach.item.attack_discovery.mitre_attack_tactics}}'
+          settings:
+            syncAlerts: false
+          severity: high
+          connector:
+            id: none
+            name: none
+            type: .none
+            fields: null
+      - name: foreach_alert_in_ad
+        type: foreach
+        foreach: '{{for_each_discovery.item.attack_discovery.alert_ids}}'
+        steps:
+          - name: get_details
+            type: elasticsearch.search
+            with:
+              index: .alerts-security.alerts-default
+              size: 10
+              query:
+                match:
+                  _id: '{{foreach.item}}'
+          - name: add_to_case
+            type: kibana.request
+            with:
+              method: POST
+              path: /api/cases/{{ steps.create_case.output.id }}/comments
+              body:
+                type: alert
+                alertId: '{{ foreach.item}}'
+                index: .alerts-security.alerts-default
+                rule:
+                  name: '{{ steps.get_details.output.hits.hits._source.kibana.alert.rule.name }}'
+                  id: '{{ steps.get_details.output.hits.hits._source.kibana.alert.rule.uuid }}'
+                owner: securitySolution
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+                Authorization: '{{ consts.secret }}'
+      - name: add_analysis_to_case
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/cases/{{ steps.create_case.output.id }}/comments
+          body:
+            type: user
+            owner: securitySolution
+            comment: '{{ steps.triage_agent.output.data.data | json }}'
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            Authorization: '{{ consts.secret }}'
+      - name: get_host_details
+        type: console
+        with:
+          message: getting host details
+      - name: ai_summary
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/security_ai_assistant/chat/complete
+          body:
+            isStream: false
+            timeout: 10m
+            persist: false
+            connectorId: '{{ consts.sonnet }}'
+            messages:
+              - role: user
+                content: |
+                  <instructions>
+                   Can you generate a one-to-two-sentence summary of the attack above? Make sure the summary captures key details of this attack. This output will be used as content for a Slack message, so make sure sure everything an analyst needs is captured succinctly and very clearly. When references entites like hosts and users, put them in apostrophes (`) like like `hostname`   
+
+                   MAKE SURE TO ONLY OUTPUT THE SUMMARY message
+                  </instructions>
+
+                   <detected attack>
+
+                       {{ event | json:2 }}
+
+                   </detected attack>
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            Authorization: '{{ consts.secret }}'
+      - name: isolate_host
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/endpoint/action/isolate
+          body:
+            endpoint_ids:
+              - 345d5ffc-80a8-413c-9a5d-829687e8a5f2
+            comment: >-
+              Based on my analysis so far, I've isolated the host in question pending further investigation and
+              analysis. As a next step, I'll notify the team.
+            case_ids:
+              - '{{ steps.create_case.output.id }}'
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            Authorization: '{{ consts.secret }}'
+consts:
+  schedule_id: 'REDACTED'
+  kibana: 'REDACTED'
+  secret: 'REDACTED'
+  sonnet: 'REDACTED'
+  endpoint_id: 'REDACTED'
+  slack_web_hook: 'REDACTED'

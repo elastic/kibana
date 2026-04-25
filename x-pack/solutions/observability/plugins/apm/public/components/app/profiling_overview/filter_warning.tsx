@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -57,9 +57,7 @@ function FilterWarningToolTip({ values = [], label }: FilterWarningToolTipProps)
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={renderTooltipOptions()}>
-          <EuiIcon type="question" />
-        </EuiToolTip>
+        <EuiIconTip content={renderTooltipOptions()} type="question" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

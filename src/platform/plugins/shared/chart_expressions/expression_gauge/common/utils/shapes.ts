@@ -8,7 +8,7 @@
  */
 
 import { GaugeShapes } from '../constants';
-import { GaugeShape } from '../types';
+import type { GaugeShape } from '../types';
 
 export const isRoundShape = (shape: GaugeShape) => {
   const roundShapes: string[] = [GaugeShapes.ARC, GaugeShapes.CIRCLE];

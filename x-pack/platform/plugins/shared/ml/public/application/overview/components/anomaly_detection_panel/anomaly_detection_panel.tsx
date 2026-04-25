@@ -215,7 +215,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
         defaultMessage: 'anomaly detection panel',
       })}
     >
-      {noAdJobs ? <AnomalyDetectionEmptyState /> : null}
+      {noAdJobs ? <AnomalyDetectionEmptyState iconSize="s" /> : null}
 
       {typeof errorMessage !== 'undefined' && errorDisplay}
 

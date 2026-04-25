@@ -25,7 +25,7 @@ describe('Find security AI prompts route', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     const mockUser1 = {
-      username: 'my_username',
+      username: 'elastic',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
@@ -34,7 +34,7 @@ describe('Find security AI prompts route', () => {
 
     (getPromptsByGroupId as jest.Mock).mockResolvedValue(Promise.resolve(mockResponse));
     context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
-      username: 'my_username',
+      username: 'elastic',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',

@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-import { LineStyle } from '../types';
+import type { LineStyle } from '../types';
 
 interface LineStyleConfig {
   lineStyle?: LineStyle;
@@ -73,7 +73,7 @@ export const LineStyleSettings = ({
                     defaultMessage: 'Dashed',
                   }),
                   'data-test-subj': 'lnsXY_line_style_dashed',
-                  iconType: 'lineDashed',
+                  iconType: 'lineDash',
                 },
                 {
                   id: `${idPrefix}dotted`,
@@ -81,7 +81,7 @@ export const LineStyleSettings = ({
                     defaultMessage: 'Dotted',
                   }),
                   'data-test-subj': 'lnsXY_line_style_dotted',
-                  iconType: 'lineDotted',
+                  iconType: 'lineDot',
                 },
               ]}
               idSelected={`${idPrefix}${currentConfig?.lineStyle || 'solid'}`}

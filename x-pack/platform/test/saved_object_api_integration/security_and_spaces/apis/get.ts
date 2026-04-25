@@ -7,13 +7,10 @@
 
 import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { TestUser } from '../../common/lib/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  getTestSuiteFactory,
-  TEST_CASES as CASES,
-  GetTestDefinition,
-} from '../../common/suites/get';
+import type { TestUser } from '../../common/lib/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { GetTestDefinition } from '../../common/suites/get';
+import { getTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/get';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -49,11 +46,8 @@ const createTestCases = (spaceId: string) => {
   return { normalTypes, hiddenType, allTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = getTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = getTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const { normalTypes, hiddenType, allTypes } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases

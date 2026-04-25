@@ -7,9 +7,9 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useFlyout } from './use_flyout';
-import { IWaterfallContext } from '../context/waterfall_chart';
+import type { IWaterfallContext } from '../context/waterfall_chart';
 
-import { ProjectedValues, XYChartElementEvent } from '@elastic/charts';
+import type { ProjectedValues, XYChartElementEvent } from '@elastic/charts';
 
 describe('useFlyoutHook', () => {
   const metadata: IWaterfallContext['metadata'] = [

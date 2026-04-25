@@ -43,6 +43,13 @@ const mustMatchError = i18n.translate(
   }
 );
 
+const matchedIndicesTableCaption = i18n.translate(
+  'xpack.ml.dataDrift.indexPatternsEditor.matchedIndicesTableCaption',
+  {
+    defaultMessage: 'Matched indices for the selected index pattern',
+  }
+);
+
 export function DataViewEditor({
   id,
   label,
@@ -160,7 +167,7 @@ export function DataViewEditor({
       </EuiFlexItem>
       <EuiFlexItem css={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
         {errorMessage === mustMatchError ? (
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount color="warning">
             <FormattedMessage
               id="xpack.ml.dataDrift.indexPatternsEditor.notMatchDetail"
               defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases.
@@ -187,6 +194,7 @@ export function DataViewEditor({
           columns={columns}
           pagination={pagination}
           onChange={onTableChange}
+          tableCaption={matchedIndicesTableCaption}
           data-test-subject={`mlDataDriftIndexPatternTable-${id ?? ''}`}
           rowProps={(item) => {
             return {

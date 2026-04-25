@@ -13,7 +13,7 @@ import {
   EuiDescriptionListDescription,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { PingRedirects } from '../../ping_list/ping_redirects';
 
 interface Props {
@@ -31,7 +31,7 @@ export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
         className="euiLink euiLink--primary"
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         data-test-subj="uptimeMonitorRedirectInfo"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
       >
         {i18n.translate('xpack.uptime.monitorList.redirects.title.number', {

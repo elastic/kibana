@@ -56,11 +56,7 @@ export const solutionFormatter = (
   const { body, footer = [] } = navigationTree;
   const nodes: NodeDefinition[] = [];
   [...body, ...footer].forEach((rootNode) => {
-    if (rootNode.type === 'navGroup') {
-      nodes.push(...rootNode.children);
-    } else {
-      nodes.push(rootNode);
-    }
+    nodes.push(rootNode);
   });
 
   return solutionNodesFormatter(nodes, normalizedLinks);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ensure, SerializableRecord } from '@kbn/utility-types';
+import type { Ensure, SerializableRecord } from '@kbn/utility-types';
 
 export type TemplateLayout = Ensure<
   {

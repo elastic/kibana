@@ -51,7 +51,7 @@ export const UpgradeContentsComponent = () => (
       <EuiFlexItem grow={false}>
         <EuiButton
           href="https://www.elastic.co/subscriptions"
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           target="_blank"
         >

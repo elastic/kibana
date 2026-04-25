@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesConfig, SeriesUrl } from '../../types';
+import type { SeriesConfig, SeriesUrl } from '../../types';
 import { useDiscoverLink } from '../../hooks/use_discover_link';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 
@@ -73,7 +73,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
   const popoverButton = (
     <EuiButtonIcon
       data-test-subj="exploratoryViewSeriesActionsButton"
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       onClick={changePopoverVisibility}
       color="text"
       aria-label={POPOVER_BUTTON_LABEL}
@@ -118,7 +118,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="hideSeries"
-                icon={series.hidden ? 'eye' : 'eyeClosed'}
+                icon={series.hidden ? 'eye' : 'eyeSlash'}
                 onClick={toggleSeries}
                 aria-label={series.hidden ? SHOW_SERIES_LABEL : HIDE_SERIES_LABEL}
               >

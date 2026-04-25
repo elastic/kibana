@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema, Type, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { Type, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import {
   KIBANA_PRODUCT_TIERS,
   KIBANA_SOLUTIONS,
@@ -72,6 +73,7 @@ const configSchema = schema.object({
   deployments_url: schema.string({ defaultValue: '/deployments' }),
   deployment_url: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
+  isSaasContainer: schema.maybe(schema.boolean()),
   organization_id: schema.maybe(schema.string()),
   billing_url: schema.maybe(schema.string()),
   performance_url: schema.maybe(schema.string()),
@@ -100,6 +102,7 @@ const configSchema = schema.object({
         ),
         product_tier: schema.maybe(createProductTiersSchema()),
         orchestrator_target: schema.maybe(schema.string()),
+        in_trial: schema.maybe(schema.boolean()),
       },
       // avoid future chicken-and-egg situation with the component populating the config
       { unknowns: 'ignore' }
@@ -117,6 +120,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     deployments_url: true,
     deployment_url: true,
     id: true,
+    isSaasContainer: true,
     organization_id: true,
     billing_url: true,
     users_and_roles_url: true,
@@ -132,6 +136,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
       project_type: true,
       product_tier: true,
       orchestrator_target: true,
+      in_trial: true,
     },
     onboarding: {
       default_solution: true,

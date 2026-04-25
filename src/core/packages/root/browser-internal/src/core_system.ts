@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/css';
-import { filter, firstValueFrom } from 'rxjs';
+import { type Subscription, filter, firstValueFrom, pairwise } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
@@ -25,12 +25,13 @@ import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { FeatureFlagsService } from '@kbn/core-feature-flags-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
+import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-browser-internal';
 import { SettingsService, UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
-import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
@@ -44,6 +45,7 @@ import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
+import { CoreInjectionService } from '@kbn/core-di-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -90,9 +92,10 @@ export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly featureFlags: FeatureFlagsService;
   private readonly injectedMetadata: InjectedMetadataService;
+  private readonly injection: CoreInjectionService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
-  private readonly savedObjects: SavedObjectsService;
+  private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly uiSettings: UiSettingsService;
   private readonly settings: SettingsService;
   private readonly chrome: ChromeService;
@@ -114,6 +117,7 @@ export class CoreSystem {
   private readonly userProfile: UserProfileService;
   private readonly pricing: PricingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
+  private overlayNavigationSubscription: Subscription | undefined;
 
   constructor(params: CoreSystemParams) {
     const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
@@ -146,19 +150,21 @@ export class CoreSystem {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
+    this.injection = new CoreInjectionService();
     this.featureFlags = new FeatureFlagsService(this.coreContext);
     this.security = new SecurityService(this.coreContext);
     this.userProfile = new UserProfileService(this.coreContext);
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
-    this.savedObjects = new SavedObjectsService();
+    this.httpRateLimiter = new HttpRateLimiterService();
     this.uiSettings = new UiSettingsService();
     this.settings = new SettingsService();
     this.overlay = new OverlayService();
     this.chrome = new ChromeService({
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
+      basePath: injectedMetadata.basePath,
       coreContext: this.coreContext,
     });
     this.docLinks = new DocLinksService(this.coreContext);
@@ -257,9 +263,11 @@ export class CoreSystem {
         fatalErrors: this.fatalErrorsSetup,
         executionContext,
       });
+      this.httpRateLimiter.setup({ fatalErrors: this.fatalErrorsSetup, http });
+      const injection = this.injection.setup();
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
-      this.chrome.setup({ analytics });
+      const chrome = this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
@@ -271,10 +279,12 @@ export class CoreSystem {
       const core: InternalCoreSetup = {
         analytics,
         application,
+        chrome,
         fatalErrors: this.fatalErrorsSetup,
         featureFlags,
         http,
         injectedMetadata,
+        injection,
         notifications,
         theme,
         uiSettings,
@@ -310,15 +320,16 @@ export class CoreSystem {
       const security = this.security.start();
       const userProfile = this.userProfile.start();
       const injectedMetadata = this.injectedMetadata.start();
+      const injection = this.injection.start();
       const uiSettings = this.uiSettings.start();
       const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = this.http.start();
-      const savedObjects = await this.savedObjects.start({ http });
       const i18n = this.i18n.start();
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
+      this.httpRateLimiter.start();
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
@@ -346,19 +357,21 @@ export class CoreSystem {
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
       });
-      const rendering = this.rendering.start({
-        analytics,
-        executionContext,
-        i18n,
-        theme,
-        userProfile,
-      });
 
-      const notifications = this.notifications.start({
-        analytics,
-        overlays,
-        targetDomElement: notificationsTargetDomElement,
-        rendering,
+      this.overlayNavigationSubscription = application.currentAppId$
+        .pipe(pairwise())
+        .subscribe(() => {
+          this.overlay.closeAllFlyouts();
+        });
+
+      const featureFlags = await this.featureFlags.start();
+
+      // Temp hack: https://github.com/elastic/kibana/issues/247820
+      // Create a deferred promise for notifications to break circular dependency
+      // chrome -> rendering -> notifications -> chrome
+      let resolveNotifications: (notifications: NotificationsStart) => void;
+      const notificationsPromise = new Promise<NotificationsStart>((resolve) => {
+        resolveNotifications = resolve;
       });
 
       const chrome = await this.chrome.start({
@@ -366,14 +379,35 @@ export class CoreSystem {
         docLinks,
         http,
         injectedMetadata,
-        notifications,
+        getNotifications: () => notificationsPromise,
         customBranding,
         i18n,
         theme,
         userProfile,
         uiSettings,
+        featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
+
+      const rendering = this.rendering.start({
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+        coreEnv: this.coreContext.env,
+        chrome,
+      });
+
+      const notifications = this.notifications.start({
+        analytics,
+        overlays,
+        targetDomElement: notificationsTargetDomElement,
+        rendering,
+        settings,
+      });
+
+      resolveNotifications!(notifications);
 
       this.coreApp.start({
         application,
@@ -387,7 +421,6 @@ export class CoreSystem {
         userProfile,
       });
 
-      const featureFlags = await this.featureFlags.start();
       const pricing = await this.pricing.start({ http });
 
       const core: InternalCoreStart = {
@@ -399,9 +432,9 @@ export class CoreSystem {
         featureFlags,
         http,
         theme,
-        savedObjects,
         i18n,
         injectedMetadata,
+        injection,
         notifications,
         overlays,
         uiSettings,
@@ -431,7 +464,15 @@ export class CoreSystem {
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
       this.rendering.renderCore(
-        { chrome, application, overlays, featureFlags },
+        {
+          chrome,
+          application,
+          overlays,
+          featureFlags,
+          http,
+          docLinks,
+          customBranding,
+        },
         coreUiTargetDomElement
       );
 
@@ -441,9 +482,6 @@ export class CoreSystem {
 
       // Wait for the first app navigation to report Kibana Loaded
       firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
-        performance.mark(KBN_LOAD_MARKS, {
-          detail: LOAD_FIRST_NAV,
-        });
         this.reportKibanaLoadedEvent(analytics);
       });
 
@@ -463,6 +501,7 @@ export class CoreSystem {
   }
 
   public stop() {
+    this.overlayNavigationSubscription?.unsubscribe();
     this.plugins.stop();
     this.coreApp.stop();
     this.notifications.stop();

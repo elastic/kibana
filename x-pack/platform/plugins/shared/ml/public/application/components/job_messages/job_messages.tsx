@@ -119,7 +119,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
                     aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
                       defaultMessage: 'Toggle in chart',
                     })}
-                    iconType="visAreaStacked"
+                    iconType="chartAreaStack"
                     onClick={() => actionHandler(message)}
                   />
                 </EuiToolTip>
@@ -150,8 +150,13 @@ export const JobMessages: FC<JobMessagesProps> = ({
         compressed={true}
         loading={loading}
         error={error}
-        pagination={true}
+        pagination={{
+          initialPageSize: 25,
+        }}
         data-test-subj={'mlAnalyticsDetailsJobMessagesTable'}
+        tableCaption={i18n.translate('xpack.ml.jobMessages.tableCaption', {
+          defaultMessage: 'Job messages',
+        })}
       />
     </>
   );

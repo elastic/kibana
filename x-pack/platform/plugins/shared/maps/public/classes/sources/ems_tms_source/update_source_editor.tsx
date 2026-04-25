@@ -8,8 +8,9 @@
 import React, { Fragment } from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EmsTmsSourceConfig, TileServiceSelect } from './tile_service_select';
-import { OnSourceChangeArgs } from '../source';
+import type { EmsTmsSourceConfig } from './tile_service_select';
+import { TileServiceSelect } from './tile_service_select';
+import type { OnSourceChangeArgs } from '../source';
 
 interface Props {
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;

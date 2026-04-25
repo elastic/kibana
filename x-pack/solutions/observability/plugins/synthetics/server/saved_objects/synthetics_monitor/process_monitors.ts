@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { intersection } from 'lodash';
 import { periodToMs } from '../../routes/overview_status/utils';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
-  SourceType,
-} from '../../../common/runtime_types';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../common/runtime_types';
 
 export interface MonitorData {
   scheduleInMs: number;

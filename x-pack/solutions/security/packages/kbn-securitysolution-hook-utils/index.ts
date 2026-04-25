@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './src/types';
+export type * from './src/types';
 export * from './src/use_async';
 export * from './src/use_is_mounted';
 export * from './src/use_observable';

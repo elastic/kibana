@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { INSTALLED_VERSION } from '../services/private_location_test_service';
+import { type PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
+import { formatMWs } from '@kbn/synthetics-plugin/server/synthetics_service/formatters/formatting_utils';
+import { DEFAULT_SYNTHETICS_VERSION } from '../services/private_location_test_service';
 import { getDataStream } from './test_policy';
 
-export const commonVars = {
+export const commonVars = (mws?: MaintenanceWindow[]) => ({
   max_attempts: {
     type: 'integer',
     value: 2,
   },
-};
+  maintenance_windows: {
+    type: 'yaml',
+    value: mws ? formatMWs(mws) : [],
+  },
+});
 
 export const getTestProjectSyntheticsPolicyLightweight = (
   {
@@ -26,6 +32,8 @@ export const getTestProjectSyntheticsPolicyLightweight = (
     projectId = 'test-suite',
     locationName = 'Fleet Managed',
     namespace,
+    mws,
+    kibanaUrl,
   }: {
     name?: string;
     inputs: Record<string, { value: string | boolean; type: string }>;
@@ -35,6 +43,8 @@ export const getTestProjectSyntheticsPolicyLightweight = (
     locationId: string;
     locationName?: string;
     namespace?: string;
+    mws?: MaintenanceWindow[];
+    kibanaUrl?: string;
   } = {
     name: 'My Monitor 3',
     inputs: {},
@@ -48,7 +58,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: namespace || undefined,
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: DEFAULT_SYNTHETICS_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],
@@ -134,7 +144,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               type: 'integer',
               value: '0',
             },
-            ...commonVars,
+            ...commonVars(mws),
             mode: {
               type: 'text',
               value: 'any',
@@ -161,7 +171,9 @@ export const getTestProjectSyntheticsPolicyLightweight = (
                       config_id: configId,
                       'monitor.project.name': projectId,
                       'monitor.project.id': projectId,
+                      'monitor.interval': 3600,
                       meta: { space_id: 'default' },
+                      ...(kibanaUrl ? { kibanaUrl } : {}),
                     },
                     target: '',
                   },
@@ -282,11 +294,13 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               {
                 add_fields: {
                   fields: {
-                    config_id: configId,
                     'monitor.fleet_managed': true,
-                    'monitor.project.id': projectId,
+                    config_id: configId,
                     'monitor.project.name': projectId,
+                    'monitor.project.id': projectId,
+                    'monitor.interval': 3600,
                     meta: { space_id: 'default' },
+                    ...(kibanaUrl ? { kibanaUrl } : {}),
                   },
                   target: '',
                 },
@@ -330,7 +344,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'ssl.supported_protocols': { type: 'yaml' },
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
-            ...commonVars,
+            ...commonVars(mws),
             id: { type: 'text' },
             origin: { type: 'text' },
             ipv4: { type: 'bool', value: true },
@@ -365,7 +379,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             tags: { type: 'yaml' },
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
-            ...commonVars,
+            ...commonVars(mws),
             id: { type: 'text' },
             origin: { type: 'text' },
             ipv4: { type: 'bool', value: true },
@@ -434,7 +448,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'source.zip_url.proxy_url': { type: 'text' },
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
-            ...commonVars,
+            ...commonVars(mws),
             id: { type: 'text' },
             origin: { type: 'text' },
             ...inputs,
@@ -519,6 +533,7 @@ export const getTestProjectSyntheticsPolicy = (
     locationId,
     locationName = 'Fleet Managed',
     namespace,
+    mws,
   }: {
     name?: string;
     inputs: Record<string, { value: string | boolean; type: string }>;
@@ -528,6 +543,7 @@ export const getTestProjectSyntheticsPolicy = (
     locationName?: string;
     locationId: string;
     namespace?: string;
+    mws?: MaintenanceWindow[];
   } = {
     name: 'check if title is present-Test private location 0',
     inputs: {},
@@ -541,7 +557,7 @@ export const getTestProjectSyntheticsPolicy = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: namespace || undefined,
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: DEFAULT_SYNTHETICS_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],
@@ -592,7 +608,7 @@ export const getTestProjectSyntheticsPolicy = (
             'ssl.supported_protocols': { type: 'yaml' },
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
-            ...commonVars,
+            ...commonVars(mws),
             id: { type: 'text' },
             origin: { type: 'text' },
             ipv4: { type: 'bool', value: true },
@@ -635,7 +651,7 @@ export const getTestProjectSyntheticsPolicy = (
             'ssl.verification_mode': { type: 'text' },
             'ssl.supported_protocols': { type: 'yaml' },
             location_name: { value: 'Fleet managed', type: 'text' },
-            ...commonVars,
+            ...commonVars(mws),
             id: { type: 'text' },
             origin: { type: 'text' },
             ipv4: { type: 'bool', value: true },
@@ -739,7 +755,7 @@ export const getTestProjectSyntheticsPolicy = (
             'source.zip_url.ssl.supported_protocols': { type: 'yaml' },
             'source.zip_url.proxy_url': { type: 'text' },
             location_name: { value: 'Test private location 0', type: 'text' },
-            ...commonVars,
+            ...commonVars(mws),
             location_id: { value: 'fleet_managed', type: 'text' },
             id: { value: id, type: 'text' },
             origin: { value: 'project', type: 'text' },

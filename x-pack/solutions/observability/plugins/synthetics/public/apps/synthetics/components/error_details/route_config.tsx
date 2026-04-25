@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import type { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
@@ -15,7 +15,7 @@ import { ErrorStartedAt } from './components/error_started_at';
 import { ErrorDetailsPage } from './error_details_page';
 import { ErrorDuration } from './components/error_duration';
 import { ERROR_DETAILS_ROUTE } from '../../../../../common/constants';
-import { RouteProps } from '../../routes';
+import type { RouteProps } from '../../routes';
 
 export const getErrorDetailsRouteConfig = (
   history: ReturnType<typeof useHistory>,

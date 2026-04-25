@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function removeLifecycle(client: ElasticsearchClient, indexNames: string[]) {
@@ -24,7 +24,7 @@ async function removeLifecycle(client: ElasticsearchClient, indexNames: string[]
 }
 
 const bodySchema = schema.object({
-  indexNames: schema.arrayOf(schema.string()),
+  indexNames: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
 });
 
 export function registerRemoveRoute({

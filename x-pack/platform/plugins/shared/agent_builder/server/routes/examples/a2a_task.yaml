@@ -1,0 +1,30 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        a2aTaskRequestExample:
+          description: "WARNING: DO NOT USE THIS ENDPOINT VIA REST API. These examples are auto-generated and should not be run. Integrate with A2A using an A2A SDK or A2A Inspector instead."
+          value:
+            jsonrpc: "2.0"
+            method: "complete"
+            params:
+              messages:
+              - role: "user"
+                content: "Hello from A2A protocol"
+            id: "task-123"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          a2aTaskResponseExample:
+            description: "Example response from A2A Task Endpoint with results of task execution"
+            value:
+              jsonrpc: "2.0"
+              id: "task-123"
+              result:
+                type: "response"
+                response:
+                  message: "Hello! How can I help you today?"
+                conversation_id: "conv-456"

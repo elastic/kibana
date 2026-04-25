@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { PLUGIN_TITLE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
@@ -60,9 +61,8 @@ export const QueryRulesOverview = () => {
     <QueryRulesPageTemplate restrictWidth={false}>
       {!isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0 && (
         <KibanaPageTemplate.Header
-          pageTitle="Query Rules"
+          pageTitle={PLUGIN_TITLE}
           restrictWidth
-          color="primary"
           rightSideItems={[
             <EuiFlexGroup alignItems="center" key="queryRulesOverviewHeaderButtons">
               <EuiFlexItem grow={false}>
@@ -88,7 +88,7 @@ export const QueryRulesOverview = () => {
                 <EuiButton
                   data-test-subj="queryRulesOverviewCreateButton"
                   fill
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => {
                     usageTracker?.click(AnalyticsEvents.addRulesetClicked);
                     setIsCreateModalVisible(true);

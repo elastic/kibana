@@ -10,7 +10,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
-import { DocumentDiffMode } from '../types';
+import type { DocumentDiffMode } from '../types';
 
 export const FIELD_NAME_CLASS = 'unifiedDataTable__comparisonFieldName';
 export const BASE_CELL_CLASS = 'unifiedDataTable__comparisonBaseDocCell';

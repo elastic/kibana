@@ -9,11 +9,11 @@ import { Observable } from 'rxjs';
 import { getTableActions } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createTagCapabilities } from '../../../common/test_utils';
-import { TagsCapabilities } from '../../../common/capabilities';
+import type { TagsCapabilities } from '../../../common/capabilities';
 import { tagClientMock } from '../../services/tags/tags_client.mock';
 import { tagsCacheMock } from '../../services/tags/tags_cache.mock';
 import { assignmentServiceMock } from '../../services/assignments/assignment_service.mock';
-import { TagAction } from './types';
+import type { TagAction } from './types';
 
 describe('getTableActions', () => {
   let core: ReturnType<typeof coreMock.createStart>;
@@ -43,6 +43,7 @@ describe('getTableActions', () => {
       setLoading,
       assignableTypes,
       capabilities: createTagCapabilities(caps),
+      // @ts-expect-error upgrade typescript v5.9.3
       fetchTags,
       canceled$: new Observable<void>(),
     });

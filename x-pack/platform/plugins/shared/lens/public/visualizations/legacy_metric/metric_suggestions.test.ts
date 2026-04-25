@@ -6,7 +6,7 @@
  */
 
 import { getSuggestions } from './metric_suggestions';
-import { TableSuggestionColumn, TableSuggestion } from '../../types';
+import type { TableSuggestionColumn, TableSuggestion } from '@kbn/lens-common';
 
 describe('metric_suggestions', () => {
   function numCol(columnId: string): TableSuggestionColumn {

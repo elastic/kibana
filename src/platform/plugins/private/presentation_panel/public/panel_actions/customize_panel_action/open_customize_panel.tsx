@@ -12,7 +12,7 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import React from 'react';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
-import { CustomizePanelActionApi } from './customize_panel_action';
+import type { CustomizePanelActionApi } from './customize_panel_action';
 
 export function openCustomizePanelFlyout({
   focusOnTitle,
@@ -42,7 +42,7 @@ export function openCustomizePanelFlyout({
     },
     flyoutProps: {
       'data-test-subj': 'customizePanel',
+      focusedPanelId: apiHasUniqueId(api) ? api.uuid : undefined,
     },
-    uuid: apiHasUniqueId(api) ? api.uuid : undefined,
   });
 }

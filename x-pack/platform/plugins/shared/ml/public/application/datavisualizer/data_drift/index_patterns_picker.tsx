@@ -21,6 +21,7 @@ import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor
 
 import { MlPageHeader } from '../../components/page_header';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import { PageTitle } from '../../components/page_title';
 
 type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
 
@@ -46,9 +47,13 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
     <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
         <MlPageHeader>
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-            defaultMessage="Select data view or saved Discover session"
+          <PageTitle
+            title={
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+                defaultMessage="Select data view or saved Discover session"
+              />
+            }
           />
         </MlPageHeader>
         <EuiPanel hasShadow={false} hasBorder>
@@ -94,7 +99,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
             <EuiButton
               size="m"
               fill
-              iconType="plusInCircleFilled"
+              iconType="plusCircle"
               onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
               disabled={!canEditDataView}
               data-test-subj={'dataDriftCreateDataViewButton'}
@@ -192,9 +197,13 @@ export const DataDriftIndexPatternsPicker: FC = () => {
     <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
         <MlPageHeader>
-          <FormattedMessage
-            id="xpack.ml.dataDrift.createDataDriftDataViewTitle"
-            defaultMessage="Create data view and analyze data drift"
+          <PageTitle
+            title={
+              <FormattedMessage
+                id="xpack.ml.dataDrift.createDataDriftDataViewTitle"
+                defaultMessage="Create data view and analyze data drift"
+              />
+            }
           />
         </MlPageHeader>
         <EuiPageSection>

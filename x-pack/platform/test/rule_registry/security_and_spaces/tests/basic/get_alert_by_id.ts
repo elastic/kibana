@@ -51,6 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const TEST_URL = '/internal/rac/alerts';
   const ALERTS_INDEX_URL = `${TEST_URL}/index`;
+  const DEFAULT = 'default';
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
@@ -65,10 +66,10 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(user.username, user.password)
         .set('kbn-xsrf', 'true')
         .expect(200);
-    const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === APM_ALERT_INDEX
+    const observabilityIndex = indexNames?.index_name?.find((indexName) =>
+      indexName.startsWith(APM_ALERT_INDEX)
     );
-    expect(observabilityIndex).to.eql(APM_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
+    expect(observabilityIndex).to.eql(`${APM_ALERT_INDEX}-${DEFAULT}`); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   const getSecuritySolutionIndexName = async (user: User) => {
@@ -89,11 +90,11 @@ export default ({ getService }: FtrProviderContext) => {
       await getSecuritySolutionIndexName(superUser);
       await getAPMIndexName(superUser);
 
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     it('superuser should be able to access an alert in a given space', async () => {

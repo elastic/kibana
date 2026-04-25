@@ -12,8 +12,10 @@ import React from 'react';
 
 import * as styledComponents from 'styled-components';
 
-import { ThemedStyledComponentsModule, ThemeProvider, ThemeProviderProps } from 'styled-components';
-import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import type { ThemedStyledComponentsModule, ThemeProviderProps } from 'styled-components';
+import { ThemeProvider } from 'styled-components';
+import type { euiThemeVars } from '@kbn/ui-theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 /**
  * A `deprecated` structure representing a Kibana theme containing variables from the current EUI theme.
@@ -53,7 +55,7 @@ const KibanaStyledComponentsThemeProvider = <
  * @deprecated All Kibana components need to migrate to Emotion.
  */
 export const KibanaStyledComponentsThemeProviderDecorator: Decorator = (storyFn, { globals }) => {
-  const darkMode = globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark';
+  const darkMode = globals.euiTheme === 'borealis.dark';
 
   return (
     <KibanaStyledComponentsThemeProvider darkMode={darkMode}>

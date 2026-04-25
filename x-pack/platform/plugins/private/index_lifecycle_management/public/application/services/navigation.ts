@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
 
 export const ROUTES = {

@@ -12,7 +12,7 @@ import { useCallback, useMemo } from 'react';
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
 import type { MlLocatorParams } from '../../../../common/types/locator';
-import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlLocator, useMlManagementLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -35,11 +35,12 @@ export interface Tab {
 
 export function useSideNavItems(activeRoute: MlRoute | undefined) {
   const mlLocator = useMlLocator();
+  const mlManagementLocator = useMlManagementLocator();
   const navigateToPath = useNavigateToPath();
 
   const mlFeaturesDisabled = !isFullLicense();
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
-  const [canUseAiops] = usePermissionCheck(['canUseAiops']);
+  const [canUseAiops, canGetJobs] = usePermissionCheck(['canUseAiops', 'canGetJobs']);
 
   const [globalState] = useUrlState('_g');
 
@@ -68,6 +69,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     [pageState]
   );
 
+  const navigateToAnomalyDetectionJobsManagement = useCallback(async () => {
+    if (!mlManagementLocator) return;
+
+    await mlManagementLocator.navigate({
+      sectionId: 'ml',
+      appId: 'anomaly_detection',
+    });
+  }, [mlManagementLocator]);
+
   const tabsDefinition: Tab[] = useMemo((): Tab[] => {
     const disableLinks = mlFeaturesDisabled;
 
@@ -88,7 +98,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           {
             id: 'datavisualizer',
             name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
-              defaultMessage: 'Data Visualizer',
+              defaultMessage: 'Data visualizer',
             }),
             disabled: false,
             pathId: ML_PAGES.DATA_VISUALIZER,
@@ -106,9 +116,18 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
               disabled: disableLinks || !isADEnabled,
               items: [
                 {
+                  id: 'manage_jobs',
+                  name: i18n.translate('xpack.ml.navMenu.anomalyDetection.manageJobsText', {
+                    defaultMessage: 'Manage jobs',
+                  }),
+                  disabled: disableLinks || !isADEnabled || !canGetJobs,
+                  onClick: navigateToAnomalyDetectionJobsManagement,
+                  testSubj: 'mlMainTab manageJobs',
+                },
+                {
                   id: 'anomaly_explorer',
                   name: i18n.translate('xpack.ml.navMenu.anomalyDetection.anomalyExplorerText', {
-                    defaultMessage: 'Anomaly Explorer',
+                    defaultMessage: 'Anomaly explorer',
                   }),
                   disabled: disableLinks || !isADEnabled,
                   pathId: ML_PAGES.ANOMALY_EXPLORER,
@@ -117,7 +136,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
                 {
                   id: 'single_metric_viewer',
                   name: i18n.translate('xpack.ml.navMenu.anomalyDetection.singleMetricViewerText', {
-                    defaultMessage: 'Single Metric Viewer',
+                    defaultMessage: 'Single metric viewer',
                   }),
                   pathId: ML_PAGES.SINGLE_METRIC_VIEWER,
                   disabled: disableLinks || !isADEnabled,
@@ -132,7 +151,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             {
               id: 'data_frame_analytics_section',
               name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
-                defaultMessage: 'Data Frame Analytics',
+                defaultMessage: 'Data frame analytics',
               }),
               disabled: disableLinks || !isDFAEnabled,
               items: [
@@ -140,7 +159,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
                   id: 'data_frame_analytics_results_explorer',
                   pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
                   name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.resultsExplorerText', {
-                    defaultMessage: 'Results Explorer',
+                    defaultMessage: 'Results explorer',
                   }),
                   disabled: disableLinks || !isDFAEnabled,
                   testSubj: 'mlMainTab dataFrameAnalyticsResultsExplorer',
@@ -149,7 +168,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
                   id: 'data_frame_analytics_job_map',
                   pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
                   name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {
-                    defaultMessage: 'Analytics Map',
+                    defaultMessage: 'Analytics map',
                   }),
                   disabled: disableLinks || !isDFAEnabled,
                   testSubj: 'mlMainTab dataFrameAnalyticsMap',
@@ -175,7 +194,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           id: 'logRateAnalysis',
           pathId: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT,
           name: i18n.translate('xpack.ml.navMenu.logRateAnalysisLinkText', {
-            defaultMessage: 'Log Rate Analysis',
+            defaultMessage: 'Log rate analysis',
           }),
           disabled: disableLinks,
           testSubj: 'mlMainTab logRateAnalysis',
@@ -185,7 +204,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           id: 'logCategorization',
           pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
           name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
-            defaultMessage: 'Log Pattern Analysis',
+            defaultMessage: 'Log pattern analysis',
           }),
           disabled: disableLinks,
           testSubj: 'mlMainTab logCategorization',
@@ -194,10 +213,10 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         ...(CHANGE_POINT_DETECTION_ENABLED
           ? [
               {
-                id: 'changePointDetection',
+                id: 'chartChangePoint',
                 pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
                 name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
-                  defaultMessage: 'Change Point Detection',
+                  defaultMessage: 'Change point detection',
                 }),
                 disabled: disableLinks,
                 testSubj: 'mlMainTab changePointDetection',
@@ -209,7 +228,14 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     });
 
     return mlTabs;
-  }, [mlFeaturesDisabled, isADEnabled, isDFAEnabled, canUseAiops]);
+  }, [
+    mlFeaturesDisabled,
+    isADEnabled,
+    isDFAEnabled,
+    canUseAiops,
+    canGetJobs,
+    navigateToAnomalyDetectionJobsManagement,
+  ]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
     (tab: Tab) => {

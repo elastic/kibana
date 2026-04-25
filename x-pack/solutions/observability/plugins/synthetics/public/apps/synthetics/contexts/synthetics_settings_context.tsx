@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   AppMountParameters,
   ChromeBadge,
   ChromeBreadcrumb,
   CoreStart,
   I18nStart,
 } from '@kbn/core/public';
-import React, { createContext, useContext, useMemo, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { useGetUrlParams } from '../hooks';
 
@@ -41,6 +42,7 @@ export interface SyntheticsAppProps {
   appMountParameters: AppMountParameters;
   isDev: boolean;
   isServerless: boolean;
+  isCCSEnabled: boolean;
 }
 
 export interface SyntheticsSettingsContextValues {
@@ -55,6 +57,7 @@ export interface SyntheticsSettingsContextValues {
   commonlyUsedRanges?: CommonlyUsedDateRange[];
   isDev?: boolean;
   isServerless?: boolean;
+  isCCSEnabled?: boolean;
   setBreadcrumbs?: (crumbs: ChromeBreadcrumb[]) => void;
   darkMode: boolean;
 }
@@ -75,6 +78,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
   isInfraAvailable: true,
   isLogsAvailable: true,
   isDev: false,
+  isCCSEnabled: false,
   canSave: false,
   canManagePrivateLocations: false,
   darkMode: false,
@@ -93,6 +97,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     commonlyUsedRanges,
     isDev,
     isServerless,
+    isCCSEnabled,
     darkMode,
   } = props;
 
@@ -117,6 +122,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
       dateRangeStart: dateRangeStart ?? DATE_RANGE_START,
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
       isServerless,
+      isCCSEnabled,
       canManagePrivateLocations,
     };
   }, [
@@ -131,6 +137,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     dateRangeEnd,
     commonlyUsedRanges,
     isServerless,
+    isCCSEnabled,
     canManagePrivateLocations,
   ]);
 

@@ -6,8 +6,8 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import expect from 'expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import {
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type {
   MonitorFields,
   EncryptedSyntheticsSavedMonitor,
   ProjectMonitorsRequest,
@@ -16,7 +16,7 @@ import {
 import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import pMap from 'p-map';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 
@@ -25,6 +25,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const retry = getService('retry');
     const privateLocationsTestService = new PrivateLocationTestService(getService);
 
     const SPACE_ID = `test-space-${uuidv4()}`;
@@ -59,13 +60,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: [
-          syntheticsMonitorSavedObjectType,
-          'ingest-agent-policies',
-          'ingest-package-policies',
-          'synthetics-private-location',
-        ],
+      await retry.try(async () => {
+        await kibanaServer.savedObjects.clean({
+          types: [
+            syntheticsMonitorSavedObjectType,
+            'ingest-agent-policies',
+            'ingest-package-policies',
+            'synthetics-private-location',
+          ],
+        });
       });
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await supertest
@@ -91,8 +94,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: [syntheticsMonitorSavedObjectType, 'ingest-package-policies'],
+      await retry.try(async () => {
+        await kibanaServer.savedObjects.clean({
+          types: [syntheticsMonitorSavedObjectType, 'ingest-package-policies'],
+        });
       });
 
       monitors = [];
@@ -107,7 +112,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.spaces.delete(SPACE_ID);
+      try {
+        await kibanaServer.spaces.delete(SPACE_ID);
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          (!error.message.includes('status code 404') && !error.message.includes('Status: 404'))
+        ) {
+          throw error;
+        }
+      }
     });
 
     it('returns the suggestions', async () => {

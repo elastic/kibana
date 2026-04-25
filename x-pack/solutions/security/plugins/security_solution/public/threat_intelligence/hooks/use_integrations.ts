@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type QueryFunctionContext, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type QueryFunctionContext, useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback, useEffect, useRef } from 'react';
 import { filterIntegrations } from '../utils/filter_integrations';
 import { useKibana } from '../../common/lib/kibana';
@@ -26,7 +26,7 @@ export interface Integration {
   status: IntegrationInstallStatus;
 }
 
-const queryKey = ['integrations'];
+const queryKey = ['integrations-threat-intel'];
 
 /**
  * Retrieves integrations from the Fleet plugin endpoint /api/fleet/epm/packages.

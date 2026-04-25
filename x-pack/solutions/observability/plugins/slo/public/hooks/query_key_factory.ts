@@ -33,6 +33,13 @@ interface SLOOverviewFilter {
   lastRefresh?: number;
 }
 
+interface SloTemplateListFilter {
+  search?: string;
+  tags?: string[];
+  page: number;
+  perPage: number;
+}
+
 export const sloKeys = {
   all: ['slo'] as const,
   lists: () => [...sloKeys.all, 'list'] as const,
@@ -40,6 +47,11 @@ export const sloKeys = {
   group: (filters: SloGroupListFilter) => [...sloKeys.groups(), filters] as const,
   groups: () => [...sloKeys.all, 'group'] as const,
   overview: (filters: SLOOverviewFilter) => ['overview', filters] as const,
+  templates: () => [...sloKeys.all, 'templates'] as const,
+  template: (templateId: string) => [...sloKeys.templates(), templateId] as const,
+  templatesList: (filters: SloTemplateListFilter) =>
+    [...sloKeys.templates(), 'list', filters] as const,
+  templateTags: () => [...sloKeys.templates(), 'tags'] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId: string, instanceId: string | undefined, remoteName: string | undefined) =>
     [...sloKeys.details(), { sloId, instanceId, remoteName }] as const,
@@ -59,8 +71,15 @@ export const sloKeys = {
     includeOutdatedOnly: boolean;
     validTags: string;
   }) => [...sloKeys.allDefinitions(), params],
+  searchDefinitions: (params: {
+    search: string;
+    size: number;
+    searchAfter?: string;
+    remoteName?: string;
+  }) => [...sloKeys.all, 'searchDefinitions', params] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
-  health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
+  allHealth: () => [...sloKeys.all, 'health'] as const,
+  health: (list: Array<{ id: string; instanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,
   burnRates: (
     sloId: string,
@@ -79,16 +98,50 @@ export const sloKeys = {
     groupBy?: string[];
   }) => [...sloKeys.all, 'preview', params] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
-  groupings: (params: {
+  instances: (params: {
     sloId: string;
-    instanceId: string;
-    groupingKey: string;
     search?: string;
-    afterKey?: string;
-    excludeStale?: boolean;
+    searchAfter?: string;
+    size: number;
     remoteName?: string;
-  }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
+  }) => [...sloKeys.all, 'instances', params] as const,
   bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
+  allHealthScans: () => [...sloKeys.all, 'healthScans'] as const,
+  healthScans: (size?: number) => [...sloKeys.allHealthScans(), { size }] as const,
+  allHealthScanResults: () => [...sloKeys.all, 'healthScanResults'] as const,
+  healthScanResults: ({
+    scanId,
+    size,
+    searchAfter,
+    problematic,
+    allSpaces,
+  }: {
+    scanId: string;
+    size?: number;
+    searchAfter?: string;
+    problematic?: boolean;
+    allSpaces?: boolean;
+  }) =>
+    [
+      ...sloKeys.allHealthScanResults(),
+      { scanId, size, searchAfter, problematic, allSpaces },
+    ] as const,
+  compositeLists: () => [...sloKeys.all, 'compositeList'] as const,
+  compositeList: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    tags?: string;
+    sortBy?: string;
+    sortDirection?: string;
+    status?: string;
+  }) => [...sloKeys.compositeLists(), filters] as const,
+  compositeDetails: () => [...sloKeys.all, 'compositeDetail'] as const,
+  compositeDetail: (id: string) => [...sloKeys.compositeDetails(), id] as const,
+  compositeHistoricalSummaries: () => [...sloKeys.all, 'compositeHistoricalSummary'] as const,
+  compositeHistoricalSummary: (ids: string[]) =>
+    [...sloKeys.compositeHistoricalSummaries(), ids] as const,
+  compositeSuggestions: () => [...sloKeys.all, 'compositeSuggestions'] as const,
 };
 
 export type SloKeys = typeof sloKeys;

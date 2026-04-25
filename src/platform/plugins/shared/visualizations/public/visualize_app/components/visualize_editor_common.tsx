@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EventEmitter } from 'events';
-import React, { RefObject, useCallback, useEffect } from 'react';
+import type { EventEmitter } from 'events';
+import type { RefObject } from 'react';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
+import React, { useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiBreakpoint, EuiScreenReaderOnly, type UseEuiTheme } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { css as cssReact } from '@emotion/react';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
 import { getUISettings } from '../../services';
 import { VizChartWarning } from './viz_chart_warning';
-import {
+import type {
   SavedVisInstance,
   VisualizeAppState,
   VisualizeServices,
@@ -34,7 +37,12 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
-import { visualizeStyle } from '../../vis.styles';
+
+const visualizeStyle = cssReact(`
+    display: flex;
+    flex: 1 1 100%;
+    overflow: hidden;
+  `);
 
 const flexParentStyle = css({
   flex: '1 1 auto',
@@ -71,6 +79,30 @@ const visEditorCommonStyles = {
     z-index: 0;
     ${flexParentStyle};
   `,
+  visType: (euiThemeContext: UseEuiTheme) =>
+    css({
+      '&.visEditor--timelion': {
+        '.visEditorSidebar__timelionOptions': {
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+      },
+      '&.visEditor--vega': {
+        '.visEditorSidebar__config': {
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'row',
+          overflow: 'hidden',
+
+          minHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+
+          [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+            maxHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+          },
+        },
+      },
+    }),
 };
 
 interface VisualizeEditorCommonProps {
@@ -87,6 +119,7 @@ interface VisualizeEditorCommonProps {
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   originatingPath?: string;
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[];
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   eventEmitter?: EventEmitter;
@@ -104,6 +137,7 @@ export const VisualizeEditorCommon = ({
   onAppLeave,
   originatingApp,
   originatingPath,
+  incomingBreadcrumbs,
   setOriginatingApp,
   visualizationIdFromUrl,
   embeddableId,
@@ -177,7 +211,7 @@ export const VisualizeEditorCommon = ({
   return (
     <div
       className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}
-      css={styles.base}
+      css={[styles.base, styles.visType]}
     >
       {visInstance && appState && currentAppState && (
         <VisualizeTopNav
@@ -189,6 +223,7 @@ export const VisualizeEditorCommon = ({
           hasUnappliedChanges={hasUnappliedChanges}
           originatingApp={originatingApp}
           originatingPath={originatingPath}
+          incomingBreadcrumbs={incomingBreadcrumbs}
           setOriginatingApp={setOriginatingApp}
           visInstance={visInstance}
           stateContainer={appState}

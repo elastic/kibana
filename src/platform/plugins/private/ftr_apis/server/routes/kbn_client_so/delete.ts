@@ -34,7 +34,7 @@ export const registerDeleteRoute = (router: IRouter) => {
       const hiddenTypes = listHiddenTypes(savedObjects.typeRegistry);
       const soClient = savedObjects.getClient({ includedHiddenTypes: hiddenTypes });
 
-      const result = await soClient.delete(type, id, { force: true });
+      const result = await soClient.delete(type, id, { force: true, refresh: true });
       return res.ok({ body: result });
     })
   );

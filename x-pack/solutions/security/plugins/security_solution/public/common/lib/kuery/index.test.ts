@@ -58,6 +58,107 @@ describe('convertToBuildEsQuery', () => {
     dateFormatTZ: 'Browser',
   };
 
+  const expectedConverted = {
+    bool: {
+      must: [],
+      filter: [
+        {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      // ✅ Nested fields are converted to use the `nested` query syntax
+                      nested: {
+                        path: 'threat.enrichments',
+                        query: {
+                          bool: {
+                            should: [
+                              {
+                                match: {
+                                  'threat.enrichments.matched.atomic':
+                                    'a4f87cbcd2a4241da77b6bf0c5d9e8553fec991f',
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        score_mode: 'none',
+                        // ✅ The `nested` query syntax includes the `ignore_unmapped` option
+                        ignore_unmapped: true,
+                      },
+                    },
+                    {
+                      nested: {
+                        path: 'threat.enrichments',
+                        query: {
+                          bool: {
+                            should: [
+                              {
+                                match: {
+                                  'threat.enrichments.matched.type': 'indicator_match_rule',
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        score_mode: 'none',
+                        ignore_unmapped: true,
+                      },
+                    },
+                    {
+                      nested: {
+                        path: 'threat.enrichments',
+                        query: {
+                          bool: {
+                            should: [
+                              {
+                                match: {
+                                  'threat.enrichments.matched.field': 'file.hash.md5',
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        score_mode: 'none',
+                        ignore_unmapped: true,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      exists: {
+                        // ✅ Non-nested fields are NOT converted to the `nested` query syntax
+                        // ✅ Non-nested fields do NOT include the `ignore_unmapped` option
+                        field: '@timestamp',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          exists: {
+            field: '_id',
+          },
+        },
+      ],
+      should: [],
+      must_not: [],
+    },
+  };
+
   it('should, by default, build a query where the `nested` fields syntax includes the `"ignore_unmapped":true` option', () => {
     const [converted, _] = convertToBuildEsQuery({
       config,
@@ -67,106 +168,7 @@ describe('convertToBuildEsQuery', () => {
       filters,
     });
 
-    expect(JSON.parse(converted ?? '')).to.eql({
-      bool: {
-        must: [],
-        filter: [
-          {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    filter: [
-                      {
-                        // ✅ Nested fields are converted to use the `nested` query syntax
-                        nested: {
-                          path: 'threat.enrichments',
-                          query: {
-                            bool: {
-                              should: [
-                                {
-                                  match: {
-                                    'threat.enrichments.matched.atomic':
-                                      'a4f87cbcd2a4241da77b6bf0c5d9e8553fec991f',
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                          score_mode: 'none',
-                          // ✅ The `nested` query syntax includes the `ignore_unmapped` option
-                          ignore_unmapped: true,
-                        },
-                      },
-                      {
-                        nested: {
-                          path: 'threat.enrichments',
-                          query: {
-                            bool: {
-                              should: [
-                                {
-                                  match: {
-                                    'threat.enrichments.matched.type': 'indicator_match_rule',
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                          score_mode: 'none',
-                          ignore_unmapped: true,
-                        },
-                      },
-                      {
-                        nested: {
-                          path: 'threat.enrichments',
-                          query: {
-                            bool: {
-                              should: [
-                                {
-                                  match: {
-                                    'threat.enrichments.matched.field': 'file.hash.md5',
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                          score_mode: 'none',
-                          ignore_unmapped: true,
-                        },
-                      },
-                    ],
-                  },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        exists: {
-                          // ✅ Non-nested fields are NOT converted to the `nested` query syntax
-                          // ✅ Non-nested fields do NOT include the `ignore_unmapped` option
-                          field: '@timestamp',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
-          {
-            exists: {
-              field: '_id',
-            },
-          },
-        ],
-        should: [],
-        must_not: [],
-      },
-    });
+    expect(JSON.parse(converted ?? '')).to.eql(expectedConverted);
   });
 
   it('should, when the default is overridden, build a query where `nested` fields include the `"ignore_unmapped":false` option', () => {
@@ -278,6 +280,82 @@ describe('convertToBuildEsQuery', () => {
         should: [],
         must_not: [],
       },
+    });
+  });
+
+  describe('When ignoreFilterIfFieldNotInIndex is true', () => {
+    const updatedConfig = { ...config, ignoreFilterIfFieldNotInIndex: true };
+
+    it('should use dataViewSpec when an empty dataView is provided', () => {
+      mockDataViewSpec.fields = {
+        _id: {
+          name: '_id',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+          scripted: false,
+        },
+      };
+      const emptyStubDataView = createStubDataView({ spec: { id: '', title: '' } });
+      const [converted] = convertToBuildEsQuery({
+        config: updatedConfig,
+        dataView: emptyStubDataView, // <-- empty dataView
+        queries: queryWithNestedFields,
+        dataViewSpec: mockDataViewSpec, // <-- should be used instead of the empty dataView
+        filters,
+      });
+
+      expect(JSON.parse(converted ?? '')).to.eql(expectedConverted); // just verify that something was built
+    });
+
+    it('should not use the field if the filter is not mapped in the', () => {
+      const updatedConvertedWithoutIdQuery = structuredClone(expectedConverted);
+      updatedConvertedWithoutIdQuery.bool.filter = [updatedConvertedWithoutIdQuery.bool.filter[0]]; // remove the search bar filter
+      const dataViewWithoutIdMapped = createStubDataView({
+        spec: {
+          id: 'test-id',
+          title: 'some-title',
+        },
+      });
+      const [converted] = convertToBuildEsQuery({
+        config: updatedConfig,
+        dataView: dataViewWithoutIdMapped,
+        queries: queryWithNestedFields,
+        dataViewSpec: mockDataViewSpec,
+        filters,
+      });
+
+      expect(JSON.parse(converted ?? '')).to.eql(updatedConvertedWithoutIdQuery); // just verify that something was built
+    });
+
+    it('should use the filters when the field is mapped in the dataView', () => {
+      const dataViewWithIdMapped = createStubDataView({
+        spec: {
+          id: 'test-id',
+          title: 'some-title',
+          fields: {
+            _id: {
+              name: '_id',
+              type: 'string',
+              esTypes: ['keyword'],
+              aggregatable: true,
+              searchable: true,
+              scripted: false,
+            },
+          },
+        },
+      });
+      const [converted] = convertToBuildEsQuery({
+        config: updatedConfig,
+        dataView: dataViewWithIdMapped,
+        queries: queryWithNestedFields,
+        dataViewSpec: mockDataViewSpec,
+        filters,
+      });
+
+      // This should have the id with the
+      expect(JSON.parse(converted ?? '')).to.eql(expectedConverted);
     });
   });
 });

@@ -35,6 +35,8 @@
           "\"Shared UX Storybook\""
         ],
         "path": "src/platform/packages/private/shared-ux/storybook/config/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52,6 +54,8 @@
           "\"https://github.com/elastic/kibana/tree/main/packages/shared_ux\""
         ],
         "path": "src/platform/packages/private/shared-ux/storybook/config/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

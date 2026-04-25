@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { RegisterAPIRoutesArgs } from '../types';
+import type { RegisterAPIRoutesArgs } from '../types';
+import { registerLensInternalAPIRoutes } from './internal';
 import { registerLensVisualizationsAPIRoutes } from './visualizations';
 
 export function registerLensAPIRoutes(args: RegisterAPIRoutesArgs) {
+  registerLensInternalAPIRoutes(args);
   registerLensVisualizationsAPIRoutes(args);
 }
+
+export * from './internal/schema';

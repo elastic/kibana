@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -16,6 +16,9 @@
     "@kbn/serverless",
     "@kbn/core-plugins-browser",
     "@kbn/deeplinks-search",
+    "@kbn/spaces-plugin",
+    "@kbn/share-plugin",
+    "@kbn/index-management-shared-types",
   ],
   "exclude": ["target/**/*"]
 }

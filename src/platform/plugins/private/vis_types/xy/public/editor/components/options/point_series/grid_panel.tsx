@@ -14,8 +14,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
-import { VisParams, ValueAxis } from '../../../../types';
-import { ValidationVisOptionsProps } from '../../common';
+import type { VisParams, ValueAxis } from '../../../../types';
+import type { ValidationVisOptionsProps } from '../../common';
 
 type GridPanelOptions = ValidationVisOptionsProps<VisParams>;
 

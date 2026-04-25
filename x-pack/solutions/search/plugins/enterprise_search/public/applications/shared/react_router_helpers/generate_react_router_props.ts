@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import type { EuiSideNavItemType } from '@elastic/eui';
 
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
-import { ReactRouterProps } from '../types';
+import type { ReactRouterProps } from '../types';
 
 import { letBrowserHandleEvent, createHref } from '.';
 

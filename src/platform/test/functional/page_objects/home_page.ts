@@ -29,22 +29,13 @@ export class HomePageObject extends FtrService {
     return await this.testSubjects.exists(`sampleDataSetCard${id}`);
   }
 
+  /**
+   * @deprecated The sample data accordion was removed. Sample data cards are now displayed directly.
+   * References to 'showSampleDataButton' and 'showSampleDataAccordion' data-test-subj should be
+   * removed from relevant tests.
+   */
   async openSampleDataAccordion() {
-    const accordionButton = await this.testSubjects.find('showSampleDataButton');
-    let expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
-    let expanded = expandedAttribute.toLocaleLowerCase().includes('true');
-    this.log.debug(`Sample data accordion expanded: ${expanded}`);
-
-    if (!expanded) {
-      await this.retry.waitFor('sample data according to be expanded', async () => {
-        this.log.debug(`Opening sample data accordion`);
-        await accordionButton.click();
-        expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
-        expanded = expandedAttribute.toLocaleLowerCase().includes('true');
-        return expanded;
-      });
-      this.log.debug(`Sample data accordion expanded: ${expanded}`);
-    }
+    // No-op: The accordion UI was removed; sample data cards are now displayed directly.
   }
 
   async isSampleDataSetInstalled(id: string) {
@@ -73,10 +64,6 @@ export class HomePageObject extends FtrService {
     return this.retry.try(async () => {
       return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', animSpeedExtraSlow * 4);
     });
-  }
-
-  async isGuidedOnboardingLandingDisplayed() {
-    return await this.testSubjects.isDisplayed('guided-onboarding--landing-page');
   }
 
   async isHomePageDisplayed() {

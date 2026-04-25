@@ -9,10 +9,11 @@
 
 import { useMemo } from 'react';
 import createContainer from 'constate';
-import { copyToClipboard, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { FieldMapping } from '@kbn/unified-doc-viewer/src/services/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { FieldMapping } from '@kbn/unified-doc-viewer/src/services/types';
 
 interface WithFieldParam {
   field: string;
@@ -53,6 +54,7 @@ const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFi
         filter && filter(mapping ?? field, value, '-'),
       copyToClipboard,
       removeColumn: onRemoveColumn,
+      isColumnAdded: ({ field }: WithFieldParam) => columns?.includes(field) ?? false,
       toggleFieldColumn: ({ field }: WithFieldParam) => {
         if (!columns) return;
         const isFieldInTable = columns.includes(field);
@@ -84,13 +86,13 @@ export const useUIFieldActions = ({
     () => [
       {
         id: 'addFilterInAction',
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
         label: filterForValueLabel,
         onClick: () => actions.addFilterIn({ field, value, mapping }),
       },
       {
         id: 'addFilterOutremoveFromFilterAction',
-        iconType: 'minusInCircle',
+        iconType: 'minusCircle',
         label: filterOutValueLabel,
         onClick: () => actions.addFilterOut({ field, value, mapping }),
       },
@@ -102,13 +104,13 @@ export const useUIFieldActions = ({
       },
       {
         id: 'toggleFieldColumnAction',
-        iconType: 'listAdd',
+        iconType: actions.isColumnAdded({ field }) ? 'cross' : 'plusCircle',
         label: toggleColumnLabel,
         onClick: () => actions.toggleFieldColumn({ field }),
       },
       {
         id: 'copyToClipboardAction',
-        iconType: 'copyClipboard',
+        iconType: 'copy',
         label: copyToClipboardLabel,
         onClick: () => actions.copyToClipboard(formattedValue ?? (value as string)),
       },

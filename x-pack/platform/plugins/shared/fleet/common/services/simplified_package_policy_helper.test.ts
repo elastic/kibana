@@ -11,6 +11,7 @@ import nginxPackageInfo from '../../server/services/package_policies/fixtures/pa
 
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
+  packagePolicyToSimplifiedPackagePolicy,
   generateInputId,
 } from './simplified_package_policy_helper';
 
@@ -28,6 +29,42 @@ function getEnabledInputsAndStreams(newPackagePolicy: NewPackagePolicy) {
     }, {} as Record<string, string[]>);
 }
 
+describe('generateInputId', () => {
+  it('should use name instead of type when name is present', () => {
+    expect(
+      generateInputId({
+        type: 'otelcol',
+        name: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('nginx-filelog_otel');
+  });
+
+  it('should fall back to type when name is not present', () => {
+    expect(
+      generateInputId({
+        type: 'logfile',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('nginx-logfile');
+  });
+
+  it('should use name without policy_template prefix when policy_template is not stored on the input (single-template packages)', () => {
+    expect(
+      generateInputId({
+        type: 'otelcol',
+        name: 'filelog_otel',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('filelog_otel');
+  });
+});
+
 describe('toPackagePolicy', () => {
   describe('With nginx package', () => {
     it('should work', () => {
@@ -37,6 +74,8 @@ describe('toPackagePolicy', () => {
           namespace: 'default',
           policy_id: 'policy123',
           policy_ids: ['policy123'],
+          supports_cloud_connector: undefined,
+          cloud_connector_id: undefined,
           output_id: 'output123',
           description: 'Test description',
           inputs: {
@@ -173,6 +212,42 @@ describe('toPackagePolicy', () => {
       );
 
       expect(res.additional_datastreams_permissions).toEqual(['logs-test-123']);
+    });
+
+    it('should preserve var_group_selections when creating package policy', () => {
+      const varGroupSelections = { auth_method: 'api_key' };
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_id: 'policy123',
+          policy_ids: ['policy123'],
+          description: 'Test description',
+          var_group_selections: varGroupSelections,
+        },
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      expect(res.var_group_selections).toEqual(varGroupSelections);
+    });
+
+    it('should include var_group_selections when converting back to simplified policy', () => {
+      const varGroupSelections = { auth_method: 'api_key' };
+      const packagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_id: 'policy123',
+          policy_ids: ['policy123'],
+          description: 'Test description',
+          var_group_selections: varGroupSelections,
+        },
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      const simplified = packagePolicyToSimplifiedPackagePolicy(packagePolicy as any);
+
+      expect((simplified as any).var_group_selections).toEqual(varGroupSelections);
     });
   });
 });

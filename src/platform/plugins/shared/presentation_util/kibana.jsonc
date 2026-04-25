@@ -13,7 +13,6 @@
     "server": true,
     "requiredPlugins": [
       "kibanaReact",
-      "contentManagement",
       "embeddable",
       "expressions",
       "dataViews",

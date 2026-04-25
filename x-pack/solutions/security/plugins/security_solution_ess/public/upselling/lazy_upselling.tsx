@@ -48,3 +48,21 @@ export const AttackDiscoveryUpsellingPageLazy = lazy(() =>
     default: AttackDiscoveryUpsellingPageESS,
   }))
 );
+
+export const AIValueUpsellingPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/ai_value').then(({ AIValueUpsellingPageESS }) => ({
+      default: AIValueUpsellingPageESS,
+    }))
+  )
+);
+
+export const GraphVisualizationUpsellingSectionLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./sections/graph_visualization_upselling').then(
+      ({ GraphVisualizationUpsellingSectionESS }) => ({
+        default: GraphVisualizationUpsellingSectionESS,
+      })
+    )
+  )
+);

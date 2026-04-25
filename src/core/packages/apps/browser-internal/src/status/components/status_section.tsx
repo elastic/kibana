@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiPanel } from '@elastic/eui';
 import { StatusTable } from './status_table';
-import { FormattedStatus, getHighestStatus } from '../lib';
+import type { FormattedStatus } from '../lib';
+import { getHighestStatus } from '../lib';
 import { StatusBadge } from './status_badge';
 
 interface StatusSectionProps {

@@ -7,19 +7,26 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
 
 export const useDashboardRenderer = () => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardApi>();
+  const [dashboardInternalApi, setDashboardInternalApi] = useState<DashboardInternalApi>();
 
-  const handleDashboardLoaded = useCallback((container: DashboardApi) => {
-    setDashboardContainer(container);
-  }, []);
+  const handleDashboardLoaded = useCallback(
+    (container: DashboardApi, internalApi: DashboardInternalApi) => {
+      setDashboardContainer(container);
+      setDashboardInternalApi(internalApi);
+    },
+    []
+  );
 
   return useMemo(
     () => ({
       dashboardContainer,
+      dashboardInternalApi,
       handleDashboardLoaded,
     }),
-    [dashboardContainer, handleDashboardLoaded]
+    [dashboardContainer, dashboardInternalApi, handleDashboardLoaded]
   );
 };

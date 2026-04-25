@@ -64,34 +64,64 @@ const UserDetailsLinkComponent: React.FC<{
   title?: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-}> = ({ children, Component, userName, isButton, onClick: onClickParam, title, userTab }) => {
-  const encodedUserName = encodeURIComponent(userName);
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
+  entityId?: string;
+  identityFields?: Record<string, string>;
+}> = ({
+  children,
+  Component,
+  userName,
+  isButton,
+  onClick: onClickParam,
+  title,
+  userTab,
+  entityId,
+  identityFields,
+}) => {
+  const { formatUrl, search: urlStateQuery } = useFormatUrl(SecurityPageName.users);
   const {
     application: { navigateToApp },
     telemetry,
   } = useKibana().services;
+  const resolutionIdentityFields = useMemo(
+    () =>
+      identityFields ??
+      (entityId === undefined || entityId === '' ? { 'user.name': userName } : undefined),
+    [entityId, identityFields, userName]
+  );
+
   const goToUsersDetails = useCallback(
     (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
         path: userTab
-          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab, search)
-          : getUsersDetailsUrl(encodedUserName, search),
+          ? getTabsOnUsersDetailsUrl(
+              userName,
+              userTab,
+              urlStateQuery,
+              entityId,
+              resolutionIdentityFields
+            )
+          : getUsersDetailsUrl(userName, urlStateQuery, resolutionIdentityFields, entityId),
       });
     },
-    [encodedUserName, navigateToApp, search, userTab]
+    [userName, navigateToApp, urlStateQuery, userTab, entityId, resolutionIdentityFields]
   );
 
   const href = useMemo(
     () =>
       formatUrl(
         userTab
-          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab)
-          : getUsersDetailsUrl(encodedUserName)
+          ? getTabsOnUsersDetailsUrl(
+              userName,
+              userTab,
+              undefined,
+              entityId,
+              resolutionIdentityFields
+            )
+          : getUsersDetailsUrl(userName, undefined, resolutionIdentityFields, entityId)
       ),
-    [formatUrl, encodedUserName, userTab]
+    [formatUrl, userName, userTab, entityId, resolutionIdentityFields]
   );
 
   const onClick = useCallback(
@@ -159,6 +189,8 @@ export interface HostDetailsLinkProps {
   onClick?: (e: SyntheticEvent) => void;
   hostTab?: HostsTableType;
   title?: string;
+  entityId?: string;
+  identityFields?: Record<string, string>;
 }
 const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
   children,
@@ -168,14 +200,21 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
   onClick: onClickParam,
   title,
   hostTab,
+  entityId,
+  identityFields,
 }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
+  const { formatUrl, search: urlStateQuery } = useFormatUrl(SecurityPageName.hosts);
   const {
     application: { navigateToApp },
     telemetry,
   } = useKibana().services;
 
-  const encodedHostName = encodeURIComponent(hostName);
+  const resolutionIdentityFields = useMemo(
+    () =>
+      identityFields ??
+      (entityId === undefined || entityId === '' ? { 'host.name': hostName } : undefined),
+    [entityId, hostName, identityFields]
+  );
 
   const goToHostDetails = useCallback(
     (ev: SyntheticEvent) => {
@@ -183,20 +222,32 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: hostTab
-          ? getTabsOnHostDetailsUrl(encodedHostName, hostTab, search)
-          : getHostDetailsUrl(encodedHostName, search),
+          ? getTabsOnHostDetailsUrl(
+              hostName,
+              hostTab,
+              urlStateQuery,
+              entityId,
+              resolutionIdentityFields
+            )
+          : getHostDetailsUrl(hostName, urlStateQuery, entityId, resolutionIdentityFields),
       });
     },
-    [encodedHostName, navigateToApp, search, hostTab]
+    [navigateToApp, hostTab, hostName, urlStateQuery, entityId, resolutionIdentityFields]
   );
   const href = useMemo(
     () =>
       formatUrl(
         hostTab
-          ? getTabsOnHostDetailsUrl(encodedHostName, hostTab)
-          : getHostDetailsUrl(encodedHostName)
+          ? getTabsOnHostDetailsUrl(
+              hostName,
+              hostTab,
+              undefined,
+              entityId,
+              resolutionIdentityFields
+            )
+          : getHostDetailsUrl(hostName, undefined, entityId, resolutionIdentityFields)
       ),
-    [formatUrl, encodedHostName, hostTab]
+    [formatUrl, hostName, hostTab, entityId, resolutionIdentityFields]
   );
 
   const onClick = useCallback(
@@ -214,7 +265,7 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
       Component={Component}
       dataTestSubj="data-grid-host-details"
       href={href}
-      iconType="expand"
+      iconType="maximize"
       onClick={onClick}
       title={title ?? hostName}
     >
@@ -239,17 +290,37 @@ export interface EntityDetailsLinkProps {
   tab?: HostsTableType | UsersTableType;
   title?: string;
   entityType: EntityType;
+  entityId?: string;
+  identityFields?: Record<string, string>;
 }
 export const EntityDetailsLink = ({
   entityType,
   tab,
   entityName,
+  entityId,
+  identityFields,
   ...props
 }: EntityDetailsLinkProps) => {
   if (entityType === EntityType.host) {
-    return <HostDetailsLink {...props} hostTab={tab as HostsTableType} hostName={entityName} />;
+    return (
+      <HostDetailsLink
+        {...props}
+        hostTab={tab as HostsTableType}
+        hostName={entityName}
+        entityId={entityId}
+        identityFields={identityFields}
+      />
+    );
   } else if (entityType === EntityType.user) {
-    return <UserDetailsLink {...props} userTab={tab as UsersTableType} userName={entityName} />;
+    return (
+      <UserDetailsLink
+        {...props}
+        userTab={tab as UsersTableType}
+        userName={entityName}
+        entityId={entityId}
+        identityFields={identityFields}
+      />
+    );
   } else if (entityType === EntityType.service) {
     return <ServiceDetailsLink serviceName={entityName} onClick={props.onClick} />;
   }
@@ -341,7 +412,7 @@ const IpLinkComponent: React.FC<IpLinkComponentProps> = ({
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
     deepLinkId: SecurityPageName.network,
-    path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ipAddress)), flowTarget),
+    path: getNetworkDetailsUrl(encodeIpv6(ipAddress), flowTarget),
   });
 
   const onLinkClick = useCallback(
@@ -574,11 +645,9 @@ const ReputationLinkComponent: React.FC<{
       ipReputationLinksSetting
         ?.slice(0, allItemsLimit)
         .filter(
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           ({ url_template, name }) =>
             !isNil(url_template) && !isNil(name) && !isUrlInvalid(url_template)
         )
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         .map(({ name, url_template }: { name: string; url_template: string }) => ({
           name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
           url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),

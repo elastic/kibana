@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IBasePath } from '@kbn/core-http-browser';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { modifyUrl } from '@kbn/std';
 
 export class BasePath implements IBasePath {

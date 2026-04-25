@@ -4,6 +4,7 @@ exports[`Should render icon select 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="downLeft"
+    aria-label="Icon selector"
     button={
       <EuiFieldText
         compressed={true}
@@ -11,7 +12,7 @@ exports[`Should render icon select 1`] = `
         icon={
           Object {
             "side": "right",
-            "type": "arrowDown",
+            "type": "chevronSingleDown",
           }
         }
         onClick={[Function]}
@@ -27,7 +28,7 @@ exports[`Should render icon select 1`] = `
     }
     closePopover={[Function]}
     display="block"
-    hasArrow={true}
+    hasArrow={false}
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="s"
@@ -87,6 +88,7 @@ exports[`Should render icon select with custom icons 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="downLeft"
+    aria-label="Icon selector"
     button={
       <EuiFieldText
         compressed={true}
@@ -94,7 +96,7 @@ exports[`Should render icon select with custom icons 1`] = `
         icon={
           Object {
             "side": "right",
-            "type": "arrowDown",
+            "type": "chevronSingleDown",
           }
         }
         onClick={[Function]}
@@ -111,7 +113,7 @@ exports[`Should render icon select with custom icons 1`] = `
     }
     closePopover={[Function]}
     display="block"
-    hasArrow={true}
+    hasArrow={false}
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="s"

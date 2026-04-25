@@ -8,6 +8,7 @@
 import { ALERT_NAMESPACE, ALERT_RULE_NAMESPACE, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 
 export const ALERT_ANCESTORS = `${ALERT_NAMESPACE}.ancestors` as const;
+export const ALERT_ANCESTORS_ID = `${ALERT_NAMESPACE}.ancestors.id` as const;
 export const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
 export const ALERT_DEPTH = `${ALERT_NAMESPACE}.depth` as const;
 export const ALERT_GROUP_ID = `${ALERT_NAMESPACE}.group.id` as const;
@@ -65,3 +66,5 @@ export const ALERT_RULE_TIMELINE_ID = `${ALERT_RULE_NAMESPACE}.timeline_id` as c
 export const ALERT_RULE_TIMELINE_TITLE = `${ALERT_RULE_NAMESPACE}.timeline_title` as const;
 export const ALERT_RULE_TIMESTAMP_OVERRIDE = `${ALERT_RULE_NAMESPACE}.timestamp_override` as const;
 export const ALERT_RULE_INDICES = `${ALERT_RULE_NAMESPACE}.indices` as const;
+
+export const ALERT_ATTACK_IDS = `${ALERT_NAMESPACE}.attack_ids` as const;

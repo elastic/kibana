@@ -172,7 +172,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
   ]);
 
   return (
-    <div data-test-subj="chartPanels">
+    <div data-test-subj="chartPanels" css={{ 'max-height': CHART_PANEL_HEIGHT, overflow: 'auto' }}>
       {alertViewSelection === 'trend' && (
         <FullHeightFlexItem grow={2}>
           {isLoadingIndexPattern ? (
@@ -226,6 +226,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               title={title}
               isExpanded={isExpanded}
               setIsExpanded={setIsExpanded}
+              signalIndexName={signalIndexName}
             />
           )}
         </FullHeightFlexItem>

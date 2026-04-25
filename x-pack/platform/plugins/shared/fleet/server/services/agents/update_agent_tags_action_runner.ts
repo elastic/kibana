@@ -15,7 +15,7 @@ import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
 
-import { FleetError } from '../../errors';
+import { FleetError, FleetVersionConflictError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
 
@@ -157,7 +157,7 @@ export async function updateTagsBatch(
   // creating an action doc so that update tags  shows up in activity
   // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
   // this ensures that the action status count will be accurate
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     agents: updatedIds
       .concat(failures.map((failure) => failure.id))
@@ -218,7 +218,7 @@ export async function updateTagsBatch(
         .getLogger()
         .debug(`action conflict result wrote on ${versionConflictCount} agents`);
     }
-    throw new FleetError(`Version conflict of ${versionConflictCount} agents`);
+    throw new FleetVersionConflictError(`Version conflict of ${versionConflictCount} agents`);
   }
 
   return { actionId, updated: res.updated, took: res.took };

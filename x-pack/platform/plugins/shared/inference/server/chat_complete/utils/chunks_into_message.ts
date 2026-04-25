@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   ChatCompletionChunkEvent,
-  ChatCompletionEventType,
   ChatCompletionMessageEvent,
   ChatCompletionTokenCountEvent,
   ToolOptions,
-  withoutTokenCountEvents,
 } from '@kbn/inference-common';
+import { ChatCompletionEventType, withoutTokenCountEvents } from '@kbn/inference-common';
 import { trace } from '@opentelemetry/api';
 import type { Logger } from '@kbn/logging';
-import { OperatorFunction, map, merge, share, toArray } from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
+import { map, merge, share, toArray } from 'rxjs';
 import { setChoice } from '@kbn/inference-tracing/src/with_chat_complete_span';
 import { validateToolCalls } from '../../util/validate_tool_calls';
 import { mergeChunks } from './merge_chunks';
@@ -45,17 +45,21 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
 
           logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
 
-          const { content, tool_calls: toolCalls } = concatenatedChunk;
+          const { content, refusal, tool_calls: toolCalls } = concatenatedChunk;
           const activeSpan = trace.getActiveSpan();
           if (activeSpan) {
             setChoice(activeSpan, { content, toolCalls });
           }
 
-          const validatedToolCalls = validateToolCalls<TToolOptions>({ ...toolOptions, toolCalls });
+          const validatedToolCalls = validateToolCalls<TToolOptions>({
+            ...toolOptions,
+            toolCalls,
+          });
 
           return {
             type: ChatCompletionEventType.ChatCompletionMessage,
             content,
+            ...(refusal ? { refusal } : {}),
             toolCalls: validatedToolCalls,
           };
         })

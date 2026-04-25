@@ -27,9 +27,10 @@ import {
 } from './default_cell_actions';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
-import { EuiButton, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { dataTableContextMock } from '../../__mocks__/table_context';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('Default cell actions ', function () {
   const CopyBtn = buildCopyValueButton(
@@ -45,7 +46,6 @@ describe('Default cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
     const cellActions = buildCellActions(
       { name: 'foo', filterable: false } as DataViewField,
-      false,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter
     );
@@ -62,7 +62,6 @@ describe('Default cell actions ', function () {
   it('should show filter actions for filterable fields', async () => {
     const cellActions = buildCellActions(
       { name: 'foo', filterable: true } as DataViewField,
-      false,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter,
       jest.fn()
@@ -73,7 +72,6 @@ describe('Default cell actions ', function () {
   it('should show Copy action for _source field', async () => {
     const cellActions = buildCellActions(
       { name: '_source', type: '_source', filterable: false } as DataViewField,
-      false,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter
     );
@@ -98,7 +96,6 @@ describe('Default cell actions ', function () {
             isExpanded: false,
           }}
           field={{ name: 'extension', filterable: true } as DataViewField}
-          isPlainRecord={false}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -122,7 +119,6 @@ describe('Default cell actions ', function () {
             isExpanded: false,
           }}
           field={{ name: 'extension', filterable: true } as DataViewField}
-          isPlainRecord={false}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -146,7 +142,6 @@ describe('Default cell actions ', function () {
             isExpanded: false,
           }}
           field={{ name: 'message', filterable: true } as DataViewField}
-          isPlainRecord={false}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -170,7 +165,6 @@ describe('Default cell actions ', function () {
             isExpanded: false,
           }}
           field={{ name: 'extension', filterable: true } as DataViewField}
-          isPlainRecord={false}
         />
       </UnifiedDataTableContext.Provider>
     );

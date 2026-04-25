@@ -63,4 +63,35 @@ const getVersionsFile = (() => {
   return () => versions;
 })();
 
-export { getKibanaDir, getVersionsFile };
+const getRequiredEnv = (name: string) => {
+  const value = process.env[name];
+  if (typeof value !== 'string' || !value) {
+    throw new Error(`Missing required environment variable "${name}"`);
+  }
+  return value;
+};
+
+function runBatchedPromises<T>(
+  promiseCreators: Array<() => Promise<T>>,
+  maxParallel: number
+): Promise<T[]> {
+  const results: T[] = [];
+  let i = 0;
+
+  const next: () => Promise<any> = () => {
+    if (i >= promiseCreators.length) {
+      return Promise.resolve();
+    }
+
+    const promiseCreator = promiseCreators[i++];
+    return Promise.resolve(promiseCreator()).then((result) => {
+      results.push(result);
+      return next();
+    });
+  };
+
+  const tasks = Array.from({ length: maxParallel }, () => next());
+  return Promise.all(tasks).then(() => results);
+}
+
+export { getKibanaDir, getVersionsFile, getRequiredEnv, runBatchedPromises };

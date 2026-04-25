@@ -9,31 +9,35 @@ paths:
       description: Get a list of all query packs.
       operationId: OsqueryFindPacks
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: page
           in: query
           required: false
+          description: 'The page number to return.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
         - name: pageSize
           in: query
           required: false
+          description: 'The number of results to return per page.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
         - name: sort
           in: query
           required: false
+          description: 'The field to sort results by.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         - name: sortOrder
           in: query
           required: false
+          description: 'The sort order.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -43,7 +47,7 @@ paths:
       description: Create a query pack.
       operationId: OsqueryCreatePacks
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       requestBody:
         required: true
         content:
@@ -52,7 +56,7 @@ paths:
               $ref: './create_pack.schema.yaml#/components/schemas/CreatePacksRequestBody'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -63,16 +67,17 @@ paths:
       description: Get the details of a query pack using the pack ID.
       operationId: OsqueryGetPacksDetails
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: id
           in: path
           required: true
+          description: 'The pack ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -82,16 +87,17 @@ paths:
       description: Delete a query pack using the pack ID.
       operationId: OsqueryDeletePacks
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: id
           in: path
           required: true
+          description: 'The pack ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -106,11 +112,12 @@ paths:
         > You cannot update a prebuilt pack.
       operationId: OsqueryUpdatePacks
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: id
           in: path
           required: true
+          description: 'The pack ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       requestBody:
@@ -121,8 +128,59 @@ paths:
               $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestBody'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksResponse'
+  /api/osquery/packs/{id}/copy:
+    post:
+      summary: Copy a pack
+      description: >-
+        Create a copy of a query pack with a unique name by appending a `_copy` suffix.
+        If the name already exists, a numeric suffix is added (e.g., `_copy_2`).
+        The copied pack is always created with `enabled` set to `false`.
+      operationId: OsqueryCopyPacks
+      x-codegen-enabled: true
+      x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'The ID of the pack to copy.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './copy_pack.schema.yaml#/components/schemas/CopyPacksResponse'
+              examples:
+                copyPackExample:
+                  summary: Example response for copying a pack
+                  value:
+                    data:
+                      saved_object_id: '1c266590-381f-428c-878f-c80c1334f856'
+                      name: 'my_pack_copy'
+                      description: 'My pack'
+                      enabled: false
+                      queries:
+                        - id: 'ports'
+                          query: 'SELECT * FROM listening_ports;'
+                          interval: 60
+                          snapshot: true
+                          removed: false
+                          timeout: 120
+                          ecs_mapping:
+                            - key: 'client.port'
+                              value:
+                                field: 'port'
+                      shards: []
+                      policy_ids: []
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: 'elastic'
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: 'elastic'

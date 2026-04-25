@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RequiredPaletteParamTypes } from '@kbn/coloring';
 import {
-  RequiredPaletteParamTypes,
   FIXED_PROGRESSION,
   DEFAULT_CONTINUITY,
   DEFAULT_MIN_STOP,

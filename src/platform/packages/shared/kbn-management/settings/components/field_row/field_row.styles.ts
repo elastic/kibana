@@ -9,7 +9,11 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { UnsavedFieldChange, FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import type {
+  UnsavedFieldChange,
+  FieldDefinition,
+  SettingType,
+} from '@kbn/management-settings-types';
 import { hasUnsavedChange } from '@kbn/management-settings-utilities';
 
 /**

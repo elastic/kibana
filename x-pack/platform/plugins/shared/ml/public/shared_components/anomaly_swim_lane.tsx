@@ -9,17 +9,17 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
+import type { HasSerializedChildState } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimlaneEmbeddableCustomInput,
-  AnomalySwimLaneEmbeddableState,
-} from '../embeddables';
+import type { TypeOf } from '@kbn/config-schema';
+import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from '../embeddables';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
+import type { anomalySwimlanePropsSchema } from '../../server/embeddable/schemas';
 
-export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInput {
+type AnomalySwimlaneEmbeddableCustomInputProps = TypeOf<typeof anomalySwimlanePropsSchema>;
+
+export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInputProps {
   id?: string;
   executionContext: KibanaExecutionContext;
 }
@@ -29,7 +29,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   jobIds,
   swimlaneType,
   viewBy,
-  timeRange,
+  time_range: timeRange,
   filters,
   query,
   refreshConfig,
@@ -38,12 +38,20 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
 }) => {
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
-  const rawState: AnomalySwimLaneEmbeddableState = useMemo(() => {
+  const embeddableState: AnomalySwimLaneEmbeddableState = useMemo(() => {
+    if (swimlaneType === 'viewBy' && viewBy) {
+      return {
+        jobIds,
+        swimlaneType: 'viewBy',
+        refreshConfig,
+        viewBy,
+      };
+    }
+
     return {
       jobIds,
-      swimlaneType,
+      swimlaneType: 'overall',
       refreshConfig,
-      viewBy,
     };
   }, [jobIds, refreshConfig, swimlaneType, viewBy]);
 
@@ -81,7 +89,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(timeRange);
 
     return {
-      getSerializedStateForChild: () => ({ rawState }),
+      getSerializedStateForChild: () => embeddableState,
       filters$,
       setFilters: (newFilters) => {
         filters$.next(newFilters);

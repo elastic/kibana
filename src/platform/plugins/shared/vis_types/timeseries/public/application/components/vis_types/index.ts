@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy } from 'react';
-import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type React from 'react';
+import { lazy } from 'react';
+import type { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { FieldFormatMap } from '@kbn/data-views-plugin/common';
-import { TimeseriesVisParams } from '../../../types';
+import type { TimeseriesVisParams } from '../../../types';
 import type { TimeseriesVisData, PanelData } from '../../../../common/types';
-import { FetchedIndexPattern } from '../../../../common/types';
+import type { FetchedIndexPattern } from '../../../../common/types';
 
 /**
  * Lazy load each visualization type, since the only one is presented on the screen at the same time.

@@ -337,7 +337,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
               <EuiButtonEmpty
                 onClick={createADJobInWizard}
                 size="s"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 data-test-subj={`mlLensLayerCreateWithWizardButton_${layerIndex}`}
               >
@@ -359,7 +359,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
           >
             <EuiFlexItem grow={false}>
               <EuiText size="s">
-                <EuiIcon type="checkInCircleFilled" color="success" />
+                <EuiIcon type="checkCircleFill" color="success" />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -417,7 +417,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
       {state === STATE.SAVE_FAILED && createError !== null ? (
         <>
           <EuiSpacer />
-          <EuiCallOut color="danger" title={createError.text}>
+          <EuiCallOut announceOnMount color="danger" title={createError.text}>
             {createError.errorText}
           </EuiCallOut>
         </>
@@ -425,7 +425,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
       {incomingCreateError ? (
         <>
           <EuiSpacer />
-          <EuiCallOut color="danger" title={incomingCreateError.text}>
+          <EuiCallOut announceOnMount color="danger" title={incomingCreateError.text}>
             {incomingCreateError.errorText}
           </EuiCallOut>
         </>

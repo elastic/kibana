@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Ensure, SerializableRecord } from '@kbn/utility-types';
+import type { Ensure, SerializableRecord } from '@kbn/utility-types';
 
-import { isMainThread, MessagePort, workerData } from 'worker_threads';
+import type { MessagePort } from 'worker_threads';
+import { isMainThread, workerData } from 'worker_threads';
 import path from 'path';
 
 import { getTemplate } from './get_template';
@@ -188,6 +189,7 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
         },
       },
     };
+    // @ts-expect-error upgrade typescript v5.9.3
     port.postMessage(successResponse, [buffer.buffer /* Transfer buffer instead of copying */]);
   } catch (error) {
     const errorResponse: GeneratePdfResponse = {

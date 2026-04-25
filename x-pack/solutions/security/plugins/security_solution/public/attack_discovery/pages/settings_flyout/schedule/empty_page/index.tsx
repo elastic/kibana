@@ -7,21 +7,14 @@
 
 import React, { useCallback, useState } from 'react';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiLink,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 
 import ScheduleIconSVG from '../icons/schedule.svg';
 import { CreateFlyout } from '../create_flyout';
+import { CreateButton } from '../create_button';
 
 export const EmptyPage: React.FC = React.memo(() => {
   // showing / hiding the flyout:
@@ -54,15 +47,7 @@ export const EmptyPage: React.FC = React.memo(() => {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="createSchedule"
-                  fill
-                  onClick={openFlyout}
-                  size="m"
-                  iconType="plusInCircle"
-                >
-                  {i18n.CREATE_SCHEDULE}
-                </EuiButton>
+                <CreateButton onClick={openFlyout} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiLink

@@ -6,14 +6,19 @@
  */
 
 import React from 'react';
-import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import {
-  DEFAULT_BEDROCK_MODEL,
-  DEFAULT_BEDROCK_URL,
+  DEFAULT_MODEL,
+  DEFAULT_URL,
   DEFAULT_TOKEN_LIMIT,
-} from '../../../common/bedrock/constants';
+} from '@kbn/connector-schemas/bedrock/constants';
+import {
+  contextWindowLengthField,
+  OptionalFieldLabel,
+  temperatureField,
+} from '../../common/genai_connectors';
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
@@ -30,7 +35,7 @@ export const bedrockConfig: ConfigFieldSchema[] = [
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
     isUrlField: true,
-    defaultValue: DEFAULT_BEDROCK_URL,
+    defaultValue: DEFAULT_URL,
     helpText: (
       <FormattedMessage
         defaultMessage="The Amazon Bedrock API endpoint URL. For more information on the URL, refer to the {bedrockAPIUrlDocs}."
@@ -46,6 +51,18 @@ export const bedrockConfig: ConfigFieldSchema[] = [
             </EuiLink>
           ),
         }}
+      />
+    ),
+  },
+  {
+    id: 'region',
+    label: i18n.REGION_LABEL,
+    isRequired: false,
+    labelAppend: OptionalFieldLabel,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Optional AWS region for request signing. Required when using a custom endpoint URL that does not include the region in the hostname (for example, `us-west-1`)."
+        id="xpack.stackConnectors.components.bedrock.regionHelpText"
       />
     ),
   },
@@ -69,8 +86,10 @@ export const bedrockConfig: ConfigFieldSchema[] = [
         }}
       />
     ),
-    defaultValue: DEFAULT_BEDROCK_MODEL,
+    defaultValue: DEFAULT_MODEL,
   },
+  contextWindowLengthField,
+  temperatureField,
 ];
 
 export const bedrockSecrets: SecretsFieldSchema[] = [

@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback } from 'react';
-import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
-import { DataStreamApis } from '../use_data_stream_apis';
-import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation } from '../../..';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import type { DataStreamApis } from '../use_data_stream_apis';
+import type { AIConnector } from '../../connectorland/connector_selector';
+import type { Conversation } from '../../..';
 import { AssistantSettings } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';

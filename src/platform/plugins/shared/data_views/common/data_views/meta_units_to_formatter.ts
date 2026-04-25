@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 
 const timeUnitToDurationFmt = (inputFormat = 'milliseconds') => {
   return {

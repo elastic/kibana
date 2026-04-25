@@ -10,16 +10,16 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { TutorialsRegistry } from './tutorials_registry';
 import { coreMock } from '@kbn/core/server/mocks';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import {
+import type {
   TutorialProvider,
   TutorialSchema,
   TutorialsCategory,
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 
 const INVALID_TUTORIAL: TutorialSchema = {
@@ -97,24 +97,40 @@ describe('TutorialsRegistry', () => {
       expect(setup).toHaveProperty('addScopedTutorialContextFactory');
     });
 
-    test('registerTutorial throws when registering a tutorial with an invalid schema', () => {
+    test('registerTutorial does not throw immediately for an invalid schema but throws when the deferred initializer is triggered', () => {
       const setup = new TutorialsRegistry(mockInitContext).setup(
         mockCoreSetup,
         mockCustomIntegrationsPluginSetup
       );
       testProvider = ({}) => invalidTutorialProvider;
-      expect(() => setup.registerTutorial(testProvider)).toThrowErrorMatchingInlineSnapshot(
+
+      // Registration itself must not throw — validation is deferred.
+      expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
+
+      // The deferred initializer (captured by the mock) should throw when called.
+      const [deferredInit] =
+        mockCustomIntegrationsPluginSetup.registerDeferredIntegrations.mock.calls[0];
+      expect(() => deferredInit()).toThrowErrorMatchingInlineSnapshot(
         `"Unable to register tutorial spec because its invalid. Error: [name]: is not allowed to be empty"`
       );
     });
 
-    test('registerTutorial registers a tutorial with a valid schema', () => {
+    test('registerTutorial registers a tutorial with a valid schema once the deferred initializer is triggered', () => {
       const setup = new TutorialsRegistry(mockInitContext).setup(
         mockCoreSetup,
         mockCustomIntegrationsPluginSetup
       );
       testProvider = ({}) => validTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
+
+      // Nothing registered yet — deferred path not yet triggered.
+      expect(mockCustomIntegrationsPluginSetup.registerCustomIntegration).not.toHaveBeenCalled();
+
+      // Trigger the deferred initializer (simulates the first read of the integrations list).
+      const [deferredInit] =
+        mockCustomIntegrationsPluginSetup.registerDeferredIntegrations.mock.calls[0];
+      deferredInit();
+
       expect(mockCustomIntegrationsPluginSetup.registerCustomIntegration.mock.calls).toEqual([
         [
           {

@@ -6,8 +6,8 @@
  */
 
 import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_management';
-import { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
-import { SyntheticsAppState } from '../root_reducer';
+import type { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
+import type { SyntheticsAppState } from '../root_reducer';
 
 export const getStatusByConfig = (
   configId: string,

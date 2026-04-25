@@ -51,6 +51,9 @@ export const DEFAULT_REPEAT_OPTIONS = [
 ];
 
 export const DEFAULT_RRULE_PRESETS = {
+  [RRuleFrequency.HOURLY]: {
+    interval: 1,
+  },
   [RRuleFrequency.DAILY]: {
     interval: 1,
   },

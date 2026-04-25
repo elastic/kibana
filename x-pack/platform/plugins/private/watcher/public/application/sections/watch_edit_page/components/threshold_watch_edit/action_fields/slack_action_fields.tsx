@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { EuiComboBox, EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SlackAction } from '../../../../../../../common/types/action_types';
+import type { SlackAction } from '../../../../../../../common/types/action_types';
 
 interface Props {
   action: SlackAction;

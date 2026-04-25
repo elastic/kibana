@@ -15,7 +15,7 @@ import type {
   MultiContextEvaluationContext,
 } from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
-import apm from 'elastic-apm-node';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { getFlattenedObject } from '@kbn/std';
 import {
   type Client,
@@ -24,7 +24,17 @@ import {
   NOOP_PROVIDER,
 } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
-import { filter, switchMap, startWith, Subject, BehaviorSubject, pairwise, takeUntil } from 'rxjs';
+import {
+  filter,
+  switchMap,
+  startWith,
+  Subject,
+  BehaviorSubject,
+  pairwise,
+  takeUntil,
+  merge,
+  map,
+} from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
@@ -56,6 +66,7 @@ export class FeatureFlagsService {
   private readonly logger: Logger;
   private readonly stop$ = new Subject<void>();
   private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
+  private readonly contextChanged$ = new Subject<void>();
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
 
@@ -117,7 +128,12 @@ export class FeatureFlagsService {
       featureFlagsChanged$.next(keys);
     });
     const observeFeatureFlag$ = (flagName: string) =>
-      featureFlagsChanged$.pipe(
+      merge(
+        // Flag changes
+        featureFlagsChanged$,
+        // Context changes (we need to reevaluate)
+        this.contextChanged$.pipe(map(() => [flagName]))
+      ).pipe(
         filter((flagNames) => flagNames.includes(flagName)),
         startWith([flagName]), // only to emit on the first call
         takeUntil(this.stop$) // stop the observable when the service stops
@@ -199,7 +215,7 @@ export class FeatureFlagsService {
         ? (override as T)
         : // We have to bind the evaluation or the client will lose its internal context
           await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
-    apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
+    addSpanLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
     // TODO: increment usage counter
     return value;
   }
@@ -221,5 +237,6 @@ export class FeatureFlagsService {
     // Merge the formatted context to append to the global context, and set it in the OpenFeature client.
     this.context = deepMerge(this.context, formattedContextToAppend);
     OpenFeature.setContext(this.context);
+    this.contextChanged$.next();
   }
 }

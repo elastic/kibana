@@ -10,3 +10,9 @@ export const MAX_SCHEDULE_BACKFILL_BULK_SIZE = 100;
 export const MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS =
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+
+export const backfillInitiator = {
+  USER: 'user',
+  SYSTEM: 'system',
+} as const;
+export type BackfillInitiator = (typeof backfillInitiator)[keyof typeof backfillInitiator];

@@ -27,6 +27,7 @@ import {
   EuiPopover,
   EuiPortal,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
@@ -242,12 +243,19 @@ export const Controls: FC<Props> = React.memo(
       [isModalVisible, deleteItem, didUntag]
     );
 
+    const flyoutTitleId = useGeneratedHtmlId();
+
     if (showFlyout === false) {
       return null;
     }
 
     const button = (
-      <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={onActionsButtonClick}>
+      <EuiButton
+        size="s"
+        iconType="chevronSingleDown"
+        iconSide="right"
+        onClick={onActionsButtonClick}
+      >
         <FormattedMessage
           id="xpack.ml.dataframe.analyticsMap.flyout.nodeActionsButton"
           defaultMessage="Node actions"
@@ -289,7 +297,7 @@ export const Controls: FC<Props> = React.memo(
             <EuiContextMenuItem
               disabled={!canCreateDataFrameAnalytics}
               key={`${nodeId}-drift-data`}
-              icon="visTagCloud"
+              icon="chartTagCloud"
               onClick={onAnalyzeDataDrift}
             >
               <FormattedMessage
@@ -304,7 +312,7 @@ export const Controls: FC<Props> = React.memo(
             <EuiContextMenuItem
               disabled={!canCreateDataFrameAnalytics}
               key={`${nodeId}-create`}
-              icon="plusInCircle"
+              icon="plusCircle"
               onClick={onCreateJobClick}
             >
               <FormattedMessage
@@ -356,12 +364,18 @@ export const Controls: FC<Props> = React.memo(
 
     return (
       <EuiPortal>
-        <EuiFlyout ownFocus size="m" onClose={deselect} data-test-subj="mlAnalyticsJobMapFlyout">
+        <EuiFlyout
+          aria-labelledby={flyoutTitleId}
+          ownFocus
+          size="m"
+          onClose={deselect}
+          data-test-subj="mlAnalyticsJobMapFlyout"
+        >
           <EuiFlyoutHeader>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
-                  <h3 data-test-subj="mlDataFrameAnalyticsNodeDetailsTitle">
+                  <h3 id={flyoutTitleId} data-test-subj="mlDataFrameAnalyticsNodeDetailsTitle">
                     <FormattedMessage
                       id="xpack.ml.dataframe.analyticsMap.flyoutHeaderTitle"
                       defaultMessage="Details for {type} {id}"

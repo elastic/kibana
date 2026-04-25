@@ -7,7 +7,7 @@
 
 import type { RouteDefinitionParams } from '..';
 import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
-import type { SessionInfo } from '../../../common/types';
+import { LogoutReason, type SessionInfo } from '../../../common/types';
 
 /**
  * Defines routes required for the session info.
@@ -20,7 +20,7 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
         authz: {
           enabled: false,
           reason:
-            'This route is opted out from authorization because a valid session is required, and it does not return sensative session information',
+            'This route is opted out from authorization because a valid session is required, and it does not return sensitive session information',
         },
       },
       validate: false,
@@ -29,19 +29,27 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
       const { value: sessionValue } = await getSession().get(request);
       if (sessionValue) {
         const expirationTime =
-          sessionValue.idleTimeoutExpiration && sessionValue.lifespanExpiration
+          sessionValue.idleTimeoutExpiration !== null && sessionValue.lifespanExpiration !== null
             ? Math.min(sessionValue.idleTimeoutExpiration, sessionValue.lifespanExpiration)
-            : sessionValue.idleTimeoutExpiration || sessionValue.lifespanExpiration;
+            : sessionValue.idleTimeoutExpiration ?? sessionValue.lifespanExpiration;
+
+        const expirationReason: SessionInfo['expirationReason'] | undefined =
+          expirationTime !== null
+            ? expirationTime === sessionValue.lifespanExpiration
+              ? LogoutReason.SESSION_LIFESPAN_TIMEOUT
+              : LogoutReason.SESSION_IDLE_TIMEOUT
+            : undefined;
 
         return response.ok({
           body: {
-            expiresInMs: expirationTime ? expirationTime - Date.now() : null,
+            expiresInMs: expirationTime !== null ? expirationTime - Date.now() : null,
             canBeExtended:
               sessionValue.idleTimeoutExpiration !== null &&
               expirationTime !== null &&
               (sessionValue.lifespanExpiration === null ||
                 expirationTime + SESSION_EXPIRATION_WARNING_MS < sessionValue.lifespanExpiration),
             provider: sessionValue.provider,
+            ...(expirationReason !== undefined ? { expirationReason } : {}),
           } as SessionInfo,
         });
       }

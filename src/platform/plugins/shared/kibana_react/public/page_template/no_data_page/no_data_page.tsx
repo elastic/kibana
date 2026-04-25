@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useMemo, FunctionComponent, MouseEventHandler } from 'react';
-import { EuiCardProps, EuiSpacer, EuiText, EuiLink, CommonProps } from '@elastic/eui';
+import type { ReactNode, FunctionComponent, MouseEventHandler } from 'react';
+import React, { useMemo } from 'react';
+import type { EuiCardProps, CommonProps } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';

@@ -12,7 +12,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 
 import { APP_BASE_PATH, sectionsMock } from '../mocks/mocks';
 import { CardsNavigation } from './cards_navigation';
-import { CardsNavigationComponentProps } from './types';
+import type { CardsNavigationComponentProps } from './types';
 
 const renderCardsNavigationComponent = (props: CardsNavigationComponentProps) => {
   return [render(<CardsNavigation {...props} />)];
@@ -81,7 +81,7 @@ describe('Cards Navigation', () => {
         appBasePath: APP_BASE_PATH,
         extendedCardNavigationDefinitions: {
           [invalidAppId]: {
-            icon: 'launch',
+            icon: 'rocket',
             description: 'Invalid app not part of any registered management section',
             category: 'other',
           },
@@ -101,7 +101,7 @@ describe('Cards Navigation', () => {
         appBasePath: APP_BASE_PATH,
         extendedCardNavigationDefinitions: {
           [notManagementAppId]: {
-            icon: 'launch',
+            icon: 'rocket',
             description: 'Invalid app not part of any registered management section',
             category: 'other',
             skipValidation: true,

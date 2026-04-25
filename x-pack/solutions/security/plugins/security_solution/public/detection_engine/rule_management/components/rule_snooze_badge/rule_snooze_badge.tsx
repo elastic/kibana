@@ -7,11 +7,10 @@
 
 import React from 'react';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { useUserData } from '../../../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings_query';
 import { useRuleSnoozeSettings } from './use_rule_snooze_settings';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 interface RuleSnoozeBadgeProps {
   /**
@@ -27,8 +26,7 @@ export function RuleSnoozeBadge({
 }: RuleSnoozeBadgeProps): JSX.Element {
   const RulesListNotifyBadge = useKibana().services.triggersActionsUi.getRulesListNotifyBadge;
   const { snoozeSettings, error } = useRuleSnoozeSettings(ruleId);
-  const [{ canUserCRUD }] = useUserData();
-  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
 
   return (
@@ -36,7 +34,7 @@ export function RuleSnoozeBadge({
       ruleId={ruleId}
       snoozeSettings={snoozeSettings}
       loading={!snoozeSettings && !error}
-      disabled={!hasCRUDPermissions || error}
+      disabled={!canEditRules || error}
       showTooltipInline={showTooltipInline}
       onRuleChanged={invalidateFetchRuleSnoozeSettings}
     />

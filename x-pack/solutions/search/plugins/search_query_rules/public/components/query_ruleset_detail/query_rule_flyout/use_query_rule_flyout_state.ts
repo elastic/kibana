@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
-import { OnDragEndResponder } from '@hello-pangea/dnd';
+import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import { euiDragDropReorder } from '@elastic/eui';
 import { AnalyticsEvents } from '../../../analytics/constants';
-import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../../common/types';
+import type { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../../common/types';
 import { useFetchIndexNames } from '../../../hooks/use_fetch_index_names';
 import { isCriteriaAlways } from '../../../utils/query_rules_utils';
 import { useUsageTracker } from '../../../hooks/use_usage_tracker';
@@ -48,7 +48,6 @@ export const useQueryRuleFlyoutState = ({
     fields: criteria,
     remove,
     replace,
-    update,
     append,
   } = useFieldArray({
     control,
@@ -78,6 +77,10 @@ export const useQueryRuleFlyoutState = ({
     name: 'actions.ids',
   });
 
+  const criteriaFields = useWatch({
+    control,
+    name: 'criteria',
+  });
   useEffect(() => {
     trigger('actions.ids');
   }, [actionIdsFields, trigger]);
@@ -86,7 +89,7 @@ export const useQueryRuleFlyoutState = ({
   }, [actionFields, trigger]);
   useEffect(() => {
     trigger('criteria');
-  }, [criteria, trigger]);
+  }, [trigger, criteriaFields, criteria]);
 
   const { data: indexNames } = useFetchIndexNames('');
 
@@ -183,7 +186,7 @@ export const useQueryRuleFlyoutState = ({
         rule_id: ruleId,
         criteria: isAlways
           ? [{ type: 'always' } as QueryRuleEditorForm['criteria'][0]]
-          : criteria.map((c) => {
+          : criteriaFields.map((c) => {
               const normalizedCriteria = {
                 values: c.values,
                 metadata: c.metadata,
@@ -200,7 +203,7 @@ export const useQueryRuleFlyoutState = ({
         rule_id: ruleId,
         criteria: isAlways
           ? [{ type: 'always' }]
-          : criteria.map((c) => {
+          : criteriaFields.map((c) => {
               const normalizedCriteria = {
                 values: c.values,
                 metadata: c.metadata,
@@ -291,7 +294,7 @@ export const useQueryRuleFlyoutState = ({
 
   const documentCount = actionFields.length || actionIdsFields?.length || 0;
   const shouldShowMetadataEditor = (createMode || !!ruleFromRuleset) && !isAlways;
-  const criteriaCount = criteria.length;
+  const criteriaCount = criteriaFields.length;
 
   return {
     actionFields,
@@ -319,6 +322,6 @@ export const useQueryRuleFlyoutState = ({
     setCriteriaCalloutActive,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
-    update,
+    criteriaFields,
   };
 };

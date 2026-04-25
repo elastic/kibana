@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectServiceLocationsState } from '../../../state';
@@ -13,25 +14,33 @@ import { useEnablement } from '../../../hooks';
 
 export const useCanUsePublicLocById = (configId: string) => {
   const { allConfigs } = useSelector(selectOverviewStatus);
-
   const { isServiceAllowed } = useEnablement();
-
   const { locations: allLocations } = useSelector(selectServiceLocationsState);
+  const kibana = useKibana();
 
-  const listIds = allLocations?.filter((loc) => loc.isServiceManaged).map((loc) => loc.id) ?? [];
+  const canUsePublicLocations = useMemo(
+    () => Boolean(kibana.services?.application?.capabilities.uptime.elasticManagedLocationsEnabled),
+    [kibana.services?.application?.capabilities.uptime.elasticManagedLocationsEnabled]
+  );
 
-  const hasManagedLocation = allConfigs?.filter((mon) => {
-    const sameId = mon.configId === configId;
-    const hasLocation = mon.locations.some((loc) => listIds.includes(loc.id));
-    return sameId && hasLocation;
-  });
+  const managedLocationIds = useMemo(
+    () => new Set(allLocations?.filter((loc) => loc.isServiceManaged).map((loc) => loc.id) ?? []),
+    [allLocations]
+  );
 
-  const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+  const hasManagedLocation = useMemo(
+    () =>
+      allConfigs?.some(
+        (mon) =>
+          mon.configId === configId &&
+          mon.locations.some((loc) => managedLocationIds.has(loc.id))
+      ) ?? false,
+    [allConfigs, configId, managedLocationIds]
+  );
 
   if (!isServiceAllowed) {
     return false;
   }
 
-  return hasManagedLocation ? !!canUsePublicLocations : true;
+  return hasManagedLocation ? canUsePublicLocations : true;
 };

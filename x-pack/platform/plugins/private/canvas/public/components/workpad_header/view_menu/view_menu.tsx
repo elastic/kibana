@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useCallback, useContext } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { compose, withHandlers } from 'react-recompose';
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
-import { State, CanvasWorkpadBoundingBox } from '../../../../types';
+import type { State, CanvasWorkpadBoundingBox } from '../../../../types';
 // @ts-expect-error untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
 // @ts-expect-error untyped local
@@ -23,7 +24,8 @@ import {
   isWriteable,
 } from '../../../state/selectors/workpad';
 import { WorkpadRoutingContext } from '../../../routes/workpad';
-import { ViewMenu as Component, Props as ComponentProps } from './view_menu.component';
+import type { Props as ComponentProps } from './view_menu.component';
+import { ViewMenu as Component } from './view_menu.component';
 import { getFitZoomScale } from './lib/get_fit_zoom_scale';
 import { forceReload } from '../../hooks/use_canvas_api';
 

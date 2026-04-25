@@ -22,7 +22,7 @@ export const ExecuteActionRequestSchema = {
         },
       }),
       /**
-       * The max timeout value before the command is killed. Number represents milliseconds
+       * The max timeout value before the command is killed. Number represents **seconds**
        */
       timeout: schema.maybe(schema.number({ min: 1 })),
     }),

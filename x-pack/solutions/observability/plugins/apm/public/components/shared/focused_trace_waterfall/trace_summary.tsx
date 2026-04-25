@@ -10,7 +10,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
-type TraceSummary = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>['summary'];
+type TraceSummary = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/summary'>['summary'];
 
 interface Props {
   summary: TraceSummary;
@@ -55,7 +55,7 @@ export function TraceSummary({ summary }: Props) {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />
+            <EuiIcon type="errorFill" color={theme.euiTheme.colors.danger} size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">

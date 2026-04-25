@@ -8,8 +8,9 @@
  */
 
 export * from './src/create_router';
+export * from './src/errors';
 export * from './src/encode_path';
-export * from './src/types';
+export type * from './src/types';
 export * from './src/outlet';
 export * from './src/route_renderer';
 export * from './src/router_provider';

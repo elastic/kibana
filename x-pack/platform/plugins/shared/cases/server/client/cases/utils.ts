@@ -10,9 +10,10 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { v4 } from 'uuid';
 import type {
   ActionConnector,
-  Attachment,
+  AttachmentV2,
   Case,
   CaseAssignees,
   CaseAttributes,
@@ -22,6 +23,7 @@ import type {
   ConnectorMappingTarget,
   CustomFieldsConfiguration,
   ExternalService,
+  Observable,
   User,
 } from '../../../common/types/domain';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
@@ -29,6 +31,7 @@ import type {
   CasePostRequest,
   CaseRequestCustomFields,
   CaseUserActionsDeprecatedResponse,
+  ObservablePost,
 } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
@@ -37,6 +40,7 @@ import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
 import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
+import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
 import * as i18n from './translations';
 
 interface CreateIncidentArgs {
@@ -57,6 +61,9 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
 
   return uniqBy(assignees, 'uid');
 };
+
+export const getCloseReasonIfValid = (closeReason?: string): string | undefined =>
+  closeReason != null && closeReason.trim().length > 0 ? closeReason : undefined;
 
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
@@ -83,23 +90,27 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const getCommentContent = (comment: Attachment): string => {
-  if (comment.type === AttachmentType.user) {
-    return comment.comment;
-  } else if (comment.type === AttachmentType.alert) {
-    const ids = getAlertIds(comment);
-    return `Alert with ids ${ids.join(', ')} added to case`;
-  } else if (
-    comment.type === AttachmentType.actions &&
-    (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
-  ) {
-    const firstHostname =
-      comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
-    const totalHosts = comment.actions.targets.length;
-    const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
-    const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
+// Only used for comment and action attachments.
+// TODO: https://github.com/elastic/kibana/issues/262574
+const getCommentContent = (comment: AttachmentV2): string => {
+  if (isLegacyAttachmentRequest(comment)) {
+    if (comment.type === AttachmentType.user) {
+      return comment.comment;
+    } else if (comment.type === AttachmentType.alert) {
+      const ids = getAlertIds(comment);
+      return `Alert with ids ${ids.join(', ')} added to case`;
+    } else if (
+      comment.type === AttachmentType.actions &&
+      (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
+    ) {
+      const firstHostname =
+        comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
+      const totalHosts = comment.actions.targets.length;
+      const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
+      const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
 
-    return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
+      return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
+    }
   }
 
   return '';
@@ -118,7 +129,7 @@ const getAlertsInfo = (
 
   const res =
     comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
-      if (comment.type === AttachmentType.alert) {
+      if (isLegacyAttachmentRequest(comment) && comment.type === AttachmentType.alert) {
         return {
           totalComments: totalComments + 1,
           pushed: comment.pushed_at != null ? pushed + 1 : pushed,
@@ -645,3 +656,27 @@ export const normalizeCreateCaseRequest = (
     customFieldsConfiguration,
   }),
 });
+
+export const isObservable = (observable: ObservablePost | Observable): observable is Observable =>
+  'id' in observable && 'typeKey' in observable && 'value' in observable;
+
+export const processObservables = (
+  observablesMap: Map<string, Observable>,
+  observable: ObservablePost | Observable
+) => {
+  const key = `${observable.typeKey}-${observable.value}`;
+  const isExistingObservable = observablesMap.has(key);
+  if (isExistingObservable) {
+    return;
+  }
+  if (isObservable(observable)) {
+    observablesMap.set(key, observable);
+  } else {
+    observablesMap.set(key, {
+      ...observable,
+      id: v4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+};

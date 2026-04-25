@@ -6,13 +6,13 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { GetRuleMigrationPrebuiltRulesResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationPrebuiltRulesRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from './util/with_license';
+import { withLicense } from '../../common/api/util/with_license';
 import { getPrebuiltRulesForMigration } from './util/prebuilt_rules';
 
 export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
@@ -43,7 +43,7 @@ export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
           const { migration_id: migrationId } = req.params;
           try {
             const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
             const savedObjectsClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
 

@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ListArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { SearchEsListSchema } from '../../schemas/elastic_response';
+import type { SearchEsListSchema } from '../../schemas/elastic_response';
 
 import { convertDateNumberToString } from './convert_date_number_to_string';
 

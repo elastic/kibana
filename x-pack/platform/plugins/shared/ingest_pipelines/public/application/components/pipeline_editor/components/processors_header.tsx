@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../shared_imports';
 
-import { LoadFromJsonButton, OnDoneLoadJsonHandler, TestPipelineActions } from '.';
+import type { OnDoneLoadJsonHandler } from '.';
+import { LoadFromJsonButton, TestPipelineActions } from '.';
 
 export interface Props {
   onLoadJson: OnDoneLoadJsonHandler;

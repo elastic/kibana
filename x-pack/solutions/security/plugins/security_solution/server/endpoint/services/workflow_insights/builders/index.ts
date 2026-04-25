@@ -5,29 +5,40 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { InvalidDefendInsightTypeError } from '@kbn/elastic-assistant-plugin/server/lib/defend_insights/errors';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
-
+import type {
+  DefendInsight,
+  SecurityWorkflowInsight,
+} from '../../../../../common/endpoint/types/workflow_insights';
 import type { EndpointMetadataService } from '../../metadata';
+import { WorkflowInsightType } from '../../../../../common/endpoint/types/workflow_insights';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
+import { buildCustomWorkflowInsights } from './custom';
 
 export interface BuildWorkflowInsightParams {
   defendInsights: DefendInsight[];
-  request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
   endpointMetadataService: EndpointMetadataService;
   esClient: ElasticsearchClient;
+  options: {
+    insightType: WorkflowInsightType;
+    endpointIds: string[];
+    connectorId?: string;
+    model?: string;
+  };
 }
 
 export function buildWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): Promise<SecurityWorkflowInsight[]> {
-  if (params.request.body.insightType === DefendInsightType.Enum.incompatible_antivirus) {
-    return buildIncompatibleAntivirusWorkflowInsights(params);
+  switch (params.options.insightType) {
+    case WorkflowInsightType.enum.incompatible_antivirus:
+      return buildIncompatibleAntivirusWorkflowInsights(params);
+    case WorkflowInsightType.enum.policy_response_failure:
+      return buildCustomWorkflowInsights(params);
+    case WorkflowInsightType.enum.custom:
+      return buildCustomWorkflowInsights(params);
+    default:
+      throw new Error('Invalid insight type');
   }
-
-  throw new InvalidDefendInsightTypeError();
 }

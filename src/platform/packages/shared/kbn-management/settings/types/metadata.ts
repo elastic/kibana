@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
-import { KnownTypeToValue, SettingType } from './setting_type';
+import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
+import type { KnownTypeToValue, SettingType } from './setting_type';
 
 /**
  * Creating this type based on {@link UiSettingsClientCommon} and exporting for ease.

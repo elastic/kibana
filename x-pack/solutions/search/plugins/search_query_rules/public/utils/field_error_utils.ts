@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldError } from 'react-hook-form';
+import type { FieldError } from 'react-hook-form';
 
 export const isFieldError = (error?: { type?: string; message?: string }): error is FieldError => {
   return !!error && error.type !== undefined && error.message !== undefined;

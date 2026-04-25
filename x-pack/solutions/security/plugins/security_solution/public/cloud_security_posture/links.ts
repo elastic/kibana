@@ -6,8 +6,8 @@
  */
 import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import type { SecurityPageName } from '../../common/constants';
-import { SECURITY_FEATURE_ID } from '../../common/constants';
 import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_posture_dashboard_page.png';
 import cloudNativeVulnerabilityManagementDashboardImage from '../common/images/cloud_native_vulnerability_management_dashboard_page.png';
 import type { LinkItem } from '../common/links/types';
@@ -15,7 +15,7 @@ import { IconEndpoints } from '../common/icons/endpoints';
 
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
 };
 
 export const findingsLinks: LinkItem = {

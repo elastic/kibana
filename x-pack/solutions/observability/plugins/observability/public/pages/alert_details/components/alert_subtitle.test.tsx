@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { render } from '../../../utils/test_helper';
 import { alert } from '../mock/alert';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { AlertSubtitle, AlertSubtitleProps } from './alert_subtitle';
+import type { AlertSubtitleProps } from './alert_subtitle';
+import { AlertSubtitle } from './alert_subtitle';
 
 jest.mock('../../../utils/kibana_react');
 
@@ -39,13 +39,16 @@ describe('Alert subtitle', () => {
     mockKibana();
   });
 
-  it('should show alert subtitle', async () => {
-    const alertSubtitle = renderComponent({
-      alert,
-    });
+  it('should show the rule type breached text', async () => {
+    const result = renderComponent({ alert });
 
-    expect(alertSubtitle.queryByText('Rule:')).toBeInTheDocument();
+    expect(result.queryByText('Log threshold breached')).toBeInTheDocument();
+  });
 
-    expect(alertSubtitle.queryByText(alert.fields[ALERT_RULE_NAME])).toBeInTheDocument();
+  it('should show a "View rule" link', async () => {
+    const result = renderComponent({ alert });
+
+    expect(result.queryByText('View rule')).toBeInTheDocument();
+    expect(result.getByTestId('o11yAlertRuleLink')).toBeInTheDocument();
   });
 });

@@ -21,7 +21,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
 } from '@elastic/eui';
-import {
+import type {
   CardsNavigationComponentProps,
   AppRegistrySections,
   Application,

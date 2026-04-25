@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
-import { registerTestBed } from '../shared_imports';
+import { render, act } from '@testing-library/react';
 
 import { Form, UseField } from '../components';
 import React from 'react';
 import { useForm } from '.';
 import { emptyField } from '../../helpers/field_validators';
-import { FieldHook, FieldValidateResponse, VALIDATION_TYPES, FieldConfig } from '..';
+import type { FieldHook, FieldValidateResponse, FieldConfig } from '..';
+import { VALIDATION_TYPES } from '..';
 
 describe('useField() hook', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -55,15 +55,19 @@ describe('useField() hook', () => {
         ],
       });
 
-      registerTestBed(TestForm)();
+      render(<TestForm />);
 
       let validateResponse: FieldValidateResponse;
 
       await act(async () => {
-        validateResponse = await fieldHook!.validate({
+        const validatePromise = fieldHook!.validate({
           value: EMPTY_VALUE,
           validationType: VALIDATION_TYPES.ARRAY_ITEM,
         });
+
+        await jest.runAllTimersAsync();
+
+        validateResponse = await validatePromise;
       });
 
       // validation fails for ARRAY_ITEM with a non-blocking validation error
@@ -95,15 +99,19 @@ describe('useField() hook', () => {
         ],
       });
 
-      registerTestBed(TestForm)();
+      render(<TestForm />);
 
       let validateResponse: FieldValidateResponse;
 
       await act(async () => {
-        validateResponse = await fieldHook!.validate({
+        const validatePromise = fieldHook!.validate({
           value: EMPTY_VALUE,
           validationType: VALIDATION_TYPES.ARRAY_ITEM,
         });
+
+        await jest.runAllTimersAsync();
+
+        validateResponse = await validatePromise;
       });
 
       // validation fails for ARRAY_ITEM with a blocking validation error
@@ -135,15 +143,19 @@ describe('useField() hook', () => {
         ],
       });
 
-      registerTestBed(TestForm)();
+      render(<TestForm />);
 
-      act(() => {
+      await act(async () => {
         // This should **not** call our validator as it is of type ARRAY_ITEM
         // and here, as we don't specify the validation type, we validate the default "FIELD" type.
-        fieldHook!.validate({
+        const validatePromise = fieldHook!.validate({
           value: 'foo',
           validationType: undefined, // Although not necessary adding it to be explicit
         });
+
+        await jest.runAllTimersAsync();
+
+        await validatePromise;
       });
 
       expect(validatorFn).toBeCalledTimes(0);
@@ -179,14 +191,15 @@ describe('useField() hook', () => {
         }
       );
 
-      const wrapper = registerTestBed(TestForm, {
-        memoryRouter: { wrapComponent: false },
-      })({ showField1: true, showField2: true });
+      const { rerender } = render(<TestForm showField1={true} showField2={true} />);
       expect(field2ValidatorFn).toBeCalledTimes(0);
 
+      rerender(<TestForm showField1={false} showField2={true} />);
+
       await act(async () => {
-        wrapper.setProps({ showField1: false });
+        await jest.runAllTimersAsync();
       });
+
       expect(field2ValidatorFn).toBeCalledTimes(1);
     });
   });

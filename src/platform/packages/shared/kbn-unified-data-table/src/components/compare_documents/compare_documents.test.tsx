@@ -14,7 +14,8 @@ import { render } from '@testing-library/react';
 import { omit } from 'lodash';
 import React from 'react';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import CompareDocuments, { CompareDocumentsProps } from './compare_documents';
+import type { CompareDocumentsProps } from './compare_documents';
+import CompareDocuments from './compare_documents';
 import { useComparisonFields } from './hooks/use_comparison_fields';
 
 let mockLocalStorage: Record<string, string> = {};
@@ -99,7 +100,7 @@ describe('CompareDocuments', () => {
       Object {
         "aria-describedby": "test",
         "aria-labelledby": "test",
-        "className": "css-h7dgtn-useComparisonCss-useComparisonCss",
+        "className": "css-d1lkc2-useComparisonCss-useComparisonCss",
         "columnVisibility": Object {
           "setVisibleColumns": [Function],
           "visibleColumns": Array [

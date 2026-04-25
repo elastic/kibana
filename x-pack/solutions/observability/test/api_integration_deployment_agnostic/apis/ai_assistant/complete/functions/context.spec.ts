@@ -7,17 +7,17 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import {
+import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
+import type {
   KnowledgeBaseEntry,
   MessageAddEvent,
-  MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
-import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/recall_and_score';
+import { CONTEXT_FUNCTION_NAME, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/recall_and_score';
 import { SCORE_SUGGESTIONS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
-import { KnowledgeBaseDocument, LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
+import type { KnowledgeBaseDocument, LlmProxy } from '../../utils/create_llm_proxy';
+import { createLlmProxy } from '../../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { addSampleDocsToInternalKb, clearKnowledgeBase } from '../../utils/knowledge_base';
 import { chatComplete } from '../../utils/conversation';

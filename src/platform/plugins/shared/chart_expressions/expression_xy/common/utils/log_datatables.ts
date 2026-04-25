@@ -8,21 +8,18 @@
  */
 
 import { DimensionType } from '@kbn/expressions-plugin/common';
-import { QueryPointEventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import {
+import type { QueryPointEventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import type {
   Datatable,
   DefaultInspectorAdapters,
   ExecutionContext,
 } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import {
-  Dimension,
-  LayerDimension,
-  prepareLogTable,
-} from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { Dimension, LayerDimension } from '@kbn/visualizations-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
-import {
+import type {
   AnnotationLayerConfigResult,
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,

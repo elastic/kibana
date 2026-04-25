@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { asyncMap } from '@kbn/std';
 import { FtrService } from '../../ftr_provider_context';
 
 const ACTION_SHOW_CONFIG_PANEL_SUBJ = 'embeddablePanelAction-ACTION_SHOW_CONFIG_PANEL';
@@ -32,7 +33,6 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly inspector = this.ctx.getService('inspector');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly browser = this.ctx.getService('browser');
 
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
@@ -47,10 +47,26 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async getDashboardContainerTopOffset() {
-    return (
-      (await (await this.testSubjects.find('dashboardContainer')).getPosition()).y +
-      DASHBOARD_MARGIN_SIZE
-    );
+    const fixedHeaders = (
+      await Promise.all([
+        // global fixed eui headers, TODO: remove when Kibana switched to grid layout
+        this.find.allByCssSelector('[data-fixed-header="true"]', 500),
+        // fixed header with actions from project navigation
+        this.find.allByCssSelector('[data-test-subj="kibanaProjectHeaderActionMenu"]', 500),
+        // sticky unified search bar
+        this.find.allByCssSelector('[data-test-subj="globalQueryBar"]', 500),
+      ])
+    ).flat();
+
+    let fixedHeaderHeight = 0;
+    await asyncMap(fixedHeaders, async (header) => {
+      const headerHeight = (await header.getSize()).height;
+      fixedHeaderHeight += headerHeight;
+    });
+
+    const additionalOffsetForFloatingHoverActions = 32;
+
+    return fixedHeaderHeight + DASHBOARD_MARGIN_SIZE + additionalOffsetForFloatingHoverActions;
   }
 
   async getCanvasContainerTopOffset() {
@@ -70,17 +86,10 @@ export class DashboardPanelActionsService extends FtrService {
   async scrollPanelIntoView(wrapper?: WebElementWrapper) {
     this.log.debug(`scrollPanelIntoView`);
     wrapper = wrapper || (await this.getPanelWrapper());
-    const yOffset = (await wrapper.getPosition()).y;
-    await this.browser.execute(`
-        const scrollY = window.scrollY;
-        window.scrollBy(0, scrollY - ${yOffset});
-      `);
 
     const containerTop = await this.getContainerTopOffset();
 
-    await wrapper.moveMouseTo({
-      topOffset: containerTop,
-    });
+    await wrapper.moveMouseTo({ topOffset: containerTop });
   }
 
   async toggleContextMenu(wrapper?: WebElementWrapper) {

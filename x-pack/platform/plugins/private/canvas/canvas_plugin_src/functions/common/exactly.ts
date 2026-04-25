@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionValueFilter, ExpressionFunctionDefinition } from '../../../types';
+import type { ExpressionValueFilter, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

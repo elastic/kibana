@@ -6,11 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
-import { getJourneyFailedSteps } from '../../queries/get_journey_failed_steps';
+import type { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 import { getJourneySteps } from '../../queries/get_journey_steps';
 import { getJourneyDetails } from '../../queries/get_journey_details';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -44,30 +43,5 @@ export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
       details,
       checkGroup,
     };
-  },
-});
-
-export const createJourneyFailedStepsRoute: SyntheticsRestApiRouteFactory = () => ({
-  method: 'GET',
-  path: SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
-  validate: {
-    query: schema.object({
-      checkGroups: schema.arrayOf(schema.string()),
-    }),
-  },
-  handler: async ({ syntheticsEsClient, request, response }): Promise<any> => {
-    const { checkGroups } = request.query;
-    try {
-      const result = await getJourneyFailedSteps({
-        syntheticsEsClient,
-        checkGroups,
-      });
-      return {
-        checkGroups,
-        steps: result,
-      };
-    } catch (e) {
-      return response.customError({ statusCode: 500, body: e });
-    }
   },
 });

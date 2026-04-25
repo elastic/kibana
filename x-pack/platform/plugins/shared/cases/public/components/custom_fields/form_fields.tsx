@@ -60,7 +60,8 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMo
           euiFieldProps: {
             'data-test-subj': 'custom-field-label-input',
             fullWidth: true,
-            autoFocus: true,
+            // Setting autoFocus to false in order to preserve the correct focus when modal is closed
+            autoFocus: false,
             isLoading: isSubmitting,
           },
         }}

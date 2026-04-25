@@ -8,6 +8,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { ClientRequest } from 'http';
+import type { Socket } from 'net';
 import type { Test } from 'supertest';
 import type { PluginFunctionalProviderContext } from '../../services';
 
@@ -16,23 +18,49 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   describe('route', function () {
     describe('timeouts', function () {
+      // Sends `body` one character at a time with `interval` ms between each write.
+      //
+      // The first character is written immediately to initiate the TCP connection.
+      // Subsequent characters are sent via setInterval only after the socket is
+      // connected, preventing writes from being buffered during the TCP handshake
+      // and arriving at the server in a single burst rather than drip-fed.
       const writeBodyCharAtATime = (request: Test, body: string, interval: number) => {
         return new Promise((resolve, reject) => {
-          let i = 0;
-          const intervalId = setInterval(() => {
-            if (i < body.length) {
-              request.write(body[i++]);
-            } else {
-              clearInterval(intervalId);
-              void request.end((err, res) => {
-                resolve(res);
-              });
-            }
-          }, interval);
+          let charIdx = 0;
+          let intervalId: ReturnType<typeof setInterval> | undefined;
+
+          const startInterval = () => {
+            intervalId = setInterval(() => {
+              if (charIdx < body.length) {
+                void request.write(body[charIdx++]);
+              } else {
+                clearInterval(intervalId);
+                void request.end((err, res) => {
+                  resolve(res);
+                });
+              }
+            }, interval);
+          };
+
           void request.on('error', (err) => {
             clearInterval(intervalId);
             reject(err);
           });
+
+          void request.write(body[charIdx++]);
+
+          const underlyingReq = (request as unknown as { req?: ClientRequest }).req;
+          if (underlyingReq !== undefined) {
+            underlyingReq.once('socket', (socket: Socket) => {
+              if (socket.connecting) {
+                socket.once('connect', startInterval);
+              } else {
+                setImmediate(startInterval);
+              }
+            });
+          } else {
+            startInterval();
+          }
         });
       };
 
@@ -48,8 +76,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 20);
 
           await result.then(
-            (res) => {
-              expect(res).to.be(undefined);
+            () => {
+              throw new Error('Expected payload timeout error but request succeeded');
             },
             (err) => {
               expect(err.message).to.be('Request Timeout');
@@ -72,7 +100,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               expect(res).to.have.property('statusCode', 200);
             },
             (err) => {
-              expect(err).to.be(undefined);
+              throw err;
             }
           );
         });
@@ -87,11 +115,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('Transfer-Encoding', 'chunked')
             .set('kbn-xsrf', 'true');
 
-          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 20);
+          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 50);
 
           await result.then(
-            (res) => {
-              expect(res).to.be(undefined);
+            () => {
+              throw new Error('Expected idle socket timeout error but request succeeded');
             },
             (err) => {
               expect(err.message).to.be('socket hang up');
@@ -114,7 +142,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               expect(res).to.have.property('statusCode', 200);
             },
             (err) => {
-              expect(err).to.be(undefined);
+              throw err;
             }
           );
         });

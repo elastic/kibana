@@ -16,8 +16,6 @@ import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
-import { TourContextProvider } from '../../common/components/guided_onboarding_tour';
-
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
 import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
@@ -35,14 +33,38 @@ interface HomePageProps {
   children: React.ReactNode;
 }
 
+/**
+ * `useInitSourcerer` must only run under the legacy data view picker: it registers many hooks
+ * and must not be mounted with a changing hook count when `newDataViewPickerEnabled` toggles.
+ */
+const HomePageDragLayerLegacy: React.FC<{ children: React.ReactNode; pathname: string }> = ({
+  children,
+  pathname,
+}) => {
+  const { browserFields } = useInitSourcerer(getScopeFromPath(pathname, false));
+  return (
+    <DragDropContextWrapper browserFields={browserFields as BrowserFields}>
+      {children}
+    </DragDropContextWrapper>
+  );
+};
+
+const HomePageDragLayerNew: React.FC<{ children: React.ReactNode; pathname: string }> = ({
+  children,
+  pathname,
+}) => {
+  const browserFields = useBrowserFields(getScopeFromPath(pathname, true));
+  return (
+    <DragDropContextWrapper browserFields={browserFields as BrowserFields}>
+      {children}
+    </DragDropContextWrapper>
+  );
+};
+
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { pathname } = useLocation();
-  const { browserFields: oldBrowserFields } = useInitSourcerer(getScopeFromPath(pathname, false));
-  const { browserFields: experimentalBrowserFields } = useBrowserFields(
-    getScopeFromPath(pathname, newDataViewPickerEnabled)
-  );
 
   useRestoreDataViewManagerStateFromURL(
     useInitDataViewManager(),
@@ -52,10 +74,6 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
-
-  const browserFields = (
-    newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields
-  ) as BrowserFields;
 
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
@@ -68,16 +86,16 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   return (
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
       <ConsoleManager>
-        <TourContextProvider>
-          <>
-            <GlobalHeader />
-            <DragDropContextWrapper browserFields={browserFields}>
-              {children}
-            </DragDropContextWrapper>
-            <HelpMenu />
-            <TopValuesPopover />
-          </>
-        </TourContextProvider>
+        <>
+          <GlobalHeader />
+          {newDataViewPickerEnabled ? (
+            <HomePageDragLayerNew pathname={pathname}>{children}</HomePageDragLayerNew>
+          ) : (
+            <HomePageDragLayerLegacy pathname={pathname}>{children}</HomePageDragLayerLegacy>
+          )}
+          <HelpMenu />
+          <TopValuesPopover />
+        </>
       </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );

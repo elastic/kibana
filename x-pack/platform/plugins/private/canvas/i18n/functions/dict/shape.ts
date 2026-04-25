@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { shape } from '../../../canvas_plugin_src/functions/common/shape';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
+import type { FunctionHelp } from '../function_help';
+import type { FunctionFactory } from '../../../types';
 import { SVG } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof shape>> = {

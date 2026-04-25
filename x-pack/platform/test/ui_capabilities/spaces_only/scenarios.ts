@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Space } from '../common/types';
+import type { Space } from '../common/types';
 
 // For all scenarios, we define both an instance in addition
 // to a "type" definition so that we can use the exhaustive switch in

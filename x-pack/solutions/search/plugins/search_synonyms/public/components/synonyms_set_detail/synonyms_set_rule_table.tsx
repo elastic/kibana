@@ -6,9 +6,9 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiCode,
@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTextTruncate,
 } from '@elastic/eui';
-import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
+import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchSynonymsSet } from '../../hooks/use_fetch_synonyms_set';
@@ -83,7 +83,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 data-test-subj="searchSynonymsColumnsButton"
-                iconType="expand"
+                iconType="maximize"
                 aria-label={i18n.translate(
                   'xpack.searchSynonyms.synonymsSetTable.expandSynonyms.aria.label',
                   {
@@ -224,7 +224,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
             button={
               <EuiButton
                 data-test-subj="searchSynonymsSynonymsSetRuleTableAddRuleButton"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={() => {
                   setAddNewRulePopoverOpen(true);
                 }}
@@ -260,6 +260,9 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
               setPageIndex(page.index);
               setPageSize(page.size);
             }}
+            tableCaption={i18n.translate('xpack.searchSynonyms.synonymsSetTable.tableCaption', {
+              defaultMessage: 'Synonym rules',
+            })}
           />
         </>
       )}

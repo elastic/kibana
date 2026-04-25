@@ -12,7 +12,7 @@ import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { ConfigEditorContent } from './config_editor_content';
 import { coreMock } from '@kbn/core/public/mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   FILTERS_FORM_ITEM_SUBJ,

@@ -62,7 +62,7 @@ const connectorClientPopoverPanels = [
     icons: [
       <EuiIcon size="l" type="plugs" />,
       <EuiIcon size="l" type="sortRight" />,
-      <EuiIcon size="l" type="launch" />,
+      <EuiIcon size="l" type="rocket" />,
     ],
     id: 'client-deploy',
   },
@@ -130,6 +130,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiCallOut
+                    announceOnMount
                     title={
                       showIsOnlySelfManaged
                         ? i18n.translate(
@@ -161,6 +162,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate(
                     'xpack.contentConnectors.createConnector.connectorDescriptionBadge.elasticManagedDiscontinuedTitle',
                     {

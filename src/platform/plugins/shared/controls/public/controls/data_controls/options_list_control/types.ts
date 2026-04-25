@@ -7,61 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 
-import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
-import { SubjectsOf, SettersOf } from '@kbn/presentation-publishing/state_manager/types';
 import type {
-  OptionsListControlState,
-  OptionsListDisplaySettings,
   OptionsListSelection,
   OptionsListSortingType,
-  OptionsListSuggestions,
-} from '../../../../common/options_list';
+  DataControlState,
+  OptionsListDSLControlState,
+} from '@kbn/controls-schemas';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type {
+  HasType,
+  HasUniqueId,
+  PublishesUnsavedChanges,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
+import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 import type { DataControlApi, PublishesField } from '../types';
-import { SelectionsState } from './selections_manager';
-import { DefaultDataControlState } from '../../../../common';
-import { TemporaryState } from './temporay_state_manager';
-import { EditorState } from './editor_state_manager';
+import type { EditorState } from './editor_state_manager';
+import type { SelectionsState } from './selections_manager';
+import type { TemporaryState } from './temporay_state_manager';
+import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../../types';
 
-export type OptionsListControlApi = DataControlApi & {
-  setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
-};
+export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlState> &
+  DataControlApi &
+  PublishesUnsavedChanges & {
+    setSelectedOptions: (options: OptionsListSelection[]) => void;
+    clearSelections: () => void;
+    hasSelections$: PublishingSubject<boolean | undefined>;
+  };
 
-export interface OptionsListComponentState
-  extends Omit<OptionsListControlState, keyof OptionsListDisplaySettings> {
-  searchString: string;
-  searchStringValid: boolean;
-  requestSize: number;
-}
-
-interface PublishesOptions {
-  availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
-  invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
-  totalCardinality$: PublishingSubject<number>;
-}
-export type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
+/**
+ * A type consisting of only the properties that the options list control puts into state managers
+ * and then passes to the UI component. Excludes any managed state properties that don't end up being used
+ * by the component
+ */
+export type OptionsListComponentState = Pick<DataControlState, 'field_name'> &
   SelectionsState &
   EditorState &
-  TemporaryState & { sort: OptionsListSortingType | undefined };
-
-type PublishesOptionsListState = SubjectsOf<OptionsListState>;
-type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
-  SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
-
-export type OptionsListComponentApi = PublishesField &
-  PublishesOptions &
-  PublishesOptionsListState &
-  Pick<PublishesTitle, 'title$'> &
-  OptionsListStateSetters & {
-    deselectOption: (key: string | undefined) => void;
-    makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
-    loadMoreSubject: Subject<void>;
-    selectAll: (keys: string[]) => void;
-    deselectAll: (keys: string[]) => void;
-    defaultTitle$?: PublishingSubject<string | undefined>;
-    uuid: string;
-    parentApi: {
-      allowExpensiveQueries$: PublishingSubject<boolean>;
-    };
+  TemporaryState<OptionsListSelection> & {
+    sort: OptionsListSortingType | undefined;
   };
+
+type PublishesDSLOptionsListComponentState = SubjectsOf<
+  /**
+   * For API consistency, we continue to refer to the control's label as `title`; however, to avoid
+   * being impacted by default embeddable title handling, we switch to `label` for the implementation
+   */
+  Omit<OptionsListComponentState, 'title'> & { label: string }
+>;
+type DSLOptionsListComponentStateSetters = SettersOf<OptionsListComponentState>;
+
+export type DSLOptionsListComponentApi = HasType &
+  HasUniqueId &
+  PublishesField &
+  OptionsListPublishesOptions<OptionsListSelection> &
+  PublishesDSLOptionsListComponentState &
+  DataControlApi &
+  DSLOptionsListComponentStateSetters &
+  OptionsListSelectionsApi & {
+    loadMoreSubject: Subject<void>;
+  };
+
+export interface OptionsListCustomStrings {
+  invalidSelectionsLabel?: string;
+}

@@ -7,8 +7,8 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common';
 import {
-  ConversationResponse,
   AppendConversationMessageRequestBody,
   AppendConversationMessageRequestParams,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
@@ -16,7 +16,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../utils';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { performChecks } from '../helpers';
 
 export const appendConversationMessageRoute = (router: ElasticAssistantPluginRouter) => {
@@ -63,10 +63,17 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
               statusCode: 404,
             });
           }
-
           const conversation = await dataClient?.appendConversationMessages({
             existingConversation,
-            messages: request.body.messages,
+            messages: request.body.messages.map((message) =>
+              message.role === 'user'
+                ? {
+                    ...message,
+                    user: { id: authenticatedUser.profile_uid, name: authenticatedUser.username },
+                  }
+                : message
+            ),
+            authenticatedUser,
           });
           if (conversation == null) {
             return assistantResponse.error({

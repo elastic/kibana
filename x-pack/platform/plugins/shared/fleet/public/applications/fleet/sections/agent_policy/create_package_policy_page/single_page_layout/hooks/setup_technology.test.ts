@@ -116,7 +116,7 @@ describe('useAgentless', () => {
     expect(result.current.isAgentlessEnabled).toBeFalsy();
   });
 
-  it('should return isAgentlessIntegration that returns false when agentless custom integrations are not enabled, and a custom integration is provided', () => {
+  it('should return getAgentlessStatusForPackage that returns isAgentless false when agentless custom integrations are not enabled, and a custom integration is provided', () => {
     (useStartServices as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -130,14 +130,17 @@ describe('useAgentless', () => {
 
     const {
       result: {
-        current: { isAgentlessIntegration },
+        current: { getAgentlessStatusForPackage },
       },
     } = renderHook(() => useAgentless());
 
-    expect(isAgentlessIntegration(mockPackageInfo)).toBe(false);
+    expect(getAgentlessStatusForPackage(mockPackageInfo)).toEqual({
+      isAgentless: false,
+      isDefaultDeploymentMode: false,
+    });
   });
 
-  it('should return isAgentlessIntegration that returns true when agentless custom integrations are enabled, and a custom integration is provided', () => {
+  it('should return getAgentlessStatusForPackage that returns isAgentless false when agentless custom integrations are enabled, and a custom integration is provided', () => {
     (useStartServices as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -151,11 +154,14 @@ describe('useAgentless', () => {
 
     const {
       result: {
-        current: { isAgentlessIntegration },
+        current: { getAgentlessStatusForPackage },
       },
     } = renderHook(() => useAgentless());
 
-    expect(isAgentlessIntegration(mockPackageInfo)).toBe(false);
+    expect(getAgentlessStatusForPackage(mockPackageInfo)).toEqual({
+      isAgentless: false,
+      isDefaultDeploymentMode: false,
+    });
   });
 
   it('should return isAgentlessDefault as falsey when agentless is disabled and isDefault is true', () => {
@@ -778,9 +784,7 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
-        global_data_tags: undefined,
         inactivity_timeout: 3600,
-        monitoring_enabled: ['logs', 'metrics'],
       });
     });
   });
@@ -822,9 +826,7 @@ describe('useSetupTechnology', () => {
     expect(setNewAgentPolicy).toHaveBeenCalledWith({
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
-      global_data_tags: undefined,
       inactivity_timeout: 3600,
-      monitoring_enabled: ['logs', 'metrics'],
     });
 
     rerender({
@@ -842,9 +844,7 @@ describe('useSetupTechnology', () => {
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-2',
-        global_data_tags: undefined,
         inactivity_timeout: 3600,
-        monitoring_enabled: ['logs', 'metrics'],
         supports_agentless: true,
       });
     });
@@ -993,20 +993,6 @@ describe('useSetupTechnology', () => {
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
         inactivity_timeout: 3600,
-        monitoring_enabled: ['logs', 'metrics'],
-        global_data_tags: [
-          { name: 'organization', value: 'org' },
-          { name: 'division', value: 'div' },
-          { name: 'team', value: 'team' },
-        ],
-        agentless: {
-          resources: {
-            requests: {
-              memory: '256Mi',
-              cpu: '100m',
-            },
-          },
-        },
       });
       expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     });
@@ -1019,52 +1005,6 @@ describe('useSetupTechnology', () => {
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
       expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
       expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: false });
-    });
-  });
-
-  it('should have agentless resources section on the request when creating agentless policy with resources', async () => {
-    (useConfig as MockFn).mockReturnValue({
-      agentless: {
-        enabled: true,
-        api: {
-          url: 'https://agentless.api.url',
-        },
-      },
-    } as any);
-    (useStartServices as MockFn).mockReturnValue({
-      cloud: {
-        isCloudEnabled: true,
-      },
-    });
-
-    const { result } = renderHook(() =>
-      useSetupTechnology({
-        setNewAgentPolicy,
-        newAgentPolicy: newAgentPolicyMock,
-        setSelectedPolicyTab: setSelectedPolicyTabMock,
-        packagePolicy: packagePolicyMock,
-        packageInfo: createPackageInfoMock(),
-        updatePackagePolicy: updatePackagePolicyMock,
-      })
-    );
-
-    act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
-    });
-
-    await waitFor(() => {
-      expect(setNewAgentPolicy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          agentless: {
-            resources: {
-              requests: {
-                memory: '256Mi',
-                cpu: '100m',
-              },
-            },
-          },
-        })
-      );
     });
   });
 
@@ -1146,7 +1086,7 @@ describe('useSetupTechnology', () => {
     });
   });
 
-  it('should have global_data_tags with the integration team when creating agentless policy with global_data_tags', async () => {
+  it('should not have global_data_tags with the integration team when creating agentless policy with global_data_tags', async () => {
     (useConfig as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -1180,11 +1120,6 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
           supports_agentless: true,
-          global_data_tags: [
-            { name: 'organization', value: 'org' },
-            { name: 'division', value: 'div' },
-            { name: 'team', value: 'team' },
-          ],
         })
       );
     });
@@ -1254,9 +1189,7 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
-        global_data_tags: undefined,
         inactivity_timeout: 3600,
-        monitoring_enabled: ['logs', 'metrics'],
       });
       expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
         global_data_tags: [
@@ -1332,9 +1265,7 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
-        global_data_tags: undefined,
         inactivity_timeout: 3600,
-        monitoring_enabled: ['logs', 'metrics'],
       });
       expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
         global_data_tags: [
@@ -1379,9 +1310,7 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
-        global_data_tags: undefined,
         inactivity_timeout: 3600,
-        monitoring_enabled: ['logs', 'metrics'],
       });
       expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
         global_data_tags: [
@@ -1430,11 +1359,6 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
           supports_agentless: true,
-          global_data_tags: [
-            { name: 'organization', value: 'org' },
-            { name: 'division', value: 'div' },
-            { name: 'team', value: 'team' },
-          ],
         })
       );
     });

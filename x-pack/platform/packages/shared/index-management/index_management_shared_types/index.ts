@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './src/types';
+export type * from './src/types';
+export * from './src/index_templates';
 export * from './src/home_sections';
-export * from './src/services';
+export type * from './src/services';
+export * from './src/constants';

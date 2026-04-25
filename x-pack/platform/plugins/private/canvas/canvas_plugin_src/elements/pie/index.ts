@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 export const pie: ElementFactory = () => ({
   name: 'pie',
   displayName: 'Pie',
@@ -13,7 +13,7 @@ export const pie: ElementFactory = () => ({
   width: 300,
   height: 300,
   help: 'A simple pie chart',
-  icon: 'visPie',
+  icon: 'chartPie',
   expression: `kibana
 | selectFilter
 | demodata

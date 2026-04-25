@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { keyBy, mapValues } from 'lodash';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 interface MonitoringStats {
   last_update: string;
@@ -255,7 +255,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         runtime: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           value: { drift, drift_by_type, load, polling, execution },
         },
       } = (await getHealthForSampleTask()).stats;

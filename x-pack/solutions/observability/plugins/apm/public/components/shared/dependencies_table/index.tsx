@@ -37,6 +37,7 @@ interface Props {
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
   onChangeRenderedItems?: (items: FormattedSpanMetricGroup[]) => void;
+  saveTableOptionsToUrl?: boolean;
 }
 
 export type FormattedSpanMetricGroup = SpanMetricGroup & {
@@ -56,6 +57,7 @@ export function DependenciesTable({
   initialPageSize,
   showSparkPlots,
   onChangeRenderedItems,
+  saveTableOptionsToUrl = true,
 }: Props) {
   const { isLarge } = useBreakpoints();
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
@@ -95,7 +97,7 @@ export function DependenciesTable({
         return <TruncateWithTooltip text={name} content={itemLink} />;
       },
       sortable: true,
-      width: '30%',
+      minWidth: '14em', // Will grow to fill the space
     },
     ...getSpanMetricColumns({
       shouldShowSparkPlots,
@@ -144,6 +146,8 @@ export function DependenciesTable({
             showPerPageOptions={showPerPageOptions}
             initialPageSize={initialPageSize}
             onChangeRenderedItems={onChangeRenderedItems}
+            saveTableOptionsToUrl={saveTableOptionsToUrl}
+            tableLayout="auto"
           />
         </OverviewTableContainer>
       </EuiFlexItem>

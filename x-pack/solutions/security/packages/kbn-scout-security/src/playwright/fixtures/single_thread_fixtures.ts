@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { test as baseTest, mergeTests, ApiServicesFixture } from '@kbn/scout';
-import { SecurityApiServicesFixture, SecurityTestFixtures, SecurityWorkerFixtures } from './types';
-import { getDetectionRuleApiService } from './worker';
+import type { ApiServicesFixture } from '@kbn/scout';
+import { test as baseTest, mergeTests } from '@kbn/scout';
+import type {
+  SecurityApiServicesFixture,
+  SecurityTestFixtures,
+  SecurityWorkerFixtures,
+} from './types';
+import {
+  getDetectionRuleApiService,
+  getDetectionAlertsApiService,
+  getEntityAnalyticsApiService,
+  getTimelineApiService,
+  getAttackDiscoveryApiService,
+} from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
 const securityFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
@@ -17,10 +28,15 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
     {
       pageObjects,
       page,
-    }: { pageObjects: SecurityTestFixtures['pageObjects']; page: SecurityTestFixtures['page'] },
+      config,
+    }: {
+      pageObjects: SecurityTestFixtures['pageObjects'];
+      page: SecurityTestFixtures['page'];
+      config: SecurityWorkerFixtures['config'];
+    },
     use: (pageObjects: SecurityTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
+    const extendedPageObjects = extendPageObjects(pageObjects, page, config);
     await use(extendedPageObjects);
   },
   apiServices: [
@@ -28,16 +44,34 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
       {
         apiServices,
         kbnClient,
+        esClient,
         log,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityWorkerFixtures['kbnClient'];
+        esClient: SecurityWorkerFixtures['esClient'];
         log: SecurityWorkerFixtures['log'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
+      extendedApiServices.detectionAlerts = getDetectionAlertsApiService({
+        esClient,
+        log,
+      });
       extendedApiServices.detectionRule = getDetectionRuleApiService({
+        kbnClient,
+        log,
+      });
+      extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
+        kbnClient,
+        log,
+      });
+      extendedApiServices.timeline = getTimelineApiService({
+        kbnClient,
+        log,
+      });
+      extendedApiServices.attackDiscovery = getAttackDiscoveryApiService({
         kbnClient,
         log,
       });

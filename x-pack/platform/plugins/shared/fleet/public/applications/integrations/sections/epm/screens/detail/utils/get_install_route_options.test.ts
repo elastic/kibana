@@ -22,7 +22,6 @@ describe('getInstallPkgRouteOptions', () => {
       integration: 'myintegration',
       pkgkey: 'myintegration-1.0.0',
       isFirstTimeAgentUser: false,
-      isGuidedOnboardingActive: false,
       isCloud: false,
       isExperimentalAddIntegrationPageEnabled: false,
     };
@@ -52,7 +51,6 @@ describe('getInstallPkgRouteOptions', () => {
       pkgkey: 'myintegration-1.0.0',
       agentPolicyId: '12345',
       isFirstTimeAgentUser: false,
-      isGuidedOnboardingActive: false,
       isCloud: false,
       isExperimentalAddIntegrationPageEnabled: false,
     };
@@ -81,7 +79,6 @@ describe('getInstallPkgRouteOptions', () => {
       integration: 'myintegration',
       pkgkey: 'myintegration-1.0.0',
       isFirstTimeAgentUser: true,
-      isGuidedOnboardingActive: false,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
@@ -110,7 +107,6 @@ describe('getInstallPkgRouteOptions', () => {
       integration: 'myintegration',
       pkgkey: 'apm-1.0.0',
       isFirstTimeAgentUser: true,
-      isGuidedOnboardingActive: false,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
@@ -144,7 +140,6 @@ describe('getInstallPkgRouteOptions', () => {
       integration: 'myintegration',
       pkgkey: 'endpoint-1.0.0',
       isFirstTimeAgentUser: true,
-      isGuidedOnboardingActive: false,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
@@ -179,7 +174,6 @@ describe('getInstallPkgRouteOptions', () => {
         integration: 'myintegration',
         pkgkey: 'myintegration-1.0.0',
         isFirstTimeAgentUser: true,
-        isGuidedOnboardingActive: false,
         isCloud: true,
         isExperimentalAddIntegrationPageEnabled: true,
       };
@@ -198,7 +192,6 @@ describe('getInstallPkgRouteOptions', () => {
         integration: 'myintegration',
         pkgkey: 'apm-1.0.0',
         isFirstTimeAgentUser: true,
-        isGuidedOnboardingActive: false,
         isCloud: true,
         isExperimentalAddIntegrationPageEnabled: true,
       };
@@ -217,7 +210,6 @@ describe('getInstallPkgRouteOptions', () => {
         integration: 'myintegration',
         pkgkey: 'myintegration-1.0.0',
         isFirstTimeAgentUser: true,
-        isGuidedOnboardingActive: false,
         isCloud: false,
         isExperimentalAddIntegrationPageEnabled: true,
       };
@@ -230,35 +222,15 @@ describe('getInstallPkgRouteOptions', () => {
       expect(getInstallPkgRouteOptions(opts)[1]).toMatchObject(expectedOptions);
     });
 
-    it('should not use multi-page layout if isFirstTimeAgentUser and isGuidedOnboardingActive are false', () => {
-      const opts = {
-        currentPath: 'currentPath',
-        integration: 'myintegration',
-        pkgkey: 'myintegration-1.0.0',
-        isFirstTimeAgentUser: false,
-        isGuidedOnboardingActive: false,
-        isCloud: true,
-        isExperimentalAddIntegrationPageEnabled: true,
-      };
-
-      const expectedOptions = {
-        path: '/integrations/myintegration-1.0.0/add-integration/myintegration',
-        state: expect.any(Object),
-      };
-
-      expect(getInstallPkgRouteOptions(opts)[1]).toMatchObject(expectedOptions);
-    });
-
-    it('should not use multi-page layout if isAgentlessDefault is true', () => {
+    it('should not use multi-page layout if isAgentlessByDefault is true', () => {
       const opts = {
         currentPath: 'currentPath',
         integration: 'myintegration',
         pkgkey: 'myintegration-1.0.0',
         isFirstTimeAgentUser: true,
-        isGuidedOnboardingActive: false,
         isCloud: true,
         isExperimentalAddIntegrationPageEnabled: true,
-        isAgentlessDefault: true,
+        isAgentlessByDefault: true,
       };
 
       const expectedOptions = {

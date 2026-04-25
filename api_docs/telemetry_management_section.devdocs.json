@@ -24,6 +24,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/telemetry_management_section/public/components/lazy_opt_in_example_flyout.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -39,6 +41,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -57,6 +61,8 @@
           "\nOptInExampleFlyout props"
         ],
         "path": "src/platform/plugins/shared/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -73,6 +79,8 @@
               "() => Promise<unknown[]>"
             ],
             "path": "src/platform/plugins/shared/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -91,6 +99,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -131,6 +141,8 @@
           "string[]"
         ],
         "path": "src/platform/plugins/shared/telemetry_management_section/common/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

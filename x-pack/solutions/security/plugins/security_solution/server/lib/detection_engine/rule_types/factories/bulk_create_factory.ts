@@ -68,10 +68,12 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
         logger: sharedParams.ruleExecutionLogger,
         events: alerts,
         spaceId: params.spaceId,
+        experimentalFeatures: sharedParams.experimentalFeatures,
+        entityStoreCrudClient: sharedParams.entityStoreCrudClient,
       });
       return enrichedAlerts;
     } catch (error) {
-      ruleExecutionLogger.error(`Alerts enrichment failed: ${error}`);
+      ruleExecutionLogger.error(`Error enriching alerts\nError: ${error}`);
       throw error;
     } finally {
       enrichmentsTimeFinish = performance.now();
@@ -91,10 +93,10 @@ export const bulkCreate = async <T extends DetectionAlertLatest>({
 
   const end = performance.now();
 
-  ruleExecutionLogger.debug(`Alerts bulk process took ${makeFloatString(end - start)} ms`);
+  ruleExecutionLogger.debug(`Bulk processing alerts took ${makeFloatString(end - start)}ms.`);
 
   if (!isEmpty(errors)) {
-    ruleExecutionLogger.warn(`Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
+    ruleExecutionLogger.warn(`Error bulk processing alerts\nError: ${JSON.stringify(errors)}`);
     return {
       errors: Object.keys(errors),
       success: false,

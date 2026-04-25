@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { EuiBadge, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
-import { Ping } from '../../../../../../common/runtime_types/ping';
+import type { Ping } from '../../../../../../common/runtime_types/ping';
 import { MONITOR_TYPES, STATUS } from '../../../../../../common/constants';
 import {
   STATUS_COMPLETE_LABEL,
@@ -32,11 +32,8 @@ const getPingStatusLabel = (status: string, ping: Ping) => {
 
 export const PingStatusColumn = ({ pingStatus, item }: Props) => {
   const theme = useEuiTheme();
-  const isAmsterdam = theme.euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
 
-  const dangerBehindText = isAmsterdam
-    ? theme.euiTheme.colors.vis.euiColorVisBehindText9
-    : theme.euiTheme.colors.vis.euiColorVis6;
+  const dangerBehindText = theme.euiTheme.colors.vis.euiColorVis6;
 
   const timeStamp = moment(item.timestamp);
 

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { InternalFields } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
 import type { BackfillSchedule } from '../../../application/backfill/result/types';
 import { parseDuration } from '../../../../common';
 import { clipDateInterval } from '../gap/interval_utils';
 import type { Gap } from '../gap';
+import type { GapBase } from '../../../application/gaps/types';
 
 export interface ScheduledItem {
   from: Date;
@@ -54,7 +56,7 @@ const findEarliestOverlapping = (
 
     // There is an overlap at this point
     earliestOverlapping = Math.min(earliestOverlapping, midIdx);
-    // go left to see if there is an erlier interval
+    // go left to see if there is an earlier interval
     endIdx = midIdx - 1;
   }
 
@@ -113,4 +115,22 @@ export const findOverlappingIntervals = (gaps: Gap[], scheduledItems: ScheduledI
       scheduled: findOverlapping(gap.range.gte.getTime(), gap.range.lte.getTime(), scheduledItems),
     };
   });
+};
+
+/**
+ * Converts an array of Gap objects to the format expected by updateGapsInEventLog.
+ * Filters out gaps without internalFields.
+ */
+export const prepareGapsForUpdate = (
+  gaps: Gap[]
+): Array<{ gap: GapBase; internalFields: InternalFields }> => {
+  return gaps.reduce<Array<{ gap: GapBase; internalFields: InternalFields }>>((acc, gap) => {
+    if (gap.internalFields) {
+      acc.push({
+        gap: gap.toObject(),
+        internalFields: gap.internalFields,
+      });
+    }
+    return acc;
+  }, []);
 };

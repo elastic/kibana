@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiTitle } from '@elastic/eui';
 
 export function DetailViewHeader({
   backLabel,
@@ -22,7 +22,7 @@ export function DetailViewHeader({
         <EuiLink data-test-subj="apmDetailViewHeaderLink" href={backHref}>
           <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="arrowLeft" />
+              <EuiIcon type="chevronSingleLeft" />
             </EuiFlexItem>
             <EuiFlexItem>{backLabel}</EuiFlexItem>
           </EuiFlexGroup>
@@ -30,7 +30,7 @@ export function DetailViewHeader({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">
-          <EuiText>{title}</EuiText>
+          <h4>{title}</h4>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>

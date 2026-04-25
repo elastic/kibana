@@ -23,6 +23,8 @@
         "label": "uiSettingsServiceMock",
         "description": [],
         "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+        "lineNumber": 79,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               ">"
             ],
             "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -57,6 +61,8 @@
               ">"
             ],
             "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -75,6 +81,8 @@
               ">"
             ],
             "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -93,6 +101,8 @@
               ">"
             ],
             "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -109,6 +119,8 @@
               "() => jest.Mocked<UiSettingsServiceContract>"
             ],
             "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

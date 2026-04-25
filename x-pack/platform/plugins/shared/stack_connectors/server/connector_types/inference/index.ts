@@ -10,19 +10,21 @@ import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/t
 import {
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
-  INFERENCE_CONNECTOR_TITLE,
-  INFERENCE_CONNECTOR_ID,
+  CONNECTOR_NAME,
+  CONNECTOR_ID,
+  ConfigSchema,
+  SecretsSchema,
   ServiceProviderKeys,
   SUB_ACTION,
-} from '../../../common/inference/constants';
-import { ConfigSchema, SecretsSchema } from '../../../common/inference/schema';
-import type { Config, Secrets } from '../../../common/inference/types';
+} from '@kbn/connector-schemas/inference';
+import type { Config, Secrets } from '@kbn/connector-schemas/inference';
 import { InferenceConnector } from './inference';
 import { unflattenObject } from '../lib/unflatten_object';
 
@@ -49,8 +51,8 @@ const deleteInferenceEndpoint = async (
 };
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
-  id: INFERENCE_CONNECTOR_ID,
-  name: INFERENCE_CONNECTOR_TITLE,
+  id: CONNECTOR_ID,
+  name: CONNECTOR_NAME,
   getService: (params) => new InferenceConnector(params),
   schema: {
     config: ConfigSchema,
@@ -61,20 +63,29 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForSearchPlaygroundConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
+    WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
     const esClient = services.scopedClusterClient.asInternalUser;
+
     try {
-      const taskSettings = config?.taskTypeConfig
-        ? {
-            ...unflattenObject(config?.taskTypeConfig),
-          }
-        : {};
+      const { taskTypeConfig, providerConfig } = config ?? {};
+
       const serviceSettings = {
-        ...unflattenObject(config?.providerConfig ?? {}),
+        ...(isUpdate === false ? unflattenObject(providerConfig ?? {}) : {}),
+        // Update accepts only secrets in service_settings
         ...unflattenObject(secrets?.providerSecrets ?? {}),
       };
+
+      const adaptiveAllocations = providerConfig?.adaptive_allocations;
+      const numAllocations = providerConfig?.num_allocations;
+      let allocationSettings = {};
+      if (adaptiveAllocations) {
+        allocationSettings = { adaptive_allocations: adaptiveAllocations };
+      } else if (numAllocations) {
+        allocationSettings = { num_allocations: numAllocations };
+      }
 
       let inferenceExists = false;
       try {
@@ -86,6 +97,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       } catch (e) {
         /* throws error if inference endpoint by id does not exist */
       }
+
       if (!isUpdate && inferenceExists) {
         throw new Error(
           `Inference with id ${config?.inferenceId} and task type ${config?.taskType} already exists.`
@@ -93,24 +105,29 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       }
 
       if (isUpdate && inferenceExists && config && config.provider) {
-        // TODO: replace, when update API for inference endpoint exists
-        await deleteInferenceEndpoint(
-          config.inferenceId,
-          config.taskType as InferenceTaskType,
-          logger,
-          esClient
-        );
+        await esClient?.inference.update({
+          inference_id: config?.inferenceId,
+          task_type: config?.taskType as InferenceTaskType,
+          // @ts-ignore The InferenceInferenceEndpoint type is out of date and has 'service' as a required property but this call will error if service is included
+          inference_config: {
+            service_settings: {
+              ...serviceSettings,
+              ...allocationSettings,
+            },
+            ...(Object.keys(taskTypeConfig ?? {}).length ? { task_settings: taskTypeConfig } : {}),
+          },
+        });
+      } else {
+        await esClient?.inference.put({
+          inference_id: config?.inferenceId ?? '',
+          task_type: config?.taskType as InferenceTaskType,
+          inference_config: {
+            service: config!.provider,
+            service_settings: serviceSettings,
+            ...(Object.keys(taskTypeConfig ?? {}).length ? { task_settings: taskTypeConfig } : {}),
+          },
+        });
       }
-
-      await esClient?.inference.put({
-        inference_id: config?.inferenceId ?? '',
-        task_type: config?.taskType as InferenceTaskType,
-        inference_config: {
-          service: config!.provider,
-          service_settings: serviceSettings,
-          task_settings: taskSettings,
-        },
-      });
       logger.debug(
         `Inference endpoint for task type "${config?.taskType}" and inference id ${
           config?.inferenceId

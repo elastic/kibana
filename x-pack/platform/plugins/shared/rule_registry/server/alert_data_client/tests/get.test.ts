@@ -28,6 +28,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   authorization: alertingAuthMock,
   esClient: esClientMock,
+  esClientScoped: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
@@ -125,6 +126,10 @@ describe('get()', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",

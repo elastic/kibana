@@ -5,17 +5,19 @@
  * 2.0.
  */
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import type { OverviewTrend } from '../../../../../../../../common/types';
 import { useMetricSubtitle } from '../../../../../hooks/use_metric_subtitle';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
-import { ClientPluginsStart } from '../../../../../../../plugin';
+import { MetricItemExtra } from './metric_item_extra';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../../../plugin';
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
 import {
   selectErrorPopoverState,
@@ -30,37 +32,84 @@ import {
 import { formatDuration } from '../../../../../utils/formatting';
 import { ActionsPopover } from '../actions_popover';
 import { MetricItemBody } from './metric_item_body';
-import { MetricItemExtra } from './metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
+import { getTrendDuration } from '../../../../../utils/formatting/trend_duration';
 
-const METRIC_ITEM_HEIGHT = 170;
+export const METRIC_ITEM_HEIGHT = 180;
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
     return euiTheme.colors.backgroundBaseDisabled;
   }
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   // make sure these are synced with slo card colors while making changes
   switch (status) {
     case 'down':
-      return isAmsterdam
-        ? euiTheme.colors.vis.euiColorVisBehindText9
-        : euiTheme.colors.backgroundBaseDanger;
+      return euiTheme.colors.backgroundBaseDanger;
     case 'up':
-      return isAmsterdam
-        ? euiTheme.colors.vis.euiColorVisBehindText0
-        : euiTheme.colors.backgroundBaseSuccess;
+      return euiTheme.colors.backgroundBaseSuccess;
     case 'unknown':
       return euiTheme.colors.backgroundBasePlain;
     case 'pending':
       return euiTheme.colors.backgroundBasePlain;
     default:
-      return isAmsterdam
-        ? euiTheme.colors.vis.euiColorVisBehindText0
-        : euiTheme.colors.backgroundBaseSuccess;
+      return euiTheme.colors.backgroundBaseSuccess;
   }
+};
+
+const truncateText = (text: string) => {
+  // truncate from middle if longer than maxLength
+  const maxLength = 100;
+  if (text.length <= maxLength) {
+    return text;
+  }
+  const halfLength = Math.floor(maxLength / 2);
+  return `${text.slice(0, halfLength)}…${text.slice(-halfLength)}`;
+};
+
+/**
+ * Get metric value props for Metric component. The goal of this function is
+ * to be able to handle the loading state of the trend data without disrupting
+ * the type expectations of the Metric component.
+ */
+export const getMetricValueProps = (trendData: OverviewTrend | 'loading' | null | undefined) => {
+  return getTrendDuration<
+    | {
+        value: string;
+        extra: React.JSX.Element;
+        valueFormatter?: undefined;
+      }
+    | {
+        value: number;
+        valueFormatter: (d: number) => string;
+        extra: React.JSX.Element;
+      }
+  >({
+    onLoading: (onLoadingComponent) => ({
+      value: '',
+      extra: onLoadingComponent,
+    }),
+    onNoData: (onNoDataComponent) => ({
+      value: '',
+      extra: onNoDataComponent,
+    }),
+    onData: ({ max, median, min, avg }) => ({
+      value: median,
+      valueFormatter: (d: number) => formatDuration(d),
+      extra: (
+        <MetricItemExtra
+          stats={{
+            medianDuration: median,
+            minDuration: min,
+            maxDuration: max,
+            avgDuration: avg,
+          }}
+        />
+      ),
+    }),
+    trendData,
+  });
 };
 
 export const MetricItem = ({
@@ -157,6 +206,9 @@ export const MetricItem = ({
             pointer-events: auto;
             opacity: 1;
           }
+          .echMetricText__body {
+            overflow: visible;
+          }
         `}
         title={moment(timestamp).format('LLL')}
       >
@@ -188,32 +240,13 @@ export const MetricItem = ({
             data={[
               [
                 {
-                  title: monitor.name,
+                  title: truncateText(monitor.name),
                   subtitle: metricSubtitle,
-                  value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
+                  body: <MetricItemBody monitor={monitor} />,
+                  color: getColor(euiTheme, monitor.isEnabled, status),
                   trendShape: MetricTrendShape.Area,
                   trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
-                  extra:
-                    trendData !== 'loading' && !!trendData ? (
-                      <MetricItemExtra
-                        stats={{
-                          medianDuration: trendData.median,
-                          minDuration: trendData.min,
-                          maxDuration: trendData.max,
-                          avgDuration: trendData.avg,
-                        }}
-                      />
-                    ) : trendData === 'loading' ? (
-                      <div>
-                        <FormattedMessage
-                          defaultMessage="Loading metrics"
-                          id="xpack.synthetics.overview.metricItem.loadingMessage"
-                        />
-                      </div>
-                    ) : undefined,
-                  valueFormatter: (d: number) => formatDuration(d),
-                  color: getColor(euiTheme, monitor.isEnabled, status),
-                  body: <MetricItemBody monitor={monitor} />,
+                  ...getMetricValueProps(trendData),
                 },
               ],
             ]}

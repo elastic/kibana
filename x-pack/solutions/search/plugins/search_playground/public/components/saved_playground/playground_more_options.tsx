@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext } from 'react-hook-form';
-import { SavedPlaygroundForm } from '../../types';
+import type { SavedPlaygroundForm } from '../../types';
 import { hasSavedPlaygroundFormErrors } from '../../utils/saved_playgrounds';
 
 /**

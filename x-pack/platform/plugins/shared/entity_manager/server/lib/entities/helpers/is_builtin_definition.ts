@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../built_in';
 
 export function isBuiltinDefinition(definition: EntityDefinition) {

@@ -3,6 +3,8 @@
   "id": "@kbn/unified-tabs-examples-plugin",
   "owner": "@elastic/kibana-data-discovery",
   "description": "Examples of using unified tabs.",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "unifiedTabsExamples",
     "server": false,

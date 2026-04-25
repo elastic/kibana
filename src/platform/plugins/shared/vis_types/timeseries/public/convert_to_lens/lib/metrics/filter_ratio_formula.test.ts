@@ -11,7 +11,7 @@ import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Metric } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getFilterRatioFormula } from './filter_ratio_formula';
-import { AdditionalArgs } from '../../types';
+import type { AdditionalArgs } from '../../types';
 
 describe('getFilterRatioFormula', () => {
   const metric: Metric = {

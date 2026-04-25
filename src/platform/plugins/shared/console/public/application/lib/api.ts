@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { EsConfigApiResponse } from '../../../common/types/api_responses';
+import type { HttpSetup } from '@kbn/core/public';
+import type { EsConfigApiResponse } from '../../../common/types/api_responses';
 import { sendRequest } from '../../shared_imports';
 
 interface Dependencies {

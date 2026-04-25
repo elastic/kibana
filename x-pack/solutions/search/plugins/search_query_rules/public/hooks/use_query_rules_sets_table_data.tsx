@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { Pagination } from '@elastic/eui';
-import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
-import { Paginate } from '../../common/pagination';
+import type { Pagination } from '@elastic/eui';
+import type { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
+import type { Paginate } from '../../common/pagination';
 
 interface UseQueryRulesSetsTableDataProps {
   queryRulesSetsFilteredData: QueryRulesListRulesetsQueryRulesetListItem[];

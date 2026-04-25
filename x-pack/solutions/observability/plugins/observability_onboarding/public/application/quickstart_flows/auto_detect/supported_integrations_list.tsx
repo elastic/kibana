@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -13,7 +14,6 @@ import {
   EuiText,
   EuiTextColor,
   EuiToolTip,
-  IconType,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +50,7 @@ const FEATURED_INTEGRATIONS_LIST: SupportedIntegrationItem[] = [
   { title: 'Docker', icon: dockerIconSrc },
   { title: 'Nginx', icon: nginxIconSrc },
   { title: 'MySQL', icon: mysqlIconSrc },
-  { title: 'System', icon: 'desktop' },
+  { title: 'System', icon: 'display' },
 ];
 
 export function SupportedIntegrationsList() {
@@ -87,7 +87,7 @@ export function SupportedIntegrationsList() {
           </EuiText>
         }
       >
-        <EuiBadge color="hollow">
+        <EuiBadge color="hollow" tabIndex={0}>
           <EuiTextColor color={colors.link}>
             {`+${SUPPORTED_INTEGRATIONS_LIST.length - FEATURED_INTEGRATIONS_LIST.length}`}
           </EuiTextColor>

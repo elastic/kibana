@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -68,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Graph']);
+        expect(navLinks.map((link) => link.text)).to.contain('Graph');
       });
 
       it('landing page shows "Create new graph" button', async () => {
@@ -129,7 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Graph']);
+        expect(navLinks).to.eql(['Graph', 'Workflows']);
       });
 
       it('does not show a "Create new Workspace" button', async () => {

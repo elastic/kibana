@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -17,6 +18,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import type { FieldConfig } from '../../../../../../../shared_imports';
 import {
   getUseField,
   Field,
@@ -25,10 +27,9 @@ import {
   Form,
   TextField,
   fieldValidators,
-  FieldConfig,
 } from '../../../../../../../shared_imports';
 import { useIsMounted } from '../../../../use_is_mounted';
-import { Document } from '../../../../types';
+import type { Document } from '../../../../types';
 
 const UseField = getUseField({ component: Field });
 
@@ -146,6 +147,7 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
       {documentError && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18nTexts.addDocumentErrorMessage}
             color="danger"
             iconType="warning"

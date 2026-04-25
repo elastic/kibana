@@ -12,7 +12,7 @@ import { Markdown } from '@kbn/kibana-react-plugin/public';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MarkdownVisParams } from './types';
+import type { MarkdownVisParams } from './types';
 
 interface MarkdownVisComponentProps extends MarkdownVisParams {
   renderComplete: () => void;

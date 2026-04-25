@@ -139,7 +139,7 @@ export const SpaceListInternal = ({
             />
           }
         >
-          <EuiBadge>+{unauthorizedSpacesCount}</EuiBadge>
+          <EuiBadge tabIndex={0}>+{unauthorizedSpacesCount}</EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;

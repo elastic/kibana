@@ -8,8 +8,8 @@
  */
 
 import { isString, isObject } from 'lodash';
-import { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
-import { IAggConfig } from '../agg_config';
+import type { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
+import type { IAggConfig } from '../agg_config';
 
 export const isType = (...types: string[]) => {
   return (agg: IAggConfig): boolean => {

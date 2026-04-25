@@ -6,13 +6,13 @@
  */
 
 import { mockGlobalState, mockSourcererState } from '../../common/mock';
-import { SourcererScopeName } from './model';
 import {
   checkIfIndicesExist,
   getScopePatternListSelection,
   validateSelectedPatterns,
 } from './helpers';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { PageScope } from '../../data_view_manager/constants';
 
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 
@@ -25,7 +25,9 @@ const patternListNoSignals = sortWithExcludesAtEnd(
   mockGlobalState.sourcerer.defaultDataView.patternList.filter((p) => p !== signalIndexName)
 );
 
-describe('sourcerer store helpers', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('sourcerer store helpers', () => {
   describe('getScopePatternListSelection', () => {
     it('is not a default data view, returns patternList sorted', () => {
       const result = getScopePatternListSelection(
@@ -33,34 +35,34 @@ describe('sourcerer store helpers', () => {
           ...dataView,
           id: '1234',
         },
-        SourcererScopeName.default,
+        PageScope.default,
         signalIndexName,
         false
       );
       expect(result).toEqual([`${signalIndexName}`, 'auditbeat-*', 'packetbeat-*']);
     });
-    it('default data view, SourcererScopeName.timeline, returns patternList sorted', () => {
+    it('default data view, PageScope.timeline, returns patternList sorted', () => {
       const result = getScopePatternListSelection(
         dataView,
-        SourcererScopeName.timeline,
+        PageScope.timeline,
         signalIndexName,
         true
       );
       expect(result).toEqual([signalIndexName, 'auditbeat-*', 'packetbeat-*']);
     });
-    it('default data view, SourcererScopeName.default, returns patternList sorted without signals index', () => {
+    it('default data view, PageScope.default, returns patternList sorted without signals index', () => {
       const result = getScopePatternListSelection(
         dataView,
-        SourcererScopeName.default,
+        PageScope.default,
         signalIndexName,
         true
       );
       expect(result).toEqual(['auditbeat-*', 'packetbeat-*']);
     });
-    it('default data view, SourcererScopeName.detections, returns patternList with only signals index', () => {
+    it('default data view, PageScope.alerts, returns patternList with only signals index', () => {
       const result = getScopePatternListSelection(
         dataView,
-        SourcererScopeName.detections,
+        PageScope.alerts,
         signalIndexName,
         true
       );
@@ -69,15 +71,15 @@ describe('sourcerer store helpers', () => {
   });
   describe('validateSelectedPatterns', () => {
     const payload = {
-      id: SourcererScopeName.default,
+      id: PageScope.default,
       selectedDataViewId: dataView.id,
       selectedPatterns: ['auditbeat-*'],
     };
     it('sets selectedPattern', () => {
       const result = validateSelectedPatterns(mockGlobalState.sourcerer, payload, true);
       expect(result).toEqual({
-        [SourcererScopeName.default]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+        [PageScope.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
           selectedPatterns: ['auditbeat-*'],
         },
       });
@@ -92,8 +94,8 @@ describe('sourcerer store helpers', () => {
         true
       );
       expect(result).toEqual({
-        [SourcererScopeName.default]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+        [PageScope.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
           selectedPatterns: patternListNoSignals,
         },
       });
@@ -103,14 +105,14 @@ describe('sourcerer store helpers', () => {
         mockGlobalState.sourcerer,
         {
           ...payload,
-          id: SourcererScopeName.detections,
+          id: PageScope.alerts,
           selectedPatterns: [],
         },
         true
       );
       expect(result).toEqual({
-        [SourcererScopeName.detections]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.detections],
+        [PageScope.alerts]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.alerts],
           selectedDataViewId: dataView.id,
           selectedPatterns: [signalIndexName],
         },
@@ -121,14 +123,14 @@ describe('sourcerer store helpers', () => {
         mockGlobalState.sourcerer,
         {
           ...payload,
-          id: SourcererScopeName.timeline,
+          id: PageScope.timeline,
           selectedPatterns: [],
         },
         true
       );
       expect(result).toEqual({
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+        [PageScope.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
           selectedDataViewId: dataView.id,
           selectedPatterns: [],
         },
@@ -148,14 +150,14 @@ describe('sourcerer store helpers', () => {
         stateNoSignals,
         {
           ...payload,
-          id: SourcererScopeName.timeline,
+          id: PageScope.timeline,
           selectedPatterns: [`${mockGlobalState.sourcerer.signalIndexName}`],
         },
         true
       );
       expect(result).toEqual({
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+        [PageScope.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
           selectedDataViewId: dataView.id,
           selectedPatterns: [signalIndexName],
         },
@@ -167,7 +169,7 @@ describe('sourcerer store helpers', () => {
           mockGlobalState.sourcerer,
           {
             ...payload,
-            id: SourcererScopeName.timeline,
+            id: PageScope.timeline,
             selectedDataViewId: null,
             selectedPatterns: [
               mockGlobalState.sourcerer.defaultDataView.patternList[3],
@@ -177,8 +179,8 @@ describe('sourcerer store helpers', () => {
           true
         );
         expect(result).toEqual({
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          [PageScope.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
             selectedDataViewId: null,
             selectedPatterns: [
               mockGlobalState.sourcerer.defaultDataView.patternList[3],
@@ -192,7 +194,7 @@ describe('sourcerer store helpers', () => {
           mockGlobalState.sourcerer,
           {
             ...payload,
-            id: SourcererScopeName.timeline,
+            id: PageScope.timeline,
             selectedDataViewId: null,
             selectedPatterns: [
               mockGlobalState.sourcerer.defaultDataView.patternList[3],
@@ -202,8 +204,8 @@ describe('sourcerer store helpers', () => {
           true
         );
         expect(result).toEqual({
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          [PageScope.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
             selectedDataViewId: null,
             selectedPatterns: [
               mockGlobalState.sourcerer.defaultDataView.patternList[3],
@@ -233,14 +235,14 @@ describe('sourcerer store helpers', () => {
         state,
         {
           ...payload,
-          id: SourcererScopeName.default,
+          id: PageScope.default,
           selectedPatterns: ['auditbeat-*', 'yoohoo'],
         },
         true
       );
       expect(result).toEqual({
-        [SourcererScopeName.default]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+        [PageScope.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
           missingPatterns: ['yoohoo'],
           selectedPatterns: ['auditbeat-*', 'yoohoo'],
         },
@@ -266,15 +268,15 @@ describe('sourcerer store helpers', () => {
         state,
         {
           ...payload,
-          id: SourcererScopeName.default,
+          id: PageScope.default,
           selectedDataViewId: 'wow',
           selectedPatterns: ['auditbeat-*', 'yoohoo'],
         },
         true
       );
       expect(result).toEqual({
-        [SourcererScopeName.default]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+        [PageScope.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
           selectedDataViewId: 'wow',
           selectedPatterns: ['auditbeat-*', 'yoohoo'],
         },
@@ -283,11 +285,13 @@ describe('sourcerer store helpers', () => {
   });
 });
 
-describe('checkIfIndicesExist', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('checkIfIndicesExist', () => {
   it('should return true when scopeId is "detections" and patternList includes signalIndexName', () => {
     const result = checkIfIndicesExist({
       patternList: ['index1', 'index2', 'signalIndex'],
-      scopeId: SourcererScopeName.detections,
+      scopeId: PageScope.alerts,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: false,
     });
@@ -298,7 +302,7 @@ describe('checkIfIndicesExist', () => {
   it('should return false when scopeId is "detections" and patternList does not include signalIndexName', () => {
     const result = checkIfIndicesExist({
       patternList: ['index1', 'index2'],
-      scopeId: SourcererScopeName.detections,
+      scopeId: PageScope.alerts,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: false,
     });
@@ -309,7 +313,7 @@ describe('checkIfIndicesExist', () => {
   it('should return true when scopeId is "default" and isDefaultDataViewSelected is true and patternList has elements other than signalIndexName', () => {
     const result = checkIfIndicesExist({
       patternList: ['index1', 'index2', 'index3'],
-      scopeId: SourcererScopeName.default,
+      scopeId: PageScope.default,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: true,
     });
@@ -320,7 +324,7 @@ describe('checkIfIndicesExist', () => {
   it('should return false when scopeId is "default" and isDefaultDataViewSelected is true and patternList only contains signalIndexName', () => {
     const result = checkIfIndicesExist({
       patternList: ['signalIndex'],
-      scopeId: SourcererScopeName.default,
+      scopeId: PageScope.default,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: true,
     });
@@ -331,7 +335,7 @@ describe('checkIfIndicesExist', () => {
   it('should return true when scopeId is "default" and isDefaultDataViewSelected is false and patternList has elements', () => {
     const result = checkIfIndicesExist({
       patternList: ['index1', 'index2'],
-      scopeId: SourcererScopeName.default,
+      scopeId: PageScope.default,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: false,
     });
@@ -342,7 +346,7 @@ describe('checkIfIndicesExist', () => {
   it('should return false when scopeId is "default" and isDefaultDataViewSelected is false and patternList is empty', () => {
     const result = checkIfIndicesExist({
       patternList: [],
-      scopeId: SourcererScopeName.default,
+      scopeId: PageScope.default,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: false,
     });
@@ -353,7 +357,7 @@ describe('checkIfIndicesExist', () => {
   it('should return true when scopeId is not "detections" or "default" and patternList has elements', () => {
     const result = checkIfIndicesExist({
       patternList: ['index1', 'index2'],
-      scopeId: 'other' as SourcererScopeName,
+      scopeId: 'other' as PageScope,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: false,
     });
@@ -364,7 +368,7 @@ describe('checkIfIndicesExist', () => {
   it('should return false when scopeId is not "detections" or "default" and patternList is empty', () => {
     const result = checkIfIndicesExist({
       patternList: [],
-      scopeId: 'other' as SourcererScopeName,
+      scopeId: 'other' as PageScope,
       signalIndexName: 'signalIndex',
       isDefaultDataViewSelected: false,
     });

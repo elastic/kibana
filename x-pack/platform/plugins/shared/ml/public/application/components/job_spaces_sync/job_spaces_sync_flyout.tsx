@@ -104,7 +104,14 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
 
   return (
     <>
-      <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlJobMgmtSyncFlyout">
+      <EuiFlyout
+        maxWidth={600}
+        onClose={onClose}
+        data-test-subj="mlJobMgmtSyncFlyout"
+        aria-label={i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.flyoutAriaLabel', {
+          defaultMessage: 'Synchronize saved objects',
+        })}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -120,7 +127,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.ml.management.syncSavedObjectsFlyout.description"
-                defaultMessage="Synchronize the saved objects if they are out of sync with the machine learning jobs in Elasticsearch."
+                defaultMessage="Synchronize the saved objects if they are out of sync with the machine learning jobs or trained models in Elasticsearch."
               />
             </EuiText>
           </EuiCallOut>

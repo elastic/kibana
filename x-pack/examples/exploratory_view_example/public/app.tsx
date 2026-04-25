@@ -18,9 +18,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { AllSeries } from '@kbn/exploratory-view-plugin/public';
-import { StartDependencies } from './plugin';
+import type { CoreStart } from '@kbn/core/public';
+import type { AllSeries } from '@kbn/exploratory-view-plugin/public';
+import type { StartDependencies } from './plugin';
 
 export const App = (props: {
   core: CoreStart;

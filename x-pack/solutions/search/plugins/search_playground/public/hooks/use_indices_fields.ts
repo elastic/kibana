@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { SearchPlaygroundQueryKeys } from '../../common';
-import { APIRoutes, IndicesQuerySourceFields } from '../types';
+import type { IndicesQuerySourceFields } from '../types';
+import { APIRoutes } from '../types';
 import { useKibana } from './use_kibana';
 
 const initialData = {};

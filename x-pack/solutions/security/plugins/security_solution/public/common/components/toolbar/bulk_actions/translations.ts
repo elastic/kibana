@@ -142,20 +142,6 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   }
 );
 
-export const UPDATE_ALERT_TAGS_FAILED = (conflicts: number) =>
-  i18n.translate('xpack.securitySolution.bulkActions.updateAlertTagsFailed', {
-    values: { conflicts },
-    defaultMessage:
-      'Failed to update tags for { conflicts } {conflicts, plural, =1 {alert} other {alerts}}.',
-  });
-
-export const UPDATE_ALERT_TAGS_FAILED_DETAILED = (updated: number, conflicts: number) =>
-  i18n.translate('xpack.securitySolution.bulkActions.updateAlertTagsFailedDetailed', {
-    values: { updated, conflicts },
-    defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update
-         because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
-  });
-
 export const UPDATE_ALERT_TAGS_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.bulkActions.updateAlertTagsSuccessToastMessage', {
     values: { totalAlerts },

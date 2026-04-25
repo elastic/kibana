@@ -17,11 +17,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, of } from 'rxjs';
-import { BookApi } from '../../react_embeddables/saved_book/types';
+import type { BookApi } from '../../react_embeddables/saved_book/types';
 import { savedStateManager, unsavedStateManager } from './session_storage';
 import { BOOK_EMBEDDABLE_TYPE, type BookEmbeddableState } from '../../../common';
 
@@ -43,23 +43,15 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
           return unsavedSavedBookState ? unsavedSavedBookState : lastSavedbookState;
         }
 
-        return {
-          rawState: {},
-          references: [],
-        };
+        return {};
       },
       lastSavedStateForChild$: (childId: string) => {
         return childId === BOOK_EMBEDDABLE_ID ? lastSavedBookState$ : of(undefined);
       },
       getLastSavedStateForChild: (childId: string) => {
-        return childId === BOOK_EMBEDDABLE_ID
-          ? lastSavedBookState$.value
-          : {
-              rawState: {},
-              references: [],
-            };
+        return childId === BOOK_EMBEDDABLE_ID ? lastSavedBookState$.value : {};
       },
-      setLastSavedBookState: (savedState: SerializedPanelState<BookEmbeddableState>) => {
+      setLastSavedBookState: (savedState: BookEmbeddableState) => {
         lastSavedBookState$.next(savedState);
       },
     };
@@ -142,7 +134,9 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
               <EuiButtonEmpty
                 disabled={!bookApi}
                 onClick={() => {
-                  bookApi?.resetUnsavedChanges();
+                  bookApi?.applySerializedState(
+                    parentApi.getLastSavedStateForChild(BOOK_EMBEDDABLE_ID) as BookEmbeddableState
+                  );
                 }}
               >
                 Reset

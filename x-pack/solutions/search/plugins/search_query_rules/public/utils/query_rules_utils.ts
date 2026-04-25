@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   QueryRulesQueryRule,
   QueryRulesQueryRuleCriteria,
   QueryRulesQueryRuleset,
 } from '@elastic/elasticsearch/lib/api/types';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
-import { SearchQueryRulesQueryRule, SearchQueryRulesQueryRuleset } from '../types';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { SearchQueryRulesQueryRule, SearchQueryRulesQueryRuleset } from '../types';
 
 export const isPermissionError = (error: { body: KibanaServerError }) => {
   return error.body.statusCode === 403;
