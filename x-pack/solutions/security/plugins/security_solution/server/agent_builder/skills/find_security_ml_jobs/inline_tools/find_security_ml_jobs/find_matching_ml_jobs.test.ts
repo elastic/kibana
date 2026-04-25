@@ -7,7 +7,7 @@
 
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
-import type { ActiveMlModules } from './get_security_ml_jobs';
+import type { ActiveMlModules } from './find_security_ml_jobs';
 import { findMatchingMlJobs } from './find_matching_ml_jobs';
 
 const createMockModel = (invokeResult: {
