@@ -20,7 +20,7 @@ engine:
   model: llm-gateway/claude-opus-4-7
   max-turns: 30
   env:
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
+    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai/v1
 if: >-
   ${{
     !github.event.repository.fork &&
