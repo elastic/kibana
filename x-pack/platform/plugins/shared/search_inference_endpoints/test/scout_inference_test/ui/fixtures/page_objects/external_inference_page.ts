@@ -143,6 +143,8 @@ export class ExternalInferencePage {
   }
 
   public accordionToggleButton(groupId: string): Locator {
-    return this.page.locator(`[aria-controls="${groupId}-group-accordion"]`);
+    return this.page.locator(
+      `button[aria-controls="${groupId}-group-accordion"]:not([aria-hidden="true"])`
+    );
   }
 }
