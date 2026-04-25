@@ -143,7 +143,10 @@ export const getRelativeViewInAppUrl = ({
  * but config maps are keyed by `${configId}-${locationId}`. This helper tries
  * an exact match first, then falls back to a prefix match.
  */
-function findConfigKeyByAlertId<T>(configs: Record<string, T>, alertId: string): string | undefined {
+function findConfigKeyByAlertId<T>(
+  configs: Record<string, T>,
+  alertId: string
+): string | undefined {
   if (configs[alertId]) return alertId;
   return Object.keys(configs).find((key) => key.startsWith(`${alertId}-`));
 }
