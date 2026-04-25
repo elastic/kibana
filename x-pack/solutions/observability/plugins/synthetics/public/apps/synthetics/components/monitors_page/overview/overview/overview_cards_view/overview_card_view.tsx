@@ -8,7 +8,7 @@
 import { type EuiAutoSize, EuiAutoSizer, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { FixedSizeList, type ListChildComponentProps } from 'react-window';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CardsViewFooter } from './cards_view_footer';
 import type { FlyoutParamProps } from '../types';
@@ -61,6 +61,15 @@ export const OverviewCardView = ({
   });
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const rowCountRef = useRef(rowCount);
+
+  const updateRowCount = useCallback((width: number) => {
+    const newCount = Math.max(1, Math.min(5, Math.floor(width / MIN_CARD_WIDTH)));
+    if (newCount !== rowCountRef.current) {
+      rowCountRef.current = newCount;
+      setRowCount(newCount);
+    }
+  }, []);
 
   const listHeight = Math.min(
     ITEM_HEIGHT * Math.ceil(monitorsSortedByStatus.length / rowCount),
@@ -96,9 +105,7 @@ export const OverviewCardView = ({
                   threshold={LIST_THRESHOLD}
                 >
                   {({ onItemsRendered, ref }) => {
-                    // set min row count to based on width to ensure cards are not too small
-                    // min is 1 and max is 5
-                    setRowCount(Math.max(1, Math.min(5, Math.floor(width / MIN_CARD_WIDTH))));
+                    updateRowCount(width);
 
                     return (
                       <FixedSizeList

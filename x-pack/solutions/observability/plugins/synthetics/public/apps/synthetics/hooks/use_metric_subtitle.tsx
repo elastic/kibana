@@ -66,7 +66,7 @@ export function useMetricSubtitle(monitor: OverviewStatusMetaData) {
     if (!locationsLoaded) {
       dispatch(getServiceLocations());
     }
-  });
+  }, [dispatch, locationsLoaded]);
   const locationId = monitor.locations[0]?.id ?? '';
   const locationLabel = monitor.locations[0]?.label;
 
