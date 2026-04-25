@@ -448,8 +448,15 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
 
 export const fillOverrideEsqlRuleName = (value: string) => {
   cy.get(RULE_NAME_OVERRIDE_FOR_ESQL).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${value}{enter}`);
+    cy.get(COMBO_BOX_INPUT).should('not.be.disabled');
+    cy.get(COMBO_BOX_INPUT).click();
+    cy.get(COMBO_BOX_INPUT).type(value);
   });
+  // The dropdown is rendered in a portal outside the form row, so look it up at the
+  // top level. Clicking the option avoids a keyboard-focus race that can happen while
+  // ES|QL fields are still being fetched (`{enter}` becomes a no-op when no option
+  // is highlighted).
+  cy.contains(COMBO_BOX_OPTION, value).click();
 };
 
 // called after import rule from saved timeline
