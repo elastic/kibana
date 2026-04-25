@@ -71,7 +71,6 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
   );
 
   const onShowRuleSummary = useCallback(() => {
-    if (!ruleId) return;
     overlays.openSystemFlyout(
       flyoutProviders({
         services,

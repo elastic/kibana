@@ -7,56 +7,35 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlyoutFooter, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
 import { useRuleDetails } from './hooks/use_rule_details';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
-import { RULE_DETAILS_LOADING_TEST_ID, RULE_DETAILS_ERROR_TEST_ID } from './test_ids';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
+import { FlyoutError } from '../shared/components/flyout_error';
+import { RULE_DETAILS_LOADING_TEST_ID } from './test_ids';
 
 export interface RuleDetailsProps {
+  /**
+   * The unique identifier of the rule to display.
+   */
   ruleId: string;
 }
 
+/**
+ * Displays the full details of a detection rule inside a flyout,
+ * including its header, body content, and footer actions.
+ */
 export const RuleDetails: FC<RuleDetailsProps> = memo(({ ruleId }) => {
   const { rule, loading, isExistingRule } = useRuleDetails({ ruleId });
 
   if (loading) {
-    return (
-      <EuiFlyoutBody>
-        <EuiEmptyPrompt
-          icon={<EuiLoadingSpinner size="xl" />}
-          data-test-subj={RULE_DETAILS_LOADING_TEST_ID}
-        />
-      </EuiFlyoutBody>
-    );
+    return <FlyoutLoading data-test-subj={RULE_DETAILS_LOADING_TEST_ID} />;
   }
 
   if (!rule) {
-    return (
-      <EuiFlyoutBody>
-        <EuiEmptyPrompt
-          iconType="warning"
-          title={
-            <h2>
-              {i18n.translate('xpack.securitySolution.flyout.ruleDetails.errorTitle', {
-                defaultMessage: 'Unable to display rule details',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.securitySolution.flyout.ruleDetails.errorBody', {
-                defaultMessage:
-                  'There was an error displaying the rule details. Please try again later.',
-              })}
-            </p>
-          }
-          data-test-subj={RULE_DETAILS_ERROR_TEST_ID}
-        />
-      </EuiFlyoutBody>
-    );
+    return <FlyoutError />;
   }
 
   return (
@@ -67,7 +46,9 @@ export const RuleDetails: FC<RuleDetailsProps> = memo(({ ruleId }) => {
       <EuiFlyoutBody>
         <Content rule={rule} />
       </EuiFlyoutBody>
-      <Footer rule={rule} />
+      <EuiFlyoutFooter>
+        <Footer rule={rule} />
+      </EuiFlyoutFooter>
     </>
   );
 });

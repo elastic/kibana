@@ -12,11 +12,8 @@ import { RuleDetails } from '.';
 import { getStepsData } from '../../detection_engine/common/helpers';
 import { useRuleDetails } from './hooks/use_rule_details';
 import type { RuleResponse } from '../../../common/api/detection_engine';
-import {
-  RULE_DETAILS_BODY_TEST_ID,
-  RULE_DETAILS_LOADING_TEST_ID,
-  RULE_DETAILS_ERROR_TEST_ID,
-} from './test_ids';
+import { RULE_DETAILS_LOADING_TEST_ID } from './test_ids';
+import { FLYOUT_ERROR_TEST_ID } from '../shared/components/test_ids';
 
 const mockFooter = jest.fn();
 jest.mock('./footer', () => ({
@@ -54,9 +51,8 @@ describe('<RuleDetails />', () => {
 
     const { getByTestId, queryByTestId } = renderRuleDetails();
 
-    expect(getByTestId(RULE_DETAILS_BODY_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(RULE_DETAILS_LOADING_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(RULE_DETAILS_ERROR_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(FLYOUT_ERROR_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render loading state', () => {
@@ -82,8 +78,7 @@ describe('<RuleDetails />', () => {
 
     const { getByTestId, queryByTestId } = renderRuleDetails();
 
-    expect(getByTestId(RULE_DETAILS_ERROR_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(RULE_DETAILS_BODY_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(FLYOUT_ERROR_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render footer with rule', () => {

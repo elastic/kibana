@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { FLYOUT_LOADING_TEST_ID } from './test_ids';
-import { FlyoutLoading } from './flyout_loading';
+import { FLYOUT_LOADING_TEST_ID } from '../../../flyout_v2/shared/components/test_ids';
+import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
 
 describe('<FlyoutLoading />', () => {
   it('should render loading', () => {

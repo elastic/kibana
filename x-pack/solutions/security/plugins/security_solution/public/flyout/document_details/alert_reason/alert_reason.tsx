@@ -13,7 +13,7 @@ import { ALERT_REASON_BODY_TEST_ID } from './test_ids';
 import { useAlertReasonPanelContext } from './context';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { FlyoutError } from '../../shared/components/flyout_error';
+import { FlyoutError } from '../../../flyout_v2/shared/components/flyout_error';
 
 /**
  * Alert reason renderer on a preview panel on top of the right section of expandable flyout

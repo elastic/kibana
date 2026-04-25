@@ -8,8 +8,8 @@
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useEventDetails } from '../shared/hooks/use_event_details';
-import { FlyoutError } from '../../shared/components/flyout_error';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutError } from '../../../flyout_v2/shared/components/flyout_error';
+import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
 import type { AlertReasonPanelProps } from '.';
 
 export interface AlertReasonPanelContext {

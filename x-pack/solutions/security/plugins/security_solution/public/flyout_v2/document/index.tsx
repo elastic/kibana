@@ -13,10 +13,10 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { useDefaultToolsFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
+import { defaultToolsFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { EventKind } from './constants/event_kinds';
 import { Footer } from './footer';
@@ -53,7 +53,6 @@ export const DocumentFlyout = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
-    const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -76,7 +75,7 @@ export const DocumentFlyout = memo(
           historyKey,
         }
       );
-    }, [defaultToolsFlyoutProperties, history, historyKey, hit, overlays, services, store]);
+    }, [history, historyKey, hit, overlays, services, store]);
 
     if (isAlert && loading) {
       return <FlyoutLoading data-test-subj="document-overview-loading" />;

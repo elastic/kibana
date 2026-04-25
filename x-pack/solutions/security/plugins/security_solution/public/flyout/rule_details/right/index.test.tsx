@@ -20,7 +20,6 @@ import {
 } from '../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { LOADING_TEST_ID } from './test_ids';
-import { RULE_DETAILS_BODY_TEST_ID } from '../../../flyout_v2/rule_details/test_ids';
 import type {
   ExpandableFlyoutApi,
   ExpandableFlyoutState,
@@ -95,7 +94,6 @@ describe('<RulePanel />', () => {
 
     const { getByTestId, queryByTestId, queryByText } = renderRulePanel();
 
-    expect(getByTestId(RULE_DETAILS_BODY_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(LOADING_TEST_ID)).not.toBeInTheDocument();
     expect(queryByText(ERROR_MESSAGE)).not.toBeInTheDocument();
   });
@@ -121,7 +119,6 @@ describe('<RulePanel />', () => {
     mockGetStepsData.mockReturnValue({});
     const { queryByTestId, getByText } = renderRulePanel();
 
-    expect(queryByTestId(RULE_DETAILS_BODY_TEST_ID)).not.toBeInTheDocument();
     expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
   });
 

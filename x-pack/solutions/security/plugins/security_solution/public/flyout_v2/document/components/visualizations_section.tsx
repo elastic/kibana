@@ -24,7 +24,7 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer';
 import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { SessionView } from '../../session_view';
-import { useDefaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
+import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
@@ -64,7 +64,6 @@ export const VisualizationsSection = memo(
     const store = useStore();
     const history = useHistory();
     const sessionViewConfig = useSessionViewConfig(hit);
-    const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -95,17 +94,7 @@ export const VisualizationsSection = memo(
             session: 'start',
           }
         ),
-      [
-        defaultToolsFlyoutProperties,
-        history,
-        historyKey,
-        hit,
-        onAlertUpdated,
-        overlays,
-        renderCellActions,
-        services,
-        store,
-      ]
+      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
 
     const onShowSessionView = useCallback(
@@ -132,7 +121,6 @@ export const VisualizationsSection = memo(
           }
         ),
       [
-        defaultToolsFlyoutProperties,
         history,
         historyKey,
         hit,

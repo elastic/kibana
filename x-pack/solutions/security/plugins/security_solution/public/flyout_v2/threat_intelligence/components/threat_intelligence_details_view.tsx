@@ -19,7 +19,7 @@ import {
   THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_MATCHES_TEST_ID,
 } from './test_ids';
-import { FlyoutLoading } from '../../../flyout/shared/components/flyout_loading';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 
 export interface ThreatIntelligenceDetailsViewProps {
   /**

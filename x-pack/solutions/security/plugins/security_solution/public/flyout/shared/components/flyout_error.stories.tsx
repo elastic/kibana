@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import { FlyoutError } from './flyout_error';
+import { FlyoutError } from '../../../flyout_v2/shared/components/flyout_error';
 
 export default {
   component: FlyoutError,

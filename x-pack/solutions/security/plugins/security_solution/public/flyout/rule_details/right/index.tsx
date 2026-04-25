@@ -14,9 +14,9 @@ import { Content } from '../../../flyout_v2/rule_details/content';
 import { PreviewFooter } from '../preview/footer';
 import { useRuleDetails } from '../../../flyout_v2/rule_details/hooks/use_rule_details';
 import { LOADING_TEST_ID } from './test_ids';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
-import { FlyoutError } from '../../shared/components/flyout_error';
+import { FlyoutError } from '../../../flyout_v2/shared/components/flyout_error';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 

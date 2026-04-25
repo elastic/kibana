@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandableSection } from '../shared/components/expandable_section';
@@ -17,7 +17,6 @@ import { StepRuleActionsReadOnly } from '../../detection_engine/rule_creation/co
 import { getStepsData } from '../../detection_engine/common/helpers';
 import type { RuleResponse } from '../../../common/api/detection_engine';
 import {
-  RULE_DETAILS_BODY_TEST_ID,
   RULE_DETAILS_ABOUT_TEST_ID,
   RULE_DETAILS_DEFINITION_TEST_ID,
   RULE_DETAILS_SCHEDULE_TEST_ID,
@@ -64,12 +63,7 @@ export const Content = memo(({ rule }: ContentProps) => {
   );
 
   return (
-    <EuiPanel
-      hasBorder={false}
-      hasShadow={false}
-      data-test-subj={RULE_DETAILS_BODY_TEST_ID}
-      paddingSize="none"
-    >
+    <>
       <ExpandableSection
         title={
           <FormattedMessage
@@ -137,7 +131,7 @@ export const Content = memo(({ rule }: ContentProps) => {
           <StepRuleActionsReadOnly addPadding={false} defaultValues={ruleActionsData} />
         </ExpandableSection>
       )}
-    </EuiPanel>
+    </>
   );
 });
 

@@ -32,7 +32,7 @@ import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
 import { ThreatIntelligenceDetails } from '../../threat_intelligence';
 import {
-  useDefaultToolsFlyoutProperties,
+  defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../shared/hooks/use_default_flyout_properties';
 import { ChildLink } from '../../shared/components/child_link';
@@ -69,7 +69,6 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
   const store = useStore();
   const history = useHistory();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -110,7 +109,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
         session: 'start',
       }
     );
-  }, [defaultToolsFlyoutProperties, history, historyKey, hit, overlays, services, store]);
+  }, [history, historyKey, hit, overlays, services, store]);
 
   const onShowAlert = useCallback(
     (id: string, indexName: string) =>
@@ -157,16 +156,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
         session: 'start',
       }
     );
-  }, [
-    defaultToolsFlyoutProperties,
-    history,
-    historyKey,
-    hit,
-    onShowAlert,
-    overlays,
-    services,
-    store,
-  ]);
+  }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
 
   const onShowPrevalenceDetails = useCallback(() => {
     overlays.openSystemFlyout(
@@ -189,17 +179,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
         session: 'start',
       }
     );
-  }, [
-    defaultToolsFlyoutProperties,
-    history,
-    historyKey,
-    hit,
-    investigationFields,
-    isInSecurityApp,
-    overlays,
-    services,
-    store,
-  ]);
+  }, [history, historyKey, hit, investigationFields, isInSecurityApp, overlays, services, store]);
 
   return (
     <ExpandableSection

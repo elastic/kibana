@@ -14,6 +14,7 @@ import type { Maybe } from '../../../common/search_strategy';
 import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import {
   IP_FIELD_TYPE,
+  LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../timelines/components/timeline/body/renderers/constants';
 import { getEcsField } from '../../flyout/document_details/right/components/table_field_name_cell';
@@ -95,7 +96,10 @@ export const getCellRendererForGivenRecord = (
       };
     }
 
-    if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
+    if (
+      fieldName === SIGNAL_RULE_NAME_FIELD_NAME ||
+      fieldName === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
+    ) {
       return function RuleNameFieldRenderer(props: DataGridCellValueElementProps) {
         return <RuleNameCellRenderer {...props} services={services} store={store} />;
       };

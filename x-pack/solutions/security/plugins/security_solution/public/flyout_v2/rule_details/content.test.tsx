@@ -17,7 +17,6 @@ import {
 } from '../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import type { RuleResponse } from '../../../common/api/detection_engine';
 import {
-  RULE_DETAILS_BODY_TEST_ID,
   RULE_DETAILS_ABOUT_HEADER_TEST_ID,
   RULE_DETAILS_ABOUT_CONTENT_TEST_ID,
   RULE_DETAILS_DEFINITION_HEADER_TEST_ID,
@@ -51,7 +50,6 @@ describe('<Content />', () => {
 
     const { getByTestId } = renderContent();
 
-    expect(getByTestId(RULE_DETAILS_BODY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_DETAILS_ABOUT_HEADER_TEST_ID)).toHaveTextContent('About');
     expect(getByTestId(RULE_DETAILS_ABOUT_CONTENT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_DETAILS_DEFINITION_HEADER_TEST_ID)).toHaveTextContent('Definition');
