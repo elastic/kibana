@@ -95,7 +95,7 @@ const getQueryParams = (dateRangeStart: string, dateRangeEnd: string, configIds:
     aggs: {
       byIds: {
         terms: {
-          field: 'monitor.id',
+          field: 'config_id',
           size: Math.max(configIds.length, 1),
         },
         aggs: {
