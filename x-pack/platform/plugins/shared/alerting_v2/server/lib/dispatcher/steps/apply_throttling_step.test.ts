@@ -5,13 +5,29 @@
  * 2.0.
  */
 
-import { applyThrottling } from './apply_throttling_step';
+import {
+  applyThrottling,
+  ApplyThrottlingStep,
+  computeLastNotifiedLookbackMs,
+  LAST_NOTIFIED_LOOKBACK_CEILING_MS,
+  LAST_NOTIFIED_LOOKBACK_FLOOR_MS,
+  LAST_NOTIFIED_LOOKBACK_SAFETY_FACTOR,
+} from './apply_throttling_step';
+import { createQueryService } from '../../services/query_service/query_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { createLastNotifiedTimestampsResponse } from '../fixtures/dispatcher';
 import {
   createAlertEpisode,
+  createDispatcherPipelineState,
   createNotificationGroup,
   createNotificationPolicy,
 } from '../fixtures/test_utils';
-import type { NotificationGroupId, LastNotifiedInfo } from '../types';
+import type {
+  NotificationGroupId,
+  LastNotifiedInfo,
+  NotificationPolicy,
+  NotificationPolicyId,
+} from '../types';
 
 const NOW = new Date('2026-01-22T10:00:00.000Z');
 
@@ -459,5 +475,154 @@ describe('applyThrottling', () => {
       expect(dispatch).toHaveLength(0);
       expect(throttled).toHaveLength(0);
     });
+  });
+});
+
+describe('computeLastNotifiedLookbackMs', () => {
+  const buildPolicies = (
+    intervals: Array<string | undefined>
+  ): Map<NotificationPolicyId, NotificationPolicy> => {
+    const entries = intervals.map((interval, idx) => {
+      const id = `p${idx}`;
+      const policy = createNotificationPolicy({
+        id,
+        throttle: interval === undefined ? undefined : { interval },
+      });
+      return [id, policy] as const;
+    });
+    return new Map(entries);
+  };
+
+  it('returns the floor when there are no policies', () => {
+    expect(computeLastNotifiedLookbackMs(new Map())).toBe(LAST_NOTIFIED_LOOKBACK_FLOOR_MS);
+  });
+
+  it('returns the floor when no policy has a throttle interval', () => {
+    const policies = buildPolicies([undefined, undefined]);
+    expect(computeLastNotifiedLookbackMs(policies)).toBe(LAST_NOTIFIED_LOOKBACK_FLOOR_MS);
+  });
+
+  it('returns the floor when the longest interval is below it', () => {
+    const policies = buildPolicies(['5m', '30m']);
+    expect(computeLastNotifiedLookbackMs(policies)).toBe(LAST_NOTIFIED_LOOKBACK_FLOOR_MS);
+  });
+
+  it('derives the lookback from the longest configured interval with safety factor', () => {
+    const policies = buildPolicies(['1h', '7d', '2h']);
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+    expect(computeLastNotifiedLookbackMs(policies)).toBe(
+      sevenDaysMs * LAST_NOTIFIED_LOOKBACK_SAFETY_FACTOR
+    );
+  });
+
+  it('clamps to the ceiling when the longest interval exceeds it', () => {
+    const policies = buildPolicies(['52w']);
+    const { loggerService, mockLogger } = createLoggerService();
+
+    const result = computeLastNotifiedLookbackMs(policies, loggerService);
+
+    expect(result).toBe(LAST_NOTIFIED_LOOKBACK_CEILING_MS);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not warn when the lookback fits within the ceiling', () => {
+    const policies = buildPolicies(['7d']);
+    const { loggerService, mockLogger } = createLoggerService();
+
+    computeLastNotifiedLookbackMs(policies, loggerService);
+
+    expect(mockLogger.warn).not.toHaveBeenCalled();
+  });
+
+  it('skips policies with malformed interval strings without throwing', () => {
+    const policies = buildPolicies(['not-a-duration', '7d', '10y']);
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+    expect(computeLastNotifiedLookbackMs(policies)).toBe(
+      sevenDaysMs * LAST_NOTIFIED_LOOKBACK_SAFETY_FACTOR
+    );
+  });
+
+  it('returns the floor when every policy has an invalid interval', () => {
+    const policies = buildPolicies(['invalid', '10y']);
+    expect(computeLastNotifiedLookbackMs(policies)).toBe(LAST_NOTIFIED_LOOKBACK_FLOOR_MS);
+  });
+});
+
+describe('ApplyThrottlingStep', () => {
+  const buildState = (overrides: {
+    groups?: ReturnType<typeof createNotificationGroup>[];
+    policies?: Map<NotificationPolicyId, NotificationPolicy>;
+    startedAt?: Date;
+  }) =>
+    createDispatcherPipelineState({
+      groups: overrides.groups,
+      policies: overrides.policies,
+      input: {
+        startedAt: overrides.startedAt ?? new Date('2026-01-22T08:00:00.000Z'),
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+      },
+    });
+
+  it('returns early without querying when there are no groups', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new ApplyThrottlingStep(queryService, loggerService);
+
+    const result = await step.execute(buildState({ groups: [] }));
+
+    expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data).toEqual({ dispatch: [], throttled: [] });
+  });
+
+  it('bounds the last-notified query by startedAt minus the derived lookback', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new ApplyThrottlingStep(queryService, loggerService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+    const startedAt = new Date('2026-01-22T08:00:00.000Z');
+    const policies = new Map<NotificationPolicyId, NotificationPolicy>([
+      ['p1', createNotificationPolicy({ id: 'p1', throttle: { interval: '7d' } })],
+    ]);
+    const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+
+    await step.execute(buildState({ groups: [group], policies, startedAt }));
+
+    const expectedLookbackMs = 7 * 24 * 60 * 60 * 1000 * LAST_NOTIFIED_LOOKBACK_SAFETY_FACTOR;
+    const expectedSince = new Date(startedAt.getTime() - expectedLookbackMs).toISOString();
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
+    const [[{ query }]] = mockEsClient.esql.query.mock.calls as unknown as Array<
+      [{ query: string }]
+    >;
+    expect(query).toContain(`@timestamp >= "${expectedSince}"::DATETIME`);
+  });
+
+  it('uses the floor lookback when no policy has a throttle interval', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new ApplyThrottlingStep(queryService, loggerService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+    const startedAt = new Date('2026-01-22T08:00:00.000Z');
+    const policies = new Map<NotificationPolicyId, NotificationPolicy>([
+      ['p1', createNotificationPolicy({ id: 'p1' })],
+    ]);
+    const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+
+    await step.execute(buildState({ groups: [group], policies, startedAt }));
+
+    const expectedSince = new Date(
+      startedAt.getTime() - LAST_NOTIFIED_LOOKBACK_FLOOR_MS
+    ).toISOString();
+
+    const [[{ query }]] = mockEsClient.esql.query.mock.calls as unknown as Array<
+      [{ query: string }]
+    >;
+    expect(query).toContain(`@timestamp >= "${expectedSince}"::DATETIME`);
   });
 });

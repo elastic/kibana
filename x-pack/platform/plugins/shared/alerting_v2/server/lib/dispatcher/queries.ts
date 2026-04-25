@@ -89,13 +89,23 @@ export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]):
       | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action`.toRequest();
 };
 
+/**
+ * Builds the ES|QL query that returns the most recent `notified` action per notification group.
+ *
+ * The `since` bound caps how far back the query scans. The throttling step derives this bound
+ * from the longest `policy.throttle.interval` currently configured, so the query cost stays
+ * proportional to the active throttle windows rather than the full retention of the actions
+ * data stream.
+ */
 export const getLastNotifiedTimestampsQuery = (
-  notificationGroupIds: NotificationGroupId[]
+  notificationGroupIds: NotificationGroupId[],
+  since: Date
 ): EsqlRequest => {
   const values = notificationGroupIds.map((id) => esql.str(id));
   const whereClause = esql.exp`action_type == "notified" AND notification_group_id IN (${values})`;
 
   return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+    | WHERE @timestamp >= ${since.toISOString()}::datetime
     | WHERE ${whereClause}
     | STATS last_notified = MAX(@timestamp), episode_status = LAST(episode_status, @timestamp) BY notification_group_id
     | KEEP notification_group_id, last_notified, episode_status
