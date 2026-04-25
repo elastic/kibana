@@ -15,7 +15,8 @@ imports:
   - .github/agents/code-reviewer.md
 engine:
   id: claude
-  model: llm-gateway/claude-opus-4-6
+  version: "2.1.114"
+  model: llm-gateway/claude-opus-4-7
   max-turns: 30
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
