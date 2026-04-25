@@ -74,7 +74,7 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
-      x-code-samples:
+      x-codeSamples:
         - label: curl
           lang: curl
           source: |
@@ -2016,65 +2016,6 @@ components:
         - email
         - full_name
         - username
-    actions_comment_response_properties:
-      title: Case response properties for actions comments
-      type: object
-      required:
-        - type
-      properties:
-        actions:
-          type: object
-          properties:
-            targets:
-              type: array
-              items:
-                type: object
-                properties:
-                  endpointId:
-                    type: string
-                    example: 1
-                  hostname:
-                    type: string
-                    example: host-01
-            type:
-              type: string
-              example: isolate
-        comment:
-          type: string
-          example: Isolating the host from the case UI.
-        created_at:
-          type: string
-          format: date-time
-          example: '2022-05-13T09:16:17.416Z'
-        created_by:
-          $ref: '#/components/schemas/case_response_created_by_properties'
-        id:
-          type: string
-          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
-        owner:
-          $ref: '#/components/schemas/owner'
-        pushed_at:
-          type: string
-          format: date-time
-          nullable: true
-          example: null
-        pushed_by:
-          $ref: '#/components/schemas/case_response_pushed_by_properties'
-        type:
-          type: string
-          example: actions
-          enum:
-            - actions
-        updated_at:
-          type: string
-          format: date-time
-          nullable: true
-          example: null
-        updated_by:
-          $ref: '#/components/schemas/case_response_updated_by_properties'
-        version:
-          type: string
-          example: WzIwNDMxLDFd
     alert_comment_response_properties:
       title: Add case comment response properties for alerts
       type: object
@@ -2490,14 +2431,12 @@ components:
           maxItems: 10000
           items:
             oneOf:
-              - $ref: '#/components/schemas/actions_comment_response_properties'
               - $ref: '#/components/schemas/alert_comment_response_properties'
               - $ref: '#/components/schemas/event_comment_response_properties'
               - $ref: '#/components/schemas/user_comment_response_properties'
             discriminator:
               propertyName: type
               mapping:
-                actions: '#/components/schemas/actions_comment_response_properties'
                 alert: '#/components/schemas/alert_comment_response_properties'
                 event: '#/components/schemas/event_comment_response_properties'
                 user: '#/components/schemas/user_comment_response_properties'
