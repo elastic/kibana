@@ -55,39 +55,76 @@ export const selectOverviewStatus = createSelector(
   }
 );
 
-const separateByLocation = (status: Record<string, OverviewStatusMetaData>, groupBy?: string) => {
-  if (groupBy === 'monitor' || !status) {
-    return status;
-  }
+type ConfigBuckets = Pick<
+  OverviewStatusState,
+  'upConfigs' | 'downConfigs' | 'pendingConfigs' | 'disabledConfigs'
+>;
 
-  // if it has two or more locations, separate them by location and create new array entries per location
-  // record key will become `${monitorId}-${locationId}`
-  const newStatus: Record<string, OverviewStatusMetaData> = {};
-  Object.entries(status).forEach(([key, value]) => {
-    if (value.locations.length > 1) {
-      value.locations.forEach((location) => {
-        const newKey = `${key}-${location.id}`;
-        newStatus[newKey] = {
-          ...value,
-          overallStatus: location.status,
-          locations: [location],
-        };
-      });
-    } else {
-      newStatus[key] = value;
-    }
-  });
-  return newStatus;
+const bucketForStatus = (
+  buckets: ConfigBuckets,
+  status: string | undefined
+): Record<string, OverviewStatusMetaData> | undefined => {
+  switch (status) {
+    case 'up':
+      return buckets.upConfigs;
+    case 'down':
+      return buckets.downConfigs;
+    case 'disabled':
+      return buckets.disabledConfigs;
+    case 'pending':
+      return buckets.pendingConfigs;
+    default:
+      return undefined;
+  }
 };
+
 const formatStatus = (status: OverviewStatusState, groupBy?: string): OverviewStatusState => {
   if (groupBy === 'monitor' || !status) {
     return status;
   }
+
+  // Single-location monitors stay in their server-assigned bucket. For
+  // multi-location monitors we split into one entry per location keyed
+  // `${configId}-${locationId}`, and route each split entry to the bucket
+  // matching the *per-location* status — otherwise e.g. a monitor with a
+  // down + several pending locations leaves the pending splits inside
+  // `downConfigs`, breaking sort-by-status and per-bucket consumers.
+  const newBuckets: ConfigBuckets = {
+    upConfigs: { ...(status.upConfigs ?? {}) },
+    downConfigs: { ...(status.downConfigs ?? {}) },
+    pendingConfigs: { ...(status.pendingConfigs ?? {}) },
+    disabledConfigs: { ...(status.disabledConfigs ?? {}) },
+  };
+
+  const sourceBuckets: Array<
+    [Record<string, OverviewStatusMetaData> | undefined, Record<string, OverviewStatusMetaData>]
+  > = [
+    [status.upConfigs, newBuckets.upConfigs],
+    [status.downConfigs, newBuckets.downConfigs],
+    [status.pendingConfigs, newBuckets.pendingConfigs],
+    [status.disabledConfigs, newBuckets.disabledConfigs],
+  ];
+
+  sourceBuckets.forEach(([source, target]) => {
+    Object.entries(source ?? {}).forEach(([key, value]) => {
+      if (value.locations.length <= 1) return;
+
+      delete target[key];
+      value.locations.forEach((location) => {
+        const newKey = `${key}-${location.id}`;
+        const entry: OverviewStatusMetaData = {
+          ...value,
+          overallStatus: location.status,
+          locations: [location],
+        };
+        const destination = bucketForStatus(newBuckets, location.status) ?? target;
+        destination[newKey] = entry;
+      });
+    });
+  });
+
   return {
     ...status,
-    upConfigs: separateByLocation(status.upConfigs, groupBy),
-    downConfigs: separateByLocation(status.downConfigs, groupBy),
-    pendingConfigs: separateByLocation(status.pendingConfigs, groupBy),
-    disabledConfigs: separateByLocation(status.disabledConfigs, groupBy),
+    ...newBuckets,
   };
 };

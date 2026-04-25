@@ -207,21 +207,53 @@ describe('selectOverviewStatus', () => {
     expect(result.status?.downConfigs.multi.locations).toHaveLength(2);
   });
 
-  it('separates multi-location monitors into per-location entries when groupBy is not "monitor"', () => {
+  it('separates multi-location monitors into per-location entries placed in the bucket matching each location status', () => {
     const state = buildState('none');
     const result = selectOverviewStatus(state as SyntheticsAppState);
 
+    // The down-located entry stays in downConfigs.
     expect(result.status?.downConfigs).not.toHaveProperty('multi');
     expect(result.status?.downConfigs).toHaveProperty('multi-loc1');
-    expect(result.status?.downConfigs).toHaveProperty('multi-loc2');
-
     expect(result.status?.downConfigs['multi-loc1'].locations).toHaveLength(1);
     expect(result.status?.downConfigs['multi-loc1'].locations[0].id).toBe('loc1');
     expect(result.status?.downConfigs['multi-loc1'].overallStatus).toBe('down');
 
-    expect(result.status?.downConfigs['multi-loc2'].locations).toHaveLength(1);
-    expect(result.status?.downConfigs['multi-loc2'].locations[0].id).toBe('loc2');
-    expect(result.status?.downConfigs['multi-loc2'].overallStatus).toBe('up');
+    // The up-located entry moves into upConfigs (previously stayed in downConfigs).
+    expect(result.status?.downConfigs).not.toHaveProperty('multi-loc2');
+    expect(result.status?.upConfigs).toHaveProperty('multi-loc2');
+    expect(result.status?.upConfigs['multi-loc2'].locations).toHaveLength(1);
+    expect(result.status?.upConfigs['multi-loc2'].locations[0].id).toBe('loc2');
+    expect(result.status?.upConfigs['multi-loc2'].overallStatus).toBe('up');
+  });
+
+  it('redistributes pending locations of a down monitor into pendingConfigs', () => {
+    const downWithPendingLocs = makeMeta({
+      configId: 'mixed',
+      overallStatus: 'down',
+      locations: [
+        { id: 'loc1', label: 'Loc 1', status: 'down' },
+        { id: 'loc2', label: 'Loc 2', status: 'pending' },
+        { id: 'loc3', label: 'Loc 3', status: 'pending' },
+      ],
+    });
+    const state = {
+      overviewStatus: {
+        loading: false,
+        loaded: true,
+        error: null,
+        isInitialLoad: false,
+        status: makeStatus({ downConfigs: { mixed: downWithPendingLocs } }),
+      },
+      overview: { groupBy: { field: 'none', order: 'asc' } } as any,
+    };
+    const result = selectOverviewStatus(state as SyntheticsAppState);
+
+    expect(Object.keys(result.status?.downConfigs ?? {})).toEqual(['mixed-loc1']);
+    expect(Object.keys(result.status?.pendingConfigs ?? {})).toEqual([
+      'mixed-loc2',
+      'mixed-loc3',
+    ]);
+    expect(result.status?.upConfigs).toEqual({});
   });
 
   it('keeps single-location monitors as-is regardless of groupBy', () => {
