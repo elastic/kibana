@@ -27,7 +27,7 @@ const initialState: MonitorOverviewState = {
     sortField: 'status',
   },
   trendStats: {},
-  groupBy: { field: 'none', order: 'asc' },
+  groupBy: { field: 'monitor', order: 'asc' },
   flyoutConfig: null,
   isErrorPopoverOpen: null,
   view: DEFAULT_OVERVIEW_VIEW,
@@ -55,9 +55,15 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       state.isErrorPopoverOpen = action.payload;
     })
     .addCase(trendStatsBatch.get, (state, action) => {
-      for (const { configId } of action.payload) {
+      for (const { configId, locationIds } of action.payload) {
         if (!state.trendStats[configId]) {
           state.trendStats[configId] = 'loading';
+        }
+        for (const locationId of locationIds) {
+          const key = configId + locationId;
+          if (!state.trendStats[key]) {
+            state.trendStats[key] = 'loading';
+          }
         }
       }
     })

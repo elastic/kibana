@@ -12,13 +12,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 
-import { selectOverviewState, setOverviewPageStateAction } from '../../../../state/overview';
+import { selectOverviewPageState, setOverviewPageStateAction } from '../../../../state/overview';
 import { SortMenu } from './sort_menu';
 
 export const SortFields = () => {
-  const {
-    pageState: { sortOrder, sortField },
-  } = useSelector(selectOverviewState);
+  const { sortOrder, sortField } = useSelector(selectOverviewPageState);
   const dispatch = useDispatch();
   const { asc, desc, label } = getOrderContent(sortField);
   const handleSortChange = (payloadAction: PayloadAction<unknown>) => {

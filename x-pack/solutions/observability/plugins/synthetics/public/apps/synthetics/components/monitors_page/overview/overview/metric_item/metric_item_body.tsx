@@ -29,7 +29,7 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
       }}
     />
   );
-  if (tags.length === 0) {
+  if (tags.length === 0 && (monitor?.locations?.length ?? 0) <= 1) {
     return (
       <>
         <EuiSpacer size="xs" />
@@ -44,7 +44,7 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>
         {monitor?.locations?.length > 1 && (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <LocationsBadge monitor={monitor} />
           </EuiFlexItem>
         )}

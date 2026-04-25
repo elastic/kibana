@@ -21,7 +21,7 @@ import { useFilters } from '../../../common/monitor_filters/use_filters';
 import { GroupGridItem } from './grid_group_item';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
 import type { OverviewView } from '../../../../../state';
-import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
+import { selectOverviewGroupBy, selectServiceLocationsState } from '../../../../../state';
 import type { FlyoutParamProps } from '../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 
@@ -33,9 +33,7 @@ export const GridItemsByGroup = ({
   view: OverviewView;
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');
-  const {
-    groupBy: { field: groupField, order: groupOrder },
-  } = useSelector(selectOverviewState);
+  const { field: groupField, order: groupOrder } = useSelector(selectOverviewGroupBy);
 
   const { allConfigs, loaded } = useSelector(selectOverviewStatus);
 

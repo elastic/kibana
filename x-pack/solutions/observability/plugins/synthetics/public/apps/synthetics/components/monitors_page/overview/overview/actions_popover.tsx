@@ -39,7 +39,7 @@ import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locato
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { useAddToDashboard } from '../../../common/components/add_to_dashboard';
-import { selectOverviewState } from '../../../../state';
+import { selectOverviewView } from '../../../../state';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -155,7 +155,7 @@ export function ActionsPopover({
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {

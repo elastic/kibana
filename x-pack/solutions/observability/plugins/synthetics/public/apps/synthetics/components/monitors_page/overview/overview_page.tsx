@@ -14,7 +14,7 @@ import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
-import { selectOverviewState, selectServiceLocationsState } from '../../../state';
+import { selectOverviewView, selectServiceLocationsState } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 
@@ -34,7 +34,7 @@ export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview', delay: 15000 });
   useOverviewBreadcrumbs();
 
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
 
   const dispatch = useDispatch();
 
