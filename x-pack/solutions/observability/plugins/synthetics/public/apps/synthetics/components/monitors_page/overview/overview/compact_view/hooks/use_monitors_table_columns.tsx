@@ -7,14 +7,14 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MonitorStatusCol } from '../components/monitor_status_col';
+import { i18n } from '@kbn/i18n';
 import { selectOverviewState } from '../../../../../../state';
+import { MonitorStatusCol } from '../components/monitor_status_col';
 import { MonitorBarSeries } from '../components/monitor_bar_series';
 import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
@@ -28,21 +28,21 @@ import {
   LOCATIONS,
   NAME,
   TAGS,
-  DURATION,
   URL,
   NO_URL,
   MONITOR_HISTORY,
 } from '../labels';
-import { MonitorsDuration } from '../components/monitors_duration';
 import { useKibanaSpace } from '../../../../../../../../hooks/use_kibana_space';
 import type { ClientPluginsStart } from '../../../../../../../../plugin';
 
 export const useMonitorsTableColumns = ({
   setFlyoutConfigCallback,
   items,
+  isFlyoutOpen,
 }: {
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  isFlyoutOpen?: boolean;
 }) => {
   const history = useHistory();
   const { histogramsById, minInterval } = useMonitorHistogram({ items });
@@ -55,11 +55,11 @@ export const useMonitorsTableColumns = ({
 
   const onClickMonitorFilter = useCallback(
     (filterName: string, filterValue: string) => {
-      const searchParams = new URLSearchParams(history.location.search); // Get existing query params
-      searchParams.set(filterName, JSON.stringify([filterValue])); // Add or update the query param
+      const searchParams = new URLSearchParams(history.location.search);
+      searchParams.set(filterName, JSON.stringify([filterValue]));
 
       history.push({
-        search: searchParams.toString(), // Convert back to a query string
+        search: searchParams.toString(),
       });
     },
     [history]
@@ -89,6 +89,7 @@ export const useMonitorsTableColumns = ({
     return [
       {
         name: STATUS,
+        width: '120px',
         render: (monitor: OverviewStatusMetaData) => (
           <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
         ),
@@ -96,6 +97,7 @@ export const useMonitorsTableColumns = ({
       {
         field: 'name',
         name: NAME,
+        width: '15%',
         render: (name: OverviewStatusMetaData['name'], monitor) => (
           <EuiFlexGroup
             direction="column"
@@ -118,27 +120,35 @@ export const useMonitorsTableColumns = ({
           </EuiFlexGroup>
         ),
       },
-      {
-        field: 'urls',
-        name: URL,
-        render: (url: OverviewStatusMetaData['urls']) =>
-          url ? (
-            <EuiLink
-              data-test-subj="syntheticsCompactViewUrl"
-              href={url}
-              target="_blank"
-              color="text"
-              external
-            >
-              {url}
-            </EuiLink>
-          ) : (
-            <EuiText>{NO_URL}</EuiText>
-          ),
-      },
+      ...(isFlyoutOpen
+        ? []
+        : [
+            {
+              field: 'urls' as const,
+              name: URL,
+              truncateText: true,
+              width: '15%',
+              render: (url: OverviewStatusMetaData['urls']) =>
+                url ? (
+                  <EuiLink
+                    data-test-subj="syntheticsCompactViewUrl"
+                    href={url}
+                    target="_blank"
+                    color="text"
+                    external
+                    css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
+                    {url}
+                  </EuiLink>
+                ) : (
+                  <EuiText>{NO_URL}</EuiText>
+                ),
+            },
+          ]),
       {
         field: 'locationLabel',
         name: LOCATIONS,
+        width: '120px',
         render: (locationLabel: OverviewStatusMetaData['locationLabel']) => (
           <EuiLink
             data-test-subj="syntheticsCompactViewLocation"
@@ -148,38 +158,49 @@ export const useMonitorsTableColumns = ({
           </EuiLink>
         ),
       },
-      {
-        field: 'tags',
-        name: TAGS,
-        render: (tags: OverviewStatusMetaData['tags']) => (
-          <TagsList tags={tags} onClick={(tag) => onClickMonitorFilter('tags', tag)} />
-        ),
-      },
-      {
-        name: DURATION,
-        render: (monitor: OverviewStatusMetaData) => (
-          <MonitorsDuration monitor={monitor} onClickDuration={() => openFlyout(monitor)} />
-        ),
-        width: '100px',
-      },
-      {
-        align: 'left' as const,
-        field: 'configId',
-        name: MONITOR_HISTORY,
-        mobileOptions: {
-          show: false,
-        },
-        width: '220px',
-        render: (configId: string, monitor: OverviewStatusMetaData) => {
-          const uniqId = `${configId}-${monitor.locationId}`;
-          return (
-            <MonitorBarSeries
-              histogramSeries={histogramsById?.[uniqId]?.points}
-              minInterval={minInterval!}
-            />
-          );
-        },
-      },
+      ...(isFlyoutOpen
+        ? []
+        : [
+            {
+              name: TAGS,
+              width: '15%',
+              render: (monitor: OverviewStatusMetaData) => (
+                <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">@every {monitor.schedule}m</EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <TagsList
+                      tags={monitor.tags}
+                      onClick={(tag) => onClickMonitorFilter('tags', tag)}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+            },
+          ]),
+      ...(isFlyoutOpen
+        ? []
+        : [
+            {
+              align: 'left' as const,
+              field: 'configId' as const,
+              name: MONITOR_HISTORY,
+              mobileOptions: {
+                show: false,
+              },
+              width: '180px',
+              render: (configId: string, monitor: OverviewStatusMetaData) => {
+                const uniqId = `${configId}-${monitor.locationId}`;
+                return (
+                  <MonitorBarSeries
+                    histogramSeries={histogramsById?.[uniqId]?.points}
+                    minInterval={minInterval!}
+                  />
+                );
+              },
+            },
+          ]),
       ...(showFromAllSpaces
         ? [
             {
@@ -208,6 +229,7 @@ export const useMonitorsTableColumns = ({
     ];
   }, [
     histogramsById,
+    isFlyoutOpen,
     minInterval,
     onClickMonitorFilter,
     openFlyout,

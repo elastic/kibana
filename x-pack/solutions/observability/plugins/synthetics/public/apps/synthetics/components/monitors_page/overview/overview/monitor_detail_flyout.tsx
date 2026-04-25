@@ -38,7 +38,8 @@ import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import {
   getMonitorAction,
   selectMonitorUpsertStatus,
-  selectOverviewState,
+  selectOverviewFlyoutConfig,
+  selectOverviewPageState,
   selectServiceLocationsState,
   selectSyntheticsMonitor,
   selectSyntheticsMonitorError,
@@ -49,14 +50,18 @@ import { MonitorDetailsPanel } from '../../../common/components/monitor_details_
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
 import { ErrorCallout } from '../../../common/components/error_callout';
 import { MonitorStatus } from '../../../common/components/monitor_status';
-import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
 import type { EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
 import type { FlyoutParamProps } from './types';
-import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
+import {
+  quietFetchOverviewStatusAction,
+  selectOverviewStatus,
+} from '../../../../state/overview_status';
+import { useMonitorHistogram } from '../../hooks/use_monitor_histogram';
+import { MonitorBarSeries } from './compact_view/components/monitor_bar_series';
 
 interface Props {
   configId: string;
@@ -222,19 +227,37 @@ export function LoadingState() {
   );
 }
 
+function DetailFlyoutDowntimeHistory({ monitor }: { monitor: OverviewStatusMetaData }) {
+  const items = useMemo(() => [monitor], [monitor]);
+  const { histogramsById, minInterval } = useMonitorHistogram({ items });
+  const uniqId = `${monitor.configId}-${monitor.locationId}`;
+  const histogramSeries =
+    histogramsById?.[uniqId]?.points ?? histogramsById[monitor.configId]?.points;
+
+  return (
+    <EuiPageSection bottomBorder="extended">
+      <EuiTitle size="xs">
+        <h3>{DOWNTIME_HISTORY_HEADER_TEXT}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <MonitorBarSeries histogramSeries={histogramSeries} minInterval={minInterval!} />
+    </EuiPageSection>
+  );
+}
+
 export function MonitorDetailFlyout(props: Props) {
   const { id, configId, onLocationChange, locationId, spaces } = props;
 
-  const { status: overviewStatus } = useOverviewStatus({ scopeStatusByLocation: true });
+  const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
   const monitor: OverviewStatusMetaData | undefined = useMemo(() => {
+    if (!overviewStatus) return undefined;
     const allConfigs = Object.values({
-      ...(overviewStatus?.upConfigs ?? {}),
-      ...(overviewStatus?.downConfigs ?? {}),
+      ...(overviewStatus.upConfigs ?? {}),
+      ...(overviewStatus.downConfigs ?? {}),
     });
-    const overviewItem = allConfigs.find((ov) => ov.configId === configId);
-    if (overviewItem) return overviewItem;
-  }, [overviewStatus?.upConfigs, overviewStatus?.downConfigs, configId]);
+    return allConfigs.find((ov) => ov.configId === configId);
+  }, [overviewStatus, configId]);
 
   const setLocation = useCallback(
     (location: string, locationIdT: string) =>
@@ -294,6 +317,8 @@ export function MonitorDetailFlyout(props: Props) {
 
   const isOverlay = useIsWithinMaxBreakpoint('xl');
 
+  const displayName = monitorObject?.[ConfigKey.NAME] ?? monitor?.name ?? configId;
+
   return (
     <EuiFlyout
       size="600px"
@@ -302,86 +327,93 @@ export function MonitorDetailFlyout(props: Props) {
       paddingSize="none"
     >
       {error && !isLoading && <ErrorCallout {...error} />}
-      {isLoading && <LoadingState />}
-      {monitorObject && (
-        <>
-          <EuiFlyoutHeader hasBorder>
-            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-              <EuiFlexGroup responsive={false} gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="s">
-                    <h2>{monitorObject?.[ConfigKey.NAME]}</h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {monitor && (
-                    <ActionsPopover
-                      isPopoverOpen={isActionsPopoverOpen}
-                      isInspectView
-                      monitor={monitor}
-                      setIsPopoverOpen={setIsActionsPopoverOpen}
-                      position="default"
-                      iconHasPanel={false}
-                      iconSize="xs"
-                      locationId={locationId}
-                    />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <DetailedFlyoutHeader
-                currentLocation={props.location}
-                locations={locations}
-                setCurrentLocation={setLocation}
-                configId={configId}
-                monitor={monitorObject}
-                onEnabledChange={props.onEnabledChange}
-              />
-            </EuiPanel>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <DetailFlyoutDurationChart {...props} location={props.location} />
-            <MonitorDetailsPanel
-              hasBorder={false}
-              hideEnabled
-              latestPing={monitorDetail.data}
+      <EuiFlyoutHeader hasBorder>
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+          <EuiFlexGroup responsive={false} gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2>{displayName}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {monitor && (
+                <ActionsPopover
+                  isPopoverOpen={isActionsPopoverOpen}
+                  isInspectView
+                  monitor={monitor}
+                  setIsPopoverOpen={setIsActionsPopoverOpen}
+                  position="default"
+                  iconHasPanel={false}
+                  iconSize="xs"
+                  locationId={locationId}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          {monitorObject ? (
+            <DetailedFlyoutHeader
+              currentLocation={props.location}
+              locations={locations}
+              setCurrentLocation={setLocation}
               configId={configId}
-              monitor={{
-                ...monitorObject,
-                id,
-              }}
-              loading={Boolean(isLoading)}
+              monitor={monitorObject}
+              onEnabledChange={props.onEnabledChange}
             />
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
-                    onClick={props.onClose}
-                  >
-                    {CLOSE_FLYOUT_TEXT}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
-                    // `detailLink` can be undefined, in this case, disable the button
-                    isDisabled={!detailLink}
-                    href={detailLink}
-                    iconType="sortRight"
-                    iconSide="right"
-                    fill
-                  >
-                    {GO_TO_MONITOR_LINK_TEXT}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlyoutFooter>
-        </>
-      )}
+          ) : (
+            <EuiLoadingSpinner size="m" />
+          )}
+        </EuiPanel>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <DetailFlyoutDurationChart {...props} location={props.location} />
+        {monitor && <DetailFlyoutDowntimeHistory monitor={monitor} />}
+        {monitorObject ? (
+          <MonitorDetailsPanel
+            hasBorder={false}
+            hideEnabled
+            latestPing={monitorDetail.data}
+            configId={configId}
+            monitor={{
+              ...monitorObject,
+              id,
+            }}
+            loading={Boolean(isLoading)}
+          />
+        ) : (
+          <EuiFlexGroup justifyContent="center" css={{ padding: 24 }}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                onClick={props.onClose}
+              >
+                {CLOSE_FLYOUT_TEXT}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                isDisabled={!detailLink}
+                href={detailLink}
+                iconType="sortRight"
+                iconSide="right"
+                fill
+              >
+                {GO_TO_MONITOR_LINK_TEXT}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 }
@@ -393,7 +425,8 @@ export const MaybeMonitorDetailsFlyout = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { flyoutConfig, pageState } = useSelector(selectOverviewState);
+  const flyoutConfig = useSelector(selectOverviewFlyoutConfig);
+  const pageState = useSelector(selectOverviewPageState);
   const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
   const forceRefreshCallback = useCallback(
     () => dispatch(quietFetchOverviewStatusAction.get({ pageState })),
@@ -435,6 +468,13 @@ const PREVIOUS_PERIOD_SERIES_NAME = i18n.translate(
 const ENABLED_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.enabledItemText', {
   defaultMessage: 'Enabled (all locations)',
 });
+
+const DOWNTIME_HISTORY_HEADER_TEXT = i18n.translate(
+  'xpack.synthetics.monitorList.downtimeHistoryHeaderText',
+  {
+    defaultMessage: 'Downtime history',
+  }
+);
 
 const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyoutText', {
   defaultMessage: 'Close',

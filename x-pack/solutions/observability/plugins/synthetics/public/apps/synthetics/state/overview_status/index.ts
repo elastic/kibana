@@ -43,8 +43,8 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.status = null;
       state.loading = true;
     })
-    .addCase(quietFetchOverviewStatusAction.get, (state) => {
-      state.loading = true;
+    .addCase(quietFetchOverviewStatusAction.get, (_state) => {
+      // intentionally no loading state for quiet/background refreshes
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = action.payload;

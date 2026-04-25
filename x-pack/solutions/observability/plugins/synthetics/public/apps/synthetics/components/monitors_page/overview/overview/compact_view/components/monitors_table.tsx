@@ -8,9 +8,10 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { EuiTableRowProps } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { useOverviewStatus } from '../../../../hooks/use_overview_status';
+import { selectOverviewFlyoutConfig } from '../../../../../../state';
 import type { FlyoutParamProps } from '../../types';
 import { useMonitorsTableColumns } from '../hooks/use_monitors_table_columns';
 import { useMonitorsTablePagination } from '../hooks/use_monitors_table_pagination';
@@ -32,7 +33,14 @@ export const MonitorsTable = ({
 
   useOverviewTrendsRequests(pageOfItems);
 
-  const { columns } = useMonitorsTableColumns({ setFlyoutConfigCallback, items: pageOfItems });
+  const flyoutConfig = useSelector(selectOverviewFlyoutConfig);
+  const isFlyoutOpen = Boolean(flyoutConfig?.configId);
+
+  const { columns } = useMonitorsTableColumns({
+    setFlyoutConfigCallback,
+    items: pageOfItems,
+    isFlyoutOpen,
+  });
 
   const dispatch = useDispatch();
 
@@ -74,7 +82,7 @@ export const MonitorsTable = ({
       onChange={onTableChange}
       rowProps={getRowProps}
       data-test-subj="syntheticsCompactViewTable"
-      tableLayout="auto"
+      tableLayout="fixed"
       tableCaption={i18n.translate('xpack.synthetics.monitorsTable.tableCaption', {
         defaultMessage: 'Compact monitors list',
       })}
