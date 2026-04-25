@@ -3,6 +3,8 @@ name: Claude Reviewer
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    forks:
+      - "Ikuni17/kibana"
   workflow_dispatch:
     inputs:
       pr_number:
