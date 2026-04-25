@@ -20,7 +20,7 @@ engine:
   model: llm-gateway/claude-opus-4-7
   max-turns: 30
   env:
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai/v1
+    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
 if: >-
   ${{
     !github.event.repository.fork &&
@@ -37,7 +37,10 @@ concurrency:
   group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
   cancel-in-progress: true
   job-discriminator: ${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
-permissions: read-all
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
 tools:
   github:
     toolsets: [default]
