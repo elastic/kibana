@@ -14,6 +14,118 @@
         "line": 80,
         "column": 7
       }
+    },
+    {
+      "id": "b621efd3ec8d996-e8dfa7be3731465",
+      "title": "Rule logs \"show all spaces\" switch hides the switch when only the default space exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_logs_spaces_switch.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "b621efd3ec8d996-5a271ef4519f6c6",
+      "title": "Rule logs \"show all spaces\" switch shows the switch and toggles it when multiple spaces are accessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_logs_spaces_switch.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "b621efd3ec8d996-bec0e1b69570809",
+      "title": "Rule logs \"show all spaces\" switch hides the switch when the user can only access one space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_logs_spaces_switch.spec.ts",
+        "line": 54,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-a76523058bbc608",
+      "title": "Rules home page loads the Rules page with alerts-and-actions role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 84,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-a3844c4ca73888c",
+      "title": "Rules home page shows the no-permission prompt when the user has actions but no alerting privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 91,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-324663b1eec2a0e",
+      "title": "Rules home page loads the Rules page as admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 101,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-352b2eaa6e31174",
+      "title": "Rules home page renders the rules list with a newly-created rule visible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-cf41b97453bbbad",
+      "title": "Rules home page navigates to the rule details page when clicking a rule in the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 129,
+        "column": 7
+      }
     }
   ]
 }
