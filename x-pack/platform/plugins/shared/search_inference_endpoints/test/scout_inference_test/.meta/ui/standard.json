@@ -92,6 +92,171 @@
       }
     },
     {
+      "id": "14d3c9eab764dd9-4e4c807140e5171",
+      "title": "External Inference renders the External Inference page header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-f9c80b13b2f15f6",
+      "title": "External Inference empty state renders prompt, add button, and documentation link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-ae915f6162a729d",
+      "title": "External Inference empty state opens the add inference flyout from the empty prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 49,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-8da460204aa3192",
+      "title": "External Inference renders the header with api documentation and add endpoint button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-c19563099038eac",
+      "title": "External Inference opens the add inference flyout from the header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 75,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-bc7be9b47b24368",
+      "title": "External Inference renders the tabular view with every external endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 83,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-f9e2b4341f0cf6f",
+      "title": "External Inference filters the table when typing in the search field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 112,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-77163d31b895dc3",
+      "title": "External Inference endpoint stats update when the table is filtered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 133,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-cb03b399cb54064",
+      "title": "External Inference defaults to group-by Model and supports switching group-by selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 147,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-620c3a566138d91",
+      "title": "External Inference opens the edit inference flyout from the view endpoint row action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 171,
+        "column": 9
+      }
+    },
+    {
+      "id": "14d3c9eab764dd9-88d6b61d6f7c5f6",
+      "title": "External Inference delete action is enabled for user-defined external endpoints",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference.spec.ts",
+        "line": 184,
+        "column": 9
+      }
+    },
+    {
       "id": "600135eb4869d8a-d5355675947674e",
       "title": "Feature Settings shows empty state when no models are available",
       "expectedStatus": "passed",
