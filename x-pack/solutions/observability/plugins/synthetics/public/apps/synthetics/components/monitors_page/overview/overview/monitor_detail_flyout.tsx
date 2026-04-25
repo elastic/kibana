@@ -8,19 +8,18 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHealth,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   EuiTitle,
   useEuiTheme,
   useIsWithinMaxBreakpoint,
@@ -33,24 +32,21 @@ import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
+import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
 import type { LocationsStatus } from '../../../../hooks/use_status_by_location';
-import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
+import { useMonitorHealthColor } from '../../hooks/use_monitor_health_color';
 import {
   getMonitorAction,
   selectMonitorUpsertStatus,
   selectOverviewFlyoutConfig,
   selectOverviewPageState,
-  selectServiceLocationsState,
   selectSyntheticsMonitor,
   selectSyntheticsMonitorError,
   selectSyntheticsMonitorLoading,
   setFlyoutConfig,
 } from '../../../../state';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
-import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
 import { ErrorCallout } from '../../../common/components/error_callout';
-import { MonitorStatus } from '../../../common/components/monitor_status';
-import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
 import type { EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
@@ -60,8 +56,7 @@ import {
   quietFetchOverviewStatusAction,
   selectOverviewStatus,
 } from '../../../../state/overview_status';
-import { useMonitorHistogram } from '../../hooks/use_monitor_histogram';
-import { MonitorBarSeries } from './compact_view/components/monitor_bar_series';
+import { MonitorStatusPanel } from '../../../monitor_details/monitor_status/monitor_status_panel';
 
 interface Props {
   configId: string;
@@ -72,10 +67,6 @@ interface Props {
   onClose: () => void;
   onEnabledChange: () => void;
   onLocationChange: (params: FlyoutParamProps) => void;
-  currentDurationChartFrom?: string;
-  currentDurationChartTo?: string;
-  previousDurationChartFrom?: string;
-  previousDurationChartTo?: string;
 }
 
 const DEFAULT_DURATION_CHART_FROM = 'now-12h';
@@ -83,137 +74,163 @@ const DEFAULT_CURRENT_DURATION_CHART_TO = 'now';
 const DEFAULT_PREVIOUS_DURATION_CHART_FROM = 'now-24h';
 const DEFAULT_PREVIOUS_DURATION_CHART_TO = 'now-12h';
 
+const VIS_COLORS = [
+  'euiColorVis0',
+  'euiColorVis1',
+  'euiColorVis2',
+  'euiColorVis3',
+  'euiColorVis4',
+  'euiColorVis5',
+  'euiColorVis6',
+  'euiColorVis7',
+  'euiColorVis8',
+  'euiColorVis9',
+] as const;
+
 function DetailFlyoutDurationChart({
   id,
   location,
-  currentDurationChartFrom,
-  currentDurationChartTo,
-  previousDurationChartFrom,
-  previousDurationChartTo,
-}: Pick<
-  Props,
-  | 'id'
-  | 'location'
-  | 'currentDurationChartFrom'
-  | 'currentDurationChartTo'
-  | 'previousDurationChartFrom'
-  | 'previousDurationChartTo'
->) {
+  allLocations,
+}: {
+  id: string;
+  location: string;
+  allLocations: Array<{ id: string; label: string }>;
+}) {
   const { euiTheme } = useEuiTheme();
+  const [showAllLocations, setShowAllLocations] = useState(false);
 
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
+
+  const attributes = useMemo(() => {
+    if (showAllLocations) {
+      return allLocations.map((loc, idx) => ({
+        seriesType: 'line' as const,
+        color: euiTheme.colors.vis[VIS_COLORS[idx % VIS_COLORS.length]],
+        time: {
+          from: DEFAULT_DURATION_CHART_FROM,
+          to: DEFAULT_CURRENT_DURATION_CHART_TO,
+        },
+        reportDefinitions: {
+          'monitor.id': [id],
+          'observer.geo.name': [loc.label],
+        },
+        filters: [{ field: 'observer.geo.name', values: [loc.label] }],
+        dataType: 'synthetics' as const,
+        selectedMetricField: 'monitor.duration.us',
+        name: loc.label,
+        operationType: 'average' as const,
+      }));
+    }
+    return [
+      {
+        seriesType: 'area' as const,
+        color: euiTheme.colors.vis.euiColorVis1,
+        time: {
+          from: DEFAULT_DURATION_CHART_FROM,
+          to: DEFAULT_CURRENT_DURATION_CHART_TO,
+        },
+        reportDefinitions: {
+          'monitor.id': [id],
+          'observer.geo.name': [location],
+        },
+        filters: [{ field: 'observer.geo.name', values: [location] }],
+        dataType: 'synthetics' as const,
+        selectedMetricField: 'monitor.duration.us',
+        name: DURATION_SERIES_NAME,
+        operationType: 'average' as const,
+      },
+      {
+        seriesType: 'line' as const,
+        color: euiTheme.colors.vis.euiColorVis7,
+        time: {
+          from: DEFAULT_PREVIOUS_DURATION_CHART_FROM,
+          to: DEFAULT_PREVIOUS_DURATION_CHART_TO,
+        },
+        reportDefinitions: {
+          'monitor.id': [id],
+          'observer.geo.name': [location],
+        },
+        filters: [{ field: 'observer.geo.name', values: [location] }],
+        dataType: 'synthetics' as const,
+        selectedMetricField: 'monitor.duration.us',
+        name: PREVIOUS_PERIOD_SERIES_NAME,
+        operationType: 'average' as const,
+      },
+    ];
+  }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
+
   return (
     <EuiPageSection bottomBorder="extended">
-      <EuiTitle size="xs">
-        <h3>{DURATION_HEADER_TEXT}</h3>
-      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{DURATION_HEADER_TEXT}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {allLocations.length > 1 && (
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={ALL_LOCATIONS_LABEL}
+              checked={showAllLocations}
+              onChange={(e) => setShowAllLocations(e.target.checked)}
+              compressed
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <ExploratoryViewEmbeddable
         customHeight="200px"
         reportType="kpi-over-time"
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
         legendIsVisible={true}
         legendPosition="bottom"
-        attributes={[
-          {
-            seriesType: 'area',
-            color: euiTheme.colors.vis.euiColorVis1,
-            time: {
-              from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
-              to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
-            },
-            reportDefinitions: {
-              'monitor.id': [id],
-              'observer.geo.name': [location],
-            },
-            filters: [
-              {
-                field: 'observer.geo.name',
-                values: [location],
-              },
-            ],
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor.duration.us',
-            name: DURATION_SERIES_NAME,
-            operationType: 'average',
-          },
-          {
-            seriesType: 'line',
-            color: euiTheme.colors.vis.euiColorVis7,
-            time: {
-              from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
-              to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
-            },
-            reportDefinitions: {
-              'monitor.id': [id],
-              'observer.geo.name': [location],
-            },
-            filters: [
-              {
-                field: 'observer.geo.name',
-                values: [location],
-              },
-            ],
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor.duration.us',
-            name: PREVIOUS_PERIOD_SERIES_NAME,
-            operationType: 'average',
-          },
-        ]}
+        attributes={attributes}
       />
     </EuiPageSection>
   );
 }
 
-function DetailedFlyoutHeader({
+function LocationScopeBadges({
   locations,
   currentLocation,
-  configId,
   setCurrentLocation,
-  monitor,
-  onEnabledChange,
 }: {
   locations: LocationsStatus;
   currentLocation: string;
-  configId: string;
-  monitor: EncryptedSyntheticsMonitor;
-  onEnabledChange: () => void;
   setCurrentLocation: (location: string, locationId: string) => void;
 }) {
-  const status = locations.find((l) => l.label === currentLocation)?.status;
-  const { locations: allLocations } = useSelector(selectServiceLocationsState);
-
-  const selectedLocation = allLocations.find((ll) => ll.label === currentLocation);
-
   return (
-    <EuiFlexGroup wrap={true} responsive={false}>
-      <EuiFlexItem grow={false}>
-        <MonitorStatus status={status} monitor={monitor} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <MonitorLocationSelect
-          compressed
-          monitorLocations={monitor.locations}
-          configId={configId}
-          selectedLocation={selectedLocation}
-          onChange={useCallback(
-            (id: any, label: any) => {
-              if (currentLocation !== label) setCurrentLocation(label, id);
-            },
-            [currentLocation, setCurrentLocation]
-          )}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiDescriptionList align="left" compressed>
-          <EuiDescriptionListTitle>{ENABLED_ITEM_TEXT}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            <MonitorEnabled configId={configId} monitor={monitor} reloadPage={onEnabledChange} />
-          </EuiDescriptionListDescription>
-        </EuiDescriptionList>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPageSection bottomBorder="extended" paddingSize="s">
+      <EuiTitle size="xxxs">
+        <h4>{LOCATION_LABEL_TEXT}</h4>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+        {locations.map((loc) => {
+          const isSelected = loc.label === currentLocation;
+          return (
+            <EuiFlexItem grow={false} key={loc.id}>
+              <EuiButton
+                size="s"
+                color={isSelected ? 'primary' : 'text'}
+                fill={isSelected}
+                onClick={() => {
+                  if (!isSelected) setCurrentLocation(loc.label, loc.id);
+                }}
+                data-test-subj={`syntheticsLocationButton-${loc.id}`}
+              >
+                <EuiHealth color={loc.color}>
+                  {loc.label} · {loc.status}
+                </EuiHealth>
+              </EuiButton>
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    </EuiPageSection>
   );
 }
 
@@ -227,20 +244,23 @@ export function LoadingState() {
   );
 }
 
-function DetailFlyoutDowntimeHistory({ monitor }: { monitor: OverviewStatusMetaData }) {
-  const items = useMemo(() => [monitor], [monitor]);
-  const { histogramsById, minInterval } = useMonitorHistogram({ items });
-  const uniqId = `${monitor.configId}-${monitor.locationId}`;
-  const histogramSeries =
-    histogramsById?.[uniqId]?.points ?? histogramsById[monitor.configId]?.points;
-
+function DetailFlyoutStatusHistory({
+  configId,
+  location,
+}: {
+  configId: string;
+  location: string;
+}) {
   return (
     <EuiPageSection bottomBorder="extended">
-      <EuiTitle size="xs">
-        <h3>{DOWNTIME_HISTORY_HEADER_TEXT}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <MonitorBarSeries histogramSeries={histogramSeries} minInterval={minInterval!} />
+      <MonitorStatusPanel
+        from="now-24h"
+        to="now"
+        brushable={false}
+        periodCaption={LAST_24H_TEXT}
+        monitorId={configId}
+        locationLabel={location}
+      />
     </EuiPageSection>
   );
 }
@@ -271,6 +291,8 @@ export function MonitorDetailFlyout(props: Props) {
     spaces,
   });
 
+  const editLink = useEditMonitorLocator({ configId, spaces });
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -300,10 +322,17 @@ export function MonitorDetailFlyout(props: Props) {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const monitorDetail = useMonitorDetail(configId, props.location);
-  const { locations } = useStatusByLocation({
-    configId,
-    monitorLocations: monitorObject?.locations,
-  });
+  const getColor = useMonitorHealthColor();
+  const locations: LocationsStatus = useMemo(
+    () =>
+      (monitor?.locations ?? []).map((loc) => ({
+        id: loc.id,
+        label: loc.label,
+        status: loc.status,
+        color: getColor(loc.status),
+      })),
+    [monitor?.locations, getColor]
+  );
 
   useMonitorAttachmentConfigWithMonitor(
     monitorObject
@@ -321,16 +350,18 @@ export function MonitorDetailFlyout(props: Props) {
 
   return (
     <EuiFlyout
-      size="600px"
+      size="m"
+      maxWidth={1000}
       type={isOverlay ? 'overlay' : 'push'}
       onClose={props.onClose}
       paddingSize="none"
+      resizable
     >
       {error && !isLoading && <ErrorCallout {...error} />}
       <EuiFlyoutHeader hasBorder>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-          <EuiFlexGroup responsive={false} gutterSize="s">
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+            <EuiFlexItem grow>
               <EuiTitle size="s">
                 <h2>{displayName}</h2>
               </EuiTitle>
@@ -350,28 +381,23 @@ export function MonitorDetailFlyout(props: Props) {
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          {monitorObject ? (
-            <DetailedFlyoutHeader
-              currentLocation={props.location}
-              locations={locations}
-              setCurrentLocation={setLocation}
-              configId={configId}
-              monitor={monitorObject}
-              onEnabledChange={props.onEnabledChange}
-            />
-          ) : (
-            <EuiLoadingSpinner size="m" />
-          )}
         </EuiPanel>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <DetailFlyoutDurationChart {...props} location={props.location} />
-        {monitor && <DetailFlyoutDowntimeHistory monitor={monitor} />}
+        <LocationScopeBadges
+          locations={locations}
+          currentLocation={props.location}
+          setCurrentLocation={setLocation}
+        />
+        <DetailFlyoutDurationChart
+          id={id}
+          location={props.location}
+          allLocations={monitor?.locations ?? []}
+        />
+        <DetailFlyoutStatusHistory configId={configId} location={props.location} />
         {monitorObject ? (
           <MonitorDetailsPanel
             hasBorder={false}
-            hideEnabled
             latestPing={monitorDetail.data}
             configId={configId}
             monitor={{
@@ -393,23 +419,37 @@ export function MonitorDetailFlyout(props: Props) {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                data-test-subj="syntheticsMonitorDetailFlyoutCloseButton"
                 onClick={props.onClose}
               >
                 {CLOSE_FLYOUT_TEXT}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="syntheticsMonitorDetailFlyoutButton"
-                isDisabled={!detailLink}
-                href={detailLink}
-                iconType="sortRight"
-                iconSide="right"
-                fill
-              >
-                {GO_TO_MONITOR_LINK_TEXT}
-              </EuiButton>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="syntheticsMonitorDetailFlyoutEditButton"
+                    isDisabled={!editLink}
+                    href={editLink}
+                    iconType="pencil"
+                  >
+                    {EDIT_MONITOR_LINK_TEXT}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                    isDisabled={!detailLink}
+                    href={detailLink}
+                    iconType="sortRight"
+                    iconSide="right"
+                    fill
+                  >
+                    {GO_TO_MONITOR_LINK_TEXT}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -447,6 +487,10 @@ export const MaybeMonitorDetailsFlyout = ({
   ) : null;
 };
 
+const ALL_LOCATIONS_LABEL = i18n.translate('xpack.synthetics.flyout.allLocationsLabel', {
+  defaultMessage: 'All locations',
+});
+
 const DURATION_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.durationHeaderText', {
   defaultMessage: 'Duration',
 });
@@ -465,19 +509,20 @@ const PREVIOUS_PERIOD_SERIES_NAME = i18n.translate(
   }
 );
 
-const ENABLED_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.enabledItemText', {
-  defaultMessage: 'Enabled (all locations)',
+const LAST_24H_TEXT = i18n.translate('xpack.synthetics.flyout.last24hCaption', {
+  defaultMessage: 'Last 24 hours',
 });
-
-const DOWNTIME_HISTORY_HEADER_TEXT = i18n.translate(
-  'xpack.synthetics.monitorList.downtimeHistoryHeaderText',
-  {
-    defaultMessage: 'Downtime history',
-  }
-);
 
 const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyoutText', {
   defaultMessage: 'Close',
+});
+
+const LOCATION_LABEL_TEXT = i18n.translate('xpack.synthetics.flyout.locationLabel', {
+  defaultMessage: 'Location',
+});
+
+const EDIT_MONITOR_LINK_TEXT = i18n.translate('xpack.synthetics.monitorList.editMonitorLinkText', {
+  defaultMessage: 'Edit monitor',
 });
 
 const GO_TO_MONITOR_LINK_TEXT = i18n.translate('xpack.synthetics.monitorList.goToMonitorLinkText', {
