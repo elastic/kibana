@@ -101,16 +101,9 @@ export const useMonitorsTableColumns = ({
         name: NAME,
         width: '15%',
         render: (name: OverviewStatusMetaData['name'], monitor) => (
-          <EuiFlexGroup
-            direction="column"
-            alignItems="flexStart"
-            gutterSize="s"
-            className="clickCellContent"
-          >
+          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
             <EuiFlexItem>
-              <EuiText size="s" onClick={() => openFlyout(monitor)}>
-                {name}
-              </EuiText>
+              <EuiText size="s">{name}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <MonitorTypeBadge

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { EuiTableRowProps } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { useOverviewStatus } from '../../../../hooks/use_overview_status';
@@ -50,39 +50,50 @@ export const MonitorsTable = ({
       const locationId = monitor.locations[0]?.id ?? '';
       const locationLabel = monitor.locations[0]?.label ?? '';
       return {
+        style: { cursor: 'pointer' },
         onClick: (e) => {
-          // This is a workaround to prevent the flyout from opening when clicking on the action buttons
-          if (
-            Array.from((e.target as HTMLElement).classList).some(
-              (className) =>
-                className.includes('euiTableCellContent') || className.includes('clickCellContent')
-            )
-          ) {
-            dispatch(
-              setFlyoutConfigCallback({
-                configId,
-                id: configId,
-                location: locationLabel,
-                locationId,
-                spaces,
-              })
-            );
+          const target = e.target as HTMLElement;
+          // Skip flyout when clicking interactive elements that have their own behavior
+          if (target.closest('a, button, [role="button"]')) {
+            return;
           }
+          dispatch(
+            setFlyoutConfigCallback({
+              configId,
+              id: configId,
+              location: locationLabel,
+              locationId,
+              spaces,
+            })
+          );
         },
       };
     },
     [dispatch, setFlyoutConfigCallback]
   );
 
+  const isLoading = !status || !loaded || loading;
+
   return (
     <EuiBasicTable
       compressed
       items={pageOfItems}
       columns={columns}
-      loading={!status || !loaded || loading}
+      loading={isLoading}
       pagination={pagination}
       onChange={onTableChange}
       rowProps={getRowProps}
+      noItemsMessage={
+        isLoading ? (
+          <EuiLoadingSpinner size="xl" />
+        ) : (
+          <EuiText size="s">
+            {i18n.translate('xpack.synthetics.monitorsTable.noItemsMessage', {
+              defaultMessage: 'No monitors found',
+            })}
+          </EuiText>
+        )
+      }
       data-test-subj="syntheticsCompactViewTable"
       tableLayout="fixed"
       tableCaption={i18n.translate('xpack.synthetics.monitorsTable.tableCaption', {
