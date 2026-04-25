@@ -1,5 +1,5 @@
 {
-  "sha1": "1e122cbdb9ce37c5da8770b00945ec8b00ee60db",
+  "sha1": "77e40558333559e9a83368a7cb551c0cf9c2f393",
   "tests": [
     {
       "id": "8f6baf4aef167da-b456d708d2cf55e",
@@ -12,6 +12,90 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_from_spec.spec.ts",
         "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "e0bf6344b976f93-5b78379599b5df5",
+      "title": "Jira connector shows the created connector in the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
+        "line": 94,
+        "column": 7
+      }
+    },
+    {
+      "id": "e0bf6344b976f93-7d0878a2d799068",
+      "title": "Jira connector does not throw a type error for other fields when its valid json",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "e0bf6344b976f93-009f73e4800ec2a",
+      "title": "Jira connector disables the execute button when other fields is not valid json",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
+        "line": 125,
+        "column": 7
+      }
+    },
+    {
+      "id": "26a2ff6ed40159a-9064144ce2e83f0",
+      "title": "Webhook connector creates a connector with config and secret headers via the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
+        "line": 63,
+        "column": 7
+      }
+    },
+    {
+      "id": "26a2ff6ed40159a-07c5fed478fa7ad",
+      "title": "Webhook connector renders CR and PFX tabs for SSL auth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
+        "line": 120,
+        "column": 7
+      }
+    },
+    {
+      "id": "26a2ff6ed40159a-29643d8a9af7ad4",
+      "title": "Webhook connector displays headers as expected when the connector was created via API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
+        "line": 132,
         "column": 7
       }
     },
