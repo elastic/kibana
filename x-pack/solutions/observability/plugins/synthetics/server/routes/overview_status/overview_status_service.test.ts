@@ -478,6 +478,246 @@ describe('current status route', () => {
     });
   });
 
+  describe('processOverviewStatus grouping logic', () => {
+    const usLoc = { id: 'us_east', label: 'US East' };
+    const euLoc = { id: 'eu_west', label: 'EU West' };
+    const apLoc = { id: 'ap_south', label: 'AP South' };
+
+    const makeMonitor = (id: string, locations: any[], enabled = true) => ({
+      attributes: {
+        config_id: id,
+        id,
+        type: 'http',
+        enabled,
+        name: `monitor-${id}`,
+        project_id: 'test-project',
+        tags: [],
+        schedule: { number: '3', unit: 'm' },
+        locations,
+      },
+    });
+
+    const makeStatusData = (entries: Array<{ monitorId: string; locationId: string; status: string; timestamp?: string }>) => {
+      const map = new Map<string, Array<{ status: string; locationId: string; timestamp: string; monitorUrl?: string }>>();
+      for (const entry of entries) {
+        if (!map.has(entry.monitorId)) {
+          map.set(entry.monitorId, []);
+        }
+        map.get(entry.monitorId)!.push({
+          status: entry.status,
+          locationId: entry.locationId,
+          timestamp: entry.timestamp ?? '2025-05-28T10:00:00.000Z',
+        });
+      }
+      return map;
+    };
+
+    it('groups multiple locations under a single configId entry', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: usLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+            },
+            {
+              key: { monitorId: 'mon1', locationId: euLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:01:00.000Z'] }] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = { request: { query: {} }, syntheticsEsClient };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.upConfigs.mon1).toBeDefined();
+      expect(result.upConfigs.mon1.locations).toHaveLength(2);
+      expect(result.upConfigs.mon1.locations[0].id).toBe(usLoc.id);
+      expect(result.upConfigs.mon1.locations[1].id).toBe(euLoc.id);
+      expect(result.upConfigs.mon1.overallStatus).toBe('up');
+    });
+
+    it('sets overallStatus to down when any location is down', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: usLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+            },
+            {
+              key: { monitorId: 'mon1', locationId: euLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:01:00.000Z'] }] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = { request: { query: {} }, syntheticsEsClient };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+
+      const result = await service.getOverviewStatus();
+
+      const mon = result.upConfigs.mon1 || result.downConfigs.mon1;
+      expect(mon).toBeDefined();
+      expect(mon.overallStatus).toBe('down');
+      expect(mon.locations).toHaveLength(2);
+      expect(mon.locations.find((l: any) => l.id === usLoc.id)?.status).toBe('up');
+      expect(mon.locations.find((l: any) => l.id === euLoc.id)?.status).toBe('down');
+    });
+
+    it('moves pending config with a down location to downConfigs', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: usLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = { request: { query: {} }, syntheticsEsClient };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([
+        makeMonitor('mon1', [usLoc, euLoc, apLoc]),
+      ]);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.downConfigs.mon1).toBeDefined();
+      expect(result.pendingConfigs.mon1).toBeUndefined();
+      expect(result.downConfigs.mon1.locations).toHaveLength(3);
+      const pendingLocs = result.downConfigs.mon1.locations.filter((l: any) => l.status === 'pending');
+      const downLocs = result.downConfigs.mon1.locations.filter((l: any) => l.status === 'down');
+      expect(downLocs).toHaveLength(1);
+      expect(pendingLocs).toHaveLength(2);
+      // pending locations should be sorted to end
+      expect(result.downConfigs.mon1.locations[0].status).toBe('down');
+    });
+
+    it('moves pending config with an up location to upConfigs', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: usLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = { request: { query: {} }, syntheticsEsClient };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([
+        makeMonitor('mon1', [usLoc, euLoc]),
+      ]);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.upConfigs.mon1).toBeDefined();
+      expect(result.pendingConfigs.mon1).toBeUndefined();
+      expect(result.upConfigs.mon1.overallStatus).toBe('up');
+      expect(result.upConfigs.mon1.locations).toHaveLength(2);
+      // pending locations sorted to end
+      expect(result.upConfigs.mon1.locations[0].status).toBe('up');
+      expect(result.upConfigs.mon1.locations[1].status).toBe('pending');
+    });
+
+    it('groups disabled monitor locations under a single configId', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = { request: { query: {} }, syntheticsEsClient };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([
+        makeMonitor('mon1', [usLoc, euLoc, apLoc], false),
+      ]);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.disabledConfigs.mon1).toBeDefined();
+      expect(result.disabledConfigs.mon1.locations).toHaveLength(3);
+      expect(result.disabledConfigs.mon1.overallStatus).toBe('disabled');
+      result.disabledConfigs.mon1.locations.forEach((loc: any) => {
+        expect(loc.status).toBe('disabled');
+      });
+    });
+
+    it('uses latest timestamp across locations', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: usLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T09:00:00.000Z'] }] },
+            },
+            {
+              key: { monitorId: 'mon1', locationId: euLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T11:00:00.000Z'] }] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = { request: { query: {} }, syntheticsEsClient };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.upConfigs.mon1.timestamp).toBe('2025-05-28T11:00:00.000Z');
+    });
+
+    it('handles three locations: up, down, pending correctly', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: usLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+            },
+            {
+              key: { monitorId: 'mon1', locationId: euLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:01:00.000Z'] }] },
+            },
+            // apLoc has no status data -> pending
+          ],
+        })
+      );
+
+      const routeContext: any = { request: { query: {} }, syntheticsEsClient };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([
+        makeMonitor('mon1', [usLoc, euLoc, apLoc]),
+      ]);
+
+      const result = await service.getOverviewStatus();
+
+      // down takes precedence since it was promoted from pending -> down
+      const mon = result.downConfigs.mon1 || result.upConfigs.mon1;
+      expect(mon).toBeDefined();
+      expect(mon.overallStatus).toBe('down');
+      expect(mon.locations).toHaveLength(3);
+      expect(mon.locations.find((l: any) => l.id === usLoc.id)?.status).toBe('up');
+      expect(mon.locations.find((l: any) => l.id === euLoc.id)?.status).toBe('down');
+      expect(mon.locations.find((l: any) => l.id === apLoc.id)?.status).toBe('pending');
+    });
+  });
+
   describe('getStatus', () => {
     jest.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
       publicLocations: allLocations,
