@@ -1,7 +1,7 @@
 ---
 name: Claude Reviewer
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
