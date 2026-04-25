@@ -46,6 +46,11 @@ export const MonitorLocations = ({ locations, monitorId, overviewStatus, spaces 
   });
 
   return (
-    <LocationStatusBadges configId={monitorId} locations={locationsToDisplay} loading={false} spaces={spaces} />
+    <LocationStatusBadges
+      configId={monitorId}
+      locations={locationsToDisplay}
+      loading={false}
+      spaces={spaces}
+    />
   );
 };
