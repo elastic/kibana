@@ -51,6 +51,10 @@ network:
     - elastic.litellm-prod.ai
 jobs:
   prefetch_pr_context:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
     uses: ./.github/workflows/prefetch-pr-context.yml
     with:
       pr_number: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
