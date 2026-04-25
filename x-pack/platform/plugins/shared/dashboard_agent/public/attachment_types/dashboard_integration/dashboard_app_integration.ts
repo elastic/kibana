@@ -85,7 +85,7 @@ export const registerDashboardAppIntegration = ({
       const { id: conversationId, conversation } = change;
       const dashboardAttachments = conversation?.attachments
         ?.filter(isDashboardAttachment)
-        .flatMap((attachment): DashboardAttachment[] => {
+        ?.flatMap((attachment): DashboardAttachment[] => {
           const latestVersionData = getLatestVersion(attachment)?.data;
 
           return latestVersionData
