@@ -7013,7 +7013,7 @@
           "{ readonly Installed: \"installed\"; readonly Installing: \"installing\"; readonly InstallFailed: \"install_failed\"; readonly NotInstalled: \"not_installed\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "lineNumber": 113,
+        "lineNumber": 114,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37338,7 +37338,7 @@
           "\"cloud_defend\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37355,7 +37355,7 @@
           "\"cloud_asset_inventory\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37372,7 +37372,7 @@
           "\"asset_inventory\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37389,7 +37389,7 @@
           "\"vuln_mgmt\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37406,7 +37406,7 @@
           "\"cspm\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37423,7 +37423,7 @@
           "\"kspm\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37440,7 +37440,7 @@
           "\"cloud_security_posture\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -41450,7 +41450,7 @@
         "label": "DASHBOARD_LOCATORS_IDS",
         "description": [],
         "signature": [
-          "{ readonly ELASTIC_AGENT_OVERVIEW: \"elastic_agent-a148dc70-6b3c-11ed-98de-67bdecd21824\"; readonly ELASTIC_AGENT_AGENT_INFO: \"elastic_agent-0600ffa0-6b5e-11ed-98de-67bdecd21824\"; readonly ELASTIC_AGENT_AGENT_METRICS: \"elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395\"; readonly ELASTIC_AGENT_INTEGRATIONS: \"elastic_agent-1a4e7280-6b5e-11ed-98de-67bdecd21824\"; readonly OTEL_INTERNAL_TELEMETRY: \"otel_internal_telemetry-9d120e25-539a-41b0-8b27-47a937342f3d\"; }"
+          "{ readonly ELASTIC_AGENT_OVERVIEW: \"elastic_agent-a148dc70-6b3c-11ed-98de-67bdecd21824\"; readonly ELASTIC_AGENT_AGENT_INFO: \"elastic_agent-0600ffa0-6b5e-11ed-98de-67bdecd21824\"; readonly ELASTIC_AGENT_AGENT_METRICS: \"elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395\"; readonly ELASTIC_AGENT_INTEGRATIONS: \"elastic_agent-1a4e7280-6b5e-11ed-98de-67bdecd21824\"; readonly OTEL_COLLECTOR_INTERNAL_TELEMETRY: \"otel_collector_internal_telemetry-4c979b50-19eb-411c-8cfd-6ffe37fb0092\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/locators.ts",
         "lineNumber": 15,
