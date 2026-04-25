@@ -22,16 +22,7 @@ import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
 import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
-import {
-  STATUS,
-  ACTIONS,
-  LOCATIONS,
-  NAME,
-  TAGS,
-  URL,
-  NO_URL,
-  MONITOR_HISTORY,
-} from '../labels';
+import { STATUS, ACTIONS, LOCATIONS, NAME, TAGS, URL, NO_URL, MONITOR_HISTORY } from '../labels';
 import { useKibanaSpace } from '../../../../../../../../hooks/use_kibana_space';
 import type { ClientPluginsStart } from '../../../../../../../../plugin';
 
