@@ -33,6 +33,12 @@ export class ExternalInferencePage {
   readonly groupByButton: Locator;
 
   readonly inferenceFlyout: Locator;
+  readonly inferenceFlyoutCloseButton: Locator;
+
+  readonly deleteConfirmModal: Locator;
+  readonly deleteConfirmModalEndpointName: Locator;
+  readonly deleteConfirmModalCancelButton: Locator;
+  readonly toastList: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.pageHeader = this.page.testSubj.locator('externalInferenceHeader');
@@ -62,6 +68,16 @@ export class ExternalInferencePage {
     this.groupByButton = this.page.testSubj.locator('group-by-button');
 
     this.inferenceFlyout = this.page.testSubj.locator('inference-flyout');
+    this.inferenceFlyoutCloseButton = this.page.testSubj.locator('inference-flyout-close-button');
+
+    this.deleteConfirmModal = this.page.testSubj.locator('deleteModalForInferenceUI');
+    this.deleteConfirmModalEndpointName = this.page.testSubj.locator(
+      'deleteModalInferenceEndpointName'
+    );
+    this.deleteConfirmModalCancelButton = this.deleteConfirmModal.locator(
+      '[data-test-subj="confirmModalCancelButton"]'
+    );
+    this.toastList = this.page.testSubj.locator('globalToastList');
   }
 
   public async goto() {
@@ -90,6 +106,10 @@ export class ExternalInferencePage {
 
   public get viewEndpointAction(): Locator {
     return this.page.testSubj.locator('inference-endpoints-action-view-endpoint-label');
+  }
+
+  public get copyEndpointIdAction(): Locator {
+    return this.page.testSubj.locator('inference-endpoints-action-copy-id-label');
   }
 
   public get deleteActionUserDefined(): Locator {

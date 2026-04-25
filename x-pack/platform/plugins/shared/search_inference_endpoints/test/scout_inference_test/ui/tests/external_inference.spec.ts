@@ -46,7 +46,7 @@ test.describe(
       await expect(externalInference.emptyPromptDocumentationLink).toBeVisible();
     });
 
-    test('empty state opens the add inference flyout from the empty prompt', async ({
+    test('empty state opens and closes the add inference flyout from the empty prompt', async ({
       page,
       pageObjects,
     }) => {
@@ -56,8 +56,15 @@ test.describe(
       await mockInferenceEndpoints(page, []);
       await externalInference.gotoEmptyState();
 
-      await externalInference.emptyPromptAddButton.click();
-      await expect(externalInference.inferenceFlyout).toBeVisible();
+      await test.step('clicking add endpoint opens the flyout', async () => {
+        await externalInference.emptyPromptAddButton.click();
+        await expect(externalInference.inferenceFlyout).toBeVisible();
+      });
+
+      await test.step('clicking close hides the flyout', async () => {
+        await externalInference.inferenceFlyoutCloseButton.click();
+        await expect(externalInference.inferenceFlyout).toBeHidden();
+      });
     });
 
     test('renders the header with api documentation and add endpoint button', async ({
@@ -72,12 +79,20 @@ test.describe(
       await expect(externalInference.addEndpointHeaderButton).toBeVisible();
     });
 
-    test('opens the add inference flyout from the header', async ({ pageObjects }) => {
+    test('opens and closes the add inference flyout from the header', async ({ pageObjects }) => {
       const { externalInference } = pageObjects;
 
       await externalInference.goto();
-      await externalInference.addEndpointHeaderButton.click();
-      await expect(externalInference.inferenceFlyout).toBeVisible();
+
+      await test.step('clicking add endpoint opens the flyout', async () => {
+        await externalInference.addEndpointHeaderButton.click();
+        await expect(externalInference.inferenceFlyout).toBeVisible();
+      });
+
+      await test.step('clicking close hides the flyout', async () => {
+        await externalInference.inferenceFlyoutCloseButton.click();
+        await expect(externalInference.inferenceFlyout).toBeHidden();
+      });
     });
 
     test('renders the tabular view with every external endpoint', async ({ pageObjects }) => {
@@ -179,7 +194,7 @@ test.describe(
       await expect(externalInference.inferenceFlyout).toBeVisible();
     });
 
-    test('delete action is enabled for user-defined external endpoints', async ({
+    test('opens and cancels the delete confirm modal for a user-defined endpoint', async ({
       pageObjects,
     }) => {
       const { externalInference } = pageObjects;
@@ -188,8 +203,39 @@ test.describe(
       await externalInference.selectGroupBy('none');
       await expect(externalInference.endpointsTable).toBeVisible();
 
+      await test.step('the delete row action is enabled and clickable', async () => {
+        await externalInference.openRowActionsFor('openai-chat-completion-01');
+        await expect(externalInference.deleteActionUserDefined).toBeEnabled();
+        await externalInference.deleteActionUserDefined.click();
+      });
+
+      await test.step('the confirm modal shows the right endpoint id', async () => {
+        await expect(externalInference.deleteConfirmModal).toBeVisible();
+        await expect(externalInference.deleteConfirmModalEndpointName).toContainText(
+          'openai-chat-completion-01'
+        );
+      });
+
+      await test.step('cancel hides the modal and returns to the table', async () => {
+        await externalInference.deleteConfirmModalCancelButton.click();
+        await expect(externalInference.deleteConfirmModal).toBeHidden();
+        await expect(externalInference.endpointsTable).toBeVisible();
+      });
+    });
+
+    test('copy endpoint id action shows a confirmation toast', async ({ context, pageObjects }) => {
+      const { externalInference } = pageObjects;
+
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+
+      await externalInference.goto();
+      await externalInference.selectGroupBy('none');
+      await expect(externalInference.endpointsTable).toBeVisible();
+
       await externalInference.openRowActionsFor('openai-chat-completion-01');
-      await expect(externalInference.deleteActionUserDefined).toBeEnabled();
+      await externalInference.copyEndpointIdAction.click();
+
+      await expect(externalInference.toastList).toContainText('openai-chat-completion-01');
     });
   }
 );
