@@ -4544,131 +4544,6 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.GeneratedSignificantEventQuery",
-        "type": "Interface",
-        "tags": [],
-        "label": "GeneratedSignificantEventQuery",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 78,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.GeneratedSignificantEventQuery.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"match\" | \"stats\""
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 79,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.GeneratedSignificantEventQuery.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 80,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.GeneratedSignificantEventQuery.esql",
-            "type": "Object",
-            "tags": [],
-            "label": "esql",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/streams-schema",
-                "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.EsqlQuery",
-                "text": "EsqlQuery"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 81,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.GeneratedSignificantEventQuery.severity_score",
-            "type": "number",
-            "tags": [],
-            "label": "severity_score",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 82,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.GeneratedSignificantEventQuery.evidence",
-            "type": "Array",
-            "tags": [],
-            "label": "evidence",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 83,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.GeneratedSignificantEventQuery.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 84,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.GeneratedSignificantEventQuery.replaces",
-            "type": "string",
-            "tags": [],
-            "label": "replaces",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 85,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.GenerateInsightsResult",
         "type": "Interface",
         "tags": [],
@@ -6465,7 +6340,7 @@
         "label": "SignificantEventsGetResponse",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6488,7 +6363,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6504,7 +6379,7 @@
               "SignificantEventOccurrence[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6520,7 +6395,7 @@
         "label": "SignificantEventsQueriesGenerationResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 95,
+        "lineNumber": 98,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6533,17 +6408,18 @@
             "label": "queries",
             "description": [],
             "signature": [
+              "{ type: any; title: string; esql: ",
               {
                 "pluginId": "@kbn/streams-schema",
                 "scope": "common",
                 "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.GeneratedSignificantEventQuery",
-                "text": "GeneratedSignificantEventQuery"
+                "section": "def-common.EsqlQuery",
+                "text": "EsqlQuery"
               },
-              "[]"
+              "; severity_score: number; description: string; evidence?: string[] | undefined; replaces?: string | undefined; }[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 96,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6559,7 +6435,7 @@
               "{ completion: number; prompt: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-            "lineNumber": 97,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7499,6 +7375,31 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.GeneratedSignificantEventQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "GeneratedSignificantEventQuery",
+        "description": [],
+        "signature": [
+          "{ type: any; title: string; esql: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.EsqlQuery",
+            "text": "EsqlQuery"
+          },
+          "; severity_score: number; description: string; evidence?: string[] | undefined; replaces?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.IdentifiedFeature",
         "type": "Type",
         "tags": [],
@@ -8401,15 +8302,15 @@
         "description": [],
         "signature": [
           "Observable",
-          "<{ queries: ",
+          "<{ queries: { type: any; title: string; esql: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.GeneratedSignificantEventQuery",
-            "text": "GeneratedSignificantEventQuery"
+            "section": "def-common.EsqlQuery",
+            "text": "EsqlQuery"
           },
-          "[]; tokensUsed: ",
+          "; severity_score: number; description: string; evidence?: string[] | undefined; replaces?: string | undefined; }[]; tokensUsed: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -8420,7 +8321,7 @@
           "; } & { type: \"generated_queries\"; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 88,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8445,7 +8346,7 @@
           ", \"esql\" | \"occurrences\" | \"change_points\"> & { firing_count?: number | undefined; truncated?: boolean | undefined; multi_group?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 52,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8534,7 +8435,7 @@
           ")"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 100,
+        "lineNumber": 103,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8558,7 +8459,7 @@
           " & { stream_name: string; occurrences: SignificantEventOccurrence[]; change_points: { type: Partial<Record<ChangePointsType, Partial<{ p_value: number; r_value: number; change_point: number; trend: string; }>>>; }; rule_backed: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "lineNumber": 38,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10306,6 +10207,62 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/record_types.ts",
         "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.generatedSignificantEventQuerySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "generatedSignificantEventQuerySchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ type: any; title: ",
+          "ZodString",
+          "; esql: ",
+          "ZodType",
+          "<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.EsqlQuery",
+            "text": "EsqlQuery"
+          },
+          ", unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.EsqlQuery",
+            "text": "EsqlQuery"
+          },
+          ", unknown>>; severity_score: ",
+          "ZodNumber",
+          "; description: ",
+          "ZodString",
+          "; evidence: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">>; replaces: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+        "lineNumber": 79,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
