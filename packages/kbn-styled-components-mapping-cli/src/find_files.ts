@@ -30,7 +30,7 @@ const walkDirectory = async (dirPath: string): Promise<Meta> => {
   let usesOnlyStyledComponents = true;
 
   for (const file of await fs.readdir(dirPath, { withFileTypes: true })) {
-    const fullPath = path.join(file.path, file.name);
+    const fullPath = path.join(dirPath, file.name);
 
     if (file.isDirectory()) {
       const meta = await walkDirectory(fullPath);
