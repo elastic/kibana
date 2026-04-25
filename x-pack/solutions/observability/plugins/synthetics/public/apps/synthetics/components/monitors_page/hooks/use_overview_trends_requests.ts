@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
 import type { TrendRequest } from '../../../../../../common/types';
@@ -14,11 +14,14 @@ import { selectOverviewTrends, trendStatsBatch } from '../../../state';
 export const useOverviewTrendsRequests = (monitorsToFetchTrendsFor: OverviewStatusMetaData[]) => {
   const dispatch = useDispatch();
   const trendData = useSelector(selectOverviewTrends);
+  const trendDataRef = useRef(trendData);
+  trendDataRef.current = trendData;
 
   useEffect(() => {
+    const currentTrends = trendDataRef.current;
     const trendRequests = monitorsToFetchTrendsFor.reduce((acc, item) => {
       const locationId = item.locations[0]?.id ?? '';
-      if (trendData[item.configId + locationId] === undefined) {
+      if (currentTrends[item.configId + locationId] === undefined) {
         acc.push({
           configId: item.configId,
           locationIds: item.locations.map((loc) => loc.id),
@@ -28,5 +31,5 @@ export const useOverviewTrendsRequests = (monitorsToFetchTrendsFor: OverviewStat
       return acc;
     }, [] as TrendRequest[]);
     if (trendRequests.length) dispatch(trendStatsBatch.get(trendRequests));
-  }, [dispatch, monitorsToFetchTrendsFor, trendData]);
+  }, [dispatch, monitorsToFetchTrendsFor]);
 };
