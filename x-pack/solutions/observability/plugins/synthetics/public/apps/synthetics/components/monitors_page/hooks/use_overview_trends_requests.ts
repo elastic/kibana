@@ -20,11 +20,16 @@ export const useOverviewTrendsRequests = (monitorsToFetchTrendsFor: OverviewStat
   useEffect(() => {
     const currentTrends = trendDataRef.current;
     const trendRequests = monitorsToFetchTrendsFor.reduce((acc, item) => {
-      const locationId = item.locations[0]?.id ?? '';
-      if (currentTrends[item.configId + locationId] === undefined) {
+      // Trend stats are cached per `${configId}${locationId}`, but a single
+      // request fetches all locations for a config. Re-fetch when any location
+      // is missing from the cache so multi-location monitors aren't skipped.
+      const missingLocationIds = item.locations
+        .filter((loc) => currentTrends[item.configId + loc.id] === undefined)
+        .map((loc) => loc.id);
+      if (missingLocationIds.length) {
         acc.push({
           configId: item.configId,
-          locationIds: item.locations.map((loc) => loc.id),
+          locationIds: missingLocationIds,
           schedule: item.schedule,
         });
       }

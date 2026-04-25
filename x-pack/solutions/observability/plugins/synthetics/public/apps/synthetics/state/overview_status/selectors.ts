@@ -18,13 +18,23 @@ export const getStatusByConfig = (
   if (!status) {
     return MONITOR_STATUS_ENUM.PENDING;
   }
-  const configStatus = status.downConfigs[configId] || status.upConfigs[configId];
+  // Look up the config across all status buckets so disabled and pending
+  // monitors are not misreported as PENDING / UP / DOWN by accident.
+  const configStatus =
+    status.downConfigs[configId] ||
+    status.upConfigs[configId] ||
+    status.pendingConfigs[configId] ||
+    status.disabledConfigs[configId];
   if (configStatus) {
     const config = configStatus?.locations.find((loc) => loc.id === locId);
     return config?.status ?? MONITOR_STATUS_ENUM.PENDING;
   } else {
     const configByIdLoc = configId + '-' + locId;
-    const configS = status.downConfigs[configByIdLoc] || status.upConfigs[configByIdLoc];
+    const configS =
+      status.downConfigs[configByIdLoc] ||
+      status.upConfigs[configByIdLoc] ||
+      status.pendingConfigs[configByIdLoc] ||
+      status.disabledConfigs[configByIdLoc];
     const config = configS?.locations.find((loc) => loc.id === locId);
     return config?.status ?? MONITOR_STATUS_ENUM.PENDING;
   }

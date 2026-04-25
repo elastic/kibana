@@ -180,7 +180,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": "undefined",
+              "urls": undefined,
             },
             "id2": Object {
               "configId": "id2",
@@ -212,7 +212,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": "undefined",
+              "urls": undefined,
             },
           },
         }
@@ -337,7 +337,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": "undefined",
+              "urls": undefined,
             },
             "id2": Object {
               "configId": "id2",
@@ -369,7 +369,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": "undefined",
+              "urls": undefined,
             },
           },
         }
@@ -497,8 +497,13 @@ describe('current status route', () => {
       },
     });
 
-    const makeStatusData = (entries: Array<{ monitorId: string; locationId: string; status: string; timestamp?: string }>) => {
-      const map = new Map<string, Array<{ status: string; locationId: string; timestamp: string; monitorUrl?: string }>>();
+    const makeStatusData = (
+      entries: Array<{ monitorId: string; locationId: string; status: string; timestamp?: string }>
+    ) => {
+      const map = new Map<
+        string,
+        Array<{ status: string; locationId: string; timestamp: string; monitorUrl?: string }>
+      >();
       for (const entry of entries) {
         if (!map.has(entry.monitorId)) {
           map.set(entry.monitorId, []);
@@ -519,11 +524,15 @@ describe('current status route', () => {
           buckets: [
             {
               key: { monitorId: 'mon1', locationId: usLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }],
+              },
             },
             {
               key: { monitorId: 'mon1', locationId: euLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:01:00.000Z'] }] },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:01:00.000Z'] }],
+              },
             },
           ],
         })
@@ -531,7 +540,9 @@ describe('current status route', () => {
 
       const routeContext: any = { request: { query: {} }, syntheticsEsClient };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+      service.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
       const result = await service.getOverviewStatus();
 
@@ -549,11 +560,17 @@ describe('current status route', () => {
           buckets: [
             {
               key: { monitorId: 'mon1', locationId: usLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }],
+              },
             },
             {
               key: { monitorId: 'mon1', locationId: euLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:01:00.000Z'] }] },
+              status: {
+                top: [
+                  { metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:01:00.000Z'] },
+                ],
+              },
             },
           ],
         })
@@ -561,7 +578,9 @@ describe('current status route', () => {
 
       const routeContext: any = { request: { query: {} }, syntheticsEsClient };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+      service.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
       const result = await service.getOverviewStatus();
 
@@ -580,7 +599,11 @@ describe('current status route', () => {
           buckets: [
             {
               key: { monitorId: 'mon1', locationId: usLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+              status: {
+                top: [
+                  { metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:00:00.000Z'] },
+                ],
+              },
             },
           ],
         })
@@ -588,16 +611,18 @@ describe('current status route', () => {
 
       const routeContext: any = { request: { query: {} }, syntheticsEsClient };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([
-        makeMonitor('mon1', [usLoc, euLoc, apLoc]),
-      ]);
+      service.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc, apLoc])]);
 
       const result = await service.getOverviewStatus();
 
       expect(result.downConfigs.mon1).toBeDefined();
       expect(result.pendingConfigs.mon1).toBeUndefined();
       expect(result.downConfigs.mon1.locations).toHaveLength(3);
-      const pendingLocs = result.downConfigs.mon1.locations.filter((l: any) => l.status === 'pending');
+      const pendingLocs = result.downConfigs.mon1.locations.filter(
+        (l: any) => l.status === 'pending'
+      );
       const downLocs = result.downConfigs.mon1.locations.filter((l: any) => l.status === 'down');
       expect(downLocs).toHaveLength(1);
       expect(pendingLocs).toHaveLength(2);
@@ -612,7 +637,9 @@ describe('current status route', () => {
           buckets: [
             {
               key: { monitorId: 'mon1', locationId: usLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }],
+              },
             },
           ],
         })
@@ -620,9 +647,9 @@ describe('current status route', () => {
 
       const routeContext: any = { request: { query: {} }, syntheticsEsClient };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([
-        makeMonitor('mon1', [usLoc, euLoc]),
-      ]);
+      service.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
       const result = await service.getOverviewStatus();
 
@@ -641,9 +668,9 @@ describe('current status route', () => {
 
       const routeContext: any = { request: { query: {} }, syntheticsEsClient };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([
-        makeMonitor('mon1', [usLoc, euLoc, apLoc], false),
-      ]);
+      service.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc, apLoc], false)]);
 
       const result = await service.getOverviewStatus();
 
@@ -662,11 +689,15 @@ describe('current status route', () => {
           buckets: [
             {
               key: { monitorId: 'mon1', locationId: usLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T09:00:00.000Z'] }] },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T09:00:00.000Z'] }],
+              },
             },
             {
               key: { monitorId: 'mon1', locationId: euLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T11:00:00.000Z'] }] },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T11:00:00.000Z'] }],
+              },
             },
           ],
         })
@@ -674,7 +705,9 @@ describe('current status route', () => {
 
       const routeContext: any = { request: { query: {} }, syntheticsEsClient };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+      service.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
       const result = await service.getOverviewStatus();
 
@@ -688,11 +721,17 @@ describe('current status route', () => {
           buckets: [
             {
               key: { monitorId: 'mon1', locationId: usLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }] },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }],
+              },
             },
             {
               key: { monitorId: 'mon1', locationId: euLoc.id },
-              status: { top: [{ metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:01:00.000Z'] }] },
+              status: {
+                top: [
+                  { metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:01:00.000Z'] },
+                ],
+              },
             },
             // apLoc has no status data -> pending
           ],
@@ -701,9 +740,9 @@ describe('current status route', () => {
 
       const routeContext: any = { request: { query: {} }, syntheticsEsClient };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = jest.fn().mockResolvedValue([
-        makeMonitor('mon1', [usLoc, euLoc, apLoc]),
-      ]);
+      service.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc, apLoc])]);
 
       const result = await service.getOverviewStatus();
 

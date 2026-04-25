@@ -112,6 +112,60 @@ describe('getStatusByConfig', () => {
     });
     expect(getStatusByConfig('cfg_unknown', status, 'loc1')).toBe('pending');
   });
+
+  it('finds status by configId key in pendingConfigs', () => {
+    const status = makeStatus({
+      pendingConfigs: {
+        cfg1: makeMeta({
+          configId: 'cfg1',
+          overallStatus: 'pending',
+          locations: [{ id: 'loc1', label: 'Loc 1', status: 'pending' }],
+        }),
+      },
+    });
+    expect(getStatusByConfig('cfg1', status, 'loc1')).toBe('pending');
+  });
+
+  it('finds status by configId key in disabledConfigs', () => {
+    const status = makeStatus({
+      disabledConfigs: {
+        cfg1: makeMeta({
+          configId: 'cfg1',
+          isEnabled: false,
+          overallStatus: 'disabled',
+          locations: [{ id: 'loc1', label: 'Loc 1', status: 'disabled' }],
+        }),
+      },
+    });
+    expect(getStatusByConfig('cfg1', status, 'loc1')).toBe('disabled');
+  });
+
+  it('falls back to composite key in pendingConfigs', () => {
+    const status = makeStatus({
+      pendingConfigs: {
+        'cfg1-loc2': makeMeta({
+          configId: 'cfg1',
+          overallStatus: 'pending',
+          locations: [{ id: 'loc2', label: 'Loc 2', status: 'pending' }],
+        }),
+      },
+    });
+    expect(getStatusByConfig('cfg1', status, 'loc2')).toBe('pending');
+  });
+
+  it('falls back to composite key in disabledConfigs', () => {
+    const status = makeStatus({
+      disabledConfigs: {
+        'cfg1-loc2': makeMeta({
+          configId: 'cfg1',
+          isEnabled: false,
+          overallStatus: 'disabled',
+          locations: [{ id: 'loc2', label: 'Loc 2', status: 'disabled' }],
+        }),
+      },
+    });
+    expect(getStatusByConfig('cfg1', status, 'loc2')).toBe('disabled');
+  });
 });
 
 describe('selectOverviewStatus', () => {

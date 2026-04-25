@@ -214,7 +214,7 @@ export class OverviewStatusService {
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
           const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);
-          const monitorUrl = String(statusAgg.top?.[0].metrics?.['url.full.keyword']);
+          const rawMonitorUrl = statusAgg.top?.[0].metrics?.['url.full.keyword'];
 
           const timestamp = String(statusAgg.top[0].sort[0]);
           if (!monitorByIds.has(String(monitorId))) {
@@ -224,7 +224,7 @@ export class OverviewStatusService {
             status,
             locationId,
             timestamp,
-            monitorUrl: monitorUrl ? String(monitorUrl) : undefined,
+            monitorUrl: rawMonitorUrl != null ? String(rawMonitorUrl) : undefined,
           });
         });
       } while (hasMoreData && afterKey);
