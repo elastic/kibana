@@ -96,7 +96,7 @@ export class ExternalInferencePage {
     return this.page.testSubj.locator('inferenceUIDeleteAction-user-defined');
   }
 
-  public async selectGroupBy(key: 'none' | 'model' | 'service') {
+  public async selectGroupBy(key: 'none' | 'service') {
     await this.groupByButton.click();
     await this.page.testSubj.waitForSelector('group-by-selectable', { state: 'visible' });
     await this.page.testSubj.locator(`group-by-option-${key}`).click();

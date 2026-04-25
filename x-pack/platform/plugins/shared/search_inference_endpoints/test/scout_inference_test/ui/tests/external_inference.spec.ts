@@ -144,16 +144,13 @@ test.describe(
       await expect(externalInference.endpointStatsEndpointsCount).toHaveText('2');
     });
 
-    test('defaults to group-by Model and supports switching group-by selection', async ({
-      pageObjects,
-    }) => {
+    test('supports switching group-by between Service and None', async ({ pageObjects }) => {
       const { externalInference } = pageObjects;
 
       await externalInference.goto();
 
-      await test.step('default group-by label mentions Model', async () => {
+      await test.step('group-by selector is visible', async () => {
         await expect(externalInference.groupBySelect).toBeVisible();
-        await expect(externalInference.groupByButton).toContainText('Model');
       });
 
       await test.step('switching to service updates the label', async () => {
