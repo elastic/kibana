@@ -17,10 +17,11 @@ export const useOverviewTrendsRequests = (monitorsToFetchTrendsFor: OverviewStat
 
   useEffect(() => {
     const trendRequests = monitorsToFetchTrendsFor.reduce((acc, item) => {
-      if (trendData[item.configId + item.locationId] === undefined) {
+      const locationId = item.locations[0]?.id ?? '';
+      if (trendData[item.configId + locationId] === undefined) {
         acc.push({
           configId: item.configId,
-          locationId: item.locationId,
+          locationIds: item.locations.map((loc) => loc.id),
           schedule: item.schedule,
         });
       }

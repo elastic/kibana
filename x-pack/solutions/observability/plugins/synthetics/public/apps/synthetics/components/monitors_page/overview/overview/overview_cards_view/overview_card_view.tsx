@@ -12,7 +12,6 @@ import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CardsViewFooter } from './cards_view_footer';
 import type { FlyoutParamProps } from '../types';
-import { useOverviewStatus } from '../../../hooks/use_overview_status';
 import { METRIC_ITEM_HEIGHT, MetricItem } from '../metric_item/metric_item';
 import { OverviewLoader } from '../overview_loader';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
@@ -31,15 +30,17 @@ const LIST_THRESHOLD = 12;
 
 interface ListItem {
   configId: string;
-  locationId: string;
+  locations: Array<{ id: string }>;
 }
 
 export const OverviewCardView = ({
   monitorsSortedByStatus,
   setFlyoutConfigCallback,
+  loaded,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  loaded: boolean;
 }) => {
   const {
     groupBy: { field: groupField },
@@ -60,10 +61,6 @@ export const OverviewCardView = ({
   });
 
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const { loaded } = useOverviewStatus({
-    scopeStatusByLocation: true,
-  });
 
   const listHeight = Math.min(
     ITEM_HEIGHT * Math.ceil(monitorsSortedByStatus.length / rowCount),
@@ -87,7 +84,9 @@ export const OverviewCardView = ({
               {({ width }: EuiAutoSize) => (
                 <InfiniteLoader
                   isItemLoaded={(idx: number) =>
-                    listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
+                    listItems[idx].every(
+                      (m) => !!trendData[m.configId + (m.locations[0]?.id ?? '')]
+                    )
                   }
                   itemCount={listItems.length}
                   loadMoreItems={(start, stop: number) =>

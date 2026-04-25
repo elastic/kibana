@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createSelector } from '@reduxjs/toolkit';
 import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_management';
 import type { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
 import type { SyntheticsAppState } from '../root_reducer';
@@ -29,19 +30,20 @@ export const getStatusByConfig = (
   }
 };
 
-export const selectOverviewStatus = ({ overviewStatus, overview }: SyntheticsAppState) => {
-  if (overview.groupBy.field === 'monitor') {
-    return overviewStatus;
+export const selectOverviewStatus = createSelector(
+  (state: SyntheticsAppState) => state.overviewStatus,
+  (state: SyntheticsAppState) => state.overview.groupBy.field,
+  (overviewStatus, groupByField) => {
+    if (groupByField === 'monitor' || !overviewStatus.status) {
+      return overviewStatus;
+    }
+    const status = formatStatus(overviewStatus.status, groupByField);
+    return {
+      ...overviewStatus,
+      status,
+    };
   }
-  if (!overviewStatus.status) {
-    return overviewStatus;
-  }
-  const status = formatStatus(overviewStatus.status, overview.groupBy.field);
-  return {
-    ...overviewStatus,
-    status,
-  };
-};
+);
 
 const separateByLocation = (status: Record<string, OverviewStatusMetaData>, groupBy?: string) => {
   if (groupBy === 'monitor' || !status) {

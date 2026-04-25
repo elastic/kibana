@@ -356,17 +356,13 @@ export class OverviewStatusService {
     // check if any pending config have any up/down location, move it there instead of keeping it in pending and delete it from pending
     Object.values(pendingConfigs).forEach((pendingMeta) => {
       if (pendingMeta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.DOWN)) {
-        down += 1;
-        // sort locations and move pending to end
         pendingMeta.locations = movePendingToEnd(pendingMeta.locations);
         downConfigs[pendingMeta.configId] = pendingMeta;
         delete pendingConfigs[pendingMeta.configId];
       } else if (pendingMeta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.UP)) {
-        up += 1;
-        upConfigs[pendingMeta.configId] = pendingMeta;
         pendingMeta.overallStatus = MONITOR_STATUS_ENUM.UP;
-        // sort locations and move pending to end
         pendingMeta.locations = movePendingToEnd(pendingMeta.locations);
+        upConfigs[pendingMeta.configId] = pendingMeta;
         delete pendingConfigs[pendingMeta.configId];
       }
     });

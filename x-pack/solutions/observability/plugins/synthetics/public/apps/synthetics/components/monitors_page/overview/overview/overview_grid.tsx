@@ -102,6 +102,7 @@ export const OverviewGrid = memo(
           <OverviewCardView
             monitorsSortedByStatus={monitorsSortedByStatus}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
+            loaded={isInitialized}
           />
         ) : view === 'compactView' ? (
           <OverviewGridCompactView setFlyoutConfigCallback={setFlyoutConfigCallback} />
