@@ -1,6 +1,34 @@
 {
-  "sha1": "b56b1a7b72c59bdeb6acf0a6582f1f7173f6021a",
+  "sha1": "d9901ee11461e224a3e20f661c9373dd8e37d26d",
   "tests": [
+    {
+      "id": "f6d065371af5227-8e2fb993048f286",
+      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and revokes a client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "f6d065371af5227-6c2001b07df0ffc",
+      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy rejects malformed create payloads at the Kibana schema layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
+        "line": 133,
+        "column": 12
+      }
+    },
     {
       "id": "afb06677eff5d09-36a05fbd4d8d379",
       "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should discover OAuth protected resource metadata from Kibana",

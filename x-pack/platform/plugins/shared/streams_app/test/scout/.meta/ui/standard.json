@@ -1,5 +1,5 @@
 {
-  "sha1": "d6c8ebadd9b52cbb08f9c41ae6db3e4ff54b5b52",
+  "sha1": "605b1108c55730eb022e6c1d683c2f130a3ca90d",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -3407,6 +3407,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
         "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "7ce2670a3e19b7c-af09f3b002dfd4f",
+      "title": "Query streams - Create query stream rejects invalid child query stream names inline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
+        "line": 119,
         "column": 7
       }
     },
