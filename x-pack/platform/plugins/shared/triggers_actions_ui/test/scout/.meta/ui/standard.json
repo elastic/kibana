@@ -1,5 +1,5 @@
 {
-  "sha1": "09f3aff2a16f17a036d9d0ea55866027e36507f7",
+  "sha1": "a6d519907c0613e2349d8e7a8b2546d80373990b",
   "tests": [
     {
       "id": "b4b539a64e36b08-cf340212ea83da6",
@@ -124,6 +124,132 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
         "line": 129,
+        "column": 7
+      }
+    },
+    {
+      "id": "e8c3862f6d55eee-57f680c8893dd8f",
+      "title": "Rules page navigation and loading navigates to /app/rules successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "e8c3862f6d55eee-1211e89e04348b2",
+      "title": "Rules page navigation and loading loads with the correct page title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "e8c3862f6d55eee-b39978856446ad2",
+      "title": "Rules page navigation and loading displays the rules list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "e8c3862f6d55eee-1b2c9e13b31e54f",
+      "title": "Rules page navigation and loading finishes loading and shows the rules list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
+        "line": 74,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-57791701106b473",
+      "title": "Rules page tab functionality selects the Rules tab by default on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-baebad54642ecd3",
+      "title": "Rules page tab functionality shows the Logs tab when the user has permission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-4773d1d036ead66",
+      "title": "Rules page tab functionality navigates to /app/rules/logs when clicking the Logs tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 76,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-0bf63d694e57d1d",
+      "title": "Rules page tab functionality navigates back to /app/rules when clicking the Rules tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 82,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-9ae519159ac0aa4",
+      "title": "Rules page tab functionality updates the URL correctly when switching back and forth between tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 92,
         "column": 7
       }
     }
