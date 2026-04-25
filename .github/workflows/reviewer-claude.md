@@ -13,26 +13,23 @@ resources:
   - prefetch-pr-context.yml
 imports:
   - .github/agents/code-reviewer.md
-secrets:
-  ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
 engine:
   id: claude
   model: llm-gateway/claude-opus-4-7
   max-turns: 30
   env:
+    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
 if: >-
-  ${{
-    !github.event.repository.fork &&
+  !github.event.repository.fork &&
+  (
+    github.event_name == 'workflow_dispatch' ||
     (
-      github.event_name == 'workflow_dispatch' ||
-      (
-        github.event.pull_request.user.type != 'Bot' &&
-        !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-        contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
-      )
+      github.event.pull_request.user.type != 'Bot' &&
+      !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
+      contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
     )
-  }}
+  )
 concurrency:
   group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
   cancel-in-progress: true
