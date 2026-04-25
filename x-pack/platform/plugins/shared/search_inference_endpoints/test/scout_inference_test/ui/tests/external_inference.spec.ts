@@ -145,6 +145,99 @@ test.describe(
       });
     });
 
+    test('filters the table by service', async ({ pageObjects }) => {
+      const { externalInference } = pageObjects;
+
+      await externalInference.goto();
+      await externalInference.selectGroupBy('none');
+      await expect(externalInference.endpointsTable).toBeVisible();
+
+      await test.step('opening the service filter and selecting OpenAI narrows the rows', async () => {
+        await externalInference.openServiceFilter();
+        await externalInference.filterOption('OpenAI').click();
+        await expect(externalInference.allEndpointCells).toHaveCount(2);
+        await expect(externalInference.endpointCell('openai-chat-completion-01')).toBeVisible();
+        await expect(externalInference.endpointCell('openai-text-embedding-02')).toBeVisible();
+      });
+
+      await test.step('clearing the service filter restores all rows', async () => {
+        await externalInference.filterOption('OpenAI').click();
+        await expect(externalInference.allEndpointCells).toHaveCount(
+          externalInferenceEndpointsMockData.length
+        );
+      });
+    });
+
+    test('filters the table by task type', async ({ pageObjects }) => {
+      const { externalInference } = pageObjects;
+
+      await externalInference.goto();
+      await externalInference.selectGroupBy('none');
+      await expect(externalInference.endpointsTable).toBeVisible();
+
+      await test.step('opening the type filter and selecting text_embedding narrows the rows', async () => {
+        await externalInference.openTaskTypeFilter();
+        await externalInference.filterOption('text_embedding').click();
+        await expect(externalInference.allEndpointCells).toHaveCount(2);
+        await expect(externalInference.endpointCell('openai-text-embedding-02')).toBeVisible();
+        await expect(
+          externalInference.endpointCell('hugging-face-text-embedding-04')
+        ).toBeVisible();
+      });
+
+      await test.step('clearing the task type filter restores all rows', async () => {
+        await externalInference.filterOption('text_embedding').click();
+        await expect(externalInference.allEndpointCells).toHaveCount(
+          externalInferenceEndpointsMockData.length
+        );
+      });
+    });
+
+    test('expand all and collapse all toggle every group accordion', async ({ pageObjects }) => {
+      const { externalInference } = pageObjects;
+
+      await externalInference.goto();
+      await externalInference.selectGroupBy('service');
+
+      await test.step('all group accordions are visible', async () => {
+        await expect(externalInference.groupAccordion('openai')).toBeVisible();
+        await expect(externalInference.groupAccordion('cohere')).toBeVisible();
+        await expect(externalInference.groupAccordion('hugging_face')).toBeVisible();
+      });
+
+      await test.step('collapse all sets aria-expanded=false on every accordion', async () => {
+        await externalInference.collapseAllGroupsButton.click();
+        await expect(externalInference.accordionToggleButton('openai')).toHaveAttribute(
+          'aria-expanded',
+          'false'
+        );
+        await expect(externalInference.accordionToggleButton('cohere')).toHaveAttribute(
+          'aria-expanded',
+          'false'
+        );
+        await expect(externalInference.accordionToggleButton('hugging_face')).toHaveAttribute(
+          'aria-expanded',
+          'false'
+        );
+      });
+
+      await test.step('expand all sets aria-expanded=true on every accordion', async () => {
+        await externalInference.expandAllGroupsButton.click();
+        await expect(externalInference.accordionToggleButton('openai')).toHaveAttribute(
+          'aria-expanded',
+          'true'
+        );
+        await expect(externalInference.accordionToggleButton('cohere')).toHaveAttribute(
+          'aria-expanded',
+          'true'
+        );
+        await expect(externalInference.accordionToggleButton('hugging_face')).toHaveAttribute(
+          'aria-expanded',
+          'true'
+        );
+      });
+    });
+
     test('endpoint stats update when the table is filtered', async ({ pageObjects }) => {
       const { externalInference } = pageObjects;
 

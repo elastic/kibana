@@ -31,6 +31,8 @@ export class ExternalInferencePage {
 
   readonly groupBySelect: Locator;
   readonly groupByButton: Locator;
+  readonly expandAllGroupsButton: Locator;
+  readonly collapseAllGroupsButton: Locator;
 
   readonly inferenceFlyout: Locator;
   readonly inferenceFlyoutCloseButton: Locator;
@@ -66,6 +68,8 @@ export class ExternalInferencePage {
 
     this.groupBySelect = this.page.testSubj.locator('group-by-select');
     this.groupByButton = this.page.testSubj.locator('group-by-button');
+    this.expandAllGroupsButton = this.page.testSubj.locator('expandAllGroups');
+    this.collapseAllGroupsButton = this.page.testSubj.locator('collapseAllGroups');
 
     this.inferenceFlyout = this.page.testSubj.locator('inference-flyout');
     this.inferenceFlyoutCloseButton = this.page.testSubj.locator('inference-flyout-close-button');
@@ -120,5 +124,25 @@ export class ExternalInferencePage {
     await this.groupByButton.click();
     await this.page.testSubj.waitForSelector('group-by-selectable', { state: 'visible' });
     await this.page.testSubj.locator(`group-by-option-${key}`).click();
+  }
+
+  public async openServiceFilter() {
+    await this.serviceFilter.getByRole('button', { name: 'Service' }).click();
+  }
+
+  public async openTaskTypeFilter() {
+    await this.taskTypeFilter.getByRole('button', { name: 'Type' }).click();
+  }
+
+  public filterOption(name: string): Locator {
+    return this.page.getByRole('option', { name });
+  }
+
+  public groupAccordion(groupId: string): Locator {
+    return this.page.testSubj.locator(`${groupId}-accordion`);
+  }
+
+  public accordionToggleButton(groupId: string): Locator {
+    return this.page.locator(`[aria-controls="${groupId}-group-accordion"]`);
   }
 }
