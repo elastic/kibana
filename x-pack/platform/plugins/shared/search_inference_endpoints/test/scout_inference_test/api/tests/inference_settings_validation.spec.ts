@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_PATH, COMMON_HEADERS } from '../constants';
+import { API_PATH, COMMON_HEADERS, FEATURE_PRIVILEGED_ROLE, LOCAL_TAGS } from '../constants';
 
-apiTest.describe('Inference settings validation', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
-    ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
+    ({ cookieHeader } = await samlAuth.asInteractiveUser(FEATURE_PRIVILEGED_ROLE));
   });
 
   apiTest('rejects duplicate feature_id values', async ({ apiClient }) => {

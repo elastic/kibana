@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
+
 export const API_PATH = 'internal/search_inference_endpoints/settings';
 export const API_VERSION = '1';
+
+export const LOCAL_TAGS = [
+  '@local-stateful-classic',
+  '@local-stateful-search',
+  '@local-serverless-search',
+];
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -15,7 +23,8 @@ export const COMMON_HEADERS = {
   'elastic-api-version': API_VERSION,
 } as const;
 
-export const FEATURE_PRIVILEGED_ROLE = {
+export const FEATURE_PRIVILEGED_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
   kibana: [
     {
       base: [],
@@ -23,7 +32,7 @@ export const FEATURE_PRIVILEGED_ROLE = {
       spaces: ['*'],
     },
   ],
-} as const;
+};
 
 export const SAMPLE_FEATURES = {
   agentBuilderAnthropic: {

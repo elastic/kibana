@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_PATH, COMMON_HEADERS, SAMPLE_FEATURES } from '../constants';
+import {
+  API_PATH,
+  COMMON_HEADERS,
+  FEATURE_PRIVILEGED_ROLE,
+  LOCAL_TAGS,
+  SAMPLE_FEATURES,
+} from '../constants';
 
-apiTest.describe('Inference settings CRUD', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Inference settings CRUD', { tag: LOCAL_TAGS }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
-    ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
+    ({ cookieHeader } = await samlAuth.asInteractiveUser(FEATURE_PRIVILEGED_ROLE));
   });
 
   apiTest.afterEach(async ({ apiClient }) => {

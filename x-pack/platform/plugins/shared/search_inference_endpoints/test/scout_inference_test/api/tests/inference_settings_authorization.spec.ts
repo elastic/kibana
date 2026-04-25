@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_PATH, COMMON_HEADERS, FEATURE_PRIVILEGED_ROLE, SAMPLE_FEATURES } from '../constants';
+import {
+  API_PATH,
+  COMMON_HEADERS,
+  FEATURE_PRIVILEGED_ROLE,
+  LOCAL_TAGS,
+  SAMPLE_FEATURES,
+} from '../constants';
 
-apiTest.describe('Inference settings authorization', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Inference settings authorization', { tag: LOCAL_TAGS }, () => {
   let featureUserCookie: Record<string, string>;
   let viewerCookie: Record<string, string>;
 
