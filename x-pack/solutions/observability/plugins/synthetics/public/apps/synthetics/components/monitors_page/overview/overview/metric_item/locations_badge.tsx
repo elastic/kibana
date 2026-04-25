@@ -58,14 +58,17 @@ export const LocationsBadge = ({ monitor }: { monitor: OverviewStatusMetaData })
     },
   ];
 
+  // Note: don't close the popover on `mouseout`/`blur` here. EuiPopover renders
+  // the menu in a portal outside this div, so the cursor leaving this trigger
+  // would dismiss the menu before users can interact with it. Closing is
+  // handled by EuiPopover's own outside-click / Escape behaviour via
+  // `closePopover`.
   const button = (
     <div
       onMouseOver={() => {
         throttledOpenPopover();
       }}
       onFocus={() => setPopover(true)}
-      onMouseOut={() => setPopover(false)}
-      onBlur={() => setPopover(false)}
     >
       <EuiBadge
         data-test-subj="syntheticsLocationsBadgeClickMeToLoadAContextMenuButton"

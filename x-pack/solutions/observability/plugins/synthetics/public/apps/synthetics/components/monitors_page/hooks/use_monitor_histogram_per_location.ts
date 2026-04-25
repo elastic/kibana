@@ -100,7 +100,7 @@ const getQueryParamsPerLocation = (
               },
             },
           },
-        ] as estypes.QueryDslQueryContainer,
+        ] as estypes.QueryDslQueryContainer[],
       },
     },
     aggs: {

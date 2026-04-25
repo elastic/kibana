@@ -89,7 +89,7 @@ const getQueryParams = (dateRangeStart: string, dateRangeEnd: string, configIds:
               },
             },
           },
-        ] as estypes.QueryDslQueryContainer,
+        ] as estypes.QueryDslQueryContainer[],
       },
     },
     aggs: {
