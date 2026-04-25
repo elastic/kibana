@@ -50,14 +50,19 @@ export function determineDelayedAlerts<
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
-    // Drop alerts that were re-activated by flapping (not reported by the rule
-    // executor this run) but have not yet met the alertDelay threshold. Without
-    // this, such alerts would be promoted as active/new with blank rule-type
-    // fields because the executor never reported them.
+    // Alerts re-activated by the flapping mechanism (the rule executor did not
+    // report them this run) that haven't met the alertDelay threshold should
+    // not be promoted as active or new. Mark them as delayed and keep them in
+    // trackedActiveAlerts so future runs carry them forward, without counting
+    // synthetic reactivations toward the alertDelay threshold (otherwise
+    // repeated reactivations would graduate the alert as a "new" alert with no
+    // payload, see https://github.com/elastic/kibana/issues/259886).
     if (flappingReactivatedAlertIds?.has(id) && alert.getActiveCount() < alertDelay) {
+      alert.setStatus(ALERT_STATUS_DELAYED);
+      delayedAlerts[id] = alert;
+      delayedAlertsCount += 1;
       delete newAlerts[id];
       delete activeAlerts[id];
-      delete trackedActiveAlerts[id];
       continue;
     }
     alert.incrementActiveCount();

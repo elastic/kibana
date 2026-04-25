@@ -268,10 +268,12 @@ describe('determineDelayedAlerts', () => {
     `);
   });
 
-  test('should drop alerts re-activated by flapping when still under alertDelay', () => {
+  test('should route alerts re-activated by flapping under alertDelay to delayed without incrementing activeCount', () => {
     // Simulates the state after determineFlappingAlerts re-activated a recovered
     // alert that the rule executor did not report this run and that has not yet
-    // met the alertDelay threshold.
+    // met the alertDelay threshold. The alert should stay in trackedActiveAlerts
+    // and be marked as delayed, but the synthetic re-activation must not count
+    // toward graduation (activeCount unchanged).
     const reactivatedAlert = new Alert('flap-1', {
       meta: { activeCount: 1, uuid: 'uuid-flap-1' },
     });
@@ -300,8 +302,8 @@ describe('determineDelayedAlerts', () => {
 
     expect(newAlerts).toEqual({});
     expect(activeAlerts['flap-1']).toBeUndefined();
-    expect(trackedActiveAlerts['flap-1']).toBeUndefined();
-    expect(delayedAlerts['flap-1']).toBeUndefined();
+    expect(trackedActiveAlerts['flap-1']).toBe(reactivatedAlert);
+    expect(delayedAlerts['flap-1']).toBe(reactivatedAlert);
     expect(reactivatedAlert.getActiveCount()).toBe(1);
 
     expect(delayedAlerts['reported-1']).toBe(reportedAlert);
