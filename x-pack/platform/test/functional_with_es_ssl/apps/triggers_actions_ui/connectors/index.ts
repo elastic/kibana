@@ -15,6 +15,5 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./tines'));
     loadTestFile(require.resolve('./slack'));
     loadTestFile(require.resolve('./webhook'));
-    loadTestFile(require.resolve('./from_connector_spec'));
   });
 };

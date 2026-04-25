@@ -1,6 +1,20 @@
 {
-  "sha1": "a6d519907c0613e2349d8e7a8b2546d80373990b",
+  "sha1": "1e122cbdb9ce37c5da8770b00945ec8b00ee60db",
   "tests": [
+    {
+      "id": "8f6baf4aef167da-b456d708d2cf55e",
+      "title": "Create connector from connector spec creates a spec-defined connector (.alienvault-otx)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_from_spec.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
     {
       "id": "b4b539a64e36b08-cf340212ea83da6",
       "title": "Rule details alerts tab filters alerts table with search bar query",
@@ -250,6 +264,48 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
         "line": 92,
+        "column": 7
+      }
+    },
+    {
+      "id": "eed3b91c11a0e78-5089e2cd39a0734",
+      "title": "Rules settings flyout the rules settings link is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_settings.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
+    {
+      "id": "eed3b91c11a0e78-6fa8ceddad3b668",
+      "title": "Rules settings flyout opens the rules settings flyout with the configured values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_settings.spec.ts",
+        "line": 99,
+        "column": 7
+      }
+    },
+    {
+      "id": "eed3b91c11a0e78-904f40306eb4327",
+      "title": "Rules settings flyout modifies the rules settings and persists them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_settings.spec.ts",
+        "line": 121,
         "column": 7
       }
     }
