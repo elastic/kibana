@@ -144,28 +144,35 @@ describe(
         selectAlertSuppressionPerRuleExecution();
         selectDoNotSuppressForMissingFields();
 
+        // DEBUG: capture rule update API request body BEFORE save
+        cy.intercept('PUT', '/api/detection_engine/rules*').as('updateRule');
+        cy.intercept('PATCH', '/api/detection_engine/rules*').as('updateRulePatch');
+
         cy.wait('@esqlSuppressionFieldsRequest');
         fillAlertSuppressionFields(['_count']);
 
-        // DEBUG: capture pill state right before save
+        // DEBUG: assert pill state right after helper, with diagnostic message
         cy.get('[data-test-subj="alertSuppressionInput"]')
           .find('[data-test-subj="euiComboBoxPill"]')
           .then(($pills) => {
             const text = Array.from($pills).map((el) => (el as HTMLElement).innerText);
-            cy.log(`DEBUG pills before save: ${JSON.stringify(text)}`);
+            // Failing this prints the actual pills in the failure message
+            expect(text, 'pills before save').to.deep.equal(['event.category', '_count']);
           });
-
-        // DEBUG: capture rule update API request body
-        cy.intercept('PUT', '/api/detection_engine/rules*').as('updateRule');
-        cy.intercept('PATCH', '/api/detection_engine/rules*').as('updateRulePatch');
 
         saveEditedRule();
 
-        cy.get('@updateRule.all').then((calls) => cy.log(`DEBUG PUT calls: ${calls.length}`));
-        cy.get('@updateRulePatch.all').then((calls) => {
-          cy.log(`DEBUG PATCH calls: ${calls.length}`);
-          (calls as unknown as Array<{ request: { body: unknown } }>).forEach((c, i) => {
-            cy.log(`DEBUG PATCH ${i} body: ${JSON.stringify(c.request.body)}`);
+        // DEBUG: dump request body via expect failure for visibility in CI logs
+        cy.get('@updateRule.all').then((puts) => {
+          cy.get('@updateRulePatch.all').then((patches) => {
+            const all = [
+              ...(puts as unknown as Array<{ request: { body: unknown } }>),
+              ...(patches as unknown as Array<{ request: { body: unknown } }>),
+            ];
+            const bodies = all.map((c) => c.request.body);
+            // Failing this prints the actual request body in the failure message
+            expect(bodies, 'rule update request bodies').to.have.length.greaterThan(0);
+            expect(JSON.stringify(bodies), 'request body must contain _count').to.include('_count');
           });
         });
 
