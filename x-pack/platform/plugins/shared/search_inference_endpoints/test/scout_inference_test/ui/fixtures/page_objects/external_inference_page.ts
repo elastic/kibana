@@ -101,7 +101,7 @@ export class ExternalInferencePage {
   }
 
   public async openRowActionsFor(inferenceId: string) {
-    const row = this.endpointCell(inferenceId).locator('xpath=ancestor::tr');
+    const row = this.page.testSubj.locator(`endpointRow-${inferenceId}`);
     await row.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
     await this.page.testSubj.waitForSelector('inference-endpoints-action-view-endpoint-label', {
       state: 'visible',
