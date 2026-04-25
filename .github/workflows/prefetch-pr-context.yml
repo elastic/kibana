@@ -30,18 +30,28 @@ jobs:
           PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ inputs.repo }}
         run: |
+          fetch_paginated_array() {
+            local endpoint="$1"
+            local output_file="$2"
+            gh api "$endpoint" --paginate --jq '.[]' | jq -s '.' > "$output_file"
+          }
+
           mkdir -p /tmp/pr-context
           gh pr view "$PR_NUMBER" --repo "$REPO" \
             --json number,title,body,url,isDraft,author,baseRefName,headRefName,labels \
             > /tmp/pr-context/pr-metadata.json
-          gh api "repos/$REPO/pulls/$PR_NUMBER/files?per_page=100" --paginate \
-            > /tmp/pr-context/pr-files.json
-          gh api "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" --paginate \
-            > /tmp/pr-context/pr-issue-comments.json
-          gh api "repos/$REPO/pulls/$PR_NUMBER/comments?per_page=100" --paginate \
-            > /tmp/pr-context/pr-review-comments.json
-          gh api "repos/$REPO/pulls/$PR_NUMBER/reviews?per_page=100" --paginate \
-            > /tmp/pr-context/pr-reviews.json
+          fetch_paginated_array \
+            "repos/$REPO/pulls/$PR_NUMBER/files?per_page=100" \
+            /tmp/pr-context/pr-files.json
+          fetch_paginated_array \
+            "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" \
+            /tmp/pr-context/pr-issue-comments.json
+          fetch_paginated_array \
+            "repos/$REPO/pulls/$PR_NUMBER/comments?per_page=100" \
+            /tmp/pr-context/pr-review-comments.json
+          fetch_paginated_array \
+            "repos/$REPO/pulls/$PR_NUMBER/reviews?per_page=100" \
+            /tmp/pr-context/pr-reviews.json
           gh pr diff "$PR_NUMBER" --repo "$REPO" \
             > /tmp/pr-context/pr-diff.txt
       - name: Upload PR context artifact
