@@ -147,7 +147,27 @@ describe(
         cy.wait('@esqlSuppressionFieldsRequest');
         fillAlertSuppressionFields(['_count']);
 
+        // DEBUG: capture pill state right before save
+        cy.get('[data-test-subj="alertSuppressionInput"]')
+          .find('[data-test-subj="euiComboBoxPill"]')
+          .then(($pills) => {
+            const text = Array.from($pills).map((el) => (el as HTMLElement).innerText);
+            cy.log(`DEBUG pills before save: ${JSON.stringify(text)}`);
+          });
+
+        // DEBUG: capture rule update API request body
+        cy.intercept('PUT', '/api/detection_engine/rules*').as('updateRule');
+        cy.intercept('PATCH', '/api/detection_engine/rules*').as('updateRulePatch');
+
         saveEditedRule();
+
+        cy.get('@updateRule.all').then((calls) => cy.log(`DEBUG PUT calls: ${calls.length}`));
+        cy.get('@updateRulePatch.all').then((calls) => {
+          cy.log(`DEBUG PATCH calls: ${calls.length}`);
+          (calls as unknown as Array<{ request: { body: unknown } }>).forEach((c, i) => {
+            cy.log(`DEBUG PATCH ${i} body: ${JSON.stringify(c.request.body)}`);
+          });
+        });
 
         cy.get(DEFINITION_DETAILS).within(() => {
           getDetails(SUPPRESS_BY_DETAILS).should('have.text', NEW_SUPPRESS_BY_FIELDS.join(''));
