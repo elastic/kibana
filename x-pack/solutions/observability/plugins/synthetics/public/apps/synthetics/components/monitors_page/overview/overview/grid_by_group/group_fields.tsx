@@ -85,7 +85,7 @@ export const GroupFields = () => {
     },
     {
       label: LOCATION_LABEL,
-      value: 'location.id',
+      value: 'locationId',
       checked: groupField === 'locationId',
       defaultSortOrder: 'asc',
       onClick: () => {

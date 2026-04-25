@@ -106,18 +106,18 @@ export function ActionsPopover({
   position,
   iconHasPanel = true,
   iconSize = 's',
-  locationId: locationId,
+  locationId,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
   const locationName = useLocationName(monitor);
 
   const { http } = useKibana().services;
-  const locationLabel = monitor.locations[0].label;
+  const locationLabel = monitor.locations[0]?.label ?? '';
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: locationId ?? monitor.locations[0].id,
+    locationId: locationId || monitor.locations[0]?.id || '',
     spaces: monitor.spaces,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });

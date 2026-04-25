@@ -68,7 +68,7 @@ const GroupGridCardContent = ({
         >
           {visibleMonitors.map((monitor) => (
             <EuiFlexItem
-              key={`${monitor.configId}-${monitor.locations[0].id}`}
+              key={`${monitor.configId}-${monitor.locations[0]?.id ?? 'default'}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
               <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
@@ -120,7 +120,7 @@ export const GroupGridItem = ({
     if (downConfigs) {
       return (
         downConfigs[monitor.configId] ||
-        downConfigs[monitor.configId + '-' + monitor.locations[0].id]
+        downConfigs[monitor.configId + '-' + (monitor.locations[0]?.id ?? '')]
       );
     }
   });

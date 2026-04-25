@@ -72,8 +72,8 @@ export const useMonitorsTableColumns = ({
     (monitor: OverviewStatusMetaData) => {
       const { configId } = monitor;
 
-      const locationId = monitor.locations[0].id;
-      const locationLabel = monitor.locations[0].label;
+      const locationId = monitor.locations[0]?.id ?? '';
+      const locationLabel = monitor.locations[0]?.label ?? '';
       dispatch(
         setFlyoutConfigCallback({
           configId,
@@ -172,7 +172,7 @@ export const useMonitorsTableColumns = ({
         },
         width: '220px',
         render: (configId: string, monitor: OverviewStatusMetaData) => {
-          const locationId = monitor.locations[0].id;
+          const locationId = monitor.locations[0]?.id ?? '';
           const uniqId = `${configId}-${locationId}`;
           return (
             <MonitorBarSeries

@@ -88,7 +88,7 @@ const SingleMonitorView = () => {
   useEffect(() => {
     if (
       monitor &&
-      !(trendData[monitor.configId + monitor.locations[0].id] || trendData[monitor.configId])
+      !(trendData[monitor.configId + (monitor.locations[0]?.id ?? '')] || trendData[monitor.configId])
     ) {
       dispatch(
         trendStatsBatch.get([

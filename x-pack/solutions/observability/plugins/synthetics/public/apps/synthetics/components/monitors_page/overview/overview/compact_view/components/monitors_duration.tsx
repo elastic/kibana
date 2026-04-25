@@ -31,7 +31,7 @@ export const MonitorsDuration = ({
   onClickDuration: () => void;
 }) => {
   const trendDataMap = useSelector(selectOverviewTrends);
-  const locationId = monitor.locations[0].id;
+  const locationId = monitor.locations[0]?.id ?? '';
 
   const trendData = trendDataMap[monitor.configId] ?? trendDataMap[monitor.configId + locationId];
   return (

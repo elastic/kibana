@@ -15,7 +15,7 @@ export const MonitorsActions = ({ monitor }: { monitor: OverviewStatusMetaData }
   return (
     <ActionsPopover
       isPopoverOpen={isPopoverOpen}
-      locationId={monitor.locations[0].id}
+      locationId={monitor.locations[0]?.id ?? ''}
       monitor={monitor}
       position="default"
       setIsPopoverOpen={setIsPopoverOpen}

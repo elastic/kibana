@@ -54,7 +54,7 @@ export const MetricItemIcon = ({
   configIdByLocation: string;
   timestamp?: string;
 }) => {
-  const locationId = monitor.locations[0].id;
+  const locationId = monitor.locations[0]?.id ?? '';
 
   const testNowRun = useSelector(manualTestRunSelector(monitor.configId));
   const isPopoverOpen = useSelector(selectErrorPopoverState);

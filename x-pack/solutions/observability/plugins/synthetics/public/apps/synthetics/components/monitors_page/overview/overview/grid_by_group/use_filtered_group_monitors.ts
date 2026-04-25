@@ -6,7 +6,6 @@
  */
 
 import { useSelector } from 'react-redux';
-import { selectServiceLocationsState } from '../../../../../state';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { getConfigStatusByLocation, useGetUrlParams } from '../../../../../hooks';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
@@ -19,19 +18,15 @@ export const useFilteredGroupMonitors = ({
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const { statusFilter } = useGetUrlParams();
 
-  const { locations } = useSelector(selectServiceLocationsState);
-
   if (statusFilter === 'all' || !statusFilter) return groupMonitors;
 
   if (statusFilter === 'disabled') return groupMonitors.filter((monitor) => !monitor.isEnabled);
 
   return groupMonitors.filter((monitor) => {
-    const locationLabel =
-      locations.find((location) => {
-        return monitor.locations.some((loc) => loc.id === location.id);
-      })?.label ?? monitor.locations[0].label;
+    const locationId = monitor.locations[0]?.id;
+    if (!locationId) return false;
 
-    const status = getConfigStatusByLocation(overviewStatus, monitor.configId, locationLabel);
+    const status = getConfigStatusByLocation(overviewStatus, monitor.configId, locationId);
     if (statusFilter === 'up' && status.status === 'up') {
       return true;
     } else if (statusFilter === 'down' && status.status === 'down') {
