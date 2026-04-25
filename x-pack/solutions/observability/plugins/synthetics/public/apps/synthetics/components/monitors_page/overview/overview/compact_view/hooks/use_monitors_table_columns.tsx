@@ -203,6 +203,7 @@ export const useMonitorsTableColumns = ({
               }),
               field: 'spaces',
               sortable: true,
+              width: '120px',
               render: (monSpaces: string[]) => {
                 return (
                   <LazySpaceList
