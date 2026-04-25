@@ -28,6 +28,8 @@ apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body).toMatchObject({ message: 'Invalid inference settings' });
+    expect(response.body.attributes.errors[0]).toContain('Duplicate feature_id');
   });
 
   apiTest('rejects duplicate endpoints within a feature', async ({ apiClient }) => {
@@ -44,6 +46,8 @@ apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body).toMatchObject({ message: 'Invalid inference settings' });
+    expect(response.body.attributes.errors[0]).toContain('Duplicate endpoints');
   });
 
   apiTest('rejects an empty feature_id', async ({ apiClient }) => {
@@ -55,6 +59,7 @@ apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain('feature_id');
   });
 
   apiTest('rejects a missing features field', async ({ apiClient }) => {
@@ -64,5 +69,6 @@ apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain('features');
   });
 });
