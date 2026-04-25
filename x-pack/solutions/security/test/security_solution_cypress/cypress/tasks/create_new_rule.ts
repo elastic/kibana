@@ -979,7 +979,7 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
       .find('[data-test-subj="euiComboBoxPill"]')
       .should('contain.text', field);
   });
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type('{esc}');
+  // DEBUG: not sending {esc} to test if it removes the pill
 };
 
 export const clearAlertSuppressionFields = () => {
