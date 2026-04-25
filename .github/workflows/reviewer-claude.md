@@ -15,7 +15,7 @@ imports:
   - .github/agents/code-reviewer.md
 engine:
   id: claude
-  version: "2.1.114"
+  version: "2.1.111"
   model: llm-gateway/claude-opus-4-7
   max-turns: 30
   env:
