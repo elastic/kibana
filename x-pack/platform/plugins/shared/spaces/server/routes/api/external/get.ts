@@ -9,11 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { ExternalRouteDeps } from '.';
+import { getSpaceExamples } from './examples';
 import { API_VERSIONS } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { getSpaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
-import { getSpaceExamples } from './examples';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
   const { router, getSpacesService, isServerless } = deps;
