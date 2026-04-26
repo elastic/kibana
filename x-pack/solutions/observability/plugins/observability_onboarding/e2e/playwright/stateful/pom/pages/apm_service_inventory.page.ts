@@ -17,15 +17,15 @@ export class ApmServiceInventoryPage {
   // Inventory fetches /internal/apm/services once on mount with no auto-refetch; reload to re-fire if the row hasn't aggregated yet.
   public async waitForServiceRow(
     serviceTestId: string,
-    { perAttemptTimeoutMs = 30_000, maxReloads = 3 } = {}
+    { perAttemptTimeoutMs = 30_000, maxRetries = 3 } = {}
   ) {
     const locator = this.page.getByTestId(serviceTestId);
-    for (let attempt = 0; attempt <= maxReloads; attempt++) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         await locator.waitFor({ timeout: perAttemptTimeoutMs });
         return;
       } catch (err) {
-        if (attempt === maxReloads) throw err;
+        if (attempt === maxRetries) throw err;
         await this.page.reload();
       }
     }
