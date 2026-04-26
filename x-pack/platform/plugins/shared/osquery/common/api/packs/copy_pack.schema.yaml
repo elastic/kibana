@@ -8,67 +8,99 @@ components:
     CopyPacksResponse:
       description: 'The response for copying a pack.'
       type: object
+      required:
+        - data
       properties:
         data:
-          description: 'The copied pack.'
           type: object
+          required:
+            - saved_object_id
+            - name
           properties:
             saved_object_id:
               description: 'The saved object ID of the copied pack.'
               type: string
             name:
-              description: 'The name of the copied pack.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackName'
             description:
-              description: 'The pack description.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackDescriptionOrUndefined'
             queries:
-              description: 'The queries in the copied pack.'
-              type: object
-            version:
-              description: 'The pack version.'
-              type: integer
-            enabled:
-              description: 'Whether the pack is enabled. Always false for copies.'
-              type: boolean
-            created_at:
-              description: 'The creation timestamp.'
-              type: string
-            created_by:
-              description: 'The user who created the copy.'
-              type: string
-            updated_at:
-              description: 'The last update timestamp.'
-              type: string
-            updated_by:
-              description: 'The user who last updated the pack.'
-              type: string
-            policy_ids:
-              description: 'A list of agent policy IDs associated with the pack. Always empty for copies.'
+              description: 'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
               type: array
               items:
-                type: string
+                type: object
+                properties:
+                  id:
+                    type: string
+                  query:
+                    type: string
+                  interval:
+                    type: integer
+                  platform:
+                    type: string
+                  version:
+                    type: string
+                  snapshot:
+                    type: boolean
+                  removed:
+                    type: boolean
+                  timeout:
+                    type: integer
+                  ecs_mapping:
+                    $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingArrayOrUndefined'
+            version:
+              description: 'The pack version number.'
+              type: integer
+            enabled:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/EnabledOrUndefined'
+            created_at:
+              type: string
+              format: date-time
+            created_by:
+              type: string
+              nullable: true
+            created_by_profile_uid:
+              type: string
+            updated_at:
+              type: string
+              format: date-time
+            updated_by:
+              type: string
+              nullable: true
+            updated_by_profile_uid:
+              type: string
+            policy_ids:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PolicyIdsOrUndefined'
             shards:
-              description: 'Shard configuration for the pack.'
-              type: object
+              description: 'Shard configuration as an array of key-value pairs.'
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: number
       example:
         data:
           saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"
           name: "my_pack_copy"
           description: "My pack"
           queries:
-            ports:
+            - id: "ports"
               query: "SELECT * FROM listening_ports;"
               interval: 60
               snapshot: true
               removed: false
               timeout: 120
               ecs_mapping:
-                client.port:
-                  field: "port"
+                - key: "client.port"
+                  value:
+                    field: "port"
           enabled: false
-          shards: {}
+          shards: []
           created_at: "2025-02-26T13:37:30.452Z"
           created_by: "elastic"
           updated_at: "2025-02-26T13:37:30.452Z"
           updated_by: "elastic"
+          policy_ids: []

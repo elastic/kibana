@@ -1,0 +1,53 @@
+summary: Find maintenance windows response
+description: >
+  The response returned when maintenance windows are successfully found.
+value:
+  page: 1
+  per_page: 10
+  total: 2
+  maintenanceWindows:
+    - id: 'f0cb1780-537a-4e34-8adf-3b4336862858'
+      title: 'Weekly Maintenance Window'
+      enabled: true
+      schedule:
+        custom:
+          start: '2025-03-01T08:00:00.000Z'
+          duration: '2h'
+          timezone: 'Europe/Amsterdam'
+          recurring:
+            every: '1w'
+            onWeekDay:
+              - 'MO'
+              - 'WE'
+            occurrences: 10
+      scope:
+        alerting:
+          query:
+            kql: 'kibana.alert.tags: "infra"'
+      status: 'upcoming'
+      created_at: '2025-02-25T10:00:00.000Z'
+      updated_at: '2025-02-25T10:00:00.000Z'
+      created_by: 'elastic'
+      updated_by: 'elastic'
+    - id: 'a1c94560-6e3b-4ea1-9065-8e3f1b8c5f29'
+      title: 'Database Upgrade Window'
+      enabled: true
+      schedule:
+        custom:
+          start: '2025-04-01T10:00:00.000Z'
+          duration: '1h'
+          timezone: 'US/Eastern'
+          recurring:
+            every: '2w'
+            onWeekDay:
+              - 'FR'
+            end: '2025-12-31T00:00:00.000Z'
+      scope:
+        alerting:
+          query:
+            kql: 'kibana.alert.tags: "database"'
+      status: 'upcoming'
+      created_at: '2025-03-10T09:00:00.000Z'
+      updated_at: '2025-03-15T14:30:00.000Z'
+      created_by: 'elastic'
+      updated_by: 'elastic'

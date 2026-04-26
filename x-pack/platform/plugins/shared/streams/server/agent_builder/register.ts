@@ -9,26 +9,29 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
+import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { streamsManagementSkill } from './skills/streams_management_skill';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
+import { registerAgentBuilderSkills } from './skills/register_skills';
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
   server,
   logger,
+  telemetry,
   isMemoryEnabled,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
-  agentBuilder.skills.register(streamsManagementSkill);
+  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderSkills({ agentBuilder });
 
   const getMemoryService = () =>
     new MemoryServiceImpl({

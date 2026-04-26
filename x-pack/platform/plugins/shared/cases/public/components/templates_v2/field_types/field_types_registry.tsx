@@ -21,6 +21,7 @@ import { InputNumber } from './controls/input_number';
 import { DatePicker } from './controls/date_picker';
 import { CheckboxGroup } from './controls/checkbox_group';
 import { RadioGroup } from './controls/radio_group';
+import { UserPicker } from './controls/user_picker';
 
 // NOTE: this guarantees the control will receive props aligned with the schema plus condition render props
 export type FieldMap = {
@@ -36,4 +37,5 @@ export const controlRegistry: FieldMap = {
   [FieldType.DATE_PICKER]: DatePicker,
   [FieldType.CHECKBOX_GROUP]: CheckboxGroup,
   [FieldType.RADIO_GROUP]: RadioGroup,
+  [FieldType.USER_PICKER]: UserPicker,
 };

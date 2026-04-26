@@ -84,7 +84,7 @@ const heatmapStylingSchema = schema.object(
   }
 );
 
-const heatmapSharedStateSchema = {
+const heatmapSharedConfigSchema = {
   type: schema.literal('heatmap'),
   legend: schema.maybe(
     schema.object(legendSchemaProps, {
@@ -97,7 +97,7 @@ const heatmapSharedStateSchema = {
   ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
-  axes: schema.maybe(
+  axis: schema.maybe(
     schema.object(
       {
         x: schema.maybe(
@@ -145,17 +145,17 @@ const heatmapSharedStateSchema = {
   ),
 };
 
-const heatmapAxesStateSchemaProps = {
+const heatmapAxesConfigSchemaProps = {
   x: bucketOperationDefinitionSchema,
   y: schema.maybe(bucketOperationDefinitionSchema),
 };
 
-const heatmapAxesStateESQLSchemaProps = {
+const heatmapAxesConfigESQLSchemaProps = {
   x: esqlColumnWithFormatSchema,
   y: schema.maybe(esqlColumnWithFormatSchema),
 };
 
-const heatmapStateMetricOptionsSchemaProps = {
+const heatmapConfigMetricOptionsSchemaProps = {
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, autoColorSchema], {
       defaultValue: AUTO_COLOR,
@@ -163,35 +163,38 @@ const heatmapStateMetricOptionsSchemaProps = {
   ),
 };
 
-export const heatmapStateSchemaNoESQL = schema.object(
+export const heatmapConfigSchemaNoESQL = schema.object(
   {
-    ...heatmapSharedStateSchema,
-    ...heatmapAxesStateSchemaProps,
+    ...heatmapSharedConfigSchema,
+    ...heatmapAxesConfigSchemaProps,
     ...dslOnlyPanelInfoSchema,
     ...dataSourceSchema,
     styling: schema.maybe(heatmapStylingSchema),
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      heatmapStateMetricOptionsSchemaProps
+      heatmapConfigMetricOptionsSchemaProps
     ),
   },
   { meta: { id: 'heatmapNoESQL', title: 'Heatmap Chart (DSL)' } }
 );
 
-export const heatmapStateSchemaESQL = schema.object(
+export const heatmapConfigSchemaESQL = schema.object(
   {
-    ...heatmapSharedStateSchema,
-    ...heatmapAxesStateESQLSchemaProps,
+    ...heatmapSharedConfigSchema,
+    ...heatmapAxesConfigESQLSchemaProps,
     ...dataSourceEsqlTableSchema,
     styling: schema.maybe(heatmapStylingSchema),
-    metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
+    metric: esqlColumnWithFormatSchema.extends(heatmapConfigMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
 );
 
-export const heatmapStateSchema = objectUnion([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
-  meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
-});
+export const heatmapConfigSchema = objectUnion(
+  [heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL],
+  {
+    meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
+  }
+);
 
-export type HeatmapState = TypeOf<typeof heatmapStateSchema>;
-export type HeatmapStateNoESQL = TypeOf<typeof heatmapStateSchemaNoESQL>;
-export type HeatmapStateESQL = TypeOf<typeof heatmapStateSchemaESQL>;
+export type HeatmapConfig = TypeOf<typeof heatmapConfigSchema>;
+export type HeatmapConfigNoESQL = TypeOf<typeof heatmapConfigSchemaNoESQL>;
+export type HeatmapConfigESQL = TypeOf<typeof heatmapConfigSchemaESQL>;

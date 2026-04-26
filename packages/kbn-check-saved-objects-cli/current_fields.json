@@ -84,6 +84,9 @@
     "snoozeSchedule.duration",
     "snoozeSchedule.id",
     "snoozeSchedule.skipRecurrences",
+    "snoozedInstances",
+    "snoozedInstances.instanceId",
+    "snoozedInstances.snoozeSnapshot",
     "tags",
     "throttle",
     "uiamApiKey",
@@ -960,6 +963,11 @@
   ],
   "inventory-view": [],
   "kql-telemetry": [],
+  "lead-generation-config": [
+    "connectorId",
+    "lastError",
+    "lastExecutionUuid"
+  ],
   "legacy-url-alias": [
     "disabled",
     "resolveCounter",
@@ -1423,7 +1431,8 @@
     "status",
     "taskType",
     "userScope",
-    "userScope.apiKeyId"
+    "userScope.apiKeyId",
+    "userScope.uiamApiKeyId"
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
@@ -1488,6 +1497,9 @@
     "enabled",
     "managed",
     "name",
+    "range",
+    "range.end",
+    "range.start",
     "type"
   ],
   "workplace_search_telemetry": []

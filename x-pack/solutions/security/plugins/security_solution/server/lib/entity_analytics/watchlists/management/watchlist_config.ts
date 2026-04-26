@@ -227,10 +227,6 @@ export class WatchlistConfigClient {
       watchlistId
     );
 
-    if (so.attributes.managed === true) {
-      throw createWatchlistValidationError(400, `Cannot modify managed watchlist '${watchlistId}'`);
-    }
-
     if (source.managed === true) {
       throw createWatchlistValidationError(
         400,

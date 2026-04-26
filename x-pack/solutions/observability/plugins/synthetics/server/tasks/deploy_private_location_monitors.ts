@@ -259,15 +259,22 @@ export class DeployPrivateLocationMonitors {
       }
       if (privateConfigs.length > 0) {
         this.debugLog(
-          `Syncing private configs for spaceId: ${spaceId}, privateConfigs count: ${privateConfigs.length}`
+          `Syncing private configs for spaceId: ${spaceId}, privateConfigs count: ${privateConfigs.length}, ` +
+            `monitors: [${privateConfigs.map(({ config }) => config.id).join(', ')}]`
         );
 
-        await privateLocationAPI.editMonitors(
+        const result = await privateLocationAPI.editMonitors(
           privateConfigs,
           allPrivateLocations,
           spaceId,
           maintenanceWindows
         );
+
+        if (result?.failedCreates && result.failedCreates.length > 0) {
+          this.serverSetup.logger.error(
+            `[DeployPrivateLocationMonitors] Failed to create ${result.failedCreates.length} policies during sync`
+          );
+        }
       } else {
         this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
       }
@@ -363,6 +370,7 @@ export class DeployPrivateLocationMonitors {
             spaceId,
             monitor: normalizedMonitor,
             configId: monitor.id,
+            kibanaUrl: this.serverSetup.basePath.publicBaseUrl ?? undefined,
           },
           paramsString
         )

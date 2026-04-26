@@ -10,14 +10,14 @@
         "tags": [],
         "label": "loadConnectors",
         "description": [
-          "\nFetches AI connectors for a given feature, maps them to {@link AIConnector},\nand applies the default-connector UI settings filter.\n\nWhen the \"default connector only\" setting is active and a default connector\nID is configured, the connector is retrieved directly by ID rather than\nfiltered from the feature connector list."
+          "\nFetches AI connectors for a given feature from the search_inference_endpoints backend\nand maps them to {@link AIConnector}. The backend route applies feature resolution,\ndefault-connector UI settings, and recommended-endpoint flagging.\n"
         ],
         "signature": [
-          "({ http, featureId, settings, }: { http: ",
+          "({ http, featureId, }: { http: ",
           "HttpSetup",
-          "; featureId: string; settings: ",
+          "; featureId: string; settings?: ",
           "SettingsStart",
-          "; }) => Promise<",
+          " | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/inference-connectors",
             "scope": "public",
@@ -28,7 +28,7 @@
           "[]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-        "lineNumber": 51,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38,10 +38,10 @@
             "id": "def-public.loadConnectors.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  featureId,\n  settings,\n}",
+            "label": "{\n  http,\n  featureId,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-            "lineNumber": 55,
+            "lineNumber": 47,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -57,7 +57,7 @@
                   "HttpSetup"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-                "lineNumber": 56,
+                "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -70,7 +70,7 @@
                 "label": "featureId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-                "lineNumber": 57,
+                "lineNumber": 49,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -83,10 +83,11 @@
                 "label": "settings",
                 "description": [],
                 "signature": [
-                  "SettingsStart"
+                  "SettingsStart",
+                  " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/load_connectors.ts",
-                "lineNumber": 58,
+                "lineNumber": 50,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -163,7 +164,7 @@
         "label": "useLoadConnectors",
         "description": [],
         "signature": [
-          "({ http, toasts, featureId, settings, }: ",
+          "({ http, toasts, featureId, }: ",
           {
             "pluginId": "@kbn/inference-connectors",
             "scope": "public",
@@ -191,7 +192,7 @@
             "id": "def-public.useLoadConnectors.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  featureId,\n  settings,\n}",
+            "label": "{\n  http,\n  toasts,\n  featureId,\n}",
             "description": [],
             "signature": [
               {
@@ -290,7 +291,7 @@
           "\nProps for {@link useLoadConnectors}.\n\nThe hook calls an internal HTTP route registered by the `searchInferenceEndpoints` plugin.\nAny Kibana plugin that uses this package must load that plugin (it is platform-shared and\nenabled in standard distributions)."
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
-        "lineNumber": 26,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -306,7 +307,7 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
-            "lineNumber": 34,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -323,7 +324,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
-            "lineNumber": 35,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -338,7 +339,7 @@
               "\nFeature identifier used to scope which inference endpoints are relevant.\nPassed to the search_inference_endpoints API to resolve feature-specific endpoints."
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
-            "lineNumber": 36,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -347,17 +348,114 @@
             "parentPluginId": "@kbn/inference-connectors",
             "id": "def-public.UseLoadConnectorsProps.settings",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "settings",
             "description": [],
             "signature": [
-              "SettingsStart"
+              "SettingsStart",
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
-            "lineNumber": 41,
+            "lineNumber": 36,
             "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/conversations/conversation_input/input_actions/connector_selector/connector_selector.tsx"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_selector/index.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_setup/index.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/evaluation_settings/evaluation_settings.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/assistant_settings.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/index.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/conversations/conversation_settings/conversation_settings_editor.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/search_ai_lake_configurations_settings_management.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/public/common/components/connector_selector.tsx"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_genai_connectors.ts"
+              },
+              {
+                "plugin": "observabilityAgentBuilder",
+                "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/hooks/use_genai_connectors.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/common/components/start_migration_modal/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout/components/entity_highlights.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan_ab.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/settings_flyout/schedule/create_flyout/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/settings_flyout/schedule/details_flyout/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/attacks/content.tsx"
+              },
+              {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/assistant_settings_management.tsx"
+              },
+              {
+                "plugin": "workplaceAIApp",
+                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/components/connector_selector/connector_selector.tsx"
+              }
+            ]
           }
         ],
         "initialIsOpen": false

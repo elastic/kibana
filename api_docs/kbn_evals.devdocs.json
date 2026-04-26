@@ -187,7 +187,7 @@
             "tags": [],
             "label": "indexSingleScore",
             "description": [
-              "\nIndexes a single evaluation score document to Elasticsearch immediately.\nUsed for incremental writes so results survive worker crashes.\n\nUses `refresh: false` to avoid the shard refresh penalty on every write;\ndocuments become queryable within the default 5s refresh interval.\nDeterministic IDs (via {@link computeScoreDocumentId}) make this idempotent —\nthe batch export at teardown will simply encounter 409 conflicts for\nalready-written documents."
+              "\nIndexes a single evaluation score document to Elasticsearch immediately.\nUsed for incremental writes so results survive worker crashes.\n\nUses `refresh: 'wait_for'` so scores are searchable immediately (e.g. for\nper-worker terminal summaries and other readers right after incremental write).\nDeterministic IDs (via {@link computeScoreDocumentId}) make this idempotent —\nthe batch export at teardown will simply encounter 409 conflicts for\nalready-written documents."
             ],
             "signature": [
               "(document: ",
@@ -3237,7 +3237,7 @@
           "; }) => Promise<void>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/create_connector_fixture.ts",
-        "lineNumber": 34,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3250,7 +3250,7 @@
             "label": "{\n  fetch,\n  connectorId,\n  log,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/create_connector_fixture.ts",
-            "lineNumber": 38,
+            "lineNumber": 60,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -3266,7 +3266,7 @@
                   "HttpHandler"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/create_connector_fixture.ts",
-                "lineNumber": 39,
+                "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3312,7 +3312,7 @@
                 "label": "connectorId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/create_connector_fixture.ts",
-                "lineNumber": 40,
+                "lineNumber": 62,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3334,7 +3334,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/create_connector_fixture.ts",
-                "lineNumber": 41,
+                "lineNumber": 63,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

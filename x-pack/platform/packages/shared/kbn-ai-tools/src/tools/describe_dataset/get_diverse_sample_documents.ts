@@ -28,6 +28,7 @@ interface GetDiverseSampleDocumentsOptions {
   index: string;
   start: number;
   end: number;
+  offset: number;
   size?: number;
   filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   runtime_mappings?: MappingRuntimeFields;
@@ -42,6 +43,7 @@ export async function getDiverseSampleDocuments({
   size = 100,
   filter,
   runtime_mappings,
+  offset,
   timeout = '10s',
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
   const timeRangeFilter = dateRangeQuery(start, end);
@@ -62,76 +64,55 @@ export async function getDiverseSampleDocuments({
     samplingProbability = 1;
   }
 
-  let buckets: CategoryBucket[];
-  try {
-    const response = await esClient.search({
-      index,
-      size: 0,
-      track_total_hits: false,
-      timeout,
-      runtime_mappings,
-      query: { bool: { filter: combinedFilter } },
-      aggregations: {
-        sampler: {
-          random_sampler: { probability: samplingProbability },
-          aggs: {
-            categories: {
-              categorize_text: {
-                field: messageField,
-                size,
-                min_doc_count: 1,
+  const response = await esClient.search({
+    index,
+    size: 0,
+    track_total_hits: false,
+    timeout,
+    runtime_mappings,
+    query: { bool: { filter: combinedFilter } },
+    aggregations: {
+      sampler: {
+        random_sampler: { probability: samplingProbability },
+        aggs: {
+          categories: {
+            categorize_text: {
+              field: messageField,
+              size: size + offset,
+              min_doc_count: 1,
+            },
+            aggs: {
+              docs: {
+                top_hits: {
+                  size: 1,
+                  _source: false,
+                  fields: [{ field: '*', include_unmapped: true }],
+                },
               },
-              aggs: {
-                docs: {
-                  top_hits: {
-                    size: 1,
-                    _source: false,
-                    fields: [{ field: '*', include_unmapped: true }],
-                  },
+              paginate: {
+                bucket_sort: {
+                  sort: [{ _count: { order: 'desc' } }],
+                  from: offset,
+                  size,
                 },
               },
             },
           },
         },
       },
-    });
+    },
+  });
 
-    const sampler = response.aggregations?.sampler as
-      | { categories: { buckets: CategoryBucket[] } }
-      | undefined;
-
-    buckets = sampler?.categories?.buckets ?? [];
-  } catch {
-    return getSampleDocuments(sampleDocOpts);
-  }
-
-  if (buckets.length === 0) {
-    return getSampleDocuments(sampleDocOpts);
-  }
+  const sampler = response.aggregations?.sampler as
+    | { categories: { buckets: CategoryBucket[] } }
+    | undefined;
 
   // 1 representative doc per category
-  const categoryHits = buckets
+  const categoryHits = (sampler?.categories?.buckets ?? [])
     .map((bucket) => bucket.docs.hits.hits[0])
     .filter((hit): hit is SearchHit<Record<string, unknown>> => Boolean(hit?._id));
 
-  // Pad with random samples if categories < target
-  const remaining = size - categoryHits.length;
-  if (remaining <= 0) {
-    return { hits: categoryHits.slice(0, size) };
-  }
-
-  // Over-fetch to compensate for duplicates that will be removed during dedup
-  const randomSamples = await getSampleDocuments({
-    ...sampleDocOpts,
-    size: remaining + categoryHits.length,
-  });
-
-  const categoryIdSet = new Set(categoryHits.map((hit) => hit._id));
-  const dedupedRandomHits = randomSamples.hits.filter(
-    (hit) => !hit._id || !categoryIdSet.has(hit._id)
-  );
-
-  return { hits: [...categoryHits, ...dedupedRandomHits].slice(0, size) };
+  return { hits: categoryHits };
 }
 
 async function detectMessageField({

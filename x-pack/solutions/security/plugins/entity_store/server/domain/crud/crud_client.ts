@@ -9,8 +9,10 @@ import type { Logger } from '@kbn/logging';
 import type {
   BulkOperationContainer,
   BulkUpdateAction,
+  QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   Result,
+  SearchHit,
   SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -46,6 +48,7 @@ export interface ListEntitiesParams {
   size?: number;
   source?: string[] | undefined;
   searchAfter?: Array<string | number>;
+  fields?: (QueryDslFieldAndFormat | string)[];
   /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
   entityTypes?: EntityType[];
   filterQuery?: string;
@@ -57,6 +60,7 @@ export interface ListEntitiesParams {
 
 export interface ListEntitiesResult {
   entities: Entity[];
+  fields?: Array<SearchHit['fields']>; // Only present if `fields` was specified in ListEntitiesParams
   nextSearchAfter?: Array<string | number>;
   total?: number;
   page?: number;
@@ -406,7 +410,7 @@ export class CRUDClient {
 
     this.logger.debug('Listing entities (cursor mode)');
 
-    const { filter, size, searchAfter, source } = p;
+    const { filter, size, searchAfter, source, fields } = p;
 
     let query: QueryDslQueryContainer = { match_all: {} };
     if (filter) {
@@ -423,13 +427,19 @@ export class CRUDClient {
       size,
       sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
       search_after: searchAfter,
+      ...(fields && fields.length > 0 ? { fields } : {}),
       ...(source && source.length > 0 ? { _source: source } : {}),
     });
 
     const hits = resp.hits.hits;
     const entities = hits.map((hit) => hit._source as Entity);
     const lastHit = hits[hits.length - 1];
+    const entityFields = fields && fields.length > 0 ? hits.map((hit) => hit.fields) : undefined;
 
-    return { entities, nextSearchAfter: lastHit?.sort as Array<string | number> | undefined };
+    return {
+      entities,
+      nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
+      ...(entityFields ? { fields: entityFields } : {}),
+    };
   }
 }
