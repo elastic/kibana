@@ -71,6 +71,19 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
           return moment(a.updated_at).diff(moment(b.updated_at));
         });
         return sortOrder === 'asc' ? result : result.reverse();
+      case 'urls': {
+        // Monitors without a URL (e.g. ICMP/TCP, or browser checks where the
+        // url field is empty) are always sorted last regardless of direction —
+        // an alphabetical run that ends with a wall of "—" is more useful for
+        // triage than letting empty strings flip to the top in desc order.
+        const withUrl = result.filter((m) => m.urls);
+        const withoutUrl = result.filter((m) => !m.urls);
+        withUrl.sort((a, b) => (a.urls ?? '').localeCompare(b.urls ?? ''));
+        return [
+          ...(sortOrder === 'asc' ? withUrl : withUrl.reverse()),
+          ...withoutUrl,
+        ];
+      }
     }
     return result;
   }, [disabledConfigs, sortField, sortOrder, status, statusFilter]);

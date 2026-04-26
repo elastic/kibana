@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
-import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { useGetUrlParams } from '../../../../../hooks';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
@@ -15,7 +13,6 @@ export const useFilteredGroupMonitors = ({
 }: {
   groupMonitors: OverviewStatusMetaData[];
 }) => {
-  const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const { statusFilter } = useGetUrlParams();
 
   if (statusFilter === 'all' || !statusFilter) return groupMonitors;

@@ -132,6 +132,12 @@ const getOrderContent = (sortField: MonitorListSortField) => {
         desc: SORT_STATUS_DESC,
         label: STATUS_LABEL,
       };
+    case 'urls':
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: URL_LABEL,
+      };
     default:
       return {
         asc: ASCENDING_LABEL,
@@ -190,6 +196,10 @@ const DESCENDING_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.d
 
 const STATUS_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.status.label', {
   defaultMessage: 'Status',
+});
+
+const URL_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.url.label', {
+  defaultMessage: 'URL',
 });
 
 const ALPHABETICAL_LABEL = i18n.translate(

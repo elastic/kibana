@@ -497,26 +497,6 @@ describe('current status route', () => {
       },
     });
 
-    const makeStatusData = (
-      entries: Array<{ monitorId: string; locationId: string; status: string; timestamp?: string }>
-    ) => {
-      const map = new Map<
-        string,
-        Array<{ status: string; locationId: string; timestamp: string; monitorUrl?: string }>
-      >();
-      for (const entry of entries) {
-        if (!map.has(entry.monitorId)) {
-          map.set(entry.monitorId, []);
-        }
-        map.get(entry.monitorId)!.push({
-          status: entry.status,
-          locationId: entry.locationId,
-          timestamp: entry.timestamp ?? '2025-05-28T10:00:00.000Z',
-        });
-      }
-      return map;
-    };
-
     it('groups multiple locations under a single configId entry', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(

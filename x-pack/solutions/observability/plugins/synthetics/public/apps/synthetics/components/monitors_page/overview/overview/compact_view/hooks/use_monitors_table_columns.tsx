@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
@@ -52,6 +52,21 @@ export const useMonitorsTableColumns = ({
 
   const { showFromAllSpaces } = useSelector(selectOverviewPageState);
 
+  // The Spaces column only adds value when monitors actually span more than
+  // one space. When the visible page only contains a single unique space, the
+  // 120px column degenerates into a wall of identical avatars — so hide it
+  // and let the surrounding columns reclaim the room.
+  const hasMultipleSpaces = useMemo(() => {
+    const seen = new Set<string>();
+    for (const item of items) {
+      for (const sp of item.spaces ?? []) {
+        seen.add(sp);
+        if (seen.size > 1) return true;
+      }
+    }
+    return false;
+  }, [items]);
+
   const onClickMonitorFilter = useCallback(
     (filterName: string, filterValue: string) => {
       const searchParams = new URLSearchParams(history.location.search);
@@ -90,9 +105,11 @@ export const useMonitorsTableColumns = ({
 
     return [
       {
+        field: 'overallStatus',
         name: STATUS,
         width: '120px',
-        render: (monitor: OverviewStatusMetaData) => (
+        sortable: true,
+        render: (_overallStatus: string, monitor: OverviewStatusMetaData) => (
           <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
         ),
       },
@@ -100,17 +117,31 @@ export const useMonitorsTableColumns = ({
         field: 'name',
         name: NAME,
         width: '15%',
+        sortable: true,
         render: (name: OverviewStatusMetaData['name'], monitor) => (
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-            <EuiFlexItem>
+          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
+            <EuiFlexItem grow={false}>
               <EuiText size="s">{name}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <MonitorTypeBadge
-                monitorType={monitor.type}
-                ariaLabel={getFilterForTypeMessage(monitor.type)}
-                onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
-              />
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <MonitorTypeBadge
+                    monitorType={monitor.type}
+                    ariaLabel={getFilterForTypeMessage(monitor.type)}
+                    onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
+                    size="s"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('xpack.synthetics.overview.compactView.scheduleInline', {
+                      defaultMessage: 'Every {schedule}m',
+                      values: { schedule: monitor.schedule },
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -122,6 +153,7 @@ export const useMonitorsTableColumns = ({
               field: 'urls' as const,
               name: URL,
               truncateText: true,
+              sortable: true,
               width: '15%',
               render: (url: OverviewStatusMetaData['urls']) =>
                 url ? (
@@ -156,17 +188,10 @@ export const useMonitorsTableColumns = ({
               name: TAGS,
               width: '15%',
               render: (monitor: OverviewStatusMetaData) => (
-                <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">@every {monitor.schedule}m</EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <TagsList
-                      tags={monitor.tags}
-                      onClick={(tag) => onClickMonitorFilter('tags', tag)}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <TagsList
+                  tags={monitor.tags}
+                  onClick={(tag) => onClickMonitorFilter('tags', tag)}
+                />
               ),
             },
           ]),
@@ -195,14 +220,13 @@ export const useMonitorsTableColumns = ({
               },
             },
           ]),
-      ...(showFromAllSpaces
+      ...(showFromAllSpaces && hasMultipleSpaces
         ? [
             {
               name: i18n.translate('xpack.synthetics.management.monitorList.spacesColumnTitle', {
                 defaultMessage: 'Spaces',
               }),
               field: 'spaces',
-              sortable: true,
               width: '120px',
               render: (monSpaces: string[]) => {
                 return (
@@ -223,6 +247,7 @@ export const useMonitorsTableColumns = ({
       },
     ];
   }, [
+    hasMultipleSpaces,
     histogramsById,
     isFlyoutOpen,
     minInterval,

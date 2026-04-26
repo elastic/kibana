@@ -48,7 +48,7 @@ import {
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ErrorCallout } from '../../../common/components/error_callout';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
-import type { EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
+import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
 import type { FlyoutParamProps } from './types';
