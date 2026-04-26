@@ -22,7 +22,7 @@ import { DefendInsightsResponse } from './common_attributes.gen';
 export const DefendInsightGetRequestParams = lazySchema(() =>
   z.object({
     /**
-     * The Defend insight id
+     * The Defend insight id.
      */
     id: NonEmptyString,
   })

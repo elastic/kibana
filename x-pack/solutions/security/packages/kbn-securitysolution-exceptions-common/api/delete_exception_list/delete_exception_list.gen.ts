@@ -33,6 +33,11 @@ export const DeleteExceptionListRequestQuery = lazySchema(() =>
      * Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.
      */
     list_id: ExceptionListHumanId.optional(),
+    /**
+      * `single` deletes the list in the current Kibana space; `agnostic` deletes a global list. Must match the
+list you are removing when using `list_id` or `id`.
+
+      */
     namespace_type: ExceptionNamespaceType.optional().default('single'),
   })
 );
