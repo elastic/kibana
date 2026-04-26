@@ -7,10 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { DataSourceType } from './datasource_types';
+
 export interface DataSourceListItem {
   id: string;
   name: string;
   description: string;
+  type: DataSourceType;
 }
 
 const INITIAL_ROWS: DataSourceListItem[] = [
@@ -18,26 +21,31 @@ const INITIAL_ROWS: DataSourceListItem[] = [
     id: 'ds-logs-prod',
     name: 'logs-production',
     description: 'Read-only connection used by Observability for production log indices.',
+    type: 's3',
   },
   {
     id: 'ds-security',
     name: 'security-analytics',
     description: 'Cross-cluster search target for detection rules and alert history.',
+    type: 'iceberg',
   },
   {
     id: 'ds-reports',
     name: 'reporting-archive',
     description: 'Historical CSV and PDF reports stored in a cold-tier cluster.',
+    type: 'gcs',
   },
   {
     id: 'ds-stage',
     name: 'staging-metrics',
     description: 'Low-volume metrics cluster for pre-production dashboards and experiments.',
+    type: 'jdbc',
   },
   {
     id: 'ds-fleet',
     name: 'fleet-ingest',
     description: 'Elasticsearch endpoint receiving Elastic Agent documents and fleet metadata.',
+    type: 'flight',
   },
 ];
 
@@ -56,7 +64,11 @@ export class SampleDataSourcesClient {
     return cloneRows(this.rows);
   }
 
-  public async add(input: { name: string; description: string }): Promise<DataSourceListItem> {
+  public async add(input: {
+    name: string;
+    description: string;
+    type: DataSourceType;
+  }): Promise<DataSourceListItem> {
     const name = input.name.trim();
     if (!name) {
       throw new Error(
@@ -73,7 +85,12 @@ export class SampleDataSourcesClient {
       );
     }
     const id = `ds-${Date.now().toString(36)}`;
-    const row: DataSourceListItem = { id, name, description: input.description.trim() };
+    const row: DataSourceListItem = {
+      id,
+      name,
+      description: input.description.trim(),
+      type: input.type,
+    };
     this.rows.push(row);
     return { ...row };
   }

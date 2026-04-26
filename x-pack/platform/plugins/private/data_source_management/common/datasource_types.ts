@@ -34,6 +34,16 @@ export type DataSourceWithSecrets =
 
 export type DataSourceType = 's3' | 'gcs' | 'azure_blob' | 'iceberg' | 'jdbc' | 'flight';
 
+/** All supported data source type values, for select components and validation. */
+export const ALL_DATA_SOURCE_TYPES: DataSourceType[] = [
+  's3',
+  'gcs',
+  'azure_blob',
+  'iceberg',
+  'jdbc',
+  'flight',
+];
+
 export interface S3DataSource extends DataSourceCommon {
   type: 's3';
   settings: S3DataSourceSettings;
