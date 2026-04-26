@@ -13,6 +13,7 @@ import { API_VERSIONS, type Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { getSpaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
+import { putSpaceExamples } from './examples';
 
 export function initPutSpacesApi(deps: ExternalRouteDeps) {
   const { router, getSpacesService, isServerless } = deps;
@@ -37,6 +38,9 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: putSpaceExamples,
+        },
         validate: {
           request: {
             params: schema.object({
@@ -51,6 +55,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
           },
           response: {
             200: {
+              body: () => getSpaceSchema(isServerless),
               description: 'Indicates a successful call.',
             },
           },
