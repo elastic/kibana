@@ -20,11 +20,13 @@ import {
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
+import type { DataSourceType } from '../common/datasource_types';
 import type { DataSetListItem } from '../common/sample_data_sets_client';
 import { SampleDataSetsClient } from '../common/sample_data_sets_client';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import { SampleDataSourcesClient } from '../common/sample_data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
+import { getDataSourceTypeLabel } from './get_data_source_type_label';
 
 export interface DataSourcesPageProps {
   pageTitle: string;
@@ -65,7 +67,11 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
   }, [dataSetsClient]);
 
   const handleCreateDataSourceSave = useCallback(
-    async (values: { name: string; description: string }): Promise<string | null> => {
+    async (values: {
+      name: string;
+      description: string;
+      type: DataSourceType;
+    }): Promise<string | null> => {
       try {
         await dataClient.add(values);
         setItems(await dataClient.get());
@@ -85,8 +91,18 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
           defaultMessage: 'Name',
         }),
         sortable: true,
-        width: '28%',
+        width: '24%',
         'data-test-subj': 'dataSourceManagementColName',
+      },
+      {
+        field: 'type',
+        name: i18n.translate('dataSourceManagement.table.columnType', {
+          defaultMessage: 'Type',
+        }),
+        sortable: true,
+        width: '20%',
+        render: (value: DataSourceListItem['type']) => getDataSourceTypeLabel(value),
+        'data-test-subj': 'dataSourceManagementColType',
       },
       {
         field: 'description',
@@ -158,6 +174,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
                   schema: {
                     fields: {
                       name: { type: 'string' },
+                      type: { type: 'string' },
                       description: { type: 'string' },
                     },
                   },
