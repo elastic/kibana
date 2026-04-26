@@ -12,7 +12,8 @@
  *
  * This demonstrates a threat intelligence connector with:
  * - File hash scanning (MD5, SHA-1, SHA-256)
- * - URL analysis and scanning
+ * - URL and domain analysis
+ * - Analysis result retrieval
  * - File submission for analysis
  * - IP address reputation lookups
  *
@@ -22,6 +23,11 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+
+const VIRUSTOTAL_API_BASE_URL = 'https://www.virustotal.com/api/v3';
+const VIRUSTOTAL_RESOURCE_TYPES = ['analysis', 'url', 'domain', 'ip', 'file'] as const;
+
+type VirusTotalResourceType = (typeof VIRUSTOTAL_RESOURCE_TYPES)[number];
 
 /**
  * Common error handling for VirusTotal API responses
@@ -49,6 +55,77 @@ interface ErrorResult {
     details: unknown;
   };
 }
+
+const isAbsoluteUrl = (value: string): boolean => {
+  try {
+    const { hostname } = new URL(value);
+    return Boolean(hostname);
+  } catch {
+    return false;
+  }
+};
+
+const normalizeDomain = (value: string): string => value.trim().toLowerCase();
+
+const isValidDomain = (value: string): boolean => {
+  const domain = normalizeDomain(value);
+
+  if (
+    domain.length === 0 ||
+    domain.length > 253 ||
+    domain.startsWith('.') ||
+    domain.endsWith('.') ||
+    domain.includes('/') ||
+    domain.includes(':') ||
+    /\s/.test(domain)
+  ) {
+    return false;
+  }
+
+  const labels = domain.split('.');
+  return (
+    labels.length > 1 &&
+    labels.every((label) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))
+  );
+};
+
+const urlOrDomainSchema = z
+  .string()
+  .trim()
+  .refine((value) => isAbsoluteUrl(value) || isValidDomain(value), {
+    message: 'Must be a valid absolute URL or bare domain',
+  });
+
+const getVirusTotalUrlIdentifier = (urlOrId: string): string => {
+  const value = urlOrId.trim();
+
+  if (!isAbsoluteUrl(value)) {
+    return encodeURIComponent(value);
+  }
+
+  return Buffer.from(value)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+};
+
+const getVirusTotalResourcePath = (resourceType: VirusTotalResourceType, id: string): string => {
+  const value = id.trim();
+
+  switch (resourceType) {
+    case 'analysis':
+      return `analyses/${encodeURIComponent(value)}`;
+    case 'url':
+      return `urls/${getVirusTotalUrlIdentifier(value)}`;
+    case 'domain':
+      return `domains/${encodeURIComponent(normalizeDomain(value))}`;
+    case 'ip':
+      return `ip_addresses/${encodeURIComponent(value)}`;
+    case 'file':
+      return `files/${encodeURIComponent(value)}`;
+  }
+};
 
 function handleVirusTotalError(error: unknown, options: ErrorHandlerOptions): ErrorResult | never {
   // Only handle axios errors with response
@@ -95,7 +172,7 @@ export const VirusTotalConnector: ConnectorSpec = {
     id: '.virustotal',
     displayName: 'VirusTotal',
     description: i18n.translate('connectorSpecs.virustotal.metadata.description', {
-      defaultMessage: 'File scanning, URL analysis, and threat intelligence lookups',
+      defaultMessage: 'File scanning, URL and domain analysis, and threat intelligence lookups',
     }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -128,7 +205,7 @@ export const VirusTotalConnector: ConnectorSpec = {
         const typedInput = input as { hash: string; failOnError?: boolean };
         try {
           const response = await ctx.client.get(
-            `https://www.virustotal.com/api/v3/files/${typedInput.hash}`
+            `${VIRUSTOTAL_API_BASE_URL}/files/${encodeURIComponent(typedInput.hash)}`
           );
           return {
             id: response.data.data.id,
@@ -148,7 +225,7 @@ export const VirusTotalConnector: ConnectorSpec = {
     scanUrl: {
       isTool: true,
       input: z.object({
-        url: z.url().describe('URL to scan'),
+        url: urlOrDomainSchema.describe('Absolute URL to scan, or bare domain to look up'),
         failOnError: z
           .boolean()
           .optional()
@@ -160,9 +237,24 @@ export const VirusTotalConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { url: string; failOnError?: boolean };
         try {
+          const url = typedInput.url.trim();
+
+          if (isValidDomain(url)) {
+            const response = await ctx.client.get(
+              `${VIRUSTOTAL_API_BASE_URL}/domains/${encodeURIComponent(normalizeDomain(url))}`
+            );
+            return {
+              id: response.data.data.id,
+              type: response.data.data.type,
+              attributes: response.data.data.attributes,
+              stats: response.data.data.attributes.last_analysis_stats,
+              reputation: response.data.data.attributes.reputation,
+            };
+          }
+
           const submitResponse = await ctx.client.post(
-            'https://www.virustotal.com/api/v3/urls',
-            new URLSearchParams({ url: typedInput.url }),
+            `${VIRUSTOTAL_API_BASE_URL}/urls`,
+            new URLSearchParams({ url }),
             {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -171,7 +263,7 @@ export const VirusTotalConnector: ConnectorSpec = {
           );
           const analysisId = submitResponse.data.data.id;
           const analysisResponse = await ctx.client.get(
-            `https://www.virustotal.com/api/v3/analyses/${analysisId}`
+            `${VIRUSTOTAL_API_BASE_URL}/analyses/${encodeURIComponent(analysisId)}`
           );
           return {
             id: analysisId,
@@ -183,6 +275,58 @@ export const VirusTotalConnector: ConnectorSpec = {
             failOnError: typedInput.failOnError,
             notFoundMessage: 'URL not found in VirusTotal database',
             genericMessage: 'VirusTotal API request failed',
+          });
+        }
+      },
+    },
+
+    getAnalysisResults: {
+      isTool: true,
+      input: z.object({
+        id: z
+          .string()
+          .trim()
+          .min(1)
+          .describe('VirusTotal analysis ID, URL, domain, IP address, or file hash'),
+        resourceType: z
+          .enum(VIRUSTOTAL_RESOURCE_TYPES)
+          .optional()
+          .default('analysis')
+          .describe('Type of VirusTotal resource to retrieve'),
+        failOnError: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe(
+            'If true, throw error on API failures. If false (default), return error details'
+          ),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          id: string;
+          resourceType?: VirusTotalResourceType;
+          failOnError?: boolean;
+        };
+        const resourceType = typedInput.resourceType ?? 'analysis';
+
+        try {
+          const response = await ctx.client.get(
+            `${VIRUSTOTAL_API_BASE_URL}/${getVirusTotalResourcePath(resourceType, typedInput.id)}`
+          );
+          const attributes = response.data.data.attributes;
+          return {
+            id: response.data.data.id,
+            type: response.data.data.type,
+            attributes,
+            status: attributes.status,
+            stats: attributes.stats ?? attributes.last_analysis_stats,
+            links: response.data.data.links,
+          };
+        } catch (error: unknown) {
+          return handleVirusTotalError(error, {
+            failOnError: typedInput.failOnError,
+            notFoundMessage: 'VirusTotal analysis results not found',
+            genericMessage: 'VirusTotal analysis results request failed',
           });
         }
       },
@@ -208,10 +352,7 @@ export const VirusTotalConnector: ConnectorSpec = {
           const formData = new FormData();
           formData.append('file', new Blob([buffer]), typedInput.filename || 'file');
 
-          const response = await ctx.client.post(
-            'https://www.virustotal.com/api/v3/files',
-            formData
-          );
+          const response = await ctx.client.post(`${VIRUSTOTAL_API_BASE_URL}/files`, formData);
           return {
             id: response.data.data.id,
             type: response.data.data.type,
@@ -243,7 +384,7 @@ export const VirusTotalConnector: ConnectorSpec = {
         const typedInput = input as { ip: string; failOnError?: boolean };
         try {
           const response = await ctx.client.get(
-            `https://www.virustotal.com/api/v3/ip_addresses/${typedInput.ip}`
+            `${VIRUSTOTAL_API_BASE_URL}/ip_addresses/${encodeURIComponent(typedInput.ip)}`
           );
           return {
             id: response.data.data.id,
@@ -265,7 +406,7 @@ export const VirusTotalConnector: ConnectorSpec = {
   test: {
     handler: async (ctx) => {
       try {
-        await ctx.client.get('https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8');
+        await ctx.client.get(`${VIRUSTOTAL_API_BASE_URL}/ip_addresses/8.8.8.8`);
         return {
           ok: true,
           message: 'Successfully connected to VirusTotal API',
