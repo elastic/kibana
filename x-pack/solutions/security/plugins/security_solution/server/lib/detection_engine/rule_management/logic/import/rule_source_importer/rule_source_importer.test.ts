@@ -31,6 +31,7 @@ describe('ruleSourceImporter', () => {
     ruleAssetsClientMock.fetchLatestAssets.mockResolvedValue([{}]);
     ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([]);
     ruleAssetsClientMock.fetchAssetsByVersion.mockResolvedValue([]);
+    ruleAssetsClientMock.fetchDeprecatedRules.mockResolvedValue([]);
     ruleObjectsClientMock = createPrebuiltRuleObjectsClientMock();
     ruleObjectsClientMock.fetchInstalledRulesByIds.mockResolvedValue([]);
     ruleToImport = { rule_id: 'rule-1', version: 1 } as RuleToImport;
@@ -98,6 +99,24 @@ describe('ruleSourceImporter', () => {
       expect(subject.isPrebuiltRule(ruleWithoutVersion)).toBe(true);
     });
 
+    it("returns true if the rule's rule_id only matches a deprecated rule asset", async () => {
+      ruleAssetsClientMock.fetchLatestVersions.mockReset().mockResolvedValue([]);
+      ruleAssetsClientMock.fetchDeprecatedRules.mockReset().mockResolvedValue([
+        {
+          rule_id: ruleToImport.rule_id,
+          version: ruleToImport.version ?? 1,
+          deprecated: true,
+          name: 'Deprecated rule',
+        },
+      ]);
+      await subject.setup([ruleToImport]);
+
+      expect(subject.isPrebuiltRule(ruleToImport)).toBe(true);
+      expect(ruleAssetsClientMock.fetchDeprecatedRules).toHaveBeenCalledWith([
+        ruleToImport.rule_id,
+      ]);
+    });
+
     it('throws an error if the rule is not known to the calculator', async () => {
       await subject.setup([ruleToImport]);
 
@@ -141,6 +160,25 @@ describe('ruleSourceImporter', () => {
       expect(() => subject.calculateRuleSource(rule)).toThrowErrorMatchingInlineSnapshot(
         `"Rule validated-rule was not registered during setup."`
       );
+    });
+
+    it('returns external rule_source for re-imports of deprecated prebuilt rules', async () => {
+      ruleAssetsClientMock.fetchLatestVersions.mockReset().mockResolvedValue([]);
+      ruleAssetsClientMock.fetchAssetsByVersion.mockReset().mockResolvedValue([]);
+      ruleAssetsClientMock.fetchDeprecatedRules.mockReset().mockResolvedValue([
+        {
+          rule_id: rule.rule_id,
+          version: rule.version ?? 1,
+          deprecated: true,
+          name: 'Deprecated rule',
+        },
+      ]);
+      await subject.setup([rule]);
+
+      const result = subject.calculateRuleSource(rule);
+
+      expect(result.immutable).toBe(true);
+      expect(result.ruleSource.type).toBe('external');
     });
   });
 });
