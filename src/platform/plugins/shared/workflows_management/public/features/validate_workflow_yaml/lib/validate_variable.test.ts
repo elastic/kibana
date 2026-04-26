@@ -274,6 +274,109 @@ describe('validateVariable', () => {
     });
   });
 
+  it('should validate prefix and dynamic key for dynamic bracket access', () => {
+    const variableItem = createVariableItem({
+      key: 'steps.load.output._source[steps.space.output].id',
+    });
+    mockParseVariablePath
+      .mockReturnValueOnce({
+        propertyPath: 'steps.load.output._source[steps.space.output].id',
+        filters: [],
+        hasDynamicBracketAccess: true,
+        dynamicAccess: {
+          prefixPath: 'steps.load.output._source',
+          dynamicKey: 'steps.space.output',
+          suffixPath: 'id',
+        },
+      })
+      .mockReturnValueOnce({
+        propertyPath: 'steps.space.output',
+        filters: [],
+        hasDynamicBracketAccess: false,
+      });
+    mockGetSchemaAtPath
+      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
+      .mockReturnValueOnce({ schema: z.string(), scopedToPath: null });
+
+    const result = validateVariable(variableItem, mockContext);
+
+    expect(result).toMatchObject({
+      message: null,
+      severity: null,
+      owner: 'variable-validation',
+    });
+    expect(result.hoverMessage).toContain('Dynamic bracket access');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledTimes(2);
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.load.output._source');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.space.output');
+  });
+
+  it('should return error when dynamic bracket prefix path is invalid', () => {
+    const variableItem = createVariableItem({
+      key: 'steps.load.output._source[steps.space.output].id',
+    });
+    mockParseVariablePath
+      .mockReturnValueOnce({
+        propertyPath: 'steps.load.output._source[steps.space.output].id',
+        filters: [],
+        hasDynamicBracketAccess: true,
+        dynamicAccess: {
+          prefixPath: 'steps.load.output._source',
+          dynamicKey: 'steps.space.output',
+          suffixPath: 'id',
+        },
+      })
+      .mockReturnValueOnce({
+        propertyPath: 'steps.space.output',
+        filters: [],
+        hasDynamicBracketAccess: false,
+      });
+    mockGetSchemaAtPath
+      .mockReturnValueOnce({ schema: null, scopedToPath: null })
+      .mockReturnValueOnce({ schema: z.string(), scopedToPath: null });
+
+    const result = validateVariable(variableItem, mockContext);
+
+    expect(result).toMatchObject({
+      message: expect.stringContaining('Invalid prefix path'),
+      severity: 'error',
+      owner: 'variable-validation',
+    });
+  });
+
+  it('should return error when dynamic bracket key is invalid', () => {
+    const variableItem = createVariableItem({
+      key: 'steps.load.output._source[steps.nonexistent.output].id',
+    });
+    mockParseVariablePath
+      .mockReturnValueOnce({
+        propertyPath: 'steps.load.output._source[steps.nonexistent.output].id',
+        filters: [],
+        hasDynamicBracketAccess: true,
+        dynamicAccess: {
+          prefixPath: 'steps.load.output._source',
+          dynamicKey: 'steps.nonexistent.output',
+          suffixPath: 'id',
+        },
+      })
+      .mockReturnValueOnce({
+        propertyPath: 'steps.nonexistent.output',
+        filters: [],
+        hasDynamicBracketAccess: false,
+      });
+    mockGetSchemaAtPath
+      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
+      .mockReturnValueOnce({ schema: null, scopedToPath: null });
+
+    const result = validateVariable(variableItem, mockContext);
+
+    expect(result).toMatchObject({
+      message: expect.stringContaining('Dynamic key steps.nonexistent.output is invalid'),
+      severity: 'error',
+      owner: 'variable-validation',
+    });
+  });
+
   it('should handle array input with default value in foreach validation', () => {
     const variableItem = createVariableItem({
       key: 'inputs.days_to_plan',

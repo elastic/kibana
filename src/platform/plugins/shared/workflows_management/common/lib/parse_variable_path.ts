@@ -7,16 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ALLOWED_KEY_REGEX, PROPERTY_PATH_REGEX } from './regex';
+import { ALLOWED_KEY_REGEX, DYNAMIC_BRACKET_ACCESS_REGEX, PROPERTY_PATH_REGEX } from './regex';
 
 export function validateVariablePath(path: string) {
   return ALLOWED_KEY_REGEX.test(path);
+}
+
+export interface DynamicBracketAccessInfo {
+  prefixPath: string;
+  dynamicKey: string;
+  suffixPath: string | null;
 }
 
 export interface ParsedVariablePath {
   errors?: string[];
   propertyPath: string | null;
   filters: string[];
+  hasDynamicBracketAccess?: boolean;
+  dynamicAccess?: DynamicBracketAccessInfo;
 }
 
 // Receives a variable path e.g. 'items[0].name' or 'items[0].name | title' or 'items[0].name | title | uppercase'
@@ -65,10 +73,30 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
     };
   }
 
+  const hasDynamicBracketAccess = DYNAMIC_BRACKET_ACCESS_REGEX.test(propertyPath);
+  const dynamicAccess = hasDynamicBracketAccess
+    ? extractDynamicBracketAccess(propertyPath)
+    : undefined;
+
   return {
     propertyPath,
     filters,
+    hasDynamicBracketAccess,
+    dynamicAccess,
   };
+}
+
+function extractDynamicBracketAccess(propertyPath: string): DynamicBracketAccessInfo | undefined {
+  const match = propertyPath.match(DYNAMIC_BRACKET_ACCESS_REGEX);
+  if (!match || match.index === undefined) return undefined;
+
+  const prefixPath = propertyPath.slice(0, match.index);
+  const bracketContent = match[0];
+  const dynamicKey = bracketContent.slice(1, -1).trim();
+  const afterBracket = propertyPath.slice(match.index + bracketContent.length);
+  const suffixPath = afterBracket.startsWith('.') ? afterBracket.slice(1) : afterBracket || null;
+
+  return { prefixPath, dynamicKey, suffixPath: suffixPath || null };
 }
 
 function splitByPipeRespectingParentheses(input: string): string[] {
