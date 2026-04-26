@@ -10,6 +10,7 @@ import { ruleTypeUsageSchema } from './schemas/detection_rule_usage';
 import { ruleMetricsSchema } from './schemas/rule_metrics';
 import { ruleStatusMetricsSchema } from './schemas/detection_rule_status';
 import { ruleUpgradeStatusSchema } from './schemas/detection_rule_upgrade_status';
+import { ruleDeprecatedStatusSchema } from './schemas/detection_rule_deprecated_status';
 import type { RuleAdoption } from './types';
 import { ruleCustomizedFieldsCounts } from './schemas/detection_rule_customization_status';
 
@@ -35,6 +36,7 @@ export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
   detection_rule_status: ruleStatusMetricsSchema,
   elastic_detection_rule_upgrade_status: ruleUpgradeStatusSchema,
   elastic_detection_rule_customization_status: ruleCustomizedFieldsCounts,
+  elastic_detection_rule_deprecated_status: ruleDeprecatedStatusSchema,
   ai_created_rules: {
     total: {
       type: 'long',

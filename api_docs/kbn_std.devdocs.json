@@ -1074,7 +1074,7 @@
           "(rootValue: Record<string, any>) => { [key: string]: any; }"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/get_flattened_object.ts",
-        "lineNumber": 14,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1090,7 +1090,7 @@
               "Record<string, any>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get_flattened_object.ts",
-            "lineNumber": 25,
+            "lineNumber": 45,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
