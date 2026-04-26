@@ -192,14 +192,3 @@ export interface UserAgentFields {
   'user_agent.name': string;
   'user_agent.version': string;
 }
-
-export interface TraceDocumentOverview
-  extends TraceFields,
-    Partial<ServiceFields>,
-    Partial<SpanFields>,
-    Partial<UserAgentFields>,
-    Partial<TransactionFields> {
-  duration?: number;
-  kind?: string;
-  'resource.attributes.telemetry.sdk.language'?: string;
-}

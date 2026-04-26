@@ -16,7 +16,7 @@ export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"
 
-BUILD_ARGS=("--with-test-plugins" "--with-example-plugins" "--no-debug")
+BUILD_ARGS=("--with-test-plugins" "--with-example-plugins" "--no-debug" "--tar-zstd")
 is_pr_with_label "ci:build-all-platforms" && BUILD_ARGS+=("--all-platforms")
 is_pr_with_label "ci:build-docker-cross-compile" && BUILD_ARGS+=("--docker-cross-compile")
 is_pr_with_label "ci:build-os-packages" || BUILD_ARGS+=("--skip-os-packages")
@@ -31,6 +31,6 @@ wait $cleanup_pid || true
 
 echo "--- Archive Kibana Distribution"
 version="$(jq -r '.version' package.json)"
-linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.gz"
+linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.zst"
 mkdir -p "$KIBANA_BUILD_LOCATION"
-tar -xzf "$linuxBuild" -C "$KIBANA_BUILD_LOCATION" --strip=1
+tar -xf "$linuxBuild" -I zstd -C "$KIBANA_BUILD_LOCATION" --strip=1
