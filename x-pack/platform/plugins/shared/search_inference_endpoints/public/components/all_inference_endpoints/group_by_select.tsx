@@ -14,14 +14,8 @@ import {
   EuiText,
   type EuiSelectableOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
-import {
-  EMPTY_FILTER_MESSAGE,
-  GROUP_BY_NONE,
-  GROUP_BY_MODELS,
-  GROUP_BY_SERVICE,
-} from '../../../common/translations';
 import { GroupByOptions } from '../../types';
 import { GroupByFilterButton, GroupBySelectableContainer } from './styles';
 
@@ -33,15 +27,21 @@ interface GroupBySelectProps {
 const GROUP_BY_OPTIONS = [
   {
     key: GroupByOptions.None,
-    label: GROUP_BY_NONE,
+    label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.none.label', {
+      defaultMessage: 'None',
+    }),
   },
   {
     key: GroupByOptions.Model,
-    label: GROUP_BY_MODELS,
+    label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.models.label', {
+      defaultMessage: 'Model Author',
+    }),
   },
   {
     key: GroupByOptions.Service,
-    label: GROUP_BY_SERVICE,
+    label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.service.label', {
+      defaultMessage: 'Service',
+    }),
   },
 ];
 
@@ -95,11 +95,10 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
             isSelected={isPopoverOpen}
           >
             <EuiText size="s" className="eui-textTruncate">
-              <FormattedMessage
-                id="xpack.searchInferenceEndpoints.groupBy.label"
-                defaultMessage="Group: {selectedGroup}"
-                values={{ selectedGroup: selectedOptionLabel }}
-              />
+              {i18n.translate('xpack.searchInferenceEndpoints.groupBy.label', {
+                defaultMessage: 'Group: {selectedGroup}',
+                values: { selectedGroup: selectedOptionLabel },
+              })}
             </EuiText>
           </EuiFilterButton>
         }
@@ -111,7 +110,9 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
         <EuiSelectable
           data-test-subj="group-by-selectable"
           options={options}
-          emptyMessage={EMPTY_FILTER_MESSAGE}
+          emptyMessage={i18n.translate('xpack.searchInferenceEndpoints.filter.emptyMessage', {
+            defaultMessage: 'No options',
+          })}
           onChange={handleValueChange}
           singleSelection="always"
           renderOption={(option) => (

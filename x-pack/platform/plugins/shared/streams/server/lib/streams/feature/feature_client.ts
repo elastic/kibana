@@ -32,6 +32,7 @@ import {
   FEATURE_EXCLUDED_AT,
   FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
+  FEATURE_RUN_ID,
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
@@ -589,6 +590,7 @@ function toStorage(stream: string, feature: Feature, inferenceAvailable: boolean
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
     [FEATURE_EXCLUDED_AT]: feature.excluded_at,
+    [FEATURE_RUN_ID]: feature.run_id,
     [FEATURE_TITLE]: feature.title,
     [FEATURE_FILTER]: feature.filter,
     ...(inferenceAvailable && embeddingText ? { [FEATURE_SEARCH_EMBEDDING]: embeddingText } : {}),
@@ -613,6 +615,7 @@ function fromStorage(feature: StoredFeature): Feature {
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
     excluded_at: feature[FEATURE_EXCLUDED_AT],
+    run_id: feature[FEATURE_RUN_ID],
     title: feature[FEATURE_TITLE],
     filter: feature[FEATURE_FILTER],
   };

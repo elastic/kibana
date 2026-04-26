@@ -595,7 +595,6 @@ export const RuleDetailsPage = connector(
     const deprecationCallout = useDeprecatedRuleDetailsCallout({
       rule,
       confirmDeletion,
-      showBulkDuplicateExceptionsConfirmation: showBulkDuplicateConfirmation,
     });
 
     const {

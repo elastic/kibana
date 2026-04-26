@@ -18,8 +18,10 @@ export {
   dataViewSpecSchema,
 } from './src/schema_data_view';
 export { esqlDataSourceSchema } from './src/schema_esql_data_source';
-export { runtimeFieldSchema } from './src/schema_runtime_field';
 export type {
+  AsCodeCompositeRuntimeField,
+  AsCodeRuntimeBaseField,
+  AsCodeFieldSettings,
   AsCodeDataView,
   AsCodeDataViewReference,
   AsCodeDataViewSpec,
