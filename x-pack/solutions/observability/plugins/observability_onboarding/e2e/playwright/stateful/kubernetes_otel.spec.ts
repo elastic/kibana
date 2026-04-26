@@ -136,6 +136,7 @@ test('Otel Kubernetes', async ({
 
     const serviceTestId = 'serviceLink_opentelemetry/java/elastic';
 
+    await apmServiceInventoryPage.waitForServiceRow(serviceTestId);
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
   } else {
