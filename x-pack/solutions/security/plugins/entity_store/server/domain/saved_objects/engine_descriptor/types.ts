@@ -231,6 +231,12 @@ const logExtractionRuntimeStateSchemaV5 = schema.object({
 const engineDescriptorSchemaV5 = schema.object({
   ...engineDescriptorAttributesSchemaV1,
   logExtractionState: logExtractionRuntimeStateSchemaV5,
+  error: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
 });
 
 const version5: SavedObjectsFullModelVersion = {
