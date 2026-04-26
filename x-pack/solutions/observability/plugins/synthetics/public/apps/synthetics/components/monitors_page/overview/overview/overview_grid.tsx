@@ -5,9 +5,13 @@
  * 2.0.
  */
 import React, { memo, useCallback, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
+import { DisplayOptionsPopover } from '../../common/display_options_popover';
+import { selectOverviewPageState } from '../../../../state';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
@@ -46,9 +50,15 @@ export const OverviewGrid = memo(
     );
     const { lastRefresh } = useSyntheticsRefreshContext();
 
+    // Trend refreshes are only consumed by the card view's sparklines. The
+    // compact view drives its own trend fetches via `useOverviewTrendsRequests`
+    // keyed to the visible page, so dispatching here would just be duplicate
+    // work. Also wait for the first overview load — refreshing before we know
+    // what monitors exist throws away the response anyway.
     useEffect(() => {
+      if (view !== 'cardView' || !isInitialized) return;
       dispatch(refreshOverviewTrends.get());
-    }, [dispatch, lastRefresh]);
+    }, [dispatch, lastRefresh, view, isInitialized]);
 
     // Display no monitors found when down, up, or disabled filter produces no results
     if (status && !monitorsSortedByStatus.length && isInitialized) {
@@ -64,7 +74,14 @@ export const OverviewGrid = memo(
           wrap={true}
         >
           <EuiFlexItem grow={true}>
-            <OverviewPaginationInfo total={status ? monitorsSortedByStatus.length : undefined} />
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <OverviewPaginationInfo
+                  total={status ? monitorsSortedByStatus.length : undefined}
+                />
+              </EuiFlexItem>
+              <ActiveFiltersBadges />
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ShowAllSpaces />
@@ -85,8 +102,18 @@ export const OverviewGrid = memo(
               <ViewButtons />
             </EuiFlexItem>
           ) : null}
+          <EuiFlexItem grow={false}>
+            <DisplayOptionsPopover />
+          </EuiFlexItem>
         </EuiFlexGroup>
-        {loading && isInitialized ? (
+        {/*
+          Card view has no built-in refresh indicator, so we surface a thin
+          progress bar above the grid while a fetch is in flight. The compact
+          (table) view already paints its own loading overlay via
+          `EuiBasicTable loading={...}`, so showing the progress bar there too
+          would render two competing spinners.
+        */}
+        {loading && isInitialized && view !== 'compactView' ? (
           <>
             <EuiProgress size="xs" color="accent" />
             <EuiSpacer
@@ -111,4 +138,47 @@ export const OverviewGrid = memo(
       </>
     );
   }
+);
+
+/**
+ * Renders a small info icon next to the "Showing X monitors" pagination info
+ * when a URL-driven filter is narrowing the list. The tooltip explains *why*
+ * the count may be lower than expected (e.g. range filter active) and shows
+ * the actual range. Users clear the filter from Display options — keeping
+ * the indicator informational keeps the toolbar uncluttered.
+ *
+ * Cosmetic localStorage prefs intentionally don't surface here — they don't
+ * change what's on screen, only how it's drawn.
+ */
+const ActiveFiltersBadges: React.FC = () => {
+  const { filterByDateRange, dateRangeStart, dateRangeEnd } = useSelector(selectOverviewPageState);
+
+  if (!filterByDateRange) return null;
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiIconTip
+        type="info"
+        color="subdued"
+        position="top"
+        aria-label={INFO_ARIA_LABEL}
+        data-test-subj="syntheticsActiveFilterByDateRangeInfo"
+        content={
+          <FormattedMessage
+            id="xpack.synthetics.overview.activeFilters.filterByDateRangeTooltip"
+            defaultMessage="Showing only monitors with a run between {start} and {end}. Adjust this in Display options."
+            values={{
+              start: <strong>{dateRangeStart || 'now-15m'}</strong>,
+              end: <strong>{dateRangeEnd || 'now'}</strong>,
+            }}
+          />
+        }
+      />
+    </EuiFlexItem>
+  );
+};
+
+const INFO_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.overview.activeFilters.filterByDateRangeAriaLabel',
+  { defaultMessage: 'Filtered by date range' }
 );

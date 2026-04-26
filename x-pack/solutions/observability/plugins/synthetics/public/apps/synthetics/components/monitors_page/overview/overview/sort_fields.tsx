@@ -79,6 +79,34 @@ export const SortFields = () => {
       },
     },
     {
+      label: URL_LABEL,
+      value: 'urls',
+      checked: sortField === 'urls',
+      defaultSortOrder: 'asc',
+      onClick: () => {
+        handleSortChange(
+          setOverviewPageStateAction({
+            sortField: 'urls',
+            sortOrder: 'asc',
+          })
+        );
+      },
+    },
+    {
+      label: MONITOR_TYPE_LABEL,
+      value: `${ConfigKey.MONITOR_TYPE}.keyword`,
+      checked: sortField === `${ConfigKey.MONITOR_TYPE}.keyword`,
+      defaultSortOrder: 'asc',
+      onClick: () => {
+        handleSortChange(
+          setOverviewPageStateAction({
+            sortField: `${ConfigKey.MONITOR_TYPE}.keyword`,
+            sortOrder: 'asc',
+          })
+        );
+      },
+    },
+    {
       label: LAST_MODIFIED_LABEL,
       value: 'updated_at',
       checked: sortField === 'updated_at',
@@ -137,6 +165,12 @@ const getOrderContent = (sortField: MonitorListSortField) => {
         asc: SORT_ALPHABETICAL_ASC,
         desc: SORT_ALPHABETICAL_DESC,
         label: URL_LABEL,
+      };
+    case `${ConfigKey.MONITOR_TYPE}.keyword`:
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: MONITOR_TYPE_LABEL,
       };
     default:
       return {
@@ -200,6 +234,10 @@ const STATUS_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.statu
 
 const URL_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.url.label', {
   defaultMessage: 'URL',
+});
+
+const MONITOR_TYPE_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.monitorType.label', {
+  defaultMessage: 'Monitor type',
 });
 
 const ALPHABETICAL_LABEL = i18n.translate(

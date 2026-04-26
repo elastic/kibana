@@ -997,6 +997,87 @@ describe('current status route', () => {
       expect(result.pending).toEqual(pending);
     });
   });
+
+  describe('error reason and downSince enrichment', () => {
+    it('attaches error + downSince to down locations and omits them on up locations', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'id1', locationId: japanLoc.id },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }],
+              },
+              // Up bucket: filter > top_hits short-circuits with no hits.
+              errorAndState: { doc_count: 0, latest: { hits: { hits: [] } } },
+            },
+            {
+              key: { monitorId: 'id2', locationId: japanLoc.id },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2025-05-28T10:00:00.000Z'] }],
+              },
+              errorAndState: { doc_count: 0, latest: { hits: { hits: [] } } },
+            },
+            {
+              key: { monitorId: 'id2', locationId: germanyLoc.id },
+              status: {
+                top: [
+                  { metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:00:00.000Z'] },
+                ],
+              },
+              errorAndState: {
+                doc_count: 1,
+                latest: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          error: { message: 'TLS handshake failed', type: 'io' },
+                          state: { started_at: '2025-05-28T09:30:00.000Z' },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = { request: { query: {} }, syntheticsEsClient };
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      // id1 (single up location) — error/downSince must be stripped even if
+      // the latest summary doc still carries legacy state info.
+      const upMonitor = result.upConfigs.id1;
+      expect(upMonitor.locations).toEqual([
+        { id: japanLoc.id, label: japanLoc.label, status: 'up' },
+      ]);
+
+      // id2 has up (japan) + down (germany). It stays in upConfigs because of
+      // the existing grouping logic (monitor lands wherever its first
+      // location was), but overallStatus flips to down. The down location
+      // alone should carry the new fields.
+      const mixedMonitor = result.upConfigs.id2;
+      expect(mixedMonitor.overallStatus).toBe('down');
+      expect(mixedMonitor.locations).toEqual([
+        { id: japanLoc.id, label: japanLoc.label, status: 'up' },
+        {
+          id: germanyLoc.id,
+          label: germanyLoc.label,
+          status: 'down',
+          downSince: '2025-05-28T09:30:00.000Z',
+          error: { message: 'TLS handshake failed', type: 'io' },
+        },
+      ]);
+    });
+  });
 });
 
 function getEsResponse({ buckets, after }: { buckets: any[]; after?: any }) {

@@ -46,21 +46,21 @@ export function useMonitorList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastRefresh]);
 
-  // On initial mount, load the page
-  useDebounce(
-    () => {
-      if (isInitialMount.current) {
-        if (loaded) {
-          dispatch(quietFetchMonitorListAction(pageState));
-        } else {
-          dispatch(fetchMonitorListAction.get(pageState));
-        }
-      }
-    },
-    100,
-    // we don't use pageState here, for pageState, useDebounce will handle it
-    [dispatch]
-  );
+  // On initial mount fire the request immediately. The previous implementation
+  // wrapped this in `useDebounce(100)` which delayed the request by 100ms on
+  // top of the saga's own `debounce(300)`. The saga still rate-limits rapid
+  // pageState changes, so the client-side delay was pure latency on top of the
+  // already-slow `/synthetics/monitors` round trip.
+  useEffect(() => {
+    if (loaded) {
+      dispatch(quietFetchMonitorListAction(pageState));
+    } else {
+      dispatch(fetchMonitorListAction.get(pageState));
+    }
+    // Only run once on mount — `pageState` changes are handled by the
+    // debounced effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   useDebounce(
     () => {

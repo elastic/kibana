@@ -34,21 +34,20 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastRefresh]);
 
-  // On initial mount, load the page
-  useDebounce(
-    () => {
-      if (isInitialMount.current) {
-        if (loaded) {
-          dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
-        } else {
-          dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
-        }
-      }
-    },
-    100,
-    // we don't use pageState or scopeStatus here, for pageState, useDebounce will handle it
-    [dispatch]
-  );
+  // On initial mount, fire the request immediately. The previous version
+  // wrapped this in `useDebounce(100)` which delayed first paint by ~100ms on
+  // top of the saga's own `debounce(300)`. The saga still rate-limits rapid
+  // pageState changes, so the client-side delay is pure latency.
+  useEffect(() => {
+    if (loaded) {
+      dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+    } else {
+      dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+    }
+    // Only run once on mount — `pageState` changes are handled by the debounced
+    // effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   useDebounce(
     () => {

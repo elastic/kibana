@@ -29,6 +29,13 @@ const FetchMonitorQueryArgsCommon = {
   sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
   showFromAllSpaces: t.boolean,
   useLogicalAndFor: t.array(t.union(useLogicalAndFileLiteral)),
+  // Optional date-range filter for the overview list. When `filterByDateRange`
+  // is true, the server narrows the result set to monitors that have a final
+  // summary in `[dateRangeStart, dateRangeEnd]`. The range strings accept
+  // datemath (e.g. `now-15m`) or ISO timestamps.
+  filterByDateRange: t.boolean,
+  dateRangeStart: t.string,
+  dateRangeEnd: t.string,
 };
 
 export const FetchMonitorManagementListQueryArgsCodec = t.partial({

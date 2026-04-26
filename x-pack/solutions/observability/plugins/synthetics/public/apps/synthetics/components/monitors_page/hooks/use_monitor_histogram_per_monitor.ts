@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { useMemo } from 'react';
 
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { getHistogramInterval } from '../common/get_histogram_interval';
@@ -30,12 +31,20 @@ export const useMonitorHistogramPerMonitor = ({
 
   const { lastRefresh } = useSyntheticsRefreshContext();
 
-  const monitorIds = (items ?? []).map(({ configId }) => configId);
-
-  const { queryParams, minInterval } = getQueryParams(dateRangeStart, dateRangeEnd, monitorIds);
+  // See the sibling `use_monitor_histogram_per_location` for the rationale —
+  // stabilizing the cache key avoids a per-render JSON.stringify over the
+  // entire visible page.
+  const idsKey = useMemo(
+    () => (items ?? []).map(({ configId }) => configId).join('|'),
+    [items]
+  );
+  const { queryParams, minInterval } = useMemo(() => {
+    const monitorIds = idsKey ? idsKey.split('|') : [];
+    return getQueryParams(dateRangeStart, dateRangeEnd, monitorIds);
+  }, [dateRangeStart, dateRangeEnd, idsKey]);
   const { data, loading } = useReduxEsSearch<Ping, typeof queryParams>(
     queryParams,
-    [JSON.stringify(monitorIds), lastRefresh],
+    [idsKey, lastRefresh],
     {
       name: 'getMonitorDownHistoryPerMonitor',
       isRequestReady: isReady,

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,14 +23,15 @@ import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
 import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
+import { getLatestDownSummary } from '../get_latest_down_summary';
 import {
   STATUS,
   ACTIONS,
+  LATEST_ERROR,
   LOCATIONS,
   NAME,
+  NO_ERROR,
   TAGS,
-  URL,
-  NO_URL,
   MONITOR_HISTORY,
 } from '../labels';
 import { useKibanaSpace } from '../../../../../../../../hooks/use_kibana_space';
@@ -46,8 +47,15 @@ export const useMonitorsTableColumns = ({
   isFlyoutOpen?: boolean;
 }) => {
   const history = useHistory();
-  const { histogramsById, minInterval } = useMonitorHistogram({ items });
+  // Skip the histogram fetch while the flyout is open — the column it feeds
+  // (`MONITOR_HISTORY`) is hidden in that layout, so paying for an ES query +
+  // the resulting render work just warms a cache nobody sees right now.
+  const { histogramsById, minInterval } = useMonitorHistogram({
+    items,
+    enabled: !isFlyoutOpen,
+  });
   const { space } = useKibanaSpace();
+  const spaceId = space?.id;
   const { spaces } = useKibana<ClientPluginsStart>().services;
 
   const { showFromAllSpaces } = useSelector(selectOverviewPageState);
@@ -104,19 +112,23 @@ export const useMonitorsTableColumns = ({
     const LazySpaceList = spaces?.ui.components.getSpaceList ?? (() => null);
 
     return [
-      {
-        field: 'overallStatus',
-        name: STATUS,
-        width: '120px',
-        sortable: true,
-        render: (_overallStatus: string, monitor: OverviewStatusMetaData) => (
-          <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
-        ),
-      },
+          {
+            field: 'overallStatus',
+            name: STATUS,
+            width: '160px',
+            sortable: true,
+            render: (_overallStatus: string, monitor: OverviewStatusMetaData) => (
+              <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
+            ),
+          },
       {
         field: 'name',
         name: NAME,
-        width: '15%',
+        // Bumped to 25% so the folded URL has room to render readably on
+        // common viewport widths before the EUI link truncates with an
+        // ellipsis. The URL column it replaced was 15% wide on its own.
+        // Reclaimed budget comes from the Tags column (15% → 12%).
+        width: '25%',
         sortable: true,
         render: (name: OverviewStatusMetaData['name'], monitor) => (
           <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
@@ -143,35 +155,50 @@ export const useMonitorsTableColumns = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+            {monitor.urls ? (
+              // `alignSelf: stretch` overrides the outer flex group's
+              // `alignItems="flexStart"` for just this row, so the URL flex
+              // item spans the cell width — without that, the inner EuiText
+              // shrink-wraps the URL and the truncation rules never fire.
+              // `minWidth: 0` lets the flex algorithm shrink below the link's
+              // intrinsic width so `text-overflow: ellipsis` can take over.
+              <EuiFlexItem
+                grow={false}
+                css={{ alignSelf: 'stretch', maxWidth: '100%', minWidth: 0 }}
+              >
+                <EuiToolTip position="top" content={monitor.urls}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    className="eui-textTruncate"
+                    css={{ display: 'block', width: '100%' }}
+                  >
+                    <EuiLink
+                      data-test-subj="syntheticsCompactViewUrl"
+                      href={monitor.urls}
+                      target="_blank"
+                      color="subdued"
+                      external={false}
+                      // `display: block` + `width: 100%` ensure the anchor
+                      // (inline by default) inherits the truncation box from
+                      // its EuiText parent rather than overflowing it.
+                      css={{
+                        display: 'block',
+                        width: '100%',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {monitor.urls}
+                    </EuiLink>
+                  </EuiText>
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         ),
       },
-      ...(isFlyoutOpen
-        ? []
-        : [
-            {
-              field: 'urls' as const,
-              name: URL,
-              truncateText: true,
-              sortable: true,
-              width: '15%',
-              render: (url: OverviewStatusMetaData['urls']) =>
-                url ? (
-                  <EuiLink
-                    data-test-subj="syntheticsCompactViewUrl"
-                    href={url}
-                    target="_blank"
-                    color="text"
-                    external
-                    css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                  >
-                    {url}
-                  </EuiLink>
-                ) : (
-                  <EuiText>{NO_URL}</EuiText>
-                ),
-            },
-          ]),
       {
         name: LOCATIONS,
         width: '120px',
@@ -185,8 +212,63 @@ export const useMonitorsTableColumns = ({
         ? []
         : [
             {
+              name: LATEST_ERROR,
+              // Wide enough that most error reasons fit in 1–2 lines without
+              // wrap; longer messages clamp to 3 lines + tooltip below.
+              width: '20%',
+              render: (monitor: OverviewStatusMetaData) => {
+                const { errorMessage, locationLabel } = getLatestDownSummary(monitor);
+                if (!errorMessage) {
+                  return (
+                    <EuiText size="xs" color="subdued">
+                      {NO_ERROR}
+                    </EuiText>
+                  );
+                }
+                return (
+                  <EuiToolTip
+                    position="top"
+                    display="block"
+                    content={
+                      locationLabel ? (
+                        <EuiText size="xs">
+                          <strong>{locationLabel}</strong>
+                          <br />
+                          {errorMessage}
+                        </EuiText>
+                      ) : (
+                        errorMessage
+                      )
+                    }
+                  >
+                    <EuiText
+                      size="xs"
+                      color="danger"
+                      data-test-subj="syntheticsLatestErrorCell"
+                      // Wrap onto multiple lines naturally, then clamp to 3
+                      // lines with an ellipsis. `word-break: break-word`
+                      // keeps long URLs / hashes from overflowing.
+                      css={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                        whiteSpace: 'normal',
+                      }}
+                    >
+                      {errorMessage}
+                    </EuiText>
+                  </EuiToolTip>
+                );
+              },
+            },
+            {
               name: TAGS,
-              width: '15%',
+              // 15% was wider than typical 1–2 short tags need; 12% keeps two
+              // tags visible inline and the rest collapse into a "+N more"
+              // chip via TagsList's built-in overflow handling.
+              width: '12%',
               render: (monitor: OverviewStatusMetaData) => (
                 <TagsList
                   tags={monitor.tags}
@@ -231,7 +313,7 @@ export const useMonitorsTableColumns = ({
               render: (monSpaces: string[]) => {
                 return (
                   <LazySpaceList
-                    namespaces={monSpaces ?? (space ? [space?.id] : [])}
+                    namespaces={monSpaces ?? (spaceId ? [spaceId] : [])}
                     behaviorContext="outside-space"
                   />
                 );
@@ -254,7 +336,11 @@ export const useMonitorsTableColumns = ({
     onClickMonitorFilter,
     openFlyout,
     showFromAllSpaces,
-    space,
+    // Depending on the resolved space id (a string) instead of the whole
+    // `space` object keeps the columns array referentially stable: the hook
+    // returns a new object each render until the active space resolves, so
+    // depending on the object would remount every cell once on resolution.
+    spaceId,
     spaces?.ui.components.getSpaceList,
   ]);
 

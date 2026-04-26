@@ -23,16 +23,21 @@ import { useOverviewTrendsRequests } from '../../../../hooks/use_overview_trends
 // Maps EUI column `field` values to the redux `sortField` keys understood by
 // `useMonitorsSortedByStatus`. Only columns whose data is actually sorted by
 // the selector chain are listed here — other columns intentionally omit
-// `sortable` so we don't expose non-functional UI.
+// `sortable` so we don't expose non-functional UI. URL was folded into the
+// Name cell (no header to click anymore) but the sort dropdown still drives
+// the `urls` sort token via `sort_fields.tsx`.
 const COLUMN_TO_SORT_FIELD: Record<string, MonitorOverviewPageState['sortField']> = {
   overallStatus: 'status',
   name: 'name.keyword',
-  urls: 'urls',
 };
 
 const SORT_FIELD_TO_COLUMN = Object.fromEntries(
   Object.entries(COLUMN_TO_SORT_FIELD).map(([column, sortField]) => [sortField, column])
 );
+
+// Module-level stable empty list so passing it to `useOverviewTrendsRequests`
+// while the flyout is open doesn't churn the effect's dependency identity.
+const EMPTY_ITEMS: OverviewStatusMetaData[] = [];
 
 export const MonitorsTable = ({
   items,
@@ -48,11 +53,15 @@ export const MonitorsTable = ({
     totalItems: items,
   });
 
-  useOverviewTrendsRequests(pageOfItems);
-
   const flyoutConfig = useSelector(selectOverviewFlyoutConfig);
   const isFlyoutOpen = Boolean(flyoutConfig?.configId);
   const { sortField, sortOrder } = useSelector(selectOverviewPageState);
+
+  // While the flyout is open we hide the columns that consume trend stats and
+  // the down-history sparkline, so paying for those fetches just feeds caches
+  // the user can't see. Pass an empty stable list to short-circuit the trends
+  // dispatch; the histogram gate is plumbed via `enabled` below.
+  useOverviewTrendsRequests(isFlyoutOpen ? EMPTY_ITEMS : pageOfItems);
 
   const { columns } = useMonitorsTableColumns({
     setFlyoutConfigCallback,

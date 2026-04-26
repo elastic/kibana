@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment/moment';
+import datemath from '@kbn/datemath';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
@@ -28,12 +29,22 @@ import {
   getTimespanFilter,
 } from '../../../common/constants/client_defaults';
 
-type LocationStatus = Array<{
+interface LocationStatusEntry {
   status: string;
   locationId: string;
   timestamp: string;
   monitorUrl?: string;
-}>;
+  // The latest error reason for the most recent final summary on this
+  // (monitor, location). Only populated for down checks where the heartbeat
+  // doc has an `error` object — `error.message` is `text` so we collect it
+  // via `top_hits` rather than `top_metrics`.
+  error?: { message?: string; type?: string };
+  // Start of the current state segment (down streak) for this location, taken
+  // from `state.started_at` on the latest final summary. Used to render
+  // "Down · 12m" without having to compute durations on the client.
+  downSince?: string;
+}
+type LocationStatus = LocationStatusEntry[];
 
 export const SUMMARIES_PAGE_SIZE = 5000;
 
@@ -49,10 +60,19 @@ export class OverviewStatusService {
   async getOverviewStatus() {
     this.filterData = await getMonitorFilters(this.routeContext);
 
-    const [allConfigs, statusResult] = await Promise.all([
+    const [rawConfigs, statusResult] = await Promise.all([
       this.getMonitorConfigs(),
       this.getQueryResult(),
     ]);
+
+    // When the user opts into date-range filtering, drop any configured
+    // monitor that has no final summary in the selected window. Disabled
+    // monitors (which never run) get filtered out as a side effect — that's
+    // intentional: the toggle is about "what ran in the window".
+    const filterByDateRange = Boolean(this.routeContext.request.query?.filterByDateRange);
+    const allConfigs = filterByDateRange
+      ? rawConfigs.filter((c) => statusResult.has(c.attributes[ConfigKey.MONITOR_QUERY_ID]))
+      : rawConfigs;
 
     const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
       this.processOverviewStatus(allConfigs, statusResult);
@@ -133,18 +153,51 @@ export class OverviewStatusService {
     return filters;
   }
 
+  /**
+   * Compute the `[from, to]` window we use to pull final-summary docs. By
+   * default we look back 4h+20m so we always capture the latest summary for
+   * every enabled monitor (max schedule is 4h). When the user has explicitly
+   * opted into `filterByDateRange`, we honor their picker range — but we only
+   * narrow, never widen below the default window, because the picker can be
+   * useful even with `now-15m` style values.
+   */
+  getStatusQueryRange(): { from: string; to: string } {
+    const params = this.routeContext.request.query || {};
+    const { filterByDateRange, dateRangeStart, dateRangeEnd } = params;
+    const defaultFrom = moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString();
+
+    if (!filterByDateRange || !dateRangeStart || !dateRangeEnd) {
+      return { from: defaultFrom, to: 'now' };
+    }
+
+    // Datemath returns undefined on bad input; fall back to defaults rather
+    // than failing the query.
+    const fromDate = datemath.parse(dateRangeStart);
+    const toDate = datemath.parse(dateRangeEnd, { roundUp: true });
+    if (!fromDate?.isValid() || !toDate?.isValid()) {
+      return { from: defaultFrom, to: 'now' };
+    }
+
+    return {
+      from: fromDate.toISOString(),
+      to: toDate.toISOString(),
+    };
+  }
+
   async getQueryResult() {
     return withApmSpan('monitor_status_data', async () => {
-      const range = {
-        // max monitor schedule period is 4 hours, 20 minute subtraction is to be on safe side
-        from: moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString(),
-        to: 'now',
-      };
+      const range = this.getStatusQueryRange();
 
       let hasMoreData = true;
       const monitorByIds = new Map<string, LocationStatus>();
       let afterKey: any;
       let count = 0;
+
+      // The `timespan` filter is a "currently fresh" constraint anchored to
+      // `now` — when the user is explicitly inspecting a historic window via
+      // the date picker we drop it, otherwise older summaries inside the
+      // window would be filtered out unfairly.
+      const isUserSelectedRange = Boolean(this.routeContext.request.query?.filterByDateRange);
 
       do {
         const result = await this.routeContext.syntheticsEsClient.search(
@@ -155,7 +208,9 @@ export class OverviewStatusService {
                 filter: [
                   FINAL_SUMMARY_FILTER,
                   getRangeFilter({ from: range.from, to: range.to }),
-                  getTimespanFilter({ from: 'now-15m', to: 'now' }),
+                  ...(isUserSelectedRange
+                    ? []
+                    : [getTimespanFilter({ from: 'now-15m', to: 'now' })]),
                   ...this.getEsDataFilters(),
                 ] as QueryDslQueryContainer[],
               },
@@ -198,6 +253,37 @@ export class OverviewStatusService {
                       },
                     },
                   },
+                  // `error.message` is mapped as `text` so it can't be pulled
+                  // via `top_metrics`; fetch the latest final summary doc and
+                  // grab `error` + `state` from its source.
+                  //
+                  // We only need this for currently-down locations — for up
+                  // locations the data is dropped at propagation time anyway.
+                  // Wrapping the (expensive) `top_hits` in a `filter` agg
+                  // keyed on `monitor.status: down` keeps `_source` loading
+                  // off the hot up-bucket path, which dominates real
+                  // deployments.
+                  errorAndState: {
+                    filter: {
+                      term: { 'monitor.status': 'down' },
+                    },
+                    aggs: {
+                      latest: {
+                        top_hits: {
+                          size: 1,
+                          _source: {
+                            includes: [
+                              'error.message',
+                              'error.type',
+                              'state.started_at',
+                              'state.duration_ms',
+                            ],
+                          },
+                          sort: [{ '@timestamp': 'desc' as const }],
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -210,13 +296,45 @@ export class OverviewStatusService {
         hasMoreData = (data?.buckets ?? []).length >= SUMMARIES_PAGE_SIZE;
         afterKey = data?.after_key;
 
-        data?.buckets.forEach(({ status: statusAgg, key: bKey }) => {
+        data?.buckets.forEach((bucket) => {
+          const { status: statusAgg, key: bKey } = bucket;
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
           const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);
           const rawMonitorUrl = statusAgg.top?.[0].metrics?.['url.full.keyword'];
 
           const timestamp = String(statusAgg.top[0].sort[0]);
+
+          // Pull error + state from the latest *down* doc in the bucket. The
+          // `filter > top_hits` shape means up buckets short-circuit with
+          // `doc_count: 0` and no `latest.hits.hits[0]`.
+          const latestSource =
+            (
+              bucket as unknown as {
+                errorAndState?: {
+                  doc_count?: number;
+                  latest?: {
+                    hits?: {
+                      hits?: Array<{
+                        _source?: {
+                          error?: { message?: unknown; type?: unknown };
+                          state?: { started_at?: unknown };
+                        };
+                      }>;
+                    };
+                  };
+                };
+              }
+            ).errorAndState?.latest?.hits?.hits?.[0]?._source ?? undefined;
+          const errorMessage =
+            latestSource?.error?.message != null ? String(latestSource.error.message) : undefined;
+          const errorType =
+            latestSource?.error?.type != null ? String(latestSource.error.type) : undefined;
+          const downSince =
+            latestSource?.state?.started_at != null
+              ? String(latestSource.state.started_at)
+              : undefined;
+
           if (!monitorByIds.has(String(monitorId))) {
             monitorByIds.set(monitorId, []);
           }
@@ -225,6 +343,8 @@ export class OverviewStatusService {
             locationId,
             timestamp,
             monitorUrl: rawMonitorUrl != null ? String(rawMonitorUrl) : undefined,
+            error: errorMessage || errorType ? { message: errorMessage, type: errorType } : undefined,
+            downSince,
           });
         });
       } while (hasMoreData && afterKey);
@@ -292,10 +412,16 @@ export class OverviewStatusService {
         const locData = monitorStatus?.find((loc) => loc.locationId === monLocation.id);
         const metaInfo = this.getMonitorMeta(monitor);
         const status = locData?.status || MONITOR_STATUS_ENUM.PENDING;
+        // Only attach `error` / `downSince` when this location is currently
+        // down — otherwise we'd carry stale error text from the previous
+        // failure which is misleading on the overview row.
+        const isDown = status === MONITOR_STATUS_ENUM.DOWN;
         const location = {
           status,
           id: monLocation.id,
           label: monLocation.label,
+          ...(isDown && locData?.error ? { error: locData.error } : {}),
+          ...(isDown && locData?.downSince ? { downSince: locData.downSince } : {}),
         };
         const meta = {
           ...metaInfo,

@@ -19,6 +19,7 @@ import { getServiceLocations } from '../../../state/service_locations';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 
 import { useMonitorList } from '../hooks/use_monitor_list';
+import { useSyncDateRangeFilter } from '../common/use_sync_date_range_filter';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
 import { OverviewStatus } from './overview/overview_status';
@@ -33,6 +34,11 @@ export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
   useTrackPageview({ app: 'synthetics', path: 'overview', delay: 15000 });
   useOverviewBreadcrumbs();
+
+  // Mounted at the page level (above any empty-state early returns) so the
+  // URL stays the source of truth for the date-range filter even when the
+  // grid unmounts because the previous request returned zero monitors.
+  useSyncDateRangeFilter();
 
   const view = useSelector(selectOverviewView);
 

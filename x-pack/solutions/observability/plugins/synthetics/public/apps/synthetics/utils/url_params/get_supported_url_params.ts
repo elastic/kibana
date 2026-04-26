@@ -40,6 +40,7 @@ export interface SyntheticsUrlParams {
   spaceId?: string;
   useLogicalAndFor?: UseLogicalAndField[];
   view?: Exclude<OverviewView, typeof DEFAULT_OVERVIEW_VIEW>;
+  filterByDateRange?: boolean;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -99,6 +100,7 @@ export const getSupportedUrlParams = (params: {
     spaceId,
     useLogicalAndFor,
     view,
+    filterByDateRange,
   } = filteredParams;
 
   return {
@@ -134,6 +136,7 @@ export const getSupportedUrlParams = (params: {
     spaceId: spaceId || undefined,
     useLogicalAndFor: parseFilters(useLogicalAndFor),
     view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
+    filterByDateRange: filterByDateRange === 'true' ? true : undefined,
   };
 };
 

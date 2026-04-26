@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { useMemo } from 'react';
 
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { getHistogramInterval } from '../common/get_histogram_interval';
@@ -30,16 +31,21 @@ export const useMonitorHistogramPerLocation = ({
 
   const { lastRefresh } = useSyntheticsRefreshContext();
 
-  const monitorIds = (items ?? []).map(({ configId }) => configId);
-
-  const { queryParams, minInterval } = getQueryParamsPerLocation(
-    dateRangeStart,
-    dateRangeEnd,
-    monitorIds
+  // Stabilize the cache key. Without `useMemo`, every render of the parent
+  // table re-walks `items` and produces a fresh JSON blob — large enough to
+  // dominate render time on multi-hundred-monitor pages and noisy enough to
+  // mask actual ID changes in the redux ES-search dedupe layer.
+  const idsKey = useMemo(
+    () => (items ?? []).map(({ configId }) => configId).join('|'),
+    [items]
   );
+  const { queryParams, minInterval } = useMemo(() => {
+    const monitorIds = idsKey ? idsKey.split('|') : [];
+    return getQueryParamsPerLocation(dateRangeStart, dateRangeEnd, monitorIds);
+  }, [dateRangeStart, dateRangeEnd, idsKey]);
   const { data, loading } = useReduxEsSearch<Ping, typeof queryParams>(
     queryParams,
-    [JSON.stringify(monitorIds), lastRefresh],
+    [idsKey, lastRefresh],
     {
       name: 'getMonitorDownHistoryPerLocation',
       isRequestReady: isReady,

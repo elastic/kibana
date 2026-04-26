@@ -84,6 +84,12 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
           ...withoutUrl,
         ];
       }
+      case 'type.keyword':
+        // Group same-type monitors together (asc gives browser → http → icmp
+        // → tcp). `localeCompare` is overkill for short type tokens but keeps
+        // behaviour consistent with the other alphabetical sorts.
+        result = result.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? ''));
+        return sortOrder === 'asc' ? result : result.reverse();
     }
     return result;
   }, [disabledConfigs, sortField, sortOrder, status, statusFilter]);

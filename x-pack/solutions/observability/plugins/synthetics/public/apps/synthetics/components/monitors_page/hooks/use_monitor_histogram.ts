@@ -10,17 +10,28 @@ import { useGetUrlParams } from '../../../hooks';
 import { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
 import { useMonitorHistogramPerLocation } from './use_monitor_histogram_per_location';
 
-export const useMonitorHistogram = ({ items }: { items: OverviewStatusMetaData[] }) => {
+export const useMonitorHistogram = ({
+  items,
+  enabled = true,
+}: {
+  items: OverviewStatusMetaData[];
+  /**
+   * Skip the underlying ES search entirely (e.g. when the column hosting
+   * the sparkline is hidden because the flyout is open). The cached data
+   * survives the gap, so re-enabling doesn't force a refetch on its own.
+   */
+  enabled?: boolean;
+}) => {
   const { groupBy } = useGetUrlParams();
   const isGroupByMonitor = groupBy === 'monitor';
 
   const perLocation = useMonitorHistogramPerLocation({
     items,
-    isReady: !isGroupByMonitor,
+    isReady: enabled && !isGroupByMonitor,
   });
   const perMonitor = useMonitorHistogramPerMonitor({
     items,
-    isReady: isGroupByMonitor,
+    isReady: enabled && isGroupByMonitor,
   });
   return isGroupByMonitor ? perMonitor : perLocation;
 };

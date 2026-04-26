@@ -40,11 +40,26 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     monitorQueryId: t.string,
     configId: t.string,
     locations: t.array(
-      t.interface({
-        id: t.string,
-        label: t.string,
-        status: t.string,
-      })
+      t.intersection([
+        t.interface({
+          id: t.string,
+          label: t.string,
+          status: t.string,
+        }),
+        t.partial({
+          // ISO timestamp of when this location entered its current state
+          // segment. Only set when the location is currently down so the UI
+          // can render "Down · 12m" without stale data.
+          downSince: t.string,
+          // Latest error reason for this location's most recent down check.
+          // `error.message` is `text` in the heartbeat mapping so it's pulled
+          // via top_hits on the backend.
+          error: t.partial({
+            message: t.string,
+            type: t.string,
+          }),
+        }),
+      ])
     ),
     name: t.string,
     schedule: t.string,

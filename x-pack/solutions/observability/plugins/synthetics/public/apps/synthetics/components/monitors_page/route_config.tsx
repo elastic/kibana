@@ -11,6 +11,7 @@ import type { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RefreshButton } from '../common/components/refresh_button';
+import { SyntheticsDatePicker } from '../common/date_picker/synthetics_date_picker';
 import { OverviewPage } from './overview/overview_page';
 import { MonitorsPageHeader } from './management/page_header/monitors_page_header';
 import { CreateMonitorButton } from './create_monitor_button';
@@ -24,10 +25,7 @@ export const getMonitorsRoute = (
   syntheticsPath: string,
   baseTitle: string
 ): RouteProps[] => {
-  const sharedProps = {
-    pageTitle: <MonitorsPageHeader />,
-    rightSideItems: [<RefreshButton />, <CreateMonitorButton />],
-  };
+  const pageTitle = <MonitorsPageHeader />;
   return [
     {
       title: i18n.translate('xpack.synthetics.overviewRoute.title', {
@@ -38,7 +36,14 @@ export const getMonitorsRoute = (
       component: OverviewPage,
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
-        ...sharedProps,
+        pageTitle,
+        // The date picker replaces the standalone Refresh button on overview:
+        // EuiSuperDatePicker has its own refresh button (wired to
+        // SyntheticsRefreshContext) plus an auto-refresh dropdown, so a
+        // separate <RefreshButton /> would just duplicate functionality.
+        // Management keeps the standalone button because it has no time-
+        // bound widgets that would benefit from a range picker.
+        rightSideItems: [<SyntheticsDatePicker />, <CreateMonitorButton />],
         tabs: getMonitorsTabs(syntheticsPath, 'overview', location),
       },
     },
@@ -51,7 +56,8 @@ export const getMonitorsRoute = (
       component: MonitorManagementPage,
       dataTestSubj: 'syntheticsMonitorManagementPage',
       pageHeader: {
-        ...sharedProps,
+        pageTitle,
+        rightSideItems: [<RefreshButton />, <CreateMonitorButton />],
         tabs: getMonitorsTabs(syntheticsPath, 'management', location),
       },
     },
