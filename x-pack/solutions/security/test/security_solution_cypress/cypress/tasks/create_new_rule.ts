@@ -448,8 +448,15 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
 
 export const fillOverrideEsqlRuleName = (value: string) => {
   cy.get(RULE_NAME_OVERRIDE_FOR_ESQL).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${value}{enter}`);
+    cy.get(COMBO_BOX_INPUT).should('not.be.disabled');
+    cy.get(COMBO_BOX_INPUT).click();
+    cy.get(COMBO_BOX_INPUT).type(value);
   });
+  // The dropdown is rendered in a portal outside the form row, so look it up at the
+  // top level. Clicking the option avoids a keyboard-focus race that can happen while
+  // ES|QL fields are still being fetched (`{enter}` becomes a no-op when no option
+  // is highlighted).
+  cy.contains(COMBO_BOX_OPTION, value).click();
 };
 
 // called after import rule from saved timeline
@@ -966,13 +973,14 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(field);
     // Using a click instead of keyboard navigation to avoid potential focus loss when page is still loading
     cy.contains(COMBO_BOX_OPTION, field).click();
-    // Wait for the field to be selected as a pill before closing the dropdown,
-    // otherwise {esc} can race with {enter} and cancel the selection
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX)
       .find('[data-test-subj="euiComboBoxPill"]')
       .should('contain.text', field);
   });
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type('{esc}');
+  // Intentionally NOT typing {esc} to close the dropdown: on the rule edit form,
+  // {esc} can race with the just-clicked option's onChange and remove the new pill
+  // from form state before the next interaction commits the value. The dropdown
+  // closes naturally when the next action (e.g. the save button click) shifts focus.
 };
 
 export const clearAlertSuppressionFields = () => {
