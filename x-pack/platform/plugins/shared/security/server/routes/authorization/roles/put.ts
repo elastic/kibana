@@ -41,38 +41,19 @@ export function definePutRolesRoutes({
         version: API_VERSIONS.roles.public.v1,
         validate: {
           request: {
-            params: schema.object(
-              {
-                name: schema.string({
-                  minLength: 1,
-                  maxLength: 1024,
-                  meta: { id: 'security_role_name', description: 'The role name.' },
-                }),
-              },
-              {
-                meta: {
-                  id: 'security_put_role_params',
-                  description: 'Path parameters for creating or updating a role.',
-                },
-              }
-            ),
-            query: schema.object(
-              {
-                createOnly: schema.boolean({
-                  defaultValue: false,
-                  meta: {
-                    id: 'security_role_create_only',
-                    description: 'When true, a role is not overwritten if it already exists.',
-                  },
-                }),
-              },
-              {
-                meta: {
-                  id: 'security_put_role_query',
-                  description: 'Query parameters for creating or updating a role.',
-                },
-              }
-            ),
+            params: schema.object({
+              name: schema.string({
+                minLength: 1,
+                maxLength: 1024,
+                meta: { description: 'The role name.' },
+              }),
+            }),
+            query: schema.object({
+              createOnly: schema.boolean({
+                defaultValue: false,
+                meta: { description: 'When true, a role is not overwritten if it already exists.' },
+              }),
+            }),
             body: getPutPayloadSchema(() => {
               const privileges = authz.privileges.get();
               return {

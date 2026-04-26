@@ -38,40 +38,23 @@ export function defineGetRolesRoutes({
         version: API_VERSIONS.roles.public.v1,
         validate: {
           request: {
-            params: schema.object(
-              {
-                name: schema.string({
-                  minLength: 1,
-                  meta: { id: 'security_role_name', description: 'The role name.' },
-                }),
-              },
-              {
-                meta: {
-                  id: 'security_get_role_params',
-                  description: 'Path parameters for retrieving a role.',
-                },
-              }
-            ),
+            params: schema.object({
+              name: schema.string({
+                minLength: 1,
+                meta: { description: 'The role name.' },
+              }),
+            }),
             query: schema.maybe(
-              schema.object(
-                {
-                  replaceDeprecatedPrivileges: schema.maybe(
-                    schema.boolean({
-                      meta: {
-                        id: 'security_role_replace_deprecated_privileges',
-                        description:
-                          'If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.',
-                      },
-                    })
-                  ),
-                },
-                {
-                  meta: {
-                    id: 'security_get_role_query',
-                    description: 'Query parameters for retrieving a role.',
-                  },
-                }
-              )
+              schema.object({
+                replaceDeprecatedPrivileges: schema.maybe(
+                  schema.boolean({
+                    meta: {
+                      description:
+                        'If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.',
+                    },
+                  })
+                ),
+              })
             ),
           },
           response: {

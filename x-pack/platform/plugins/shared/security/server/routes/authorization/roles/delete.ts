@@ -31,20 +31,12 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
         version: API_VERSIONS.roles.public.v1,
         validate: {
           request: {
-            params: schema.object(
-              {
-                name: schema.string({
-                  minLength: 1,
-                  meta: { id: 'security_role_name', description: 'The role name.' },
-                }),
-              },
-              {
-                meta: {
-                  id: 'security_delete_role_params',
-                  description: 'Path parameters for deleting a role.',
-                },
-              }
-            ),
+            params: schema.object({
+              name: schema.string({
+                minLength: 1,
+                meta: { description: 'The role name.' },
+              }),
+            }),
           },
           response: {
             204: {

@@ -57,7 +57,7 @@ export function getPutPayloadSchema(
       description: schema.maybe(
         schema.string({
           maxLength: 2048,
-          meta: { id: 'security_role_description', description: 'A description for the role.' },
+          meta: { description: 'A description for the role.' },
         })
       ),
 
@@ -69,7 +69,6 @@ export function getPutPayloadSchema(
         schema.recordOf(
           schema.string({
             meta: {
-              id: 'security_role_metadata_key',
               description:
                 'A metadata dictionary. Keys that begin with `_` are reserved for system usage.',
             },

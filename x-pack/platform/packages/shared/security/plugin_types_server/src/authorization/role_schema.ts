@@ -25,7 +25,6 @@ export const elasticsearchRoleSchema = schema.object(
       schema.arrayOf(
         schema.string({
           meta: {
-            id: 'security_role_cluster_privilege',
             description:
               'Cluster privileges that define the cluster level actions that users can perform.',
           },
@@ -44,7 +43,6 @@ export const elasticsearchRoleSchema = schema.object(
             privileges: schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_remote_cluster_privilege',
                   description:
                     'The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.',
                 },
@@ -54,7 +52,6 @@ export const elasticsearchRoleSchema = schema.object(
             clusters: schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_remote_cluster_alias',
                   description:
                     'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
                 },
@@ -87,7 +84,6 @@ export const elasticsearchRoleSchema = schema.object(
             names: schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_index_name',
                   description:
                     'The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).',
                 },
@@ -104,7 +100,6 @@ export const elasticsearchRoleSchema = schema.object(
                 schema.arrayOf(
                   schema.string({
                     meta: {
-                      id: 'security_role_field_security_field',
                       description: 'The document fields that the role members have read access to.',
                     },
                   }),
@@ -120,7 +115,6 @@ export const elasticsearchRoleSchema = schema.object(
             privileges: schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_index_privilege',
                   description:
                     'The index level privileges that the role members have for the data streams and indices.',
                 },
@@ -136,7 +130,6 @@ export const elasticsearchRoleSchema = schema.object(
             query: schema.maybe(
               schema.string({
                 meta: {
-                  id: 'security_role_index_query',
                   description:
                     'A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members.',
                 },
@@ -150,7 +143,6 @@ export const elasticsearchRoleSchema = schema.object(
             allow_restricted_indices: schema.maybe(
               schema.boolean({
                 meta: {
-                  id: 'security_role_allow_restricted_indices',
                   description:
                     'Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field covers the restricted indices too.',
                 },
@@ -181,7 +173,6 @@ export const elasticsearchRoleSchema = schema.object(
             clusters: schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_remote_index_cluster',
                   description:
                     'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
                 },
@@ -196,7 +187,6 @@ export const elasticsearchRoleSchema = schema.object(
             names: schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_remote_index_name',
                   description:
                     'A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).',
                 },
@@ -213,7 +203,6 @@ export const elasticsearchRoleSchema = schema.object(
                 schema.arrayOf(
                   schema.string({
                     meta: {
-                      id: 'security_role_remote_field_security_field',
                       description: 'The document fields that the role members have read access to.',
                     },
                   }),
@@ -229,7 +218,6 @@ export const elasticsearchRoleSchema = schema.object(
             privileges: schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_remote_index_privilege',
                   description:
                     'The index level privileges that role members have for the specified indices.',
                 },
@@ -245,7 +233,6 @@ export const elasticsearchRoleSchema = schema.object(
             query: schema.maybe(
               schema.string({
                 meta: {
-                  id: 'security_role_remote_index_query',
                   description:
                     'A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members. ',
                 },
@@ -259,7 +246,6 @@ export const elasticsearchRoleSchema = schema.object(
             allow_restricted_indices: schema.maybe(
               schema.boolean({
                 meta: {
-                  id: 'security_role_remote_allow_restricted_indices',
                   description:
                     'Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field will cover the restricted indices too.',
                 },
@@ -284,7 +270,6 @@ export const elasticsearchRoleSchema = schema.object(
       schema.arrayOf(
         schema.string({
           meta: {
-            id: 'security_role_run_as_user',
             description: 'A user name that the role member can impersonate.',
           },
         }),
@@ -315,7 +300,6 @@ const spacesSchema = schema.oneOf(
     schema.arrayOf(
       schema.string({
         meta: {
-          id: 'security_role_space_id',
           description: 'A space that the privilege applies to.',
         },
         validate(value) {
@@ -361,7 +345,6 @@ export const getKibanaRoleSchema = (
             schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_global_base_privilege',
                   description: 'A base privilege that grants applies to all spaces.',
                 },
                 validate(value) {
@@ -376,7 +359,6 @@ export const getKibanaRoleSchema = (
             schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_space_base_privilege',
                   description: 'A base privilege that applies to specific spaces.',
                 },
                 validate(value) {
@@ -400,7 +382,7 @@ export const getKibanaRoleSchema = (
         feature: schema.maybe(
           schema.recordOf(
             schema.string({
-              meta: { id: 'security_role_feature_name', description: 'The name of a feature.' },
+              meta: { description: 'The name of a feature.' },
               validate(value) {
                 if (!FEATURE_NAME_VALUE_REGEX.test(value)) {
                   return `only a-z, A-Z, 0-9, '_', and '-' are allowed`;
@@ -410,7 +392,6 @@ export const getKibanaRoleSchema = (
             schema.arrayOf(
               schema.string({
                 meta: {
-                  id: 'security_role_feature_privilege',
                   description: 'The privileges that the role member has for the feature.',
                 },
                 validate(value) {
