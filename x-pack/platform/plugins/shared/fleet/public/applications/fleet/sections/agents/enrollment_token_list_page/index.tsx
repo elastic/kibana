@@ -56,7 +56,6 @@ import { ConfirmRevokeModal, ConfirmDeleteModal } from './components/confirm_bul
 type SelectionMode = 'manual' | 'query';
 type BulkAction = 'delete' | 'revoke';
 type ActiveFilter = 'active' | 'inactive' | 'all';
-type TokenActionType = 'revoke' | 'delete';
 
 const Divider: React.FunctionComponent = () => {
   const { euiTheme } = useEuiTheme();
@@ -76,7 +75,7 @@ const TokenActions: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
   refresh,
 }) => {
   const { notifications } = useStartServices();
-  const [pendingAction, setPendingAction] = useState<TokenActionType | null>(null);
+  const [pendingAction, setPendingAction] = useState<BulkAction | null>(null);
 
   const onCancelAction = () => setPendingAction(null);
 
