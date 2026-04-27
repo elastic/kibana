@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
@@ -79,29 +80,15 @@ export class MetricsTab extends ServiceDetailsTab {
   async waitForAllPanelsToRender(): Promise<void> {
     await this.page.getByTestId('querySubmitButton').waitFor({ timeout: EXTENDED_TIMEOUT });
 
-    await this.page.waitForFunction(
-      ({ completeSelector, panelSelector }) => {
-        const total = document.querySelectorAll(panelSelector).length;
-        const done = document.querySelectorAll(completeSelector).length;
-        return total > 0 && done === total;
-      },
-      {
-        completeSelector: RENDER_COMPLETE_SELECTOR,
-        panelSelector: '[data-test-subj="embeddablePanel"]',
-      },
-      { timeout: EXTENDED_TIMEOUT }
-    );
-
-    await this.page.waitForFunction(
-      (selector) => document.querySelectorAll(selector).length === 0,
-      '.euiLoadingChart',
-      { timeout: EXTENDED_TIMEOUT }
-    );
-
-    await this.page.waitForFunction(
-      (selector) => document.querySelectorAll(selector).length === 0,
-      '.euiProgress',
-      { timeout: EXTENDED_TIMEOUT }
-    );
+    await expect
+      .poll(
+        async () => {
+          const total = await this.getEmbeddablePanels().count();
+          const done = await this.getRenderCompletePanels().count();
+          return total > 0 && done === total;
+        },
+        { timeout: EXTENDED_TIMEOUT }
+      )
+      .toBe(true);
   }
 }
