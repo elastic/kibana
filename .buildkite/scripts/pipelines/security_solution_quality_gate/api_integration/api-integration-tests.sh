@@ -19,7 +19,31 @@ echo "--- Running test script $1"
 cd x-pack/solutions/security/test/security_solution_api_integration
 set +e
 
-TARGET_SCRIPT=$1 node ./scripts/mki_start_api_ftr_execution
+# Resolve Kibana repo root (this package is five levels below it) so we can use stable target/ paths
+# for tee output and for buildkite-agent artifact glob uploads.
+REPO_ROOT="$(cd ../../../../../.. && pwd)"
+
+# buildkite-agent has no "fetch log" command; mirror the job console to disk so the same output is
+# available as a downloaded artifact in the build.
+LOG_DIR="${REPO_ROOT}/target/kibana-security-solution/api-integration/buildkite-logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="${LOG_DIR}/${BUILDKITE_JOB_ID:-local}-console.log"
+
+TARGET_SCRIPT=$1 node ./scripts/mki_start_api_ftr_execution 2>&1 | tee "$LOG_FILE"
 cmd_status=$?
+
+upload_cypress_artifacts() {
+  # Relative paths match cypress.config + package.json junit:merge
+  if ! cd "$REPO_ROOT" 2>/dev/null; then
+    buildkite-agent artifact upload "$LOG_FILE" || true
+    return
+  fi
+  # Capture *.log under test_failures output
+  buildkite-agent artifact upload "target/test_failures/*.log" || true
+}
+
+echo "--- Uploading step log and Cypress / JUnit artifacts"
+upload_cypress_artifacts
+
 echo "Exit code with status: $cmd_status"
 exit $cmd_status
