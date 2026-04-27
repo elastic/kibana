@@ -9,7 +9,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "evals"],
-    "requiredPlugins": ["features"],
+    "requiredPlugins": ["features", "encryptedSavedObjects"],
     "optionalPlugins": ["management"],
     "requiredBundles": ["kibanaReact"]
   }

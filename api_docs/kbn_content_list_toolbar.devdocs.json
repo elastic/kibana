@@ -30,7 +30,7 @@
           ") => React.JSX.Element | null; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-        "lineNumber": 174,
+        "lineNumber": 117,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -53,12 +53,65 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-            "lineNumber": 82,
+            "lineNumber": 42,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.CreatedByFilterRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "CreatedByFilterRenderer",
+        "description": [
+          "\n`CreatedByFilterRenderer` component for `EuiSearchBar` `custom_component` filter.\n\nThin wrapper around {@link UserFieldFilterRenderer} for the `createdBy` field."
+        ],
+        "signature": [
+          "({ query, onChange, \"data-test-subj\": dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.CreatedByFilterRendererProps",
+            "text": "CreatedByFilterRendererProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/created_by/created_by_filter_renderer.tsx",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.CreatedByFilterRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  query,\n  onChange,\n  'data-test-subj': dataTestSubj = 'contentListCreatedByRenderer',\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-toolbar",
+                "scope": "public",
+                "docId": "kibKbnContentListToolbarPluginApi",
+                "section": "def-public.CreatedByFilterRendererProps",
+                "text": "CreatedByFilterRendererProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/created_by/created_by_filter_renderer.tsx",
+            "lineNumber": 49,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -112,7 +165,7 @@
           "\n`FilterPopover` component.\n\nBase component for filter popovers with consistent styling.\n\nProvides:\n- `EuiPopover` with arrow and proper padding.\n- `EuiFilterButton` with active filter badge.\n- Bold title header with border.\n"
         ],
         "signature": [
-          "({ title, buttonLabel, activeCount, isOpen, onToggle, onClose, panelWidth, panelMinWidth, anchorPosition, \"data-test-subj\": dataTestSubj, children, }: ",
+          "({ title, buttonLabel, totalCount, activeCount, isOpen, onToggle, onClose, panelWidth, panelMinWidth, anchorPosition, \"data-test-subj\": dataTestSubj, children, }: ",
           {
             "pluginId": "@kbn/content-list-toolbar",
             "scope": "public",
@@ -123,7 +176,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-        "lineNumber": 94,
+        "lineNumber": 96,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -133,7 +186,7 @@
             "id": "def-public.FilterPopover.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  buttonLabel,\n  activeCount = 0,\n  isOpen,\n  onToggle,\n  onClose,\n  panelWidth,\n  panelMinWidth,\n  anchorPosition = 'downCenter',\n  'data-test-subj': dataTestSubj,\n  children,\n}",
+            "label": "{\n  title,\n  buttonLabel,\n  totalCount,\n  activeCount = 0,\n  isOpen,\n  onToggle,\n  onClose,\n  panelWidth,\n  panelMinWidth,\n  anchorPosition = 'downCenter',\n  'data-test-subj': dataTestSubj,\n  children,\n}",
             "description": [],
             "signature": [
               {
@@ -145,7 +198,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-            "lineNumber": 94,
+            "lineNumber": 96,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
@@ -374,91 +427,6 @@
       },
       {
         "parentPluginId": "@kbn/content-list-toolbar",
-        "id": "def-public.parseFiltersFromQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "parseFiltersFromQuery",
-        "description": [
-          "\nChains multiple query parsers, passing cleaned text from each to the next.\n\nEach parser receives the `searchQuery` produced by the previous parser (with\nits filter syntax already stripped), and contributes its own filter values to\nthe accumulated result. The pipeline is pure — it does not touch React state.\n"
-        ],
-        "signature": [
-          "(queryText: string, parsers: readonly ",
-          {
-            "pluginId": "@kbn/content-list-toolbar",
-            "scope": "public",
-            "docId": "kibKbnContentListToolbarPluginApi",
-            "section": "def-public.QueryParser",
-            "text": "QueryParser"
-          },
-          "[]) => ",
-          {
-            "pluginId": "@kbn/content-list-toolbar",
-            "scope": "public",
-            "docId": "kibKbnContentListToolbarPluginApi",
-            "section": "def-public.QueryParserResult",
-            "text": "QueryParserResult"
-          }
-        ],
-        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
-        "lineNumber": 88,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/content-list-toolbar",
-            "id": "def-public.parseFiltersFromQuery.$1",
-            "type": "string",
-            "tags": [],
-            "label": "queryText",
-            "description": [
-              "- Raw query text from `EuiSearchBar`."
-            ],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
-            "lineNumber": 89,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/content-list-toolbar",
-            "id": "def-public.parseFiltersFromQuery.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "parsers",
-            "description": [
-              "- Ordered array of parsers to run. Typically one parser per"
-            ],
-            "signature": [
-              "readonly ",
-              {
-                "pluginId": "@kbn/content-list-toolbar",
-                "scope": "public",
-                "docId": "kibKbnContentListToolbarPluginApi",
-                "section": "def-public.QueryParser",
-                "text": "QueryParser"
-              },
-              "[]"
-            ],
-            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
-            "lineNumber": 90,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "The final cleaned `searchQuery` and merged `filters` ready to pass\nto `setSearch`."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-list-toolbar",
         "id": "def-public.SelectableFilterPopover",
         "type": "Function",
         "tags": [],
@@ -467,7 +435,7 @@
           "\n`SelectableFilterPopover` component.\n\nA reusable multi-select filter popover with include/exclude support.\n\nProvides:\n- `EuiSelectable` with search.\n- Include/exclude via modifier key (Cmd/Ctrl + click).\n- Filter counts with active state badges.\n- Standard header with selection count and clear button.\n- Standard footer with modifier key tip.\n"
         ],
         "signature": [
-          "<T extends object = Record<string, unknown>>({ fieldName, title, query, onChange, options, renderOption, singleSelection, isLoading, emptyMessage, noMatchesMessage, panelWidth, panelMinWidth, footerContent, \"data-test-subj\": dataTestSubj, }: ",
+          "<T extends object = Record<string, unknown>>({ fieldName, title, query, onChange, options, renderOption, singleSelection, isLoading, emptyMessage, noMatchesMessage, panelWidth, panelMinWidth, footerContent, headerContent, onToggle: onToggleProp, \"data-test-subj\": dataTestSubj, }: ",
           {
             "pluginId": "@kbn/content-list-toolbar",
             "scope": "public",
@@ -478,7 +446,7 @@
           "<T>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/selectable_filter_popover.tsx",
-        "lineNumber": 145,
+        "lineNumber": 149,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -488,7 +456,7 @@
             "id": "def-public.SelectableFilterPopover.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fieldName,\n  title,\n  query,\n  onChange,\n  options,\n  renderOption,\n  singleSelection = false,\n  isLoading,\n  emptyMessage,\n  noMatchesMessage,\n  panelWidth,\n  panelMinWidth,\n  footerContent,\n  'data-test-subj': dataTestSubj = 'selectableFilterPopover',\n}",
+            "label": "{\n  fieldName,\n  title,\n  query,\n  onChange,\n  options,\n  renderOption,\n  singleSelection = false,\n  isLoading,\n  emptyMessage,\n  noMatchesMessage,\n  panelWidth,\n  panelMinWidth,\n  footerContent,\n  headerContent,\n  onToggle: onToggleProp,\n  'data-test-subj': dataTestSubj = 'selectableFilterPopover',\n}",
             "description": [],
             "signature": [
               {
@@ -501,7 +469,7 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/selectable_filter_popover.tsx",
-            "lineNumber": 145,
+            "lineNumber": 149,
             "columnNumber": 85,
             "deprecated": false,
             "trackAdoption": false,
@@ -526,7 +494,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/selectable_filter_popover.tsx",
-        "lineNumber": 331,
+        "lineNumber": 356,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -542,7 +510,7 @@
               "StandardOptionRenderProps"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/selectable_filter_popover.tsx",
-            "lineNumber": 331,
+            "lineNumber": 356,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -616,35 +584,6 @@
           "An object containing `isOpen` state, `toggle` function, and `close` function."
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-list-toolbar",
-        "id": "def-public.useTagQueryParser",
-        "type": "Function",
-        "tags": [],
-        "label": "useTagQueryParser",
-        "description": [
-          "\nReturns a {@link QueryParser} that extracts `tag:name` and `-tag:name` clauses\nfrom the search bar query text and maps them to `filters.tag` include/exclude lists.\n\nReturns `null` when no tag service is registered — the toolbar skips this\nparser and the query text is passed through unchanged.\n\nUsed by {@link ContentListToolbar}'s `handleSearchChange` pipeline. Register\nadditional parsers alongside this one (e.g. `useUserQueryParser`) to support\nmore filter types without modifying `handleSearchChange`."
-        ],
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "@kbn/content-list-toolbar",
-            "scope": "public",
-            "docId": "kibKbnContentListToolbarPluginApi",
-            "section": "def-public.QueryParser",
-            "text": "QueryParser"
-          },
-          " | null"
-        ],
-        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/tags/use_tag_query_parser.ts",
-        "lineNumber": 25,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -658,7 +597,7 @@
           "\nProps for the {@link ContentListToolbar} component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-        "lineNumber": 28,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -676,7 +615,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-            "lineNumber": 32,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -694,7 +633,102 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-            "lineNumber": 34,
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.CreatedByFilterRendererProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreatedByFilterRendererProps",
+        "description": [
+          "\nProps for the {@link CreatedByFilterRenderer} component.\n\nWhen used with `EuiSearchBar` `custom_component` filters, the search bar passes\n`query` and `onChange` props."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/created_by/created_by_filter_renderer.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.CreatedByFilterRendererProps.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "Query object from `EuiSearchBar`."
+            ],
+            "signature": [
+              "Query",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/created_by/created_by_filter_renderer.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.CreatedByFilterRendererProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [
+              "`onChange` callback from `EuiSearchBar`."
+            ],
+            "signature": [
+              "((query: ",
+              "Query",
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/created_by/created_by_filter_renderer.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-toolbar",
+                "id": "def-public.CreatedByFilterRendererProps.onChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "Query"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/created_by/created_by_filter_renderer.tsx",
+                "lineNumber": 26,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.CreatedByFilterRendererProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Optional `data-test-subj` attribute for testing."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/created_by/created_by_filter_renderer.tsx",
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -853,6 +887,24 @@
           },
           {
             "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.FilterPopoverProps.totalCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalCount",
+            "description": [
+              "Total item count shown in parens next to the title (e.g. \"Tags (1000)\")."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
             "id": "def-public.FilterPopoverProps.activeCount",
             "type": "number",
             "tags": [],
@@ -864,7 +916,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-            "lineNumber": 49,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -879,7 +931,7 @@
               "Whether the popover is open."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-            "lineNumber": 51,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -897,7 +949,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-            "lineNumber": 53,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -917,7 +969,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-            "lineNumber": 55,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -937,7 +989,7 @@
               "string | number | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-            "lineNumber": 57,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -955,7 +1007,7 @@
               "string | number | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-            "lineNumber": 59,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -973,7 +1025,7 @@
               "\"downCenter\" | \"downLeft\" | \"downRight\" | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-            "lineNumber": 61,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -991,7 +1043,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filter_popover.tsx",
-            "lineNumber": 63,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1009,7 +1061,7 @@
           "\nProps for the {@link Filters} container component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1027,127 +1079,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
-            "lineNumber": 20,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-list-toolbar",
-        "id": "def-public.QueryParser",
-        "type": "Interface",
-        "tags": [],
-        "label": "QueryParser",
-        "description": [
-          "\nA parser that extracts one filter dimension from an EUI search bar query string.\n\nParsers are chained by {@link parseFiltersFromQuery} — each receives the\ncleaned query text produced by the previous parser (with earlier filter\nsyntax already removed), and returns cleaned text + its own parsed filters.\n"
-        ],
-        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
-        "lineNumber": 39,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/content-list-toolbar",
-            "id": "def-public.QueryParser.parse",
-            "type": "Function",
-            "tags": [],
-            "label": "parse",
-            "description": [],
-            "signature": [
-              "(queryText: string) => ",
-              {
-                "pluginId": "@kbn/content-list-toolbar",
-                "scope": "public",
-                "docId": "kibKbnContentListToolbarPluginApi",
-                "section": "def-public.QueryParserResult",
-                "text": "QueryParserResult"
-              }
-            ],
-            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
-            "lineNumber": 66,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/content-list-toolbar",
-                "id": "def-public.QueryParser.parse.$1",
-                "type": "string",
-                "tags": [],
-                "label": "queryText",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
-                "lineNumber": 66,
-                "columnNumber": 9,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-list-toolbar",
-        "id": "def-public.QueryParserResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "QueryParserResult",
-        "description": [
-          "\nResult returned by a {@link QueryParser}."
-        ],
-        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
-        "lineNumber": 17,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/content-list-toolbar",
-            "id": "def-public.QueryParserResult.searchQuery",
-            "type": "string",
-            "tags": [],
-            "label": "searchQuery",
-            "description": [
-              "\nQuery text with this parser's field syntax removed.\n\nPassed to the next parser in the chain so each parser operates on\nprogressively cleaner text. The final value is used as `filters.search`."
-            ],
-            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
             "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-list-toolbar",
-            "id": "def-public.QueryParserResult.filters",
-            "type": "Object",
-            "tags": [],
-            "label": "filters",
-            "description": [
-              "\nFilter values extracted by this parser, keyed by filter ID.\n\nMerged into the accumulated {@link ActiveFilters} for the current query.\nReturn an empty object when no clauses for this filter type are present —\nthis clears the filter dimension, which is correct since the search bar\nis the source of truth."
-            ],
-            "signature": [
-              "{ [x: string]: string | boolean | ",
-              {
-                "pluginId": "@kbn/content-list-provider",
-                "scope": "public",
-                "docId": "kibKbnContentListProviderPluginApi",
-                "section": "def-public.IncludeExcludeFilter",
-                "text": "IncludeExcludeFilter"
-              },
-              " | undefined; search?: string | undefined; starredOnly?: boolean | undefined; }"
-            ],
-            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
-            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1633,6 +1565,62 @@
           },
           {
             "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.SelectableFilterPopoverProps.headerContent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "headerContent",
+            "description": [
+              "Optional header content rendered above the selectable list (e.g. a search input)."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/selectable_filter_popover.tsx",
+            "lineNumber": 91,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.SelectableFilterPopoverProps.onToggle",
+            "type": "Function",
+            "tags": [],
+            "label": "onToggle",
+            "description": [
+              "Called when the popover opens or closes."
+            ],
+            "signature": [
+              "((isOpen: boolean) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/selectable_filter_popover.tsx",
+            "lineNumber": 93,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-toolbar",
+                "id": "def-public.SelectableFilterPopoverProps.onToggle.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOpen",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/selectable_filter_popover.tsx",
+                "lineNumber": 94,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
             "id": "def-public.SelectableFilterPopoverProps.datatestsubj",
             "type": "string",
             "tags": [],
@@ -1644,7 +1632,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/selectable_filter_popover.tsx",
-            "lineNumber": 91,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1691,6 +1679,25 @@
     "misc": [
       {
         "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.CreatedByFilter",
+        "type": "Any",
+        "tags": [],
+        "label": "CreatedByFilter",
+        "description": [
+          "\n`CreatedByFilter` declarative component for toolbar filter composition.\n\nResolves to a `custom_component` filter using {@link CreatedByFilterRenderer}\nwhen the user profiles service is available (`hasCreatedBy` is true)."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/created_by/created_by_filter.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
         "id": "def-public.Filters",
         "type": "Any",
         "tags": [],
@@ -1700,7 +1707,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
-        "lineNumber": 50,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1752,7 +1759,7 @@
           "\nProps for the {@link SortFilter} declarative component.\n\nNote: `SortFilter` is a non-rendering declarative component whose props are\nparsed as attributes during filter resolution. Because `EuiSearchBar`\ninstantiates `custom_component` filters itself, attributes cannot be\nforwarded to the underlying {@link SortRenderer}. Extend this interface\nonly with props the `resolve` callback can act on directly."
         ],
         "signature": [
-          "{ [x: string]: never; }"
+          "{}"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/part.ts",
         "lineNumber": 13,
@@ -1790,7 +1797,7 @@
           "\nProps for the {@link TagFilter} declarative component.\n\nNote: `TagFilter` is a non-rendering declarative component whose props are\nparsed as attributes during filter resolution. Because `EuiSearchBar`\ninstantiates `custom_component` filters itself, attributes cannot be\nforwarded to the underlying {@link TagFilterRenderer}. Extend this interface\nonly with props the `resolve` callback can act on directly."
         ],
         "signature": [
-          "{ [x: string]: never; }"
+          "{}"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/part.ts",
         "lineNumber": 24,

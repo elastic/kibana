@@ -15,23 +15,17 @@ import {
   RICH_TRACE,
   setupTracesExperience,
   teardownTracesExperience,
+  expectTracesExperienceEnabled,
 } from '../../fixtures/traces_experience';
-import type { TracesExperienceTestFixtures } from '../../fixtures/traces_experience';
+
+// Waterfall rendering after navigation + API interception can exceed the default
+// 10s expect.timeout on cloud CI.
+const WATERFALL_RENDER_TIMEOUT = 20000;
 
 const APM_TIME_RANGE = {
   rangeFrom: TRACES.DEFAULT_START_TIME,
   rangeTo: TRACES.DEFAULT_END_TIME,
 };
-
-async function expectTracesExperienceEnabled(
-  pageObjects: TracesExperienceTestFixtures['pageObjects']
-) {
-  await pageObjects.discover.waitForDocTableRendered();
-  for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-    await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-  }
-  await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
-}
 
 spaceTest.describe(
   'Traces in Discover - Explore from APM',
@@ -283,13 +277,18 @@ spaceTest.describe(
         });
 
         await spaceTest.step('unified waterfall size warning is visible', async () => {
-          await expect(page.testSubj.locator('waterfallSizeWarning')).toBeVisible();
+          await expect(pageObjects.tracesExperience.apm.waterfall.container).toBeVisible({
+            timeout: WATERFALL_RENDER_TIMEOUT,
+          });
+          await expect(pageObjects.tracesExperience.apm.waterfall.sizeWarning).toBeVisible({
+            timeout: WATERFALL_RENDER_TIMEOUT,
+          });
         });
 
         await spaceTest.step(
           'warning "view in Discover" link opens traces experience',
           async () => {
-            await page.testSubj.locator('waterfallSizeWarningDiscoverLink').click();
+            await pageObjects.tracesExperience.apm.waterfall.sizeWarningDiscoverLink.click();
             await expectTracesExperienceEnabled(pageObjects);
             await page.unrouteAll({ behavior: 'wait' });
           }

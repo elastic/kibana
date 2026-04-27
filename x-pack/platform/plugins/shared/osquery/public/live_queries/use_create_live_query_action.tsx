@@ -14,7 +14,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 import type { LiveQueryDetailsItem } from '../actions/use_live_query_details';
 
 interface UseLiveQueryProps {
-  onSuccess?: () => void;
+  onSuccess?: (actionId: string) => void;
 }
 
 export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryProps) => {
@@ -52,10 +52,10 @@ export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryProps) => {
       return response?.data;
     },
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setErrorToast();
         if (onSuccess) {
-          onSuccess();
+          onSuccess(data.action_id);
         }
       },
       onError: (error) => {

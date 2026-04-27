@@ -21,7 +21,7 @@ import { getRowItemsWithActions } from '../../../../../common/components/tables/
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { WatchlistTableItemType } from './types';
 
-const COLUMN_WIDTHS = { actions: '5%', watchlist_name: '15%' };
+const COLUMN_WIDTHS = { actions: '8em', watchlist_name: '24em' };
 
 const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
   field: 'name',
@@ -126,6 +126,7 @@ const WatchlistsActionsMenu = ({
           <EuiContextMenuItem
             key="delete"
             icon="trash"
+            disabled={record.managed === true}
             data-test-subj="watchlistsManagementTableActionDelete"
             onClick={() => {
               onDelete(record);
@@ -152,7 +153,7 @@ const WatchlistsActionsCell = ({
   onEdit: (record: WatchlistTableItemType) => void;
   onDelete: (record: WatchlistTableItemType) => void;
 }) => (
-  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+  <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
         iconType="pencil"

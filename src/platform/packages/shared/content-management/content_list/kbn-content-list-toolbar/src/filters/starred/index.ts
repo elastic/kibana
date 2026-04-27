@@ -9,4 +9,3 @@
 
 export { StarredFilter, type StarredFilterProps } from './starred_filter';
 export { StarredFilterRenderer, type StarredFilterRendererProps } from './starred_filter_renderer';
-export { useStarredQueryParser } from './use_starred_query_parser';

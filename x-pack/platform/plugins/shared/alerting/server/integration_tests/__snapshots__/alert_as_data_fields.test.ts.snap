@@ -154,6 +154,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "anomaly.detector_type": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "container.id": Object {
       "required": false,
       "type": "keyword",
@@ -261,6 +265,10 @@ Object {
   ],
   "fieldMap": Object {
     "agent.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "anomaly.detector_type": Object {
       "required": false,
       "type": "keyword",
     },
@@ -374,6 +382,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "anomaly.detector_type": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "container.id": Object {
       "required": false,
       "type": "keyword",
@@ -481,6 +493,10 @@ Object {
   ],
   "fieldMap": Object {
     "agent.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "anomaly.detector_type": Object {
       "required": false,
       "type": "keyword",
     },

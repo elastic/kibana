@@ -710,13 +710,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
 
     this.logger.debug('Request has been authenticated via refreshed token.');
     const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+
+    const isUiamToken = this.isUiamToken(accessToken);
+
     return AuthenticationResult.succeeded(
       this.authenticationInfoToAuthenticatedUser(authenticationInfo),
       {
-        authHeaders: {
-          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-        },
-        ...(this.isUiamToken(accessToken) && {
+        authHeaders: isUiamToken
+          ? this.options.uiam.getAuthenticationHeaders(accessToken)
+          : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() },
+        ...(isUiamToken && {
           userProfileGrant: {
             type: 'uiamAccessToken',
             accessToken,

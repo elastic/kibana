@@ -32,7 +32,7 @@ const smlStorageSchemaProperties = {
   permissions: types.keyword({}),
 };
 
-const storageSettings = {
+export const storageSettings = {
   name: smlIndexName,
   schema: {
     properties: smlStorageSchemaProperties,

@@ -166,22 +166,22 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-#  - command: .buildkite/scripts/steps/checks/api_contracts.sh
-#    label: 'Check API Contracts'
-#    agents:
-#      image: family/kibana-ubuntu-2404
-#      imageProject: elastic-images-prod
-#      provider: gcp
-#      machineType: n2d-standard-2
-#      preemptible: true
-#      spotZones: us-central1-c,us-central1-a
-#    depends_on: check_oas_snapshot
-#    timeout_in_minutes: 30
-#    soft_fail: true
-#    retry:
-#      automatic:
-#        - exit_status: '-1'
-#          limit: 3
+  #  - command: .buildkite/scripts/steps/checks/api_contracts.sh
+  #    label: 'Check API Contracts'
+  #    agents:
+  #      image: family/kibana-ubuntu-2404
+  #      imageProject: elastic-images-prod
+  #      provider: gcp
+  #      machineType: n2d-standard-2
+  #      preemptible: true
+  #      spotZones: us-central1-c,us-central1-a
+  #    depends_on: check_oas_snapshot
+  #    timeout_in_minutes: 30
+  #    soft_fail: true
+  #    retry:
+  #      automatic:
+  #        - exit_status: '-1'
+  #          limit: 3
 
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
     label: Check Public API Docs
@@ -190,9 +190,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
+      machineType: c4d-highmem-4
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -248,11 +249,9 @@ steps:
       diskSizeGb: 105
     key: build_scout_tests
     timeout_in_minutes: 20
-    depends_on:
-      - build
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -271,22 +270,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-
-  - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
-    label: Trigger unsupported ftr tests
-    timeout_in_minutes: 10
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-    depends_on:
-      - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
 
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'

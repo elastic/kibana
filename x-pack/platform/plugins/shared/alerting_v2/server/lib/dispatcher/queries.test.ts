@@ -57,10 +57,11 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(req.query).toContain('last_episode_status = LAST(episode_status, @timestamp)');
   });
 
-  it('fetches _source metadata alongside _index', () => {
+  it('fetches _source metadata', () => {
     const req = getDispatchableAlertEventsQuery();
 
-    expect(req.query).toContain('METADATA _index, _source');
+    expect(req.query).toContain('METADATA _source');
+    expect(req.query).not.toContain('_index');
   });
 
   it('extracts data_json from _source using JSON_EXTRACT for rule-events rows', () => {

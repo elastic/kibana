@@ -179,7 +179,11 @@ export const buildRunsListingFilterQuery = (
     filters.push({ term: { 'task.model.id': options.modelId } });
   }
   if (options?.branch) {
-    filters.push({ term: { 'run_metadata.git_branch': options.branch } });
+    filters.push({
+      wildcard: {
+        'run_metadata.git_branch': { value: `*${options.branch}*`, case_insensitive: true },
+      },
+    });
   }
   if (options?.datasetId) {
     filters.push({ term: { 'example.dataset.id': options.datasetId } });

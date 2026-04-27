@@ -30,7 +30,7 @@
           ", void, never, never>"
         ],
         "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-        "lineNumber": 37,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -46,7 +46,7 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-            "lineNumber": 42,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -65,7 +65,7 @@
                   ">"
                 ],
                 "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-                "lineNumber": 42,
+                "lineNumber": 47,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -92,7 +92,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-            "lineNumber": 49,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -110,7 +110,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-            "lineNumber": 58,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -243,6 +243,19 @@
           ],
           "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
           "lineNumber": 18,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-public.ActionsPublicPluginSetup.isEarsEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isEarsEnabled",
+          "description": [],
+          "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
+          "lineNumber": 19,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -5285,6 +5298,48 @@
           ],
           "returnComment": [
             "boolean indicating whether the connector was added or not"
+          ]
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginStartContract.unregisterDynamicConnector",
+          "type": "Function",
+          "tags": [],
+          "label": "unregisterDynamicConnector",
+          "description": [
+            "\nRemove a previously registered dynamic InMemoryConnector from the inMemoryConnectors list.\nOnly connectors flagged as dynamic (via registerDynamicConnector) can be removed this way;\npreconfigured or system connectors are left untouched."
+          ],
+          "signature": [
+            "(connectorId: string) => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+          "lineNumber": 209,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginStartContract.unregisterDynamicConnector.$1",
+              "type": "string",
+              "tags": [],
+              "label": "connectorId",
+              "description": [
+                "id of the dynamic connector to remove"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+              "lineNumber": 216,
+              "columnNumber": 32,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "boolean indicating whether the connector was removed or not"
           ]
         }
       ],

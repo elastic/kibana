@@ -187,7 +187,44 @@ interface RunStatsAggregations {
 const EVALUATIONS_DATA_STREAM_ALIAS = 'kibana-evaluations';
 const EVALUATIONS_DATA_STREAM_WILDCARD = 'kibana-evaluations*';
 const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
+
+/**
+ * Builds a deterministic document ID from the score document's key fields.
+ * Used by both batch (`exportScores`) and incremental (`indexSingleScore`) paths
+ * to ensure idempotent writes — re-indexing the same result produces a 409 conflict
+ * rather than a duplicate.
+ */
+export function computeScoreDocumentId(doc: EvaluationScoreDocument): string {
+  const suiteIdPart = doc.suite?.id ?? 'unknown-suite';
+  return [
+    doc.run_id,
+    suiteIdPart,
+    doc.task.model.id,
+    doc.example.dataset.id,
+    doc.example.id,
+    doc.evaluator.name,
+    doc.task.repetition_index,
+  ].join('-');
+}
+
+function enrichDocument(
+  doc: EvaluationScoreDocument,
+  suiteId: string | undefined,
+  buildkite: BuildkiteCiMetadata | undefined
+): EvaluationScoreDocument {
+  if (!suiteId && !buildkite) {
+    return doc;
+  }
+  return {
+    ...doc,
+    suite: doc.suite ?? (suiteId ? { id: suiteId } : undefined),
+    ci: doc.ci ?? (buildkite ? { buildkite } : undefined),
+  };
+}
+
 export class EvaluationScoreRepository {
+  private localExportTargetReady: Promise<void> | undefined;
+
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
   private getErrorStatusCode(error: unknown): number | undefined {
@@ -386,9 +423,17 @@ export class EvaluationScoreRepository {
     }
   }
 
-  private async prepareLocalExportTarget(): Promise<void> {
-    await this.ensureIndexTemplate();
-    await this.ensureDatastream();
+  private prepareLocalExportTarget(): Promise<void> {
+    if (!this.localExportTargetReady) {
+      this.localExportTargetReady = (async () => {
+        await this.ensureIndexTemplate();
+        await this.ensureDatastream();
+      })().catch((err) => {
+        this.localExportTargetReady = undefined;
+        throw err;
+      });
+    }
+    return this.localExportTargetReady;
   }
 
   /**
@@ -484,45 +529,19 @@ export class EvaluationScoreRepository {
 
       const buildkite = options.buildkite ?? getBuildkiteCiMetadataFromEnv();
       const suiteId = options.suiteId ?? process.env.EVAL_SUITE_ID;
-      const enrichedDocuments =
-        suiteId || buildkite
-          ? documents.map((doc) => ({
-              ...doc,
-              suite: doc.suite ?? (suiteId ? { id: suiteId } : undefined),
-              ci: doc.ci ?? (buildkite ? { buildkite } : undefined),
-            }))
-          : documents;
+      const enrichedDocuments = documents.map((doc) => enrichDocument(doc, suiteId, buildkite));
 
-      // Bulk index documents
       if (enrichedDocuments.length > 0) {
         const dropped: Array<BulkDroppedDocument<EvaluationScoreDocument>> = [];
 
         const stats = await this.esClient.helpers.bulk({
           datasource: enrichedDocuments,
-          onDocument: (doc) => {
-            // Documents are exported from multiple suites *and* multiple task models/connectors.
-            // Keep IDs unique across that matrix while maintaining deterministic IDs for re-runs.
-            const suiteIdPart = doc.suite?.id ?? 'unknown-suite';
-            const docId = [
-              doc.run_id,
-              suiteIdPart,
-              doc.task.model.id,
-              doc.example.dataset.id,
-              doc.example.id,
-              doc.evaluator.name,
-              doc.task.repetition_index,
-            ].join('-');
-
-            return {
-              // Data streams only allow create operations. Use deterministic document IDs so:
-              // - Re-runs/retries don't create duplicates (they'll 409 conflict instead)
-              // - We can treat 409s as a no-op for idempotency
-              create: {
-                _index: EVALUATIONS_DATA_STREAM_ALIAS,
-                _id: docId,
-              },
-            };
-          },
+          onDocument: (doc) => ({
+            create: {
+              _index: EVALUATIONS_DATA_STREAM_ALIAS,
+              _id: computeScoreDocumentId(doc),
+            },
+          }),
           onDrop: (droppedDoc) => {
             dropped.push(droppedDoc as BulkDroppedDocument<EvaluationScoreDocument>);
           },
@@ -586,6 +605,42 @@ export class EvaluationScoreRepository {
       const cause = error instanceof Error ? error : new Error(String(error));
       this.log.error('Failed to export scores to Elasticsearch', cause);
       throw cause;
+    }
+  }
+
+  /**
+   * Indexes a single evaluation score document to Elasticsearch immediately.
+   * Used for incremental writes so results survive worker crashes.
+   *
+   * Uses `refresh: 'wait_for'` so scores are searchable immediately (e.g. for
+   * per-worker terminal summaries and other readers right after incremental write).
+   * Deterministic IDs (via {@link computeScoreDocumentId}) make this idempotent —
+   * the batch export at teardown will simply encounter 409 conflicts for
+   * already-written documents.
+   */
+  async indexSingleScore(
+    document: EvaluationScoreDocument,
+    options: ExportScoresOptions = {}
+  ): Promise<void> {
+    await this.prepareLocalExportTarget();
+
+    const buildkite = options.buildkite ?? getBuildkiteCiMetadataFromEnv();
+    const suiteId = options.suiteId ?? process.env.EVAL_SUITE_ID;
+    const enrichedDoc = enrichDocument(document, suiteId, buildkite);
+    const docId = computeScoreDocumentId(enrichedDoc);
+
+    try {
+      await this.esClient.create({
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
+        id: docId,
+        document: enrichedDoc,
+        refresh: 'wait_for',
+      });
+    } catch (error: unknown) {
+      if (this.getErrorStatusCode(error) === 409) {
+        return;
+      }
+      throw error;
     }
   }
 

@@ -21,10 +21,10 @@ import type { ApplicationStart, ScopedHistory } from '@kbn/core/public';
 import type { ExtensionsService } from '../../../../../../services/extensions_service';
 
 import { ConvertToLookupIndexModalContainer } from '../../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container';
-import { notificationService } from '../../../../../services/notification';
 import { getIndexDetailsLink } from '../../../../../services/routing';
 import { IndexDetailsSection } from '../../../../../../../common/constants';
 import type { Index } from '../../../../../../../common';
+import { useServices } from '../../../../../app_context';
 
 export type ModalOpenRequest =
   | { kind: 'forcemerge' }
@@ -106,6 +106,7 @@ export const ModalHost = memo(
     },
     ref
   ) {
+    const { notificationService } = useServices();
     const [state, dispatch] = useReducer(modalReducer, initialModalState);
 
     useImperativeHandle(ref, () => ({

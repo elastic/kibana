@@ -226,6 +226,7 @@ describe('useUpdateRule', () => {
       expect(body.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
+        recovering_count: 0,
       });
     });
   });

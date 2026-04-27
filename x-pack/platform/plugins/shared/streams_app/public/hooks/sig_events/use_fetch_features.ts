@@ -29,6 +29,11 @@ export const useFetchFeatures = () => {
   }: QueryFunctionContext): Promise<FetchFeaturesResult | undefined> => {
     return await streamsRepositoryClient.fetch('GET /internal/streams/_features', {
       signal: signal ?? null,
+      params: {
+        query: {
+          include_excluded: true,
+        },
+      },
     });
   };
 

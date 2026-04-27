@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { ObserverCodec } from '../ping/observer';
 import { ErrorStateCodec } from '../ping/error_state';
 import { AgentType, MonitorType, PingErrorType, UrlType } from '..';
+import { remoteMonitorInfoSchema } from '../remote';
 
 export const OverviewPingCodec = t.intersection([
   t.interface({
@@ -55,6 +56,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     spaces: t.array(t.string),
     urls: t.string,
     maintenanceWindows: t.array(t.string),
+    remote: remoteMonitorInfoSchema,
   }),
 ]);
 

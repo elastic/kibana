@@ -28,18 +28,33 @@ import { InternalQueryError } from '../errors';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
 type WindowName = string;
+
+interface LookbackWindow {
+  name: WindowName;
+  duration: Duration;
+}
+
+interface BurnRateResult {
+  burnRate: number;
+  sli: number;
+  name: WindowName;
+}
+
+interface CalculateBatchParams {
+  slo: SLODefinition;
+  instanceId: string;
+  lookbackWindows: LookbackWindow[];
+  remoteName?: string;
+}
+
 export interface BurnRatesClient {
   calculate(
     slo: SLODefinition,
     instanceId: string,
     lookbackWindows: LookbackWindow[],
     remoteName?: string
-  ): Promise<Array<{ burnRate: number; sli: number; name: WindowName }>>;
-}
-
-interface LookbackWindow {
-  name: WindowName;
-  duration: Duration;
+  ): Promise<BurnRateResult[]>;
+  calculateBatch(params: CalculateBatchParams[]): Promise<BurnRateResult[][]>;
 }
 
 type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
@@ -85,6 +100,75 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
     });
 
     return handleWindowedResult(result.aggregations, lookbackWindows, slo);
+  }
+
+  async calculateBatch(params: CalculateBatchParams[]): Promise<BurnRateResult[][]> {
+    if (params.length === 0) {
+      return [];
+    }
+
+    const perItemMeta = params.map(({ slo, instanceId, lookbackWindows, remoteName }) => {
+      if (lookbackWindows.length === 0) {
+        throw new Error(`lookbackWindows must not be empty for SLO [${slo.id}]`);
+      }
+      const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
+        a.duration.isShorterThan(b.duration) ? 1 : -1
+      );
+      const longestLookbackWindow = sortedLookbackWindows[0];
+      const delayInSeconds = getDelayInSecondsFromSLO(slo);
+      const longestDateRange = getLookbackDateRange(
+        new Date(),
+        longestLookbackWindow.duration,
+        delayInSeconds
+      );
+      const index = remoteName
+        ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+        : SLI_DESTINATION_INDEX_PATTERN;
+
+      return {
+        index,
+        slo,
+        instanceId,
+        lookbackWindows,
+        sortedLookbackWindows,
+        longestDateRange,
+        delayInSeconds,
+      };
+    });
+
+    const searches = perItemMeta.flatMap(
+      ({ index, slo, instanceId, sortedLookbackWindows, longestDateRange, delayInSeconds }) => [
+        { index },
+        {
+          ...commonQuery(slo, instanceId, longestDateRange),
+          aggs: occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+            ? toLookbackWindowsAggregationsQuery(
+                longestDateRange.to,
+                sortedLookbackWindows,
+                delayInSeconds
+              )
+            : toLookbackWindowsSlicedAggregationsQuery(
+                longestDateRange.to,
+                sortedLookbackWindows,
+                delayInSeconds
+              ),
+        },
+      ]
+    );
+
+    const result = await this.esClient.msearch<unknown, EsAggregations>({ searches });
+
+    return perItemMeta.map(({ lookbackWindows, slo }, i) => {
+      const response = result.responses[i];
+      if ('error' in response) {
+        throw new InternalQueryError('Burn rate batch query failed');
+      }
+      return handleWindowedResult(
+        response.aggregations as EsAggregations | undefined,
+        lookbackWindows,
+        slo
+      );
+    });
   }
 }
 

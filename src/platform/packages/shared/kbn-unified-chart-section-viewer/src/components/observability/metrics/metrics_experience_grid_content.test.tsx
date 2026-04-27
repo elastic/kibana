@@ -29,6 +29,16 @@ jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
 }));
 
+jest.mock('./metrics_grid', () => ({
+  MetricsGrid: jest.fn((props: { metricItems: any[] }) =>
+    props.metricItems.length === 0 ? (
+      <div data-test-subj="metricsExperienceNoData" />
+    ) : (
+      <div data-test-subj="unifiedMetricsExperienceGrid" />
+    )
+  ),
+}));
+
 /**
  * Mock EuiDelayRender to render immediately in tests.
  */
@@ -89,6 +99,7 @@ describe('MetricsExperienceGridContent', () => {
 
     defaultProps = {
       metricItems,
+      activeDimensions: [],
       services: {} as any,
       discoverFetch$: fetch$,
       fetchParams,
@@ -110,6 +121,7 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     usePaginationMock.mockReturnValue({
@@ -169,6 +181,7 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));
@@ -206,5 +219,18 @@ describe('MetricsExperienceGridContent', () => {
     );
 
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
+  });
+
+  it('passes activeDimensions prop to MetricsGrid', () => {
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+
+    render(<MetricsExperienceGridContent {...defaultProps} activeDimensions={[dimensions[0]]} />, {
+      wrapper: IntlProvider,
+    });
+
+    const lastCall = (MetricsGrid as jest.Mock).mock.calls[
+      (MetricsGrid as jest.Mock).mock.calls.length - 1
+    ][0];
+    expect(lastCall.dimensions).toEqual([dimensions[0]]);
   });
 });

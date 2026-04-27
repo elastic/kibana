@@ -1043,6 +1043,66 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
     });
 
+    it('should update output if preconfigured ES output exists and otel_exporter_config_yaml changed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          otel_exporter_config_yaml: 'flush_interval: 10s',
+        } as any,
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+    });
+
+    it('should update output if preconfigured ES output exists and otel_disable_beatsauth changed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          otel_disable_beatsauth: true,
+        } as any,
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+    });
+
+    it('should not update output if preconfigured ES output exists and otel fields did not change', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          // neither otel field set — matches the existing mock which also has neither set
+        },
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).not.toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+    });
+
     it('should not update output if preconfigured logstash output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

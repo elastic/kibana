@@ -15,8 +15,9 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { RuleTagArray } from '../../model/rule_schema/common_attributes.gen';
 
+export const ReadTagsResponse = lazySchema(() => RuleTagArray);
 export type ReadTagsResponse = z.infer<typeof ReadTagsResponse>;
-export const ReadTagsResponse = RuleTagArray;

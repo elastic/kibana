@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButton, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
@@ -74,13 +74,14 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
             : []),
           canWriteArtifact ? (
             // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiLink
+            <EuiButtonEmpty
               onClick={onClickHandler}
               href={toRouteUrl}
+              size="m"
               data-test-subj="unassigned-manage-artifacts-button"
             >
               {labels.emptyUnassignedSecondaryActionButtonTitle}
-            </EuiLink>
+            </EuiButtonEmpty>
           ) : null,
         ]}
       />
