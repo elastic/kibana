@@ -111,6 +111,7 @@ export const GroupEditorFlyout = ({
 
   return (
     <EuiFlyout
+      aria-labelledby={flyoutHeadingId}
       onClose={onClose}
       paddingSize="m"
       size="l"
