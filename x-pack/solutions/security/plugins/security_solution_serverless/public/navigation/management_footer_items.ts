@@ -124,7 +124,8 @@ export const createManagementFooterItemsTree = (
           breadcrumbStatus: 'hidden',
           children: [
             {
-              link: 'management:triggersActions',
+              id: 'stackRules',
+              link: 'rules',
               breadcrumbStatus: 'hidden',
             },
             {
