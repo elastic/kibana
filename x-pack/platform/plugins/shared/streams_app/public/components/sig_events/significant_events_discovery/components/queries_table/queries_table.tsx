@@ -63,7 +63,6 @@ import {
   THRESHOLD_BREACHES_TOOLTIP_NAME,
   OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
   OPEN_IN_DISCOVER_ACTION_TITLE,
-  SAVE_QUERY_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
   TABLE_CAPTION,
@@ -137,7 +136,7 @@ export function QueriesTable() {
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
 
   const queryClient = useQueryClient();
-  const { demote, upsertQuery, removeQuery } = useQueriesApi();
+  const { demote, removeQuery } = useQueriesApi();
 
   const [selectedItems, setSelectedItems] = useState<SignificantEventQueryRow[]>([]);
   const [itemsToDelete, setItemsToDelete] = useState<SignificantEventQueryRow[]>([]);
@@ -167,32 +166,6 @@ export function QueriesTable() {
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: BULK_DEMOTE_ERROR_TITLE });
-    },
-  });
-
-  const saveQueryMutation = useMutation<
-    void,
-    Error,
-    { updatedQuery: SignificantEventQueryRow['query']; streamName: string }
-  >({
-    mutationFn: async ({ updatedQuery, streamName }) => {
-      await upsertQuery({ query: updatedQuery, streamName });
-    },
-    onSuccess: async (_, variables) => {
-      await invalidateQueriesData();
-      setSelectedQuery((currentSelectedQuery) =>
-        currentSelectedQuery !== null
-          ? {
-              ...currentSelectedQuery,
-              query: variables.updatedQuery,
-            }
-          : currentSelectedQuery
-      );
-    },
-    onError: (error) => {
-      toasts.addError(error, {
-        title: SAVE_QUERY_ERROR_TOAST_TITLE,
-      });
     },
   });
 
@@ -519,13 +492,9 @@ export function QueriesTable() {
         <QueryDetailsFlyout
           item={selectedQuery}
           onClose={() => setSelectedQuery(null)}
-          onSave={(updatedQuery, streamName) =>
-            saveQueryMutation.mutateAsync({ updatedQuery, streamName })
-          }
           onDelete={(queryId, streamName) =>
             deleteQueryMutation.mutateAsync({ queryId, streamName })
           }
-          isSaving={saveQueryMutation.isLoading}
           isDeleting={deleteQueryMutation.isLoading}
         />
       )}

@@ -574,6 +574,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
     }
 
+    if (
+      packagePolicy.global_data_tags?.length &&
+      !(
+        agentPolicies.every((policy) => policy?.supports_agentless) ||
+        packagePolicy.supports_agentless
+      )
+    ) {
+      throw new PackagePolicyValidationError(
+        '`global_data_tags` can only be set on agentless integration policies'
+      );
+    }
+
     const spaceIds = agentPolicies.flatMap((ap) => ap.space_ids ?? []);
     // trailing whitespace causes issues creating API keys
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
@@ -1645,6 +1657,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (packagePolicy.supports_agentless && !isAgentlessIntegration(pkgInfo)) {
         throw new PackagePolicyValidationError(
           `Package "${pkgInfo.name}" does not support agentless deployment mode`
+        );
+      }
+
+      // Validate that global_data_tags is only set on agentless package policies
+      if (
+        packagePolicy.global_data_tags?.length &&
+        !(packagePolicy.supports_agentless || agentPolicy?.supports_agentless)
+      ) {
+        throw new PackagePolicyValidationError(
+          '`global_data_tags` can only be set on agentless integration policies'
         );
       }
 
@@ -3808,12 +3830,13 @@ function _compilePackageStream(
 
   stream = _applyIndexPrivileges(packageDataStream, streamIn);
 
+  const effectiveInputName = getInputEffectiveName(input);
   const streamFromPkg = (packageDataStream.streams || []).find(
-    (pkgStream) => pkgStream.input === input.type
+    (pkgStream) => pkgStream.input === effectiveInputName
   );
   if (!streamFromPkg) {
     throw new StreamNotFoundError(
-      `Stream template not found, unable to find stream for input ${input.type}`
+      `Stream template not found, unable to find stream for input ${effectiveInputName} (type: ${input.type})`
     );
   }
 
@@ -4081,6 +4104,13 @@ export function updatePackageInputs(
     originalInput.deprecated = update.deprecated;
     originalInput.migrate_from = update.migrate_from;
 
+    // Snapshot the stored input-level vars before deepMergeVars mutates them (it modifies the
+    // vars object in place via a shared reference). Used later by the Path B stream migration
+    // block to determine which vars the user actually configured on this input vs package defaults.
+    const storedInputVars = originalInput.vars
+      ? Object.fromEntries(Object.entries(originalInput.vars).map(([k, v]) => [k, { ...v }]))
+      : undefined;
+
     if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
       const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
@@ -4097,6 +4127,10 @@ export function updatePackageInputs(
       // Per-source-type counters for positional stream matching when a stream declares
       // migrate_from. Shared across iterations so each source stream is consumed once.
       const streamMigrateFromCounters: Record<string, number> = {};
+      // Track whether any stream successfully migrated from an old input type, and which
+      // old input was the source. Used to carry enabled state and input-level vars over.
+      let streamMigratedFromOldInput = false;
+      let oldSourceInput: NewPackagePolicyInput | undefined;
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -4130,6 +4164,8 @@ export function updatePackageInputs(
               originalInput.streams.push(
                 migrateStreamVars(stream as InputsOverride, oldStream, oldInputForStream?.vars)
               );
+              streamMigratedFromOldInput = true;
+              if (!oldSourceInput) oldSourceInput = oldInputForStream;
               continue;
             }
           }
@@ -4154,6 +4190,49 @@ export function updatePackageInputs(
           originalInput.streams[indexOfStream] = filteredVars;
           originalStream = originalInput.streams[indexOfStream];
         }
+      }
+      // When stream-level migrate_from succeeded: mirror what applyStreamLevelMigration does
+      // for Path A — carry the old source input's enabled state and input-level vars to the
+      // existing input. This covers the partial-migration case where the new input (cel) already
+      // existed in the old policy alongside the old input (httpjson), but was disabled and had
+      // empty vars because the user only ever configured the httpjson side.
+      if (streamMigratedFromOldInput && oldSourceInput) {
+        const indexOfInput = inputs.indexOf(originalInput);
+        let updatedInput = originalInput;
+
+        if (!limitedPackage) {
+          updatedInput = {
+            ...updatedInput,
+            enabled: oldSourceInput.enabled ?? updatedInput.enabled,
+          };
+        }
+
+        if (oldSourceInput.vars && (update.vars || updatedInput.vars)) {
+          const oldSourceVars = oldSourceInput.vars;
+          const storedCelVars = storedInputVars ?? {};
+          // Start with httpjson vars as the base — the migrate_from declaration signals that
+          // httpjson is the authoritative source for these vars.
+          const seededVars: typeof storedCelVars = { ...oldSourceVars };
+          // Merge in cel's own stored vars only for keys NOT present in the old source input
+          // (i.e. cel-only vars). For shared keys (url, api_token, etc.), the old source
+          // (httpjson) always wins — that is the purpose of the migrate_from migration.
+          for (const [key, celEntry] of Object.entries(storedCelVars)) {
+            if (!(key in oldSourceVars)) {
+              if (celEntry?.value != null && celEntry.value !== '') {
+                seededVars[key] = celEntry;
+              }
+            }
+          }
+          const merged = deepMergeVars(
+            { ...updatedInput, vars: seededVars },
+            update,
+            true
+          ) as NewPackagePolicyInput;
+          updatedInput = removeStaleVars<NewPackagePolicyInput>(merged, update);
+        }
+
+        inputs[indexOfInput] = updatedInput;
+        originalInput = inputs[indexOfInput];
       }
     }
     // Filter all stream that have been removed from the input

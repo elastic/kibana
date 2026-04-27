@@ -47,6 +47,9 @@ import {
   patchExtendedFieldsCasesRequest,
   patchUpdateExtendedFieldsCasesRequest,
   getExtendedFieldsUserActions,
+  patchTemplateCasesRequest,
+  patchRemoveTemplateCasesRequest,
+  getTemplateUserActions,
 } from '../mocks';
 import { AttachmentType, UserActionTypes } from '../../../../common/types/domain';
 
@@ -352,6 +355,26 @@ describe('UserActionPersister', () => {
             user: testUser,
           })
         ).toEqual({ '1': [] });
+      });
+    });
+
+    describe('template', () => {
+      it('creates a user action when a template is applied', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: { id: 'tmpl-1', version: 3 } }));
+      });
+
+      it('creates a user action when a template is removed (null)', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchRemoveTemplateCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: null }));
       });
     });
 

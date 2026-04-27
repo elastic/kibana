@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/visualization-utils'
   - '@kbn/esql-types'
+  - '@kbn/esql-server-utils'
   - '@kbn/licensing-plugin'
   - '@kbn/projects-solutions-groups'
   - '@kbn/esql-language'

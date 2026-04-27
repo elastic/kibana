@@ -27,6 +27,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { alertFlyoutHistoryKey } from './constants/flyout_history';
+import { RemoteDocumentCallout } from './components/remote_document_callout';
 
 export interface DocumentFlyoutProps {
   /**
@@ -58,7 +59,6 @@ export const DocumentFlyout = memo(
     );
     const isSecurityApp = useIsInSecurityApp();
     const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
@@ -87,6 +87,7 @@ export const DocumentFlyout = memo(
 
     return (
       <>
+        <RemoteDocumentCallout hit={hit} />
         <EuiFlyoutHeader>
           <Header
             hit={hit}

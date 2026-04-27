@@ -361,6 +361,7 @@ const HeartbeatFieldsCodec = t.intersection([
     'monitor.fleet_managed': t.boolean,
     'monitor.interval': t.number,
     meta: t.record(t.string, t.union([t.string, t.array(t.string)])),
+    kibanaUrl: t.string,
   }),
 ]);
 

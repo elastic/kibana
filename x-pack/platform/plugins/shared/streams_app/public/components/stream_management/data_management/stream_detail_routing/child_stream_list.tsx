@@ -26,7 +26,7 @@ import { css } from '@emotion/css';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { MAX_NESTING_LEVEL, getSegments, Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
+import { useScrollToActive } from '@kbn/ui-side-navigation/src/hooks/use_scroll_to_active';
 import type { DraggableProvided } from '@hello-pangea/dnd';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
@@ -223,7 +223,6 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     isLoadingSuggestions,
     suggestions,
     suggestionReason,
-    refinementHistory,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
@@ -306,17 +305,9 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
         end: timeState.end,
         userPrompt,
         existingPartitions: suggestions ?? undefined,
-        refinementHistory: refinementHistory.length > 0 ? refinementHistory : undefined,
       });
     },
-    [
-      fetchSuggestions,
-      definition.stream.name,
-      timeState.start,
-      timeState.end,
-      suggestions,
-      refinementHistory,
-    ]
+    [fetchSuggestions, definition.stream.name, timeState.start, timeState.end, suggestions]
   );
 
   const renderCreateButton = () => {

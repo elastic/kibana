@@ -14,15 +14,15 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionList,
   ExceptionListItem,
 } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_common.gen';
 
+export const EndpointList = lazySchema(() => z.union([ExceptionList, z.object({}).strict()]));
 export type EndpointList = z.infer<typeof EndpointList>;
-export const EndpointList = z.union([ExceptionList, z.object({}).strict()]);
 
+export const EndpointListItem = lazySchema(() => ExceptionListItem);
 export type EndpointListItem = z.infer<typeof EndpointListItem>;
-export const EndpointListItem = ExceptionListItem;
