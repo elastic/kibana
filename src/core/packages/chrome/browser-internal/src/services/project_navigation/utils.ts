@@ -177,7 +177,7 @@ function getNodeStatus(
   },
   { cloudLinks }: { cloudLinks: CloudLinks }
 ): SideNavNodeStatus | 'remove' {
-  if (link && !deepLink) {
+  if (link && (!deepLink || !deepLink?.visibleIn.includes('sideNav'))) {
     // If a link is provided, but no deepLink is found, don't render anything
     return 'remove';
   }
