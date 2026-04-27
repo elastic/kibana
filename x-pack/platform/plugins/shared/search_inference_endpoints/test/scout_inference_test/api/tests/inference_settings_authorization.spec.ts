@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 import {
-  API_PATH,
   COMMON_HEADERS,
   FEATURE_PRIVILEGED_ROLE,
-  LOCAL_TAGS,
+  INFERENCE_SETTINGS_API_PATH,
   SAMPLE_FEATURES,
 } from '../constants';
 
-apiTest.describe('Inference settings authorization', { tag: LOCAL_TAGS }, () => {
+apiTest.describe('Inference settings authorization', { tag: tags.deploymentAgnostic }, () => {
   let featureUserCookie: Record<string, string>;
   let viewerCookie: Record<string, string>;
 
@@ -27,14 +27,14 @@ apiTest.describe('Inference settings authorization', { tag: LOCAL_TAGS }, () => 
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
-    await apiClient.put(API_PATH, {
+    await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...featureUserCookie },
       body: JSON.stringify({ features: [] }),
     });
   });
 
   apiTest('feature-privileged user can GET settings', async ({ apiClient }) => {
-    const response = await apiClient.get(API_PATH, {
+    const response = await apiClient.get(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...featureUserCookie },
     });
 
@@ -45,7 +45,7 @@ apiTest.describe('Inference settings authorization', { tag: LOCAL_TAGS }, () => 
   apiTest('feature-privileged user can PUT settings', async ({ apiClient }) => {
     const settings = { features: [SAMPLE_FEATURES.agentBuilderAnthropic] };
 
-    const response = await apiClient.put(API_PATH, {
+    const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...featureUserCookie },
       body: JSON.stringify(settings),
     });
@@ -57,7 +57,7 @@ apiTest.describe('Inference settings authorization', { tag: LOCAL_TAGS }, () => 
   apiTest(
     'user without searchInferenceEndpoints privilege gets 403 on GET',
     async ({ apiClient }) => {
-      const response = await apiClient.get(API_PATH, {
+      const response = await apiClient.get(INFERENCE_SETTINGS_API_PATH, {
         headers: { ...COMMON_HEADERS, ...viewerCookie },
       });
 
@@ -68,7 +68,7 @@ apiTest.describe('Inference settings authorization', { tag: LOCAL_TAGS }, () => 
   apiTest(
     'user without searchInferenceEndpoints privilege gets 403 on PUT',
     async ({ apiClient }) => {
-      const response = await apiClient.put(API_PATH, {
+      const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
         headers: { ...COMMON_HEADERS, ...viewerCookie },
         body: JSON.stringify({ features: [SAMPLE_FEATURES.agentBuilderAnthropic] }),
       });

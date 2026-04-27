@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_PATH, COMMON_HEADERS, LOCAL_TAGS, SAMPLE_FEATURES } from '../constants';
+import { COMMON_HEADERS, INFERENCE_SETTINGS_API_PATH, SAMPLE_FEATURES } from '../constants';
 
 const SPACE_A = 'inference-settings-space-a';
 const SPACE_B = 'inference-settings-space-b';
 
-const spaceApiPath = (spaceId: string) => `s/${spaceId}/${API_PATH}`;
+const spaceApiPath = (spaceId: string) => `s/${spaceId}/${INFERENCE_SETTINGS_API_PATH}`;
 
-apiTest.describe('Inference settings space isolation', { tag: LOCAL_TAGS }, () => {
+apiTest.describe('Inference settings space isolation', { tag: tags.stateful.all }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiServices, samlAuth }) => {

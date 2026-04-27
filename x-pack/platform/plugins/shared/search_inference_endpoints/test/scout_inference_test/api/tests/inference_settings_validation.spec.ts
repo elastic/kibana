@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_PATH, COMMON_HEADERS, FEATURE_PRIVILEGED_ROLE, LOCAL_TAGS } from '../constants';
+import { COMMON_HEADERS, FEATURE_PRIVILEGED_ROLE, INFERENCE_SETTINGS_API_PATH } from '../constants';
 
-apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
+apiTest.describe('Inference settings validation', { tag: tags.deploymentAgnostic }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
@@ -17,7 +18,7 @@ apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
   });
 
   apiTest('rejects duplicate feature_id values', async ({ apiClient }) => {
-    const response = await apiClient.put(API_PATH, {
+    const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: JSON.stringify({
         features: [
@@ -33,7 +34,7 @@ apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
   });
 
   apiTest('rejects duplicate endpoints within a feature', async ({ apiClient }) => {
-    const response = await apiClient.put(API_PATH, {
+    const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: JSON.stringify({
         features: [
@@ -51,7 +52,7 @@ apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
   });
 
   apiTest('rejects an empty feature_id', async ({ apiClient }) => {
-    const response = await apiClient.put(API_PATH, {
+    const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: JSON.stringify({
         features: [{ feature_id: '', endpoints: [{ id: '.endpoint-a' }] }],
@@ -63,7 +64,7 @@ apiTest.describe('Inference settings validation', { tag: LOCAL_TAGS }, () => {
   });
 
   apiTest('rejects a missing features field', async ({ apiClient }) => {
-    const response = await apiClient.put(API_PATH, {
+    const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: JSON.stringify({}),
     });

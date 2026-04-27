@@ -7,14 +7,8 @@
 
 import type { KibanaRole } from '@kbn/scout';
 
-export const API_PATH = 'internal/search_inference_endpoints/settings';
+export const INFERENCE_SETTINGS_API_PATH = 'internal/search_inference_endpoints/settings';
 export const API_VERSION = '1';
-
-export const LOCAL_TAGS = [
-  '@local-stateful-classic',
-  '@local-stateful-search',
-  '@local-serverless-search',
-];
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

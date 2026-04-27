@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 import {
-  API_PATH,
   COMMON_HEADERS,
   FEATURE_PRIVILEGED_ROLE,
-  LOCAL_TAGS,
+  INFERENCE_SETTINGS_API_PATH,
   SAMPLE_FEATURES,
 } from '../constants';
 
-apiTest.describe('Inference settings CRUD', { tag: LOCAL_TAGS }, () => {
+apiTest.describe('Inference settings CRUD', { tag: tags.deploymentAgnostic }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
@@ -23,14 +23,14 @@ apiTest.describe('Inference settings CRUD', { tag: LOCAL_TAGS }, () => {
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
-    await apiClient.put(API_PATH, {
+    await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: JSON.stringify({ features: [] }),
     });
   });
 
   apiTest('GET returns empty defaults when no settings exist', async ({ apiClient }) => {
-    const response = await apiClient.get(API_PATH, {
+    const response = await apiClient.get(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
     });
 
@@ -42,7 +42,7 @@ apiTest.describe('Inference settings CRUD', { tag: LOCAL_TAGS }, () => {
   apiTest('PUT creates settings and returns the saved payload', async ({ apiClient }) => {
     const settings = { features: [SAMPLE_FEATURES.agentBuilderAnthropic] };
 
-    const response = await apiClient.put(API_PATH, {
+    const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: JSON.stringify(settings),
     });
@@ -54,7 +54,7 @@ apiTest.describe('Inference settings CRUD', { tag: LOCAL_TAGS }, () => {
   });
 
   apiTest('PUT overwrites existing settings', async ({ apiClient }) => {
-    await apiClient.put(API_PATH, {
+    await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: JSON.stringify({ features: [SAMPLE_FEATURES.agentBuilderAnthropic] }),
     });
@@ -63,7 +63,7 @@ apiTest.describe('Inference settings CRUD', { tag: LOCAL_TAGS }, () => {
       features: [SAMPLE_FEATURES.agentBuilderClaudeOpus, SAMPLE_FEATURES.attackDiscoveryClaude],
     };
 
-    const response = await apiClient.put(API_PATH, {
+    const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: JSON.stringify(updated),
     });
@@ -77,12 +77,12 @@ apiTest.describe('Inference settings CRUD', { tag: LOCAL_TAGS }, () => {
       features: [SAMPLE_FEATURES.agentBuilderAnthropic, SAMPLE_FEATURES.attackDiscoveryClaude],
     };
 
-    await apiClient.put(API_PATH, {
+    await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: JSON.stringify(settings),
     });
 
-    const response = await apiClient.get(API_PATH, {
+    const response = await apiClient.get(INFERENCE_SETTINGS_API_PATH, {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
     });
 
