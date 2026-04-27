@@ -16,8 +16,6 @@ import { ConnectionDetailsOptsProvider } from '../context';
 import type { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
 
-const API_KEY_PRIVILEGES_PATH = '/internal/security/api_key/_privileges';
-
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;
   const { http, docLinks, analytics } = start.core;
@@ -70,19 +68,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
         };
       },
       hasPermission: async () => {
-        if (!http) return false;
-
-        try {
-          const { areApiKeysEnabled, canManageApiKeys } = await http.get<{
-            areApiKeysEnabled: boolean;
-            canManageApiKeys: boolean;
-            canManageOwnApiKeys: boolean;
-          }>(API_KEY_PRIVILEGES_PATH);
-
-          return areApiKeysEnabled && canManageApiKeys;
-        } catch {
-          return false;
-        }
+        return !!start.core.application?.capabilities.api_keys?.save;
       },
       ...options?.apiKeys,
     },
