@@ -23,7 +23,7 @@ describe('bindContract', () => {
     container = new Container({ autobind: false });
     scope = new Container({ autobind: false });
     mockRulesClient = { getRule: jest.fn() };
-    scope.bind(RulesClient).toConstantValue(mockRulesClient);
+    scope.bind(RulesClient).toConstantValue(mockRulesClient as RulesClient);
 
     fork = jest.fn(() => scope);
     container.bind(CoreStart('injection')).toConstantValue({
