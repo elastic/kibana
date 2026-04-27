@@ -192,18 +192,16 @@ export const pciScopeDiscoveryTool = (
       }
       for (const customIndex of customIndices ?? []) {
         if (customIndex.includes('*') || customIndex.includes('?')) {
-          // Patterns are resolved via the fieldCaps call, but fieldCaps returns
-          // concrete index names — not the pattern itself. To avoid a key mismatch
-          // in the byIndex map, resolve the pattern against the concrete index list
-          // from cat.indices (which already contains every matching index).
-          const pattern = new RegExp(
-            `^${customIndex
-              .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-              .replace(/\*/g, '.*')
-              .replace(/\?/g, '.')}$`
-          );
-          for (const existing of indexSet) {
-            if (pattern.test(existing)) indexSet.add(existing);
+          // Resolve wildcard patterns to concrete index names so `fetchFieldsByIndex`
+          // receives real index names (not globs) as map keys.
+          const resolved = (await esClient.asCurrentUser.cat.indices({
+            index: customIndex,
+            format: 'json',
+            h: ['index'],
+            expand_wildcards: 'all',
+          })) as Array<{ index?: string }>;
+          for (const { index } of resolved) {
+            if (index) indexSet.add(index);
           }
         } else {
           indexSet.add(customIndex);

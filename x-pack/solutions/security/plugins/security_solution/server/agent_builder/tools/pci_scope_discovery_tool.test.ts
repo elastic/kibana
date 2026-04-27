@@ -116,12 +116,15 @@ describe('pciScopeDiscoveryTool', () => {
       expect(data.discovered[0].index).toBe('packetbeat-network-1');
     });
 
-    it('resolves custom wildcard patterns to concrete indices instead of storing the pattern', async () => {
-      (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mockResolvedValue([
-        { index: 'custom-firewall-2024' },
-        { index: 'custom-firewall-2025' },
-        { index: 'unrelated-index' },
-      ]);
+    it('resolves custom wildcard patterns to concrete indices via cat.indices', async () => {
+      (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock)
+        // First call: initial index discovery (no pattern arg)
+        .mockResolvedValueOnce([{ index: 'unrelated-index' }])
+        // Second call: resolve the wildcard pattern
+        .mockResolvedValueOnce([
+          { index: 'custom-firewall-2024' },
+          { index: 'custom-firewall-2025' },
+        ]);
 
       (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mockResolvedValue({
         fields: {
@@ -139,17 +142,22 @@ describe('pciScopeDiscoveryTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const call = (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mock.calls[0][0];
-      // The pattern should NOT appear as a literal index in the fieldCaps call
-      expect(call.index).not.toContain('custom-firewall-*');
-      expect(call.index).toContain('custom-firewall-2024');
-      expect(call.index).toContain('custom-firewall-2025');
+      // cat.indices should have been called twice: once for initial discovery, once for the pattern
+      expect(mockEsClient.asCurrentUser.cat.indices).toHaveBeenCalledTimes(2);
+      expect(
+        (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mock.calls[1][0]
+      ).toEqual(expect.objectContaining({ index: 'custom-firewall-*' }));
+
+      const fieldCapsCall = (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mock
+        .calls[0][0];
+      expect(fieldCapsCall.index).not.toContain('custom-firewall-*');
+      expect(fieldCapsCall.index).toContain('custom-firewall-2024');
+      expect(fieldCapsCall.index).toContain('custom-firewall-2025');
 
       const data = result.results[0].data as {
         discovered: Array<{ index: string; ecsCoveragePercent: number }>;
       };
       const firewallIndices = data.discovered.filter((d) => d.index.startsWith('custom-firewall-'));
-      // Both concrete indices should be discovered with non-zero coverage
       expect(firewallIndices).toHaveLength(2);
       for (const idx of firewallIndices) {
         expect(idx.ecsCoveragePercent).toBeGreaterThan(0);

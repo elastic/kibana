@@ -104,7 +104,8 @@ function buildResult(
   confidence: ComplianceConfidence,
   findings: RequirementFinding[],
   caveats: string[],
-  evidenceCount: number
+  evidenceCount: number,
+  missingFields: string[] = []
 ): EvaluatedRequirement {
   const statusLabel =
     status === 'GREEN'
@@ -125,7 +126,7 @@ function buildResult(
     caveats,
     findings,
     recommendations: definition.recommendations,
-    dataGaps: status === 'GREEN' ? [] : definition.requiredFields,
+    dataGaps: status === 'GREEN' || status === 'RED' ? [] : missingFields,
     evidenceCount,
     score: statusToScore(status, confidence),
   };
@@ -290,7 +291,15 @@ export async function evaluateRequirement({
     );
   }
 
-  return buildResult(definition, status, confidence, findings, caveats, evidenceCount);
+  return buildResult(
+    definition,
+    status,
+    confidence,
+    findings,
+    caveats,
+    evidenceCount,
+    preflight.missingFields
+  );
 }
 
 /**
