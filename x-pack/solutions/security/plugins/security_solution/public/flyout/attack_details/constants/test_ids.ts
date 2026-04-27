@@ -16,6 +16,7 @@ export const STATUS_POPOVER_BUTTON_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-status-popover-button` as const;
 export const STATUS_POPOVER_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-status-popover` as const;
 export const HEADER_TITLE_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-title` as const;
+export const HEADER_TITLE_LINK_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-title-link` as const;
 export const HEADER_ALERTS_BLOCK_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-alerts-block` as const;
 export const HEADER_STATUS_BLOCK_TEST_ID =

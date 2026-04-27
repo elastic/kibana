@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { ATTACK_DISCOVERY_AD_HOC_RULE_ID } from '@kbn/elastic-assistant-common';
 
 import { HeaderTitle } from './header_title';
 import { TestProviders } from '../../../common/mock';
@@ -17,6 +18,7 @@ import {
   HEADER_ALERTS_BLOCK_TEST_ID,
   HEADER_ASSIGNEES_BLOCK_TEST_ID,
   HEADER_BADGE_TEST_ID,
+  HEADER_TITLE_LINK_TEST_ID,
 } from '../constants/test_ids';
 
 jest.mock('../hooks/use_header_data', () => ({
@@ -31,8 +33,35 @@ jest.mock('../hooks/use_navigate_to_attack_details_left_panel', () => ({
   useNavigateToAttackDetailsLeftPanel: jest.fn(),
 }));
 
+jest.mock('../../../attack_discovery/pages/settings_flyout/schedule/details_flyout', () => ({
+  DetailsFlyout: ({
+    scheduleId,
+    onClose,
+  }: {
+    scheduleId: string;
+    onClose: () => void;
+  }) => (
+    <div
+      data-test-subj="attack-details-schedule-details-flyout"
+      data-schedule-id={scheduleId}
+    >
+      <button data-test-subj="attack-details-mock-close-schedule-details" onClick={onClose} />
+    </div>
+  ),
+}));
+
 jest.mock('../../../flyout_v2/shared/components/flyout_title', () => ({
-  FlyoutTitle: ({ title }: { title: string }) => <div data-test-subj="flyout-title">{title}</div>,
+  FlyoutTitle: ({
+    title,
+    isLink,
+  }: {
+    title: string;
+    isLink?: boolean;
+  }) => (
+    <div data-is-link={isLink ? 'true' : 'false'} data-test-subj="flyout-title">
+      {title}
+    </div>
+  ),
 }));
 
 jest.mock('../../../common/components/formatted_date', () => ({
@@ -78,6 +107,7 @@ describe('HeaderTitle', () => {
     });
     mockedUseAttackDetailsContext.mockReturnValue({
       attackId: 'attack-1',
+      attack: { alertRuleUuid: undefined },
       searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
     });
     mockedUseNavigateToAttackDetailsLeftPanel.mockReturnValue(jest.fn());
@@ -152,5 +182,76 @@ describe('HeaderTitle', () => {
 
     expect(screen.getByTestId(HEADER_ASSIGNEES_BLOCK_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId('assignees')).toBeInTheDocument();
+  });
+
+  it('renders the attack name as a link when the attack is tied to a schedule', () => {
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      attack: { alertRuleUuid: 'attack-discovery-schedule-uuid' },
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId(HEADER_TITLE_LINK_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId('flyout-title')).toHaveAttribute('data-is-link', 'true');
+  });
+
+  it('opens the schedule details flyout when the title link is clicked', () => {
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      attack: { alertRuleUuid: 'attack-discovery-schedule-uuid' },
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    fireEvent.click(screen.getByTestId(HEADER_TITLE_LINK_TEST_ID));
+
+    const flyout = screen.getByTestId('attack-details-schedule-details-flyout');
+    expect(flyout).toHaveAttribute('data-schedule-id', 'attack-discovery-schedule-uuid');
+  });
+
+  it('closes the schedule details flyout when DetailsFlyout calls onClose', () => {
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      attack: { alertRuleUuid: 'attack-discovery-schedule-uuid' },
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    fireEvent.click(screen.getByTestId(HEADER_TITLE_LINK_TEST_ID));
+    fireEvent.click(screen.getByTestId('attack-details-mock-close-schedule-details'));
+    expect(screen.queryByTestId('attack-details-schedule-details-flyout')).not.toBeInTheDocument();
+  });
+
+  it('does not show a schedule link for ad hoc attack runs', () => {
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      attack: { alertRuleUuid: ATTACK_DISCOVERY_AD_HOC_RULE_ID },
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId(HEADER_TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.getByTestId('flyout-title')).toHaveAttribute('data-is-link', 'false');
   });
 });
