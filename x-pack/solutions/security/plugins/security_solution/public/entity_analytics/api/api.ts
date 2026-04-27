@@ -793,6 +793,15 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
 
+    const deleteWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      entitySourceId: string;
+    }) =>
+      http.fetch(`${WATCHLISTS_URL}/${params.watchlistId}/entity_source/${params.entitySourceId}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'DELETE',
+      });
+
     const searchWatchlistIndices = async (params: {
       query: string | undefined;
       signal?: AbortSignal;
@@ -857,12 +866,12 @@ export const useEntityAnalyticsRoutes = () => {
       params,
     }: {
       signal?: AbortSignal;
-      params?: { maxLeads?: number };
+      params: { connectorId: string; maxLeads?: number };
     }) =>
       http.fetch<GenerateLeadsResponse>(GENERATE_LEADS_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
-        body: JSON.stringify(params ?? {}),
+        body: JSON.stringify(params),
         signal,
       });
 
@@ -887,10 +896,11 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
-    const enableLeadGeneration = () =>
+    const enableLeadGeneration = ({ connectorId }: { connectorId: string }) =>
       http.fetch<{ success: boolean }>(ENABLE_LEAD_GENERATION_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
+        body: JSON.stringify({ connectorId }),
       });
 
     const disableLeadGeneration = () =>
@@ -931,6 +941,7 @@ export const useEntityAnalyticsRoutes = () => {
       listWatchlistEntitySources,
       updateWatchlistEntitySource,
       createWatchlistEntitySource,
+      deleteWatchlistEntitySource,
       searchWatchlistIndices,
       uploadWatchlistCsv,
       fetchRiskEngineSettings,

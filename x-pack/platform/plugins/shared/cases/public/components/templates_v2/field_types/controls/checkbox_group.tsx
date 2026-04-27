@@ -14,6 +14,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   CheckboxGroupFieldSchema,
   ConditionRenderProps,
@@ -90,7 +91,11 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   );
 
   return (
-    <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={config}>
+    <UseField
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
+      config={config}
+    >
       {renderField}
     </UseField>
   );

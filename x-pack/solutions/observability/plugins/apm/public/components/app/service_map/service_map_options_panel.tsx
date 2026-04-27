@@ -218,7 +218,7 @@ export function ServiceMapOptionsPanel({
     []
   );
 
-  /** Same hit target as `.serviceMapRfControlButton` in graph.tsx (2 × base size). */
+  /** Same hit target as map zoom / fit controls in graph.tsx (2 × base size). */
   const mapToolbarToggleIconCss = useMemo(
     () => css`
       min-inline-size: calc(${euiTheme.size.base} * 2);

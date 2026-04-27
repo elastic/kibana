@@ -9,6 +9,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import { WaterfallLegendType, type IWaterfallLegend } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
@@ -141,8 +142,8 @@ function getWaterfallErrorsMarks({
       error,
       id: error.id,
       verticalLine: false,
-      offset: error.timestamp.us - rootTimestampUs,
-      skew: getClockSkew({ itemTimestamp: error.timestamp.us, itemDuration: 0, parent }),
+      offset: getTimestampUs(error) - rootTimestampUs,
+      skew: getClockSkew({ itemTimestamp: getTimestampUs(error), itemDuration: 0, parent }),
       serviceColor: parent?.color ?? '',
       onClick:
         onErrorClick && docId

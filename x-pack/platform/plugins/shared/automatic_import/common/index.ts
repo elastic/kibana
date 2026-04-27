@@ -76,6 +76,7 @@ export {
   type IntegrationDownloadZipClickedPayload,
   type ApproveModalCancelClickedPayload,
   type ApproveModalApproveClickedPayload,
+  type ApproveModalApproveWithAutoInstallClickedPayload,
   type DataStreamDeleteConfirmedPayload,
   type DataStreamRefreshConfirmedPayload,
   type PipelineEditedPayload,

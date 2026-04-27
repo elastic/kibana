@@ -811,6 +811,12 @@ export class WorkflowsService {
   ): Promise<DeleteWorkflowsResponse> {
     const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
 
+    // Phase 1: Disable enabled workflows to prevent new executions from being
+    // created between the running-execution check and the actual delete
+    // (closes the TOCTOU race window).
+    const disabledIds = await this.disableWorkflowsForDeletion(hits, client);
+
+    // Phase 2: Check for running executions
     const runningIds: string[] = [];
     for (const id of foundIds) {
       const executions = await this.getWorkflowExecutions(
@@ -822,12 +828,14 @@ export class WorkflowsService {
       }
     }
     if (runningIds.length > 0) {
+      await this.restoreDisabledWorkflows(hits, disabledIds, client);
       throw new WorkflowConflictError(
         `Cannot force-delete workflows with running executions: [${runningIds.join(', ')}]`,
         runningIds[0]
       );
     }
 
+    // Phase 3: Delete workflow documents
     const successfulIds: string[] = [];
     for (const id of foundIds) {
       try {
@@ -841,6 +849,7 @@ export class WorkflowsService {
       }
     }
 
+    // Phase 4: Cleanup
     await this.unscheduleDeletedWorkflowTasks(successfulIds);
     await this.purgeWorkflowRelatedData(successfulIds, spaceId);
 
@@ -850,6 +859,83 @@ export class WorkflowsService {
       failures,
       successfulIds,
     };
+  }
+
+  /**
+   * Disables enabled workflows before hard-deletion to prevent new executions
+   * from being accepted while the delete is in progress.
+   * Returns the IDs of workflows that were actually disabled (were previously enabled).
+   */
+  private async disableWorkflowsForDeletion(
+    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
+    client: WorkflowStorageClient
+  ): Promise<string[]> {
+    const disableOperations = hits
+      .filter(
+        (hit): hit is { _id: string; _source: WorkflowProperties } =>
+          Boolean(hit._id) && Boolean(hit._source) && hit._source?.enabled === true
+      )
+      .map((hit) => {
+        return {
+          index: {
+            _id: hit._id,
+            document: {
+              ...(hit._source satisfies WorkflowProperties),
+              enabled: false,
+            },
+          },
+        };
+      });
+
+    if (disableOperations.length > 0) {
+      const response = await client.bulk({ operations: disableOperations, refresh: true });
+      return disableOperations
+        .filter((_, i) => {
+          const status = response.items[i]?.index?.status ?? 0;
+          return status >= 200 && status < 300;
+        })
+        .map((op) => op.index._id);
+    }
+
+    return [];
+  }
+
+  /**
+   * Re-enables workflows that were disabled during a hard-delete attempt
+   * that was aborted due to running executions.
+   */
+  private async restoreDisabledWorkflows(
+    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
+    disabledIds: string[],
+    client: WorkflowStorageClient
+  ): Promise<void> {
+    if (disabledIds.length === 0) {
+      return;
+    }
+
+    const restoreOperations = hits
+      .filter(
+        (hit): hit is { _id: string; _source: WorkflowProperties } =>
+          Boolean(hit._id) && Boolean(hit._source) && disabledIds.includes(String(hit._id))
+      )
+      .map((hit) => ({
+        index: {
+          _id: hit._id,
+          document: hit._source satisfies WorkflowProperties,
+        },
+      }));
+
+    if (restoreOperations.length > 0) {
+      try {
+        await client.bulk({ operations: restoreOperations, refresh: true });
+      } catch (error) {
+        this.logger.warn(
+          `Failed to restore disabled workflows after hard-delete conflict: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
   }
 
   /**
@@ -977,11 +1063,13 @@ export class WorkflowsService {
   }
 
   /**
-   * Disables all enabled workflows across all spaces. Sets `enabled: false`,
-   * patches YAML accordingly, and unschedules any scheduled tasks.
-   * Used when a user opts out of workflows by toggling the global UI setting off.
+   * Disables all enabled workflows. When `spaceId` is set, only workflows in that space;
+   * otherwise across all spaces. Sets `enabled: false`, patches YAML accordingly, and
+   * unschedules any scheduled tasks.
+   * Used when a user opts out of workflows by toggling the per-space UI setting off, or
+   * when availability (license / config) requires bulk disable.
    */
-  public async disableAllWorkflows(): Promise<{
+  public async disableAllWorkflows(spaceId?: string): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
@@ -997,7 +1085,7 @@ export class WorkflowsService {
 
     const query = {
       bool: {
-        must: [{ term: { enabled: true } }],
+        must: [{ term: { enabled: true } }, ...(spaceId ? [{ term: { spaceId } }] : [])],
         must_not: [{ exists: { field: 'deleted_at' } }],
       },
     };
@@ -1092,12 +1180,16 @@ export class WorkflowsService {
 
     if (hasMore && pageCount >= MAX_PAGES) {
       this.logger.warn(
-        `disableAllWorkflows truncated at ${MAX_PAGES} pages (${totalHits} workflows processed)`
+        `disableAllWorkflows truncated at ${MAX_PAGES} pages (${totalHits} workflows processed)${
+          spaceId ? ` (spaceId=${spaceId})` : ''
+        }`
       );
     }
 
     this.logger.info(
-      `Disabled ${disabledIds.length} workflows across all spaces (${failures.length} failures)`
+      `Disabled ${disabledIds.length} workflows${
+        spaceId ? ` in space ${spaceId}` : ' across all spaces'
+      } (${failures.length} failures)`
     );
 
     return {

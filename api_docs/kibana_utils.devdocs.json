@@ -3606,7 +3606,7 @@
           ") => void"
         ],
         "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-        "lineNumber": 57,
+        "lineNumber": 64,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3619,7 +3619,7 @@
             "label": "{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n  theme,\n  userProfile,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-            "lineNumber": 70,
+            "lineNumber": 77,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -3636,7 +3636,7 @@
                   "<unknown>"
                 ],
                 "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-                "lineNumber": 71,
+                "lineNumber": 78,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3654,7 +3654,7 @@
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-                "lineNumber": 72,
+                "lineNumber": 79,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3703,7 +3703,7 @@
                   "IBasePath"
                 ],
                 "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-                "lineNumber": 73,
+                "lineNumber": 80,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3721,7 +3721,7 @@
                   "string | Mapping"
                 ],
                 "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-                "lineNumber": 74,
+                "lineNumber": 81,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3739,7 +3739,7 @@
                   "IToasts"
                 ],
                 "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-                "lineNumber": 79,
+                "lineNumber": 86,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3765,7 +3765,7 @@
                   ") => void) | undefined"
                 ],
                 "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-                "lineNumber": 83,
+                "lineNumber": 90,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3787,7 +3787,7 @@
                       }
                     ],
                     "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-                    "lineNumber": 86,
+                    "lineNumber": 93,
                     "columnNumber": 23,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -3807,7 +3807,7 @@
                   "ThemeServiceSetup"
                 ],
                 "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-                "lineNumber": 87,
+                "lineNumber": 94,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3824,7 +3824,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/kibana_utils/public/history/redirect_when_missing.tsx",
-                "lineNumber": 88,
+                "lineNumber": 95,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
