@@ -46,7 +46,7 @@ export interface KIFeatureExtractionEvaluationDataset {
 interface KIFeatureExtractionTaskOutput {
   features: BaseFeature[];
   traceId?: string | null;
-  sample_documents?: Array<Record<string, unknown>>;
+  sample_documents?: Array<SearchHit<Record<string, unknown>>>;
 }
 
 export type KIFeatureExtractionOutput = BaseFeature[] | KIFeatureExtractionTaskOutput;

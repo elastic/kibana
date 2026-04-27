@@ -154,11 +154,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                 return {
                   features,
                   traceId: getCurrentTraceId(),
-                  sample_documents: heavy.sampleDocuments.map((doc) => ({
-                    _id: doc._id,
-                    ...(doc.fields ?? {}),
-                    ...(doc._source ?? {}),
-                  })),
+                  sample_documents: heavy.sampleDocuments,
                 };
               },
             },

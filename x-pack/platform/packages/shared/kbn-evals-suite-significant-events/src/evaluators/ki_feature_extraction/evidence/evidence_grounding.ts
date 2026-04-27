@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 import type { KIFeatureExtractionEvaluator } from '../types';
 import { getFeaturesFromOutput } from '../types';
@@ -33,22 +34,22 @@ export const evidenceGroundingEvaluator = {
       output != null && !Array.isArray(output)
         ? (output as unknown as Record<string, unknown>)
         : undefined;
-    const taskDocs = taskOutput?.sample_documents as Array<Record<string, unknown>> | undefined;
+    const taskDocs = taskOutput?.sample_documents as
+      | Array<SearchHit<Record<string, unknown>>>
+      | undefined;
 
-    if (
-      (!taskDocs || taskDocs.length === 0) &&
-      (!input.sample_documents || input.sample_documents.length === 0)
-    ) {
+    const rawDocs = taskDocs ?? input.sample_documents ?? [];
+    if (rawDocs.length === 0) {
       return { score: null, explanation: 'No sample documents available' };
     }
 
     const docsById = new Map<string, Record<string, unknown>>();
 
-    const resolveDoc = (raw: Record<string, unknown>): Record<string, unknown> => {
-      const id = typeof raw._id === 'string' ? raw._id : undefined;
+    const resolveDoc = (hit: SearchHit<Record<string, unknown>>): Record<string, unknown> => {
+      const id = typeof hit._id === 'string' ? hit._id : undefined;
       const resolved = {
-        ...((raw.fields as Record<string, unknown>) ?? {}),
-        ...getFlattenedObject((raw._source as Record<string, unknown>) ?? raw),
+        ...((hit.fields as Record<string, unknown>) ?? {}),
+        ...getFlattenedObject((hit._source ?? {}) as Record<string, unknown>),
       };
       if (id) {
         docsById.set(id, resolved);
@@ -56,19 +57,7 @@ export const evidenceGroundingEvaluator = {
       return resolved;
     };
 
-    const documents = taskDocs
-      ? taskDocs.map(resolveDoc)
-      : (input.sample_documents ?? []).map((doc) => {
-          const id = typeof doc._id === 'string' ? doc._id : undefined;
-          const resolved = {
-            ...(doc.fields ?? {}),
-            ...getFlattenedObject(doc._source ?? {}),
-          };
-          if (id) {
-            docsById.set(id, resolved);
-          }
-          return resolved;
-        });
+    const documents = rawDocs.map(resolveDoc);
 
     let totalEvidence = 0;
     let groundedEvidence = 0;
