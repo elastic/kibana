@@ -115,6 +115,7 @@ export { useAnnotations } from './components/annotations/use_annotations';
 export { RuleConditionChart } from './components/rule_condition_chart';
 export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_group';
 export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';
+export { AnomalyThreshold } from './components/custom_threshold/components/anomaly_threshold';
 export { Threshold } from './components/custom_threshold/components/threshold';
 
 export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';

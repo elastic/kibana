@@ -19,6 +19,7 @@ interface Params {
   definition: Streams.all.Definition;
   connectorId: string;
   systemPrompt: string;
+  maxExistingQueriesForContext?: number;
 }
 
 interface Dependencies {
@@ -39,7 +40,7 @@ export async function generateSignificantEventDefinitions(
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
-  const { definition, connectorId, systemPrompt } = params;
+  const { definition, connectorId, systemPrompt, maxExistingQueriesForContext } = params;
   const { inferenceClient, featureClient, queryClient, logger, signal, esClient, memoryTools } =
     dependencies;
 
@@ -74,6 +75,7 @@ export async function generateSignificantEventDefinitions(
     additionalTools: memoryTools?.tools,
     additionalToolCallbacks: memoryTools?.callbacks,
     existingQueries,
+    maxExistingQueriesForContext,
   });
 
   return {

@@ -7,7 +7,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 47881
-  apm: 25363
+  apm: 26000
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -31,7 +31,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
-  dashboardAgent: 5135
+  dashboardAgent: 8000
   dashboardMarkdown: 6151
   data: 496646
   dataQuality: 11469
