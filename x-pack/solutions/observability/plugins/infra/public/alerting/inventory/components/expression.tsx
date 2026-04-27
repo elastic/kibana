@@ -26,11 +26,8 @@ import type {
   IErrorObject,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  builtInComparatorsWithInclusive,
-  ForLastExpression,
-  ThresholdExpression,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression, ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import { builtInComparatorsWithInclusive } from '@kbn/observability-plugin/public';
 import { omit } from 'lodash';
 import type { ChangeEvent, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';

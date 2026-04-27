@@ -104,7 +104,6 @@ export {
   ThresholdExpression,
   ValueExpression,
   builtInComparators,
-  builtInComparatorsWithInclusive,
   builtInGroupByTypes,
   builtInAggregationTypes,
   convertFieldSpecToFieldOption,

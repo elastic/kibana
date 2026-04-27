@@ -22,7 +22,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  builtInComparatorsWithInclusive,
   OfExpression,
   ThresholdExpression,
   WhenExpression,
@@ -30,6 +29,7 @@ import {
 import useToggle from 'react-use/lib/useToggle';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { builtInComparatorsWithInclusive } from '@kbn/observability-plugin/public';
 import { Aggregators } from '../../../../common/alerting/metrics';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
