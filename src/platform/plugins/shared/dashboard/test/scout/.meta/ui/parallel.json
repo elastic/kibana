@@ -806,58 +806,6 @@
         "line": 282,
         "column": 12
       }
-    },
-    {
-      "id": "e5a1770f89d440f-d7d72061010584f",
-      "title": "Sync colors should sync colors on dashboard for legacy default palette",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/sync_colors.spec.ts",
-        "line": 119,
-        "column": 13
-      }
-    },
-    {
-      "id": "e5a1770f89d440f-79598c1004258c5",
-      "title": "Sync colors should be possible to disable color sync",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/sync_colors.spec.ts",
-        "line": 171,
-        "column": 12
-      }
     }
   ]
 }

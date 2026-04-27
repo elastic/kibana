@@ -198,7 +198,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const sortFieldDirection: { [key: string]: string } = {};
     sortFieldDirection[sortField] = sortDirection;
 
-    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
     const { entityRecord, isLoading: isEntityRecordLoading } = useEntityFromStore({
       entityId,

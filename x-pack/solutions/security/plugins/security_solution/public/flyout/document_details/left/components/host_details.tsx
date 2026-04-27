@@ -220,7 +220,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     });
   }, [openPreviewPanel, hostName, entityId, scopeId, telemetry]);
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
   const hostIdentityFieldsForStore = useMemo(
@@ -540,6 +540,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
+          entityRecord={observedHost.entityRecord}
           identityFields={hostInsightsIdentityFields}
           entityType={EntityType.host}
           queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-document-details-host-entities`}
