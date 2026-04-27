@@ -11,7 +11,7 @@ import type { $Values } from 'utility-types';
 import type { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { LineStyle } from '@kbn/visualization-ui-components';
-import type { AvailableAnnotationIcons } from '.';
+import type { AUTO_ANNOTATION_COLOR, AvailableAnnotationIcons } from '.';
 
 export type AvailableAnnotationIcon = $Values<typeof AvailableAnnotationIcons>;
 
@@ -38,7 +38,7 @@ export type KeyType = 'point_in_time' | 'range';
 
 interface StyleSharedProps {
   label: string;
-  color?: string;
+  color?: string | typeof AUTO_ANNOTATION_COLOR;
   isHidden?: boolean;
 }
 
