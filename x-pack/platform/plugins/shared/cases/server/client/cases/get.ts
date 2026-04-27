@@ -217,42 +217,42 @@ export const get = async (
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
-    if (includeComments) {
-      const theComments = (await caseService.getAllCaseComments({
-        id,
-        options: {
-          sortField: 'created_at',
-          sortOrder: 'asc',
-        },
-        mode,
-      })) as SavedObjectsFindResponse<AttachmentAttributes>;
-
+    if (!includeComments) {
+      const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
+        caseIds: [theCase.id],
+      });
       return decodeOrThrow(CaseRt)(
         flattenCaseSavedObject({
           savedObject: theCase,
-          comments: theComments.saved_objects,
-          totalComment: countUserAttachments(theComments.saved_objects),
-          totalAlerts: countAlertsForID({ comments: theComments, id }),
-          totalEvents: countEventsForID({ comments: theComments }),
+          ...(commentStats.has(theCase.id)
+            ? {
+                totalAlerts: commentStats.get(theCase.id)?.alerts,
+                totalComment: commentStats.get(theCase.id)?.userComments,
+                totalEvents: commentStats.get(theCase.id)?.events,
+              }
+            : {}),
         })
       );
     }
 
-    const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
-      caseIds: [theCase.id],
+    const theComments = (await caseService.getAllCaseComments({
+      id,
+      options: {
+        sortField: 'created_at',
+        sortOrder: 'asc',
+      },
+      mode,
+    })) as SavedObjectsFindResponse<AttachmentAttributes>;
+
+    const res = flattenCaseSavedObject({
+      savedObject: theCase,
+      comments: theComments.saved_objects,
+      totalComment: countUserAttachments(theComments.saved_objects),
+      totalAlerts: countAlertsForID({ comments: theComments, id }),
+      totalEvents: countEventsForID({ comments: theComments }),
     });
-    return decodeOrThrow(CaseRt)(
-      flattenCaseSavedObject({
-        savedObject: theCase,
-        ...(commentStats.has(theCase.id)
-          ? {
-              totalAlerts: commentStats.get(theCase.id)?.alerts,
-              totalComment: commentStats.get(theCase.id)?.userComments,
-              totalEvents: commentStats.get(theCase.id)?.events,
-            }
-          : {}),
-      })
-    );
+
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
