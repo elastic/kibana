@@ -417,7 +417,7 @@ const createInitializerCommand = ({
     startAt = steps.executeTool;
   }
 
-  if (lastRound?.state) {
+  if (lastRound?.state && lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
     initialState.currentCycle = lastRound.state.agent.current_cycle;
     initialState.errorCount = lastRound.state.agent.error_count;
   }
@@ -429,7 +429,8 @@ const createInitializerCommand = ({
 };
 
 const getRecursionLimit = (cycleLimit: number): number => {
-  // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
-  // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
-  return cycleLimit * 2 + 8;
+  // langchain's recursionLimit is the number of graph nodes we can traverse before hitting a recursion limit error.
+  // Each research cycle traverses 3 nodes: checkBackgroundWork → researchAgent → executeTool.
+  // On top of that we have init, prepareToAnswer, answerAgent (with potential error retries), and finalize.
+  return cycleLimit * 3 + 10;
 };
