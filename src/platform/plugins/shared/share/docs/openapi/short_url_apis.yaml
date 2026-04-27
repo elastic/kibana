@@ -82,8 +82,8 @@ paths:
                     id: c54b04f5d4b3aa3c
                     slug: my-dashboard
                     accessCount: 0
-                    accessDate: "0"
-                    createDate: "2026-01-01T00:00:00.000Z"
+                    accessDate: 1767225600000
+                    createDate: 1767225600000
                     locator:
                       id: DASHBOARD_APP_LOCATOR
                       version: 9.4.0
@@ -131,8 +131,8 @@ paths:
                     id: c54b04f5d4b3aa3c
                     slug: my-dashboard
                     accessCount: 12
-                    accessDate: "2026-01-07T00:00:00.000Z"
-                    createDate: "2026-01-01T00:00:00.000Z"
+                    accessDate: 1767744000000
+                    createDate: 1767225600000
                     locator:
                       id: DASHBOARD_APP_LOCATOR
                       version: 9.4.0
@@ -172,8 +172,8 @@ paths:
                     id: c54b04f5d4b3aa3c
                     slug: my-dashboard
                     accessCount: 12
-                    accessDate: "2026-01-07T00:00:00.000Z"
-                    createDate: "2026-01-01T00:00:00.000Z"
+                    accessDate: 1767744000000
+                    createDate: 1767225600000
                     locator:
                       id: DASHBOARD_APP_LOCATOR
                       version: 9.4.0
@@ -197,10 +197,15 @@ components:
       properties:
         accessCount:
           type: integer
+          description: Number of times the short URL has been resolved.
         accessDate:
-          type: string
+          type: integer
+          format: int64
+          description: Unix epoch (milliseconds) of the last time the short URL was resolved. Set to the creation time when the URL has never been accessed.
         createDate:
-          type: string
+          type: integer
+          format: int64
+          description: Unix epoch (milliseconds) when the short URL was created.
         id:
           type: string
           description: The identifier for the short URL.
