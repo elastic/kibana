@@ -49,6 +49,7 @@ export const BASELINE_PCI_CRITERIA = [
   'The response explicitly references PCI DSS v4.0.1 (or the string "4.0.1").',
   'The response includes a QSA / Qualified Security Assessor disclaimer — the agent does not claim the finding is a formal compliance determination.',
   'The response references a scope (evaluated indices and the time range) the tool actually used, rather than a vague "I checked everything".',
+  'If the tool results include any esql or query fields, they must contain valid ES|QL syntax (e.g. starting with FROM, ROW, or SHOW) — not descriptive text labels that would cause an ES|QL parse error.',
 ];
 
 export function createPciCriteriaEvaluator({

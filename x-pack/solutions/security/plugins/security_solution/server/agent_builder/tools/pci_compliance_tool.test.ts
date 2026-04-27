@@ -212,9 +212,52 @@ describe('pciComplianceTool (consolidated)', () => {
       )) as ToolHandlerStandardReturn;
 
       const types = result.results.map((r) => r.type);
-      expect(types).toContain(ToolResultType.query);
       expect(types).toContain(ToolResultType.esqlResults);
       expect(types).toContain(ToolResultType.other);
+    });
+
+    it('never emits ToolResultType.query with non-ES|QL labels', async () => {
+      mockExecuteEsql.mockResolvedValue({
+        columns: [
+          { name: 'user.name', type: 'keyword' },
+          { name: 'cnt', type: 'long' },
+        ],
+        values: [['jdoe', 15]],
+      } as never);
+
+      const checkResult = (await tool.handler(
+        {
+          mode: 'check',
+          requirements: ['8'],
+          indices: ['logs-*'],
+          timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
+          includeEvidence: true,
+          format: 'summary',
+          includeRecommendations: true,
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const reportResult = (await tool.handler(
+        {
+          mode: 'report',
+          requirements: ['all'],
+          indices: ['logs-*'],
+          timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
+          format: 'detailed',
+          includeRecommendations: true,
+          includeEvidence: false,
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      for (const { results } of [checkResult, reportResult]) {
+        const queryEntries = results.filter((r) => r.type === ToolResultType.query);
+        for (const entry of queryEntries) {
+          const esql = (entry.data as { esql?: string }).esql ?? '';
+          expect(esql).toMatch(/^(FROM|ROW|SHOW|SET|TS)\s/i);
+        }
+      }
     });
   });
 });
