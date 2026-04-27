@@ -33,6 +33,7 @@ import {
   normalizeKeywordList,
   searchDocById,
 } from '../fixtures/helpers';
+import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../server/domain/saved_objects';
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -976,7 +977,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   apiTest(
     'Should omit documents at logs extraction when they do not match documentsFilter or postAggFilter',
     async ({ apiClient, esClient }) => {
-      const from = '2026-03-18T11:00:00Z';
+      // from is 1 second past the timestamp used by the "entity.name" test to avoid
+      // cross-test data leaking in with the now always-inclusive >= boundary.
+      const from = '2026-03-18T11:00:01Z';
       const to = '2026-03-18T12:00:00Z';
 
       // 1. event.outcome = 'failure' → documentsFilter omits (pre-agg)
@@ -1017,6 +1020,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         to
       );
       expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({ count: 0 });
 
       // Verify none of the omitted documents produced entities
       expect((await searchDocById(esClient, 'user:omitted-failure@okta')).hits.hits).toHaveLength(
@@ -1127,7 +1131,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
           headers: defaultHeaders,
           responseType: 'json',
-          body: { logExtraction: { maxLogsPerPage: 40000 } },
+          body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
         });
       }
     }
