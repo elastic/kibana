@@ -1,3 +1,4 @@
+---
 name: Backlog Grooming Agent
 timeout-minutes: 45
 description: >-
