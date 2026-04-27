@@ -3664,6 +3664,22 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/get_client.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/get_connection.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/list_clients.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/list_connections.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.ts"
               },
               {
@@ -3921,34 +3937,6 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_views.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
               },
               {
                 "plugin": "searchInferenceEndpoints",
@@ -4781,6 +4769,34 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_views.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
               },
               {
                 "plugin": "observability",
@@ -6404,6 +6420,22 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/get_client.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/get_connection.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/list_clients.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/list_connections.test.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.test.ts"
               },
               {
@@ -6824,6 +6856,18 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/create_client.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/revoke_client.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/revoke_connection.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/role_mapping/post.ts"
               },
               {
@@ -7125,26 +7169,6 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/nl_to_esql_route.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -8013,6 +8037,26 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/nl_to_esql_route.ts"
               },
               {
                 "plugin": "observability",
@@ -9432,6 +9476,18 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/create_client.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/revoke_client.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/revoke_connection.test.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/role_mapping/post.test.ts"
               },
               {
@@ -9653,10 +9709,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -9885,6 +9937,10 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
                 "plugin": "observability",
@@ -10235,6 +10291,14 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/update_client.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/update_connection.ts"
+              },
+              {
                 "plugin": "maintenanceWindows",
                 "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/apis/maintenance_window/external/update/update_maintenance_window_route.ts"
               },
@@ -10381,6 +10445,14 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/test/helpers/router_mock.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/update_client.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth/update_connection.test.ts"
               }
             ],
             "returnComment": [],
