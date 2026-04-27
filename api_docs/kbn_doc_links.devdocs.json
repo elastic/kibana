@@ -1323,7 +1323,7 @@
             "label": "agentBuilder",
             "description": [],
             "signature": [
-              "{ readonly agentBuilder: string; readonly getStarted: string; readonly models: string; readonly chat: string; readonly agentBuilderAgents: string; readonly tools: string; readonly programmaticAccess: string; readonly kibanaApi: string; readonly mcpServer: string; readonly a2aServer: string; readonly limitationsKnownIssues: string; readonly learnMore: string; }"
+              "{ readonly agentBuilder: string; readonly getStarted: string; readonly models: string; readonly chat: string; readonly agentBuilderAgents: string; readonly agentBuilderSkills: string; readonly agentBuilderPlugins: string; readonly agentBuilderConnectors: string; readonly agentBuilderTools: string; readonly programmaticAccess: string; readonly kibanaApi: string; readonly mcpServer: string; readonly a2aServer: string; readonly limitationsKnownIssues: string; readonly learnMore: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "lineNumber": 720,
@@ -1342,7 +1342,7 @@
               "{ readonly componentTemplate: string; readonly indexAlias: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 734,
+            "lineNumber": 737,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1355,7 +1355,7 @@
             "label": "subscriptions",
             "description": [],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 738,
+            "lineNumber": 741,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1371,7 +1371,7 @@
               "{ readonly casesPermissions: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 739,
+            "lineNumber": 742,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
