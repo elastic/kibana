@@ -69,6 +69,8 @@ steps:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
 safe-outputs:
+  noop:
+    report-as-issue: false
   create-pull-request-review-comment:
     max: 10
     target: ${{ env.PR_NUMBER }}
