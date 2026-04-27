@@ -349,6 +349,20 @@ describe('createScoutConfig', () => {
       );
     });
 
+    it('rejects http2=true when isCloud=true', () => {
+      writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, http2: true });
+
+      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).toThrow(
+        /'http2' must not be true when 'isCloud' is true/
+      );
+    });
+
+    it('allows http2=false when isCloud=true', () => {
+      writeConfig('cloud_mki', { ...baseCloudMkiSecurityConfig, http2: false });
+
+      expect(() => createScoutConfig(tmpDir, 'cloud_mki', noopLogger)).not.toThrow();
+    });
+
     it('aggregates multiple issues into a single error message', () => {
       writeConfig('cloud_mki', {
         serverless: true,

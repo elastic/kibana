@@ -128,6 +128,16 @@ export const ScoutTestConfigSchema = z
         message: `is required when 'isCloud' is true (used by SAML against Elastic Cloud)`,
       });
     }
+
+    if (cfg.isCloud && cfg.http2 === true) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['http2'],
+        message:
+          `must not be true when 'isCloud' is true; ` +
+          `'http2' enables TLS verification bypass and is only meaningful for local development`,
+      });
+    }
   })
   .transform((cfg) => ({
     ...cfg,
