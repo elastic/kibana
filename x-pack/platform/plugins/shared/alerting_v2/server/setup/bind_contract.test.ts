@@ -20,8 +20,8 @@ describe('bindContract', () => {
   let fork: jest.Mock;
 
   beforeEach(() => {
-    container = new Container({ autobind: false });
-    scope = new Container({ autobind: false });
+    container = new Container();
+    scope = new Container();
     mockRulesClient = { getRule: jest.fn() };
     scope.bind(RulesClient).toConstantValue(mockRulesClient as RulesClient);
 
