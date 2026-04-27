@@ -960,27 +960,30 @@ paths:
           application/json:
             schema:
               $ref: '../../../common_attributes.schema.yaml#/components/schemas/AttackDiscoveryGenerationConfig'
-            example:
-              alertsIndexPattern: ".alerts-security.alerts-default"
-              anonymizationFields:
-                - field: "host.name"
-                  allowed: true
-                  anonymized: true
-                - field: "user.name"
-                  allowed: true
-                  anonymized: true
-                - field: "process.name"
-                  allowed: true
-                  anonymized: false
-              apiConfig:
-                connectorId: "12345678-1234-1234-1234-123456789012"
-                actionTypeId: ".gen-ai"
-              connectorName: "GPT-5 Chat"
-              replacements: {}
-              size: 100
-              start: "now-24h"
-              end: "now"
-              subAction: "invokeAI"
+            examples:
+              PostAttackDiscoveryGenerateRequestBodyExample:
+                summary: Generate Attack discoveries from alerts in the last 24 hours.
+                value:
+                  alertsIndexPattern: ".alerts-security.alerts-default"
+                  anonymizationFields:
+                    - field: "host.name"
+                      allowed: true
+                      anonymized: true
+                    - field: "user.name"
+                      allowed: true
+                      anonymized: true
+                    - field: "process.name"
+                      allowed: true
+                      anonymized: false
+                  apiConfig:
+                    connectorId: "12345678-1234-1234-1234-123456789012"
+                    actionTypeId: ".gen-ai"
+                  connectorName: "GPT-5 Chat"
+                  replacements: {}
+                  size: 100
+                  start: "now-24h"
+                  end: "now"
+                  subAction: "invokeAI"
       responses:
         '200':
           description: Indicates a successful call.
@@ -998,8 +1001,11 @@ paths:
                     example: "edd26039-0990-4d9f-9829-2a1fcacb77b5"
                 required:
                   - execution_uuid
-              example:
-                execution_uuid: "edd26039-0990-4d9f-9829-2a1fcacb77b5"
+              examples:
+                PostAttackDiscoveryGenerateResponse200Example:
+                  summary: Generation started; use the returned execution UUID to track progress.
+                  value:
+                    execution_uuid: "edd26039-0990-4d9f-9829-2a1fcacb77b5"
         '400':
           description: Bad Request response.
           content:
@@ -1023,9 +1029,12 @@ paths:
                   - status_code
                   - error
                   - message
-              example:
-                status_code: 400
-                error: "Bad Request"
-                message: "Invalid request parameters."
+              examples:
+                PostAttackDiscoveryGenerateResponse400Example:
+                  summary: Bad Request error returned when the generate payload is invalid.
+                  value:
+                    status_code: 400
+                    error: "Bad Request"
+                    message: "Invalid request parameters."
 components:
   x-codegen-enabled: true
