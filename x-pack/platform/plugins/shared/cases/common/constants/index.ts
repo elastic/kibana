@@ -261,6 +261,13 @@ export const GET_ANALYTICS_STATUS_API_TAG = 'casesGetAnalyticsStatus';
 export const DELETE_LEGACY_ANALYTICS_INDICES_API_TAG = 'casesDeleteLegacyAnalyticsIndices';
 
 /**
+ * Granted with cases all access — forces a rebuild of the cases analytics
+ * ES|QL views. The view sync service rediscovers extended-field subkeys
+ * via _field_caps and re-PUTs all 9 views. Idempotent.
+ */
+export const REBUILD_ANALYTICS_VIEWS_API_TAG = 'casesRebuildAnalyticsViews';
+
+/**
  * User profiles
  */
 

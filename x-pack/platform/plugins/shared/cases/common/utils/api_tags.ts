@@ -10,6 +10,7 @@ import {
   DELETE_LEGACY_ANALYTICS_INDICES_API_TAG,
   GET_ANALYTICS_STATUS_API_TAG,
   GET_CONNECTORS_CONFIGURE_API_TAG,
+  REBUILD_ANALYTICS_VIEWS_API_TAG,
   SUGGEST_USER_PROFILES_API_TAG,
 } from '../constants';
 import { HttpApiPrivilegeOperation } from '../constants/types';
@@ -35,6 +36,7 @@ export const getApiTags = (owner: Owner): CasesApiTags => {
       GET_CONNECTORS_CONFIGURE_API_TAG,
       GET_ANALYTICS_STATUS_API_TAG,
       DELETE_LEGACY_ANALYTICS_INDICES_API_TAG,
+      REBUILD_ANALYTICS_VIEWS_API_TAG,
       read,
     ] as const,
     read: [

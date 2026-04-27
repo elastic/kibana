@@ -29,6 +29,7 @@ import { findUserActionsRoute } from './internal/find_user_actions';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import { buildGetAnalyticsStatusRoute } from './internal/get_analytics_status';
 import { deleteLegacyAnalyticsIndicesRoute } from './internal/delete_legacy_analytics_indices';
+import { buildRebuildAnalyticsViewsRoute } from './internal/rebuild_analytics_views';
 import type { ConfigType } from '../../config';
 import type { AnalyticsMode, ViewSyncService } from '../../cases_analytics/views';
 import { getTemplateRoutes } from './templates';
@@ -68,6 +69,7 @@ export const getInternalRoutes = ({
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,
     buildGetAnalyticsStatusRoute({ getAnalyticsMode, getViewSyncService }),
+    buildRebuildAnalyticsViewsRoute({ getViewSyncService }),
     deleteLegacyAnalyticsIndicesRoute,
     ...getTemplateRoutes(config),
   ] as CaseRoute[];
