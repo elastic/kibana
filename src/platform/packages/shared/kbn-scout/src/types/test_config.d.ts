@@ -9,11 +9,30 @@
 
 import type { ServerlessProjectType } from '@kbn/es';
 
+/**
+ * Serverless product tier.
+ *
+ * For project types that expose a tier today (security, oblt), this is derived
+ * from the corresponding Kibana server args
+ * (`--xpack.securitySolutionServerless.productTypes` for security,
+ * `--pricing.tiers.products` for oblt). When no tier arg is present, the
+ * implicit `complete` tier is returned.
+ *
+ * Resolves to `undefined` for stateful configs and for project types that
+ * don't have a tier system today (e.g. `es`).
+ */
+export type ServerlessProductTier =
+  | 'complete'
+  | 'essentials'
+  | 'logs_essentials'
+  | 'search_ai_lake';
+
 export interface ScoutTestConfig {
   serverless: boolean;
   http2: boolean;
   uiam: boolean;
   projectType?: ServerlessProjectType;
+  productTier?: ServerlessProductTier;
   organizationId?: string;
   isCloud: boolean;
   cloudHostName?: string;

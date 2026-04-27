@@ -50,6 +50,7 @@ describe('Config.getScoutTestConfig', () => {
       http2: false,
       uiam: false,
       projectType: undefined,
+      productTier: undefined,
       isCloud: false,
       license: 'trial',
       cloudUsersFilePath: expect.stringContaining('.ftr/role_users.json'),
@@ -110,6 +111,7 @@ describe('Config.getScoutTestConfig', () => {
       http2: false,
       uiam: false,
       projectType: 'es',
+      productTier: undefined,
       isCloud: false,
       license: 'trial',
       cloudUsersFilePath: expect.stringContaining('.ftr/role_users.json'),
@@ -171,6 +173,7 @@ describe('Config.getScoutTestConfig', () => {
       http2: false,
       uiam: true,
       projectType: 'es',
+      productTier: undefined,
       organizationId: 'org123',
       isCloud: false,
       license: 'trial',
@@ -250,6 +253,7 @@ describe('Config.getScoutTestConfig', () => {
     expect(scoutConfig.serverless).toBe(true);
     expect(scoutConfig.uiam).toBe(true);
     expect(scoutConfig.projectType).toBe('security');
+    expect(scoutConfig.productTier).toBe('complete');
     expect(scoutConfig.hosts.elasticsearch).toBe('https://localhost:9220');
   });
 
@@ -290,5 +294,116 @@ describe('Config.getScoutTestConfig', () => {
 
     const scoutConfig = config.getScoutTestConfig();
     expect(scoutConfig.linkedProject).toBeUndefined();
+  });
+
+  describe('productTier', () => {
+    const buildServerlessConfig = (kbnServerArgs: string[]) =>
+      new Config({
+        serverless: true,
+        servers: {
+          elasticsearch: {
+            protocol: 'https',
+            hostname: 'localhost',
+            port: 9220,
+            username: 'elastic_serverless',
+            password: 'changeme',
+          },
+          kibana: {
+            protocol: 'http',
+            hostname: 'localhost',
+            port: 5620,
+            username: 'elastic_serverless',
+            password: 'changeme',
+          },
+        },
+        dockerServers: {},
+        esTestCluster: {
+          from: 'serverless',
+          files: [],
+          serverArgs: [],
+          ssl: true,
+        },
+        kbnTestServer: {
+          buildArgs: [],
+          env: {},
+          sourceArgs: [],
+          serverArgs: kbnServerArgs,
+        },
+      });
+
+    it(`resolves 'essentials' for security essentials configs`, () => {
+      const config = buildServerlessConfig([
+        '--serverless=security',
+        `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'essentials' },
+          { product_line: 'cloud', product_tier: 'essentials' },
+        ])}`,
+      ]);
+
+      const scoutConfig = config.getScoutTestConfig();
+      expect(scoutConfig.projectType).toBe('security');
+      expect(scoutConfig.productTier).toBe('essentials');
+    });
+
+    it(`resolves 'search_ai_lake' for the security ai_soc (EASE) config`, () => {
+      const config = buildServerlessConfig([
+        '--serverless=security',
+        `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+          { product_line: 'ai_soc', product_tier: 'search_ai_lake' },
+        ])}`,
+      ]);
+
+      const scoutConfig = config.getScoutTestConfig();
+      expect(scoutConfig.projectType).toBe('security');
+      expect(scoutConfig.productTier).toBe('search_ai_lake');
+    });
+
+    it(`defaults to 'complete' for security configs without a productTypes arg`, () => {
+      const config = buildServerlessConfig(['--serverless=security']);
+
+      const scoutConfig = config.getScoutTestConfig();
+      expect(scoutConfig.projectType).toBe('security');
+      expect(scoutConfig.productTier).toBe('complete');
+    });
+
+    it(`resolves 'logs_essentials' for the observability logs essentials config`, () => {
+      const config = buildServerlessConfig([
+        '--serverless=oblt',
+        `--pricing.tiers.products=${JSON.stringify([
+          { name: 'observability', tier: 'logs_essentials' },
+        ])}`,
+      ]);
+
+      const scoutConfig = config.getScoutTestConfig();
+      expect(scoutConfig.projectType).toBe('oblt');
+      expect(scoutConfig.productTier).toBe('logs_essentials');
+    });
+
+    it(`defaults to 'complete' for oblt configs without a pricing tiers arg`, () => {
+      const config = buildServerlessConfig(['--serverless=oblt']);
+
+      const scoutConfig = config.getScoutTestConfig();
+      expect(scoutConfig.projectType).toBe('oblt');
+      expect(scoutConfig.productTier).toBe('complete');
+    });
+
+    it(`resolves 'undefined' for project types that don't expose a tier (e.g. es)`, () => {
+      const config = buildServerlessConfig(['--serverless=es']);
+
+      const scoutConfig = config.getScoutTestConfig();
+      expect(scoutConfig.projectType).toBe('es');
+      expect(scoutConfig.productTier).toBeUndefined();
+    });
+
+    it(`falls back to 'complete' when the productTypes arg is malformed JSON`, () => {
+      const config = buildServerlessConfig([
+        '--serverless=security',
+        '--xpack.securitySolutionServerless.productTypes=not-json',
+      ]);
+
+      const scoutConfig = config.getScoutTestConfig();
+      expect(scoutConfig.productTier).toBe('complete');
+    });
   });
 });
