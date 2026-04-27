@@ -30,7 +30,9 @@ export const controlWidthSchema = schema.oneOf(
   ],
   {
     defaultValue: DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM,
-    meta: { description: 'Minimum width of the control panel in the control group.' },
+    meta: {
+      description: 'Minimum width of the control panel.',
+    },
   }
 );
 
@@ -39,7 +41,10 @@ export const pinnedControlSchema = schema.object({
   width: controlWidthSchema,
   grow: schema.boolean({
     defaultValue: DEFAULT_PINNED_CONTROL_STATE.grow,
-    meta: { description: 'Expand width of the control panel to fit available space.' },
+    meta: {
+      description:
+        'When `true`, the control expands to fill any available horizontal space. Defaults to `false`.',
+    },
   }),
 });
 
@@ -61,6 +66,8 @@ export const getControlsGroupSchema = () => {
           meta: {
             id: 'kbn-controls-schemas-controls-group-schema-esql-control',
             title: ESQL_CONTROL,
+            description:
+              'An ES|QL variable control whose selected value is injected into ES|QL visualizations using the `?variable_name` syntax. Options can come from a fixed list or an ES|QL query. Define the options source in `config`.',
           },
         }
       ),
@@ -74,6 +81,8 @@ export const getControlsGroupSchema = () => {
           meta: {
             id: 'kbn-controls-schemas-controls-group-schema-options-list-control',
             title: OPTIONS_LIST_CONTROL,
+            description:
+              'A dropdown control that filters data by selecting field values from a data view. Define the data view, field, and selection settings in `config`.',
           },
         }
       ),
@@ -87,6 +96,8 @@ export const getControlsGroupSchema = () => {
           meta: {
             id: 'kbn-controls-schemas-controls-group-schema-range-slider-control',
             title: RANGE_SLIDER_CONTROL,
+            description:
+              'A slider control that filters data by selecting a numeric range for the configured field. Define the data view, field, and selection settings in `config`.',
           },
         }
       ),
@@ -100,6 +111,8 @@ export const getControlsGroupSchema = () => {
           meta: {
             id: 'kbn-controls-schemas-controls-group-schema-time-slider-control',
             title: TIME_SLIDER_CONTROL,
+            description:
+              'A control panel that filters a time field to a selected sub-range of the global time range. Define the start and end positions in `config` as fractions of the global range (0 to 1).',
           },
         }
       ),

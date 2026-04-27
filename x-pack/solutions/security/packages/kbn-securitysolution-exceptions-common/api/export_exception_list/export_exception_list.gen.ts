@@ -24,8 +24,18 @@ import {
 
 export const ExportExceptionListRequestQuery = lazySchema(() =>
   z.object({
+    /**
+     * Exception list's internal `id` (UUID) returned on create; use with `list_id` and `namespace_type` for an unambiguous target.
+     */
     id: ExceptionListId,
+    /**
+     * Human-readable `list_id` of the exception list to export, as shown in the UI and API responses.
+     */
     list_id: ExceptionListHumanId,
+    /**
+      * `single` exports a list in the current Kibana space; `agnostic` exports a global (space-agnostic) list.
+
+      */
     namespace_type: ExceptionNamespaceType,
     /**
      * Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
