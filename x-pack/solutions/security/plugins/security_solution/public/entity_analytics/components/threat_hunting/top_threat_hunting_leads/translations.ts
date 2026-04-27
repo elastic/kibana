@@ -194,6 +194,19 @@ export const OPTIONS_LABEL = i18n.translate(
   { defaultMessage: 'Options' }
 );
 
+export const OPEN_GENAI_SETTINGS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.openGenAiSettings',
+  { defaultMessage: 'Open GenAI settings' }
+);
+
+export const NO_CONNECTOR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.noConnectorDescription',
+  {
+    defaultMessage:
+      'Enable AI Agent as your default chat experience to start generating threat hunting leads from your entity data',
+  }
+);
+
 export const SCHEDULE_UPDATE_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError',
   { defaultMessage: 'Failed to update schedule' }

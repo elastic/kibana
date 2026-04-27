@@ -699,7 +699,9 @@
             "type": "Function",
             "tags": [],
             "label": "getProjectRouting",
-            "description": [],
+            "description": [
+              "\nReturns an explicit override value when provided, regardless of picker access mode.\nOtherwise resolves routing based on current picker access and CPS state."
+            ],
             "signature": [
               "(overrideValue?: ",
               {
@@ -741,7 +743,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-                "lineNumber": 58,
+                "lineNumber": 62,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -768,7 +770,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -794,7 +796,7 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -816,7 +818,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-                "lineNumber": 60,
+                "lineNumber": 64,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -846,7 +848,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -872,7 +874,7 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -888,7 +890,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-                "lineNumber": 62,
+                "lineNumber": 66,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -911,7 +913,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-                "lineNumber": 62,
+                "lineNumber": 66,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
