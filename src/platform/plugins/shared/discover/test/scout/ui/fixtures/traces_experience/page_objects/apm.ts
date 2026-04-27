@@ -11,6 +11,11 @@ import type { ScoutPage } from '@kbn/scout';
 import type { Waterfall } from './waterfall';
 import { createWaterfall } from './waterfall';
 
+// Table rows are populated by async API calls after navigation. On slow
+// environments (cloud CI) this can exceed the default 10s actionTimeout,
+// so we use the navigationTimeout budget instead.
+const TABLE_LOAD_TIMEOUT = 20000;
+
 export interface ApmPage {
   readonly waterfall: Waterfall;
   clickManagedTableRowAction(
@@ -35,13 +40,10 @@ export function createApmPage(page: ScoutPage): ApmPage {
       tableTestSubj?: string
     ) {
       const container = tableTestSubj ? page.testSubj.locator(tableTestSubj) : page;
+      const row = container.locator('tr').filter({ hasText: rowText });
 
-      await container
-        .locator('tr')
-        .filter({ hasText: rowText })
-        .locator('[data-test-subj="apmManagedTableActionsCellButton"]')
-        .click();
-
+      await row.waitFor({ state: 'visible', timeout: TABLE_LOAD_TIMEOUT });
+      await row.locator('[data-test-subj="apmManagedTableActionsCellButton"]').click();
       await page.testSubj.locator(actionTestSubj).click();
     },
 
