@@ -15,8 +15,6 @@
             }
         ] */
 
-import { execFileSync } from 'child_process';
-
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
@@ -26,6 +24,8 @@ import {
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
+  registerCancelKeys,
+  flushCancelOnGateFailureMetadata,
   type GetPipelineOptions,
   prHasFIPSLabel,
 } from '#pipeline-utils';
@@ -71,14 +71,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Register steps from base.yml that should still be canceled on gate failure.
     // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
-    for (const stepKey of ['pick_test_group_run_order', 'build_scout_tests', 'build_api_docs']) {
-      execFileSync('buildkite-agent', [
-        'meta-data',
-        'set',
-        `cancel_on_gate_failure:${stepKey}`,
-        'true',
-      ]);
-    }
+    registerCancelKeys(['pick_test_group_run_order', 'build_scout_tests', 'build_api_docs']);
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
@@ -661,6 +654,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     // post_build is not cancelable — cleanup/reporting should always run
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
+    flushCancelOnGateFailureMetadata();
     emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
