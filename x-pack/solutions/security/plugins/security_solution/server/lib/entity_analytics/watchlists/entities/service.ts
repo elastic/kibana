@@ -119,13 +119,19 @@ export const createWatchlistEntitiesService = ({
       }
 
       const lastHit = hits[hits.length - 1];
-      const maxEntityId = String(lastHit.sort?.[0] ?? '');
+      const rawSortValue = lastHit.sort?.[0];
+      if (rawSortValue == null) {
+        throw new Error(
+          'Entity store pagination query returned a hit without sort values — verify the query includes a sort on entity.id'
+        );
+      }
+      const maxEntityId = String(rawSortValue);
 
       yield {
         entityIdsByType,
         watchlistsByEuid,
         maxEntityId,
-        ...(isIndexSync ? { correlationMap } : {}),
+        correlationMap: isIndexSync ? correlationMap : undefined,
       };
 
       if (hits.length < pageSize) {
