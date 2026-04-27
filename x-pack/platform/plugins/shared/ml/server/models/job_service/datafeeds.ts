@@ -232,15 +232,21 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
    * - When `auto` is true, every datafeed with no `project_routing` is also included.
    * - Datafeed IDs are deduplicated in a Set before updates are applied.
    * - When `simulate` is true, no updates are sent; the same selection is returned with `simulated: true` per result.
+   * - When `restartRunningJobs` is true (default) and `simulate` is false, datafeeds that are still running
+   *   (started) in the update set are stopped first, then updated, then started again without `start`/`end` times.
    * - `results` is keyed by job ID; each value includes the corresponding `datafeedId`.
    */
   async function bulkUpdateProjectRouting(
     projectRouting: string,
     jobIds?: string[],
     auto?: boolean,
-    simulate?: boolean
+    simulate?: boolean,
+    restartRunningJobs: boolean = true
   ) {
-    const { datafeeds } = await mlClient.getDatafeeds();
+    const [{ datafeeds }, { datafeeds: datafeedStats }] = await Promise.all([
+      mlClient.getDatafeeds(),
+      mlClient.getDatafeedStats(),
+    ]);
     const datafeedIdsToUpdate = new Set<string>();
 
     if (jobIds !== undefined && jobIds.length > 0) {
@@ -264,6 +270,15 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     const datafeedIdToJobId = new Map(
       datafeeds.map((d) => [d.datafeed_id, d.job_id] as [string, string])
     );
+    const runningDatafeeds = new Set<string>();
+    for (const datafeedStat of datafeedStats) {
+      if (
+        datafeedStat.state === DATAFEED_STATE.STARTED &&
+        datafeedIdsToUpdate.has(datafeedStat.datafeed_id)
+      ) {
+        runningDatafeeds.add(datafeedStat.datafeed_id);
+      }
+    }
 
     const results: {
       [jobId: string]: {
@@ -273,6 +288,22 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
         simulated?: boolean;
       };
     } = Object.create(null);
+
+    if (restartRunningJobs && simulate !== true && runningDatafeeds.size > 0) {
+      const stopResults = await stopDatafeeds([...runningDatafeeds], false);
+      for (const datafeedId of runningDatafeeds) {
+        const r = stopResults[datafeedId];
+        if (r === undefined || r.stopped !== true) {
+          const err =
+            r !== undefined && 'error' in r
+              ? (r as { error?: unknown }).error
+              : 'datafeed not stopped';
+          throw new Error(
+            `Failed to stop datafeed ${datafeedId} before project routing update: ${String(err)}`
+          );
+        }
+      }
+    }
 
     for (const datafeedId of datafeedIdsToUpdate) {
       const jobId = datafeedIdToJobId.get(datafeedId);
@@ -297,6 +328,12 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
           error: (error as { body?: unknown }).body ?? error,
           datafeedId,
         };
+      }
+    }
+
+    if (restartRunningJobs && simulate !== true && runningDatafeeds.size > 0) {
+      for (const datafeedId of runningDatafeeds) {
+        await mlClient.startDatafeed({ datafeed_id: datafeedId });
       }
     }
 

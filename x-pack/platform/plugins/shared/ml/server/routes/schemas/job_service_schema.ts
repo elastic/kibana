@@ -185,4 +185,13 @@ export const bulkUpdateProjectRoutingSchema = schema.object({
       meta: { description: 'When true, compute matching datafeeds but do not call update.' },
     })
   ),
+  restartRunningJobs: schema.maybe(
+    schema.boolean({
+      defaultValue: true,
+      meta: {
+        description:
+          'When true, stop running datafeeds in the update set before the update, then start them again afterward (no start/end on restart).',
+      },
+    })
+  ),
 });

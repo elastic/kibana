@@ -428,13 +428,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     jobIds,
     auto,
     simulate,
+    restartRunningJobs,
   }: {
     projectRouting: string;
     jobIds?: string[];
     auto?: boolean;
     simulate?: boolean;
+    restartRunningJobs?: boolean;
   }) {
-    const body = JSON.stringify({ projectRouting, jobIds, auto, simulate });
+    const body = JSON.stringify({ projectRouting, jobIds, auto, simulate, restartRunningJobs });
     return httpService.http<BulkUpdateProjectRoutingResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/bulk_update_project_routing`,
       method: 'POST',
