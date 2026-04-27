@@ -93,11 +93,14 @@ export const tagcloudConfigSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({}),
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({}, 'tagcloudMetric'),
     /**
      * Configure how to break down to tags
      */
-    tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudConfigTagsByOptionsSchema),
+    tag_by: mergeAllBucketsWithChartDimensionSchema(
+      tagcloudConfigTagsByOptionsSchema,
+      'tagcloudTag'
+    ),
   },
   { meta: { id: 'tagcloudNoESQL', title: 'Tag Cloud Chart (DSL)' } }
 );
