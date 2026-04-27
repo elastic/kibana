@@ -116,6 +116,8 @@ interface MapPopoverProps {
   start: string;
   end: string;
   onClose: () => void;
+  /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
+  isEmbedded?: boolean;
 }
 
 export function MapPopover({
@@ -127,6 +129,7 @@ export function MapPopover({
   start,
   end,
   onClose,
+  isEmbedded,
 }: MapPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<EuiPopover>(null);
@@ -235,6 +238,7 @@ export function MapPopover({
           end={end}
           onFocusClick={onFocusClick}
           onOpenDiagnostic={handleOpenDiagnostic}
+          isEmbedded={isEmbedded}
         />
       </EuiPopover>
       {diagnosticFlyoutSelection && (
