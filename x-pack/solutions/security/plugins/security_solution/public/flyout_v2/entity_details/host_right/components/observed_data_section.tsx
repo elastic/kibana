@@ -20,17 +20,17 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
-import { ONE_WEEK_IN_HOURS } from '../../shared/constants';
-import { ObservedEntity } from '../../shared/components/observed_entity';
+import type { ObservedEntityData } from '../../../../flyout/entity_details/shared/components/observed_entity/types';
+import { ONE_WEEK_IN_HOURS } from '../../../../flyout/entity_details/shared/constants';
+import { ObservedEntity } from '../../../../flyout/entity_details/shared/components/observed_entity';
 import { useObservedHostFields } from '../hooks/use_observed_host_fields';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../common/components/ml/anomaly/anomaly_table_euid';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
-import type { IdentityFields } from '../../../document_details/shared/utils';
-import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;

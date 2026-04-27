@@ -6,21 +6,23 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { TakeAction } from '../shared/components/take_action';
+import { TakeAction } from '../../../flyout/entity_details/shared/components/take_action';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
-import type { IdentityFields } from '../../document_details/shared/utils';
-import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
-export const HostPanelFooter = ({
-  identityFields,
-  entity,
-}: {
+export interface FooterProps {
   identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
-}) => {
+}
+
+/**
+ * Footer for the host details flyout containing the asset-inventory TakeAction button.
+ */
+export const Footer = ({ identityFields, entity }: FooterProps) => {
   const hostName = useMemo(
     () => identityFields[EntityIdentifierFields.hostName] || Object.values(identityFields)[0] || '',
     [identityFields]
@@ -35,17 +37,15 @@ export const HostPanelFooter = ({
   }, [euidApi?.euid, entity]);
 
   return (
-    <EuiFlyoutFooter>
-      <EuiPanel color="transparent">
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <TakeAction
-              isDisabled={!hostName}
-              kqlQuery={euidEntityFilter ?? `host.name: "${hostName}"`}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiFlyoutFooter>
+    <EuiPanel color="transparent">
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <TakeAction
+            isDisabled={!hostName}
+            kqlQuery={euidEntityFilter ?? `host.name: "${hostName}"`}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };

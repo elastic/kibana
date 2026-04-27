@@ -10,9 +10,9 @@ import type { Meta } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../shared/mocks';
-import { HostPanelContent } from './content';
-import { mockObservedHostData, mockEntityRecord } from '../mocks';
+import { mockRiskScoreState } from '../../../flyout/shared/mocks';
+import { Content } from './content';
+import { mockObservedHostData, mockEntityRecord } from '../../../flyout/entity_details/mocks';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
@@ -34,7 +34,7 @@ export default {
 
 export const Default = {
   render: () => (
-    <HostPanelContent
+    <Content
       observedHost={mockObservedHostData}
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
@@ -52,7 +52,7 @@ export const Default = {
 
 export const WithGraphVisualization = {
   render: () => (
-    <HostPanelContent
+    <Content
       observedHost={mockObservedHostData}
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
@@ -72,7 +72,7 @@ export const WithGraphVisualization = {
 
 export const NoObservedData = {
   render: () => (
-    <HostPanelContent
+    <Content
       observedHost={{
         details: {},
         isLoading: false,
@@ -101,7 +101,7 @@ export const NoObservedData = {
 
 export const Loading = {
   render: () => (
-    <HostPanelContent
+    <Content
       observedHost={{
         details: {},
         isLoading: true,

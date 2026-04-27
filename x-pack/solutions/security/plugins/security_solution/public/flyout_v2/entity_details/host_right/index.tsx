@@ -5,17 +5,12 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { noop } from 'lodash/fp';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiSpacer } from '@elastic/eui';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { EuiFlyoutFooter, EuiSpacer } from '@elastic/eui';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
-import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
@@ -25,43 +20,35 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
-import { Footer } from '../../../flyout_v2/entity_details/host_right/footer';
-import { Content } from '../../../flyout_v2/entity_details/host_right/content';
-import { Header } from '../../../flyout_v2/entity_details/host_right/header';
-import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
-import { HostPreviewPanelFooter } from '../host_preview/footer';
-import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
+import { Header } from './header';
+import { Content } from './content';
+import { Footer } from './footer';
+import { useObservedHost } from './hooks/use_observed_host';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import { useObservedHost } from '../../../flyout_v2/entity_details/host_right/hooks/use_observed_host';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
-} from '../shared/entity_store_risk_utils';
-import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+} from '../../../flyout/entity_details/shared/entity_store_risk_utils';
+import {
+  useEntityFromStore,
+  type EntityStoreRecord,
+} from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
-} from '../../document_details/shared/utils';
+} from '../../../flyout/document_details/shared/utils';
+import { HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import {
-  HOST_PANEL_RISK_SCORE_QUERY_ID,
-  HOST_PANEL_OBSERVED_HOST_QUERY_ID,
-} from '../../../flyout_v2/entity_details/host_right/constants';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutBody } from '../../shared/components/flyout_body';
-import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
-import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
-import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
-import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
+  useEntityPanelTabs,
+  TABLE_TAB_ID,
+} from '../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../../flyout/entity_details/shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../../flyout/entity_details/shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../../flyout/entity_details/shared/components/entity_summary_grid';
 
-export { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID };
-
-export interface HostPanelProps extends Record<string, unknown> {
-  contextID: string;
-  scopeId: string;
-  isPreviewMode: boolean;
+export interface HostProps {
   /**
    * Display name from the source row / document (typically `host.name`).
    */
@@ -70,34 +57,40 @@ export interface HostPanelProps extends Record<string, unknown> {
    * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
    */
   entityId?: string;
+  /**
+   * Scope id (timeline id, table id, etc.) — used for downstream containers and queries.
+   */
+  scopeId?: string;
+  /**
+   * Stable identifier for the host panel context (defaults to `scopeId` or a static fallback).
+   */
+  contextID?: string;
 }
-
-export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'host-panel' | 'host-preview-panel';
-  params: HostPanelProps;
-}
-
-export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
 };
 
-export const HostPanel = memo(function HostPanel({
-  contextID,
-  scopeId,
-  isPreviewMode = false,
+/**
+ * Standalone host details flyout content (for use with `overlays.openSystemFlyout`).
+ *
+ * Runs the same data hooks as the v1 `HostPanel`, but without the expandable-flyout
+ * navigation, preview-mode handling, or host_details_left expansion.
+ */
+export const Host: FC<HostProps> = memo(function Host({
   hostName,
   entityId,
-}: HostPanelProps) {
+  scopeId = '',
+  contextID,
+}) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
-  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
   const hostStoreIdentityFields = useMemo(
     () => (!entityId && hostName ? { 'host.name': hostName } : undefined),
@@ -138,8 +131,7 @@ export const HostPanel = memo(function HostPanel({
     skip: entityStoreV2Enabled,
   });
 
-  const { data: hostRisk, inspect: inspectRiskScore, refetch, loading } = riskScoreState;
-  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+  const { inspect: inspectRiskScore, refetch, loading } = riskScoreState;
 
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
@@ -155,29 +147,6 @@ export const HostPanel = memo(function HostPanel({
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
     onSuccess: calculateEntityRiskScore,
-  });
-
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields:
-        hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
-    })
-  );
-
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields:
-        hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
-    })
-  );
-  const { hasNonClosedAlerts } = useNonClosedAlerts({
-    identityFields: documentEntityIdentifiers,
-    entityType: EntityType.host,
-    to,
-    from,
-    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
   });
 
   const observedHost = useObservedHost(
@@ -200,18 +169,17 @@ export const HostPanel = memo(function HostPanel({
       : inspectRiskScore,
     loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
     queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
+    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? noop : refetch,
     setQuery,
   });
 
-  // When entity store v2 is enabled, use the first entity from the store that matches identityFields
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
     ? observedHost.entityRecord ?? undefined
     : undefined;
   const riskScoreStateFromStore =
     entityStoreV2Enabled && observedHost.entityRecord
       ? buildRiskScoreStateFromEntityRecord(EntityType.host, observedHost.entityRecord, {
-          refetch: observedHost.refetchEntityStore ?? (() => {}),
+          refetch: observedHost.refetchEntityStore ?? noop,
           isLoading: observedHost.isLoading,
           error: null,
           inspect: entityFromStoreResult?.inspect,
@@ -219,10 +187,6 @@ export const HostPanel = memo(function HostPanel({
       : null;
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
-  const isRiskScoreExist =
-    entityStoreV2Enabled && observedHost.entityRecord
-      ? !!getRiskFromEntityRecord(observedHost.entityRecord)
-      : !!hostRiskData?.host?.risk;
 
   const onCriticalitySave =
     entityFromStoreResult.entityRecord && observedHost.entityRecord
@@ -233,38 +197,6 @@ export const HostPanel = memo(function HostPanel({
   const entityStoreEntityId = entityStoreV2Enabled
     ? observedHost.entityRecord?.entity?.id
     : undefined;
-
-  const openDetailsPanel = useNavigateToHostDetails({
-    hostName,
-    entityId: panelDisplayEntityId,
-    scopeId,
-    isRiskScoreExist,
-    hasMisconfigurationFindings,
-    hasVulnerabilitiesFindings,
-    hasNonClosedAlerts,
-    isPreviewMode,
-    contextID: safeContextID,
-    entityStoreEntityId,
-  });
-
-  const defaultTab = useMemo(() => {
-    if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
-    if (hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts)
-      return EntityDetailsLeftPanelTab.CSP_INSIGHTS;
-    if (entityStoreEntityId) return EntityDetailsLeftPanelTab.RESOLUTION_GROUP;
-    return EntityDetailsLeftPanelTab.RISK_INPUTS;
-  }, [
-    isRiskScoreExist,
-    hasMisconfigurationFindings,
-    hasVulnerabilitiesFindings,
-    hasNonClosedAlerts,
-    entityStoreEntityId,
-  ]);
-
-  const openDefaultPanel = useCallback(
-    () => openDetailsPanel({ tab: defaultTab }),
-    [openDetailsPanel, defaultTab]
-  );
 
   const noEntityInStore =
     entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
@@ -281,36 +213,28 @@ export const HostPanel = memo(function HostPanel({
     />
   ) : undefined;
 
+  // No expandable-flyout left panel exists in v2 yet — degrade gracefully.
+  // TODO: wire `openDetailsPanel` once `host_details_left` migrates to v2.
+  const openDetailsPanel = noop;
+
+  const riskLevel = observedHost.entityRecord
+    ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
+        'Unknown') as RiskSeverity)
+    : undefined;
+
   return (
     <>
-      <FlyoutNavigation
-        flyoutIsExpandable={
-          isRiskScoreExist ||
-          hasMisconfigurationFindings ||
-          hasVulnerabilitiesFindings ||
-          hasNonClosedAlerts ||
-          !!entityStoreEntityId
-        }
-        expandDetails={openDefaultPanel}
-        isPreviewMode={isPreviewMode}
-        isRulePreview={scopeId === TableId.rulePreview}
-      />
-      <FlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <Header
           hostName={hostName}
           lastSeen={observedHost.lastSeen}
           entityId={panelDisplayEntityId}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedHost.entityRecord}
-          riskLevel={
-            observedHost.entityRecord
-              ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
-                  'Unknown') as RiskSeverity)
-              : undefined
-          }
+          riskLevel={riskLevel}
         />
-      </FlyoutHeader>
-      <FlyoutBody>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         {observedHost.entityRecord && (
           <EntitySummaryGrid
             entityRecord={observedHost.entityRecord}
@@ -332,22 +256,14 @@ export const HostPanel = memo(function HostPanel({
             openDetailsPanel={openDetailsPanel}
             recalculatingScore={recalculatingScore}
             onAssetCriticalityChange={calculateEntityRiskScore}
-            isPreviewMode={isPreviewMode}
+            isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
           />
         )}
-      </FlyoutBody>
-      {isPreviewMode && (
-        <HostPreviewPanelFooter
-          hostName={hostName}
-          entityId={panelDisplayEntityId}
-          contextID={safeContextID}
-          scopeId={scopeId}
-        />
-      )}
-      {!isPreviewMode && assetInventoryEnabled && (
+      </EuiFlyoutBody>
+      {assetInventoryEnabled && (
         <EuiFlyoutFooter>
           <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
         </EuiFlyoutFooter>
@@ -356,4 +272,4 @@ export const HostPanel = memo(function HostPanel({
   );
 });
 
-HostPanel.displayName = 'HostPanel';
+Host.displayName = 'Host';

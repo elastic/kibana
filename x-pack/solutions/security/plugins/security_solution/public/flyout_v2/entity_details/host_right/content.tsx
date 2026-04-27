@@ -17,16 +17,16 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
-import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../../document_details/shared/utils';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
+import type { ObservedEntityData } from '../../../flyout/entity_details/shared/components/observed_entity/types';
 import type { HostItem } from '../../../../common/search_strategy';
-import { VisualizationsSection } from '../shared/components/right/visualizations_section';
+import { VisualizationsSection } from '../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
-interface HostPanelContentProps {
+export interface ContentProps {
   observedHost: ObservedHostData;
   riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
@@ -43,7 +43,10 @@ interface HostPanelContentProps {
   entityStoreEntityId?: string;
 }
 
-export const HostPanelContent = ({
+/**
+ * Host details flyout content section.
+ */
+export const Content = ({
   identityFields,
   observedHost,
   riskScoreState,
@@ -56,7 +59,7 @@ export const HostPanelContent = ({
   entityRecord,
   skipRiskAndCriticality = false,
   entityStoreEntityId,
-}: HostPanelContentProps) => {
+}: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   // Extract hostName from identityFields for components that need a string

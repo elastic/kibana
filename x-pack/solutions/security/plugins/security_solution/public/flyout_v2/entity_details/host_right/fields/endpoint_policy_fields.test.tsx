@@ -8,7 +8,7 @@
 import { TestProviders } from '../../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { mockObservedHostData } from '../../mocks';
+import { mockObservedHostData } from '../../../../flyout/entity_details/mocks';
 import { policyFields } from './endpoint_policy_fields';
 
 jest.mock('../../../../management/hooks/agents/use_get_agent_status');
