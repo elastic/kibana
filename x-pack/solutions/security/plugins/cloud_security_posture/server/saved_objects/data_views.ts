@@ -110,6 +110,7 @@ export const installDataView = async (
         namespaces: [currentSpaceId],
         allowNoIndex: true,
         timeFieldName: DATA_VIEW_TIME_FIELD,
+        managed: true,
       },
       true
     );

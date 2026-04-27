@@ -42,11 +42,12 @@ export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS = [
 // Add new deprecated versions here when updating to a new version
 export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
   'security_solution_cdr_latest_misconfigurations', // v1
+  'security_solution_cdr_latest_misconfigurations_v2', // v2 (non-managed)
 ];
 
 // Current data view ID - increment version when making breaking changes
 export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
-  'security_solution_cdr_latest_misconfigurations_v2';
+  'security_solution_cdr_latest_misconfigurations_v3';
 
 export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
 
@@ -68,11 +69,12 @@ export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS = [
 // Add new deprecated versions here when updating to a new version
 export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
   'security_solution_cdr_latest_vulnerabilities', // v1
+  'security_solution_cdr_latest_vulnerabilities_v2', // v2 (non-managed)
 ];
 
 // Current vulnerabilities data view ID - increment version when making breaking changes
 export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
-  'security_solution_cdr_latest_vulnerabilities_v2';
+  'security_solution_cdr_latest_vulnerabilities_v3';
 
 // meant as a temp workaround to get good enough posture view for 3rd party integrations, see https://github.com/elastic/security-team/issues/10683 and https://github.com/elastic/security-team/issues/10801
 export const CDR_EXTENDED_VULN_RETENTION_POLICY = '90d';
