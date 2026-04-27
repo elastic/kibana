@@ -80,7 +80,7 @@ safe-outputs:
 
 # Claude PR Reviewer
 
-Review pull request #${{ env.PR_NUMBER }} in `${{ github.repository }}` using the imported reviewer instructions.
+Review the pull request identified by `GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER` and `GH_AW_GITHUB_REPOSITORY` in the `<github-context>` block using the imported reviewer instructions.
 
 This workflow runs automatically for eligible pull request events and can still be triggered manually for testing.
 
