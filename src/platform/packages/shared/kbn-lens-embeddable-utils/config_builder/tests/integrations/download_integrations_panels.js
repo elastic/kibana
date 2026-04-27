@@ -154,7 +154,7 @@ async function main() {
   const outputFile = 'lens_panels.json';
 
   try {
-    const output = JSON.stringify(results, null, 2);
+    const output = JSON.stringify(results);
     await fs.writeFile(outputFile, output, 'utf8');
     console.log(
       `Successfully extracted ${results.length} lens metric visualizations to ${outputFile}`
