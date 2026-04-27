@@ -29,14 +29,6 @@ export interface RelatedAlertsByAncestryProps {
    * Callback to open the alert preview
    */
   onShowAlert: (id: string, indexName: string) => void;
-  /**
-   * Whether to hide the rule preview link
-   */
-  hidePreviewLink: boolean;
-  /**
-   * Whether to use system flyout links (ChildLink) instead of expandable flyout links (PreviewLink)
-   */
-  openLinksAsSystemFlyout?: boolean;
 }
 
 /**
@@ -46,9 +38,9 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
   documentId,
   scopeId,
   onShowAlert,
-  hidePreviewLink,
-  openLinksAsSystemFlyout,
 }) => {
+  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const useLegacyExpandableFlyout = !newFlyoutSystemEnabled;
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
     useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
@@ -68,10 +60,9 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
         scopeId,
         dataTestSubj: CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
         onShowAlert,
-        hidePreviewLink,
-        openLinksAsSystemFlyout,
+        useLegacyExpandableFlyout,
       }),
-    [scopeId, onShowAlert, hidePreviewLink, openLinksAsSystemFlyout]
+    [scopeId, onShowAlert, useLegacyExpandableFlyout]
   );
 
   if (error) {

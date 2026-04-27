@@ -48,11 +48,11 @@ const mockOnShowAlert = jest.fn();
 const renderCorrelationsTable = ({
   scopeId = mockContextValue.scopeId,
   columns,
-  hidePreviewLink = true,
+  useLegacyExpandableFlyout = true,
 }: {
   scopeId?: string;
   columns?: Array<CorrelationsCustomTableColumn>;
-  hidePreviewLink?: boolean;
+  useLegacyExpandableFlyout?: boolean;
 } = {}) =>
   render(
     <TestProviders>
@@ -69,7 +69,7 @@ const renderCorrelationsTable = ({
             scopeId,
             dataTestSubj: TEST_ID,
             onShowAlert: mockOnShowAlert,
-            hidePreviewLink,
+            useLegacyExpandableFlyout,
           })
         }
       />
@@ -152,7 +152,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
   });
 
   it('opens rule preview when isRulePreview is false', () => {
-    const { getAllByTestId } = renderCorrelationsTable({ hidePreviewLink: false });
+    const { getAllByTestId } = renderCorrelationsTable({ useLegacyExpandableFlyout: true });
 
     expect(getAllByTestId(`${TEST_ID}RulePreview`).length).toBe(2);
 

@@ -21,7 +21,7 @@ import { isEcsAllowedValue } from '../utils/event_utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
-import { RuleDetails } from '../../rule_details';
+import { RuleDetails } from '../../rule';
 import { AlertDescription } from './alert_description';
 import { AlertReason } from './alert_reason';
 import { AlertStatus } from './alert_status';

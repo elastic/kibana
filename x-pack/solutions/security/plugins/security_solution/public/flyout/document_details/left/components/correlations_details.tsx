@@ -51,7 +51,6 @@ export const CorrelationsDetails: React.FC = () => {
       isRulePreview={isRulePreview}
       onShowAlert={onShowAlert}
       onShowAttack={onShowAttack}
-      hidePreviewLink={false}
     />
   );
 };

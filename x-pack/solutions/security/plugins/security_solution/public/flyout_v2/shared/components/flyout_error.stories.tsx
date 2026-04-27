@@ -7,13 +7,13 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
+import { FlyoutError } from './flyout_error';
 
 export default {
-  component: FlyoutLoading,
-  title: 'Flyout/FlyoutLoading',
+  component: FlyoutError,
+  title: 'Flyout/FlyoutError',
 };
 
 export const Default: StoryFn = () => {
-  return <FlyoutLoading />;
+  return <FlyoutError />;
 };

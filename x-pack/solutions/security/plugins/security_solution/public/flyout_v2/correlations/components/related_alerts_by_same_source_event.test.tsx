@@ -24,11 +24,13 @@ import {
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 jest.mock('../../document/hooks/use_fetch_related_alerts_by_same_source_event');
 jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../common/hooks/is_in_security_app');
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../../common/hooks/use_experimental_features');
 
 const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
 
@@ -56,7 +58,6 @@ const renderRelatedAlertsBySameSourceEvent = () =>
           scopeId={scopeId}
           eventId={eventId}
           onShowAlert={mockOnShowAlert}
-          hidePreviewLink={true}
         />
       </DocumentDetailsContext.Provider>
     </TestProviders>
@@ -68,6 +69,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
       hasAlertsRead: true,
     });
     jest.mocked(useIsInSecurityApp).mockReturnValue(true);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
   });
 
   it('should render component correctly', () => {

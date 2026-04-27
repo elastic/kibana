@@ -11,6 +11,7 @@ import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_ta
 import { useFetchRelatedAlertsBySession } from '../../document/hooks/use_fetch_related_alerts_by_session';
 import { CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID } from './test_ids';
 import { getColumns } from '../utils/get_columns';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface RelatedAlertsBySessionProps {
   /**
@@ -29,14 +30,6 @@ export interface RelatedAlertsBySessionProps {
    * Callback to open the alert preview
    */
   onShowAlert: (id: string, indexName: string) => void;
-  /**
-   * Whether to hide the rule preview link
-   */
-  hidePreviewLink: boolean;
-  /**
-   * Whether to use system flyout links (ChildLink) instead of expandable flyout links (PreviewLink)
-   */
-  openLinksAsSystemFlyout?: boolean;
 }
 
 /**
@@ -47,9 +40,9 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
   scopeId,
   eventId,
   onShowAlert,
-  hidePreviewLink,
-  openLinksAsSystemFlyout,
 }) => {
+  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const useLegacyExpandableFlyout = !newFlyoutSystemEnabled;
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySession({
     entityId,
     scopeId,
@@ -61,10 +54,9 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
         scopeId,
         dataTestSubj: CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
         onShowAlert,
-        hidePreviewLink,
-        openLinksAsSystemFlyout,
+        useLegacyExpandableFlyout,
       }),
-    [scopeId, onShowAlert, hidePreviewLink, openLinksAsSystemFlyout]
+    [scopeId, onShowAlert, useLegacyExpandableFlyout]
   );
 
   if (error) {

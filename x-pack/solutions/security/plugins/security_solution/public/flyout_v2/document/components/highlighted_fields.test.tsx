@@ -19,7 +19,7 @@ import { TestProviders } from '../../../common/mock';
 import { useRuleIndexPattern } from '../../../detection_engine/rule_creation_ui/pages/form';
 import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
 import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_privilege';
-import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
+import { useRuleDetails } from '../../rule/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 
 jest.mock('../hooks/use_highlighted_fields');

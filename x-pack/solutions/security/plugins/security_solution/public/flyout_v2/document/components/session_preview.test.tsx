@@ -13,7 +13,7 @@ import { TestProviders } from '../../../common/mock';
 import React from 'react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID } from './test_ids';
-import { useRuleDetailsLink } from '../../rule_details/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from '../../rule/hooks/use_rule_details_link';
 
 jest.mock('../hooks/use_process_data');
 jest.mock('../../rule_details/hooks/use_rule_details_link');

@@ -25,14 +25,12 @@ export const getColumns = ({
   scopeId,
   dataTestSubj,
   onShowAlert,
-  hidePreviewLink,
-  openLinksAsSystemFlyout,
+  useLegacyExpandableFlyout,
 }: {
   scopeId: string;
   dataTestSubj?: string;
   onShowAlert: (id: string, indexName: string) => void;
-  hidePreviewLink: boolean;
-  openLinksAsSystemFlyout?: boolean;
+  useLegacyExpandableFlyout?: boolean;
 }): Array<EuiBasicTableColumn<Record<string, unknown>>> => [
   {
     render: (row: Record<string, unknown>) => (
@@ -83,17 +81,7 @@ export const getColumns = ({
       const ruleId = row['kibana.alert.rule.uuid'] as string;
       return (
         <EuiToolTip content={ruleName}>
-          {hidePreviewLink ? (
-            <span>{ruleName}</span>
-          ) : openLinksAsSystemFlyout ? (
-            <ChildLink
-              field={ALERT_RULE_NAME}
-              value={ruleId}
-              data-test-subj={`${dataTestSubj}RuleLink`}
-            >
-              <span>{ruleName}</span>
-            </ChildLink>
-          ) : (
+          {useLegacyExpandableFlyout ? (
             <PreviewLink
               field={ALERT_RULE_NAME}
               value={ruleName}
@@ -103,6 +91,14 @@ export const getColumns = ({
             >
               <span>{ruleName}</span>
             </PreviewLink>
+          ) : (
+            <ChildLink
+              field={ALERT_RULE_NAME}
+              value={ruleId}
+              data-test-subj={`${dataTestSubj}RuleLink`}
+            >
+              <span>{ruleName}</span>
+            </ChildLink>
           )}
         </EuiToolTip>
       );
