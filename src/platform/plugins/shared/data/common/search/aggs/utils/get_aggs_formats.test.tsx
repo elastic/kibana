@@ -178,11 +178,7 @@ describe('getAggsFormats', () => {
       expect(format.convert('machine.os.keyword')).toBe('machine.os.keyword');
       expect(getReactConvertText(format, 'machine.os.keyword')).toBe('machine.os.keyword');
       expect(format.convert('__other__')).toBe(termsMapping.params.otherBucketLabel);
-      expect(getReactConvertText(format, '__other__')).toBe(termsMapping.params.otherBucketLabel);
       expect(format.convert(MISSING_TOKEN)).toBe(termsMapping.params.missingBucketLabel);
-      expect(getReactConvertText(format, MISSING_TOKEN)).toBe(
-        termsMapping.params.missingBucketLabel
-      );
       expect(getFormat).toHaveBeenCalledTimes(1);
     });
 
@@ -192,7 +188,9 @@ describe('getAggsFormats', () => {
 
       const format = getAggFormat(termsMapping, () => mockNestedFormat);
 
+      expect(format.convert('__other__')).toBe('other bucket');
       expect(format.reactConvert('__other__')).toBe('other bucket');
+      expect(format.convert(MISSING_TOKEN)).toBe('missing bucket');
       expect(format.reactConvert(MISSING_TOKEN)).toBe('missing bucket');
       expect(mockReactConvert).not.toHaveBeenCalled();
     });
