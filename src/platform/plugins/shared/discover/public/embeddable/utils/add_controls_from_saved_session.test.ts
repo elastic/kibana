@@ -131,5 +131,29 @@ describe('addControlsFromSavedSession', () => {
       expect(addedPanels).not.toContain(['var1', 'var2']);
       expect(addedPanels).toEqual(['nonExistentVar']);
     });
+
+    it('should normalize legacy esqlControl panels through parseControlGroupJson', async () => {
+      await addControlsFromSavedSession(
+        mockContainer,
+        JSON.stringify({
+          panel1: {
+            type: 'esqlControl',
+            order: 0,
+            variable_name: 'nonExistentVar',
+          },
+        })
+      );
+
+      expect(mockContainer.addNewPanel).toHaveBeenCalledWith(
+        {
+          panelType: ESQL_CONTROL,
+          serializedState: {
+            variable_name: 'nonExistentVar',
+            type: ESQL_CONTROL,
+          },
+        },
+        { beside: undefined, scrollToPanel: false }
+      );
+    });
   });
 });

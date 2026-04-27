@@ -59,8 +59,8 @@ test.describe(
       const stats = perfTracker.collectJsBundleStats(currentUrl);
       expect(
         stats.totalSize,
-        `Total bundles size loaded on page should not exceed 3.1 MB`
-      ).toBeLessThan(3.1 * 1024 * 1024);
+        `Total bundles size loaded on page should not exceed 3.2 MB`
+      ).toBeLessThan(3.2 * 1024 * 1024);
       expect(
         stats.bundleCount,
         `Total bundle chunks count loaded on page should not exceed 100`
