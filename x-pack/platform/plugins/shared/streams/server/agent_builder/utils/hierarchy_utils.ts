@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import { Streams, getAdvancedParameters } from '@kbn/streams-schema';
 
 export interface ProcessingChainEntry {
   source: string;
@@ -16,6 +16,7 @@ export interface FieldMappingEntry {
   source: string;
   name: string;
   type: string;
+  parameters?: Record<string, unknown>;
 }
 
 export const buildProcessingChain = (
@@ -44,6 +45,23 @@ export const buildProcessingChain = (
   return chain;
 };
 
+const buildFieldEntry = (
+  source: string,
+  fieldName: string,
+  fieldDef: { type?: string; [key: string]: unknown }
+): FieldMappingEntry => {
+  const entry: FieldMappingEntry = {
+    source,
+    name: fieldName,
+    type: fieldDef.type || 'object',
+  };
+  const params = getAdvancedParameters(fieldName, fieldDef as Parameters<typeof getAdvancedParameters>[1]);
+  if (Object.keys(params).length > 0) {
+    entry.parameters = params;
+  }
+  return entry;
+};
+
 export const buildFieldMappings = (
   definition: Streams.ingest.all.Definition,
   ancestors: Streams.WiredStream.Definition[]
@@ -56,14 +74,14 @@ export const buildFieldMappings = (
     for (const ancestor of sorted) {
       for (const [fieldName, fieldDef] of Object.entries(ancestor.ingest.wired.fields)) {
         if (!seen.has(fieldName)) {
-          fields.push({ source: ancestor.name, name: fieldName, type: fieldDef.type || 'object' });
+          fields.push(buildFieldEntry(ancestor.name, fieldName, fieldDef));
           seen.add(fieldName);
         }
       }
     }
     for (const [fieldName, fieldDef] of Object.entries(definition.ingest.wired.fields)) {
       if (!seen.has(fieldName)) {
-        fields.push({ source: definition.name, name: fieldName, type: fieldDef.type || 'object' });
+        fields.push(buildFieldEntry(definition.name, fieldName, fieldDef));
         seen.add(fieldName);
       }
     }
@@ -71,7 +89,7 @@ export const buildFieldMappings = (
     for (const [fieldName, fieldDef] of Object.entries(
       definition.ingest.classic.field_overrides || {}
     )) {
-      fields.push({ source: definition.name, name: fieldName, type: fieldDef.type || 'object' });
+      fields.push(buildFieldEntry(definition.name, fieldName, fieldDef));
     }
   }
 

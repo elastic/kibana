@@ -80,7 +80,17 @@ export const streamsManagementSkill = defineSkillType({
     </inherited_vs_per_stream>
 
     <unmapped_fields>
-    "Unmapped" means a field exists in document _source but has no explicit mapping. This is normal, not an error — Elasticsearch auto-detects types via dynamic mapping. Only suggest mapping fields when the user explicitly asks. Never proactively treat unmapped fields as problems to fix.
+    "Unmapped" means a field exists in document _source but has no explicit type mapping on the stream.
+
+    The schema aspect of ${INSPECT_STREAMS} returns a dynamic_mapping value and unmapped_fields_note for each stream — always use these to explain unmapped fields to the user. Do not assume dynamic mapping behavior; report what the tool returns.
+
+    Key behaviors by dynamic setting:
+    - dynamic: false (all wired streams, some classic): Unmapped fields are NOT dynamically mapped by Elasticsearch. They are stored in _source only — not indexed, not searchable, not aggregatable. To make them queryable, add explicit field mappings via the update tool.
+    - dynamic: true (many classic/integration streams): Elasticsearch auto-maps new fields. Fields reported as unmapped by ${INSPECT_STREAMS} were not found in field_overrides or field caps — they may be source-only or recently appeared.
+    - dynamic: runtime: Elasticsearch auto-maps new fields as runtime fields (searchable at query time but not indexed on disk).
+    - dynamic: strict: New fields are rejected at index time. Unmapped fields in _source predate the strict setting or arrived via a different path.
+
+    Unmapped fields are not errors. Only suggest mapping them when the user explicitly asks, or when they need to search/filter/aggregate on a source-only field.
     </unmapped_fields>
 
     <draft_mode>

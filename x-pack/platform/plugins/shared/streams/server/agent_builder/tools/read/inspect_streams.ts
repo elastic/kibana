@@ -10,7 +10,10 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams, FIELD_DEFINITION_TYPES } from '@kbn/streams-schema';
-import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  FieldCapsResponse,
+  IndicesGetMappingResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import dateMath from '@kbn/datemath';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
@@ -40,6 +43,7 @@ import {
 } from '../../utils/quality_utils';
 import { buildProcessingChain, buildFieldMappings } from '../../utils/hierarchy_utils';
 import { getStreamConvention, getConventionHint } from '../../utils/convention_utils';
+import { getEffectiveDynamicMapping, getUnmappedFieldsNote } from '../../utils/mapping_utils';
 
 const STREAMS_SUPPORTED_TYPES = new Set<string>(FIELD_DEFINITION_TYPES);
 
@@ -88,7 +92,7 @@ export const createInspectStreamsTool = ({
 
     **Aspects:**
     - overview: name, type, description, document count (always included for context)
-    - schema: mapped fields (own + inherited with source attribution) and unmapped fields from recent documents
+    - schema: mapped fields (own + inherited with source attribution), unmapped fields from recent documents, dynamic_mapping setting, and an interpretive note explaining field indexing behavior for this stream
     - quality: assessment (primary interpretation — follow this), quality_score, pipeline_updated_at, last_failure_at, failure data per time window (last_5m, last_24h, since_pipeline_update — each with count and pct), failure store status
     - lifecycle: retention policy, storage size, ILM tier breakdown
     - processing: full processing chain with source attribution (own + inherited steps for wired streams)
@@ -222,7 +226,7 @@ const buildStreamEntry = async ({
 
   if (streamType === 'wired') {
     entry.type_context =
-      'Fully managed by Elastic. Do not suggest editing underlying ES components directly. ' +
+      'Fully managed by Elastic. Uses dynamic: false — only explicitly mapped fields are indexed. ' +
       'Mappings are additive — a child cannot change a field type defined by its parent. ' +
       'Data flows through the tree until it reaches its destination (exclusive partitioning). ' +
       'Root streams are read-only except for routing.';
@@ -254,7 +258,7 @@ const buildStreamEntry = async ({
     const convention = getStreamConvention(definition);
     const conventionHint = getConventionHint(convention);
 
-    const [ancestors, sampleDocs, fieldCapsResponse] = await Promise.all([
+    const [ancestors, sampleDocs, fieldCapsResponse, mappingResponse] = await Promise.all([
       streamsClient.getAncestors(streamName),
       esClient.search({
         index: streamName,
@@ -264,9 +268,13 @@ const buildStreamEntry = async ({
       isClassic
         ? esClient.fieldCaps({ index: streamName, fields: ['*'], include_unmapped: false })
         : (undefined as unknown as FieldCapsResponse),
+      isClassic
+        ? esClient.indices.getMapping({ index: streamName })
+        : (undefined as unknown as IndicesGetMappingResponse),
     ]);
 
     if (isClassic && fieldCapsResponse) {
+      const dynamicMapping = mappingResponse ? getEffectiveDynamicMapping(mappingResponse) : 'true';
       const { mappedFields, unmappedFields } = buildClassicSchemaWithFieldCaps(
         definition as Streams.ClassicStream.Definition,
         fieldCapsResponse,
@@ -275,6 +283,8 @@ const buildStreamEntry = async ({
       entry.schema = {
         field_convention: convention,
         field_convention_hint: conventionHint,
+        dynamic_mapping: dynamicMapping,
+        unmapped_fields_note: getUnmappedFieldsNote(dynamicMapping),
         mapped_fields: mappedFields,
         unmapped_fields: unmappedFields,
         total_mapped: mappedFields.length,
@@ -286,6 +296,8 @@ const buildStreamEntry = async ({
       entry.schema = {
         field_convention: convention,
         field_convention_hint: conventionHint,
+        dynamic_mapping: 'false',
+        unmapped_fields_note: getUnmappedFieldsNote(false),
         mapped_fields: mappedFields,
         unmapped_fields: unmappedFields,
         total_mapped: mappedFields.length,

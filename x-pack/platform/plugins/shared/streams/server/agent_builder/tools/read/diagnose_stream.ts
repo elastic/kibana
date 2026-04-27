@@ -24,6 +24,7 @@ import {
 import { classifyError } from '../../utils/error_utils';
 import { computeQualityMetrics } from '../../utils/quality_utils';
 import { getStreamConvention, getConventionHint } from '../../utils/convention_utils';
+import { getEffectiveFieldConstraints } from '../../utils/mapping_utils';
 import {
   getDocCountsForStreams,
   getDegradedDocCountsForStreams,
@@ -68,7 +69,12 @@ export const createDiagnoseStreamTool = ({
     When degraded documents are present, \`degraded_fields\` lists which specific
     fields triggered the \`_ignored\` flag during indexing (e.g. a keyword value
     exceeding \`ignore_above\`, or a type mismatch with \`ignore_malformed\`). Each
-    entry includes the field name, document count, and last occurrence timestamp.
+    entry includes the field name, document count, last occurrence timestamp,
+    a \`mapping\` object with the effective Elasticsearch mapping constraints for
+    that field (e.g. \`{ type: "keyword", ignore_above: 8191 }\`), and a
+    \`sample_value\` showing the actual field value from a recent degraded document.
+    Compare \`sample_value\` against \`mapping\` constraints to determine root cause
+    (e.g. string length vs \`ignore_above\` limit). Do not guess or assume defaults.
 
     **Before attempting fixes:** If \`last_seen\` is not near \`time_window.to\`, the errors
     may be stale. Re-diagnose with a shorter time_range (e.g. "1h") to confirm the issue
@@ -187,6 +193,18 @@ export const createDiagnoseStreamTool = ({
       if (degradedCount > 0) {
         const degradedFields = await getDegradedFieldBreakdown(esClient, name, startMs, endMs);
         if (degradedFields.length > 0) {
+          try {
+            const fieldNames = degradedFields.map((f) => f.name);
+            const constraintsMap = await getEffectiveFieldConstraints(esClient, name, fieldNames);
+            for (const entry of degradedFields) {
+              const constraints = constraintsMap.get(entry.name);
+              if (constraints) {
+                entry.mapping = constraints;
+              }
+            }
+          } catch {
+            // Mapping lookup is best-effort; degrade gracefully
+          }
           const convention = getStreamConvention(definition);
           result.degraded_fields = degradedFields;
           result.degraded_fields_convention_hint = getConventionHint(convention);
@@ -332,6 +350,13 @@ interface DegradedFieldEntry {
   name: string;
   count: number;
   last_occurrence: string;
+  sample_value?: unknown;
+  mapping?: {
+    type: string;
+    ignore_above?: number;
+    ignore_malformed?: boolean;
+    [key: string]: unknown;
+  };
 }
 
 interface DegradedFieldsAgg {
@@ -340,9 +365,22 @@ interface DegradedFieldsAgg {
       key: string;
       doc_count: number;
       last_occurrence: { value: number | null };
+      sample: { hits: { hits: Array<{ _source?: Record<string, unknown> }> } };
     }>;
   };
 }
+
+const extractFieldValue = (source: Record<string, unknown>, fieldPath: string): unknown => {
+  const flat = getFlattenedObject(source);
+  return flat[fieldPath];
+};
+
+const truncateSampleValue = (value: unknown): unknown => {
+  if (typeof value === 'string' && value.length > MAX_SAMPLE_DOC_STRING_LENGTH) {
+    return `${value.slice(0, MAX_SAMPLE_DOC_STRING_LENGTH)}...`;
+  }
+  return value;
+};
 
 const getDegradedFieldBreakdown = async (
   esClient: ElasticsearchClient,
@@ -365,19 +403,34 @@ const getDegradedFieldBreakdown = async (
           terms: { field: '_ignored', size: MAX_DEGRADED_FIELDS },
           aggs: {
             last_occurrence: { max: { field: '@timestamp' } },
+            sample: {
+              top_hits: {
+                size: 1,
+                sort: [{ '@timestamp': { order: 'desc' as const } }],
+                _source: true,
+              },
+            },
           },
         },
       },
     });
 
     const buckets = response.aggregations?.degraded_fields.buckets ?? [];
-    return buckets.map((bucket) => ({
-      name: bucket.key,
-      count: bucket.doc_count,
-      last_occurrence: bucket.last_occurrence.value
-        ? new Date(bucket.last_occurrence.value).toISOString()
-        : new Date(endMs).toISOString(),
-    }));
+    return buckets.map((bucket) => {
+      const sampleSource = bucket.sample?.hits?.hits?.[0]?._source;
+      const rawValue =
+        sampleSource != null ? extractFieldValue(sampleSource, bucket.key) : undefined;
+      const sampleValue = rawValue != null ? truncateSampleValue(rawValue) : undefined;
+
+      return {
+        name: bucket.key,
+        count: bucket.doc_count,
+        last_occurrence: bucket.last_occurrence.value
+          ? new Date(bucket.last_occurrence.value).toISOString()
+          : new Date(endMs).toISOString(),
+        ...(sampleValue != null && { sample_value: sampleValue }),
+      };
+    });
   } catch {
     return [];
   }

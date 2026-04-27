@@ -300,6 +300,8 @@ describe('createDiagnoseStreamTool handler', () => {
   });
 
   describe('degraded_fields breakdown', () => {
+    const emptySample = { hits: { hits: [] } };
+
     const mockDegradedStream = (
       esClient: ReturnType<typeof createMockGetScopedClients>['esClient'],
       scopedClusterClient: ReturnType<typeof createMockGetScopedClients>['scopedClusterClient'],
@@ -308,6 +310,7 @@ describe('createDiagnoseStreamTool handler', () => {
         totalDocs,
         degradedDocs,
         degradedFieldBuckets = [],
+        fieldMappingResponse,
       }: {
         totalDocs: number;
         degradedDocs: number;
@@ -315,7 +318,9 @@ describe('createDiagnoseStreamTool handler', () => {
           key: string;
           doc_count: number;
           last_occurrence: { value: number | null };
+          sample?: { hits: { hits: Array<{ _source?: Record<string, unknown> }> } };
         }>;
+        fieldMappingResponse?: Record<string, unknown>;
       }
     ) => {
       const backingIndex = `.ds-${streamName}-000001`;
@@ -333,6 +338,10 @@ describe('createDiagnoseStreamTool handler', () => {
         statsResponse
       );
       mockEsMethodResolvedValue(esClient.esql.query, { columns: [], values: [] });
+      mockEsMethodResolvedValue(
+        esClient.indices.getFieldMapping,
+        fieldMappingResponse ?? { [backingIndex]: { mappings: {} } }
+      );
 
       esClient.search.mockImplementation(async (params?: SearchRequest) => {
         const index = params?.index as string;
@@ -361,7 +370,91 @@ describe('createDiagnoseStreamTool handler', () => {
       });
     };
 
-    it('returns degraded_fields when degradedCount > 0', async () => {
+    it('returns degraded_fields with mapping constraints and sample_value', async () => {
+      const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-otel'));
+
+      mockDegradedStream(esClient, scopedClusterClient, 'logs-otel', {
+        totalDocs: 3422,
+        degradedDocs: 3422,
+        degradedFieldBuckets: [
+          {
+            key: 'resource.attributes.process.command_args',
+            doc_count: 154,
+            last_occurrence: { value: 1776624997219 },
+            sample: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      resource: {
+                        attributes: {
+                          process: { command_args: '/usr/bin/java -Xmx512m -jar app.jar' },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          {
+            key: 'attributes.exception.stacktrace',
+            doc_count: 42,
+            last_occurrence: { value: 1776624900000 },
+            sample: emptySample,
+          },
+        ],
+        fieldMappingResponse: {
+          '.ds-logs-otel-000001': {
+            mappings: {
+              'resource.attributes.process.command_args': {
+                full_name: 'resource.attributes.process.command_args',
+                mapping: {
+                  'process.command_args': { type: 'keyword', ignore_above: 1024 },
+                },
+              },
+              'attributes.exception.stacktrace': {
+                full_name: 'attributes.exception.stacktrace',
+                mapping: {
+                  'exception.stacktrace': { type: 'keyword', ignore_above: 8191 },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const result = await tool.handler({ name: 'logs-otel' }, context);
+
+      if ('results' in result) {
+        const data = result.results[0].data as Record<string, unknown>;
+        expect(data.health).toBe('degraded');
+        const degradedFields = data.degraded_fields as Array<{
+          name: string;
+          count: number;
+          last_occurrence: string;
+          sample_value?: unknown;
+          mapping?: Record<string, unknown>;
+        }>;
+        expect(degradedFields).toHaveLength(2);
+        expect(degradedFields[0]).toEqual({
+          name: 'resource.attributes.process.command_args',
+          count: 154,
+          last_occurrence: new Date(1776624997219).toISOString(),
+          sample_value: '/usr/bin/java -Xmx512m -jar app.jar',
+          mapping: { type: 'keyword', ignore_above: 1024 },
+        });
+        expect(degradedFields[1]).toEqual({
+          name: 'attributes.exception.stacktrace',
+          count: 42,
+          last_occurrence: new Date(1776624900000).toISOString(),
+          mapping: { type: 'keyword', ignore_above: 8191 },
+        });
+      }
+    });
+
+    it('omits mapping when field mapping lookup returns no results', async () => {
       const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
       streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-otel'));
 
@@ -374,13 +467,40 @@ describe('createDiagnoseStreamTool handler', () => {
             doc_count: 154,
             last_occurrence: { value: 1776624997219 },
           },
+        ],
+      });
+
+      const result = await tool.handler({ name: 'logs-otel' }, context);
+
+      if ('results' in result) {
+        const data = result.results[0].data as Record<string, unknown>;
+        const degradedFields = data.degraded_fields as Array<{
+          name: string;
+          mapping?: Record<string, unknown>;
+        }>;
+        expect(degradedFields).toHaveLength(1);
+        expect(degradedFields[0].mapping).toBeUndefined();
+      }
+    });
+
+    it('degrades gracefully when field mapping lookup throws', async () => {
+      const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-otel'));
+
+      mockDegradedStream(esClient, scopedClusterClient, 'logs-otel', {
+        totalDocs: 3422,
+        degradedDocs: 3422,
+        degradedFieldBuckets: [
           {
-            key: 'attributes.exception.stacktrace',
-            doc_count: 42,
-            last_occurrence: { value: 1776624900000 },
+            key: 'resource.attributes.process.command_args',
+            doc_count: 154,
+            last_occurrence: { value: 1776624997219 },
           },
         ],
       });
+      esClient.indices.getFieldMapping.mockRejectedValue(
+        new Error('security_exception: unauthorized')
+      );
 
       const result = await tool.handler({ name: 'logs-otel' }, context);
 
@@ -390,23 +510,86 @@ describe('createDiagnoseStreamTool handler', () => {
         const degradedFields = data.degraded_fields as Array<{
           name: string;
           count: number;
-          last_occurrence: string;
+          mapping?: Record<string, unknown>;
         }>;
-        expect(degradedFields).toHaveLength(2);
-        expect(degradedFields[0]).toEqual({
-          name: 'resource.attributes.process.command_args',
-          count: 154,
-          last_occurrence: new Date(1776624997219).toISOString(),
-        });
-        expect(degradedFields[1]).toEqual({
-          name: 'attributes.exception.stacktrace',
-          count: 42,
-          last_occurrence: new Date(1776624900000).toISOString(),
-        });
+        expect(degradedFields).toHaveLength(1);
+        expect(degradedFields[0].name).toBe('resource.attributes.process.command_args');
+        expect(degradedFields[0].count).toBe(154);
+        expect(degradedFields[0].mapping).toBeUndefined();
       }
     });
 
-    it('omits degraded_fields when degradedCount is 0', async () => {
+    it('truncates long sample_value strings', async () => {
+      const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-otel'));
+
+      const longValue = 'x'.repeat(300);
+      mockDegradedStream(esClient, scopedClusterClient, 'logs-otel', {
+        totalDocs: 1000,
+        degradedDocs: 500,
+        degradedFieldBuckets: [
+          {
+            key: 'attributes.stacktrace',
+            doc_count: 500,
+            last_occurrence: { value: 1776624997219 },
+            sample: {
+              hits: {
+                hits: [{ _source: { attributes: { stacktrace: longValue } } }],
+              },
+            },
+          },
+        ],
+      });
+
+      const result = await tool.handler({ name: 'logs-otel' }, context);
+
+      if ('results' in result) {
+        const data = result.results[0].data as Record<string, unknown>;
+        const degradedFields = data.degraded_fields as Array<{
+          sample_value?: unknown;
+        }>;
+        expect(degradedFields).toHaveLength(1);
+        const val = degradedFields[0].sample_value as string;
+        expect(val.length).toBe(203);
+        expect(val.endsWith('...')).toBe(true);
+      }
+    });
+
+    it('omits sample_value when field is not found in sample _source', async () => {
+      const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-otel'));
+
+      mockDegradedStream(esClient, scopedClusterClient, 'logs-otel', {
+        totalDocs: 1000,
+        degradedDocs: 500,
+        degradedFieldBuckets: [
+          {
+            key: 'attributes.missing.field',
+            doc_count: 500,
+            last_occurrence: { value: 1776624997219 },
+            sample: {
+              hits: {
+                hits: [{ _source: { attributes: { other: 'value' } } }],
+              },
+            },
+          },
+        ],
+      });
+
+      const result = await tool.handler({ name: 'logs-otel' }, context);
+
+      if ('results' in result) {
+        const data = result.results[0].data as Record<string, unknown>;
+        const degradedFields = data.degraded_fields as Array<{
+          name: string;
+          sample_value?: unknown;
+        }>;
+        expect(degradedFields).toHaveLength(1);
+        expect(degradedFields[0].sample_value).toBeUndefined();
+      }
+    });
+
+    it('omits degraded_fields when degradedCount is 0 and skips mapping lookup', async () => {
       const { tool, context, streamsClient, esClient, scopedClusterClient } = setup();
       streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-healthy'));
 
@@ -430,6 +613,7 @@ describe('createDiagnoseStreamTool handler', () => {
           );
         });
         expect(degradedFieldsCall).toBeUndefined();
+        expect(esClient.indices.getFieldMapping).not.toHaveBeenCalled();
       }
     });
 

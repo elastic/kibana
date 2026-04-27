@@ -9,6 +9,7 @@ import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools/handler'
 import type { Streams, FieldDefinition, ClassicFieldDefinition } from '@kbn/streams-schema';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import { createInspectStreamsTool } from './inspect_streams';
+import { getUnmappedFieldsNote } from '../../utils/mapping_utils';
 import {
   createMockGetScopedClients,
   createMockToolContext,
@@ -275,6 +276,12 @@ describe('createInspectStreamsTool handler', () => {
       },
     });
 
+    const mockMappingResponse = (dynamic: string = 'true') => ({
+      '.ds-test-index-000001': {
+        mappings: { dynamic, properties: {} },
+      },
+    });
+
     interface SchemaField {
       name: string;
       type: string;
@@ -283,6 +290,8 @@ describe('createInspectStreamsTool handler', () => {
     }
 
     interface SchemaResult {
+      dynamic_mapping: string;
+      unmapped_fields_note: string;
       mapped_fields: SchemaField[];
       unmapped_fields: string[];
       total_mapped: number;
@@ -308,6 +317,7 @@ describe('createInspectStreamsTool handler', () => {
           '@timestamp': { '@timestamp': { type: 'date' } },
         })
       );
+      mockEsMethodResolvedValue(esClient.indices.getMapping, mockMappingResponse('true'));
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
       const schema = getSchema(result, 'logs-otel');
@@ -329,6 +339,8 @@ describe('createInspectStreamsTool handler', () => {
         ])
       );
       expect(schema.unmapped_fields).toEqual([]);
+      expect(schema.dynamic_mapping).toBe('true');
+      expect(schema.unmapped_fields_note).toBe(getUnmappedFieldsNote('true'));
     });
 
     it('marks non-Streams types as overridable: false', async () => {
@@ -343,6 +355,7 @@ describe('createInspectStreamsTool handler', () => {
           'scope.version': { 'scope.version': { type: 'version' } },
         })
       );
+      mockEsMethodResolvedValue(esClient.indices.getMapping, mockMappingResponse());
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
       const schema = getSchema(result, 'logs-otel');
@@ -372,6 +385,7 @@ describe('createInspectStreamsTool handler', () => {
           trace_id: { trace_id: { type: 'keyword' } },
         })
       );
+      mockEsMethodResolvedValue(esClient.indices.getMapping, mockMappingResponse());
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
       const schema = getSchema(result, 'logs-otel');
@@ -404,6 +418,7 @@ describe('createInspectStreamsTool handler', () => {
           trace_id: { trace_id: { type: 'keyword' } },
         })
       );
+      mockEsMethodResolvedValue(esClient.indices.getMapping, mockMappingResponse());
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
       const schema = getSchema(result, 'logs-otel');
@@ -425,6 +440,7 @@ describe('createInspectStreamsTool handler', () => {
           'message.text': { 'message.text': { type: 'match_only_text' } },
         })
       );
+      mockEsMethodResolvedValue(esClient.indices.getMapping, mockMappingResponse());
 
       const result = await tool.handler({ names: ['logs-otel'], aspects: ['schema'] }, context);
       const schema = getSchema(result, 'logs-otel');
@@ -451,5 +467,223 @@ describe('createInspectStreamsTool handler', () => {
       const schema = getSchema(result, 'logs.ecs.nginx');
       expect(schema.mapped_fields).toBeDefined();
     });
+  });
+
+  describe('wired stream schema parameters', () => {
+    interface SchemaField {
+      name: string;
+      type: string;
+      source: string;
+      parameters?: Record<string, unknown>;
+    }
+
+    interface SchemaResult {
+      dynamic_mapping: string;
+      unmapped_fields_note: string;
+      mapped_fields: SchemaField[];
+      unmapped_fields: string[];
+      total_mapped: number;
+      total_unmapped: number;
+    }
+
+    const getSchema = (result: ToolHandlerReturn, streamName: string): SchemaResult => {
+      if (!('results' in result)) throw new Error('Expected results');
+      const data = result.results[0].data as {
+        streams: Record<string, { schema: SchemaResult }>;
+      };
+      return data.streams[streamName].schema;
+    };
+
+    it('includes parameters for fields with advanced params like ignore_above', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(
+        wiredStreamDef('logs.otel.test', [], {
+          'scope.name': { type: 'keyword', ignore_above: 1024 },
+          'body.text': { type: 'match_only_text' },
+        })
+      );
+      streamsClient.getAncestors.mockResolvedValue([]);
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+
+      const result = await tool.handler(
+        { names: ['logs.otel.test'], aspects: ['schema'] },
+        context
+      );
+      const schema = getSchema(result, 'logs.otel.test');
+
+      const scopeName = schema.mapped_fields.find((f) => f.name === 'scope.name');
+      expect(scopeName).toEqual({
+        source: 'logs.otel.test',
+        name: 'scope.name',
+        type: 'keyword',
+        parameters: { ignore_above: 1024 },
+      });
+    });
+
+    it('omits parameters for fields without advanced params', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(
+        wiredStreamDef('logs.otel.test', [], {
+          'body.text': { type: 'match_only_text' },
+        })
+      );
+      streamsClient.getAncestors.mockResolvedValue([]);
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+
+      const result = await tool.handler(
+        { names: ['logs.otel.test'], aspects: ['schema'] },
+        context
+      );
+      const schema = getSchema(result, 'logs.otel.test');
+
+      const bodyText = schema.mapped_fields.find((f) => f.name === 'body.text');
+      expect(bodyText).toEqual({
+        source: 'logs.otel.test',
+        name: 'body.text',
+        type: 'match_only_text',
+      });
+      expect(bodyText?.parameters).toBeUndefined();
+    });
+
+    it('surfaces ancestor field parameters through inheritance', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      const parentFields: FieldDefinition = {
+        'scope.name': { type: 'keyword', ignore_above: 1024 },
+        '@timestamp': { type: 'date' },
+      };
+      const childFields: FieldDefinition = {
+        'attributes.process.name': { type: 'keyword' },
+      };
+      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.otel.child', [], childFields));
+      streamsClient.getAncestors.mockResolvedValue([wiredStreamDef('logs.otel', [], parentFields)]);
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+
+      const result = await tool.handler(
+        { names: ['logs.otel.child'], aspects: ['schema'] },
+        context
+      );
+      const schema = getSchema(result, 'logs.otel.child');
+
+      const scopeName = schema.mapped_fields.find((f) => f.name === 'scope.name');
+      expect(scopeName).toEqual({
+        source: 'logs.otel',
+        name: 'scope.name',
+        type: 'keyword',
+        parameters: { ignore_above: 1024 },
+      });
+
+      const processName = schema.mapped_fields.find((f) => f.name === 'attributes.process.name');
+      expect(processName).toEqual({
+        source: 'logs.otel.child',
+        name: 'attributes.process.name',
+        type: 'keyword',
+      });
+      expect(processName?.parameters).toBeUndefined();
+    });
+  });
+
+  describe('dynamic_mapping and unmapped_fields_note', () => {
+    interface SchemaResult {
+      dynamic_mapping: string;
+      unmapped_fields_note: string;
+      mapped_fields: unknown[];
+      unmapped_fields: string[];
+    }
+
+    const getSchema = (result: ToolHandlerReturn, streamName: string): SchemaResult => {
+      if (!('results' in result)) throw new Error('Expected results');
+      const data = result.results[0].data as {
+        streams: Record<string, { schema: SchemaResult }>;
+      };
+      return data.streams[streamName].schema;
+    };
+
+    it('returns dynamic_mapping: false for wired streams without calling indices.getMapping', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx'));
+      streamsClient.getAncestors.mockResolvedValue([]);
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+
+      const result = await tool.handler(
+        { names: ['logs.ecs.nginx'], aspects: ['schema'] },
+        context
+      );
+
+      expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+      const schema = getSchema(result, 'logs.ecs.nginx');
+      expect(schema.dynamic_mapping).toBe('false');
+      expect(schema.unmapped_fields_note).toBe(getUnmappedFieldsNote(false));
+      expect(schema.unmapped_fields_note).toContain('not indexed');
+    });
+
+    it('reads dynamic_mapping from ES for classic streams', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-nginx'));
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+      mockEsMethodResolvedValue(esClient.fieldCaps, mockFieldCapsResponse({}));
+      mockEsMethodResolvedValue(esClient.indices.getMapping, {
+        '.ds-logs-nginx-000001': {
+          mappings: { dynamic: 'true', properties: {} },
+        },
+      });
+
+      const result = await tool.handler({ names: ['logs-nginx'], aspects: ['schema'] }, context);
+
+      expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: 'logs-nginx' });
+      const schema = getSchema(result, 'logs-nginx');
+      expect(schema.dynamic_mapping).toBe('true');
+      expect(schema.unmapped_fields_note).toBe(getUnmappedFieldsNote('true'));
+    });
+
+    it('returns correct note for classic streams with dynamic: false', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-strict'));
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+      mockEsMethodResolvedValue(esClient.fieldCaps, mockFieldCapsResponse({}));
+      mockEsMethodResolvedValue(esClient.indices.getMapping, {
+        '.ds-logs-strict-000001': {
+          mappings: { dynamic: 'false', properties: {} },
+        },
+      });
+
+      const result = await tool.handler({ names: ['logs-strict'], aspects: ['schema'] }, context);
+
+      const schema = getSchema(result, 'logs-strict');
+      expect(schema.dynamic_mapping).toBe('false');
+      expect(schema.unmapped_fields_note).toContain('not indexed');
+      expect(schema.unmapped_fields_note).toContain('Add explicit field mappings');
+    });
+
+    it('returns correct note for classic streams with dynamic: runtime', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(classicStreamDef('logs-runtime'));
+      mockEsMethodResolvedValue(esClient.search, emptySearchResponse);
+      mockEsMethodResolvedValue(esClient.fieldCaps, mockFieldCapsResponse({}));
+      mockEsMethodResolvedValue(esClient.indices.getMapping, {
+        '.ds-logs-runtime-000001': {
+          mappings: { dynamic: 'runtime', properties: {} },
+        },
+      });
+
+      const result = await tool.handler({ names: ['logs-runtime'], aspects: ['schema'] }, context);
+
+      const schema = getSchema(result, 'logs-runtime');
+      expect(schema.dynamic_mapping).toBe('runtime');
+      expect(schema.unmapped_fields_note).toContain('runtime fields');
+    });
+  });
+
+  it('wired type_context mentions dynamic: false', async () => {
+    const { tool, context, streamsClient } = setup();
+    streamsClient.getStream.mockResolvedValue(wiredStreamDef('logs.ecs.nginx'));
+    streamsClient.getAncestors.mockResolvedValue([]);
+
+    const result = await tool.handler(
+      { names: ['logs.ecs.nginx'], aspects: ['overview'] },
+      context
+    );
+
+    const data = getData(result);
+    expect(data.streams['logs.ecs.nginx'].type_context).toContain('dynamic: false');
   });
 });
