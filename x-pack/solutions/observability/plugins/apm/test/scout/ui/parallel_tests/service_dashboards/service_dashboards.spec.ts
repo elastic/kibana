@@ -48,6 +48,13 @@ test.describe.serial(
             searchSourceJSON: '{}',
           },
         },
+        references: [
+          {
+            type: 'indexpattern',
+            name: 'control-uuid:optionsListDataView',
+            id: 'apm_static_data_view_id_default',
+          },
+        ],
       });
       testDashboardId = dashboard.id;
     });

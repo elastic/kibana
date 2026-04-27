@@ -14,10 +14,10 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const FindPacksResponse = lazySchema(() => z.object({}));
 export type FindPacksResponse = z.infer<typeof FindPacksResponse>;
-export const FindPacksResponse = z.object({});
 
+export const FindPackResponse = lazySchema(() => z.object({}));
 export type FindPackResponse = z.infer<typeof FindPackResponse>;
-export const FindPackResponse = z.object({});

@@ -290,6 +290,8 @@ dependsOn:
   - '@kbn/search-inference-endpoints'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/core-overlays-browser'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/core-application-browser-mocks'
 tags:
   - plugin
   - prod

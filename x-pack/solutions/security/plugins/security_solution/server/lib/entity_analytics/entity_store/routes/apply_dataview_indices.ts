@@ -21,8 +21,8 @@ export const applyDataViewIndicesEntityEngineRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'public',
-      path: '/api/entity_store/engines/apply_dataview_indices',
+      access: 'internal',
+      path: '/internal/entity_store/engines/apply_dataview_indices',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -31,7 +31,7 @@ export const applyDataViewIndicesEntityEngineRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {},
         },

@@ -126,6 +126,13 @@ export const ALERTS_TABLE_UNKNOWN_ERROR_TITLE = i18n.translate(
   }
 );
 
+export const ALERTS_TABLE_SHOW_ERROR_DETAILS = i18n.translate(
+  'responseOpsAlertsTable.alertsTable.showErrorDetails',
+  {
+    defaultMessage: 'Show details',
+  }
+);
+
 export const ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE = i18n.translate(
   'responseOpsAlertsTable.alertsTable.unknownErrorBody',
   {

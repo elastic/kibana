@@ -1,0 +1,24 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getAvailableVersionsExample:
+            description: 'List of available agent versions for upgrade'
+            value:
+              items:
+                - '8.17.0'
+                - '8.16.3'
+                - '8.16.2'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

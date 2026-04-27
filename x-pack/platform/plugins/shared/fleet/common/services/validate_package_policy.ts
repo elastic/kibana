@@ -481,7 +481,7 @@ export const validatePackagePolicy = (
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
-        const streamKey = `${stream.data_stream.dataset}-${input.type}`;
+        const streamKey = `${stream.data_stream.dataset}-${getInputEffectiveName(input)}`;
 
         const streamVarDefs = streamVarDefsByDatasetAndInput[streamKey];
         const streamVarGroups = streamVarGroupsByDatasetAndInput[streamKey];

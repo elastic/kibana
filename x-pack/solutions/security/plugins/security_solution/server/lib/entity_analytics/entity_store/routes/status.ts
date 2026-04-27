@@ -33,8 +33,8 @@ export const getEntityStoreStatusRoute = (
 ) => {
   router.versioned
     .get({
-      access: 'public',
-      path: '/api/entity_store/status',
+      access: 'internal',
+      path: '/internal/entity_store/status',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -43,7 +43,7 @@ export const getEntityStoreStatusRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(GetEntityStoreStatusRequestQuery),

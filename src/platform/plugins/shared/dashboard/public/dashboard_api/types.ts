@@ -19,7 +19,6 @@ import type {
   HasLastSavedChildState,
   HasSections,
   HasSerializedChildState,
-  PassThroughContext,
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
@@ -92,9 +91,6 @@ export interface DashboardCreationOptions {
    */
   getInitialInput?: () => DashboardInitializationState;
 
-  /** Returns context to pass through to child embeddables. */
-  getPassThroughContext?: PassThroughContext['getPassThroughContext'];
-
   /** Returns embeddables to add to the dashboard on load. */
   getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
@@ -158,7 +154,6 @@ export type DashboardApi = CanExpandPanels &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
-  PassThroughContext &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &

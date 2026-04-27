@@ -37,6 +37,11 @@ import {
 import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
+import {
+  resolveExhaustedWorkflowRunTask,
+  resolveInterruptedWorkflowResumeTask,
+  resolveInterruptedWorkflowRunTask,
+} from './lib/task_recovery';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
@@ -63,9 +68,33 @@ import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
-import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
+import {
+  WORKFLOW_RESUME_TASK_TYPE,
+  WORKFLOW_RUN_TASK_TYPE,
+  WORKFLOW_SCHEDULED_TASK_TYPE,
+} from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
+
+/**
+ * Max Task Manager attempts for `workflow:run`.
+ * - Attempt 1: normal `runWorkflow` execution.
+ * - Attempts > 1: `resolveInterruptedWorkflowRunTask` runs first; when it marks the execution FAILED
+ *   (interrupt recovery) the runner returns without re-executing user logic - so attempt 2 is not a
+ *   second full workflow run in that case.
+ * - A third attempt mainly covers transient failures persisting that recovery (e.g. ES unavailable)
+ *   or a thrown error on attempt 1 where attempt 2 still runs recovery then `runWorkflow` again;
+ *   it is not meant as extra user workflow retries after successful interrupt recovery.
+ */
+const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
+
+/**
+ * Max Task Manager attempts for `workflow:resume`.
+ * Same numeric budget as run but semantics differ: each attempt can run `resumeWorkflow` user logic
+ * until interrupt recovery short-circuits or the last attempt applies `resolveExhaustedWorkflowRunTask`
+ * after a handler failure - so extra attempts also cover resume work that runs and may throw.
+ */
+const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
@@ -130,14 +159,15 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     plugins.taskManager.registerTaskDefinitions({
-      'workflow:run': {
+      [WORKFLOW_RUN_TASK_TYPE]: {
         title: 'Run Workflow',
         description: 'Executes a workflow immediately',
         // Set high timeout for long-running workflows.
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
-        maxAttempts: 1,
+        // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
+        maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a workflow without Kibana Request');
@@ -183,19 +213,48 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              await runWorkflow({
+              const workflowExecutionRepository = new WorkflowExecutionRepository(
+                coreStart.elasticsearch.client.asInternalUser
+              );
+
+              const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
+                workflowExecutionRepository,
                 workflowRunId,
                 spaceId,
-                taskAbortController,
-                config,
+                taskAttempts: taskInstance.attempts,
                 logger,
-                fakeRequest,
-                dependencies,
-                workflowsExecutionEngine,
-                meteringService: this.meteringService,
-                isEventDrivenExecutionEnabled:
-                  workflowsExecutionEngine.isEventDrivenExecutionEnabled,
               });
+
+              if (interruptedOutcome === 'task_complete') {
+                return;
+              }
+
+              try {
+                await runWorkflow({
+                  workflowRunId,
+                  spaceId,
+                  taskAbortController,
+                  config,
+                  logger,
+                  fakeRequest,
+                  dependencies,
+                  workflowsExecutionEngine,
+                  meteringService: this.meteringService,
+                  isEventDrivenExecutionEnabled:
+                    workflowsExecutionEngine.isEventDrivenExecutionEnabled,
+                });
+              } catch (error) {
+                await resolveExhaustedWorkflowRunTask({
+                  workflowExecutionRepository,
+                  workflowRunId,
+                  spaceId,
+                  taskAttempts: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
+                  error,
+                  logger,
+                });
+                throw error;
+              }
             },
             cancel: async () => {
               taskAbortController.abort();
@@ -212,7 +271,8 @@ export class WorkflowsExecutionEnginePlugin
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
-        maxAttempts: 1,
+        // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
+        maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           if (!fakeRequest) {
             throw new Error('Cannot resume a workflow without Kibana Request');
@@ -263,17 +323,46 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              await resumeWorkflow({
+              const workflowExecutionRepository = new WorkflowExecutionRepository(
+                coreStart.elasticsearch.client.asInternalUser
+              );
+
+              const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
+                workflowExecutionRepository,
                 workflowRunId,
                 spaceId,
-                taskAbortController,
-                config,
+                taskAttempts: taskInstance.attempts,
                 logger,
-                fakeRequest,
-                dependencies,
-                workflowsExecutionEngine,
-                meteringService: this.meteringService,
               });
+
+              if (interruptedOutcome === 'task_complete') {
+                return;
+              }
+
+              try {
+                await resumeWorkflow({
+                  workflowRunId,
+                  spaceId,
+                  taskAbortController,
+                  config,
+                  logger,
+                  fakeRequest,
+                  dependencies,
+                  workflowsExecutionEngine,
+                  meteringService: this.meteringService,
+                });
+              } catch (error) {
+                await resolveExhaustedWorkflowRunTask({
+                  workflowExecutionRepository,
+                  workflowRunId,
+                  spaceId,
+                  taskAttempts: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
+                  error,
+                  logger,
+                });
+                throw error;
+              }
             },
             cancel: async () => {
               taskAbortController.abort();
@@ -283,7 +372,7 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
     plugins.taskManager.registerTaskDefinitions({
-      'workflow:scheduled': {
+      [WORKFLOW_SCHEDULED_TASK_TYPE]: {
         title: 'Scheduled Workflow Execution',
         description: 'Executes workflows on a scheduled basis',
         // Set high timeout for long-running workflows.
@@ -592,7 +681,7 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       return {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
-        taskType: 'workflow:run',
+        taskType: WORKFLOW_RUN_TASK_TYPE,
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
@@ -775,7 +864,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const taskInstance = {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
-        taskType: 'workflow:run',
+        taskType: WORKFLOW_RUN_TASK_TYPE,
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,

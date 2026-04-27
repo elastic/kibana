@@ -564,4 +564,75 @@ describe('take action dropdown', () => {
       );
     });
   });
+
+  describe('remote document', () => {
+    let remoteProps: TakeActionDropdownProps;
+
+    beforeEach(() => {
+      // Timeline read privilege is required so investigateInTimelineActionItems is non-empty,
+      // which allows the dropdown to render for remote documents (only that item is shown).
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...getUserPrivilegesMockDefaultValue(),
+        timelinePrivileges: { read: true },
+      });
+
+      remoteProps = {
+        ...defaultProps,
+        dataAsNestedObject: {
+          ...getDetectionAlertMock(),
+          _index: 'remote-cluster:.alerts-security.alerts-default',
+        },
+        searchHit: {
+          _id: 'test-id',
+          _index: 'remote-cluster:.alerts-security.alerts-default',
+        } as SearchHit,
+      };
+    });
+
+    it('should render only "Investigate in timeline" for a remote alert', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown {...remoteProps} />
+        </TestProviders>
+      );
+      wrapper
+        .find(`button[data-test-subj="${FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}"]`)
+        .simulate('click');
+
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').exists()
+        ).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').exists()).toBeFalsy();
+        expect(wrapper.find('[data-test-subj="acknowledged-alert-status"]').exists()).toBeFalsy();
+        expect(
+          wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').exists()
+        ).toBeFalsy();
+        expect(
+          wrapper.find('[data-test-subj="alert-assignees-context-menu-item"]').exists()
+        ).toBeFalsy();
+      });
+    });
+
+    it('should render the full menu for a local alert', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown {...defaultProps} />
+        </TestProviders>
+      );
+      wrapper
+        .find(`button[data-test-subj="${FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}"]`)
+        .simulate('click');
+
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper.find('[data-test-subj="add-to-existing-case-action"]').exists()
+        ).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="acknowledged-alert-status"]').exists()).toBeTruthy();
+      });
+    });
+  });
 });

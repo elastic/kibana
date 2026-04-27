@@ -199,6 +199,18 @@ export function applyStreamLevelMigration(
   // old input's enabled state over instead of unconditionally enabling the new input.
   if (streamMigrationOccurred && update.migrate_from === undefined) {
     update.enabled = oldInputForStreamMigration?.enabled ?? update.enabled;
+
+    // Also carry input-level vars from the old input to the new input.
+    // This handles packages like SentinelOne where vars like url/api_token remain at
+    // input level in both old and new inputs, but only streams declare migrate_from.
+    if (oldInputForStreamMigration) {
+      const mergedInput = deepMergeVars(
+        { ...update, vars: oldInputForStreamMigration.vars },
+        update,
+        true
+      ) as InputsOverride;
+      update.vars = sanitizeMigratedVars(removeStaleVars(mergedInput, update)).vars;
+    }
   }
 }
 

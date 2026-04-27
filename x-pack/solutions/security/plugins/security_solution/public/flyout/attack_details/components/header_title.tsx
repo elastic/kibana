@@ -7,7 +7,6 @@
 
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { flyoutHeaderBlockStyles } from '../../../flyout_v2/document/constants/styles';
@@ -44,6 +43,14 @@ export const HeaderTitle = memo(() => {
 
   return (
     <>
+      {timestamp && (
+        <>
+          <PreferenceFormattedDate value={new Date(timestamp)} />
+          <EuiSpacer size="xs" />
+        </>
+      )}
+      <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
+      <EuiSpacer size="s" />
       <EuiBadge
         aria-label={ATTACK_HEADER_BADGE}
         color="hollow"
@@ -52,14 +59,6 @@ export const HeaderTitle = memo(() => {
       >
         {ATTACK_HEADER_BADGE}
       </EuiBadge>
-      <EuiSpacer size="m" />
-      {timestamp && (
-        <>
-          <PreferenceFormattedDate value={new Date(timestamp)} />
-          <EuiSpacer size="xs" />
-        </>
-      )}
-      <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem css={flyoutHeaderBlockStyles}>

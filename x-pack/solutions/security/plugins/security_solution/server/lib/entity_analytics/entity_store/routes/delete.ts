@@ -34,8 +34,8 @@ export const deleteEntityEngineRoute = (
 ) => {
   router.versioned
     .delete({
-      access: 'public',
-      path: '/api/entity_store/engines/{entityType}',
+      access: 'internal',
+      path: '/internal/entity_store/engines/{entityType}',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -44,7 +44,7 @@ export const deleteEntityEngineRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(DeleteEntityEngineRequestQuery),
@@ -99,8 +99,8 @@ export const deleteEntityEnginesRoute = (
 ) => {
   router.versioned
     .delete({
-      access: 'public',
-      path: '/api/entity_store/engines',
+      access: 'internal',
+      path: '/internal/entity_store/engines',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -115,7 +115,7 @@ export const deleteEntityEnginesRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(DeleteEntityEnginesRequestQuery),

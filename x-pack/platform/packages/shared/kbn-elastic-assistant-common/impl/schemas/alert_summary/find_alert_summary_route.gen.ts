@@ -14,55 +14,59 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../common_attributes.gen';
 import { AlertSummaryResponse } from './bulk_crud_alert_summary_route.gen';
 
+export const FindAlertSummarySortField = lazySchema(() => z.enum(['created_at', 'updated_at']));
 export type FindAlertSummarySortField = z.infer<typeof FindAlertSummarySortField>;
-export const FindAlertSummarySortField = z.enum(['created_at', 'updated_at']);
 export type FindAlertSummarySortFieldEnum = typeof FindAlertSummarySortField.enum;
 export const FindAlertSummarySortFieldEnum = FindAlertSummarySortField.enum;
 
+export const FindAlertSummaryRequestQuery = lazySchema(() =>
+  z.object({
+    fields: ArrayFromString(z.string()).optional(),
+    /**
+     * Search query
+     */
+    filter: z.string().optional(),
+    /**
+     * Connector id used for prompt lookup
+     */
+    connector_id: z.string(),
+    /**
+     * Field to sort by
+     */
+    sort_field: FindAlertSummarySortField.optional(),
+    /**
+     * Sort order
+     */
+    sort_order: SortOrder.optional(),
+    /**
+     * Page number
+     */
+    page: z.coerce.number().int().min(1).optional().default(1),
+    /**
+     * Alert Summary per page
+     */
+    per_page: z.coerce.number().int().min(0).optional().default(20),
+  })
+);
 export type FindAlertSummaryRequestQuery = z.infer<typeof FindAlertSummaryRequestQuery>;
-export const FindAlertSummaryRequestQuery = z.object({
-  fields: ArrayFromString(z.string()).optional(),
-  /**
-   * Search query
-   */
-  filter: z.string().optional(),
-  /**
-   * Connector id used for prompt lookup
-   */
-  connector_id: z.string(),
-  /**
-   * Field to sort by
-   */
-  sort_field: FindAlertSummarySortField.optional(),
-  /**
-   * Sort order
-   */
-  sort_order: SortOrder.optional(),
-  /**
-   * Page number
-   */
-  page: z.coerce.number().int().min(1).optional().default(1),
-  /**
-   * Alert Summary per page
-   */
-  per_page: z.coerce.number().int().min(0).optional().default(20),
-});
 export type FindAlertSummaryRequestQueryInput = z.input<typeof FindAlertSummaryRequestQuery>;
 
+export const FindAlertSummaryResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Prompt to use to generate new alert summary
+     */
+    prompt: z.string(),
+    page: z.number().int(),
+    perPage: z.number().int(),
+    total: z.number().int(),
+    data: z.array(AlertSummaryResponse),
+  })
+);
 export type FindAlertSummaryResponse = z.infer<typeof FindAlertSummaryResponse>;
-export const FindAlertSummaryResponse = z.object({
-  /**
-   * Prompt to use to generate new alert summary
-   */
-  prompt: z.string(),
-  page: z.number().int(),
-  perPage: z.number().int(),
-  total: z.number().int(),
-  data: z.array(AlertSummaryResponse),
-});

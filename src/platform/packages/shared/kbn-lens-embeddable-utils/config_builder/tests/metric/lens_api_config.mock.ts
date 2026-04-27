@@ -8,8 +8,8 @@
  */
 
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
-import type { MetricState } from '../../schema';
-import type { MetricStateNoESQL } from '../../schema/charts/metric';
+import type { MetricConfig } from '../../schema';
+import type { MetricConfigNoESQL } from '../../schema/charts/metric';
 import { DEFAULT_PRIMARY_VALUE_ALIGNMENT } from '../../transforms/charts/metric/defaults';
 
 export const breakdownMetricAPIAttributes = {
@@ -39,7 +39,7 @@ export const breakdownMetricAPIAttributes = {
     fields: ['extension.keyword'],
     limit: 5,
   },
-} as MetricStateNoESQL;
+} as MetricConfigNoESQL;
 
 export const complexMetricAPIAttributes = {
   type: 'metric',
@@ -88,7 +88,7 @@ export const complexMetricAPIAttributes = {
       value: { alignment: DEFAULT_PRIMARY_VALUE_ALIGNMENT },
     },
   },
-} as MetricState;
+} as MetricConfig;
 
 export const simpleMetricAPIAttributes = {
   type: 'metric',
@@ -103,7 +103,7 @@ export const simpleMetricAPIAttributes = {
       empty_as_null: true,
     },
   ],
-} as MetricState;
+} as MetricConfig;
 
 export const complexESQLMetricAPIAttributes = {
   type: 'metric',
@@ -140,7 +140,7 @@ export const complexESQLMetricAPIAttributes = {
   breakdown_by: {
     column: 'extension.keyword',
   },
-} as MetricState;
+} as MetricConfig;
 
 export const metricAPIWithTermsRankedBySecondary = {
   type: 'metric',
@@ -176,4 +176,4 @@ export const metricAPIWithTermsRankedBySecondary = {
       direction: 'desc',
     },
   },
-} as MetricState;
+} as MetricConfig;

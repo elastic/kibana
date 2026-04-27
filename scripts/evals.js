@@ -12,7 +12,7 @@
 var Fs = require('fs');
 var Path = require('path');
 
-var METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+var METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 function hasFlag(args, flag) {
   if (args.includes(flag)) {

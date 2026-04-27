@@ -11,32 +11,22 @@ import type { Anomaly } from '@kbn/security-solution-plugin/server/lib/machine_l
 import {
   getMLRuleParams,
   dataGeneratorFactory,
-  forceStartDatafeeds,
   getLatestSecurityRuleExecutionMetricsFromEventLog,
   getOpenAlerts,
-  setupMlModulesWithRetry,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const config = getService('config');
-  const retry = getService('retry');
 
-  const isServerless = config.get('serverless');
-  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
-  const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
-
-  const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity_ea';
+  const sourceEventsIndexName = '.ml-anomalies-custom-v3_linux_anomalous_network_activity_ea';
 
   const { indexListOfDocuments } = dataGeneratorFactory({
     es,
-    index: '.ml-anomalies-custom-v3_linux_anomalous_network_activity_ea',
+    index: sourceEventsIndexName,
     log,
   });
 
@@ -58,25 +48,12 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   describe('@ess @serverless Rule execution metrics for Machine Learning rules', () => {
-    before(async () => {
-      await esArchiver.load(auditPath);
-      await setupMlModulesWithRetry({ module: siemModule, supertest, retry });
-      await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
-      await esArchiver.load(
-        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
-      );
-    });
-
-    after(async () => {
-      await esArchiver.unload(auditPath);
-      await esArchiver.unload(
-        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
-      );
-      await deleteAllAlerts(supertest, log, es);
-      await deleteAllRules(supertest, log);
-    });
-
     beforeEach(async () => {
+      await es.indices.delete({
+        index: sourceEventsIndexName,
+        ignore_unavailable: true,
+      });
+
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -108,13 +85,19 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('alerts_candidate_count', () => {
         it('records alerts_candidate_count value', async () => {
+          const timestamp = new Date().toISOString();
+          const anomaly = {
+            ...baseAnomaly,
+            timestamp,
+          };
+          await indexListOfDocuments([anomaly]);
+
           const createdRule = await createRule(
             supertest,
             log,
             getMLRuleParams({
               ...sharedMlRuleRewrites,
               anomaly_threshold: 30,
-              from: '1900-01-01T00:00:00.000Z',
               enabled: true,
             })
           );
@@ -158,6 +141,67 @@ export default ({ getService }: FtrProviderContext) => {
             await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
 
           expect(alerts_candidate_count).toBe(2);
+        });
+      });
+
+      describe('alerts_suppressed_count', () => {
+        it('records alerts_suppressed_count as 0 when no suppression is configured', async () => {
+          const timestamp = new Date().toISOString();
+          const anomaly = {
+            ...baseAnomaly,
+            timestamp,
+          };
+          await indexListOfDocuments([anomaly]);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getMLRuleParams({
+              ...sharedMlRuleRewrites,
+              anomaly_threshold: 30,
+              enabled: true,
+            })
+          );
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alerts_suppressed_count).toBe(0);
+        });
+
+        it('records alerts_suppressed_count when alerts are suppressed', async () => {
+          const timestamp = new Date().toISOString();
+          const anomaly = {
+            ...baseAnomaly,
+            timestamp,
+          };
+          await indexListOfDocuments([anomaly, anomaly]);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getMLRuleParams({
+              ...sharedMlRuleRewrites,
+              anomaly_threshold: 40,
+              enabled: true,
+              alert_suppression: {
+                group_by: ['user.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: timestamp,
+            })
+          );
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alerts_suppressed_count).toBe(1);
         });
       });
     });

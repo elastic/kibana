@@ -28,6 +28,7 @@ import { UnsavedChangesModal } from './unsaved_changes_modal';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
 import { useConnectors } from '../../hooks/use_connectors';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -37,13 +38,19 @@ export const ModelSettings: React.FC = () => {
     assignments,
     sections,
     invalidEndpointIds,
+    hasSavedObject,
+    dirtyFeatureIds,
     updateEndpoints,
     save: saveFeatures,
     resetSection,
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
-  const { connectors, loading: connectorsLoading } = useConnectors();
+  const globalDefaultId = defaultModelSettings.savedState.defaultModelId;
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
+  const {
+    services: { application, http },
+  } = useKibana();
 
   const isDirty = isFeatureDirty || defaultModelSettings.isDirty;
   const isSaving = isFeatureSaving;
@@ -86,10 +93,14 @@ export const ModelSettings: React.FC = () => {
     unblockRef.current?.();
     unblockRef.current = null;
     if (pendingLocation) {
-      history.push(pendingLocation);
+      const url =
+        http.basePath.prepend(pendingLocation.pathname) +
+        pendingLocation.search +
+        pendingLocation.hash;
+      application.navigateToUrl(url, { state: pendingLocation.state });
     }
     setPendingLocation(null);
-  }, [history, pendingLocation, defaultModelSettings]);
+  }, [application, http.basePath, pendingLocation, defaultModelSettings]);
 
   const handleResetConfirm = useCallback(() => {
     if (!resetParentKey) return;
@@ -206,12 +217,15 @@ export const ModelSettings: React.FC = () => {
                     features={section.children.map((f) => ({
                       endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
                       feature: f,
+                      hasSavedObject: hasSavedObject[f.featureId] ?? false,
+                      isFeatureDirty: dirtyFeatureIds.has(f.featureId),
                     }))}
                     onReset={() => setResetParentKey(section.featureId)}
                     onEndpointsChange={updateEndpoints}
                     invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
+                    globalDefaultId={globalDefaultId}
                   />
                   <EuiSpacer size="xl" />
                 </React.Fragment>
