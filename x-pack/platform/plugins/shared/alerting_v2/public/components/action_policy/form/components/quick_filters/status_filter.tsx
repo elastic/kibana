@@ -33,13 +33,14 @@ interface StatusSelectableMeta {
   value: EpisodeStatusFilterOption['value'];
 }
 
+const KNOWN_STATUS_VALUES = new Set<string>(EPISODE_STATUS_FILTER_OPTIONS.map((o) => o.value));
+
 export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const statusPopoverId = useGeneratedHtmlId({ prefix: 'npQuickFilterStatus' });
 
-  const knownValues = new Set<string>(EPISODE_STATUS_FILTER_OPTIONS.map((o) => o.value));
   const selectedStatuses = useMemo(() => parseEpisodeStatusesFromMatcher(matcher), [matcher]);
-  const recognizedCount = selectedStatuses.filter((s) => knownValues.has(s)).length;
+  const recognizedCount = selectedStatuses.filter((s) => KNOWN_STATUS_VALUES.has(s)).length;
 
   const statusOptions = useMemo((): Array<EuiSelectableOption<StatusSelectableMeta>> => {
     const selectedSet = new Set(selectedStatuses);
