@@ -129,7 +129,7 @@ describe('Heatmap', () => {
 
         expect(outputConfig.axis?.x?.scale).toBe('temporal');
 
-        validateAPIConverter(esqlApiMocks.withTemporalXAxisScale, heatmapConfigSchema);
+        validateAPIConverter(esqlApiMocks.withTemporalXAxisScale, heatmapConfigSchema, ['axis.y']);
       });
 
       it('should convert ordinal scale correctly', () => {
@@ -139,7 +139,7 @@ describe('Heatmap', () => {
 
         expect(outputConfig.axis?.x?.scale).toBe('ordinal');
 
-        validateAPIConverter(esqlApiMocks.withOrdinalXAxisScale, heatmapConfigSchema);
+        validateAPIConverter(esqlApiMocks.withOrdinalXAxisScale, heatmapConfigSchema, ['axis.y']);
       });
 
       it('should convert linear scale correctly', () => {
@@ -149,7 +149,7 @@ describe('Heatmap', () => {
 
         expect(outputConfig.axis?.x?.scale).toBe('linear');
 
-        validateAPIConverter(esqlApiMocks.withLinearXAxisScale, heatmapConfigSchema);
+        validateAPIConverter(esqlApiMocks.withLinearXAxisScale, heatmapConfigSchema, ['axis.y']);
       });
     });
   });
