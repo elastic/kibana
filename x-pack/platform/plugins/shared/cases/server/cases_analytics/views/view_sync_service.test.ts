@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ViewSyncService } from './view_sync_service';
 
 const setupArgs = () => {
@@ -54,6 +55,45 @@ describe('ViewSyncService', () => {
       expect(status.lastRegenAt).toBeInstanceOf(Date);
       expect(status.lastRegenError).toBeNull();
       expect(status.regenInFlight).toBe(false);
+    });
+
+    it('downgrades the security_exception from missing manage_view to a WARN with operator guidance, not an ERROR (kibana_system gap is expected on this branch)', async () => {
+      /*
+       * FAILURE SCENARIO: plugin-start fire-and-forget regen runs as
+       * kibana_system, which lacks manage_view on cases.* until the
+       * parallel ES role change ships. Logging this as ERROR every
+       * Kibana start would be noisy and misleading — operators can
+       * land views via the rebuild route. Downgrade to WARN with a
+       * clear next-step hint.
+       */
+      const { esClient, logger } = setupArgs();
+      const securityExc = new EsErrors.ResponseError({
+        statusCode: 403,
+        body: {
+          error: {
+            type: 'security_exception',
+            reason:
+              'action [indices:admin/esql/view/put] is unauthorized for user [kibana_system] with effective roles [kibana_system] on indices [cases.case.cases], this action is granted by the index privileges [create_view,manage_view,manage,all]',
+          },
+        },
+        headers: {},
+        meta: {} as never,
+        warnings: null,
+      });
+      esClient.transport.request.mockRejectedValueOnce(securityExc);
+      const svc = new ViewSyncService({ esClient, logger });
+
+      await expect(svc.regenerateNow()).resolves.toBeUndefined();
+
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'POST /internal/cases/_analytics/views/_rebuild'
+        )
+      );
+      // The status still reflects the failure so the rebuild route can
+      // surface it in its response body.
+      expect(svc.getStatus().lastRegenError).toContain('security_exception');
     });
 
     it('logs and surfaces error on the status object when ES rejects, but does not throw to the caller (fire-and-forget contract)', async () => {

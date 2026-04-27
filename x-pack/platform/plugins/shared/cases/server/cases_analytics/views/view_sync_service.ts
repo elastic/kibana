@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { OWNERS } from '../../../common/constants/owners';
 import { buildActivityViewQuery } from './build_activity_view';
 import { buildCaseViewQuery } from './build_case_view';
@@ -16,6 +17,20 @@ import {
   getCAIViewName,
 } from './constants';
 import { loadExtendedFieldsFromMapping } from './mapping_fields_loader';
+
+/**
+ * Returns true when the ES error indicates the calling user lacks the
+ * manage_view / create_view index privilege required by PUT _query/view.
+ * Drives the warn-vs-error split in regenerateNow's catch block.
+ */
+const isMissingViewPrivilegeError = (err: unknown): boolean => {
+  if (!(err instanceof EsErrors.ResponseError)) return false;
+  if (err.statusCode !== 403) return false;
+  const body = err.body as { error?: { type?: string; reason?: string } } | undefined;
+  const type = body?.error?.type ?? '';
+  const reason = body?.error?.reason ?? '';
+  return type === 'security_exception' && /esql\/view\/put|manage_view|create_view/.test(reason);
+};
 
 export interface ViewSyncStatus {
   /** Last time `regenerateNow` resolved successfully, or null if never. */
@@ -98,7 +113,25 @@ export class ViewSyncService {
       .catch((err) => {
         const message = err instanceof Error ? err.message : String(err);
         this.status.lastRegenError = message;
-        this.logger.error(`ES|QL view regeneration failed: ${message}`, { error: err });
+        if (isMissingViewPrivilegeError(err)) {
+          /*
+           * Most common cause on this branch: kibana_system lacks the
+           * `manage_view` index privilege on `cases.*`. Plugin-start
+           * regen always fails here until the parallel ES role change
+           * ships. Surface as a clear warn — not error — so the log
+           * isn't noisy at startup. Operators can still land views via
+           * POST /internal/cases/_analytics/views/_rebuild as a
+           * privileged user.
+           */
+          this.logger.warn(
+            `ES|QL view regeneration skipped: ${message}. ` +
+              `Run POST /internal/cases/_analytics/views/_rebuild as a user with the cases-all privilege ` +
+              `(also requires the manage_view ES index privilege on cases.*) to land the views, ` +
+              `or grant manage_view on cases.* to the kibana_system role.`
+          );
+        } else {
+          this.logger.error(`ES|QL view regeneration failed: ${message}`, { error: err });
+        }
       })
       .finally(() => {
         this.inFlight = null;
