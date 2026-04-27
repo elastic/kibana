@@ -68,6 +68,9 @@ export interface SimplifiedPackagePolicy {
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[] | null;
+  // Only available for agentless integration policies.
+  // On standard package policies this field is rejected by server-side validation.
+  global_data_tags?: Array<{ name: string; value: string | number }> | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -195,6 +198,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     supports_cloud_connector: supportsCloudConnector,
     cloud_connector_id: cloudConnectorId,
     additional_datastreams_permissions: additionalDatastreamsPermissions,
+    global_data_tags: globalDataTags,
   } = data;
   const packagePolicy = {
     ...packageToPackagePolicy(
@@ -214,6 +218,10 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
   if (additionalDatastreamsPermissions) {
     packagePolicy.additional_datastreams_permissions = additionalDatastreamsPermissions;
+  }
+
+  if (globalDataTags) {
+    packagePolicy.global_data_tags = globalDataTags;
   }
 
   if (packagePolicy.package && options?.experimental_data_stream_features) {

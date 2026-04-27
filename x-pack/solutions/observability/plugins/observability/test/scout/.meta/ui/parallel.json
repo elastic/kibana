@@ -1,5 +1,5 @@
 {
-  "sha1": "28e201388316e8747cfe5b8ce81c3c374ec1a63e",
+  "sha1": "b0e694a57fc4c12ddb5b304fd3981a9b3d594de9",
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -148,7 +148,7 @@
     {
       "id": "09420caa5b9785f-1887bb9ce43cc37",
       "title": "Observability Landing Page redirects to page specified in defaultRoute uiSetting",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -157,14 +157,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-b4d285151fca090",
       "title": "Observability Landing Page redirects to Discover logs when logs data exists",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -173,14 +173,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 57,
+        "line": 58,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-1089e5f36b13719",
       "title": "Observability Landing Page redirects to APM services when only APM data exists",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -189,14 +189,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 76,
+        "line": 77,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-b8a96bff3cd83db",
       "title": "Observability Landing Page redirects to Discover logs when both logs and APM data exist (logs priority)",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -205,14 +205,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 95,
+        "line": 96,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-00e86e3614855e3",
       "title": "Observability Landing Page redirects to onboarding when no data exists",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -221,14 +221,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 121,
+        "line": 122,
         "column": 9
       }
     },
     {
       "id": "09420caa5b9785f-d5a54704b60249e",
       "title": "Observability Landing Page redirects to onboarding when log data that should be ignored exists",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -237,7 +237,147 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 129,
+        "line": 130,
+        "column": 9
+      }
+    },
+    {
+      "id": "ef6f2482ea914d8-f906edec2bbf00c",
+      "title": "Stateful Observability Navigation - Footer renders expected footer items with working links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
+        "line": 25,
+        "column": 9
+      }
+    },
+    {
+      "id": "ef6f2482ea914d8-2dc8a9530627e78",
+      "title": "Stateful Observability Navigation - Footer clicking footer items navigates to the correct destinations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
+        "line": 51,
+        "column": 9
+      }
+    },
+    {
+      "id": "ef6f2482ea914d8-aff4cfecfe81669",
+      "title": "Stateful Observability Navigation - Footer Stack Management panel children navigate and update breadcrumbs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
+        "line": 73,
+        "column": 9
+      }
+    },
+    {
+      "id": "ef6f2482ea914d8-5d7e97c19cc71fc",
+      "title": "Stateful Observability Navigation - Footer legacy management landing page opens the Stack Management panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
+        "line": 101,
+        "column": 9
+      }
+    },
+    {
+      "id": "ef6f2482ea914d8-9a7c4aa3c4d9797",
+      "title": "Stateful Observability Navigation - Footer active sidenav panel is re-opened after a browser refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
+        "line": 112,
+        "column": 9
+      }
+    },
+    {
+      "id": "d4c1536758c1f7d-696795309be5085",
+      "title": "Stateful Observability Navigation - Sidebar renders expected body nav items with working links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
+        "line": 25,
+        "column": 9
+      }
+    },
+    {
+      "id": "d4c1536758c1f7d-6bb14cf244a9765",
+      "title": "Stateful Observability Navigation - Sidebar clicking body nav items sets the active link, updates breadcrumbs, and navigates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "d4c1536758c1f7d-5a93e4386d422ad",
+      "title": "Stateful Observability Navigation - Sidebar in-panel deep links navigate and update breadcrumbs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
+        "line": 124,
+        "column": 9
+      }
+    },
+    {
+      "id": "d4c1536758c1f7d-1da8f216029b97b",
+      "title": "Stateful Observability Navigation - Sidebar navigates through the Cases app (list → create → configure)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
+        "line": 174,
+        "column": 9
+      }
+    },
+    {
+      "id": "d4c1536758c1f7d-8102f7c7f8e33b3",
+      "title": "Stateful Observability Navigation - Sidebar navigates between apps without a full page reload (SPA) and restores via logo",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
+        "line": 199,
         "column": 9
       }
     },
