@@ -181,8 +181,8 @@ export const MetricVis = ({
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
-    const tileColor =
-      config.metric.palette?.params && typeof value === 'number'
+    const tileColor = config.metric.applyColorTo
+      ? config.metric.palette?.params && typeof value === 'number'
         ? getColor(
             value,
             config.metric.palette,
@@ -194,7 +194,8 @@ export const MetricVis = ({
             data,
             rowIdx
           ) ?? defaultColor
-        : config.metric.color ?? defaultColor;
+        : config.metric.color ?? defaultColor
+      : defaultColor;
 
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
@@ -231,7 +232,7 @@ export const MetricVis = ({
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
         extra: secondaryMetricProps,
-        color: config.metric.color ?? defaultColor,
+        color: config.metric.applyColorTo ? config.metric.color ?? defaultColor : defaultColor,
       };
       return Array.isArray(value)
         ? { ...nonNumericMetricBase, value: value.map((v) => formatPrimaryMetric(v)) }
