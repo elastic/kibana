@@ -19,7 +19,6 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
 import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import {
-  UnifiedAttachmentAttributesRt,
   AttachmentAttributesRtV2,
   AttachmentPatchAttributesRtV2,
 } from '../../../common/types/domain/attachment/v2';
@@ -70,6 +69,7 @@ import {
 } from '../../common/types/attachments_v1';
 import type {
   AttachmentAttributesV2,
+  AttachmentSavedObjectTransformedV2,
   AttachmentTransformedAttributesV2,
   UnifiedAttachmentAttributes,
   UnifiedAttachmentPersistedAttributes,
@@ -290,7 +290,11 @@ export class AttachmentService {
               refresh,
             }
           );
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(
+        // Unified SOs may hold either unified-shape attributes (for migrated types like
+        // security.endpoint) or legacy-shape attributes (for unmigrated types that still
+        // pass through unchanged, e.g. alert, user, actions). Decode with the v2 union
+        // so both shapes round-trip without erroring.
+        const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           unifiedAttachment.attributes
         );
         return Object.assign(unifiedAttachment, { attributes: validatedAttributes });
@@ -403,14 +407,20 @@ export class AttachmentService {
     res: SavedObjectsBulkResponse<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
   ): SavedObjectsBulkResponse<AttachmentAttributesV2> {
     const validatedAttachments: Array<
-      AttachmentSavedObjectTransformed | UnifiedAttachmentSavedObjectTransformed
+      | AttachmentSavedObjectTransformed
+      | UnifiedAttachmentSavedObjectTransformed
+      | AttachmentSavedObjectTransformedV2
     > = [];
 
     for (const so of res.saved_objects) {
       if (isSOError(so)) {
         validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
+        // Unified SOs may hold either unified-shape attributes (for migrated types like
+        // security.endpoint) or legacy-shape attributes (for unmigrated types that still
+        // pass through unchanged, e.g. alert, user, actions). Decode with the v2 union
+        // so both shapes round-trip without erroring.
+        const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(so.attributes);
         validatedAttachments.push(Object.assign(so, { attributes: validatedAttributes }));
       } else if (so.type === CASE_COMMENT_SAVED_OBJECT) {
         const legacySo = so as SavedObject<AttachmentPersistedAttributes>;

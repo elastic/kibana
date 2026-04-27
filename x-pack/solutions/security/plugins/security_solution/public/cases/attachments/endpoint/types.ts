@@ -13,12 +13,14 @@ import type { ResponseActionAgentType } from '../../../../common/endpoint/servic
  * the write path, so renderers can safely cast the unified view's `metadata`
  * (typed as `Record<string, JsonValue>`) to `EndpointMetadata`.
  */
+export interface EndpointTarget {
+  endpointId: string;
+  hostname: string;
+  agentType: ResponseActionAgentType;
+}
+
 export interface EndpointMetadata {
   comment: string;
   command: string;
-  targets: Array<{
-    endpointId: string;
-    hostname: string;
-    agentType: ResponseActionAgentType;
-  }>;
+  targets: EndpointTarget[];
 }

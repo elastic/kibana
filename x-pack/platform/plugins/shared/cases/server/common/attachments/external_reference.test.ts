@@ -135,6 +135,25 @@ describe('externalReferenceAttachmentTransformer', () => {
         false
       );
     });
+
+    it('isUnifiedType rejects payloads where attachmentId is not a single id string', () => {
+      // External-reference unified attachments require `attachmentId: string`. The
+      // shared `AttachmentAttributesV2` union allows `string | string[]` for alert/event
+      // attachments, so the guard explicitly narrows to reject arrays coming via API.
+      expect(
+        externalReferenceAttachmentTransformer.isUnifiedType({
+          ...unifiedEndpointAttributes,
+          attachmentId: ['a', 'b'],
+        })
+      ).toBe(false);
+
+      expect(
+        externalReferenceAttachmentTransformer.isUnifiedType({
+          ...unifiedEndpointAttributes,
+          attachmentId: undefined,
+        })
+      ).toBe(false);
+    });
   });
 
   describe('payload transforms', () => {

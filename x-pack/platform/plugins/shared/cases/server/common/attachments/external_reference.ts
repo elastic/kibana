@@ -51,10 +51,15 @@ function isLegacyExternalReferenceAttachment(attributes: unknown): boolean {
 function isUnifiedExternalReferenceAttachment(attributes: unknown): boolean {
   if (typeof attributes !== 'object' || attributes === null) return false;
   const attrs = attributes as Record<string, unknown>;
+  // External-reference unified attachments expect `attachmentId` to be a single
+  // saved-object id string. The shared `AttachmentAttributesV2` union allows
+  // `attachmentId` to be `string | string[]` to accommodate alert/event types,
+  // so we explicitly narrow here to reject API payloads that pass an array
+  // (e.g. `{ type: 'security.endpoint', attachmentId: ['a','b'] }`).
   return (
     typeof attrs.type === 'string' &&
     resolveLegacyTypeId(attrs.type) != null &&
-    'attachmentId' in attrs
+    typeof attrs.attachmentId === 'string'
   );
 }
 

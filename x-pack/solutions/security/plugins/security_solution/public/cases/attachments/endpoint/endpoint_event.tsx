@@ -11,36 +11,33 @@ import React, { useCallback, useMemo } from 'react';
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
 import { ISOLATED_HOST, RELEASED_HOST, OTHER_ENDPOINTS } from '../../pages/translations';
-import type { EndpointMetadata } from './types';
+import type { EndpointMetadata, EndpointTarget } from './types';
 import { getEndpointDetailsPath } from '../../../management/common/routing';
 
 type Props = Pick<UnifiedReferenceAttachmentViewProps, 'metadata'>;
 
-const AttachmentContentEvent = ({ metadata }: Props) => {
+interface EndpointEventLinkProps {
+  target: EndpointTarget;
+  actionText: string;
+  remainingTargets: number;
+}
+
+const EndpointEventLink = ({ target, actionText, remainingTargets }: EndpointEventLinkProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
-  const endpointMetadata = metadata as EndpointMetadata | undefined;
-  const command = endpointMetadata?.command ?? '';
-  const targets = useMemo(() => endpointMetadata?.targets ?? [], [endpointMetadata?.targets]);
-
-  const endpointDetailsHref = getAppUrl({
-    path: getEndpointDetailsPath({
-      name: 'endpointActivityLog',
-      selected_endpoint: targets[0]?.endpointId,
-    }),
-  });
-  const hostsDetailsHref = getAppUrl({
-    path: `/hosts/name/${targets[0]?.hostname}`,
-  });
-
-  const actionText = useMemo(() => {
-    return command === 'isolate' ? `${ISOLATED_HOST} ` : `${RELEASED_HOST} `;
-  }, [command]);
-
-  const linkHref = useMemo(
-    () => (targets[0]?.agentType === 'endpoint' ? endpointDetailsHref : hostsDetailsHref),
-    [endpointDetailsHref, hostsDetailsHref, targets]
-  );
+  const linkHref = useMemo(() => {
+    if (target.agentType === 'endpoint') {
+      return getAppUrl({
+        path: getEndpointDetailsPath({
+          name: 'endpointActivityLog',
+          selected_endpoint: target.endpointId,
+        }),
+      });
+    }
+    return getAppUrl({
+      path: `/hosts/name/${encodeURIComponent(target.hostname)}`,
+    });
+  }, [getAppUrl, target.agentType, target.endpointId, target.hostname]);
 
   const onLinkClick = useCallback(
     (ev: React.MouseEvent<HTMLAnchorElement>) => {
@@ -50,10 +47,6 @@ const AttachmentContentEvent = ({ metadata }: Props) => {
     [navigateTo, linkHref]
   );
 
-  if (!targets.length) {
-    return null;
-  }
-
   return (
     <>
       {actionText}
@@ -61,12 +54,32 @@ const AttachmentContentEvent = ({ metadata }: Props) => {
       <EuiLink
         onClick={onLinkClick}
         href={linkHref}
-        data-test-subj={`actions-link-${targets[0].endpointId}`}
+        data-test-subj={`actions-link-${target.endpointId}`}
       >
-        {targets[0].hostname}
+        {target.hostname}
       </EuiLink>
-      {targets.length > 1 && OTHER_ENDPOINTS(targets.length - 1)}
+      {remainingTargets > 0 && OTHER_ENDPOINTS(remainingTargets)}
     </>
+  );
+};
+
+const AttachmentContentEvent = ({ metadata }: Props) => {
+  const endpointMetadata = metadata as EndpointMetadata | undefined;
+  const targets = endpointMetadata?.targets ?? [];
+  const command = endpointMetadata?.command ?? '';
+
+  if (!targets.length) {
+    return null;
+  }
+
+  const actionText = command === 'isolate' ? `${ISOLATED_HOST} ` : `${RELEASED_HOST} `;
+
+  return (
+    <EndpointEventLink
+      target={targets[0]}
+      actionText={actionText}
+      remainingTargets={targets.length - 1}
+    />
   );
 };
 
