@@ -339,7 +339,6 @@ export class CasePlugin
               return Promise.resolve(false);
             }
           : undefined,
-      getViewSyncService: () => this.viewSyncService,
     });
 
     return {
