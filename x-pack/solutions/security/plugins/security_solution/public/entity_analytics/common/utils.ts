@@ -7,6 +7,7 @@
 
 import { euiThemeVars } from '@kbn/ui-theme'; // eslint-disable-line @elastic/eui/no-restricted-eui-imports
 import { RiskSeverity } from '../../../common/search_strategy';
+import type { SeverityCount } from '../components/severity/types';
 export { RISK_LEVEL_RANGES as RISK_SCORE_RANGES } from '../../../common/entity_analytics/risk_engine';
 
 export const SEVERITY_UI_SORT_ORDER = [
@@ -88,3 +89,35 @@ export function safeErrorMessage(error: unknown, fallback?: string): string | un
   }
   return fallback;
 }
+
+/**
+ * Shape of a single row returned by the watchlist/entity risk-levels ES|QL
+ * query. The query groups by `entity.risk.calculated_level`, which can be a
+ * named severity string (e.g. "Critical", "Unknown") or `null` for entities
+ * without a calculated level.
+ */
+export interface EsqlSeverityRecord {
+  count: number;
+  level: string | null;
+}
+
+/**
+ * Aggregates ES|QL records grouped by `entity.risk.calculated_level` into a
+ * {@link SeverityCount}. Rows where `level` is `null` are summed together
+ * with rows where `level === 'Unknown'`, because both represent entities
+ * whose risk is not yet classified. This prevents silent undercounting when
+ * the same bucket is represented twice in a single response (observed when
+ * some entities have an explicit "Unknown" level while others have `null`).
+ */
+export const esqlRecordsToSeverityCount = (records: EsqlSeverityRecord[]): SeverityCount => {
+  const sumWhere = (predicate: (r: EsqlSeverityRecord) => boolean) =>
+    records.filter(predicate).reduce((acc, r) => acc + (r.count ?? 0), 0);
+
+  return {
+    [RiskSeverity.Critical]: sumWhere((r) => r.level === RiskSeverity.Critical),
+    [RiskSeverity.High]: sumWhere((r) => r.level === RiskSeverity.High),
+    [RiskSeverity.Moderate]: sumWhere((r) => r.level === RiskSeverity.Moderate),
+    [RiskSeverity.Low]: sumWhere((r) => r.level === RiskSeverity.Low),
+    [RiskSeverity.Unknown]: sumWhere((r) => r.level === RiskSeverity.Unknown || r.level === null),
+  };
+};

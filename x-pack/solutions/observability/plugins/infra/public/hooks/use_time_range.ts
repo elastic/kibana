@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { parseDateRange } from '../utils/datemath';
+import { useReloadRequestTimeContext } from './use_reload_request_time';
 
 const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
 
@@ -20,6 +21,12 @@ const getDefaultTimestamps = () => {
 };
 
 export const useTimeRange = ({ rangeFrom, rangeTo }: { rangeFrom?: string; rangeTo?: string }) => {
+  // Relative datemath strings (e.g. `now-15m`, `now`) are resolved to absolute ISO
+  // timestamps here. Including `reloadRequestTime` as a dependency ensures the memo
+  // is re-evaluated whenever a refresh is requested, so the resolved window advances
+  // with wall-clock time and keeps downstream consumers (table, KPIs, metadata) in sync.
+  const { reloadRequestTime } = useReloadRequestTimeContext();
+
   const parsedDateRange = useMemo(() => {
     const defaults = getDefaultTimestamps();
 
@@ -33,7 +40,9 @@ export const useTimeRange = ({ rangeFrom, rangeTo }: { rangeFrom?: string; range
     });
 
     return { from, to };
-  }, [rangeFrom, rangeTo]);
+    // `reloadRequestTime` is intentionally included to re-resolve relative datemath on refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rangeFrom, rangeTo, reloadRequestTime]);
 
   return parsedDateRange;
 };
