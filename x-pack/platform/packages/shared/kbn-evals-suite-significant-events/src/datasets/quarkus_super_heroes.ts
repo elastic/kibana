@@ -58,7 +58,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'entity-apicurio-registry',
             text: 'Must identify Apicurio Registry as an entity (evidence: resource.attributes.app=apicurio)',
             score: 2,
-            sampling_filters: [{ term: { 'resource.attributes.app': 'apicurio' } }],
+            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'apicurio' } }],
           },
           {
             id: 'entity-heroes-db',
@@ -107,8 +107,14 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Must identify the dependency rest-fights -> rest-heroes (evidence: REST calls for hero lookup during fights)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
-              { term: { 'resource.attributes.app.keyword': 'rest-heroes' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+                    { match_phrase: { 'body.text': 'Hero' } },
+                  ],
+                },
+              },
             ],
           },
           {
@@ -116,8 +122,14 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Must identify the dependency rest-heroes -> heroes-db (evidence: reactive PostgreSQL database connection)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app.keyword': 'rest-heroes' } },
-              { term: { 'resource.attributes.app.keyword': 'heroes-db' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-heroes' } },
+                    { match_phrase: { 'body.text': 'reactive-pg-client' } },
+                  ],
+                },
+              },
             ],
           },
           {
@@ -125,8 +137,14 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Must identify the dependency rest-fights -> rest-villains (evidence: REST calls for villain lookup during fights)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
-              { term: { 'resource.attributes.app.keyword': 'rest-villains' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+                    { match_phrase: { 'body.text': 'Villain' } },
+                  ],
+                },
+              },
             ],
           },
           {
@@ -134,8 +152,14 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Must identify the dependency rest-fights -> fights-db (evidence: MongoDB connection for fight persistence)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
-              { term: { 'resource.attributes.app.keyword': 'fights-db' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-fights' } },
+                    { match_phrase: { 'body.text': 'fights-db' } },
+                  ],
+                },
+              },
             ],
           },
           {
@@ -143,8 +167,14 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Must identify the dependency rest-villains -> villains-db (evidence: JDBC PostgreSQL database connection)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app.keyword': 'rest-villains' } },
-              { term: { 'resource.attributes.app.keyword': 'villains-db' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-villains' } },
+                    { match_phrase: { 'body.text': 'jdbc-postgresql' } },
+                  ],
+                },
+              },
             ],
           },
           {
@@ -152,8 +182,14 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Must identify the dependency event-statistics -> fights-kafka (evidence: Kafka connection for event consumption)',
             score: 2,
             sampling_filters: [
-              { term: { 'resource.attributes.app.keyword': 'event-statistics' } },
-              { term: { 'resource.attributes.app.keyword': 'fights-kafka' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'event-statistics' } },
+                    { match_phrase: { 'body.text': 'messaging-kafka' } },
+                  ],
+                },
+              },
             ],
           },
           {
@@ -161,20 +197,44 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             text: 'Must identify the dependency grpc-locations -> locations-db (evidence: JDBC MariaDB database connection)',
             score: 1,
             sampling_filters: [
-              { term: { 'resource.attributes.app.keyword': 'grpc-locations' } },
-              { term: { 'resource.attributes.app.keyword': 'locations-db' } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'grpc-locations' } },
+                    { match_phrase: { 'body.text': 'jdbc-mariadb' } },
+                  ],
+                },
+              },
             ],
           },
           {
             id: 'dep-rest-narration-open-ai',
             text: 'Must identify the dependency rest-narration -> OpenAI/Azure OpenAI (evidence: langchain4j-openai and langchain4j-azure-openai Quarkus extensions)',
             score: 1,
-            sampling_filters: [{ term: { 'resource.attributes.app.keyword': 'rest-narration' } }],
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app.keyword': 'rest-narration' } },
+                    {
+                      bool: {
+                        should: [
+                          { match_phrase: { 'body.text': 'langchain4j-openai' } },
+                          { match_phrase: { 'body.text': 'langchain4j-azure-openai' } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
           },
           {
             id: 'tech-kubernetes',
             text: 'Must identify Kubernetes as infrastructure (k8s pod/container metadata present)',
             score: 1,
+            sampling_filters: [{ exists: { field: 'resource.attributes.k8s.pod.name' } }],
           },
         ],
         min_features: 8,
@@ -182,7 +242,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         required_types: ['entity'],
         expect_entity_filters: true,
         expected_ground_truth:
-          'entities=[rest-heroes, rest-villains, rest-fights, heroes-db, fights-db, villains-db, fights-kafka, grpc-locations, locations-db, ui-super-heroes], deps=[rest-fights->rest-heroes, rest-heroes->heroes-db, rest-fights->rest-villains, rest-fights->fights-db, rest-villains->villains-db, grpc-locations->locations-db, rest-narration->open-ai], infra=[kubernetes]',
+          'entities=[rest-heroes, rest-villains, rest-fights, rest-narration, event-statistics, apicurio, heroes-db, fights-db, villains-db, fights-kafka, grpc-locations, locations-db, ui-super-heroes], deps=[rest-fights->rest-heroes, rest-heroes->heroes-db, rest-fights->rest-villains, rest-fights->fights-db, rest-villains->villains-db, grpc-locations->locations-db, rest-narration->open-ai, event-statistics->fights-kafka], infra=[kubernetes]',
       },
       metadata: {
         difficulty: 'easy',
@@ -229,6 +289,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
                     { match_phrase: { 'body.text': 'SRMSG18206' } },
                     { match_phrase: { 'body.text': 'SRMSG18212' } },
@@ -241,23 +302,19 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           },
           {
             id: 'entity-event-statistics',
-            text: 'Must identify event-statistics as a failing entity (Kafka consumer failures are present in the logs: topic not found, connection timeout, org.apache.kafka.common.errors.TimeoutException)',
-            score: 2,
+            text: 'Must identify event-statistics as a failing entity (evidence:inferred from Kafka broker unreachability - Topic fights not present in metadata, org.apache.kafka.common.errors.TimeoutException)',
+            score: 1,
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
-                    {
-                      match_phrase: {
-                        'body.text': 'topic not found',
-                      },
-                    },
                     {
                       match_phrase: {
                         'body.text': 'org.apache.kafka.common.errors.TimeoutException',
                       },
                     },
-                    { match_phrase: { 'body.text': 'connection timeout' } },
+                    { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
                   ],
                   minimum_should_match: 1,
                 },
@@ -265,25 +322,24 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             ],
           },
           {
-            id: 'dep-event-statistics-fights-kafka',
-            text: 'Must identify the dependency event-statistics -> fights-kafka (Kafka consumer failing: topic unavailable or connection timeout)',
-            score: 1,
+            id: 'entity-fights-kafka',
+            text: 'Must identify fights-kafka as a failing entity (evidence: fights-kafka logs show disconnected, topic not present in metadata, and timeout exceptions)',
+            score: 2,
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
-                    {
-                      match_phrase: {
-                        'body.text': 'Topic fights not present in metadata',
-                      },
-                    },
+                    { match_phrase: { 'body.text': 'fights-kafka' } },
+                    { match_phrase: { 'body.text': 'disconnected' } },
+                    { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
                     {
                       match_phrase: {
                         'body.text': 'org.apache.kafka.common.errors.TimeoutException',
                       },
                     },
                   ],
-                  minimum_should_match: 1,
+                  minimum_should_match: 2,
                 },
               },
             ],
@@ -295,6 +351,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
                     { match_phrase: { 'body.text': 'SRMSG18206' } },
                     { match_phrase: { 'body.text': 'SRMSG18212' } },
@@ -309,6 +366,20 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'tech-kafka',
             text: 'Must identify Kafka as the affected technology (both producer and consumer sides are failing due to broker unreachability)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'Unable to write to Kafka' } },
+                    { match_phrase: { 'body.text': 'SRMSG18206' } },
+                    { match_phrase: { 'body.text': 'SRMSG18212' } },
+                    { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
+                    { match_phrase: { 'body.text': 'Bootstrap broker' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'error-signatures',
@@ -343,7 +414,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         required_types: ['entity', 'dependency'],
         expect_entity_filters: true,
         expected_ground_truth:
-          'entities=[rest-fights, event-statistics], deps=[rest-fights->kafka (failed), event-statistics->kafka (failed)], tech=[kafka], error_signatures=[SRMSG18206 unable to write, SRMSG18212 message nacked, TimeoutException topic not present in metadata]',
+          'entities=[rest-fights, event-statistics, fights-kafka], deps=[rest-fights->fights-kafka (failed)], tech=[kafka], error_signatures=[SRMSG18206 unable to write, SRMSG18212 message nacked, TimeoutException topic not present in metadata]',
       },
       metadata: {
         difficulty: 'medium',
@@ -382,6 +453,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
                     { match_phrase: { 'body.text': 'MongoTimeoutException' } },
                     { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
@@ -399,6 +471,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
                     { match_phrase: { 'body.text': 'MongoTimeoutException' } },
                     { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
@@ -413,6 +486,20 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'tech-mongodb',
             text: 'Must identify MongoDB as the affected technology (evidence: com.mongodb driver exception classes MongoTimeoutException / MongoSocketOpenException in rest-fights error logs)',
             score: 2,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
+                  should: [
+                    { match_phrase: { 'body.text': 'MongoTimeoutException' } },
+                    { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
+                    { match_phrase: { 'body.text': 'Timed out while waiting for a server' } },
+                    { match_phrase: { 'body.text': 'HTTP Request to /api/fights failed' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'error-signatures',
@@ -421,6 +508,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
                     { match_phrase: { 'body.text': 'MongoTimeoutException' } },
                     { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
@@ -471,7 +559,19 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           {
             id: 'entity-rest-heroes',
             text: 'Must identify rest-heroes as the unreachable target entity (inferred from rest-fights fallback logs — no logs emitted by rest-heroes itself when Stork service discovery redirects to a dead address)',
-            score: 2,
+            score: 1,
+            sampling_filters: [
+              {
+                bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
+                  should: [
+                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                    { match_phrase: { 'body.text': 'Fallback hero' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
           },
           {
             id: 'entity-rest-fights',
@@ -480,6 +580,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
                     { match_phrase: { 'body.text': 'Falling back on Hero' } },
                     { match_phrase: { 'body.text': 'Fallback hero' } },
@@ -496,6 +597,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
                     { match_phrase: { 'body.text': 'Falling back on Hero' } },
                     { match_phrase: { 'body.text': 'Fallback hero' } },
@@ -512,6 +614,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
                     { match_phrase: { 'body.text': 'Falling back on Hero' } },
                     { match_phrase: { 'body.text': 'Fallback hero' } },
@@ -640,6 +743,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             sampling_filters: [
               {
                 bool: {
+                  filter: [{ term: { 'resource.attributes.app.keyword': 'rest-heroes' } }],
                   should: [
                     { match_phrase: { 'body.text': 'NoStackTraceThrowable: Timeout' } },
                     { match_phrase: { 'body.text': 'HR000021: DDL command failed' } },
@@ -718,7 +822,6 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
       metadata: {
         difficulty: 'easy',
         failure_domain: 'none',
-        failure_mode: 'healthy_baseline',
       },
     },
     {
@@ -726,7 +829,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         scenario_id: 'kafka-disconnect',
         stream_name: 'logs',
         stream_description:
-          'Quarkus Super Heroes logs where the Kafka broker becomes unreachable, causing rest-fights to fail publishing fight events (SRMSG18206, SRMSG18212, TimeoutException: topic not present in metadata) and event-statistics to fail consuming them',
+          'Quarkus Super Heroes logs where the Kafka broker becomes unreachable, causing rest-fights to fail publishing fight events (SRMSG18206, SRMSG18212, Unable to write to Kafka) and event-statistics to fail consuming them (Topic fights not present in metadata, org.apache.kafka.common.errors.TimeoutException)',
       },
       output: {
         criteria: [
