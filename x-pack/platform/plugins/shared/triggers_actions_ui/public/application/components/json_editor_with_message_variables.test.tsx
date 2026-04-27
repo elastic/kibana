@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 
@@ -35,19 +36,19 @@ describe('JsonEditorWithMessageVariables', () => {
 
   beforeEach(() => jest.resetAllMocks());
 
-  test('renders variables with double braces by default', () => {
-    const wrapper = mountWithIntl(<JsonEditorWithMessageVariables {...props} />);
+  test('renders variables with double braces by default', async () => {
+    render(<JsonEditorWithMessageVariables {...props} />);
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('fooAddVariableButton'));
+    await userEvent.click(screen.getByTestId('variableMenuButton-myVar'));
 
-    expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual(
+    expect(screen.getByTestId('fooJsonEditor').getAttribute('data-currentvalue')).toEqual(
       '{{myVar}}'
     );
   });
 
-  test('renders variables with triple braces when specified', () => {
-    const wrapper = mountWithIntl(
+  test('renders variables with triple braces when specified', async () => {
+    render(
       <JsonEditorWithMessageVariables
         {...props}
         messageVariables={[
@@ -60,25 +61,23 @@ describe('JsonEditorWithMessageVariables', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('fooAddVariableButton'));
+    await userEvent.click(screen.getByTestId('variableMenuButton-myVar'));
 
-    expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual(
+    expect(screen.getByTestId('fooJsonEditor').getAttribute('data-currentvalue')).toEqual(
       '{{{myVar}}}'
     );
   });
 
   test('renders correct value when the input value prop updates', () => {
-    const wrapper = mountWithIntl(<JsonEditorWithMessageVariables {...props} />);
+    const { rerender } = render(<JsonEditorWithMessageVariables {...props} />);
+    const fooJsonEditor = screen.getByTestId('fooJsonEditor');
 
-    expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual('');
+    expect(fooJsonEditor.getAttribute('data-currentvalue')).toEqual('');
 
     const inputTargetValue = '{"new": "value"}';
-    wrapper.setProps({ inputTargetValue });
-    wrapper.update();
+    rerender(<JsonEditorWithMessageVariables {...props} inputTargetValue={inputTargetValue} />);
 
-    expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual(
-      inputTargetValue
-    );
+    expect(fooJsonEditor.getAttribute('data-currentvalue')).toEqual(inputTargetValue);
   });
 });
