@@ -427,12 +427,16 @@ function validateMetrics(metrics: (PrimaryMetricType | SecondaryMetricType)[]) {
   }
 }
 
-export const primaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
-  ...metricConfigPrimaryMetricOptionsSchema,
-  ...metricConfigBackgroundChartSchemaNoESQL,
-});
+export const primaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+  {
+    ...metricConfigPrimaryMetricOptionsSchema,
+    ...metricConfigBackgroundChartSchemaNoESQL,
+  },
+  'metricPrimary'
+);
 const secondaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-  metricConfigSecondaryMetricOptionsSchema
+  metricConfigSecondaryMetricOptionsSchema,
+  'metricSecondary'
 );
 
 export const metricConfigSchemaNoESQL = schema.object(
@@ -458,7 +462,10 @@ export const metricConfigSchemaNoESQL = schema.object(
      * Configure how to break down the metric (e.g. show one metric per term).
      */
     breakdown_by: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema(metricConfigBreakdownByOptionsSchema)
+      mergeAllBucketsWithChartDimensionSchema(
+        metricConfigBreakdownByOptionsSchema,
+        'metricBreakdown'
+      )
     ),
   },
   {

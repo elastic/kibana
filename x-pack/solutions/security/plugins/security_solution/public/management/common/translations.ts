@@ -316,6 +316,12 @@ export const CONSOLE_COMMANDS = {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.memoryDump.about', {
       defaultMessage: 'Generate a memory dump on the host',
     }),
+    argNotSupported: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.argNotSupported',
+      {
+        defaultMessage: '(NOTE: not currently supported for this host type)',
+      }
+    ),
     kernelArgAbout: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.kernelArgAbout',
       {

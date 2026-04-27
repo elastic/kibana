@@ -16,7 +16,7 @@ export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
   ...createEmbeddablePersistableStateServiceMock(),
   registerDrilldown: jest.fn(),
   registerEmbeddableFactory: jest.fn(),
-  registerTransforms: jest.fn(),
+  registerEmbeddableServerDefinition: jest.fn(),
   getAllMigrations: jest.fn().mockReturnValue({}),
 });
 

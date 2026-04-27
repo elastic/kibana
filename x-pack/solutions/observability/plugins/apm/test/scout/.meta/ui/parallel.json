@@ -1,5 +1,5 @@
 {
-  "sha1": "169861cdd67757b2c1bf07c95843daad181845d0",
+  "sha1": "386d30471cafce2042e5d0c267dee917fd7376d0",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 25,
+        "line": 26,
         "column": 1
       }
     },
@@ -605,7 +605,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 97,
+        "line": 95,
         "column": 9
       }
     },
@@ -890,6 +890,22 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
         "line": 151,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ab0e55ecb54392-b5d9e6a756e8940",
+      "title": "Service map embeddable adds Service map panel with service name, environment and KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
+        "line": 44,
         "column": 9
       }
     },
@@ -1241,7 +1257,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 96,
+        "line": 99,
         "column": 9
       }
     },
@@ -1257,7 +1273,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 119,
+        "line": 122,
         "column": 9
       }
     },
@@ -1273,7 +1289,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 156,
+        "line": 169,
         "column": 9
       }
     },
