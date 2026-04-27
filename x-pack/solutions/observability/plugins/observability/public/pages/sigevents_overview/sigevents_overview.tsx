@@ -14,6 +14,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLoadingSpinner,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,7 +23,9 @@ import { FormattedRelativeTime } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchLatestSignificantEvent } from '../../hooks/use_fetch_latest_significant_event';
+import { useFetchSystemOverview } from '../../hooks/use_fetch_system_overview';
 import { SigeventsOverview } from '../../components/sigevents_overview';
+import type { HealthyMetricCardItem } from '../../components/sigevents_overview';
 import { SignificantEventDetailBody } from '../../components/sigevents_overview/significant_event_detail_body';
 import { SignificantEventDetailHeader } from '../../components/sigevents_overview/significant_event_detail_header';
 
@@ -47,8 +50,10 @@ export function SigeventsOverviewPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { services } = useKibana();
   const { agentBuilder } = services;
+  const { euiTheme } = useEuiTheme();
 
   const { loading, error, data: eventData } = useFetchLatestSignificantEvent();
+  const { loading: overviewLoading, data: overviewData } = useFetchSystemOverview();
 
   const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState(false);
   const [remediationPrompt, setRemediationPrompt] = useState<string | undefined>(undefined);
@@ -89,9 +94,111 @@ export function SigeventsOverviewPage() {
     );
   }, [eventData?.timestamp]);
 
+  const healthyMetrics: HealthyMetricCardItem[] | undefined = useMemo(() => {
+    if (!overviewData) {
+      return undefined;
+    }
+
+    const bigValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.textHeading};
+    `;
+
+    const successValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.severity.success};
+    `;
+
+    const accentValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.textAccent};
+    `;
+
+    const warningValueCss = css`
+      font-size: ${euiTheme.size.base};
+      font-weight: ${euiTheme.font.weight.semiBold};
+      color: ${euiTheme.colors.severity.warning};
+    `;
+
+    const serviceCount = overviewData.services.length;
+    const lowPriorityCount = overviewData.lowCount + overviewData.mediumCount;
+
+    return [
+      {
+        id: 'services',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.services', {
+          defaultMessage: 'Services',
+        }),
+        value: <span css={bigValueCss}>{serviceCount}</span>,
+        iconType: 'package',
+        iconBackground: euiTheme.colors.backgroundBaseSubdued,
+        iconColor: euiTheme.colors.textParagraph,
+      },
+      {
+        id: 'detections',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.detections', {
+          defaultMessage: 'Detections',
+        }),
+        value: <span css={bigValueCss}>{overviewData.detectionCount}</span>,
+        iconType: 'eye',
+        iconBackground: euiTheme.colors.backgroundBaseSubdued,
+        iconColor: euiTheme.colors.textParagraph,
+      },
+      {
+        id: 'criticalRisk',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.critical', {
+          defaultMessage: 'Critical',
+        }),
+        value: <span css={successValueCss}>{overviewData.criticalCount}</span>,
+        iconType: 'minusInCircle',
+        iconBackground: euiTheme.colors.backgroundLightSuccess,
+        iconColor: euiTheme.colors.severity.success,
+      },
+      {
+        id: 'highRisk',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.high', {
+          defaultMessage: 'High',
+        }),
+        value: (
+          <span css={overviewData.highCount > 0 ? warningValueCss : successValueCss}>
+            {overviewData.highCount}
+          </span>
+        ),
+        iconType: overviewData.highCount > 0 ? 'warning' : 'minusInCircle',
+        iconBackground:
+          overviewData.highCount > 0
+            ? euiTheme.colors.backgroundLightWarning
+            : euiTheme.colors.backgroundLightSuccess,
+        iconColor:
+          overviewData.highCount > 0
+            ? euiTheme.colors.severity.warning
+            : euiTheme.colors.severity.success,
+      },
+      {
+        id: 'lowerPriority',
+        label: i18n.translate('xpack.observability.sigeventsOverviewPage.lowMed', {
+          defaultMessage: 'Low / Med',
+        }),
+        value: (
+          <span css={lowPriorityCount > 0 ? accentValueCss : bigValueCss}>{lowPriorityCount}</span>
+        ),
+        iconType: lowPriorityCount > 0 ? 'search' : 'minusInCircle',
+        iconBackground:
+          lowPriorityCount > 0
+            ? euiTheme.colors.backgroundLightAccent
+            : euiTheme.colors.backgroundBaseSubdued,
+        iconColor:
+          lowPriorityCount > 0 ? euiTheme.colors.textAccent : euiTheme.colors.textParagraph,
+      },
+    ];
+  }, [overviewData, euiTheme]);
+
   return (
     <ObservabilityPageTemplate
-      isPageDataLoaded={!loading}
+      isPageDataLoaded={!loading && !overviewLoading}
       data-test-subj="obltSigeventsOverviewPageHeader"
       pageSectionProps={{
         grow: true,
@@ -113,7 +220,7 @@ export function SigeventsOverviewPage() {
             data-test-subj="obltSigeventsConversation"
           >
             <EuiFlexItem grow={false}>
-              {loading ? (
+              {loading || overviewLoading ? (
                 <EuiEmptyPrompt
                   icon={<EuiLoadingSpinner size="xl" />}
                   title={
@@ -152,7 +259,12 @@ export function SigeventsOverviewPage() {
                   onRemediate={handleRemediate}
                 />
               ) : (
-                <SigeventsOverview state="healthy" onViewDetails={openDetailFlyout} />
+                <SigeventsOverview
+                  state="healthy"
+                  healthyMetrics={healthyMetrics}
+                  lowerPriorityVerdicts={overviewData?.verdicts}
+                  onViewDetails={openDetailFlyout}
+                />
               )}
             </EuiFlexItem>
 

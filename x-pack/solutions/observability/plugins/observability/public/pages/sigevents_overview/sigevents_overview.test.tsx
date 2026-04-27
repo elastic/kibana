@@ -17,6 +17,13 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { SigeventsOverviewPage } from './sigevents_overview';
 
+jest.mock('../../hooks/use_fetch_system_overview', () => ({
+  useFetchSystemOverview: () => ({
+    loading: false,
+    data: undefined,
+  }),
+}));
+
 jest.mock('../../hooks/use_fetch_latest_significant_event', () => ({
   useFetchLatestSignificantEvent: () => ({
     loading: false,

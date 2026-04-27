@@ -16,7 +16,11 @@ import type { ImpactedService } from './main_significant_event';
 import { ImpactedCard } from './impacted_card';
 import type { ImpactedCardProps } from './impacted_card';
 import { MetadataIconCard } from './metadata_icon_card';
-import { DevModePlaceholder } from './dev_mode_placeholder';
+import { LowerPriorityVerdicts } from './lower_priority_verdicts';
+import type { VerdictDocument } from '../../hooks/use_fetch_system_overview';
+
+// Re-export VerdictDocument for convenience
+export type { VerdictDocument };
 
 export type SigEventSeverity = 'critical' | 'high' | 'medium' | 'low';
 
@@ -50,6 +54,7 @@ export interface SigeventsOverviewProps {
   impactedServices?: ImpactedService[];
   impactedCards?: ImpactedCardItem[];
   healthyMetrics?: HealthyMetricCardItem[];
+  lowerPriorityVerdicts?: VerdictDocument[];
   lastUpdatedLabel?: React.ReactNode;
   onRemediate?: () => void;
   onViewDetails?: () => void;
@@ -67,6 +72,7 @@ export function SigeventsOverview({
   impactedServices,
   impactedCards = DEFAULT_IMPACTED_CARDS,
   healthyMetrics,
+  lowerPriorityVerdicts,
   lastUpdatedLabel,
   onRemediate,
   onViewDetails,
@@ -153,7 +159,7 @@ export function SigeventsOverview({
   ];
 
   const resolvedHealthyMetrics = healthyMetrics ?? defaultHealthyMetrics;
-  const isUsingPlaceholderHealthyMetrics = !healthyMetrics;
+  const hasLowerPriorityVerdicts = lowerPriorityVerdicts && lowerPriorityVerdicts.length > 0;
 
   if (state === 'healthy') {
     return (
@@ -162,28 +168,33 @@ export function SigeventsOverview({
 
         <EuiSpacer size="l" />
 
-        <DevModePlaceholder hasPlaceholderData={isUsingPlaceholderHealthyMetrics}>
-          <EuiFlexGroup
-            gutterSize="s"
-            responsive={true}
-            wrap
-            data-test-subj="sigeventsOverviewHealthyMetrics"
-          >
-            {resolvedHealthyMetrics.map(
-              ({ id, label, value, iconType, iconBackground, iconColor }) => (
-                <EuiFlexItem key={id} grow={1}>
-                  <MetadataIconCard
-                    title={label}
-                    value={value}
-                    iconType={iconType}
-                    color={iconBackground}
-                    iconColor={iconColor}
-                  />
-                </EuiFlexItem>
-              )
-            )}
-          </EuiFlexGroup>
-        </DevModePlaceholder>
+        <EuiFlexGroup
+          gutterSize="s"
+          responsive={true}
+          wrap
+          data-test-subj="sigeventsOverviewHealthyMetrics"
+        >
+          {resolvedHealthyMetrics.map(
+            ({ id, label, value, iconType, iconBackground, iconColor }) => (
+              <EuiFlexItem key={id} grow={1}>
+                <MetadataIconCard
+                  title={label}
+                  value={value}
+                  iconType={iconType}
+                  color={iconBackground}
+                  iconColor={iconColor}
+                />
+              </EuiFlexItem>
+            )
+          )}
+        </EuiFlexGroup>
+
+        {hasLowerPriorityVerdicts && (
+          <>
+            <EuiSpacer size="l" />
+            <LowerPriorityVerdicts verdicts={lowerPriorityVerdicts} />
+          </>
+        )}
       </div>
     );
   }
