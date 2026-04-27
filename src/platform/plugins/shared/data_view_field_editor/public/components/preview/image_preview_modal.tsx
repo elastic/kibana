@@ -41,7 +41,7 @@ const componentStyles = {
       padding: euiTheme.size.base,
 
       '& img': {
-        maxWidth: '100%',
+        maxWidth: '100% !important',
       },
     }),
 };
