@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const postCompositeSloSummaryRefreshParamsSchema = t.partial({});
+const postCompositeSloSummaryRefreshParamsSchema = z.object({});
 
 export type CompositeSloSummaryRefreshSkippedReason =
   | 'feature_disabled'
