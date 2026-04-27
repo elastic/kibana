@@ -100,7 +100,8 @@ const createFakeModel = (lines: string[]): FakeModel => {
     startColumn: column,
     endColumn: column,
   });
-  return { getLineContent, getLineMaxColumn, getValueInRange, getWordUntilPosition };
+  const isDisposed = () => false;
+  return { getLineContent, getLineMaxColumn, getValueInRange, getWordUntilPosition, isDisposed };
 };
 
 describe('JsonEditor autocomplete provider', () => {
