@@ -7,7 +7,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { LandingLinksIconsCategories } from '@kbn/security-solution-navigation/landing_links';
+import {
+  LandingLinksIcons,
+  LandingLinksIconsCategories,
+} from '@kbn/security-solution-navigation/landing_links';
 import { SecurityPageName } from '../../../common';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { Title } from '../../common/components/header_page/title';
@@ -30,12 +33,20 @@ export const AlertDetectionsLandingPage = () => {
     <SecuritySolutionPageWrapper>
       <Title title={ALERT_DETECTIONS_PAGE_TITLE} />
       <EuiSpacer size="xl" />
-      <LandingLinksIconsCategories
-        links={links}
-        categories={categories}
-        onLinkClick={trackLandingLinkClick}
-        urlState={urlState}
-      />
+      {categories.length > 0 ? (
+        <LandingLinksIconsCategories
+          links={links}
+          categories={categories}
+          onLinkClick={trackLandingLinkClick}
+          urlState={urlState}
+        />
+      ) : (
+        <LandingLinksIcons
+          items={links}
+          onLinkClick={trackLandingLinkClick}
+          urlState={urlState}
+        />
+      )}
     </SecuritySolutionPageWrapper>
   );
 };

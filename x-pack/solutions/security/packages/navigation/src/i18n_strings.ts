@@ -12,11 +12,6 @@ export const i18nStrings = {
     title: i18n.translate('securitySolutionPackages.navLinks.alertDetections', {
       defaultMessage: 'Detections',
     }),
-    views: {
-      title: i18n.translate('securitySolutionPackages.navLinks.rules.views', {
-        defaultMessage: 'Views',
-      }),
-    },
   },
   rules: {
     title: i18n.translate('securitySolutionPackages.navLinks.rules', {

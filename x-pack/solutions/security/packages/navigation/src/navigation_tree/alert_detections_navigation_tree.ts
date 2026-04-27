@@ -9,7 +9,6 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
-import { i18nStrings } from '../i18n_strings';
 
 export const createAlertDetectionsNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.alertDetections,
@@ -18,18 +17,12 @@ export const createAlertDetectionsNavigationTree = (): NodeDefinition => ({
   renderAs: 'panelOpener',
   children: [
     {
-      title: i18nStrings.alertDetections.views.title,
-      breadcrumbStatus: 'hidden',
-      children: [
-        {
-          id: SecurityPageName.alerts,
-          link: securityLink(SecurityPageName.alerts),
-        },
-        {
-          id: SecurityPageName.attacks,
-          link: securityLink(SecurityPageName.attacks),
-        },
-      ],
+      id: SecurityPageName.alerts,
+      link: securityLink(SecurityPageName.alerts),
+    },
+    {
+      id: SecurityPageName.attacks,
+      link: securityLink(SecurityPageName.attacks),
     },
   ],
 });
