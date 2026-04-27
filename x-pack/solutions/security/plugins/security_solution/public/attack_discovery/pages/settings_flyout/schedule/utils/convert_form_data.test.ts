@@ -76,7 +76,7 @@ describe('convertFormDataInBaseSchedule', () => {
     });
   });
 
-  it('includes workflow_config in snake_case when workflowConfig is present', () => {
+  it('includes workflowConfig in camelCase when workflowConfig is present', () => {
     const baseSchedule = convertFormDataInBaseSchedule(
       {
         name: 'workflow test',
@@ -106,9 +106,9 @@ describe('convertFormDataInBaseSchedule', () => {
     expect(baseSchedule.params).toEqual(
       expect.objectContaining({
         workflowConfig: {
-          alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
-          alert_retrieval_mode: 'custom_only',
-          validation_workflow_id: 'custom-validation',
+          alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
+          alertRetrievalMode: 'custom_only',
+          validationWorkflowId: 'custom-validation',
         },
       })
     );
@@ -226,9 +226,9 @@ describe('convertFormDataInBaseSchedule', () => {
       expect.objectContaining({
         type: 'attack_discovery',
         workflowConfig: {
-          alert_retrieval_workflow_ids: ['wf-1'],
-          alert_retrieval_mode: 'custom_query',
-          validation_workflow_id: 'default',
+          alertRetrievalWorkflowIds: ['wf-1'],
+          alertRetrievalMode: 'custom_query',
+          validationWorkflowId: 'default',
         },
       })
     );
