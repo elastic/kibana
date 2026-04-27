@@ -22,6 +22,10 @@ import {
 // 10s actionTimeout in CI, so navigation gets its own budget.
 const DISCOVER_NAVIGATION_TIMEOUT = 30000;
 
+// Waterfall rendering after navigation + API interception can exceed the default
+// 10s expect.timeout on cloud CI.
+const WATERFALL_RENDER_TIMEOUT = 20000;
+
 const clickAndWaitForDiscover = (page: ScoutPage, target: string | Locator) => {
   const locator = typeof target === 'string' ? page.testSubj.locator(target) : target;
   return Promise.all([
@@ -285,8 +289,12 @@ spaceTest.describe(
         });
 
         await spaceTest.step('unified waterfall size warning is visible', async () => {
-          await expect(pageObjects.tracesExperience.apm.waterfall.container).toBeVisible();
-          await expect(pageObjects.tracesExperience.apm.waterfall.sizeWarning).toBeVisible();
+          await expect(pageObjects.tracesExperience.apm.waterfall.container).toBeVisible({
+            timeout: WATERFALL_RENDER_TIMEOUT,
+          });
+          await expect(pageObjects.tracesExperience.apm.waterfall.sizeWarning).toBeVisible({
+            timeout: WATERFALL_RENDER_TIMEOUT,
+          });
         });
 
         await spaceTest.step(
