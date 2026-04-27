@@ -88,7 +88,7 @@ export const streamsManagementSkill = defineSkillType({
     - dynamic: false (all wired streams, some classic): Unmapped fields are NOT dynamically mapped by Elasticsearch. They are stored in _source only — not indexed, not searchable, not aggregatable. To make them queryable, add explicit field mappings via the update tool.
     - dynamic: true (many classic/integration streams): Elasticsearch auto-maps new fields. Fields reported as unmapped by ${INSPECT_STREAMS} were not found in field_overrides or field caps — they may be source-only or recently appeared.
     - dynamic: runtime: Elasticsearch auto-maps new fields as runtime fields (searchable at query time but not indexed on disk).
-    - dynamic: strict: New fields are rejected at index time. Unmapped fields in _source predate the strict setting or arrived via a different path.
+    - dynamic: strict: Documents containing unmapped fields are rejected at index time and routed to the failure store (if enabled). Unmapped fields will not appear in the primary index.
 
     Unmapped fields are not errors. Only suggest mapping them when the user explicitly asks, or when they need to search/filter/aggregate on a source-only field.
     </unmapped_fields>

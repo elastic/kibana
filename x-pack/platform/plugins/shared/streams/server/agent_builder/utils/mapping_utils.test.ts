@@ -248,8 +248,8 @@ describe('getUnmappedFieldsNote', () => {
   it('returns strict note for dynamic: strict', () => {
     const note = getUnmappedFieldsNote('strict');
     expect(note).toContain('dynamic: strict');
-    expect(note).toContain('not indexed');
-    expect(note).not.toContain('Add explicit field mappings');
+    expect(note).toContain('rejected');
+    expect(note).toContain('Explicit field mappings are required');
   });
 
   it('returns runtime note for dynamic: runtime', () => {

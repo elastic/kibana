@@ -100,8 +100,8 @@ export const getUnmappedFieldsNote = (dynamic: string | boolean): string => {
   }
   if (val === 'strict') {
     return (
-      'This stream uses dynamic: strict — unmapped fields are stored in _source only ' +
-      '(not indexed, not searchable, not aggregatable).'
+      'This stream uses dynamic: strict — documents containing unmapped fields are rejected. ' +
+      'Explicit field mappings are required for all fields.'
     );
   }
   if (val === 'runtime') {
