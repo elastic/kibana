@@ -15,88 +15,50 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionState } from '../types/action';
 import type { AlertEpisodeGroupAction } from '../types/action';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
-import { AlertEpisodeActions } from './actions/actions';
 import { AlertEpisodeTags } from './actions/tags';
 
 type Rule = FindRulesResponse['items'][number];
 type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
 
-export interface EpisodeStatusCellProps extends CellRendererProps {
-  episodeActionsMap: Map<string, EpisodeActionState> | undefined;
-  groupActionsMap: Map<string, AlertEpisodeGroupAction> | undefined;
-}
-
-export const EpisodeStatusCell = ({
-  row,
-  columnId,
-  episodeActionsMap,
-  groupActionsMap,
-}: EpisodeStatusCellProps) => {
+export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
-  const episodeId = row.flattened['episode.id'] as string;
-  const groupHash = row.flattened.group_hash as string;
+
+  const episodeAction: EpisodeActionState = {
+    episodeId: row.flattened['episode.id'] as string,
+    ruleId: row.flattened['rule.id'] as string | null,
+    groupHash: row.flattened.group_hash as string | null,
+    lastAckAction: (row.flattened.last_ack_action as string | undefined) ?? null,
+    lastAssigneeUid: (row.flattened.last_assignee_uid as string | undefined) ?? null,
+  };
+
+  const groupAction: AlertEpisodeGroupAction = {
+    groupHash: row.flattened.group_hash as string,
+    ruleId: row.flattened['rule.id'] as string | null,
+    lastDeactivateAction: (row.flattened.last_deactivate_action as string | undefined) ?? null,
+    lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
+    snoozeExpiry: (row.flattened.snooze_expiry as string | undefined) ?? null,
+    tags: (row.flattened.last_tags as string[] | undefined) ?? [],
+  };
 
   return (
     <AlertEpisodeStatusBadges
       status={status}
-      episodeAction={episodeActionsMap?.get(episodeId)}
-      groupAction={groupActionsMap?.get(groupHash)}
+      episodeAction={episodeAction}
+      groupAction={groupAction}
     />
   );
 };
 
-export interface EpisodeActionsCellProps extends CellRendererProps {
-  episodeActionsMap: Map<string, EpisodeActionState> | undefined;
-  groupActionsMap: Map<string, AlertEpisodeGroupAction> | undefined;
-  discoverHref: string | undefined;
-  viewDetailsHref: string | undefined;
-  http: HttpStart;
-  expressions: ExpressionsStart;
-}
+export const EpisodeTagsCell = ({ row }: CellRendererProps) => {
+  const tags = (row.flattened.last_tags as string[] | undefined) ?? [];
 
-export const EpisodeActionsCell = ({
-  row,
-  episodeActionsMap,
-  groupActionsMap,
-  discoverHref,
-  viewDetailsHref,
-  http,
-  expressions,
-}: EpisodeActionsCellProps) => {
-  const episodeId = row.flattened['episode.id'] as string;
-  const groupHash = row.flattened.group_hash as string;
-
-  return (
-    <AlertEpisodeActions
-      episodeId={episodeId}
-      groupHash={groupHash}
-      episodeAction={episodeActionsMap?.get(episodeId)}
-      groupAction={groupActionsMap?.get(groupHash)}
-      http={http}
-      openInDiscoverHref={discoverHref}
-      expressions={expressions}
-      viewDetailsHref={viewDetailsHref}
-    />
-  );
-};
-
-export interface EpisodeTagsCellProps extends CellRendererProps {
-  groupActionsMap: Map<string, AlertEpisodeGroupAction> | undefined;
-}
-
-export const EpisodeTagsCell = ({ row, groupActionsMap }: EpisodeTagsCellProps) => {
-  const groupHash = row.flattened.group_hash as string;
-  const groupAction = groupActionsMap?.get(groupHash);
-
-  return <AlertEpisodeTags tags={groupAction?.tags ?? []} />;
+  return <AlertEpisodeTags tags={tags} />;
 };
 
 export interface EpisodeRuleCellProps extends CellRendererProps {

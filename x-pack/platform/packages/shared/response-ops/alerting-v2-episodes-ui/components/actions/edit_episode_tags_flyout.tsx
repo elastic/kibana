@@ -25,11 +25,6 @@ function tagValueFromOptionKey(key: string): string {
 }
 
 export interface AlertEpisodeTagsFlyoutProps {
-  /**
-   * Whether the flyout is open. The caller is responsible for conditionally
-   * mounting this component; this prop is not used internally.
-   */
-  isOpen: boolean;
   onClose: () => void;
   groupHash: string;
   currentTags: string[];
@@ -40,6 +35,11 @@ export interface AlertEpisodeTagsFlyoutProps {
    * internal single-row mutation. The flyout closes immediately after calling.
    */
   onSave?: (tags: string[]) => void;
+  /**
+   * When true, render only the body — `overlays.openFlyout` already provides
+   * the surrounding `EuiFlyout` shell. Default `false` for inline usage.
+   */
+  embedded?: boolean;
 }
 
 export function AlertEpisodeTagsFlyout({
@@ -49,6 +49,7 @@ export function AlertEpisodeTagsFlyout({
   http,
   services,
   onSave,
+  embedded = false,
 }: AlertEpisodeTagsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
@@ -148,6 +149,7 @@ export function AlertEpisodeTagsFlyout({
 
   return (
     <EpisodeActionFlyout
+      embedded={embedded}
       onClose={onClose}
       dataTestSubj="alertingEpisodeTagsFlyout"
       ariaLabelledBy="alertingEpisodeTagsFlyoutTitle"

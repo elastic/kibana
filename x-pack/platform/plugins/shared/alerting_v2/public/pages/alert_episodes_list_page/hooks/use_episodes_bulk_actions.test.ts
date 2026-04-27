@@ -5,330 +5,76 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import type {
-  AlertEpisodeGroupAction,
-  EpisodeActionState,
-} from '@kbn/alerting-v2-episodes-ui/types/action';
-import { useBulkCreateAlertActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_create_alert_actions';
+import { renderHook } from '@testing-library/react';
 import { useEpisodesBulkActions } from './use_episodes_bulk_actions';
+import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_bulk_create_alert_actions');
-const mockUseBulkCreate = jest.mocked(useBulkCreateAlertActions);
+const stubEpisode = (overrides: Record<string, unknown> = {}) => ({
+  '@timestamp': '2026-04-23T00:00:00Z',
+  'episode.id': 'e1',
+  group_hash: 'g1',
+  ...overrides,
+});
 
-const mockMutate = jest.fn();
-mockUseBulkCreate.mockReturnValue({ mutate: mockMutate } as unknown as ReturnType<
-  typeof useBulkCreateAlertActions
->);
-
-const mockHttp = httpServiceMock.createStartContract();
-const mockToasts = {
-  addSuccess: jest.fn(),
-  addWarning: jest.fn(),
-  addDanger: jest.fn(),
-};
-const mockRefetch = jest.fn();
-
-const ep = (id: string, groupHash: string): AlertEpisode =>
-  ({ 'episode.id': id, group_hash: groupHash } as AlertEpisode);
-
-const episodesData = [ep('ep1', 'gh1'), ep('ep2', 'gh2'), ep('ep3', 'gh1')];
-
-const defaultParams: Parameters<typeof useEpisodesBulkActions>[0] = {
-  episodesData,
-  episodeActionsMap: undefined,
-  groupActionsMap: undefined,
-  http: mockHttp,
-  toastNotifications: mockToasts as never,
-  refetch: mockRefetch,
-};
-
-const acked = (episodeId: string): [string, EpisodeActionState] => [
-  episodeId,
-  {
-    episodeId,
-    ruleId: null,
-    groupHash: null,
-    lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
-  },
-];
-
-const groupActionState = (
-  groupHash: string,
-  overrides: Partial<AlertEpisodeGroupAction> = {}
-): [string, AlertEpisodeGroupAction] => [
-  groupHash,
-  {
-    groupHash,
-    ruleId: null,
-    lastDeactivateAction: null,
-    lastSnoozeAction: null,
-    snoozeExpiry: null,
-    tags: [],
-    ...overrides,
-  },
-];
-
-beforeEach(() => jest.clearAllMocks());
+const stubAction = (overrides: Partial<EpisodeAction> = {}): EpisodeAction => ({
+  id: 'STUB',
+  order: 1,
+  displayName: 'Stub',
+  iconType: 'star',
+  isCompatible: jest.fn(() => true),
+  execute: jest.fn(async () => {}),
+  ...overrides,
+});
 
 describe('useEpisodesBulkActions', () => {
-  it('returns 7 customBulkActions', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    expect(result.current.customBulkActions).toHaveLength(7);
-  });
-
-  it('pendingBulkState starts as null', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    expect(result.current.pendingBulkState).toBeNull();
-  });
-
-  it('tableKey starts at 0', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    expect(result.current.tableKey).toBe(0);
-  });
-
-  it('snooze action sets pendingBulkState with action=snooze', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const snooze = result.current.customBulkActions.find((a) => a.key === 'snooze')!;
-
-    act(() => {
-      snooze.onClick({ selectedDocIds: ['0', '1'] });
-    });
-
-    expect(result.current.pendingBulkState).toEqual({
-      action: 'snooze',
-      selectedDocIds: ['0', '1'],
-    });
-  });
-
-  it('edit-tags action sets pendingBulkState with action=tag', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const editTags = result.current.customBulkActions.find((a) => a.key === 'edit-tags')!;
-
-    act(() => {
-      editTags.onClick({ selectedDocIds: ['0'] });
-    });
-
-    expect(result.current.pendingBulkState).toEqual({
-      action: 'tag',
-      selectedDocIds: ['0'],
-    });
-  });
-
-  it('onPendingBulkClose resets pendingBulkState to null', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const snooze = result.current.customBulkActions.find((a) => a.key === 'snooze')!;
-
-    act(() => snooze.onClick({ selectedDocIds: ['0'] }));
-    expect(result.current.pendingBulkState).not.toBeNull();
-
-    act(() => result.current.onPendingBulkClose());
-    expect(result.current.pendingBulkState).toBeNull();
-  });
-
-  it('acknowledge calls mutate with ACK items for selected episodes', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const ack = result.current.customBulkActions.find((a) => a.key === 'acknowledge')!;
-
-    act(() => ack.onClick({ selectedDocIds: ['0', '1'] }));
-
-    expect(mockMutate).toHaveBeenCalledWith(
-      [
-        { group_hash: 'gh1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK, episode_id: 'ep1' },
-        { group_hash: 'gh2', action_type: ALERT_EPISODE_ACTION_TYPE.ACK, episode_id: 'ep2' },
-      ],
-      expect.any(Object)
+  it('maps each action to a CustomBulkActions entry with correct label/icon', () => {
+    const action = stubAction();
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({ actions: [action], episodesData: [], onSuccess: jest.fn() })
     );
+    expect(result.current).toEqual([
+      expect.objectContaining({ key: 'STUB', label: 'Stub', icon: 'star' }),
+    ]);
   });
 
-  it('unsnooze deduplicates by group_hash', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const unsnooze = result.current.customBulkActions.find((a) => a.key === 'unsnooze')!;
-
-    // rows 0 and 2 share group_hash 'gh1'
-    act(() => unsnooze.onClick({ selectedDocIds: ['0', '1', '2'] }));
-
-    expect(mockMutate).toHaveBeenCalledWith(
-      [
-        { group_hash: 'gh1', action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
-        { group_hash: 'gh2', action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
-      ],
-      expect.any(Object)
+  it('isAvailable proxies to action.isCompatible with episodes resolved from docIds', () => {
+    const episodesData = [stubEpisode({ 'episode.id': 'e1' })];
+    const action = stubAction();
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({
+        actions: [action],
+        episodesData: episodesData as any,
+        onSuccess: jest.fn(),
+      })
     );
+    result.current[0].isAvailable!({ selectedDocIds: ['0'] } as any);
+    expect(action.isCompatible).toHaveBeenCalled();
   });
 
-  it('onApplyBulkSnooze calls mutate with snooze items from pendingBulkState', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const snooze = result.current.customBulkActions.find((a) => a.key === 'snooze')!;
-
-    act(() => snooze.onClick({ selectedDocIds: ['0'] }));
-    act(() => result.current.onApplyBulkSnooze('2026-05-01T00:00:00.000Z'));
-
-    expect(mockMutate).toHaveBeenCalledWith(
-      [
-        {
-          group_hash: 'gh1',
-          action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          expiry: '2026-05-01T00:00:00.000Z',
-        },
-      ],
-      expect.any(Object)
+  it('onClick calls action.execute with selected episodes and onSuccess', () => {
+    const onSuccess = jest.fn();
+    const episodesData = [stubEpisode({ 'episode.id': 'e1' })];
+    const action = stubAction();
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({ actions: [action], episodesData: episodesData as any, onSuccess })
     );
+    result.current[0].onClick!({ selectedDocIds: ['0'] } as any);
+    expect(action.execute).toHaveBeenCalledWith(expect.objectContaining({ onSuccess }));
   });
 
-  it('onBulkSuccess increments tableKey and calls refetch', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const unsnooze = result.current.customBulkActions.find((a) => a.key === 'unsnooze')!;
-
-    act(() => unsnooze.onClick({ selectedDocIds: ['0'] }));
-
-    const [, { onSuccess }] = mockMutate.mock.calls[0];
-    act(() => onSuccess({ processed: 1, total: 1 }));
-
-    expect(result.current.tableKey).toBe(1);
-    expect(mockRefetch).toHaveBeenCalled();
+  it('returns an empty array when no actions are provided', () => {
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({ actions: [], episodesData: [], onSuccess: jest.fn() })
+    );
+    expect(result.current).toEqual([]);
   });
 
-  it('onBulkSuccess shows a success toast when all episodes are processed', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const unsnooze = result.current.customBulkActions.find((a) => a.key === 'unsnooze')!;
-
-    act(() => unsnooze.onClick({ selectedDocIds: ['0'] }));
-
-    const [, { onSuccess }] = mockMutate.mock.calls[0];
-    act(() => onSuccess({ processed: 1, total: 1 }));
-
-    expect(mockToasts.addSuccess).toHaveBeenCalled();
-    expect(mockToasts.addWarning).not.toHaveBeenCalled();
-  });
-
-  it('onBulkSuccess shows a warning toast when only some episodes are processed', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const unsnooze = result.current.customBulkActions.find((a) => a.key === 'unsnooze')!;
-
-    act(() => unsnooze.onClick({ selectedDocIds: ['0'] }));
-
-    const [, { onSuccess }] = mockMutate.mock.calls[0];
-    act(() => onSuccess({ processed: 1, total: 3 }));
-
-    expect(mockToasts.addWarning).toHaveBeenCalled();
-    expect(mockToasts.addSuccess).not.toHaveBeenCalled();
-  });
-
-  describe('available predicates', () => {
-    const getAction = (key: string, params = defaultParams) => {
-      const { result } = renderHook(() => useEpisodesBulkActions(params));
-      return result.current.customBulkActions.find((a) => a.key === key)!;
-    };
-
-    it('edit-tags has no available predicate (always shown)', () => {
-      const editTags = getAction('edit-tags');
-      expect(editTags.available).toBeUndefined();
-    });
-
-    describe('acknowledge / unacknowledge', () => {
-      it('acknowledge is available when at least one selected episode is not acknowledged', () => {
-        const episodeActionsMap = new Map([acked('ep1')]);
-        const ack = getAction('acknowledge', { ...defaultParams, episodeActionsMap });
-        expect(ack.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
-      });
-
-      it('acknowledge is hidden when all selected episodes are already acknowledged', () => {
-        const episodeActionsMap = new Map([acked('ep1'), acked('ep2')]);
-        const ack = getAction('acknowledge', { ...defaultParams, episodeActionsMap });
-        expect(ack.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
-      });
-
-      it('unacknowledge is hidden when no selected episode is acknowledged', () => {
-        const unack = getAction('unacknowledge');
-        expect(unack.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
-      });
-
-      it('unacknowledge is available when at least one selected episode is acknowledged', () => {
-        const episodeActionsMap = new Map([acked('ep1')]);
-        const unack = getAction('unacknowledge', { ...defaultParams, episodeActionsMap });
-        expect(unack.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
-      });
-    });
-
-    describe('snooze / unsnooze', () => {
-      it('snooze is available when at least one selected group is not snoozed', () => {
-        const groupActionsMap = new Map([
-          groupActionState('gh1', { lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE }),
-        ]);
-        const snooze = getAction('snooze', { ...defaultParams, groupActionsMap });
-        // rows 0 (gh1 snoozed) and 1 (gh2 not snoozed)
-        expect(snooze.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
-      });
-
-      it('snooze is hidden when all selected unique groups are already snoozed', () => {
-        const groupActionsMap = new Map([
-          groupActionState('gh1', { lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE }),
-          groupActionState('gh2', { lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE }),
-        ]);
-        const snooze = getAction('snooze', { ...defaultParams, groupActionsMap });
-        expect(snooze.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
-      });
-
-      it('unsnooze is hidden when no selected group is snoozed', () => {
-        const unsnooze = getAction('unsnooze');
-        expect(unsnooze.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
-      });
-
-      it('unsnooze is available when at least one selected group is snoozed', () => {
-        const groupActionsMap = new Map([
-          groupActionState('gh1', { lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE }),
-        ]);
-        const unsnooze = getAction('unsnooze', { ...defaultParams, groupActionsMap });
-        expect(unsnooze.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
-      });
-    });
-
-    describe('resolve / activate', () => {
-      it('resolve is available when at least one selected group is not deactivated', () => {
-        const groupActionsMap = new Map([
-          groupActionState('gh1', { lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE }),
-        ]);
-        const resolve = getAction('resolve', { ...defaultParams, groupActionsMap });
-        expect(resolve.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
-      });
-
-      it('resolve is hidden when all selected unique groups are already deactivated', () => {
-        const groupActionsMap = new Map([
-          groupActionState('gh1', { lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE }),
-          groupActionState('gh2', { lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE }),
-        ]);
-        const resolve = getAction('resolve', { ...defaultParams, groupActionsMap });
-        expect(resolve.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
-      });
-
-      it('activate is hidden when no selected group is deactivated', () => {
-        const activate = getAction('activate');
-        expect(activate.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
-      });
-
-      it('activate is available when at least one selected group is deactivated', () => {
-        const groupActionsMap = new Map([
-          groupActionState('gh1', { lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE }),
-        ]);
-        const activate = getAction('activate', { ...defaultParams, groupActionsMap });
-        expect(activate.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
-      });
-    });
-  });
-
-  it('onBulkError shows a danger toast', () => {
-    const { result } = renderHook(() => useEpisodesBulkActions(defaultParams));
-    const unsnooze = result.current.customBulkActions.find((a) => a.key === 'unsnooze')!;
-
-    act(() => unsnooze.onClick({ selectedDocIds: ['0'] }));
-
-    const [, { onError }] = mockMutate.mock.calls[0];
-    act(() => onError());
-
-    expect(mockToasts.addDanger).toHaveBeenCalled();
+  it('handles undefined episodesData gracefully', () => {
+    const action = stubAction();
+    const { result } = renderHook(() =>
+      useEpisodesBulkActions({ actions: [action], episodesData: undefined, onSuccess: jest.fn() })
+    );
+    result.current[0].isAvailable!({ selectedDocIds: ['0'] } as any);
+    expect(action.isCompatible).toHaveBeenCalledWith({ episodes: [] });
   });
 });

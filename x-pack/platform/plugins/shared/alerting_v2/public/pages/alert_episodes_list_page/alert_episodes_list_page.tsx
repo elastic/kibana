@@ -26,20 +26,19 @@ import {
   type CustomGridColumnsConfiguration,
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
+import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
-import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import type {
   EpisodesFilterState,
   EpisodesSortState,
 } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
-import { BulkActionsOverlay } from '@kbn/alerting-v2-episodes-ui/components/bulk_actions_overlay';
+import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeStatusCell,
-  EpisodeActionsCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
@@ -48,6 +47,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { alertEpisodeToDataTableRecord } from './utils';
+import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { paths } from '../../constants';
 import { useEpisodesTimeRange } from './hooks/use_episodes_time_range';
@@ -62,16 +62,11 @@ const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
     duration: { width: 100 },
     assignees: { width: 120 },
-    actions: { width: 360 },
     'episode.status': { width: 220 },
   },
 };
 
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
-  actions: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
-    ...column,
-    displayAsText: i18n.EPISODES_LIST_COLUMN_ACTIONS,
-  }),
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
@@ -95,6 +90,7 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   & .euiDataGridRowCell__content {
     display: flex;
     align-items: center;
+    block-size: 100%;
   }
 
   & .euiDataGridRowCell[data-gridcell-column-id='select'] .euiDataGridRowCell__content {
@@ -103,13 +99,17 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
     height: 100%;
   }
 
-  & .euiDataGridRowCell[data-gridcell-column-id='actions'] .euiDataGridRowCell__content {
-    justify-content: flex-end;
+  &
+    .euiDataGridRowCell--controlColumn[data-gridcell-column-id='actions']
+    .euiDataGridRowCell__content
+    > .euiFlexGroup {
+    justify-content: center;
   }
 `;
 
 export const AlertEpisodesListPage = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
+  const queryClient = useQueryClient();
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
 
@@ -126,7 +126,6 @@ export const AlertEpisodesListPage = () => {
     'duration',
     'tags',
     'assignees',
-    'actions',
   ]);
   const [rowHeight, setRowHeight] = useState(2);
 
@@ -183,81 +182,70 @@ export const AlertEpisodesListPage = () => {
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
-  const episodeIds = useMemo(
-    () => episodesData?.map((row) => row['episode.id']).filter((id): id is string => id != null),
-    [episodesData]
+  const episodeActions: EpisodeAction[] = useMemo(
+    () =>
+      createEpisodeActions({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        application: services.application,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        expressions: services.expressions,
+        queryClient,
+        getEpisodeDetailsHref: (id) =>
+          services.http.basePath.prepend(paths.alertEpisodeDetails(id)),
+        getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
+          getDiscoverHrefForRuleAndEpisodeTimestamp({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            ruleEsql: rulesCache[ruleId]?.evaluation?.query?.base,
+            episodeIsoTimestamp,
+          }),
+      }),
+    [services, queryClient, rulesCache]
   );
 
-  const groupHashes = useMemo(
-    () => [
-      ...new Set(
-        episodesData?.map((row) => row.group_hash).filter((h): h is string => h != null) ?? []
-      ),
-    ],
-    [episodesData]
+  const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
+    () =>
+      episodeActions.map((action, index) => ({
+        id: action.id,
+        // The UnifiedDataTable actions header maxWidth calculation doesn't take into account larger
+        // paddings, causing the column title to wrap. This forces the column width to be larger and
+        // avoids the problem until https://github.com/elastic/kibana/issues/265569 is fixed
+        width: index === 0 ? 38 : undefined,
+        render: (Control, { record }) => {
+          const episodes = [dataTableRecordToEpisode(record)];
+          if (!action.isCompatible({ episodes })) return <></>;
+          return (
+            <Control
+              iconType={action.iconType}
+              label={action.displayName}
+              onClick={() => action.execute({ episodes, onSuccess: refetch })}
+              tooltipContent={action.displayName}
+            />
+          );
+        },
+      })),
+    [episodeActions, refetch]
   );
 
-  const { data: episodeActionsMap } = useFetchEpisodeActions({
-    episodeIds: episodeIds ?? [],
-    services,
+  const customBulkActions = useEpisodesBulkActions({
+    actions: episodeActions,
+    episodesData,
+    onSuccess: refetch,
   });
-  const { data: groupActionsMap } = useFetchGroupActions({ groupHashes, services });
 
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
     setColumns(cols);
   }, []);
 
-  const {
-    customBulkActions,
-    tableKey,
-    pendingBulkState,
-    onPendingBulkClose,
-    onApplyBulkSnooze,
-    onBulkSaveTags,
-  } = useEpisodesBulkActions({
-    episodesData,
-    episodeActionsMap,
-    groupActionsMap,
-    http: services.http,
-    toastNotifications: services.toastNotifications,
-    refetch,
-  });
-
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
-      'episode.status': (props) => (
-        <EpisodeStatusCell
-          {...props}
-          episodeActionsMap={episodeActionsMap}
-          groupActionsMap={groupActionsMap}
-        />
-      ),
-      actions: (props) => {
-        const ruleId = props.row.flattened['rule.id'] as string;
-        const episodeId = props.row.flattened['episode.id'] as string;
-        const discoverHref = getDiscoverHrefForRuleAndEpisodeTimestamp({
-          share: services.share,
-          capabilities: services.application.capabilities,
-          uiSettings: services.uiSettings,
-          ruleEsql: rulesCache[ruleId]?.evaluation?.query?.base,
-          episodeIsoTimestamp: props.row.flattened['@timestamp'] as string,
-        });
-        const viewDetailsHref = episodeId
-          ? services.http.basePath.prepend(paths.alertEpisodeDetails(episodeId))
-          : undefined;
-        return (
-          <EpisodeActionsCell
-            {...props}
-            episodeActionsMap={episodeActionsMap}
-            groupActionsMap={groupActionsMap}
-            discoverHref={discoverHref}
-            viewDetailsHref={viewDetailsHref}
-            http={services.http}
-            expressions={services.expressions}
-          />
-        );
-      },
-      tags: (props) => <EpisodeTagsCell {...props} groupActionsMap={groupActionsMap} />,
+      'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      tags: (props) => <EpisodeTagsCell {...props} />,
       'rule.id': (props) => (
         <EpisodeRuleCell
           {...props}
@@ -267,18 +255,11 @@ export const AlertEpisodesListPage = () => {
         />
       ),
       assignees: (props) => {
-        const episodeId = props.row.flattened['episode.id'] as string;
-        const assigneeUid = episodeActionsMap?.get(episodeId)?.lastAssigneeUid;
-
-        return (
-          <EpisodeAssigneeCell
-            assigneeUid={assigneeUid}
-            userProfile={services.userProfile}
-          />
-        );
+        const assigneeUid = props.row.flattened.last_assignee_uid as string | undefined;
+        return <EpisodeAssigneeCell assigneeUid={assigneeUid} userProfile={services.userProfile} />;
       },
     }),
-    [episodeActionsMap, groupActionsMap, rulesCache, isLoadingRules, rowHeight, services]
+    [rulesCache, isLoadingRules, rowHeight, services.userProfile]
   );
 
   return (
@@ -331,7 +312,6 @@ export const AlertEpisodesListPage = () => {
               <EuiLoadingSpinner />
             ) : (
               <UnifiedDataTable
-                key={tableKey}
                 ariaLabelledBy="alertingEpisodesTableAriaLabel"
                 settings={ALERT_EPISODES_TABLE_SETTINGS}
                 css={getTableCss(euiTheme)}
@@ -358,6 +338,7 @@ export const AlertEpisodesListPage = () => {
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={setRowHeight}
                 customBulkActions={customBulkActions}
+                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 enableComparisonMode={false}
                 services={services}
               />
@@ -365,13 +346,6 @@ export const AlertEpisodesListPage = () => {
           </CellActionsProvider>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <BulkActionsOverlay
-        pendingBulkState={pendingBulkState}
-        onClose={onPendingBulkClose}
-        onApplySnooze={onApplyBulkSnooze}
-        onSaveTags={onBulkSaveTags}
-        expressions={services.expressions}
-      />
     </div>
   );
 };

@@ -7,7 +7,21 @@
 
 import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
-import { addEpisodeAggregation, ALERT_EPISODE_FIELDS } from './episodes_query';
+import { addEpisodeAggregation } from './episodes_query';
+
+// Subset of `ALERT_EPISODE_FIELDS` actually populated by this query. The action
+// `last_*` columns are excluded because we only read from `.rule-events` here
+// and don't run the action INLINE STATS — keeping them caused a runtime error.
+const RELATED_EPISODE_FIELDS = [
+  '@timestamp',
+  'episode.id',
+  'episode.status',
+  'rule.id',
+  'group_hash',
+  'first_timestamp',
+  'last_timestamp',
+  'duration',
+] as const;
 
 /**
  * ES|QL query listing alert episodes for a rule, excluding one episode id.
@@ -23,5 +37,5 @@ export const buildRelatedAlertEpisodesEsqlQuery = (ruleId: string, excludeEpisod
   return query
     .sort([TIME_FIELD, 'DESC'])
     .limit(5)
-    .keep(...ALERT_EPISODE_FIELDS);
+    .keep(...RELATED_EPISODE_FIELDS);
 };
