@@ -9,6 +9,7 @@
 
 import React, {
   useState,
+  useMemo,
   isValidElement,
   Children,
   type ReactNode,
@@ -94,7 +95,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
-  const doesContainImage = containsImgElement(formattedValue);
+  const doesContainImage = useMemo(() => containsImgElement(formattedValue), [formattedValue]);
 
   const renderName = () => {
     if (isFromScript && !Boolean(key)) {
