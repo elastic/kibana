@@ -964,7 +964,10 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
       .find('[data-test-subj="euiComboBoxPill"]')
       .should('contain.text', field);
   });
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type('{esc}');
+  // Intentionally NOT typing {esc} to close the dropdown: on the rule edit form,
+  // {esc} can race with the just-clicked option's onChange and remove the new pill
+  // from form state before the next interaction commits the value. The dropdown
+  // closes naturally when the next action (e.g. the save button click) shifts focus.
 };
 
 export const clearAlertSuppressionFields = () => {
