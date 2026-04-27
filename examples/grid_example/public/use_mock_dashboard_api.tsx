@@ -35,6 +35,7 @@ export const useMockDashboardApi = ({
     const panels$ = new BehaviorSubject<MockedDashboardPanelMap>(savedState.panels);
     const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
     const viewMode$ = new BehaviorSubject<ViewMode>('edit');
+    const indicateRelatedPanelsId$ = new BehaviorSubject<string | undefined>(undefined);
 
     return {
       getSerializedStateForChild: (id: string) => {
@@ -112,6 +113,10 @@ export const useMockDashboardApi = ({
       getChildApi: () => {
         throw new Error('getChildApi implemenation not provided');
       },
+      setIndicateRelatedPanelsId: (id: string | undefined) => indicateRelatedPanelsId$.next(id),
+      indicateRelatedPanelsId$,
+      arePanelsRelated$: new BehaviorSubject((a: string, b: string) => false),
+      getRelatedPanelIds$: (id: string) => [],
     };
     // only run onMount
     // eslint-disable-next-line react-hooks/exhaustive-deps

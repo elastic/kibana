@@ -9,15 +9,13 @@
 
 import type { BehaviorSubject } from 'rxjs';
 
-/**
- * Interface for a base panel relationship function that also includes several subtypes that narrow down its criteria
- */
-export type PanelRelationshipFunction<T extends Function> = T & {
-  byFilter: T;
-  byESQL: T;
-  byESQLVariable: T;
-};
-
+export type PanelRelationshipComparator = (
+  a: string,
+  b: string,
+  options?: {
+    byESQLVariableConsumers: boolean;
+  }
+) => boolean;
 /**
  * This API can indicate panels related to a certain child panel. We are calling this "indicating" because "highlight" refers to something else and
  * "callout" is a kind of EUI element and naming things is the second hardest problem in computer science.
@@ -25,8 +23,8 @@ export type PanelRelationshipFunction<T extends Function> = T & {
 export interface CanIndicateRelatedPanels {
   setIndicateRelatedPanelsId: (panelId?: string) => void;
   indicateRelatedPanelsId$: BehaviorSubject<string | undefined>;
-  arePanelsRelated$: BehaviorSubject<PanelRelationshipFunction<(a: string, b: string) => boolean>>;
-  getRelatedPanelIds$: PanelRelationshipFunction<(panelId: string) => BehaviorSubject<string[]>>;
+  arePanelsRelated$: BehaviorSubject<PanelRelationshipComparator>;
+  getRelatedPanelIds$: (panelId: string) => BehaviorSubject<string[]>;
 }
 
 /**

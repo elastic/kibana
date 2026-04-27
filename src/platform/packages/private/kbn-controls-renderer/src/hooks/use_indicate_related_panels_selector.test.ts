@@ -49,7 +49,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
     mockParentApi = createMockParentApi();
   });
 
-  describe('when apiCanBeSelectedToIndicateRelated is false', () => {
+  describe('when apiCanBeRelatedPanelsIndicator is false', () => {
     it('should not subscribe to parent API observables', () => {
       const parentApi = createMockParentApi({ relatedPanelIds: ['panel-a', 'panel-b'] });
       const api = createMockApi({ canBeRelatedPanelsIndicator: false, parentApi });
@@ -62,7 +62,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
     });
   });
 
-  describe('when apiCanBeSelectedToIndicateRelated is true', () => {
+  describe('when apiCanBeRelatedPanelsIndicator is true', () => {
     it('should return the number of related panels', async () => {
       const parentApi = createMockParentApi({
         relatedPanelIds: ['panel-a', 'panel-b', 'panel-c'],

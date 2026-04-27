@@ -9,7 +9,7 @@
 import type {
   PublishingSubject,
   ViewMode,
-  PanelRelationshipFunction,
+  PanelRelationshipComparator,
 } from '@kbn/presentation-publishing';
 import { apiAppliesFilters, apiHasUseGlobalFiltersSetting } from '@kbn/presentation-publishing';
 import type { Observable, Subscription } from 'rxjs';
@@ -65,15 +65,7 @@ export const initializeRelatedPanelsManager = ({
   const { focusedPanelId$ } = trackPanel;
   const { children$, layout$, getDashboardPanelFromId } = layoutManager.api;
 
-  const arePanelsRelated$ = new BehaviorSubject<
-    PanelRelationshipFunction<(a: string, b: string) => boolean>
-  >(
-    Object.assign(() => false, {
-      byFilter: () => false,
-      byESQL: () => false,
-      byESQLVariable: () => false,
-    })
-  );
+  const arePanelsRelated$ = new BehaviorSubject<PanelRelationshipComparator>(() => false);
 
   const indicateRelatedPanelsId$ = new BehaviorSubject<string | undefined>(
     backupService.getIndicateRelatedPanelsId(savedObjectId$.value)
@@ -170,18 +162,17 @@ export const initializeRelatedPanelsManager = ({
         const relatedPanelUUIDs = new Set([...(esqlRelatedPanels.get(b) ?? [])]);
         return relatedPanelUUIDs.has(a);
       };
+      const byBoth = (a: string, b: string) => byFilter(a, b) || byESQL(a, b);
+
       const byESQLVariable = (a: string, b: string) => {
         const relatedPanelUUIDs = new Set([...(esqlVariableDependentPanels.get(b) ?? [])]);
         return relatedPanelUUIDs.has(a);
       };
 
-      arePanelsRelated$.next(
-        Object.assign((a: string, b: string) => byFilter(a, b) || byESQL(a, b), {
-          byFilter,
-          byESQL,
-          byESQLVariable,
-        })
-      );
+      arePanelsRelated$.next((a, b, options) => {
+        if (options?.byESQLVariableConsumers) return byESQLVariable(a, b);
+        return byBoth(a, b);
+      });
     }
   );
 
@@ -191,30 +182,24 @@ export const initializeRelatedPanelsManager = ({
   };
 
   const relatedPanelIdSubscriptions = new Set<Subscription>();
-  const getRelatedPanelIdsFactory =
-    (panelRelationshipGetterKey?: 'byFilter' | 'byESQL' | 'byESQLVariable') =>
-    (panelId: string) => {
-      const relatedPanelIds$ = new BehaviorSubject<string[]>([]);
+  const getRelatedPanelIds$ = (panelId: string) => {
+    const relatedPanelIds$ = new BehaviorSubject<string[]>([]);
 
-      const subscription = combineLatest([arePanelsRelated$, children$])
-        .pipe(
-          map(([arePanelsRelated, children]) => {
-            const comparator = panelRelationshipGetterKey
-              ? arePanelsRelated[panelRelationshipGetterKey]
-              : arePanelsRelated;
-            return Object.keys(children).filter((id) => id !== panelId && comparator(id, panelId));
-          })
-        )
-        .subscribe((next) => relatedPanelIds$.next(next));
-      relatedPanelIdSubscriptions.add(subscription);
-      hasRelatedPanelIdSubscriptions$.next(true);
-      return relatedPanelIds$;
-    };
-  const getRelatedPanelIds$ = Object.assign(getRelatedPanelIdsFactory(), {
-    byFilter: getRelatedPanelIdsFactory('byFilter'),
-    byESQL: getRelatedPanelIdsFactory('byESQL'),
-    byESQLVariable: getRelatedPanelIdsFactory('byESQLVariable'),
-  });
+    const subscription = combineLatest([arePanelsRelated$, children$])
+      .pipe(
+        map(([arePanelsRelated, children]) => {
+          return Object.keys(children).filter(
+            (id) =>
+              // Only panels related by ESQL variables can currently be indicated
+              id !== panelId && arePanelsRelated(id, panelId, { byESQLVariableConsumers: true })
+          );
+        })
+      )
+      .subscribe((next) => relatedPanelIds$.next(next));
+    relatedPanelIdSubscriptions.add(subscription);
+    hasRelatedPanelIdSubscriptions$.next(true);
+    return relatedPanelIds$;
+  };
 
   return {
     api: {

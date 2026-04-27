@@ -12,6 +12,7 @@ import type { BehaviorSubject } from 'rxjs';
 import type { ControlsGroupState, PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
+  CanIndicateRelatedPanels,
   HasSerializedChildState,
   PresentationContainer,
   PublishesDisabledActionIds,
@@ -36,15 +37,9 @@ export interface ControlsLayout {
 
 export type ControlsRendererParentApi = Pick<
   PresentationContainer,
-  | 'children$'
-  | 'addNewPanel'
-  | 'replacePanel'
-  | 'removePanel'
-  | 'setIndicateRelatedPanelsId'
-  | 'indicateRelatedPanelsId$'
-  | 'getRelatedPanelIds$'
-  | 'arePanelsRelated$'
+  'children$' | 'addNewPanel' | 'replacePanel' | 'removePanel'
 > &
+  Partial<CanIndicateRelatedPanels> &
   Partial<PublishesUnifiedSearch> &
   PublishesViewMode &
   HasSerializedChildState<object> &

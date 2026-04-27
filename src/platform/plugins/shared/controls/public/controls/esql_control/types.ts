@@ -35,6 +35,7 @@ export type ESQLControlApi<State> = DefaultEmbeddableApi<
   HasEditCapabilities &
   PublishesDataLoading &
   PublishesTooltipLabel &
+  CanBeRelatedPanelsIndicator &
   ReturnType<typeof initializeLabelManager>['api'];
 
 export type ESQLOptionsListRuntimeState = Omit<OptionsListESQLControlState, 'available_options'> &

@@ -9,7 +9,7 @@
 
 import { useMemo, useCallback, useEffect, useState, useRef } from 'react';
 import {
-  apiCanBeSelectedToIndicateRelated,
+  apiCanBeRelatedPanelsIndicator,
   apiCanIndicateRelatedPanels,
   apiHasParentApi,
   apiHasUniqueId,
@@ -39,15 +39,13 @@ export const useIndicateRelatedPanelsSelector = (
 
   useEffect(() => {
     // Don't trigger expensive subscriptions if the API can't indicate related panels
-    if (!parentApiLoaded || !apiCanBeSelectedToIndicateRelated(api)) return;
+    if (!parentApiLoaded || !apiCanBeRelatedPanelsIndicator(api)) return;
     if (!parentApiSubscription.current) {
-      const numberOfRelatedPanels$ = parentApiLoaded.getRelatedPanelIds$
-        .byESQLVariable(id ?? '')
-        .pipe(
-          debounceTime(skipDebounce ? 0 : 250), // Prevent a flash of 0 related panels on initial load
-          distinctUntilChanged(),
-          map((relatedPanelIds) => relatedPanelIds.length)
-        );
+      const numberOfRelatedPanels$ = parentApiLoaded.getRelatedPanelIds$(id ?? '').pipe(
+        debounceTime(skipDebounce ? 0 : 250), // Prevent a flash of 0 related panels on initial load
+        distinctUntilChanged(),
+        map((relatedPanelIds) => relatedPanelIds.length)
+      );
       const sub = combineLatest([
         parentApiLoaded.viewMode$,
         parentApiLoaded.indicateRelatedPanelsId$,
@@ -68,7 +66,7 @@ export const useIndicateRelatedPanelsSelector = (
         viewMode === 'edit' &&
           api &&
           id &&
-          apiCanBeSelectedToIndicateRelated(api) &&
+          apiCanBeRelatedPanelsIndicator(api) &&
           api.canBeRelatedPanelsIndicator
       ),
     [api, viewMode, id]

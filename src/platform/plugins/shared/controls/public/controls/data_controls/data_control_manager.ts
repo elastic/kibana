@@ -231,6 +231,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       isCustomizable: false,
       isDuplicable: true,
       isPinnable: true,
+      canBeRelatedPanelsIndicator: false,
     },
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();

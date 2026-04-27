@@ -62,8 +62,8 @@ export const ControlPanel = ({
     useBatchedPublishingSubjects(
       parentApi.viewMode$,
       parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>),
-      parentApi.arePanelsRelated$,
-      parentApi.indicateRelatedPanelsId$
+      parentApi.arePanelsRelated$ ?? (of(undefined) as PublishingSubject<undefined>),
+      parentApi.indicateRelatedPanelsId$ ?? (of(undefined) as PublishingSubject<undefined>)
     );
 
   const [panelLabel, setPanelLabel] = useState<string | undefined>();
@@ -73,8 +73,11 @@ export const ControlPanel = ({
 
   const indicateControl = useMemo(
     () =>
-      indicateRelatedPanelsId !== undefined && arePanelsRelated.byESQL(id, indicateRelatedPanelsId),
-    [arePanelsRelated, id, indicateRelatedPanelsId]
+      api &&
+      indicateRelatedPanelsId !== undefined &&
+      // Only panels related by ESQL variables can currently be indicated
+      arePanelsRelated?.(id, indicateRelatedPanelsId, { byESQLVariableConsumers: true }),
+    [arePanelsRelated, id, indicateRelatedPanelsId, api]
   );
   const {
     canIndicateRelatedPanels,

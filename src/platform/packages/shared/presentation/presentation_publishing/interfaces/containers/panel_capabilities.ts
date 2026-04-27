@@ -37,7 +37,7 @@ export interface CanBeRelatedPanelsIndicator {
   canBeRelatedPanelsIndicator: boolean;
 }
 
-export const apiCanBeSelectedToIndicateRelated = (
+export const apiCanBeRelatedPanelsIndicator = (
   unknownApi: unknown | null
 ): unknownApi is CanBeRelatedPanelsIndicator =>
   Boolean((unknownApi as CanBeRelatedPanelsIndicator).canBeRelatedPanelsIndicator);
