@@ -21,11 +21,9 @@ import {
 } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
-const paramsSchema = z
-  .object({
-    entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to create.'),
-  })
-  .required();
+const paramsSchema = z.object({
+  entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to create.'),
+});
 
 export function registerCRUDCreate(router: EntityStorePluginRouter) {
   router.versioned

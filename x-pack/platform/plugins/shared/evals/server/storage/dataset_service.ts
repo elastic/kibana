@@ -19,7 +19,7 @@ import {
 } from './examples_storage';
 
 export class DatasetService {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger, private readonly isServerless: boolean) {}
 
   getClient(esClient: ElasticsearchClient): DatasetClient {
     const datasetsStorageAdapter = this.createDatasetsStorageAdapter(esClient);
@@ -35,7 +35,8 @@ export class DatasetService {
     return new StorageIndexAdapter<typeof datasetsStorageSettings, DatasetStorageProperties>(
       esClient,
       this.logger,
-      datasetsStorageSettings
+      datasetsStorageSettings,
+      { isServerless: this.isServerless }
     );
   }
 
@@ -45,6 +46,8 @@ export class DatasetService {
     return new StorageIndexAdapter<
       typeof datasetExamplesStorageSettings,
       DatasetExampleStorageProperties
-    >(esClient, this.logger, datasetExamplesStorageSettings);
+    >(esClient, this.logger, datasetExamplesStorageSettings, {
+      isServerless: this.isServerless,
+    });
   }
 }

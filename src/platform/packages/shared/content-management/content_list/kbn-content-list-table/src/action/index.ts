@@ -8,7 +8,7 @@
  */
 
 // Declarative components.
-export { Action, EditAction, DeleteAction, action } from './part';
+export { Action, EditAction, DeleteAction, InspectAction, action } from './part';
 
 // Types.
 export type {
@@ -16,6 +16,7 @@ export type {
   ActionNamespace,
   EditActionProps,
   DeleteActionProps,
+  InspectActionProps,
   ActionOutput,
   ActionBuilderContext,
 } from './types';
