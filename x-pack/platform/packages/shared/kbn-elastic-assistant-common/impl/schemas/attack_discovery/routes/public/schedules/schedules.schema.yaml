@@ -8,7 +8,7 @@ components:
   schemas:
     AttackDiscoverySchedule:
       type: object
-      description: An attack discovery schedule
+      description: An Attack Discovery schedule
       required:
         - id
         - name
@@ -22,7 +22,7 @@ components:
         - actions
       properties:
         id:
-          description: UUID of attack discovery schedule
+          description: UUID of Attack Discovery schedule
           type: string
         name:
           description: The name of the schedule
@@ -45,23 +45,23 @@ components:
           description: Indicates whether the schedule is enabled
           type: boolean
         params:
-          description: The attack discovery schedule configuration parameters
+          description: The Attack Discovery schedule configuration parameters
           $ref: '#/components/schemas/AttackDiscoveryScheduleParams'
         schedule:
-          description: The attack discovery schedule interval
+          description: The Attack Discovery schedule interval
           $ref: '#/components/schemas/IntervalSchedule'
         actions:
-          description: The attack discovery schedule actions
+          description: The Attack Discovery schedule actions
           type: array
           items:
             $ref: '#/components/schemas/AttackDiscoveryScheduleAction'
         lastExecution:
-          description: The attack discovery schedule last execution summary
+          description: The Attack Discovery schedule last execution summary
           $ref: '#/components/schemas/AttackDiscoveryScheduleExecution'
 
     AttackDiscoveryScheduleParams:
       type: object
-      description: An attack discovery schedule params
+      description: An Attack Discovery schedule params
       required:
         - alertsIndexPattern
         - apiConfig
@@ -111,7 +111,7 @@ components:
           type: string
 
     Filters:
-      description: The filter array used to define the conditions for when alerts are selected as an attack discovery context. Defaults to an empty array.
+      description: The filter array used to define the conditions for when alerts are selected as an Attack Discovery context. Defaults to an empty array.
       type: array
       items: {} # unknown
 
@@ -220,7 +220,7 @@ components:
 
     AttackDiscoveryScheduleExecutionStatus:
       type: string
-      description: An attack discovery schedule execution status
+      description: An Attack Discovery schedule execution status
       enum:
         - ok
         - active
@@ -230,7 +230,7 @@ components:
 
     AttackDiscoveryScheduleExecution:
       type: object
-      description: An attack discovery schedule execution information
+      description: An Attack Discovery schedule execution information
       required:
         - date
         - status
@@ -251,7 +251,7 @@ components:
 
     AttackDiscoveryScheduleCreateProps:
       type: object
-      description: An attack discovery schedule create properties
+      description: An Attack Discovery schedule create properties
       required:
         - name
         - params
@@ -264,20 +264,20 @@ components:
           description: Indicates whether the schedule is enabled
           type: boolean
         params:
-          description: The attack discovery schedule configuration parameters
+          description: The Attack Discovery schedule configuration parameters
           $ref: '#/components/schemas/AttackDiscoveryScheduleParams'
         schedule:
-          description: The attack discovery schedule interval
+          description: The Attack Discovery schedule interval
           $ref: '#/components/schemas/IntervalSchedule'
         actions:
-          description: The attack discovery schedule actions
+          description: The Attack Discovery schedule actions
           type: array
           items:
             $ref: '#/components/schemas/AttackDiscoveryScheduleAction'
 
     AttackDiscoveryScheduleUpdateProps:
       type: object
-      description: An attack discovery schedule update properties
+      description: An Attack Discovery schedule update properties
       required:
         - name
         - params
@@ -288,13 +288,13 @@ components:
           description: The name of the schedule
           type: string
         params:
-          description: The attack discovery schedule configuration parameters
+          description: The Attack Discovery schedule configuration parameters
           $ref: '#/components/schemas/AttackDiscoveryScheduleParams'
         schedule:
-          description: The attack discovery schedule interval
+          description: The Attack Discovery schedule interval
           $ref: '#/components/schemas/IntervalSchedule'
         actions:
-          description: The attack discovery schedule actions
+          description: The Attack Discovery schedule actions
           type: array
           items:
             $ref: '#/components/schemas/AttackDiscoveryScheduleAction'

@@ -297,23 +297,17 @@ export const createLeadDataClient = ({
     id: string,
     updates: Partial<Pick<Lead, 'status'>>
   ): Promise<boolean> => {
+    if (updates.status === undefined) {
+      return false;
+    }
     try {
-      const scriptParts: string[] = [];
-      const params: Record<string, unknown> = {};
-      let paramIdx = 0;
-      for (const [key, val] of Object.entries(updates)) {
-        const paramName = `p${paramIdx++}`;
-        scriptParts.push(`ctx._source['${key}'] = params.${paramName}`);
-        params[paramName] = val;
-      }
-
       const resp = await esClient.updateByQuery({
         index: allIndices,
         query: { term: { id } },
         script: {
-          source: scriptParts.join('; '),
+          source: `ctx._source['status'] = params.status`,
           lang: 'painless',
-          params,
+          params: { status: updates.status },
         },
         refresh: true,
         conflicts: 'proceed',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
@@ -47,7 +47,7 @@ export const resolveSmlAttachItems = async ({
 }: {
   chunkIds: string[];
   sml: SmlService;
-  esClient: ElasticsearchClient;
+  esClient: IScopedClusterClient;
   request: KibanaRequest;
   spaceId: string;
   savedObjectsClient: SavedObjectsClientContract;

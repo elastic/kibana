@@ -83,6 +83,7 @@ describe('Update profile routes', () => {
           userSettings: {
             darkMode: 'dark',
             contrastMode: 'high',
+            agentBuilderAnnouncementModalSeen: true,
             agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
           },
         })
@@ -91,6 +92,7 @@ describe('Update profile routes', () => {
         userSettings: {
           darkMode: 'dark',
           contrastMode: 'high',
+          agentBuilderAnnouncementModalSeen: true,
           agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
         },
       });
@@ -358,6 +360,34 @@ describe('Update profile routes', () => {
       expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', {
         userSettings: {
           agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
+        },
+      });
+    });
+
+    it('allows Elastic Cloud users to update agentBuilderAnnouncementModalSeen.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ elastic_cloud_user: true }));
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({
+            body: {
+              userSettings: {
+                agentBuilderAnnouncementModalSeen: true,
+              },
+            },
+          }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', {
+        userSettings: {
+          agentBuilderAnnouncementModalSeen: true,
         },
       });
     });

@@ -81,11 +81,12 @@ export class OnboardingHomePage {
   }
 
   public async maybeClickIntroducingAIAgentModalContinueBtn() {
-    try {
-      await this.introducingAIAgentModalContinueBtn.waitFor({ state: 'visible', timeout: 5000 });
-      await this.introducingAIAgentModalContinueBtn.click();
-    } catch {
-      // Modal didn't appear within timeout — continue normally
-    }
+    await this.page.addLocatorHandler(
+      this.introducingAIAgentModalContinueBtn,
+      async (btn) => {
+        await btn.click();
+      },
+      { times: 1 }
+    );
   }
 }

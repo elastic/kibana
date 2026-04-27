@@ -28,9 +28,16 @@ const MarkdownRenderer = React.lazy(async () => {
   const { default: ReactMarkdown } = await import('react-markdown');
   const WrappedRenderer = ({ basePath, children }: MarkdownRendererProps) => (
     <ReactMarkdown
-      transformLinkUri={(href) => ReactMarkdown.uriTransformer(basePath.prepend(href))}
-      children={children}
-    />
+      components={{
+        a: ({ node, href, children: linkChildren, ...props }) => (
+          <a href={basePath.prepend(href || '')} {...props}>
+            {linkChildren}
+          </a>
+        ),
+      }}
+    >
+      {children}
+    </ReactMarkdown>
   );
 
   return { default: WrappedRenderer };

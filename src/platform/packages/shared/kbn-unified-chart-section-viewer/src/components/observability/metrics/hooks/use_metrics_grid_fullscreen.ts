@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useCallback, useMemo } from 'react';
-import { logicalCSS, useEuiTheme, useGeneratedHtmlId, useMutationObserver } from '@elastic/eui';
+import { useMemo } from 'react';
+import { logicalCSS, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/css';
 import {
   METRICS_GRID_FULL_SCREEN_CLASS,
   METRICS_GRID_RESTRICT_BODY_CLASS,
-  METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
 } from '../../../../common/constants';
 
-const fullScreenBodyStyles = css`
+export const FULLSCREEN_BODY_STYLES_CLASS = css`
   *:not(
       .euiFlyout,
       .${METRICS_GRID_FULL_SCREEN_CLASS}, .${METRICS_GRID_FULL_SCREEN_CLASS} *,
@@ -27,51 +26,9 @@ const fullScreenBodyStyles = css`
   }
 `;
 
-const bodyClassesToToggle = [fullScreenBodyStyles, METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS];
-
-export const toggleMetricsGridFullScreen = (metricsGrid: HTMLElement) => {
-  const hasFullScreenClass = metricsGrid.classList.contains(METRICS_GRID_FULL_SCREEN_CLASS);
-
-  if (hasFullScreenClass) {
-    document.body.classList.add(...bodyClassesToToggle);
-  } else {
-    document.body.classList.remove(...bodyClassesToToggle);
-  }
-};
-
 export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
   const { euiTheme } = useEuiTheme();
   const metricsGridId = useGeneratedHtmlId({ prefix });
-  const [metricsGridWrapper, setMetricsGridWrapper] = useState<HTMLElement | null>(null);
-  const [metricsGrid, setMetricsGrid] = useState<HTMLElement | null>(null);
-
-  const findMetricsGridElement = useCallback(
-    (_: MutationRecord[], observer: MutationObserver) => {
-      const foundMetricsGrid = document.getElementById(metricsGridId);
-
-      if (foundMetricsGrid) {
-        setMetricsGrid(foundMetricsGrid);
-        observer.disconnect();
-      }
-    },
-    [metricsGridId]
-  );
-
-  const handleMetricsGridFullScreenToggle = useCallback(() => {
-    if (metricsGrid) {
-      toggleMetricsGridFullScreen(metricsGrid);
-    }
-  }, [metricsGrid]);
-
-  useMutationObserver(metricsGridWrapper, findMetricsGridElement, {
-    childList: true,
-    subtree: true,
-  });
-
-  useMutationObserver(metricsGrid, handleMetricsGridFullScreenToggle, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
 
   const styles = useMemo(() => {
     const fullScreenZIndex = Number(euiTheme.levels.header) - 1;
@@ -123,5 +80,5 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
     };
   }, [euiTheme]);
 
-  return { metricsGridId, metricsGridWrapper, setMetricsGridWrapper, styles };
+  return { metricsGridId, styles };
 };

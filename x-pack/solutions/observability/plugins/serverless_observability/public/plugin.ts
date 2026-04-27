@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import type { Subscription } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, of } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { createNavigationTree } from './navigation_tree';
@@ -82,8 +82,8 @@ export class ServerlessObservabilityPlugin
             Boolean(aiAssistantIsEnabled) && chatExperience !== AIChatExperience.Agent
         ),
         distinctUntilChanged(),
-        map((showAiAssistant) =>
-          serverless.getNavigationCards(
+        switchMap((showAiAssistant) =>
+          serverless.getNavigationCards$(
             roleManagementEnabled,
             showAiAssistant
               ? {

@@ -63,10 +63,9 @@ const queryClampFlexItemCss = {
   minWidth: 0,
 };
 
-// TODO fix types
-const euiBasicTableCss = {
+const euiBasicTableCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
-    border: '1px solid #d3dae6',
+    border: euiTheme.border.thin,
   },
 
   '.euiTableRow.euiTableRow-isExpandedRow .euiTableCellContent': {
@@ -88,7 +87,7 @@ const euiBasicTableCss = {
     borderLeft: '0px',
     borderRight: '0px',
   },
-};
+});
 
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 

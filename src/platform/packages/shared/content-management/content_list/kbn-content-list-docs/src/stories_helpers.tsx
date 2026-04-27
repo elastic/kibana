@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
-import type { ReactElement } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import reactElementToJSXString from 'react-element-to-jsx-string';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiCodeBlock,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -33,6 +37,7 @@ import {
   NO_CREATOR_USER_LABEL,
 } from '@kbn/content-list-provider';
 import type {
+  ContentListItem,
   FindItemsParams,
   FindItemsResult,
   FilterFacetConfig,
@@ -52,6 +57,70 @@ import {
 } from '@kbn/content-list-mock-data';
 
 export { mockTagsService, createMockFavoritesClient, mockContentListUserProfilesServices };
+
+// =============================================================================
+// Inspect Flyout (mock content editor)
+// =============================================================================
+
+/**
+ * Mock "View details" flyout for Storybook stories.
+ *
+ * Renders a lightweight EuiFlyout showing item metadata. Stands in for the
+ * real Kibana content editor flyout (`@kbn/content-management-content-editor`)
+ * which requires Kibana core services not available in Storybook.
+ */
+const inspectFlyoutTitleId = 'inspect-flyout-title';
+
+const InspectFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () => void }) => (
+  <EuiFlyout onClose={onClose} size="s" ownFocus aria-labelledby={inspectFlyoutTitleId}>
+    <EuiFlyoutHeader hasBorder>
+      <EuiTitle size="m">
+        <h2 id={inspectFlyoutTitleId}>{item.title}</h2>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <EuiDescriptionList
+        type="column"
+        compressed
+        listItems={[
+          { title: 'ID', description: item.id },
+          { title: 'Description', description: item.description || '—' },
+          { title: 'Type', description: item.type || '—' },
+          {
+            title: 'Updated',
+            description: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '—',
+          },
+          { title: 'Tags', description: item.tags?.join(', ') || '—' },
+        ]}
+      />
+    </EuiFlyoutBody>
+  </EuiFlyout>
+);
+
+/**
+ * Hook that manages the open/close state for a mock inspect flyout.
+ *
+ * Returns an `onInspect` callback suitable for `ContentListItemConfig.onInspect`
+ * and a `flyout` element to render in the component tree.
+ *
+ * @example
+ * ```tsx
+ * const { onInspect, flyout } = useInspectFlyout();
+ * // pass onInspect to item config, render {flyout} in JSX
+ * ```
+ */
+export const useInspectFlyout = (): {
+  onInspect: (item: ContentListItem) => void;
+  flyout: ReactNode;
+} => {
+  const [inspectedItem, setInspectedItem] = useState<ContentListItem | null>(null);
+  const onInspect = useCallback((item: ContentListItem) => setInspectedItem(item), []);
+  const flyout = inspectedItem ? (
+    <InspectFlyout item={inspectedItem} onClose={() => setInspectedItem(null)} />
+  ) : null;
+
+  return { onInspect, flyout };
+};
 
 // =============================================================================
 // Mock Data

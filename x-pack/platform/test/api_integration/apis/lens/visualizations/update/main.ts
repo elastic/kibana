@@ -45,5 +45,19 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.id).to.be(id);
       expect(body.data.title).to.be('Upsert title');
     });
+
+    it('should validate id on creation', async () => {
+      const id = 'invalid-id__$-UPPERCASE';
+      const response = await supertest
+        .put(`${LENS_VIS_API_PATH}/${id}`)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
+        .send(getExampleLensBody('Some title'));
+
+      expect(response.status).to.be(400);
+      expect(response.body.message).to.be(
+        'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
+      );
+    });
   });
 }

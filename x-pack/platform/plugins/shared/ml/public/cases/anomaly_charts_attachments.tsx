@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { transformTimeRangeOut } from '@kbn/presentation-publishing';
-import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiDescriptionList, htmlIdGenerator } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -96,16 +96,15 @@ function isValidTimeRange(arg: unknown): arg is TimeRange {
 export const initializeAnomalyChartsAttachment = memoize(
   (fieldFormats: FieldFormatsStart, services: AnomalyChartsEmbeddableServices) => {
     return React.memo(
-      (props: PersistableStateAttachmentViewProps) => {
-        const { persistableStateAttachmentState } = props;
+      (props: UnifiedValueAttachmentViewProps) => {
+        const attachmentState = props.data.state as Record<string, unknown>;
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
         });
 
         const inputProps = transformTimeRangeOut(
-          persistableStateAttachmentState as unknown as AnomalyChartsAttachmentState &
-            Record<string, unknown>
+          attachmentState as unknown as AnomalyChartsAttachmentState & Record<string, unknown>
         );
 
         const descriptions = useMemo(() => {
@@ -162,11 +161,7 @@ export const initializeAnomalyChartsAttachment = memoize(
           </>
         );
       },
-      (prevProps, nextProps) =>
-        deepEqual(
-          prevProps.persistableStateAttachmentState,
-          nextProps.persistableStateAttachmentState
-        )
+      (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
     );
   }
 );
