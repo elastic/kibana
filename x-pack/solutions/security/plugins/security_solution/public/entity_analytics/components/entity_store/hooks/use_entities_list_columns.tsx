@@ -14,6 +14,7 @@ import { get } from 'lodash/fp';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
+  type RiskSeverity,
 } from '../../../../../common/search_strategy';
 import {
   EntityPanelKeyByType,
@@ -26,14 +27,19 @@ import type { Columns } from '../../../../explore/components/paginated_table';
 import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { type CriticalityLevels } from '../../../../../common/constants';
 import { ENTITIES_LIST_TABLE_ID } from '../constants';
-import { EntityIconByType, getEntityType, sourceFieldToText } from '../helpers';
+import {
+  EntityIconByType,
+  getEntityRecordRiskForListDisplay,
+  getEntityType,
+  sourceFieldToText,
+} from '../helpers';
 import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 import { formatRiskScore } from '../../../common';
 
 export type EntitiesListColumns = [
   Columns<Entity>,
   Columns<string, Entity>,
-  Columns<string | undefined, Entity>,
+  Columns<unknown, Entity>,
   Columns<CriticalityLevels, Entity>,
   Columns<Entity>,
   Columns<Entity>,
@@ -107,7 +113,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         const entityType = getEntityType(record);
         return (
           <span>
-            <EuiIcon type={EntityIconByType[entityType]} />
+            <EuiIcon type={EntityIconByType[entityType]} aria-hidden />
             <span css={{ paddingLeft: euiTheme.size.s }}>{record.entity.name}</span>
           </span>
         );
@@ -124,12 +130,12 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       ),
       width: '25%',
       truncateText: { lines: 2 },
-      render: (source: string | undefined) => {
-        if (source != null) {
-          return sourceFieldToText(source);
+      render: (source: unknown) => {
+        if (source == null) {
+          return getEmptyTagValue();
         }
 
-        return getEmptyTagValue();
+        return sourceFieldToText(source);
       },
     },
     {
@@ -159,7 +165,10 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       width: '10%',
       render: (entity: Entity) => {
         const entityType = getEntityType(entity);
-        const riskScore = get(EntityTypeToScoreField[entityType], entity);
+        const fromStore = getEntityRecordRiskForListDisplay(entity);
+        const riskScore =
+          fromStore?.calculated_score_norm ??
+          (get(EntityTypeToScoreField[entityType], entity) as number | null | undefined);
 
         if (riskScore != null) {
           return (
@@ -181,10 +190,13 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       width: '10%',
       render: (entity: Entity) => {
         const entityType = getEntityType(entity);
-        const riskLevel = get(EntityTypeToLevelField[entityType], entity);
+        const fromStore = getEntityRecordRiskForListDisplay(entity);
+        const riskLevel =
+          fromStore?.calculated_level ??
+          (get(EntityTypeToLevelField[entityType], entity) as string | null | undefined);
 
         if (riskLevel != null) {
-          return <RiskScoreLevel severity={riskLevel} />;
+          return <RiskScoreLevel severity={riskLevel as RiskSeverity} />;
         }
         return getEmptyTagValue();
       },
