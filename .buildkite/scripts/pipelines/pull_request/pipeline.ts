@@ -672,6 +672,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:cps-test')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cps_testing.yml', cancelable));
+    }
+
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml', cancelable));
     }
