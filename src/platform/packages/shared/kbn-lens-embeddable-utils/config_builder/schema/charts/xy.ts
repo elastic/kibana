@@ -607,28 +607,34 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema({
-        collapse_by: schema.maybe(collapseBySchema),
-        color: schema.maybe(colorMappingSchema),
-        aggregate_first: schema.maybe(
-          schema.boolean({
-            meta: { description: 'Whether to aggregate before splitting series' },
-          })
-        ),
-      })
+      mergeAllBucketsWithChartDimensionSchema(
+        {
+          collapse_by: schema.maybe(collapseBySchema),
+          color: schema.maybe(colorMappingSchema),
+          aggregate_first: schema.maybe(
+            schema.boolean({
+              meta: { description: 'Whether to aggregate before splitting series' },
+            })
+          ),
+        },
+        'xyBreakdown'
+      )
     ),
     y: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
-        axis: schema.maybe(yMetricOnAxisSchema),
-        color: schema.maybe(
-          schema.oneOf([staticColorSchema, autoColorSchema], {
-            defaultValue: AUTO_COLOR,
-          })
-        ),
-      }),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+        {
+          axis: schema.maybe(yMetricOnAxisSchema),
+          color: schema.maybe(
+            schema.oneOf([staticColorSchema, autoColorSchema], {
+              defaultValue: AUTO_COLOR,
+            })
+          ),
+        },
+        'xyY'
+      ),
       { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
     ),
-    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({})),
+    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({}, 'xyX')),
   },
   {
     meta: {
@@ -766,7 +772,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     type: schema.literal('reference_lines'),
     thresholds: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared),
+      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared, 'xyRefLine'),
       { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
     ),
   },
