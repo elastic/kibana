@@ -27,7 +27,13 @@ import { from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';
 import type { GeoipDatabase } from '../../../../../../../common/types';
-import { getDatabaseOptionLabel, getDatabaseText, getDatabaseValue, normalizeMmdbFilename, MMDB_EXTENSION } from '../../../../../sections/manage_processors/utils';
+import {
+  getDatabaseOptionLabel,
+  getDatabaseText,
+  getDatabaseValue,
+  normalizeMmdbFilename,
+  MMDB_EXTENSION,
+} from '../../../../../sections/manage_processors/utils';
 import { getTypeLabel } from '../../../../../sections/manage_processors/constants';
 
 const fieldsConfig: FieldsConfig = {
@@ -35,25 +41,27 @@ const fieldsConfig: FieldsConfig = {
   database_file: {
     type: FIELD_TYPES.COMBO_BOX,
     deserializer: (v: unknown) =>
-  to.arrayOfStrings(v).map((str) => {
-    const databaseName = str.split(MMDB_EXTENSION)[0];
-    const knownDatabaseText = getDatabaseText(databaseName);
-    // Known managed DB → return display text (e.g. "ASN" for standard_asn)
-    // Local DB → return full filename (e.g. "ASN.mmdb") to match the combo box label
-    return knownDatabaseText ?? str;
-  }),
+      to.arrayOfStrings(v).map((str) => {
+        const databaseName = str.split(MMDB_EXTENSION)[0];
+        const knownDatabaseText = getDatabaseText(databaseName);
+        // Known managed DB → return display text (e.g. "ASN" for standard_asn)
+        // Local DB → return full filename (e.g. "ASN.mmdb") to match the combo box label
+        return knownDatabaseText ?? str;
+      }),
     serializer: (v: any[]) => {
-  if (v.length) {
-    const databaseName = v[0];
-    // Local databases have the extension already in the label
-    if (typeof databaseName === 'string' && databaseName.endsWith(MMDB_EXTENSION)) {
-      return normalizeMmdbFilename(databaseName);
-    }
-    const databaseValue = getDatabaseValue(databaseName);
-    return databaseValue ? `${databaseValue}${MMDB_EXTENSION}` : `${databaseName}${MMDB_EXTENSION}`;
-  }
-  return undefined;
-},
+      if (v.length) {
+        const databaseName = v[0];
+        // Local databases have the extension already in the label
+        if (typeof databaseName === 'string' && databaseName.endsWith(MMDB_EXTENSION)) {
+          return normalizeMmdbFilename(databaseName);
+        }
+        const databaseValue = getDatabaseValue(databaseName);
+        return databaseValue
+          ? `${databaseValue}${MMDB_EXTENSION}`
+          : `${databaseName}${MMDB_EXTENSION}`;
+      }
+      return undefined;
+    },
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.ipLocationForm.databaseFileLabel', {
       defaultMessage: 'Database file (optional)',
     }),
