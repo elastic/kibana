@@ -110,6 +110,7 @@ Note:
         events,
         logger,
         topSnippetsConfig,
+        rowLimit: 100,
       });
       return { results };
     },
