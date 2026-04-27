@@ -101,6 +101,16 @@ export const SharepointOnline: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'microsoft',
+          scope: 'Sites.Read.All Files.Read.All offline_access',
+        },
+      },
     ],
   },
 

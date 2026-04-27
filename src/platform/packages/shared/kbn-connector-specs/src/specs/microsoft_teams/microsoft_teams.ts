@@ -141,6 +141,17 @@ export const MicrosoftTeams: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'microsoft',
+          scope:
+            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
+        },
+      },
     ],
   },
 
