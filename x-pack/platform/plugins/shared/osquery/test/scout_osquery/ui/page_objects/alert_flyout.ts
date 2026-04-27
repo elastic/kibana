@@ -183,10 +183,7 @@ export class AlertFlyoutPage {
 
   async clickSubmitInFlyout(): Promise<void> {
     await submitLiveQuery(this.page, this.submitButton, {
-      // Longer per-attempt timeout for Fleet + All agents on cold CI.
-      perAttemptTimeoutMs: 35_000,
-      maxAttempts: 4,
-      timeoutMs: 120_000,
+      responseTimeoutMs: 120_000,
     });
   }
 
