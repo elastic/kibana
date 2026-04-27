@@ -1,8 +1,20 @@
 get:
   summary: Get all data views
   operationId: getAllDataViews
+  description: >
+    Retrieve a list of all data views.
+    Use this endpoint to identify available data views in the current Kibana space.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X GET "${KIBANA_URL}/s/{spaceId}/api/data_views" \
+          -H "Authorization: ApiKey ${API_KEY}"
+    - lang: Console
+      source: |
+        GET kbn://s/{spaceId}/api/data_views
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
   responses:

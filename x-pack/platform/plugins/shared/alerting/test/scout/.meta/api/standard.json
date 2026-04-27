@@ -1,59 +1,59 @@
 {
-  "sha1": "b0cba678da5eefa8bf502c8ce06ecb8d1294285a",
+  "sha1": "aed7080d95e5f0eb04fa392956042036234e22f9",
   "tests": [
     {
       "id": "d477aadf04adbc2-d5bf7aa0c833ea4",
       "title": "API key invalidation on rule operations enable rule preserves existing API keys without invalidation",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 12
       }
     },
     {
       "id": "d477aadf04adbc2-a91a1d94d723dae",
       "title": "API key invalidation on rule operations update rule rotates both apiKey and uiamApiKey",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 12
       }
     },
     {
       "id": "d477aadf04adbc2-32d3d50cf3d8948",
       "title": "API key invalidation on rule operations update_api_key rotates both apiKey and uiamApiKey",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 158,
+        "line": 159,
         "column": 12
       }
     },
     {
       "id": "d477aadf04adbc2-7bf0ffd8af69858",
       "title": "API key invalidation on rule operations bulk enable preserves existing API keys without invalidation",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 206,
+        "line": 207,
         "column": 12
       }
     },

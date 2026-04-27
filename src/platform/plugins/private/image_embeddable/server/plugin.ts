@@ -15,7 +15,7 @@ import { getImageEmbeddableSchema } from './schemas';
 
 export class ImageEmbeddablePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
-    plugins.embeddable.registerTransforms(IMAGE_EMBEDDABLE_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(IMAGE_EMBEDDABLE_TYPE, {
       title: 'Image',
       getTransforms,
       getSchema: (getDrilldownsSchemas) => getImageEmbeddableSchema(getDrilldownsSchemas),
