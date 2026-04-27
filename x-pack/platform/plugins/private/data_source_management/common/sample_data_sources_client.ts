@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { DataSourceType } from './datasource_types';
+import type { DataSourceType, DataSourceWithSecrets } from './datasource_types';
 
 export interface DataSourceListItem {
   id: string;
@@ -66,8 +66,7 @@ export class SampleDataSourcesClient {
 
   public async add(input: {
     name: string;
-    description: string;
-    type: DataSourceType;
+    dataSource: Omit<DataSourceWithSecrets, 'id'>;
   }): Promise<DataSourceListItem> {
     const name = input.name.trim();
     if (!name) {
@@ -88,8 +87,8 @@ export class SampleDataSourcesClient {
     const row: DataSourceListItem = {
       id,
       name,
-      description: input.description.trim(),
-      type: input.type,
+      description: input.dataSource.description,
+      type: input.dataSource.type,
     };
     this.rows.push(row);
     return { ...row };

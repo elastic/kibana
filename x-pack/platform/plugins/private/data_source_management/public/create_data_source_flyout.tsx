@@ -25,8 +25,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import type { DataSourceWithSecrets } from '../common';
 import { ALL_DATA_SOURCE_TYPES } from '../common';
 import type { DataSourceType } from '../common/datasource_types';
+import { buildOmitIdDataSource } from './build_create_data_source_payload';
+import { emptyCreateDataSourceFormSettings } from './create_data_source_flyout_form_state';
+import type { CreateDataSourceFlyoutFormSettings } from './create_data_source_flyout_form_state';
+import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
 
 export interface CreateDataSourceFlyoutProps {
@@ -36,8 +41,7 @@ export interface CreateDataSourceFlyoutProps {
    */
   onSave: (values: {
     name: string;
-    description: string;
-    type: DataSourceType;
+    dataSource: Omit<DataSourceWithSecrets, 'id'>;
   }) => Promise<string | null>;
 }
 
@@ -48,6 +52,9 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [dataSourceType, setDataSourceType] = useState<DataSourceType>('s3');
+  const [formSettings, setFormSettings] = useState<CreateDataSourceFlyoutFormSettings>(
+    emptyCreateDataSourceFormSettings
+  );
   const [nameError, setNameError] = useState<string | undefined>();
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
@@ -75,30 +82,33 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     setSaveError(undefined);
     setIsSaving(true);
     try {
-      const message = await onSave({
-        name: trimmedName,
-        description: description.trim(),
-        type: dataSourceType,
-      });
+      const built = buildOmitIdDataSource(trimmedName, description, dataSourceType, formSettings);
+      if (!('dataSource' in built)) {
+        setSaveError(built.message);
+        return;
+      }
+      const { dataSource } = built;
+      const message = await onSave({ name: trimmedName, dataSource });
       if (message) {
         setSaveError(message);
       } else {
         setName('');
         setDescription('');
         setDataSourceType('s3');
+        setFormSettings(emptyCreateDataSourceFormSettings());
         onClose();
       }
     } finally {
       setIsSaving(false);
     }
-  }, [dataSourceType, description, name, onClose, onSave]);
+  }, [dataSourceType, description, formSettings, name, onClose, onSave]);
 
   return (
     <EuiFlyout
       ownFocus
       onClose={onClose}
       aria-labelledby="createDataSourceFlyoutTitle"
-      size="m"
+      size="l"
       data-test-subj="createDataSourceFlyout"
     >
       <EuiFlyoutHeader hasBorder>
@@ -170,6 +180,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               rows={4}
             />
           </EuiFormRow>
+          <CreateDataSourceFlyoutTypeSettingsBlock
+            dataSourceType={dataSourceType}
+            formSettings={formSettings}
+            onFormSettingsChange={setFormSettings}
+          />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
