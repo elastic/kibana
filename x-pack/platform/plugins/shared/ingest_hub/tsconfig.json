@@ -19,6 +19,7 @@
     "@kbn/cloud-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/kibana-react-plugin",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/logging-mocks"
   ]
 }
