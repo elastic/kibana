@@ -20,7 +20,7 @@ import {
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
-import type { DataSourceType } from '../common/datasource_types';
+import type { DataSourceWithSecrets } from '../common';
 import type { DataSetListItem } from '../common/sample_data_sets_client';
 import { SampleDataSetsClient } from '../common/sample_data_sets_client';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
@@ -69,8 +69,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({ pageT
   const handleCreateDataSourceSave = useCallback(
     async (values: {
       name: string;
-      description: string;
-      type: DataSourceType;
+      dataSource: Omit<DataSourceWithSecrets, 'id'>;
     }): Promise<string | null> => {
       try {
         await dataClient.add(values);
