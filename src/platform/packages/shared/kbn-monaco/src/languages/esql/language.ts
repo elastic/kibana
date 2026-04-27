@@ -184,7 +184,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         model: monaco.editor.ITextModel,
         position: monaco.Position,
         _context: monaco.languages.InlineCompletionContext,
-        token: monaco.CancellationToken
+        token?: monaco.CancellationToken
       ) {
         const fullText = model.getValue();
         // Get the text before the cursor
@@ -203,7 +203,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         );
 
         const result = await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
-        if (model.isDisposed() || token.isCancellationRequested) {
+        if (model.isDisposed() || token?.isCancellationRequested) {
           return { items: [] };
         }
         return result;
