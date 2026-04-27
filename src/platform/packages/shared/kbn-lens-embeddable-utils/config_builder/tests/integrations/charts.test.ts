@@ -11,7 +11,7 @@ import path from 'path';
 import fs from 'fs';
 import { validator } from '../utils/validator';
 import type { LensAttributes } from '../..';
-import { groupBy, camelCase } from 'lodash';
+import { groupBy } from 'lodash';
 import { LensConfigBuilder } from '../../config_builder';
 
 const files = fs.readFileSync(path.join(__dirname, './lens_panels.json'), 'utf-8');
@@ -59,11 +59,11 @@ describe('Integration panels', () => {
             it.each(active.map(({ panel_title: title, attributes }) => [title, attributes]))(
               'should convert the panel - %s',
               (_title, attributes) => {
-                const type = camelCase(builder.getCompatibleType(chartType) ?? '');
-                const typeValidator = validator[type as keyof typeof validator];
+                const type = builder.getCompatibleType(chartType);
+                const typeValidator = validator[type];
 
                 if (typeValidator) {
-                  validator[type as keyof typeof validator].fromState(attributes, true);
+                  validator[type].fromState(attributes, true);
                 } else {
                   throw new Error(`No validator found for type: ${type}(${chartType})`);
                 }

@@ -30,39 +30,39 @@ import {
 describe('Tagcloud', () => {
   describe('state transform validation', () => {
     it('should convert a simple tag cloud', () => {
-      validator.tagcloud.fromState(tagcloudAttributes);
+      validator.tag_cloud.fromState(tagcloudAttributes);
     });
     it('should convert a tag cloud with full config', () => {
-      validator.tagcloud.fromState(tagcloudAttributesWithFullConfig);
+      validator.tag_cloud.fromState(tagcloudAttributesWithFullConfig);
     });
     it('should convert an esql tagcloud', () => {
-      validator.tagcloud.fromState(tagcloudESQLAttributes);
+      validator.tag_cloud.fromState(tagcloudESQLAttributes);
     });
   });
 
   describe('api transform validation', () => {
     it('should convert a basic tagcloud chart with ad hoc dataView', () => {
-      validator.tagcloud.fromApi(basicTagcloudWithAdHocDataView);
+      validator.tag_cloud.fromApi(basicTagcloudWithAdHocDataView);
     });
 
     it('should convert a basic tagcloud chart with dataView', () => {
-      validator.tagcloud.fromApi(basicTagcloudWithDataView);
+      validator.tag_cloud.fromApi(basicTagcloudWithDataView);
     });
 
     it('should convert a ESQL-based tagcloud chart', () => {
-      validator.tagcloud.fromApi(basicEsqlTagcloud);
+      validator.tag_cloud.fromApi(basicEsqlTagcloud);
     });
 
     it('should convert a comprehensive tagcloud chart with ad hoc data view', () => {
-      validator.tagcloud.fromApi(comprehensiveTagcloudWithAdHocDataView);
+      validator.tag_cloud.fromApi(comprehensiveTagcloudWithAdHocDataView);
     });
 
     it('should convert a comprehensive tagcloud chart with data view', () => {
-      validator.tagcloud.fromApi(comprehensiveTagcloudWithDataView);
+      validator.tag_cloud.fromApi(comprehensiveTagcloudWithDataView);
     });
 
     it('should convert a comprehensive ESQL-based tagcloud chart', () => {
-      validator.tagcloud.fromApi(comprehensiveEsqlTagcloud);
+      validator.tag_cloud.fromApi(comprehensiveEsqlTagcloud);
     });
   });
 

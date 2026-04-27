@@ -9,7 +9,7 @@
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 
-import type { LensApiConfig, LegacyMetricConfig } from '../../schema';
+import type { LegacyMetricConfig } from '../../schema';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -33,59 +33,61 @@ import { validator } from '../utils/validator';
 describe('Legacy Metric', () => {
   describe('state transform validation', () => {
     it('should convert a simple legacy metric', () => {
-      validator.legacyMetric.fromState(simpleLegacyMetricAttributes);
+      validator.legacy_metric.fromState(simpleLegacyMetricAttributes);
     });
 
     it('should convert a default color by value palette', () => {
-      validator.legacyMetric.fromState(defaultColorByValueAttributes);
+      validator.legacy_metric.fromState(defaultColorByValueAttributes);
     });
 
     it('should convert a selector color by value palette', () => {
-      validator.legacyMetric.fromState(selectorColorByValueAttributes);
+      validator.legacy_metric.fromState(selectorColorByValueAttributes);
     });
 
     it('should convert a custom metric with a color by value palette', () => {
-      validator.legacyMetric.fromState(customColorByValueAttributes);
+      validator.legacy_metric.fromState(customColorByValueAttributes);
     });
   });
 
   describe('api transform validation', () => {
     it('should convert abasic legacy metric chart with ad hoc dataView', () => {
-      validator.legacyMetric.fromApi(basicLegacyMetricWithAdHocDataView);
+      validator.legacy_metric.fromApi(basicLegacyMetricWithAdHocDataView);
     });
 
     it('should convert a basic legacy metric chart with dataView', () => {
-      validator.legacyMetric.fromApi(basicLegacyMetricWithDataView);
+      validator.legacy_metric.fromApi(basicLegacyMetricWithDataView);
     });
 
     it('should reject a ESQL-based legacy metric chart', () => {
       expect(() =>
-        validator.legacyMetric.fromApi(esqlLegacyMetric as unknown as LensApiConfig)
+        validator.legacy_metric.fromApi(esqlLegacyMetric as unknown as LegacyMetricConfig)
       ).toThrow();
     });
 
     it('should convert a comprehensive legacy metric chart with ad hoc data view', () => {
-      validator.legacyMetric.fromApi(comprehensiveLegacyMetricWithAdHocDataView);
+      validator.legacy_metric.fromApi(comprehensiveLegacyMetricWithAdHocDataView);
     });
 
     it('should convert a comprehensive legacy metric chart with data view', () => {
-      validator.legacyMetric.fromApi(comprehensiveLegacyMetricWithDataView);
+      validator.legacy_metric.fromApi(comprehensiveLegacyMetricWithDataView);
     });
 
     it('should reject a comprehensive ESQL-based legacy metric chart', () => {
       expect(() =>
-        validator.legacyMetric.fromApi(comprehensiveEsqlLegacyMetric as unknown as LensApiConfig)
+        validator.legacy_metric.fromApi(
+          comprehensiveEsqlLegacyMetric as unknown as LegacyMetricConfig
+        )
       ).toThrow();
     });
 
     it('should convert a legacy metric chart with apply_color_to, but without color', () => {
-      validator.legacyMetric.fromApi(legacyMetricWithApplyColorToWithoutColor, [
+      validator.legacy_metric.fromApi(legacyMetricWithApplyColorToWithoutColor, [
         'metric.apply_color_to',
       ]);
     });
 
     it('should convert a legacy metric chart with color, but without apply_color_to', () => {
-      validator.legacyMetric.fromApi(legacyMetricWithColorWithoutApplyColorTo, ['metric.color']);
+      validator.legacy_metric.fromApi(legacyMetricWithColorWithoutApplyColorTo, ['metric.color']);
     });
   });
 

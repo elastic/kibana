@@ -9,19 +9,21 @@
 
 import { validateTransformsFn } from './validate_transforms';
 import type { ValidateTransform } from './types';
+import type { LensApiConfigByType, LensApiConfigChartType } from '../../../schema';
 
-export const validator = {
+export const validator: {
+  [K in LensApiConfigChartType]: ValidateTransform<LensApiConfigByType[K]>;
+} = {
   gauge: validateTransformsFn('gauge'),
-  tagcloud: validateTransformsFn('tagcloud'),
+  tag_cloud: validateTransformsFn('tag_cloud'),
   metric: validateTransformsFn('metric'),
-  legacyMetric: validateTransformsFn('legacy_metric'),
+  legacy_metric: validateTransformsFn('legacy_metric'),
   xy: validateTransformsFn('xy'),
   heatmap: validateTransformsFn('heatmap'),
-  regionMap: validateTransformsFn('region_map'),
-  datatable: validateTransformsFn('datatable'),
+  region_map: validateTransformsFn('region_map'),
+  data_table: validateTransformsFn('data_table'),
   mosaic: validateTransformsFn('mosaic'),
   pie: validateTransformsFn('pie'),
-  donut: validateTransformsFn('donut'),
   treemap: validateTransformsFn('treemap'),
   waffle: validateTransformsFn('waffle'),
-} satisfies Record<string, ValidateTransform<any>>;
+};

@@ -53,11 +53,11 @@ import {
   fromAPItoLensState as fromDatatableAPItoLensState,
   fromLensStateToAPI as fromDatatableLensStateToAPI,
 } from './transforms/charts/datatable';
-import type { LensApiConfig } from './schema';
+import type { LensApiConfig, LensApiConfigChartType } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
 
-const compatibilityMap: Record<string, string> = {
+const compatibilityMap: Record<string, LensApiConfigChartType> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
   lnsXY: 'xy',
@@ -172,7 +172,7 @@ export class LensConfigBuilder {
     return type in this.apiConvertersByChart;
   }
 
-  getCompatibleType(type: string): string | null {
+  getCompatibleType(type: string): LensApiConfigChartType {
     const compatType = compatibilityMap[type];
 
     if (compatType) return compatType;
