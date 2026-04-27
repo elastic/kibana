@@ -21,6 +21,7 @@ import {
 } from '../../../../lib/tasks/task_definitions/features_identification';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
+import type { FeatureBulkOperation } from '../../../../lib/streams/feature/feature_client';
 
 export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
 
@@ -284,6 +285,102 @@ export const bulkFeaturesRoute = createServerRoute({
   },
 });
 
+export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/features/_bulk',
+  options: {
+    access: 'internal',
+    summary: 'Bulk feature operations across streams',
+    description:
+      'Performs bulk delete / exclude / restore operations on features across multiple streams in a single request. Client sends flat operations keyed by feature UUID; the server resolves stream ownership via featureClient.findFeaturesByUuids and delegates per-stream to featureClient.bulk.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      operations: z
+        .array(
+          z.union([
+            z.object({ delete: z.object({ id: z.string() }) }),
+            z.object({ exclude: z.object({ id: z.string() }) }),
+            z.object({ restore: z.object({ id: z.string() }) }),
+          ])
+        )
+        .min(1),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
+    const { getFeatureClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const featureClient = await getFeatureClient();
+
+    // Resolve UUID → stream_name server-side. UUIDs not found in storage are
+    // idempotent no-ops counted as `skipped` (matching the queries endpoint
+    // pattern, which uses getQueryLinks for the same purpose).
+    const opsByUuid = new Map<string, FeatureBulkOperation>();
+    for (const op of params.body.operations) {
+      const id = 'delete' in op ? op.delete.id : 'exclude' in op ? op.exclude.id : op.restore.id;
+      // Last write wins on duplicate UUIDs in the input — caller shouldn't
+      // pass duplicates, but if they do, the latter op replaces the former.
+      opsByUuid.set(id, op);
+    }
+    const requestedUuids = Array.from(opsByUuid.keys());
+    const resolved = await featureClient.findFeaturesByUuids(requestedUuids);
+    const skippedFromLookup = requestedUuids.length - resolved.length;
+
+    // Group resolved ops by stream.
+    const byStream = resolved.reduce<Record<string, FeatureBulkOperation[]>>(
+      (acc, { uuid: featureUuid, stream_name: streamName }) => {
+        const op = opsByUuid.get(featureUuid);
+        if (!op) {
+          return acc;
+        }
+        if (!acc[streamName]) {
+          acc[streamName] = [];
+        }
+        acc[streamName].push(op);
+        return acc;
+      },
+      {}
+    );
+
+    // featureClient.bulk silently drops exclude/restore ops targeting computed
+    // features (and any stale UUIDs that slipped through between the lookup
+    // and the bulk call). Both classes show up as additional `skipped` count.
+    // Only thrown batches count as `failed`.
+    let succeeded = 0;
+    let failed = 0;
+    let skipped = skippedFromLookup;
+
+    for (const [streamName, ops] of Object.entries(byStream)) {
+      try {
+        const { applied, skipped: streamSkipped } = await featureClient.bulk(streamName, ops);
+        succeeded += applied;
+        skipped += streamSkipped;
+      } catch (error) {
+        logger.error(
+          `Bulk feature operation failed for stream ${streamName}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        failed += ops.length;
+      }
+    }
+
+    return { succeeded, failed, skipped };
+  },
+});
+
 export const featuresStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/features/_status',
   options: {
@@ -392,6 +489,7 @@ export const featureRoutes = {
   ...listFeaturesRoute,
   ...listAllFeaturesRoute,
   ...bulkFeaturesRoute,
+  ...bulkFeaturesAcrossStreamsRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,
 };

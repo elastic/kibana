@@ -15,22 +15,25 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import {
   ResponseActionCreateSuccessResponse,
   BaseActionSchema,
 } from '../../../model/schema/common.gen';
 
+export const GetProcessesRouteRequestBody = lazySchema(() => BaseActionSchema);
 export type GetProcessesRouteRequestBody = z.infer<typeof GetProcessesRouteRequestBody>;
-export const GetProcessesRouteRequestBody = BaseActionSchema;
 
+export const EndpointGetProcessesActionRequestBody = lazySchema(() => GetProcessesRouteRequestBody);
 export type EndpointGetProcessesActionRequestBody = z.infer<
   typeof EndpointGetProcessesActionRequestBody
 >;
-export const EndpointGetProcessesActionRequestBody = GetProcessesRouteRequestBody;
 export type EndpointGetProcessesActionRequestBodyInput = z.input<
   typeof EndpointGetProcessesActionRequestBody
 >;
 
+export const EndpointGetProcessesActionResponse = lazySchema(
+  () => ResponseActionCreateSuccessResponse
+);
 export type EndpointGetProcessesActionResponse = z.infer<typeof EndpointGetProcessesActionResponse>;
-export const EndpointGetProcessesActionResponse = ResponseActionCreateSuccessResponse;

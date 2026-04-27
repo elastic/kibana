@@ -27,23 +27,6 @@ import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 jest.mock('../contexts/enabled_features_context');
 const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof useEnabledFeatures>;
 
-jest.mock('@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal', () => {
-  return {
-    AIAgentConfirmationModal: ({
-      onConfirm,
-      onCancel,
-    }: {
-      onConfirm: () => void;
-      onCancel: () => void;
-    }) => (
-      <div data-test-subj="confirmModal">
-        <button data-test-subj="confirmModalConfirm" onClick={onConfirm} />
-        <button data-test-subj="confirmModalCancel" onClick={onCancel} />
-      </div>
-    ),
-  };
-});
-
 // Mock productDocBase
 const mockProductDocBase = {
   installation: {
@@ -530,9 +513,6 @@ describe('GenAiSettingsApp', () => {
       `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
     );
     fireEvent.change(chatExperienceSelect, { target: { value: AIChatExperience.Agent } });
-
-    // Close modal to mirror the real flow before saving
-    fireEvent.click(await screen.findByTestId('confirmModalConfirm'));
 
     const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
     fireEvent.click(saveButton);

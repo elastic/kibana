@@ -621,9 +621,15 @@ async function getDropdownOptions(dropdownToggleButton: HTMLElement): Promise<st
 }
 
 async function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  await act(async () => {
-    fireEvent.click(comboBoxToggleButton);
-  });
+  const parentComboBox = comboBoxToggleButton.closest('.euiComboBox');
+  const comboBoxInput = parentComboBox?.querySelector('input[role="combobox"]');
+  const isAlreadyExpanded = comboBoxInput?.getAttribute('aria-expanded') === 'true';
+
+  if (!isAlreadyExpanded) {
+    await act(async () => {
+      fireEvent.click(comboBoxToggleButton);
+    });
+  }
 
   return waitFor(() => {
     const listWithOptionsElement = document.querySelector('[role="listbox"]');

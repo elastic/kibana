@@ -14,6 +14,7 @@ paths:
       x-state: Technical Preview
       operationId: ListWatchlists
       summary: List all watchlists
+      description: Returns a list of all entity analytics watchlists.
       responses:
         "200":
           description: List of watchlists
