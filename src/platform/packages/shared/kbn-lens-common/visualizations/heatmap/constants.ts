@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IconChartHeatmap } from '@kbn/chart-icons';
-import { i18n } from '@kbn/i18n';
 import type { RequiredPaletteParamTypes } from '@kbn/coloring';
 import {
   FIXED_PROGRESSION,
@@ -23,16 +21,6 @@ export const LENS_HEATMAP_ID = 'lnsHeatmap';
 export const LENS_HEATMAP_CHART_SHAPES = {
   HEATMAP: 'heatmap',
 } as const;
-
-export const LENS_HEATMAP_CHART_NAMES = {
-  heatmap: {
-    shapeType: LENS_HEATMAP_CHART_SHAPES.HEATMAP,
-    icon: IconChartHeatmap,
-    label: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
-      defaultMessage: 'Heat map',
-    }),
-  },
-};
 
 export const LENS_HEATMAP_GROUP_ID = {
   X: 'x',

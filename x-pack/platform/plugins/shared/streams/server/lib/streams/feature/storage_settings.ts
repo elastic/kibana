@@ -26,6 +26,7 @@ import {
   FEATURE_ID,
   FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
+  FEATURE_RUN_ID,
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 
@@ -50,6 +51,7 @@ export const featureStorageSettings = {
       [FEATURE_META]: types.object({ enabled: false }),
       [FEATURE_EXPIRES_AT]: types.date(),
       [FEATURE_EXCLUDED_AT]: types.date(),
+      [FEATURE_RUN_ID]: types.keyword(),
       [FEATURE_FILTER]: types.object({ enabled: false }),
       [FEATURE_SEARCH_EMBEDDING]: types.semantic_text(),
     },

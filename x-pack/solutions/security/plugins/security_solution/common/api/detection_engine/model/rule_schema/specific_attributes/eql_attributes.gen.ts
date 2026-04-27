@@ -14,19 +14,19 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const EventCategoryOverride = lazySchema(() => z.string());
 export type EventCategoryOverride = z.infer<typeof EventCategoryOverride>;
-export const EventCategoryOverride = z.string();
 
 /**
  * Specifies the name of the event timestamp field used for sorting a sequence of events. Not to be confused with `timestamp_override`, which specifies the more general field used for querying events within a range. Defaults to the @timestamp ECS field.
  */
+export const TimestampField = lazySchema(() => z.string());
 export type TimestampField = z.infer<typeof TimestampField>;
-export const TimestampField = z.string();
 
 /**
  * Sets a secondary field for sorting events
  */
+export const TiebreakerField = lazySchema(() => z.string());
 export type TiebreakerField = z.infer<typeof TiebreakerField>;
-export const TiebreakerField = z.string();

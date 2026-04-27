@@ -7,19 +7,8 @@
 
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiToolTip,
-} from '@elastic/eui';
-import { AiButton } from '@kbn/shared-ux-ai-components';
-import {
-  navigateToSettingsManagementApp,
-  useAgentBuilderOptIn,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { navigateToSettingsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   ConnectorSelectable,
   type ConnectorSelectableComponentProps,
@@ -38,26 +27,16 @@ type ConnectorLists = [
 export function ChatActionsMenu({
   connectors,
   disabled,
-  isConversationApp,
   navigateToModelManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   disabled: boolean;
-  isConversationApp: boolean;
   navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
-  const { application, http, notifications, docLinks } = useKibana().services;
+  const { application, http, notifications } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
   const [isOpen, setIsOpen] = useState(false);
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
-
-  const {
-    showAgentBuilderOptInCta,
-    isAgentBuilderConfirmationModalOpen,
-    openAgentBuilderConfirmationModal,
-    closeAgentBuilderConfirmationModal,
-    confirmAgentBuilderOptIn,
-  } = useAgentBuilderOptIn({ navigateFromConversationApp: isConversationApp });
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
@@ -123,40 +102,17 @@ export function ChatActionsMenu({
       ),
       panel: !connectors.isConnectorSelectionRestricted ? 1 : undefined,
     },
-    ...(showAgentBuilderOptInCta
-      ? [
-          {
-            isSeparator: true as const,
-            key: 'agentBuilderOptInSeparator',
-          },
-          {
-            renderItem: () => (
-              <EuiPopoverFooter paddingSize="s">
-                <AiButton
-                  fullWidth
-                  size="s"
-                  variant="base"
-                  iconType="productAgent"
-                  style={{ marginInlineStart: 'auto' }}
-                  onClick={() => {
-                    toggleActionsMenu();
-                    openAgentBuilderConfirmationModal();
-                  }}
-                >
-                  {i18n.translate('xpack.aiAssistant.chatHeader.actions.agentBuilderOptInButton', {
-                    defaultMessage: 'Try AI Agent',
-                  })}
-                </AiButton>
-              </EuiPopoverFooter>
-            ),
-          },
-        ]
-      : []),
   ];
 
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.aiAssistant.chatActionsMenu.euiToolTip.moreActionsLabel',
+          {
+            defaultMessage: 'More actions',
+          }
+        )}
         isOpen={isOpen}
         button={
           <EuiToolTip
@@ -235,14 +191,6 @@ export function ChatActionsMenu({
             onSubmitSuccess={() => connectors.reloadConnectors()}
           />
         </Suspense>
-      )}
-
-      {isAgentBuilderConfirmationModalOpen && docLinks?.links && (
-        <AIAgentConfirmationModal
-          onConfirm={confirmAgentBuilderOptIn}
-          onCancel={closeAgentBuilderConfirmationModal}
-          docLinks={docLinks.links}
-        />
       )}
     </>
   );

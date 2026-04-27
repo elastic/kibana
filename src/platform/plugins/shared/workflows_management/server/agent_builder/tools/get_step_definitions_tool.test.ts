@@ -18,6 +18,7 @@ jest.mock('../../../common/schema', () => ({
   getAllConnectors: (...args: unknown[]) => mockGetAllConnectors(...args),
   addDynamicConnectorsToCache: (...args: unknown[]) => mockAddDynamicConnectorsToCache(...args),
   getCachedAllConnectorsMap: () => null,
+  getDeprecatedStepMetadata: () => undefined,
 }));
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>

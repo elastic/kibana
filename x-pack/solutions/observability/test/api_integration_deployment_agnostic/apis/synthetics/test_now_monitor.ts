@@ -12,6 +12,7 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
+import { cleanSyntheticsTestData } from '../../services/synthetics_private_location';
 
 export const LOCAL_LOCATION = {
   id: 'dev',
@@ -37,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let editorUser: RoleCredentials;
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)

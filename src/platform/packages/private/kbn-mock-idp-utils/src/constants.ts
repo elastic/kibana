@@ -56,6 +56,8 @@ export const MOCK_IDP_UIAM_SERVICE_INTERNAL_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_INTERNAL_URL || 'https://uiam:8443';
 export const MOCK_IDP_UIAM_SERVICE_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_URL || 'https://localhost:8443';
+export const MOCK_IDP_UIAM_OAUTH_BASE_URL =
+  process.env.MOCK_IDP_UIAM_OAUTH_BASE_URL || `https://localhost:8444/oauth2`;
 
 export const MOCK_IDP_REALM_NAME = 'cloud-saml-kibana';
 export const MOCK_IDP_REALM_TYPE = 'saml';

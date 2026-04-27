@@ -1567,7 +1567,7 @@
           ">; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_logs/missing_db_index_pool_exhaustion.ts",
-        "lineNumber": 507,
+        "lineNumber": 506,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1580,7 +1580,7 @@
             "label": "{\n  range,\n  logsEsClient,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_logs/missing_db_index_pool_exhaustion.ts",
-            "lineNumber": 510,
+            "lineNumber": 509,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1602,7 +1602,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_logs/missing_db_index_pool_exhaustion.ts",
-                "lineNumber": 511,
+                "lineNumber": 510,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1624,7 +1624,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_logs/missing_db_index_pool_exhaustion.ts",
-                "lineNumber": 512,
+                "lineNumber": 511,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

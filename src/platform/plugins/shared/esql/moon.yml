@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/visualization-utils'
   - '@kbn/esql-types'
+  - '@kbn/esql-server-utils'
   - '@kbn/licensing-plugin'
   - '@kbn/projects-solutions-groups'
   - '@kbn/esql-language'
@@ -57,6 +58,8 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/controls-constants'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod

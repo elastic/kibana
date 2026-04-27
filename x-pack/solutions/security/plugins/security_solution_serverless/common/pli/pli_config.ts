@@ -24,6 +24,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.externalRuleActions,
       ProductFeatureKey.casesConnectors,
       ProductFeatureKey.aiValueReport,
+      ProductFeatureKey.workflows,
     ],
     // neither of these tiers are available in ai_soc product line
     essentials: [],
@@ -60,6 +61,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.aiValueReport,
       ProductFeatureKey.graphVisualization,
       ProductFeatureKey.ruleGapsAutoFill,
+      ProductFeatureKey.workflows,
     ],
   },
   [ProductLine.endpoint]: {

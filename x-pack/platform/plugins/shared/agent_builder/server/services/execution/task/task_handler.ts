@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import { ExecutionStatus } from '../types';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
 import {
   handleAgentExecution,

@@ -66,6 +66,26 @@ describe('validateDeprecatedStepTypes', () => {
     ]);
   });
 
+  it('returns a warning for prefix-matched deprecated step types (AI connectors)', () => {
+    const aiStep = createStepInfo({
+      stepId: 'ai_call',
+      stepType: 'inference.completion',
+      propInfos: {
+        type: createPropInfo(['type'], 'inference.completion', [10, 20, 20]),
+      },
+    });
+
+    const results = validateDeprecatedStepTypes(createWorkflowLookup([aiStep]), mockLineCounter);
+
+    expect(results).toEqual([
+      expect.objectContaining({
+        owner: 'deprecated-step-validation',
+        severity: 'warning',
+        message: 'Step type "inference.completion" is deprecated. Use "ai.prompt" instead.',
+      }),
+    ]);
+  });
+
   it('returns no warnings for non-deprecated step types', () => {
     const currentStep = createStepInfo({
       stepId: 'create_case',

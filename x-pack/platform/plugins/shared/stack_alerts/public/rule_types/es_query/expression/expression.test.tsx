@@ -5,7 +5,9 @@
  * 2.0.
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import userEvent from '@testing-library/user-event';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React, { useState } from 'react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -18,11 +20,8 @@ import { EsQueryRuleTypeExpression } from './expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { act } from 'react-dom/test-utils';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import type { ReactWrapper } from 'enzyme';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -227,7 +226,7 @@ const setup = (
     | EsQueryRuleParams<SearchType.esqlQuery>,
   metadata?: EsQueryRuleMetaData
 ) => {
-  return mountWithIntl(
+  return renderWithI18n(
     <KibanaContextProvider
       services={{
         data: dataMock,
@@ -251,116 +250,110 @@ describe('EsQueryRuleTypeExpression', () => {
     uiSettingsMock.get.mockReturnValue(true);
   });
 
-  test('should render options by default', async () => {
-    const wrapper = setup({} as EsQueryRuleParams<SearchType.esQuery>);
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
-    expect(findTestSubject(wrapper, 'queryFormType_searchSource').exists()).toBeTruthy();
-    expect(findTestSubject(wrapper, 'queryFormType_esQuery').exists()).toBeTruthy();
-    expect(findTestSubject(wrapper, 'queryFormType_esqlQuery').exists()).toBeTruthy();
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
+  test('should render options by default', () => {
+    setup({} as EsQueryRuleParams<SearchType.esQuery>);
+    expect(screen.getByTestId('queryFormTypeChooserTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('queryFormType_searchSource')).toBeInTheDocument();
+    expect(screen.getByTestId('queryFormType_esQuery')).toBeInTheDocument();
+    expect(screen.getByTestId('queryFormType_esqlQuery')).toBeInTheDocument();
+    expect(screen.queryByTestId('queryFormTypeChooserCancel')).not.toBeInTheDocument();
   });
 
-  test('should hide ESQL option when not enabled', async () => {
+  test('should hide ESQL option when not enabled', () => {
     uiSettingsMock.get.mockReturnValueOnce(false);
-    const wrapper = setup({} as EsQueryRuleParams<SearchType.esQuery>);
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
-    expect(findTestSubject(wrapper, 'queryFormType_searchSource').exists()).toBeTruthy();
-    expect(findTestSubject(wrapper, 'queryFormType_esQuery').exists()).toBeTruthy();
-    expect(findTestSubject(wrapper, 'queryFormType_esqlQuery').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
+    setup({} as EsQueryRuleParams<SearchType.esQuery>);
+    expect(screen.getByTestId('queryFormTypeChooserTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('queryFormType_searchSource')).toBeInTheDocument();
+    expect(screen.getByTestId('queryFormType_esQuery')).toBeInTheDocument();
+    expect(screen.queryByTestId('queryFormType_esqlQuery')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('queryFormTypeChooserCancel')).not.toBeInTheDocument();
   });
 
   test('should switch to QueryDSL form type on selection and return back on cancel', async () => {
-    let wrapper = setup({} as EsQueryRuleParams<SearchType.esQuery>);
-    await act(async () => {
-      findTestSubject(wrapper, 'queryFormType_esQuery').simulate('click');
-    });
-    wrapper = await wrapper.update();
+    setup({} as EsQueryRuleParams<SearchType.esQuery>);
+    await userEvent.click(screen.getByTestId('queryFormType_esQuery'));
 
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
-    expect(wrapper.exists('[data-test-subj="queryJsonEditor"]')).toBeTruthy();
-    expect(findTestSubject(wrapper, 'selectIndexExpression').exists()).toBeTruthy();
-
-    await act(async () => {
-      findTestSubject(wrapper, 'queryFormTypeChooserCancel').simulate('click');
+    await waitFor(() => {
+      expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
     });
-    wrapper = await wrapper.update();
-    expect(findTestSubject(wrapper, 'selectIndexExpression').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
+    expect(screen.getByTestId('queryJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('queryFormTypeChooserCancel'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('selectIndexExpression')).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId('queryFormTypeChooserTitle')).toBeInTheDocument();
   });
 
   test('should switch to KQL or Lucene form type on selection and return back on cancel', async () => {
-    let wrapper = setup({} as EsQueryRuleParams<SearchType.searchSource>);
-    await act(async () => {
-      findTestSubject(wrapper, 'queryFormType_searchSource').simulate('click');
-    });
-    wrapper = await wrapper.update();
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper, 'selectDataViewExpression').exists()).toBeTruthy();
+    setup({} as EsQueryRuleParams<SearchType.searchSource>);
+    await userEvent.click(screen.getByTestId('queryFormType_searchSource'));
 
-    await act(async () => {
-      findTestSubject(wrapper, 'queryFormTypeChooserCancel').simulate('click');
+    await waitFor(() => {
+      expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
     });
-    wrapper = await wrapper.update();
-    expect(findTestSubject(wrapper, 'selectDataViewExpression').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
+    expect(screen.getByTestId('selectDataViewExpression')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('queryFormTypeChooserCancel'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('selectDataViewExpression')).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId('queryFormTypeChooserTitle')).toBeInTheDocument();
   });
 
   test('should switch to ESQL form type on selection and return back on cancel', async () => {
-    let wrapper = setup({} as EsQueryRuleParams<SearchType.searchSource>);
-    await act(async () => {
-      findTestSubject(wrapper, 'queryFormType_esqlQuery').simulate('click');
-    });
-    wrapper = await wrapper.update();
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
-    expect(wrapper.exists('[data-test-subj="queryEsqlEditor"]')).toBeTruthy();
+    setup({} as EsQueryRuleParams<SearchType.searchSource>);
+    await userEvent.click(screen.getByTestId('queryFormType_esqlQuery'));
 
-    await act(async () => {
-      findTestSubject(wrapper, 'queryFormTypeChooserCancel').simulate('click');
+    await waitFor(() => {
+      expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
     });
-    wrapper = await wrapper.update();
-    expect(wrapper.exists('[data-test-subj="queryEsqlEditor"]')).toBeFalsy();
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
+    expect(screen.getByTestId('queryEsqlEditor')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('queryFormTypeChooserCancel'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('queryEsqlEditor')).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId('queryFormTypeChooserTitle')).toBeInTheDocument();
   });
 
   test('should render QueryDSL view without the form type chooser', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = setup(defaultEsQueryRuleParams, { adHocDataViewList: [], isManagementPage: false });
-      wrapper = await wrapper.update();
+    setup(defaultEsQueryRuleParams, { adHocDataViewList: [], isManagementPage: false });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
     });
-    expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper!, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper!, 'selectIndexExpression').exists()).toBeTruthy();
+    expect(screen.queryByTestId('queryFormTypeChooserCancel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
   });
 
   test('should render KQL and Lucene view without the form type chooser', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = setup(defaultSearchSourceRuleParams, {
-        adHocDataViewList: [],
-        isManagementPage: false,
-      });
-      wrapper = await wrapper.update();
+    setup(defaultSearchSourceRuleParams, {
+      adHocDataViewList: [],
+      isManagementPage: false,
     });
-    wrapper = await wrapper!.update();
-    expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper!, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper!, 'selectDataViewExpression').exists()).toBeTruthy();
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('queryFormTypeChooserCancel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('selectDataViewExpression')).toBeInTheDocument();
   });
 
   test('should render ESQL view without the form type chooser', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = setup(defaultEsqlRuleParams, {
-        adHocDataViewList: [],
-        isManagementPage: false,
-      });
-      wrapper = await wrapper.update();
+    setup(defaultEsqlRuleParams, {
+      adHocDataViewList: [],
+      isManagementPage: false,
     });
-    wrapper = await wrapper!.update();
-    expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper!, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
-    expect(wrapper.exists('[data-test-subj="queryEsqlEditor"]')).toBeTruthy();
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('queryFormTypeChooserCancel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('queryEsqlEditor')).toBeInTheDocument();
   });
 });

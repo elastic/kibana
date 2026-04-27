@@ -10,24 +10,27 @@ components:
       description: 'The response for getting live query results.'
       properties:
         data:
-          description: 'The query results data wrapper.'
           type: object
           properties:
-            edges:
-              description: 'The paginated list of query result rows.'
-              type: array
-              items:
-                type: object
             total:
               description: 'The total number of result rows.'
               type: integer
+            edges:
+              description: 'The result rows from the query execution.'
+              type: array
+              items:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  _source:
+                    type: object
+                    description: 'The Elasticsearch document source containing query results.'
       example:
         data:
           total: 2
           edges:
-            - _id: 'result-1'
-              fields:
-                host.uptime: ['12345']
-            - _id: 'result-2'
-              fields:
-                host.uptime: ['67890']
+            - _id: "doc1"
+              _source: {}
+            - _id: "doc2"
+              _source: {}

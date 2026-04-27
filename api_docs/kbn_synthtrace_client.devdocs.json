@@ -3976,7 +3976,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"unknown\" | \"cell\" | \"wifi\" | \"wired\" | \"unavailable\""
+              "\"unknown\" | \"cell\" | \"wifi\" | \"unavailable\" | \"wired\""
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_device.ts",
             "lineNumber": 33,

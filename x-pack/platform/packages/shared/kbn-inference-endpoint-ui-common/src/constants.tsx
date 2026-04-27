@@ -137,4 +137,7 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
   [ServiceProviderKeys.googleaistudio]: {
     defaultValues: { model_id: GEMINI_DEFAULT_MODEL },
   },
+  [ServiceProviderKeys.mistral]: {
+    hidden: ['max_input_tokens'],
+  },
 };
