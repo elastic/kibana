@@ -116,6 +116,7 @@ export class LiveQueryFormPage {
         table.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS }),
         dataCell.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS }),
       ]);
+
       return;
     }
 
