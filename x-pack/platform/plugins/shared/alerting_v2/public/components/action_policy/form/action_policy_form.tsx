@@ -21,6 +21,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchDataFields } from '../../../hooks/use_fetch_data_fields';
 import { DispatchSection } from './components/dispatch_section';
 import { MatcherInput } from './components/matcher_input';
+import { QuickFilters } from './components/quick_filters';
 import { TagsInput } from './components/tags_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { ActionPolicyFormState } from './types';
@@ -155,25 +156,31 @@ export const ActionPolicyForm = () => {
             name="matcher"
             control={control}
             render={({ field }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
-                  defaultMessage: 'Matcher',
-                })}
-                labelAppend={optionalLabel}
-                fullWidth
-              >
-                <MatcherInput
-                  value={field.value}
-                  onChange={field.onChange}
+              <>
+                <QuickFilters matcher={field.value} onChange={field.onChange} />
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
+                    defaultMessage: 'Matcher',
+                  })}
+                  labelAppend={optionalLabel}
                   fullWidth
-                  data-test-subj="matcherInput"
-                  dataFieldNames={dataFieldNames}
-                  placeholder={i18n.translate(
-                    'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
-                    { defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"' }
-                  )}
-                />
-              </EuiFormRow>
+                >
+                  <MatcherInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    fullWidth
+                    data-test-subj="matcherInput"
+                    dataFieldNames={dataFieldNames}
+                    placeholder={i18n.translate(
+                      'xpack.alertingV2.actionPolicy.form.matcher.placeholder',
+                      {
+                        defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"',
+                      }
+                    )}
+                  />
+                </EuiFormRow>
+              </>
             )}
           />
         </EuiSplitPanel.Inner>

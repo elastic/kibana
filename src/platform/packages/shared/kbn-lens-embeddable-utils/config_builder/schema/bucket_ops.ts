@@ -26,6 +26,14 @@ import { formatSchema } from './format';
 import { labelSharedProp } from './shared';
 import { builderEnums } from './enums';
 
+export const BUCKET_OP_TITLES = {
+  dateHistogram: 'Date Histogram Operation',
+  terms: 'Terms Operation',
+  filters: 'Filters Operation',
+  histogram: 'Histogram Operation',
+  ranges: 'Ranges Operation',
+} as const;
+
 export const bucketDateHistogramOperationSchema = schema.object(
   {
     /**
@@ -77,7 +85,7 @@ export const bucketDateHistogramOperationSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'dateHistogramOperation', title: 'Date Histogram Operation' } }
+  { meta: { id: 'dateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram } }
 );
 const bucketTermsRankByCustomSharedSchema = schema.object({
   type: schema.literal('custom'),
@@ -299,7 +307,7 @@ export const bucketTermsOperationSchema = schema.object(
       ])
     ),
   },
-  { meta: { id: 'termsOperation', title: 'Terms Operation' } }
+  { meta: { id: 'termsOperation', title: BUCKET_OP_TITLES.terms } }
 );
 
 export const bucketFiltersOperationSchema = schema.object(
@@ -311,7 +319,7 @@ export const bucketFiltersOperationSchema = schema.object(
      */
     filters: schema.arrayOf(filterWithLabelSchema, { maxSize: 100 }),
   },
-  { meta: { id: 'filtersOperation', title: 'Filters Operation' } }
+  { meta: { id: 'filtersOperation', title: BUCKET_OP_TITLES.filters } }
 );
 
 export const bucketHistogramOperationSchema = schema.object(
@@ -365,7 +373,7 @@ export const bucketHistogramOperationSchema = schema.object(
       defaultValue: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
     }),
   },
-  { meta: { id: 'histogramOperation', title: 'Histogram Operation' } }
+  { meta: { id: 'histogramOperation', title: BUCKET_OP_TITLES.histogram } }
 );
 
 export const bucketRangesOperationSchema = schema.object(
@@ -430,7 +438,7 @@ export const bucketRangesOperationSchema = schema.object(
       { maxSize: 100 }
     ),
   },
-  { meta: { id: 'rangesOperation', title: 'Ranges Operation' } }
+  { meta: { id: 'rangesOperation', title: BUCKET_OP_TITLES.ranges } }
 );
 
 export const bucketOperationDefinitionSchema = schema.oneOf([
