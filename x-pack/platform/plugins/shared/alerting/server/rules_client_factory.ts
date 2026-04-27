@@ -406,11 +406,6 @@ export class RulesClientFactory {
       },
       cloneAPIKey: options?.cloneApiKeys
         ? async (name: string) => {
-            const authHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-            if (!authHeader || authHeader.scheme.toLowerCase() !== 'apikey') {
-              const scheme = authHeader?.scheme ?? 'none';
-              throw new Error(`cloneApiKeys requires ApiKey auth scheme but got "${scheme}"`);
-            }
             const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
               name,
               metadata: { managed: true, kibana: { type: 'alerting_rule' } },

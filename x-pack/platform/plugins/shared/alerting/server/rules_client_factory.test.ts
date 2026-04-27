@@ -916,6 +916,10 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
     });
 
+    securityService.authc.apiKeys.cloneAsInternalUser.mockRejectedValueOnce(
+      new Error('Unable to clone an API key, expected ApiKey authorization scheme but got "Bearer"')
+    );
+
     const request = mockRouter.createKibanaRequest({
       headers: { authorization: 'Bearer some-bearer-token' },
     });
@@ -924,8 +928,7 @@ describe('RulesClientFactory', () => {
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     await expect(constructorCall.cloneAPIKey('test-rule-key')).rejects.toThrow(
-      'cloneApiKeys requires ApiKey auth scheme but got "Bearer"'
+      'Unable to clone an API key, expected ApiKey authorization scheme but got "Bearer"'
     );
-    expect(securityService.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
   });
 });
