@@ -8,8 +8,6 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { THREAT_HUNTING_AGENT_ID } from '../../../../../../common/constants';
-
 // Re-exported from @kbn/discoveries-plugin/common/constants
 const DIAGNOSTIC_REPORT_ATTACHMENT_TYPE = 'diagnostic_report';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -160,7 +158,6 @@ const TroubleshootWithAiComponent: React.FC<TroubleshootWithAiProps> = ({
     telemetry.reportEvent(AttackDiscoveryEventTypes.TroubleshootWithAiClicked, {});
 
     agentBuilder.openChat({
-      agentId: THREAT_HUNTING_AGENT_ID,
       attachments: [diagnosticReportAttachment],
       autoSendInitialMessage: false,
       initialMessage: i18n.INITIAL_MESSAGE,
