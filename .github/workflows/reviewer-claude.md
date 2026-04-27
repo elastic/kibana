@@ -21,6 +21,7 @@ engine:
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
+    ENABLE_PROMPT_CACHING_1H: "1"
 if: >-
   !github.event.repository.fork &&
   (
