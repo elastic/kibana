@@ -11,6 +11,8 @@ import type { Phase } from '../../../common/types';
 
 export const createSearchableSnapshotActions = (phase: Phase) => {
   const fieldSelector = `searchableSnapshotField-${phase}`;
+  const forceMergeIndexSwitchSelector = `searchableSnapshotForceMergeIndexSwitch-${phase}`;
+  const forceMergeOnCloneSwitchSelector = `searchableSnapshotForceMergeOnCloneSwitch-${phase}`;
 
   const openPhaseAdvancedSettings = async () => {
     const phaseContainer = screen.queryByTestId(`${phase}-phase`);
@@ -102,6 +104,16 @@ export const createSearchableSnapshotActions = (phase: Phase) => {
     return (await within(container).findByTestId('searchableSnapshotCombobox')) as HTMLInputElement;
   };
 
+  const getForceMergeIndexSwitch = async () => {
+    const container = await waitForFieldContainer();
+    return within(container).queryByTestId<HTMLButtonElement>(forceMergeIndexSwitchSelector);
+  };
+
+  const getForceMergeOnCloneSwitch = async () => {
+    const container = await waitForFieldContainer();
+    return within(container).queryByTestId<HTMLButtonElement>(forceMergeOnCloneSwitchSelector);
+  };
+
   const toggleSearchableSnapshot = async () => {
     const container = await waitForFieldContainer();
     const toggle = within(container).queryByTestId('searchableSnapshotToggle');
@@ -133,6 +145,42 @@ export const createSearchableSnapshotActions = (phase: Phase) => {
     },
     searchableSnapshotsExists: () => Boolean(screen.queryByTestId(fieldSelector)),
     toggleSearchableSnapshot,
+    forceMergeIndexSwitchExists: async () => Boolean(await getForceMergeIndexSwitch()),
+    forceMergeOnCloneSwitchExists: async () => Boolean(await getForceMergeOnCloneSwitch()),
+    toggleForceMergeIndex: async () => {
+      const forceMergeIndexSwitch = await getForceMergeIndexSwitch();
+      if (!forceMergeIndexSwitch) {
+        throw new Error(`Force merge index switch not found for phase ${phase}`);
+      }
+
+      const user = userEvent.setup({
+        advanceTimers: jest.advanceTimersByTime,
+        pointerEventsCheck: 0,
+      });
+      await user.click(forceMergeIndexSwitch);
+    },
+    toggleForceMergeOnClone: async () => {
+      const forceMergeOnCloneSwitch = await getForceMergeOnCloneSwitch();
+      if (!forceMergeOnCloneSwitch) {
+        throw new Error(`Force merge on clone switch not found for phase ${phase}`);
+      }
+
+      const user = userEvent.setup({
+        advanceTimers: jest.advanceTimersByTime,
+        pointerEventsCheck: 0,
+      });
+      await user.click(forceMergeOnCloneSwitch);
+    },
+    forceMergeIndexIsChecked: async () => {
+      const forceMergeIndexSwitch = await getForceMergeIndexSwitch();
+      if (!forceMergeIndexSwitch) return undefined;
+      return forceMergeIndexSwitch.getAttribute('aria-checked') === 'true';
+    },
+    forceMergeOnCloneIsChecked: async () => {
+      const forceMergeOnCloneSwitch = await getForceMergeOnCloneSwitch();
+      if (!forceMergeOnCloneSwitch) return undefined;
+      return forceMergeOnCloneSwitch.getAttribute('aria-checked') === 'true';
+    },
     setSearchableSnapshot: async (value: string) => {
       let container = screen.queryByTestId(fieldSelector);
 

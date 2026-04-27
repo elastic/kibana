@@ -34,10 +34,10 @@ export const matcherSuggestionKeys = {
   dataFields: () => [...matcherSuggestionKeys.all, 'dataFields'] as const,
 };
 
-export const notificationPolicyKeys = {
-  all: ['notificationPolicy'] as const,
-  detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,
-  lists: () => [...notificationPolicyKeys.all, 'list'] as const,
+export const actionPolicyKeys = {
+  all: ['actionPolicy'] as const,
+  detail: (id: string) => [...actionPolicyKeys.all, 'detail', id] as const,
+  lists: () => [...actionPolicyKeys.all, 'list'] as const,
   list: (filters: {
     page: number;
     perPage: number;
@@ -46,7 +46,7 @@ export const notificationPolicyKeys = {
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-  }) => [...notificationPolicyKeys.lists(), filters] as const,
-  allTags: () => [...notificationPolicyKeys.all, 'tags'] as const,
-  tags: (search?: string) => [...notificationPolicyKeys.allTags(), { search }] as const,
+  }) => [...actionPolicyKeys.lists(), filters] as const,
+  allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
+  tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
 };
