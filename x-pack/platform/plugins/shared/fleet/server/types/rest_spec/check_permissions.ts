@@ -9,7 +9,9 @@ import { schema } from '@kbn/config-schema';
 
 export const CheckPermissionsRequestSchema = {
   query: schema.object({
-    fleetServerSetup: schema.maybe(schema.boolean()),
+    fleetServerSetup: schema.maybe(
+      schema.boolean({ meta: { description: 'When true, check Fleet Server setup privileges in addition to standard Fleet privileges' } })
+    ),
   }),
 };
 
