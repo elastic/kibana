@@ -8,8 +8,8 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { EmbeddablePublicPlugin } from './plugin';
 import React, { Suspense } from 'react';
+import { EmbeddablePublicPlugin } from './plugin';
 
 export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/types';
 
