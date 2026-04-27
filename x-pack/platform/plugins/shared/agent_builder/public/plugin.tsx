@@ -119,7 +119,7 @@ export class AgentBuilderPlugin
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    registerWorkflowSteps(deps.workflowsExtensions);
+    registerWorkflowSteps(deps.workflowsExtensions, core);
 
     core.chrome.sidebar.registerApp({
       appId: 'agentBuilder',

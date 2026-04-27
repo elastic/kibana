@@ -34,7 +34,7 @@ const sigEventsTuningConfigSchema = schema.object(
   {
     sample_size: schema.number({ min: 1, max: 100 }),
     max_iterations: schema.number({ min: 1, max: 20 }),
-    feature_ttl_days: schema.number({ min: 1, max: 90 }),
+    feature_ttl_days: schema.number({ min: 1 }),
     entity_filtered_ratio: schema.number({ min: 0, max: 1 }),
     diverse_ratio: schema.number({ min: 0, max: 1 }),
     max_excluded_features_in_prompt: schema.number({ min: 0, max: 50 }),
