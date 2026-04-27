@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,6 +28,7 @@ import type { DataSourceWithSecrets } from '../common';
 import { ALL_DATA_SOURCE_TYPES } from '../common';
 import type { DataSourceType } from '../common/datasource_types';
 import { buildOmitIdDataSource } from './build_create_data_source_payload';
+import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
 import { emptyCreateDataSourceFormSettings } from './create_data_source_flyout_form_state';
 import type { CreateDataSourceFlyoutFormSettings } from './create_data_source_flyout_form_state';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
@@ -71,11 +71,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setNameError(
-        i18n.translate('dataSourceManagement.createFlyout.nameRequired', {
-          defaultMessage: 'Name is required.',
-        })
-      );
+      setNameError(createDataSourceFlyoutStrings.nameRequired());
       return;
     }
     setNameError(undefined);
@@ -113,11 +109,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="createDataSourceFlyoutTitle">
-            {i18n.translate('dataSourceManagement.createFlyout.title', {
-              defaultMessage: 'Add data source',
-            })}
-          </h2>
+          <h2 id="createDataSourceFlyoutTitle">{createDataSourceFlyoutStrings.title()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -130,27 +122,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               <EuiSpacer size="m" />
             </>
           ) : null}
-          <EuiFormRow
-            label={i18n.translate('dataSourceManagement.createFlyout.typeLabel', {
-              defaultMessage: 'Type',
-            })}
-            fullWidth
-          >
+          <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
             <EuiSelect
               options={dataSourceTypeOptions}
               value={dataSourceType}
               onChange={(e) => setDataSourceType(e.target.value as DataSourceType)}
               data-test-subj="createDataSourceFlyoutType"
               fullWidth
-              aria-label={i18n.translate('dataSourceManagement.createFlyout.typeAriaLabel', {
-                defaultMessage: 'Data source type',
-              })}
+              aria-label={createDataSourceFlyoutStrings.typeAriaLabel()}
             />
           </EuiFormRow>
           <EuiFormRow
-            label={i18n.translate('dataSourceManagement.createFlyout.nameLabel', {
-              defaultMessage: 'Name',
-            })}
+            label={createDataSourceFlyoutStrings.nameLabel()}
             isInvalid={Boolean(nameError)}
             error={nameError}
             fullWidth
@@ -165,12 +148,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               fullWidth
             />
           </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('dataSourceManagement.createFlyout.descriptionLabel', {
-              defaultMessage: 'Description',
-            })}
-            fullWidth
-          >
+          <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
             <EuiTextArea
               name="dataSourceDescription"
               value={description}
@@ -189,9 +167,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={onClose}>
-          {i18n.translate('dataSourceManagement.createFlyout.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
+          {createDataSourceFlyoutStrings.cancelButton()}
         </EuiButtonEmpty>
         <EuiButton
           fill
@@ -201,9 +177,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           isLoading={isSaving}
           disabled={isSaving}
         >
-          {i18n.translate('dataSourceManagement.createFlyout.saveButton', {
-            defaultMessage: 'Save',
-          })}
+          {createDataSourceFlyoutStrings.saveButton()}
         </EuiButton>
       </EuiFlyoutFooter>
     </EuiFlyout>

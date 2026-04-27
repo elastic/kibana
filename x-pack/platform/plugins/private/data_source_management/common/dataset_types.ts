@@ -21,5 +21,3 @@ interface DatasetSettings {
   partitionPath?: string;
   hivePartitioning?: boolean;
 }
-
-export type DatasetType = 's3' | 'gcs' | 'azure_blob' | 'iceberg' | 'jdbc' | 'flight';
