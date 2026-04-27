@@ -17,6 +17,9 @@ export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
       return 'play';
     case 'trigger_alert':
       return 'warning';
+    case 'trigger_document':
+    case 'trigger_event':
+      return 'document';
     case 'trigger_scheduled':
       return 'clock';
     default:
