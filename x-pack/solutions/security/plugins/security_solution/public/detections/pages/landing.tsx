@@ -6,14 +6,14 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
-import { LandingLinksIconsCategories } from '@kbn/security-solution-navigation/landing_links';
+import { LandingLinksImages } from '@kbn/security-solution-navigation/landing_links';
 import { SecurityPageName } from '../../../common';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { Title } from '../../common/components/header_page/title';
+import { HeaderPage } from '../../common/components/header_page';
 import { useRootNavLink } from '../../common/links/nav_links';
 import { useGlobalQueryString } from '../../common/utils/global_query_string';
 import { trackLandingLinkClick } from '../../common/lib/telemetry/trackers';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
 
 const ALERT_DETECTIONS_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetections.landing.pageTitle',
@@ -23,19 +23,14 @@ const ALERT_DETECTIONS_PAGE_TITLE = i18n.translate(
 );
 
 export const AlertDetectionsLandingPage = () => {
-  const { links = [], categories = [] } = useRootNavLink(SecurityPageName.alertDetections) ?? {};
+  const { links = [] } = useRootNavLink(SecurityPageName.alertDetections) ?? {};
   const urlState = useGlobalQueryString();
 
   return (
     <SecuritySolutionPageWrapper>
-      <Title title={ALERT_DETECTIONS_PAGE_TITLE} />
-      <EuiSpacer size="xl" />
-      <LandingLinksIconsCategories
-        links={links}
-        categories={categories}
-        onLinkClick={trackLandingLinkClick}
-        urlState={urlState}
-      />
+      <HeaderPage title={ALERT_DETECTIONS_PAGE_TITLE} />
+      <LandingLinksImages items={links} urlState={urlState} onLinkClick={trackLandingLinkClick} />
+      <SpyRoute pageName={SecurityPageName.alertDetections} />
     </SecuritySolutionPageWrapper>
   );
 };

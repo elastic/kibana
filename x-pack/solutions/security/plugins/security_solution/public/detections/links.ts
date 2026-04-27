@@ -23,6 +23,8 @@ import { ALERT_SUMMARY, ALERTS, ATTACKS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import { IconAlerts } from '../common/icons/alerts';
 import { IconAttacks } from '../common/icons/attacks';
+import alertsPageImg from '../common/images/alerts_page.png';
+import attacksPageImg from '../common/images/attacks_page.png';
 
 export const alertsLink: LinkItem = {
   capabilities: [[ALERTS_UI_READ_PRIVILEGE, ALERTS_UI_DETECTIONS_PRIVILEGE]],
@@ -45,6 +47,7 @@ const alertsSubLink: LinkItem = {
       'Review individual detections triggered by security rules and take immediate action.',
   }),
   landingIcon: IconAlerts,
+  landingImage: alertsPageImg,
 };
 
 const attacksSubLink: LinkItem = {
@@ -62,6 +65,7 @@ const attacksSubLink: LinkItem = {
       'View correlated alerts grouped into attack chains to understand scope, impact, and progression.',
   }),
   landingIcon: IconAttacks,
+  landingImage: attacksPageImg,
 };
 
 export const alertDetectionsLinks: LinkItem = {
@@ -82,14 +86,6 @@ export const alertDetectionsLinks: LinkItem = {
   ],
   links: [alertsSubLink, attacksSubLink],
   skipUrlState: true,
-  categories: [
-    {
-      label: i18n.translate('xpack.securitySolution.appLinks.category.views', {
-        defaultMessage: 'Views',
-      }),
-      linkIds: [SecurityPageName.alerts, SecurityPageName.attacks],
-    },
-  ],
 };
 
 export const alertSummaryLink: LinkItem = {
