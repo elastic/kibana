@@ -45,7 +45,10 @@ describe('manageRuleTool', () => {
           operations: [
             { operation: 'set_metadata', name: 'CPU Alert', description: 'High CPU' },
             { operation: 'set_kind', kind: 'alert' },
-            { operation: 'set_query', base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+            {
+              operation: 'set_query',
+              base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+            },
           ],
         },
         ctx
@@ -151,9 +154,7 @@ describe('manageRuleTool', () => {
 
       const result = await tool.handler(
         {
-          operations: [
-            { operation: 'set_metadata', name: 'Failing Rule' },
-          ],
+          operations: [{ operation: 'set_metadata', name: 'Failing Rule' }],
         },
         ctx
       );

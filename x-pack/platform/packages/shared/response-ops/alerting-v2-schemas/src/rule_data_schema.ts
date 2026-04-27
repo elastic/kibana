@@ -33,7 +33,9 @@ export const esqlQuerySchema = z
 
 export const ruleKindSchema = z
   .enum(['alert', 'signal'])
-  .describe('Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.');
+  .describe(
+    'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
+  );
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
@@ -81,7 +83,9 @@ export const scheduleSchema = z
 
 export const evaluationQuerySchema = z
   .object({
-    base: esqlQuerySchema.describe('Base ES|QL query. Time filters are applied automatically via the lookback window.'),
+    base: esqlQuerySchema.describe(
+      'Base ES|QL query. Time filters are applied automatically via the lookback window.'
+    ),
   })
   .strict();
 
@@ -103,7 +107,9 @@ export const recoveryPolicySchema = z
     type: recoveryPolicyTypeSchema.describe('Recovery detection type: "query" or "no_breach".'),
     query: z
       .object({
-        base: esqlQuerySchema.optional().describe('Recovery ES|QL query. Required when type is "query".'),
+        base: esqlQuerySchema
+          .optional()
+          .describe('Recovery ES|QL query. Required when type is "query".'),
       })
       .strict()
       .optional()
@@ -128,7 +134,9 @@ export const stateTransitionSchema = z
       .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
       .describe('Consecutive breaches before transitioning to active.'),
-    pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation, e.g. 5m, 15m.'),
+    pending_timeframe: durationSchema
+      .optional()
+      .describe('Time window for pending evaluation, e.g. 5m, 15m.'),
     recovering_operator: stateTransitionOperatorSchema
       .optional()
       .describe('How to combine count and timeframe for recovering.'),
@@ -155,7 +163,9 @@ export const groupingSchema = z
     fields: z
       .array(z.string().max(256))
       .max(16)
-      .describe('Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.'),
+      .describe(
+        'Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.'
+      ),
   })
   .strict()
   .describe('Grouping configuration.');
@@ -168,7 +178,9 @@ const noDataSchema = z
       .enum(['no_data', 'last_status', 'recover'])
       .optional()
       .describe('Behavior when no data is detected.'),
-    timeframe: durationSchema.optional().describe('Time window after which no data is detected, e.g. 10m, 1h.'),
+    timeframe: durationSchema
+      .optional()
+      .describe('Time window after which no data is detected, e.g. 10m, 1h.'),
   })
   .strict()
   .describe('No data handling configuration.');
