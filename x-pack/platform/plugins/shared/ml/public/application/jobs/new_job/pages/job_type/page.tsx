@@ -46,7 +46,7 @@ export const Page: FC = () => {
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
-  const { selectedDataView, selectedSavedSearch } = dataSourceContext;
+  const { selectedDataView, selectedSavedSearch, projectRouting } = dataSourceContext;
 
   const isTimeBasedIndex: boolean = selectedDataView.isTimeBased();
 
@@ -119,9 +119,13 @@ export const Page: FC = () => {
   };
 
   const getUrlParams = () => {
-    return !selectedSavedSearch
+    let urlParams = !selectedSavedSearch
       ? `?index=${selectedDataView.id}`
       : `?savedSearchId=${selectedSavedSearch.id}`;
+    if (projectRouting) {
+      urlParams += `&project_routing=${projectRouting}`;
+    }
+    return urlParams;
   };
 
   const addSelectionToRecentlyAccessed = async () => {

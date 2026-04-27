@@ -152,7 +152,9 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
   }
 
-  if (cps?.cpsManager && jobCreator.projectRouting === null) {
+  if (dataSourceContext.projectRouting) {
+    jobCreator.projectRouting = dataSourceContext.projectRouting;
+  } else if (cps?.cpsManager && jobCreator.projectRouting === null) {
     jobCreator.projectRouting = cps.cpsManager.getDefaultProjectRouting() ?? null;
   }
 

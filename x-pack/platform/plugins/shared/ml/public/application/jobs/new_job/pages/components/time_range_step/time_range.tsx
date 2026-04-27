@@ -31,7 +31,7 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '../../../../../../../common/types/storage';
-import { ProjectRoutingSelect } from '../common/project_routing/project_routing';
+// import { ProjectRoutingSelect } from '../common/project_routing/project_routing';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();
@@ -166,7 +166,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             showAxis={true}
             loading={loadingData}
           />
-
+          {/*
           {services.cps?.cpsManager ? (
             <>
               <EuiSpacer />
@@ -177,7 +177,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
                 <EuiFlexItem />
               </EuiFlexGroup>
             </>
-          ) : null}
+          ) : null} */}
 
           <WizardNav
             next={() =>

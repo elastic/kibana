@@ -23,6 +23,10 @@ export interface DataSourceContextValue {
   combinedQuery: any;
   selectedDataView: DataView;
   selectedSavedSearch: SavedSearch | null;
+  /**
+   * `project_routing` query string on the new job wizard URL, when present.
+   */
+  projectRouting?: string;
 }
 
 export const DataSourceContext = React.createContext<DataSourceContextValue>(
@@ -100,14 +104,25 @@ export const DataSourceContextProvider: FC<PropsWithChildren<unknown>> = ({ chil
   }, [dataViewId, savedSearchId, uiSettings, dataViews, getDataViewAndSavedSearchCb]);
 
   useEffect(() => {
+    const { project_routing: projectRoutingFromUrl } = parse(location.search, {
+      sort: false,
+    }) as { project_routing?: string };
+    const projectRouting =
+      projectRoutingFromUrl !== undefined && projectRoutingFromUrl !== ''
+        ? projectRoutingFromUrl
+        : undefined;
+
     resolveDataSource()
       .then((result) => {
-        setValue(result as DataSourceContextValue);
+        setValue({
+          ...result,
+          projectRouting,
+        } as DataSourceContextValue);
       })
       .catch((e) => {
         setError(e);
       });
-  }, [resolveDataSource]);
+  }, [resolveDataSource, location.search]);
 
   if (!value && !error) return null;
 
