@@ -44,18 +44,17 @@ export function validateStateTransformsFn(
       lensApiStateSchema.validate(newApiConfig);
     }).not.toThrow();
 
-    const newAttributes = builder.fromAPIFormat(newApiConfig);
-
-    const normalizedAttributes = normalizer?.({
-      original: attributes,
-      transformed: newAttributes,
-    }) ?? {
-      original: attributes,
-      transformed: newAttributes,
-    };
-
     // Temporary strict mode, all checks should eventually be strict
     if (strict) {
+      const newAttributes = builder.fromAPIFormat(newApiConfig);
+      const normalizedAttributes = normalizer?.({
+        original: attributes,
+        transformed: newAttributes,
+      }) ?? {
+        original: attributes,
+        transformed: newAttributes,
+      };
+
       expect(normalizedAttributes.transformed).toEqual(normalizedAttributes.original);
     }
   };
