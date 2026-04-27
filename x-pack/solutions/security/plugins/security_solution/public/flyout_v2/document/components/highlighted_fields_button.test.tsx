@@ -27,7 +27,7 @@ jest.mock(
 );
 jest.mock('../../../detection_engine/rule_creation_ui/pages/form');
 jest.mock('../hooks/use_highlighted_fields_privilege');
-jest.mock('../../rule_details/hooks/use_rule_details');
+jest.mock('../../rule/hooks/use_rule_details');
 
 const mockSetIsEditLoading = jest.fn();
 const mockCustomHighlightedFields = ['field1', 'field2'];

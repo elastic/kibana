@@ -26,7 +26,7 @@ jest.mock('../hooks/use_highlighted_fields');
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../../detection_engine/rule_creation_ui/pages/form');
 jest.mock('../hooks/use_highlighted_fields_privilege');
-jest.mock('../../rule_details/hooks/use_rule_details');
+jest.mock('../../rule/hooks/use_rule_details');
 const mockAddSuccess = jest.fn();
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
