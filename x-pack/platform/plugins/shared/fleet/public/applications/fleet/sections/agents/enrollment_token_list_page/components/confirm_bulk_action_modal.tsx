@@ -8,66 +8,97 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-interface Props {
-  action: 'delete' | 'revoke';
+interface BulkActionModalProps {
   count: number;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-export const ConfirmBulkActionModal = ({ action, count, onCancel, onConfirm }: Props) => {
+export const ConfirmRevokeModal = ({ count, onCancel, onConfirm }: BulkActionModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
-  const isDelete = action === 'delete';
 
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       title={
-        isDelete
-          ? i18n.translate('xpack.fleet.enrollmentTokenBulkDeleteModal.title', {
-              defaultMessage:
-                'Delete {count, plural, one {# enrollment token} other {# enrollment tokens}}',
-              values: { count },
+        count === 1
+          ? i18n.translate('xpack.fleet.enrollmentTokenBulkRevokeModal.titleSingle', {
+              defaultMessage: 'Revoke enrollment token',
             })
           : i18n.translate('xpack.fleet.enrollmentTokenBulkRevokeModal.title', {
-              defaultMessage:
-                'Revoke {count, plural, one {# enrollment token} other {# enrollment tokens}}',
+              defaultMessage: 'Revoke {count} enrollment tokens',
               values: { count },
             })
       }
       titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      cancelButtonText={i18n.translate('xpack.fleet.enrollmentTokenBulkActionModal.cancelButton', {
+      cancelButtonText={i18n.translate('xpack.fleet.enrollmentTokenBulkRevokeModal.cancelButton', {
         defaultMessage: 'Cancel',
       })}
-      confirmButtonText={
-        isDelete
-          ? i18n.translate('xpack.fleet.enrollmentTokenBulkDeleteModal.confirmButton', {
-              defaultMessage: 'Delete tokens',
-            })
-          : i18n.translate('xpack.fleet.enrollmentTokenBulkRevokeModal.confirmButton', {
-              defaultMessage: 'Revoke tokens',
-            })
-      }
+      confirmButtonText={i18n.translate(
+        'xpack.fleet.enrollmentTokenBulkRevokeModal.confirmButton',
+        {
+          defaultMessage: 'Revoke {count, plural, one {token} other {tokens}}',
+          values: { count },
+        }
+      )}
       defaultFocusedButton="confirm"
       buttonColor="danger"
     >
-      <EuiCallOut color="danger">
-        {isDelete ? (
-          <FormattedMessage
-            id="xpack.fleet.enrollmentTokenBulkDeleteModal.description"
-            defaultMessage="This action is irreversible. Agents currently enrolling with these tokens will fail to enroll."
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.enrollmentTokenBulkRevokeModal.description"
-            defaultMessage="Agents currently enrolling with these tokens will fail to enroll."
-          />
-        )}
-      </EuiCallOut>
+      <EuiCallOut
+        title={i18n.translate('xpack.fleet.enrollmentTokenBulkRevokeModal.description', {
+          defaultMessage:
+            'This action is irreversible. Agents currently enrolling with {count, plural, one {this token} other {these tokens}} will fail to enroll.',
+          values: { count },
+        })}
+        color="danger"
+      />
+    </EuiConfirmModal>
+  );
+};
+
+export const ConfirmDeleteModal = ({ count, onCancel, onConfirm }: BulkActionModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
+  return (
+    <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      title={
+        count === 1
+          ? i18n.translate('xpack.fleet.enrollmentTokenBulkDeleteModal.titleSingle', {
+              defaultMessage: 'Delete enrollment token',
+            })
+          : i18n.translate('xpack.fleet.enrollmentTokenBulkDeleteModal.title', {
+              defaultMessage: 'Delete {count} enrollment tokens',
+              values: { count },
+            })
+      }
+      titleProps={{ id: modalTitleId }}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={i18n.translate('xpack.fleet.enrollmentTokenBulkDeleteModal.cancelButton', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate(
+        'xpack.fleet.enrollmentTokenBulkDeleteModal.confirmButton',
+        {
+          defaultMessage: 'Delete {count, plural, one {token} other {tokens}}',
+          values: { count },
+        }
+      )}
+      defaultFocusedButton="confirm"
+      buttonColor="danger"
+    >
+      <EuiCallOut
+        title={i18n.translate('xpack.fleet.enrollmentTokenBulkDeleteModal.description', {
+          defaultMessage:
+            'This action is irreversible. Any active {count, plural, one {token} other {tokens}} will be revoked, and agents currently enrolling with {count, plural, one {it} other {them}} will fail to enroll.',
+          values: { count },
+        })}
+        color="danger"
+      />
     </EuiConfirmModal>
   );
 };

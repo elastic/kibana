@@ -49,8 +49,7 @@ import { AgentPolicyFilter } from '../agent_list_page/components/filter_bar/agen
 import { HierarchicalActionsMenu } from '../components';
 import type { MenuItem } from '../components';
 
-import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
-import { ConfirmBulkActionModal } from './components/confirm_bulk_action_modal';
+import { ConfirmRevokeModal, ConfirmDeleteModal } from './components/confirm_bulk_action_modal';
 
 type SelectionMode = 'manual' | 'query';
 type BulkAction = 'delete' | 'revoke';
@@ -104,52 +103,69 @@ const TokenActions: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
     refresh();
   };
 
-  const menuItems: MenuItem[] = [
-    {
-      id: 'revoke',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenAction', {
-        defaultMessage: 'Revoke token',
-      }),
-      icon: 'minusInCircle',
-      disabled: !apiKey.active,
-      'data-test-subj': 'enrollmentTokenTable.revokeBtn',
-      onClick: () => setPendingAction('revoke'),
-    },
-    {
-      id: 'delete',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.deleteTokenAction', {
-        defaultMessage: 'Delete token',
-      }),
-      icon: 'trash',
-      'data-test-subj': 'enrollmentTokenTable.deleteBtn',
-      onClick: () => setPendingAction('delete'),
-    },
-  ];
-
   return (
     <>
       {pendingAction === 'revoke' && (
-        <ConfirmEnrollmentTokenDelete
-          enrollmentKey={apiKey}
-          onCancel={onCancelAction}
-          onConfirm={onConfirmRevoke}
-        />
+        <ConfirmRevokeModal count={1} onCancel={onCancelAction} onConfirm={onConfirmRevoke} />
       )}
       {pendingAction === 'delete' && (
-        <ConfirmBulkActionModal
-          action="delete"
-          count={1}
-          onCancel={onCancelAction}
-          onConfirm={onConfirmDelete}
-        />
+        <ConfirmDeleteModal count={1} onCancel={onCancelAction} onConfirm={onConfirmDelete} />
       )}
       <HierarchicalActionsMenu
-        items={menuItems}
+        items={getTokenActionItems({
+          onRevoke: () => setPendingAction('revoke'),
+          onDelete: () => setPendingAction('delete'),
+          revokeDisabled: !apiKey.active,
+        })}
         data-test-subj="enrollmentTokenTable.actionsMenu"
       />
     </>
   );
 };
+
+const getTokenActionItems = ({
+  onRevoke,
+  onDelete,
+  plural,
+  revokeDisabled,
+}: {
+  onRevoke: () => void;
+  onDelete: () => void;
+  plural?: boolean;
+  revokeDisabled?: boolean;
+}): MenuItem[] => [
+  {
+    id: 'revoke',
+    name: plural
+      ? i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokensAction', {
+          defaultMessage: 'Revoke tokens',
+        })
+      : i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenAction', {
+          defaultMessage: 'Revoke token',
+        }),
+    icon: 'minusInCircle',
+    disabled: revokeDisabled,
+    'data-test-subj': plural
+      ? 'enrollmentTokensList.bulkRevokeButton'
+      : 'enrollmentTokenTable.revokeBtn',
+    onClick: onRevoke,
+  },
+  {
+    id: 'delete',
+    name: plural
+      ? i18n.translate('xpack.fleet.enrollmentTokensList.deleteTokensAction', {
+          defaultMessage: 'Delete tokens',
+        })
+      : i18n.translate('xpack.fleet.enrollmentTokensList.deleteTokenAction', {
+          defaultMessage: 'Delete token',
+        }),
+    icon: 'trash',
+    'data-test-subj': plural
+      ? 'enrollmentTokensList.bulkDeleteButton'
+      : 'enrollmentTokenTable.deleteBtn',
+    onClick: onDelete,
+  },
+];
 
 const NOT_HIDDEN_KUERY = 'not hidden:true';
 
@@ -285,25 +301,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       render: (value: string) => value,
     },
     {
-      field: 'id',
-      name: i18n.translate('xpack.fleet.enrollmentTokensList.secretTitle', {
-        defaultMessage: 'Secret',
-      }),
-      width: '285px',
-      render: (apiKeyId: string) => {
-        return (
-          <ApiKeyField
-            apiKeyId={apiKeyId}
-            sendGetAPIKey={sendGetOneEnrollmentAPIKey}
-            tokenGetter={(response: SendRequestResponse<GetOneEnrollmentAPIKeyResponse>) =>
-              response.data?.item.api_key
-            }
-            length={60}
-          />
-        );
-      },
-    },
-    {
       field: 'policy_id',
       name: i18n.translate('xpack.fleet.enrollmentTokensList.policyTitle', {
         defaultMessage: 'Agent policy',
@@ -315,6 +312,23 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           <span className="eui-textTruncate" title={value}>
             {value}
           </span>
+        );
+      },
+    },
+    {
+      field: 'id',
+      name: i18n.translate('xpack.fleet.enrollmentTokensList.secretTitle', {
+        defaultMessage: 'Secret',
+      }),
+      render: (apiKeyId: string) => {
+        return (
+          <ApiKeyField
+            apiKeyId={apiKeyId}
+            sendGetAPIKey={sendGetOneEnrollmentAPIKey}
+            tokenGetter={(response: SendRequestResponse<GetOneEnrollmentAPIKeyResponse>) =>
+              response.data?.item.api_key
+            }
+          />
         );
       },
     },
@@ -359,9 +373,15 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           }}
         />
       )}
-      {bulkActionPending && (
-        <ConfirmBulkActionModal
-          action={bulkActionPending}
+      {bulkActionPending === 'revoke' && (
+        <ConfirmRevokeModal
+          count={selectedCount}
+          onCancel={() => setBulkActionPending(null)}
+          onConfirm={onBulkActionConfirm}
+        />
+      )}
+      {bulkActionPending === 'delete' && (
+        <ConfirmDeleteModal
           count={selectedCount}
           onCancel={() => setBulkActionPending(null)}
           onConfirm={onBulkActionConfirm}
@@ -374,7 +394,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
@@ -434,50 +454,27 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
-            {showSelectionInfo && (
-              <EuiFlexItem grow={false}>
-                <HierarchicalActionsMenu
-                  items={[
-                    {
-                      id: 'bulkRevoke',
-                      name: i18n.translate(
-                        'xpack.fleet.enrollmentTokensList.bulkRevokeButton',
-                        { defaultMessage: 'Revoke' }
-                      ),
-                      icon: 'minusInCircle',
-                      iconColor: 'danger',
-                      'data-test-subj': 'enrollmentTokensList.bulkRevokeButton',
-                      onClick: () => setBulkActionPending('revoke'),
-                    },
-                    {
-                      id: 'bulkDelete',
-                      name: i18n.translate(
-                        'xpack.fleet.enrollmentTokensList.bulkDeleteButton',
-                        { defaultMessage: 'Delete' }
-                      ),
-                      icon: 'trash',
-                      iconColor: 'danger',
-                      'data-test-subj': 'enrollmentTokensList.bulkDeleteButton',
-                      onClick: () => setBulkActionPending('delete'),
-                    },
-                  ]}
-                  button={{
-                    props: { iconType: 'arrowDown', iconSide: 'right' },
-                    children: i18n.translate(
-                      'xpack.fleet.enrollmentTokensList.bulkActionsButton',
-                      {
-                        defaultMessage:
-                          '{count, plural, one {# token} other {# tokens}} selected',
-                        values: { count: selectedCount },
-                      }
-                    ),
-                  }}
-                  data-test-subj="enrollmentTokensList.bulkActionsMenu"
-                />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         </EuiFlexItem>
+        {showSelectionInfo && (
+          <EuiFlexItem grow={false}>
+            <HierarchicalActionsMenu
+              items={getTokenActionItems({
+                onRevoke: () => setBulkActionPending('revoke'),
+                onDelete: () => setBulkActionPending('delete'),
+                plural: true,
+              })}
+              button={{
+                props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary' },
+                children: i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionsButton', {
+                  defaultMessage: '{count, plural, one {# token} other {# tokens}} selected',
+                  values: { count: selectedCount },
+                }),
+              }}
+              data-test-subj="enrollmentTokensList.bulkActionsMenu"
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="createEnrollmentTokenButton"
@@ -565,6 +562,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable<EnrollmentAPIKey>
+        compressed
         data-test-subj="enrollmentTokenListTable"
         tableCaption={i18n.translate(
           'xpack.fleet.enrollmentTokensList.enrollmentTokens.tableCaption',
