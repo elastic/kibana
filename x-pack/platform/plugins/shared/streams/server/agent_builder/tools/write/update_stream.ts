@@ -19,7 +19,7 @@ import type {
 } from '@kbn/streams-schema';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
-import { patchIngestAndUpsert, getStreamAssets } from '../../../lib/streams/helpers/ingest_upsert';
+import { patchIngestAndUpsert } from '../../../lib/streams/helpers/ingest_upsert';
 import {
   STREAMS_UPDATE_STREAM_TOOL_ID as UPDATE_STREAM,
   STREAMS_DESIGN_PIPELINE_TOOL_ID as DESIGN_PIPELINE,
@@ -180,73 +180,73 @@ export const createUpdateStreamTool = ({
         }
       }
 
-      const hasIngestChanges =
-        changes.processing || changes.lifecycle || changes.fields || changes.failure_store;
+      const hasChanges =
+        changes.processing ||
+        changes.lifecycle ||
+        changes.fields ||
+        changes.failure_store ||
+        changes.description !== undefined;
 
       const appliedChanges = await writeQueue.enqueue(async () => {
+        if (!hasChanges) return [];
+
         const applied: string[] = [];
 
-        if (hasIngestChanges) {
-          await patchIngestAndUpsert({
-            streamsClient,
-            queryClient,
-            attachmentClient,
-            name,
-            patchFn: (currentIngest) => {
-              let updatedIngest = { ...currentIngest };
+        await patchIngestAndUpsert({
+          streamsClient,
+          queryClient,
+          attachmentClient,
+          name,
+          patchFn: (definition) => {
+            let updatedIngest = { ...definition.ingest };
 
-              if (changes.processing) {
-                updatedIngest = {
-                  ...updatedIngest,
-                  processing: {
-                    ...updatedIngest.processing,
-                    steps:
-                      changes.processing as unknown as Streams.ingest.all.Definition['ingest']['processing']['steps'],
-                    updated_at: new Date().toISOString(),
-                  },
-                };
-                applied.push('processing');
-              }
+            if (changes.processing) {
+              updatedIngest = {
+                ...updatedIngest,
+                processing: {
+                  ...updatedIngest.processing,
+                  steps:
+                    changes.processing as unknown as Streams.ingest.all.Definition['ingest']['processing']['steps'],
+                  updated_at: new Date().toISOString(),
+                },
+              };
+              applied.push('processing');
+            }
 
-              if (changes.lifecycle) {
-                updatedIngest = {
-                  ...updatedIngest,
-                  lifecycle: toIngestLifecycle(changes.lifecycle),
-                };
-                applied.push('lifecycle');
-              }
+            if (changes.lifecycle) {
+              updatedIngest = {
+                ...updatedIngest,
+                lifecycle: toIngestLifecycle(changes.lifecycle),
+              };
+              applied.push('lifecycle');
+            }
 
-              if (changes.failure_store) {
-                updatedIngest = {
-                  ...updatedIngest,
-                  failure_store: toFailureStoreConfig(changes.failure_store),
-                };
-                applied.push('failure_store');
-              }
+            if (changes.failure_store) {
+              updatedIngest = {
+                ...updatedIngest,
+                failure_store: toFailureStoreConfig(changes.failure_store),
+              };
+              applied.push('failure_store');
+            }
 
-              if (changes.fields) {
-                updatedIngest = applyFieldChanges(
-                  updatedIngest,
-                  changes.fields as Record<string, { type: string }>
-                );
-                applied.push('fields');
-              }
+            if (changes.fields) {
+              updatedIngest = applyFieldChanges(
+                updatedIngest,
+                changes.fields as Record<string, { type: string }>
+              );
+              applied.push('fields');
+            }
 
-              return updatedIngest;
-            },
-          });
-        }
+            if (changes.description !== undefined) {
+              applied.push('description');
+            }
 
-        if (changes.description !== undefined) {
-          await updateStreamDescription({
-            streamsClient,
-            queryClient,
-            attachmentClient,
-            name,
-            description: changes.description!,
-          });
-          applied.push('description');
-        }
+            return {
+              ingest: updatedIngest,
+              ...(changes.description !== undefined && { description: changes.description }),
+            };
+          },
+        });
 
         return applied;
       }, signal);
@@ -353,49 +353,3 @@ const applyFieldChanges = (
 
   throw new Error('Field mapping is only supported on wired and classic streams.');
 };
-
-async function updateStreamDescription({
-  streamsClient,
-  queryClient,
-  attachmentClient,
-  name,
-  description,
-}: {
-  streamsClient: Parameters<typeof patchIngestAndUpsert>[0]['streamsClient'];
-  queryClient: Awaited<ReturnType<Awaited<ReturnType<GetScopedClients>>['getQueryClient']>>;
-  attachmentClient: Awaited<ReturnType<GetScopedClients>>['attachmentClient'];
-  name: string;
-  description: string;
-}) {
-  const definition = await streamsClient.getStream(name);
-  const { dashboards, queries, rules } = await getStreamAssets({
-    name,
-    queryClient,
-    attachmentClient,
-  });
-
-  const {
-    name: _name,
-    updated_at: _updatedAt,
-    query_streams: _queryStreams,
-    ...stream
-  } = definition;
-
-  if ('ingest' in stream && stream.ingest?.processing) {
-    const { updated_at: _procUpdatedAt, ...processingRest } = stream.ingest.processing as {
-      updated_at?: string;
-      steps: unknown[];
-    };
-    (stream as { ingest: { processing: unknown } }).ingest.processing = processingRest;
-  }
-
-  return streamsClient.upsertStream({
-    name,
-    request: {
-      dashboards,
-      queries,
-      rules,
-      stream: { ...stream, description },
-    } as Streams.all.UpsertRequest,
-  });
-}

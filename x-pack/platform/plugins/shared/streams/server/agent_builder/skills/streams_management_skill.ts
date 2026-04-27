@@ -200,11 +200,11 @@ export const streamsManagementSkill = defineSkillType({
     </tool_result_handling>
 
     <temporal_behavior>
-    Configuration changes take effect immediately but only affect documents ingested AFTER the change. Existing documents are not reprocessed. Exceptions: field mappings apply to all backing indices immediately; retention changes apply to future rollover cycles.
+    Configuration changes take effect immediately but only affect documents ingested AFTER the change. Existing documents are not reprocessed and there are no tools to reprocess them — do not suggest it. Exceptions: field mappings apply to all backing indices immediately; retention changes apply to future rollover cycles.
     </temporal_behavior>
 
     <boundaries>
-    This skill can inspect and modify stream configurations but cannot create ILM policies (only reference existing ones), modify cluster settings, modify replicated (CCR) streams, or write to query streams (read-only).
+    This skill can inspect and modify stream configurations but cannot create ILM policies (only reference existing ones), modify cluster settings, modify replicated (CCR) streams, reprocess or re-index existing documents, or write to query streams (read-only).
     </boundaries>
   `),
   getRegistryTools: () => [...STREAMS_READ_TOOL_IDS, ...STREAMS_WRITE_TOOL_IDS],

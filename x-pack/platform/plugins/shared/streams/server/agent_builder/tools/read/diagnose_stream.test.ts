@@ -146,6 +146,7 @@ describe('createDiagnoseStreamTool handler', () => {
       if (index?.includes('::failures')) {
         return mockSearchResponse({
           hits: { total: { value: failedDocs, relation: 'eq' }, hits: [] },
+          aggregations: { error_groups: { buckets: [] } },
         });
       }
       return mockSearchResponse();
@@ -198,30 +199,37 @@ describe('createDiagnoseStreamTool handler', () => {
       failedDocs: 50,
     });
 
-    const timestamps = [
-      '2026-04-16T10:05:00Z',
-      '2026-04-16T10:04:00Z',
-      '2026-04-16T10:03:00Z',
-      '2026-04-16T10:02:00Z',
-      '2026-04-16T10:01:00Z',
-    ];
-    const failureStoreHits = timestamps.map((ts, i) => ({
-      _index: 'failures',
-      _id: String(i),
-      _source: {
-        '@timestamp': ts,
-        error: {
-          type: 'grok_exception',
-          message: 'grok pattern invalid: no match for %{INVALID}',
-          stack_trace: 'at org.elasticsearch.grok.Grok.match(Grok.java:123)',
-        },
-      },
-    }));
     esClient.search.mockImplementation(async (params?: SearchRequest) => {
       const index = params?.index as string;
       if (index?.includes('::failures')) {
         return mockSearchResponse({
-          hits: { total: { value: 50, relation: 'eq' }, hits: failureStoreHits },
+          hits: { total: { value: 50, relation: 'eq' }, hits: [] },
+          aggregations: {
+            error_groups: {
+              buckets: [
+                {
+                  key: ['grok_exception', 'grok pattern invalid: no match for %{INVALID}'],
+                  doc_count: 5,
+                  first_seen: { value: new Date('2026-04-16T10:01:00Z').getTime() },
+                  last_seen: { value: new Date('2026-04-16T10:05:00Z').getTime() },
+                  sample: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2026-04-16T10:05:00Z',
+                            error: {
+                              stack_trace: 'at org.elasticsearch.grok.Grok.match(Grok.java:123)',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
         });
       }
       return mockSearchResponse();
@@ -239,8 +247,8 @@ describe('createDiagnoseStreamTool handler', () => {
           error_type: 'grok_exception',
           error_message: expect.stringContaining('grok pattern invalid'),
           count: 5,
-          first_seen: '2026-04-16T10:01:00Z',
-          last_seen: '2026-04-16T10:05:00Z',
+          first_seen: '2026-04-16T10:01:00.000Z',
+          last_seen: '2026-04-16T10:05:00.000Z',
           sample_stack_trace: expect.any(String),
         })
       );
@@ -346,7 +354,9 @@ describe('createDiagnoseStreamTool handler', () => {
       esClient.search.mockImplementation(async (params?: SearchRequest) => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
-          return mockSearchResponse();
+          return mockSearchResponse({
+            aggregations: { error_groups: { buckets: [] } },
+          });
         }
         if (params?.aggs && typeof params.aggs === 'object' && 'per_index' in params.aggs) {
           return mockSearchResponse({
@@ -640,7 +650,9 @@ describe('createDiagnoseStreamTool handler', () => {
       esClient.search.mockImplementation(async (params?: SearchRequest) => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
-          return mockSearchResponse();
+          return mockSearchResponse({
+            aggregations: { error_groups: { buckets: [] } },
+          });
         }
         if (params?.aggs && typeof params.aggs === 'object' && 'per_index' in params.aggs) {
           return mockSearchResponse({
@@ -680,28 +692,39 @@ describe('createDiagnoseStreamTool handler', () => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
           return mockSearchResponse({
-            hits: {
-              total: { value: 10, relation: 'eq' },
-              hits: [
-                {
-                  _index: 'failures',
-                  _id: '1',
-                  _source: {
-                    '@timestamp': '2026-04-18T12:00:00Z',
-                    error: {
-                      type: 'mapper_parsing_exception',
-                      message: 'failed to parse field [status] of type [long]',
-                    },
-                    document: {
-                      source: {
-                        message: 'GET /api/health 200',
-                        status: 'ok',
-                        host: { name: 'web-01' },
+            hits: { total: { value: 10, relation: 'eq' }, hits: [] },
+            aggregations: {
+              error_groups: {
+                buckets: [
+                  {
+                    key: [
+                      'mapper_parsing_exception',
+                      'failed to parse field [status] of type [long]',
+                    ],
+                    doc_count: 1,
+                    first_seen: { value: new Date('2026-04-18T12:00:00Z').getTime() },
+                    last_seen: { value: new Date('2026-04-18T12:00:00Z').getTime() },
+                    sample: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2026-04-18T12:00:00Z',
+                              document: {
+                                source: {
+                                  message: 'GET /api/health 200',
+                                  status: 'ok',
+                                  host: { name: 'web-01' },
+                                },
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
           });
         }
@@ -739,19 +762,30 @@ describe('createDiagnoseStreamTool handler', () => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
           return mockSearchResponse({
-            hits: {
-              total: { value: 5, relation: 'eq' },
-              hits: [
-                {
-                  _index: 'failures',
-                  _id: '1',
-                  _source: {
-                    '@timestamp': '2026-04-18T12:00:00Z',
-                    error: { type: 'some_error', message: 'failed' },
-                    document: { source: manyFields },
+            hits: { total: { value: 5, relation: 'eq' }, hits: [] },
+            aggregations: {
+              error_groups: {
+                buckets: [
+                  {
+                    key: ['some_error', 'failed'],
+                    doc_count: 1,
+                    first_seen: { value: new Date('2026-04-18T12:00:00Z').getTime() },
+                    last_seen: { value: new Date('2026-04-18T12:00:00Z').getTime() },
+                    sample: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2026-04-18T12:00:00Z',
+                              document: { source: manyFields },
+                            },
+                          },
+                        ],
+                      },
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           });
         }
@@ -785,18 +819,30 @@ describe('createDiagnoseStreamTool handler', () => {
         const index = params?.index as string;
         if (index?.includes('::failures')) {
           return mockSearchResponse({
-            hits: {
-              total: { value: 5, relation: 'eq' },
-              hits: [
-                {
-                  _index: 'failures',
-                  _id: '1',
-                  _source: {
-                    '@timestamp': '2026-04-18T12:00:00Z',
-                    error: { type: 'some_error', message: 'failed' },
+            hits: { total: { value: 5, relation: 'eq' }, hits: [] },
+            aggregations: {
+              error_groups: {
+                buckets: [
+                  {
+                    key: ['some_error', 'failed'],
+                    doc_count: 1,
+                    first_seen: { value: new Date('2026-04-18T12:00:00Z').getTime() },
+                    last_seen: { value: new Date('2026-04-18T12:00:00Z').getTime() },
+                    sample: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2026-04-18T12:00:00Z',
+                              error: { type: 'some_error', message: 'failed' },
+                            },
+                          },
+                        ],
+                      },
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           });
         }
@@ -856,6 +902,9 @@ describe('createDiagnoseStreamTool handler', () => {
     expect(rangeQuery.range['@timestamp']).toEqual(
       expect.objectContaining({ gte: expect.any(Number), lte: expect.any(Number) })
     );
-    expect(searchParams._source).toContain('@timestamp');
+    expect(searchParams.size).toBe(0);
+    expect(searchParams.aggs).toBeDefined();
+    const aggs = searchParams.aggs as Record<string, unknown>;
+    expect(aggs).toHaveProperty('error_groups');
   });
 });

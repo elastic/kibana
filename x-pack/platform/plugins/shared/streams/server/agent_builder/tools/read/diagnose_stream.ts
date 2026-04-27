@@ -257,6 +257,18 @@ interface FailureStoreDoc {
   };
 }
 
+interface FailureStoreAgg {
+  error_groups: {
+    buckets: Array<{
+      key: [string, string];
+      doc_count: number;
+      first_seen: { value: number | null; value_as_string?: string };
+      last_seen: { value: number | null; value_as_string?: string };
+      sample: { hits: { hits: Array<{ _source?: FailureStoreDoc }> } };
+    }>;
+  };
+}
+
 interface FailureStoreResult {
   groups: ErrorGroup[];
   retrieval_error?: string;
@@ -269,58 +281,60 @@ const getFailureStoreErrors = async (
   endMs: number
 ): Promise<FailureStoreResult> => {
   try {
-    const response = await esClient.search<FailureStoreDoc>({
+    const response = await esClient.search<unknown, FailureStoreAgg>({
       index: `${streamName}${FAILURE_STORE_SELECTOR}`,
-      size: 50,
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      size: 0,
       query: {
         range: { '@timestamp': { gte: startMs, lte: endMs } },
       },
-      _source: [
-        '@timestamp',
-        'error.type',
-        'error.message',
-        'error.stack_trace',
-        'document.source',
-      ],
+      aggs: {
+        error_groups: {
+          multi_terms: {
+            terms: [
+              { field: 'error.type', missing: 'unknown' },
+              { field: 'error.message', missing: 'unknown' },
+            ],
+            size: MAX_ERROR_SAMPLES,
+            order: { _count: 'desc' as const },
+          },
+          aggs: {
+            first_seen: { min: { field: '@timestamp' } },
+            last_seen: { max: { field: '@timestamp' } },
+            sample: {
+              top_hits: {
+                size: 1,
+                sort: [{ '@timestamp': { order: 'desc' as const } }],
+                _source: ['@timestamp', 'error.stack_trace', 'document.source'],
+              },
+            },
+          },
+        },
+      },
     });
 
-    const hits = response.hits.hits;
-    if (hits.length === 0) return { groups: [] };
+    const buckets = response.aggregations?.error_groups.buckets ?? [];
+    const groups: ErrorGroup[] = buckets.map((bucket) => {
+      const sampleHit = bucket.sample.hits.hits[0]?._source;
+      const stackTrace = sampleHit?.error?.stack_trace;
+      const originalDoc = sampleHit?.document?.source;
+      return {
+        error_type: bucket.key[0],
+        error_message: bucket.key[1],
+        count: bucket.doc_count,
+        first_seen: bucket.first_seen.value
+          ? new Date(bucket.first_seen.value).toISOString()
+          : new Date(startMs).toISOString(),
+        last_seen: bucket.last_seen.value
+          ? new Date(bucket.last_seen.value).toISOString()
+          : new Date(endMs).toISOString(),
+        ...(stackTrace && { sample_stack_trace: truncateStackTrace(stackTrace) }),
+        ...(originalDoc && {
+          sample_document: truncateDocument(getFlattenedObject(originalDoc)),
+        }),
+      };
+    });
 
-    const groupMap = new Map<string, ErrorGroup>();
-    for (const hit of hits) {
-      const errorType = hit._source?.error?.type ?? 'unknown';
-      const errorMessage = hit._source?.error?.message ?? 'unknown';
-      const ts = hit._source?.['@timestamp'] ?? new Date().toISOString();
-      const key = `${errorType}::${errorMessage}`;
-
-      const existing = groupMap.get(key);
-      if (existing) {
-        existing.count += 1;
-        if (ts < existing.first_seen) existing.first_seen = ts;
-        if (ts > existing.last_seen) existing.last_seen = ts;
-      } else {
-        const stackTrace = hit._source?.error?.stack_trace;
-        const originalDoc = hit._source?.document?.source;
-        const sampleDoc = originalDoc
-          ? truncateDocument(getFlattenedObject(originalDoc))
-          : undefined;
-        groupMap.set(key, {
-          error_type: errorType,
-          error_message: errorMessage,
-          count: 1,
-          first_seen: ts,
-          last_seen: ts,
-          ...(stackTrace && { sample_stack_trace: truncateStackTrace(stackTrace) }),
-          ...(sampleDoc && { sample_document: sampleDoc }),
-        });
-      }
-    }
-
-    return {
-      groups: [...groupMap.values()].sort((a, b) => b.count - a.count).slice(0, MAX_ERROR_SAMPLES),
-    };
+    return { groups };
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
     return { groups: [], retrieval_error: reason };
