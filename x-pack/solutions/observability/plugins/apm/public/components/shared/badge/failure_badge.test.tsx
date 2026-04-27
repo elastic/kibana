@@ -22,9 +22,7 @@ describe('FailureBadge', () => {
     const badge = screen.getByText('failure');
     await user.hover(badge);
 
-    expect(
-      await screen.findByText('event.outcome = failure')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('event.outcome = failure')).toBeInTheDocument();
   });
 
   it('does not render when outcome is "success"', () => {
