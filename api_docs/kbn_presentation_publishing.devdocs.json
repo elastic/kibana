@@ -4568,81 +4568,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useBatchedOptionalPublishingSubjects",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "useBatchedOptionalPublishingSubjects",
-        "description": [],
-        "signature": [
-          "<SubjectsType extends ",
-          "AnyPublishingSubject",
-          "[]>(...subjects_0: SubjectsType) => ",
-          "UnwrapPublishingSubjectTuple",
-          "<SubjectsType>"
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
-        "lineNumber": 40,
-        "columnNumber": 14,
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "presentationPanel",
-            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_hover_actions.tsx"
-          },
-          {
-            "plugin": "presentationPanel",
-            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_hover_actions.tsx"
-          },
-          {
-            "plugin": "presentationPanel",
-            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_hover_actions_wrapper.tsx"
-          },
-          {
-            "plugin": "presentationPanel",
-            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_hover_actions_wrapper.tsx"
-          },
-          {
-            "plugin": "presentationPanel",
-            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_internal.tsx"
-          },
-          {
-            "plugin": "presentationPanel",
-            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_internal.tsx"
-          },
-          {
-            "plugin": "presentationPanel",
-            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_internal.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useBatchedOptionalPublishingSubjects.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "subjects",
-            "description": [
-              "Publishing subjects array."
-            ],
-            "signature": [
-              "[...SubjectsType]"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
-            "lineNumber": 43,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.useBatchedPublishingSubjects",
         "type": "Function",
         "tags": [],
@@ -4664,7 +4589,7 @@
           "<SubjectsType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
-        "lineNumber": 115,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4682,7 +4607,7 @@
               "[...SubjectsType]"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
-            "lineNumber": 118,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
