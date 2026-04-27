@@ -68,6 +68,10 @@ function getFilterConfig(
 }
 
 const pageSizeOptions = [5, 10, 15];
+const changePointsTableWrapperCss = {
+  maxWidth: '100%',
+  overflowX: 'auto' as const,
+};
 
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   isLoading,
@@ -201,9 +205,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             id: 'groupValue',
             'data-test-subj': 'aiopsChangePointGroupValue',
             field: 'group.value',
-            name: i18n.translate('xpack.aiops.changePointDetection.fieldValueColumn', {
-              defaultMessage: 'Field value',
-            }),
+            name: fieldConfig.splitField,
             truncateText: false,
             sortable: true,
           },
@@ -296,44 +298,46 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   }, [fieldConfig, onSelectionChange]);
 
   return (
-    <EuiInMemoryTable<ChangePointAnnotation>
-      tableLayout="auto"
-      tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
-        defaultMessage: 'Change point detection results',
-      })}
-      itemId="id"
-      selection={selectionValue}
-      loading={isLoading}
-      data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
-      items={annotations}
-      columns={columns}
-      pagination={
-        pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
-      }
-      sorting={sorting}
-      onTableChange={onTableChange}
-      rowProps={(item) => ({
-        'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
-      })}
-      noItemsMessage={
-        isLoading ? (
-          <EuiEmptyPrompt
-            iconType="magnify"
-            title={
-              <h3>
-                <FormattedMessage
-                  id="xpack.aiops.changePointDetection.fetchingChangePointsTitle"
-                  defaultMessage="Fetching change points..."
-                />
-              </h3>
-            }
-            titleSize="xs"
-          />
-        ) : (
-          <NoDataFoundWarning />
-        )
-      }
-    />
+    <div css={changePointsTableWrapperCss}>
+      <EuiInMemoryTable<ChangePointAnnotation>
+        tableLayout="auto"
+        tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
+          defaultMessage: 'Change point detection results',
+        })}
+        itemId="id"
+        selection={selectionValue}
+        loading={isLoading}
+        data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
+        items={annotations}
+        columns={columns}
+        pagination={
+          pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
+        }
+        sorting={sorting}
+        onTableChange={onTableChange}
+        rowProps={(item) => ({
+          'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
+        })}
+        noItemsMessage={
+          isLoading ? (
+            <EuiEmptyPrompt
+              iconType="magnify"
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.fetchingChangePointsTitle"
+                    defaultMessage="Fetching change points..."
+                  />
+                </h3>
+              }
+              titleSize="xs"
+            />
+          ) : (
+            <NoDataFoundWarning />
+          )
+        }
+      />
+    </div>
   );
 };
 

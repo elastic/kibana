@@ -559,6 +559,12 @@ const FieldPanel: FC<FieldPanelProps> = ({
             <EuiFlexItem grow={false}>
               <EuiPopover
                 id={`panelContextMenu_${panelIndex}`}
+                aria-label={i18n.translate(
+                  'xpack.aiops.changePointDetection.panelContextMenuLabel',
+                  {
+                    defaultMessage: 'Context menu',
+                  }
+                )}
                 button={
                   <EuiButtonIcon
                     data-test-subj="aiopsChangePointDetectionContextMenuButton"
