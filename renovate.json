@@ -2147,7 +2147,6 @@
     {
       "groupName": "langchain",
       "matchDepNames": [
-        "langsmith",
         "langchain",
         "@langchain/aws",
         "@langchain/classic",
@@ -2170,6 +2169,15 @@
       "reviewers": ["team:security-generative-ai"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Security Generative AI"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "langsmith",
+      "matchDepNames": ["langsmith"],
+      "reviewers": ["team:security-threat-hunting"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Threat Hunting"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
