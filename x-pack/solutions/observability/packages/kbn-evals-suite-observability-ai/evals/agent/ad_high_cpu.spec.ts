@@ -62,30 +62,18 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  // Root cause identification
                   'Identifies the `ad` service as the primary source of latency, supported by evidence (e.g., elevated CPU usage, slow spans, or runtime metrics), rather than attributing the issue to unrelated services',
-                  // Causal reasoning
                   'Explains the causal chain from user symptom (slow product pages) → ad-related requests → degradation in the `ad` service (e.g., CPU-bound processing)',
-                  // Signal usage
                   'Uses concrete observability signals (e.g., service metrics, trace latency, runtime/host CPU) to support conclusions, not speculation alone',
-                  // Correct problem framing
                   'Frames the issue as compute/resource saturation within the `ad` service, not as a downstream outage, network issue, or error-driven failure',
-                  // Symptom vs root cause distinction
                   'Correctly treats increased latency in upstream services (e.g., frontend, recommendation) as symptoms of the `ad` service slowdown when supported by traces or topology',
-                  // Isolation of outlier
-                  'Demonstrates that other services are relatively healthy or not the primary bottleneck when compared to the `ad` service',
-                  // Avoids incorrect attribution
                   'Does not attribute the issue to unrelated domains (e.g., checkout, payment, cart) without supporting evidence',
-                  // Actionable next steps
-                  'Suggests relevant follow-ups for CPU-bound services (e.g., scaling, profiling, checking feature flags or load patterns, reviewing resource limits), not only generic advice',
                 ],
                 expectedTools: [
                   'observability.get_services',
-                  'observability.get_service_topology',
-                  'observability.get_trace_metrics',
-                  'observability.get_runtime_metrics',
-                  'observability.get_hosts',
                   'observability.get_traces',
+                  'observability.get_runtime_metrics',
+                  'observability.get_service_topology',
                 ],
               },
               metadata: {
