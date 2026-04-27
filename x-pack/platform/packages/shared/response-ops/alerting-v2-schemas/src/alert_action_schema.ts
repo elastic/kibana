@@ -45,9 +45,12 @@ const unackActionSchema = z.object({
 const assignActionSchema = z.object({
   action_type: z
     .literal(ALERT_EPISODE_ACTION_TYPE.ASSIGN)
-    .describe('Assigns an alerting episode to a user.'),
+    .describe('Assigns an alerting episode to a user, or clears the assignee when null.'),
   episode_id: z.string().describe('The episode identifier to assign.'),
-  assignee_uid: z.string().describe('User profile UID of the user the alert is assigned to.'),
+  assignee_uid: z
+    .string()
+    .nullable()
+    .describe('User profile UID of the assignee, or null to remove the assignee from the episode.'),
 });
 
 const tagActionSchema = z.object({

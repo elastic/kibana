@@ -40,7 +40,7 @@ export function RelatedAlertEpisodesSection({
       }}
       buttonContent={
         <EuiText>
-          <h3>{i18n.RELATED_EPISODES_ACCORDION_TITLE}</h3>
+          <h3>{i18n.RELATED_EPISODES_TITLE}</h3>
         </EuiText>
       }
       initialIsOpen

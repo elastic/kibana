@@ -19,7 +19,7 @@ export interface FetchEpisodeActionsOptions {
 }
 
 /**
- * Executes an ES|QL query to fetch acknowledge/unacknowledge actions for the given episodes.
+ * Executes an ES|QL query to fetch latest acknowledge action and assignee by episode.
  */
 export const fetchEpisodeActions = ({
   episodeIds,

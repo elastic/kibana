@@ -91,16 +91,19 @@ export const LOADING_RULE_TITLE = i18n.translate(
 );
 
 /** --- Sidebar --- */
-export const EPISODE_DETAILS_SIDEBAR_TITLE = i18n.translate(
+export const SIDEBAR_TITLE_EPISODE_DETAILS = i18n.translate(
   'xpack.alertingV2.episodeDetails.sidebarTitle',
   {
     defaultMessage: 'Episode details',
   }
 );
 
-export const RUNBOOK_TITLE = i18n.translate('xpack.alertingV2.episodeDetails.runbookTitle', {
-  defaultMessage: 'Runbook',
-});
+export const SIDEBAR_TITLE_RUNBOOK = i18n.translate(
+  'xpack.alertingV2.episodeDetails.runbookTitle',
+  {
+    defaultMessage: 'Runbook',
+  }
+);
 
 export const SIDEBAR_VIEW_LEGEND = i18n.translate(
   'xpack.alertingV2.episodeDetails.sidebarViewLegend',
@@ -133,6 +136,9 @@ export const DURATION_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.du
   defaultMessage: 'Duration',
 });
 
+export const ASSIGNEE_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.assigneeLabel', {
+  defaultMessage: 'Assignee',
+});
 /** --- Rule overview panel --- */
 export const RULE_OVERVIEW_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.ruleOverviewTitle',
@@ -164,8 +170,7 @@ export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2.episodeDetails.run
   defaultMessage: 'No runbook has been added to this rule.',
 });
 
-/** --- Related alert episodes (accordion) --- */
-export const RELATED_EPISODES_ACCORDION_TITLE = i18n.translate(
+export const RELATED_EPISODES_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.relatedEpisodesTitle',
   {
     defaultMessage: 'Related alert episodes',

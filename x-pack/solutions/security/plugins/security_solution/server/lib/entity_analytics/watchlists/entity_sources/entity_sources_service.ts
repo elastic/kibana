@@ -47,13 +47,18 @@ const paginatedSearch = async <T>(
     _source: string[] | false;
     sort: Array<Record<string, string>>;
   },
-  mapHit: (hit: { _id?: string; _source?: unknown }) => T | undefined
+  mapHit: (hit: { _id?: string; _source?: unknown }) => T | undefined,
+  abortSignal?: AbortSignal
 ): Promise<T[]> => {
   const results: T[] = [];
   let searchAfter: SortResults | undefined;
   const pageSize = 1000;
 
   while (true) {
+    if (abortSignal?.aborted) {
+      break;
+    }
+
     const response = await esClient.search({
       ...params,
       size: pageSize,
@@ -93,8 +98,21 @@ export const createEntitySourcesService = ({
     namespace,
   });
 
+  /** Returns true and logs if the abort signal has fired. Use as: `if (isAborted(signal, 'context')) break/return;` */
+  const isAborted = (signal: AbortSignal | undefined, context: string): boolean => {
+    if (signal?.aborted) {
+      logger.info(`[WatchlistSync] Abort signal received: ${context}`);
+      return true;
+    }
+    return false;
+  };
+
   /** Finds all entity docs in the watchlist index that belong to a specific source. */
-  const findEntitiesBySource = (meta: WatchlistMeta, sourceId: string): Promise<StaleEntity[]> =>
+  const findEntitiesBySource = (
+    meta: WatchlistMeta,
+    sourceId: string,
+    abortSignal?: AbortSignal
+  ): Promise<StaleEntity[]> =>
     paginatedSearch(
       esClient,
       {
@@ -110,11 +128,15 @@ export const createEntitySourcesService = ({
         _source: false,
         sort: [{ 'entity.id': 'asc' }],
       },
-      (hit) => (hit._id ? { docId: hit._id, sourceId } : undefined)
+      (hit) => (hit._id ? { docId: hit._id, sourceId } : undefined),
+      abortSignal
     );
 
   /** Builds a map of euid → current watchlist memberships from the entity store. */
-  const buildWatchlistsByEuid = async (meta: WatchlistMeta): Promise<WatchlistsByEuid> => {
+  const buildWatchlistsByEuid = async (
+    meta: WatchlistMeta,
+    abortSignal?: AbortSignal
+  ): Promise<WatchlistsByEuid> => {
     // Collect euids from the watchlist index
     const euids = await paginatedSearch<string>(
       esClient,
@@ -124,7 +146,8 @@ export const createEntitySourcesService = ({
         _source: ['entity.id'],
         sort: [{ 'entity.id': 'asc' }],
       },
-      (hit) => (hit._source as { entity?: { id?: string } })?.entity?.id
+      (hit) => (hit._source as { entity?: { id?: string } })?.entity?.id,
+      abortSignal
     );
 
     if (euids.length === 0) return new Map();
@@ -170,7 +193,8 @@ export const createEntitySourcesService = ({
   const cleanupOrphanedEntities = async (
     meta: WatchlistMeta,
     activeSourceIds: string[] = [],
-    ignoredSourceIds: string[] = [MANUAL_SOURCE_ID]
+    ignoredSourceIds: string[] = [MANUAL_SOURCE_ID],
+    abortSignal?: AbortSignal
   ) => {
     const aggResponse = await esClient.search({
       index: meta.index,
@@ -193,10 +217,11 @@ export const createEntitySourcesService = ({
       return;
     }
 
-    const watchlistsByEuid = await buildWatchlistsByEuid(meta);
+    const watchlistsByEuid = await buildWatchlistsByEuid(meta, abortSignal);
 
     for (const sourceId of orphanedSourceIds) {
-      const staleEntities = await findEntitiesBySource(meta, sourceId);
+      if (isAborted(abortSignal, 'stopping orphaned entity cleanup')) break;
+      const staleEntities = await findEntitiesBySource(meta, sourceId, abortSignal);
       if (staleEntities.length === 0) {
         // No entities for this orphaned source
       } else {
@@ -219,7 +244,7 @@ export const createEntitySourcesService = ({
     }
   };
 
-  const syncWatchlist = async (watchlistId: string) => {
+  const syncWatchlist = async (watchlistId: string, abortSignal?: AbortSignal) => {
     const watchlist = await watchlistClient.get(watchlistId);
     const sourceIds = await watchlistClient.getEntitySourceIds(watchlistId);
     const meta: WatchlistMeta = {
@@ -254,12 +279,16 @@ export const createEntitySourcesService = ({
     });
 
     await indexSyncService.plainIndexSync(entitiesBySource);
-    await cleanupOrphanedEntities(meta, sourceIds);
+
+    if (isAborted(abortSignal, `after index sync for watchlist ${watchlistId}, skipping cleanup`))
+      return;
+
+    await cleanupOrphanedEntities(meta, sourceIds, undefined, abortSignal);
 
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);
   };
 
-  const syncAllWatchlists = async () => {
+  const syncAllWatchlists = async ({ abortSignal }: { abortSignal?: AbortSignal } = {}) => {
     const allWatchlists = await watchlistClient.list();
     // The id field is always present on persisted watchlists (set from saved object id);
     // it is only optional in the shared OpenAPI schema because create requests omit it.
@@ -273,9 +302,11 @@ export const createEntitySourcesService = ({
     logger.debug(`Found ${watchlists.length} watchlist(s) to sync in namespace "${namespace}"`);
 
     for (const watchlist of watchlists) {
+      if (isAborted(abortSignal, 'stopping watchlist sync')) break;
+
       try {
         logger.debug(`Syncing watchlist "${watchlist.name}" (${watchlist.id})`);
-        await syncWatchlist(watchlist.id);
+        await syncWatchlist(watchlist.id, abortSignal);
       } catch (err) {
         logger.error(
           `Failed to sync watchlist "${watchlist.name}" (${watchlist.id}): ${
@@ -285,9 +316,15 @@ export const createEntitySourcesService = ({
       }
     }
 
-    logger.info(
-      `[WatchlistSync] Completed sync of ${watchlists.length} watchlist(s) for namespace "${namespace}"`
-    );
+    if (abortSignal?.aborted) {
+      logger.info(
+        `[WatchlistSync] Watchlist sync for namespace "${namespace}" stopped (abort) before all ${watchlists.length} watchlist(s) were processed.`
+      );
+    } else {
+      logger.info(
+        `[WatchlistSync] Completed sync of ${watchlists.length} watchlist(s) for namespace "${namespace}"`
+      );
+    }
   };
 
   const deleteWatchlistEntities = async (watchlistId: string) => {

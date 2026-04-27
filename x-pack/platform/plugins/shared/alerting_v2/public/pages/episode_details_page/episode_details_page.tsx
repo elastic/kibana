@@ -53,6 +53,7 @@ import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { RelatedAlertEpisodesSection } from './related_alert_episodes_section';
+import { EpisodeAssigneeCell } from '../alert_episodes_list_page/components/episode_assignee_cell';
 import * as i18n from './translations';
 
 const EpisodeLifecycleHeatmap = React.lazy(() =>
@@ -218,7 +219,9 @@ export function EpisodeDetailsPage() {
     ) : undefined;
 
   const sidebarHeaderTitle =
-    sidebarPanel === 'episode_details' ? i18n.EPISODE_DETAILS_SIDEBAR_TITLE : i18n.RUNBOOK_TITLE;
+    sidebarPanel === 'episode_details'
+      ? i18n.SIDEBAR_TITLE_EPISODE_DETAILS
+      : i18n.SIDEBAR_TITLE_RUNBOOK;
 
   const sidebar = (
     <>
@@ -253,7 +256,7 @@ export function EpisodeDetailsPage() {
               {
                 id: 'runbook',
                 'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabRunbook',
-                label: i18n.RUNBOOK_TITLE,
+                label: i18n.SIDEBAR_TITLE_RUNBOOK,
               },
             ]}
           />
@@ -302,6 +305,15 @@ export function EpisodeDetailsPage() {
                   title: i18n.DURATION_LABEL,
                   description:
                     durationMs != null ? i18n.FORMAT_EPISODE_DURATION_MS(durationMs) : '—',
+                },
+                {
+                  title: i18n.ASSIGNEE_LABEL,
+                  description: (
+                    <EpisodeAssigneeCell
+                      assigneeUid={episodeAction?.lastAssigneeUid}
+                      userProfile={services.userProfile}
+                    />
+                  ),
                 },
               ]}
             />
@@ -436,6 +448,7 @@ export function EpisodeDetailsPage() {
                 http={http}
                 openInDiscoverHref={openInDiscoverHref}
                 expressions={expressions}
+                lastAssigneeUid={episodeAction?.lastAssigneeUid}
                 buttonsOutlined={false}
               />,
             ]}
