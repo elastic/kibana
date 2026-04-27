@@ -947,15 +947,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
         }),
       };
 
-      underTest.unwindScopes(
-        mockFactory as any,
-        (scope) => scope.nodeType === 'enter-foreach'
-      );
+      underTest.unwindScopes(mockFactory as any, (scope) => scope.nodeType === 'enter-foreach');
 
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        scopeStack: expect.arrayContaining([
-          expect.objectContaining({ stepId: 'loopStep' }),
-        ]),
+        scopeStack: expect.arrayContaining([expect.objectContaining({ stepId: 'loopStep' })]),
       });
     });
 
@@ -977,11 +972,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
         }),
       };
 
-      underTest.unwindScopes(
-        mockFactory as any,
-        (scope) => scope.nodeType === 'enter-foreach',
-        { inclusive: true }
-      );
+      underTest.unwindScopes(mockFactory as any, (scope) => scope.nodeType === 'enter-foreach', {
+        inclusive: true,
+      });
 
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
         scopeStack: [],

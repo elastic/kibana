@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isCancellableNode, BaseAtomicNodeImplementation } from './node_implementation';
-import type { RunStepResult, BaseStep } from './node_implementation';
+import { BaseAtomicNodeImplementation, isCancellableNode } from './node_implementation';
+import type { BaseStep, RunStepResult } from './node_implementation';
 
 jest.mock('elastic-apm-node', () => ({
   __esModule: true,

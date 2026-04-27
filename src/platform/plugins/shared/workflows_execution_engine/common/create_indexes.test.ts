@@ -43,9 +43,7 @@ describe('createIndexes', () => {
   it('passes esClient and logger to both calls', async () => {
     await createIndexes({ esClient, logger });
 
-    expect(createOrUpdateIndex).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient, logger })
-    );
+    expect(createOrUpdateIndex).toHaveBeenCalledWith(expect.objectContaining({ esClient, logger }));
     expect(createIndexWithMappings).toHaveBeenCalledWith(
       expect.objectContaining({ esClient, logger })
     );

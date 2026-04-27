@@ -11,9 +11,7 @@ import { stringifyStackFrames } from './stringify_stack_frames';
 
 describe('stringifyStackFrames', () => {
   it('formats a single stack frame', () => {
-    const frames = [
-      { stepId: 'step1', nestedScopes: [{ nodeId: 'node1', scopeId: 'scope1' }] },
-    ];
+    const frames = [{ stepId: 'step1', nestedScopes: [{ nodeId: 'node1', scopeId: 'scope1' }] }];
     const result = stringifyStackFrames(frames as any);
     expect(result).toContain('step1');
     expect(result).toContain('node1');

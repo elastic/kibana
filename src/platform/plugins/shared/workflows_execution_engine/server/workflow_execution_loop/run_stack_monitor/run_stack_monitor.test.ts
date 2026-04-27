@@ -74,9 +74,9 @@ describe('runStackMonitor', () => {
     (processNodeStackMonitoring as jest.Mock).mockResolvedValue(undefined);
     (abortableTimeout as jest.Mock).mockRejectedValue(new Error('unexpected'));
 
-    await expect(
-      runStackMonitor(params, monitoredRuntime, monitorAbortController)
-    ).rejects.toThrow('unexpected');
+    await expect(runStackMonitor(params, monitoredRuntime, monitorAbortController)).rejects.toThrow(
+      'unexpected'
+    );
   });
 
   it('does not enter loop when already aborted', async () => {

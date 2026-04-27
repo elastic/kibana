@@ -10,8 +10,8 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import { handleExecutionDelay } from './handle_execution_delay';
 import type { WorkflowExecutionLoopParams } from './types';
-import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import { TimeoutAbortedError } from '../utils';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 jest.mock('../utils', () => {
   const actual = jest.requireActual('../utils');

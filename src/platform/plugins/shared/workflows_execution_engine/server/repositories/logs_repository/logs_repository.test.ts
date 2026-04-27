@@ -63,9 +63,7 @@ describe('LogsRepository', () => {
 
     it('uses custom limit', async () => {
       await repo.getRecentLogs(50);
-      expect(dataStreamClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({ size: 50 })
-      );
+      expect(dataStreamClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 50 }));
     });
   });
 
