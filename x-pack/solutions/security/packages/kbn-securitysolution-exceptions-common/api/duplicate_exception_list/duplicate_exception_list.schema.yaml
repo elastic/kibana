@@ -14,11 +14,13 @@ paths:
         - name: list_id
           in: query
           required: true
+          description: The `list_id` of the existing exception list to copy (source list).
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
         - name: namespace_type
           in: query
           required: true
+          description: Scope in which the source list is defined (`single` = current space, `agnostic` = all spaces).
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
           examples:
@@ -108,14 +110,19 @@ paths:
               examples:
                 notFound:
                   value:
-                    message": 'exception list id: "foo" does not exist'
-                    status_code": 404
+                    message: 'exception list id: "foo" does not exist'
+                    status_code: 404
         405:
           description: Exception list to duplicate not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notAllowed:
+                  value:
+                    message: 'Cannot duplicate: list is immutable or the operation is not allowed in this state'
+                    status_code: 405
         500:
           description: Internal server error response
           content:

@@ -2391,7 +2391,7 @@ steps:
       expect(result.valid).toBe(false);
       expect(result.validationErrors).toEqual(
         expect.arrayContaining([
-          expect.stringContaining('Invalid trigger type. Available: manual, alert, scheduled'),
+          expect.stringContaining('type has an invalid value'),
           expect.stringContaining('No steps found. Add at least one step.'),
         ])
       );

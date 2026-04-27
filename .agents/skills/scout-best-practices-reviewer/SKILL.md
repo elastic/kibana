@@ -20,12 +20,16 @@ Important: Do not post GitHub comments unless explicitly stated.
    - API Tests: Use `apiTest` (usually in `**/test/scout/api/**`).
 2. Neighboring Scout code in the same plugin/solution (existing specs + `test/scout/**/fixtures/**`) to spot reuse opportunities and avoid duplicating helpers.
 3. Removed/previous tests (if this is a migration) to verify behavior parity.
-4. Scout docs (open only what you need):
-   - Best practices: `docs/extend/scout/best-practices.md`
+4. Scout docs (open only what you need — best practices are split by test type so you can skip the irrelevant half):
+   - **General best practices** (always relevant): `docs/extend/scout/best-practices.md`
+   - **UI-only best practices** (open when reviewing UI tests): `docs/extend/scout/ui-best-practices.md`
+   - **API-only best practices** (open when reviewing API tests): `docs/extend/scout/api-best-practices.md`
    - Core concepts & fixtures: `docs/extend/scout/core-concepts.md`, `docs/extend/scout/fixtures.md`
    - Reuse surfaces: `docs/extend/scout/page-objects.md`, `docs/extend/scout/api-services.md`
    - Type-specific guides: `docs/extend/scout/write-ui-tests.md`, `docs/extend/scout/write-api-tests.md`
    - As needed: `docs/extend/scout/api-auth.md`, `docs/extend/scout/browser-auth.md`, `docs/extend/scout/parallelism.md`, `docs/extend/scout/deployment-tags.md`, `docs/extend/scout/a11y-checks.md`, `docs/extend/scout/debugging.md`, `docs/extend/scout/run-tests.md`
+
+   **Rule of thumb:** always read the general best practices, then open **only** the UI-specific file for UI reviews or the API-specific file for API reviews. If a PR mixes UI and API specs, open both.
 
 ## Scope (be comprehensive)
 
@@ -34,17 +38,25 @@ Important: Do not post GitHub comments unless explicitly stated.
   - available fixtures (`docs/extend/scout/fixtures.md` + local `test/scout/**/fixtures`)
   - existing page objects, API services, and fixtures (in `@kbn/scout`, solution Scout packages, and plugin-local `test/scout/**`) before suggesting brand-new helpers
 
-### Quick checklist (details live in `docs/extend/scout/best-practices.md`)
+### Quick checklist
 
-- **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them in the right scope (plugin vs solution vs `@kbn/scout`) and register via fixtures.
-- **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
-- **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
-- **UI scope**: UI tests should focus on user interactions and rendering; avoid “data correctness” assertions (for example exact API response shapes or exact table cell values) unless the UI behavior depends on them. Prefer Scout API tests (or unit/integration) for data correctness coverage.
-- **Isolation**: parallel-safe data and resilient cleanup in hooks; no reliance on file ordering or shared mutable state.
-- **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
-- **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals. Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`).
-- **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
-- **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
+Checklist items are tagged with the document they're detailed in:
+
+- **[general]** → `docs/extend/scout/best-practices.md` (applies to both UI and API tests)
+- **[ui]** → `docs/extend/scout/ui-best-practices.md`
+- **[api]** → `docs/extend/scout/api-best-practices.md`
+
+Open only the docs relevant to the test type(s) under review.
+
+- **[general]** **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them in the right scope (plugin vs solution vs `@kbn/scout`) and register via fixtures.
+- **[api]** **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
+- **[api]** **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
+- **[ui]** **UI scope**: UI tests should focus on user interactions and rendering; avoid “data correctness” assertions (for example exact API response shapes or exact table cell values) unless the UI behavior depends on them. Prefer Scout API tests (or unit/integration) for data correctness coverage.
+- **[general]** **Isolation**: parallel-safe data and resilient cleanup in hooks; no reliance on file ordering or shared mutable state.
+- **[general]** **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
+- **[ui]** **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals. Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`).
+- **[general]** **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
+- **[general]** **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
 
 ### Files to skip
 

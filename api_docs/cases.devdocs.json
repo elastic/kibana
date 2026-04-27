@@ -224,7 +224,7 @@
           "Props for case-level attachment tabs (Alerts/Events/… table hosts)."
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-        "lineNumber": 64,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -400,7 +400,7 @@
               "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -739,7 +739,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-        "lineNumber": 124,
+        "lineNumber": 125,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5646,7 +5646,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; }; } | { type: \"observables\"; payload: { observables: { count: number; actionType: \"update\" | \"delete\" | \"add\"; }; }; } | { type: \"extended_fields\"; payload: { extended_fields: { [x: string]: string; }; }; } | { type: \"comment\"; payload: { comment: { type: ",
+          ".NUMBER; value: number | null; })[]; }; } | { type: \"observables\"; payload: { observables: { count: number; actionType: \"update\" | \"delete\" | \"add\"; }; }; } | { type: \"extended_fields\"; payload: { extended_fields: { [x: string]: string; }; }; } | { type: \"template\"; payload: { template: { id: string; version: number; } | null; }; } | { type: \"comment\"; payload: { comment: { type: ",
           {
             "pluginId": "cases",
             "scope": "common",

@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
+import { saveFailureStoreChanges } from '../../fixtures/retention_helpers';
 
 const TEST_STREAM = 'logs-nginx-default';
 
@@ -305,7 +306,7 @@ test.describe(
 
       // Toggle the inherit failure store switch
       await page.getByTestId('inheritFailureStoreSwitch').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await saveFailureStoreChanges(page);
 
       // Verify the modal is closed
       await expect(page.getByTestId('editFailureStoreModal')).toBeHidden();

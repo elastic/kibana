@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/core-execution-context-common'
   - '@kbn/core-http-server'
   - '@kbn/core-security-server'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -67,6 +68,8 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - common/**/*
+    - test/scout/**/*
+    - test/scout_task_manager_uiam/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

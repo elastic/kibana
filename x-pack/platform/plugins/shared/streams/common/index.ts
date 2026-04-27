@@ -21,6 +21,7 @@ export {
   ATTACHMENT_SUGGESTIONS_LIMIT,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
+  FAILURE_STORE_SELECTOR,
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';

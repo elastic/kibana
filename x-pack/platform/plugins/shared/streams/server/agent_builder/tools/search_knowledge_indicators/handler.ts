@@ -32,9 +32,9 @@ export async function searchKnowledgeIndicatorsToolHandler({
     params,
     onFeatureFetchError: (streamName, error) => {
       const errorMessage =
-        error instanceof Error ? error.stack ?? error.message : String(error ?? 'Unknown error');
+        error instanceof Error ? error.stack || error.message : String(error ?? 'Unknown error');
       logger.warn(
-        `search_kis: failed to fetch features for stream "${streamName}": ${errorMessage}`
+        `ki_search: failed to fetch features for stream "${streamName}": ${errorMessage}`
       );
     },
     getStreamNames: async () => {

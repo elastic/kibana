@@ -87,6 +87,14 @@ export type ContentListItem<T = Record<string, unknown>> = T & {
   updatedAt?: Date;
   /** Optional array of tag IDs associated with this item. */
   tags?: string[];
+  /** Creation timestamp (ISO string). Used by the content editor. */
+  createdAt?: string;
+  /** User ID or profile ID of the item creator. Used by the content editor. */
+  createdBy?: string;
+  /** User ID or profile ID of the last editor. Used by the content editor. */
+  updatedBy?: string;
+  /** Whether this item is managed (system-owned). Used by the content editor. */
+  managed?: boolean;
 };
 
 /**
@@ -127,4 +135,15 @@ export interface ContentListItemConfig {
    * The callback should handle the actual deletion and return a resolved promise on success.
    */
   onDelete?: (items: ContentListItem[]) => Promise<void>;
+
+  /**
+   * Callback invoked to inspect an item (view/edit its metadata).
+   * When provided, enables the "View details" row action.
+   *
+   * This is a simple, UI-agnostic callback — the implementation decides what
+   * happens when the action fires (e.g., opening a flyout, navigating to a
+   * detail page). The Kibana content editor integration is handled by
+   * `ContentListClientProvider` in `@kbn/content-list-provider-client`.
+   */
+  onInspect?: (item: ContentListItem) => void;
 }
