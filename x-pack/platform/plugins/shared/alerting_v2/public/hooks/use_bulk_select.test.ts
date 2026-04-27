@@ -66,14 +66,14 @@ describe('useBulkSelect', () => {
     expect(result.current.selectedCount).toBe(logical);
   });
 
-  it('returns empty params when select-all with no filter or search', () => {
+  it('returns match_all params when select-all with no filter or search', () => {
     const { result } = renderHook(() => useBulkSelect({ totalItemCount: 10, items: pageItems }));
 
     act(() => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({});
+    expect(result.current.getBulkParams()).toEqual({ match_all: true });
   });
 
   it('scopes select-all bulk params to filter', () => {
@@ -89,7 +89,7 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ filter: 'enabled: true' });
+    expect(result.current.getBulkParams()).toEqual({ filter: 'enabled: true', match_all: true });
   });
 
   it('passes search as a separate field in bulk params', () => {
@@ -105,7 +105,7 @@ describe('useBulkSelect', () => {
       result.current.onSelectAll();
     });
 
-    expect(result.current.getBulkParams()).toEqual({ search: 'prod' });
+    expect(result.current.getBulkParams()).toEqual({ search: 'prod', match_all: true });
   });
 
   it('passes filter and search as separate fields with exclusions', () => {
@@ -128,6 +128,7 @@ describe('useBulkSelect', () => {
     expect(result.current.getBulkParams()).toEqual({
       filter: 'enabled: true AND NOT (id: "rule-1")',
       search: 'x',
+      match_all: true,
     });
   });
 
@@ -150,6 +151,7 @@ describe('useBulkSelect', () => {
     expect(result.current.getBulkParams()).toEqual({
       filter: 'NOT (id: "rule-1")',
       search: 'prod',
+      match_all: true,
     });
   });
 

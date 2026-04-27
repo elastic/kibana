@@ -12,8 +12,10 @@ import { BULK_FILTER_MAX_RULES } from './constants';
 /**
  * Schema for bulk operation request bodies.
  *
- * When no fields are provided, the operation targets all rules (match-all).
- * `ids` cannot be combined with `filter` or `search`.
+ * At least one targeting param must be provided:
+ * - `ids` — explicit list (cannot be combined with filter/search/match_all)
+ * - `filter` / `search` — scoped selection
+ * - `match_all` — explicit opt-in to target every rule
  */
 export const bulkOperationParamsSchema = z
   .object({
@@ -33,9 +35,21 @@ export const bulkOperationParamsSchema = z
       .string()
       .optional()
       .describe('Free-text search string to match rules by name and description.'),
+    match_all: z
+      .literal(true)
+      .optional()
+      .describe('When true, targets all rules. Cannot be combined with ids.'),
   })
+  .refine(
+    (data) =>
+      data.ids != null || data.filter != null || data.search != null || data.match_all === true,
+    { message: 'At least one of ids, filter, search, or match_all must be provided.' }
+  )
   .refine((data) => data.ids == null || (data.filter == null && data.search == null), {
     message: 'ids cannot be combined with filter or search.',
+  })
+  .refine((data) => data.match_all == null || data.ids == null, {
+    message: 'match_all cannot be combined with ids.',
   });
 
 export type BulkOperationParams = z.infer<typeof bulkOperationParamsSchema>;
