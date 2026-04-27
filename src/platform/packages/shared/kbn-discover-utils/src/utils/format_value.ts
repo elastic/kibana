@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
@@ -18,6 +19,37 @@ import type {
   TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
 import type { EsHitRecord } from '../types';
+
+/** Base parameters for field value formatting functions */
+interface FormatFieldValueBaseParams {
+  value: unknown;
+  fieldFormats: FieldFormatsStart;
+  dataView?: DataView;
+  field?: DataViewField;
+}
+
+export interface FormatFieldValueReactParams extends FormatFieldValueBaseParams {
+  hit: EsHitRecord;
+  options?: ReactContextTypeOptions;
+}
+
+export interface FormatFieldValueTextParams extends FormatFieldValueBaseParams {
+  options?: TextContextTypeOptions;
+}
+
+/**
+ * Returns the appropriate field formatter for the given field and data view,
+ * or the default string formatter if no field/data view is available.
+ */
+const getFieldFormatter = (
+  fieldFormats: FieldFormatsStart,
+  dataView?: DataView,
+  field?: DataViewField
+): FieldFormat => {
+  return !dataView || !field
+    ? fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
+    : dataView.getFormatterForField(field);
+};
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
@@ -52,25 +84,11 @@ export function formatFieldValue(
     ...options,
   };
 
-  if (!dataView || !field) {
-    // If either no field is available or no data view, we'll use the default
-    // string formatter to format that field.
-    return fieldFormats
-      .getDefaultInstance(KBN_FIELD_TYPES.STRING)
-      .convert(value, usedContentType, converterOptions);
-  }
-
-  // If we have a data view and field we use that fields field formatter
-  return dataView.getFormatterForField(field).convert(value, usedContentType, converterOptions);
-}
-
-export interface FormatFieldValueReactParams {
-  value: unknown;
-  hit: EsHitRecord;
-  fieldFormats: FieldFormatsStart;
-  dataView?: DataView;
-  field?: DataViewField;
-  options?: ReactContextTypeOptions;
+  return getFieldFormatter(fieldFormats, dataView, field).convert(
+    value,
+    usedContentType,
+    converterOptions
+  );
 }
 
 /**
@@ -89,10 +107,24 @@ export const formatFieldValueReact = ({
 }: FormatFieldValueReactParams): ReactNode => {
   const converterOptions: ReactContextTypeOptions = { ...options, hit, field };
 
-  const formatter =
-    !dataView || !field
-      ? fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
-      : dataView.getFormatterForField(field);
+  return getFieldFormatter(fieldFormats, dataView, field).reactConvert(value, converterOptions);
+};
 
-  return formatter.reactConvert(value, converterOptions);
+/**
+ * Text equivalent of formatFieldValueReact. Returns a plain text string without HTML tags.
+ * Use this when you need string values for further processing (e.g., in LogDocumentOverview).
+ *
+ * Note: Unlike formatFieldValueReact, this does not accept `hit` because text formatters
+ * do not apply highlighting (highlighting requires HTML/React markup).
+ *
+ * @returns A plain text string
+ */
+export const formatFieldValueText = ({
+  value,
+  fieldFormats,
+  dataView,
+  field,
+  options,
+}: FormatFieldValueTextParams): string => {
+  return getFieldFormatter(fieldFormats, dataView, field).convert(value, 'text', options);
 };

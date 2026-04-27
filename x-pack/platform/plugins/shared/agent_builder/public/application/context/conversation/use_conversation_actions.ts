@@ -16,6 +16,7 @@ import type {
   ToolCallStep,
   Conversation,
   CompactionStep,
+  BackgroundAgentCompleteStep,
 } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
@@ -77,6 +78,7 @@ export interface ConversationActions {
     conversationId: string;
     title: string;
   }) => void;
+  addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
   addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
   setCompactionStepComplete: ({
     tokenCountAfter,
@@ -230,6 +232,11 @@ const createConversationActions = ({
         if (step) {
           step.results = results;
         }
+      });
+    },
+    addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => {
+      setCurrentRound((round) => {
+        round.steps.push(step);
       });
     },
     addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {
