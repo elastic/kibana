@@ -10,10 +10,14 @@
 /**
  * EIS connector discovery for `yarn start --eis`.
  *
- * Queries a running Elasticsearch instance for inference endpoints provided by
- * the Elastic Inference Service (GET _inference/chat_completion/_all), converts
- * them into Kibana preconfigured connector definitions, and returns the result
- * so bootstrap.ts can inject them into the Kibana config via an env var.
+ * Queries a running Elasticsearch instance for all inference endpoints provided
+ * by the Elastic Inference Service (GET _inference/_all, filtered to
+ * service === 'elastic'), converts them into Kibana preconfigured connector
+ * definitions, and returns the result so bootstrap.ts can inject them into the
+ * Kibana config via an env var.
+ *
+ * All EIS task types (chat_completion, sparse_embedding, text_embedding, etc.)
+ * are picked up — the gateway-defined task type is preserved on each connector.
  *
  * This module does NOT start or stop Elasticsearch — that is handled separately
  * by `yarn es snapshot --eis`.
@@ -81,7 +85,7 @@ const discoverConnectors = async (
 
     try {
       ({ statusCode, data } = await eisHttpRequest(
-        `${es.baseUrl}/_inference/chat_completion/_all`,
+        `${es.baseUrl}/_inference/_all`,
         {
           method: 'GET',
           headers: { Authorization: `Basic ${auth}` },
@@ -165,9 +169,13 @@ const discoverConnectors = async (
     const connectors: Record<string, PreconfiguredConnector> = {};
 
     for (const endpoint of eisEndpoints) {
-      const modelId =
-        endpoint.service_settings?.model_id ||
-        endpoint.inference_id.replace(/^\./, '').replace(/-chat_completion$/, '');
+      // Fallback model id: strip a leading '.' and any trailing '-<task_type>'
+      // suffix from the inference id. This works for chat_completion,
+      // sparse_embedding, text_embedding, and any future task types.
+      const fallbackModelId = endpoint.inference_id
+        .replace(/^\./, '')
+        .replace(new RegExp(`-${endpoint.task_type}$`), '');
+      const modelId = endpoint.service_settings?.model_id || fallbackModelId;
 
       let baseId = toConnectorId(modelId);
       if (!baseId) {
