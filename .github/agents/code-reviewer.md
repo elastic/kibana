@@ -34,7 +34,7 @@ Ground architectural and maintainability findings in local code and clear behavi
 
 ## Do not report
 
-- lint, formatting, type-check, or import-order issues that CI already enforces
+- lint, formatting, type-check, or import-order issues as CI already enforces these static checks
 - low-value style preferences, naming nits, or refactors that are not tied to a concrete defect or maintenance risk
 - speculative concerns that are not supported by the diff and surrounding code
 - duplicate comments on unchanged lines from earlier review runs
