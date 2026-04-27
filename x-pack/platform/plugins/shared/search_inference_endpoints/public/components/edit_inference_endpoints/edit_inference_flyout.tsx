@@ -12,7 +12,8 @@ import { flattenObject } from '@kbn/object-utils';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
-import { useEventTracker } from '../../analytics/event_tracker_context';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 interface EditInterfaceFlyoutProps {
   onFlyoutClose: () => void;
@@ -30,11 +31,11 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
     },
   } = useKibana();
   const { refetch } = useQueryInferenceEndpoints();
-  const eventTracker = useEventTracker();
+  const usageTracker = useUsageTracker();
   const onEditSuccess = useCallback(() => {
-    eventTracker.endpointEdited();
+    usageTracker.count(EventType.ENDPOINT_EDITED);
     refetch();
-  }, [refetch, eventTracker]);
+  }, [refetch, usageTracker]);
   const onFocusReturn = useCallback(() => {
     // Defer focus until after any closing animations complete
     requestAnimationFrame(() => {

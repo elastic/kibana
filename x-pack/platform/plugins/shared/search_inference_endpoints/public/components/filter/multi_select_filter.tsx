@@ -19,7 +19,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import _ from 'lodash';
 import { optionCountStyles } from './styles';
-import { useEventTracker } from '../../analytics/event_tracker_context';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 export interface MultiSelectFilterOption {
   key: string;
@@ -49,7 +50,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
   const euiThemeContext = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
-  const eventTracker = useEventTracker();
+  const usageTracker = useUsageTracker();
   const options: MultiSelectFilterOption[] = _.uniqBy(
     rawOptions.map(({ key, label }) => ({
       label,
@@ -94,7 +95,8 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
           defaultMessage: 'No options',
         })}
         onChange={(newOptions) => {
-          eventTracker.filterApplied(dataTestSubj ?? 'unknown');
+          const filter = dataTestSubj ?? 'unknown';
+          usageTracker.count([EventType.FILTER_APPLIED, `${EventType.FILTER_APPLIED}_${filter}`]);
           onChange(newOptions);
         }}
         singleSelection={false}

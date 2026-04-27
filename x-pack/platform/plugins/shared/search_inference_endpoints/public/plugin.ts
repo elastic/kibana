@@ -24,7 +24,6 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from './types';
 import { registerLocators } from './locators';
-import { registerSearchInferenceEndpointsEventTypes } from './analytics/register_event_types';
 
 export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
@@ -44,7 +43,6 @@ export class SearchInferenceEndpointsPlugin
   ): SearchInferenceEndpointsPluginSetup {
     if (!this.config.ui?.enabled) return {};
 
-    registerSearchInferenceEndpointsEventTypes(core.analytics);
     registerLocators(plugins.share);
 
     this.registerInferenceEndpoints =

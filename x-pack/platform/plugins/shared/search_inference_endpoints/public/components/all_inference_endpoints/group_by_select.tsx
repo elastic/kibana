@@ -18,7 +18,8 @@ import { i18n } from '@kbn/i18n';
 
 import { GroupByOptions } from '../../types';
 import { GroupByFilterButton, GroupBySelectableContainer } from './styles';
-import { useEventTracker } from '../../analytics/event_tracker_context';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 interface GroupBySelectProps {
   value: GroupByOptions;
@@ -60,16 +61,16 @@ function parseGroupByValue(value: string | undefined): GroupByOptions {
 
 export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const eventTracker = useEventTracker();
+  const usageTracker = useUsageTracker();
   const handleValueChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       const selectedOption = newOptions.find((option) => option.checked === 'on');
       const parsed = parseGroupByValue(selectedOption?.key);
-      eventTracker.groupByChanged(parsed);
+      usageTracker.count([EventType.GROUP_BY_CHANGED, `${EventType.GROUP_BY_CHANGED}_${parsed}`]);
       onChange(parsed);
       setIsPopoverOpen(false);
     },
-    [onChange, eventTracker]
+    [onChange, usageTracker]
   );
   const { options, selectedOptionLabel } = useMemo(() => {
     let selectedOption = GROUP_BY_OPTIONS[0].label;

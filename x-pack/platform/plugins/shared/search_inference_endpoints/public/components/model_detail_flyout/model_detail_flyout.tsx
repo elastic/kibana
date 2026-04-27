@@ -35,7 +35,8 @@ import {
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
-import { useEventTracker } from '../../analytics/event_tracker_context';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -57,11 +58,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
-  const eventTracker = useEventTracker();
+  const usageTracker = useUsageTracker();
 
   useEffect(() => {
-    eventTracker.eisModelViewed(modelId);
-  }, [eventTracker, modelId]);
+    usageTracker.count([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
+  }, [usageTracker, modelId]);
 
   const { endpoints, displayName, modelAuthor } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
@@ -95,25 +96,25 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   }, [endpoints]);
 
   const handleOpenAddModal = useCallback(() => {
-    eventTracker.modalOpened('add_endpoint');
+    usageTracker.count([EventType.MODAL_OPENED, `${EventType.MODAL_OPENED}_add_endpoint`]);
     setEditingEndpoint(undefined);
     setIsModalOpen(true);
-  }, [eventTracker]);
+  }, [usageTracker]);
 
   const handleOpenEditModal = useCallback(
     (endpoint: InferenceAPIConfigResponse) => {
-      eventTracker.modalOpened('edit_endpoint');
+      usageTracker.count([EventType.MODAL_OPENED, `${EventType.MODAL_OPENED}_edit_endpoint`]);
       setEditingEndpoint(endpoint);
       setIsModalOpen(true);
     },
-    [eventTracker]
+    [usageTracker]
   );
 
   const handleCloseModal = useCallback(() => {
-    eventTracker.modalClosed();
+    usageTracker.count(EventType.MODAL_CLOSED);
     setIsModalOpen(false);
     setEditingEndpoint(undefined);
-  }, [eventTracker]);
+  }, [usageTracker]);
 
   const descriptionListItems = [
     {

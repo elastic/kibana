@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { docLinks } from '../../common/doc_links';
-import { useEventTracker } from '../analytics/event_tracker_context';
+import { useUsageTracker } from '../contexts/usage_tracker_context';
+import { EventType } from '../analytics/constants';
 
 interface ExternalInferenceEmptyPromptProps {
   onFlyoutOpen: () => void;
@@ -20,10 +21,10 @@ interface ExternalInferenceEmptyPromptProps {
 export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPromptProps> = ({
   onFlyoutOpen,
 }) => {
-  const eventTracker = useEventTracker();
+  const usageTracker = useUsageTracker();
   useEffect(() => {
-    eventTracker.emptyStateViewed();
-  }, [eventTracker]);
+    usageTracker.count(EventType.EMPTY_STATE_VIEWED);
+  }, [usageTracker]);
   return (
     <KibanaPageTemplate.EmptyPrompt
       data-test-subj="externalInferenceEmptyPrompt"
