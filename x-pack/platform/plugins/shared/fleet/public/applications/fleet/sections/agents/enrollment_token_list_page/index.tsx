@@ -111,7 +111,6 @@ const TokenActions: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
         defaultMessage: 'Revoke token',
       }),
       icon: 'minusInCircle',
-      iconColor: 'danger',
       disabled: !apiKey.active,
       'data-test-subj': 'enrollmentTokenTable.revokeBtn',
       onClick: () => setPendingAction('revoke'),
@@ -122,7 +121,6 @@ const TokenActions: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
         defaultMessage: 'Delete token',
       }),
       icon: 'trash',
-      iconColor: 'danger',
       'data-test-subj': 'enrollmentTokenTable.deleteBtn',
       onClick: () => setPendingAction('delete'),
     },
@@ -436,6 +434,48 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
+            {showSelectionInfo && (
+              <EuiFlexItem grow={false}>
+                <HierarchicalActionsMenu
+                  items={[
+                    {
+                      id: 'bulkRevoke',
+                      name: i18n.translate(
+                        'xpack.fleet.enrollmentTokensList.bulkRevokeButton',
+                        { defaultMessage: 'Revoke' }
+                      ),
+                      icon: 'minusInCircle',
+                      iconColor: 'danger',
+                      'data-test-subj': 'enrollmentTokensList.bulkRevokeButton',
+                      onClick: () => setBulkActionPending('revoke'),
+                    },
+                    {
+                      id: 'bulkDelete',
+                      name: i18n.translate(
+                        'xpack.fleet.enrollmentTokensList.bulkDeleteButton',
+                        { defaultMessage: 'Delete' }
+                      ),
+                      icon: 'trash',
+                      iconColor: 'danger',
+                      'data-test-subj': 'enrollmentTokensList.bulkDeleteButton',
+                      onClick: () => setBulkActionPending('delete'),
+                    },
+                  ]}
+                  button={{
+                    props: { iconType: 'arrowDown', iconSide: 'right' },
+                    children: i18n.translate(
+                      'xpack.fleet.enrollmentTokensList.bulkActionsButton',
+                      {
+                        defaultMessage:
+                          '{count, plural, one {# token} other {# tokens}} selected',
+                        values: { count: selectedCount },
+                      }
+                    ),
+                  }}
+                  data-test-subj="enrollmentTokensList.bulkActionsMenu"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -453,8 +493,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      {/* Selection status row — mirrors AgentsSelectionStatus pattern */}
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minHeight: euiTheme.size.xl }}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
@@ -481,64 +520,37 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 />
               </EuiText>
             </EuiFlexItem>
-            {showSelectEverything && (
-              <>
-                <EuiFlexItem grow={false}>
-                  <Divider />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    flush="left"
-                    onClick={() => setSelectionMode('query')}
-                    data-test-subj="enrollmentTokensList.selectAllButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.enrollmentTokensList.selectAllButton"
-                      defaultMessage="Select everything on all pages"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </>
-            )}
+          </>
+        )}
+        {showSelectEverything && (
+          <>
             <EuiFlexItem grow={false}>
               <Divider />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
-                flush="left"
-                color="danger"
-                onClick={() => setBulkActionPending('revoke')}
-                data-test-subj="enrollmentTokensList.bulkRevokeButton"
+                flush="both"
+                onClick={() => setSelectionMode('query')}
+                data-test-subj="enrollmentTokensList.selectAllButton"
               >
                 <FormattedMessage
-                  id="xpack.fleet.enrollmentTokensList.bulkRevokeButton"
-                  defaultMessage="Revoke"
+                  id="xpack.fleet.enrollmentTokensList.selectAllButton"
+                  defaultMessage="Select everything on all pages"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                flush="left"
-                color="danger"
-                onClick={() => setBulkActionPending('delete')}
-                data-test-subj="enrollmentTokensList.bulkDeleteButton"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.enrollmentTokensList.bulkDeleteButton"
-                  defaultMessage="Delete"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+          </>
+        )}
+        {showSelectionInfo && (
+          <>
             <EuiFlexItem grow={false}>
               <Divider />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
-                flush="left"
+                flush="both"
                 onClick={clearSelection}
                 data-test-subj="enrollmentTokensList.clearSelectionButton"
               >
