@@ -9222,6 +9222,109 @@ describe('Package policy service', () => {
         });
       });
 
+      describe('when input-level vars are renamed via migrate_from', () => {
+        // Mirrors the m365_defender scenario: httpjson input has `tenant_id` and `login_url`,
+        // CEL input renames them to `azure_tenant_id` and `token_url` respectively.
+
+        const makeRenameBasePolicy = (): NewPackagePolicy => ({
+          name: 'rename-input-var-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                tenant_id: { type: 'text', value: 'my-tenant' },
+                login_url: { type: 'text', value: 'https://login.example.com' },
+                client_id: { type: 'text', value: 'my-client' },
+              },
+              streams: [],
+            },
+          ],
+        });
+
+        // CEL packageInfo: vars are renamed but declare migrate_from on each
+        const makeRenamePackageInfo = (): PackageInfo =>
+          makeCelPackageInfo({
+            vars: [
+              { name: 'azure_tenant_id', type: 'text', migrate_from: 'tenant_id' },
+              { name: 'token_url', type: 'text', migrate_from: 'login_url' },
+              { name: 'client_id', type: 'text' }, // same name — no rename needed
+            ],
+          });
+
+        const makeRenameOverride = (): InputsOverride[] => [
+          {
+            type: 'cel',
+            policy_template: 'template_1',
+            enabled: false,
+            migrate_from: 'httpjson',
+            vars: {
+              azure_tenant_id: { type: 'text', value: 'default-tenant' },
+              token_url: { type: 'text', value: 'https://default-login.com' },
+              client_id: { type: 'text', value: 'default-client' },
+            },
+            streams: [],
+          } as unknown as InputsOverride,
+        ];
+
+        it('carries renamed input-level vars to new names when packageInfo declares migrate_from on vars', () => {
+          const result = updatePackageInputs(
+            makeRenameBasePolicy(),
+            makeRenamePackageInfo(),
+            makeRenameOverride(),
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput?.vars?.azure_tenant_id?.value).toBe('my-tenant');
+          expect(celInput?.vars?.token_url?.value).toBe('https://login.example.com');
+          // Same-named var must also carry over
+          expect(celInput?.vars?.client_id?.value).toBe('my-client');
+          // Old names must not appear in result
+          expect(celInput?.vars?.tenant_id).toBeUndefined();
+          expect(celInput?.vars?.login_url).toBeUndefined();
+        });
+
+        it('falls through to new package default when old renamed input var has a null value', () => {
+          const policyWithNullTenant: NewPackagePolicy = {
+            ...makeRenameBasePolicy(),
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: true,
+                vars: {
+                  tenant_id: { type: 'text', value: null },
+                  login_url: { type: 'text', value: 'https://login.example.com' },
+                  client_id: { type: 'text', value: 'my-client' },
+                },
+                streams: [],
+              },
+            ],
+          };
+
+          const result = updatePackageInputs(
+            policyWithNullTenant,
+            makeRenamePackageInfo(),
+            makeRenameOverride(),
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          // null old value → new package default wins
+          expect(celInput?.vars?.azure_tenant_id?.value).toBe('default-tenant');
+          // non-null old value still carries over
+          expect(celInput?.vars?.token_url?.value).toBe('https://login.example.com');
+        });
+      });
+
       describe('when individual streams have migrate_from inside the datastream', () => {
         it('should support stream-level migrate_from an input-level migration', () => {
           const overrideWithBothLevels: InputsOverride[] = [
@@ -10928,6 +11031,238 @@ describe('Package policy service', () => {
         expect(v2Input?.vars?.log_path?.value).toBe('/var/log/nginx/access.log');
         // Old input should be removed
         expect(result.inputs.find((i) => i.name === 'filelog_otel')).toBeUndefined();
+      });
+    });
+
+    describe('when stream-level vars are renamed via migrate_from (issue #264045)', () => {
+      // Mirrors the m365_defender scenario: httpjson stream has `request_url`, CEL stream
+      // renames it to `url` and declares `migrate_from: request_url` on the var definition.
+
+      const makeRenameBasePolicyPathA = (): NewPackagePolicy => ({
+        name: 'rename-migration-policy',
+        description: '',
+        namespace: 'default',
+        enabled: true,
+        policy_id: 'xxxx',
+        policy_ids: ['xxxx'],
+        package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+        inputs: [
+          {
+            type: 'httpjson',
+            policy_template: 'template_1',
+            enabled: true,
+            vars: {},
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test_package.alert', type: 'logs' },
+                vars: {
+                  request_url: { type: 'text', value: 'https://user-regional.example.com' },
+                  interval: { type: 'text', value: '5m' },
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      // Path A: new input (CEL) doesn't yet exist in the old policy — goes through
+      // originalInput === undefined branch and applyStreamLevelMigration.
+      const makeRenamePackageInfoPathA = (): PackageInfo =>
+        ({
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '2.0.0',
+          latestVersion: '2.0.0',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL Input',
+                  vars: [],
+                },
+              ],
+            },
+          ],
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'test_package.alert',
+              path: 'alert',
+              streams: [
+                {
+                  input: 'cel',
+                  title: 'Alert stream',
+                  vars: [
+                    { name: 'url', type: 'text', migrate_from: 'request_url' },
+                    { name: 'interval', type: 'text' },
+                  ],
+                },
+              ],
+            },
+          ],
+          assets: {},
+        } as unknown as PackageInfo);
+
+      const makeRenameOverridePathA = (): InputsOverride[] => [
+        {
+          type: 'cel',
+          policy_template: 'template_1',
+          enabled: false,
+          vars: {},
+          streams: [
+            {
+              enabled: true,
+              migrate_from: 'httpjson',
+              data_stream: { dataset: 'test_package.alert', type: 'logs' },
+              vars: {
+                url: { type: 'text', value: 'https://graph.microsoft.com' },
+                interval: { type: 'text', value: '60s' },
+              },
+            },
+          ],
+        } as unknown as InputsOverride,
+      ];
+
+      it('carries a renamed stream var to the new name (Path A: new input via applyStreamLevelMigration)', () => {
+        const result = updatePackageInputs(
+          makeRenameBasePolicyPathA(),
+          makeRenamePackageInfoPathA(),
+          makeRenameOverridePathA(),
+          false
+        );
+
+        const celStream = result.inputs.find((i) => i.type === 'cel')?.streams[0];
+        expect(celStream?.vars?.url?.value).toBe('https://user-regional.example.com');
+        expect(celStream?.vars?.request_url).toBeUndefined();
+      });
+
+      it('falls back to the package default when the old renamed var has a null value (Path A)', () => {
+        const policyWithNullUrl: NewPackagePolicy = {
+          ...makeRenameBasePolicyPathA(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {},
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.alert', type: 'logs' },
+                  vars: {
+                    request_url: { type: 'text', value: null },
+                    interval: { type: 'text', value: '5m' },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          policyWithNullUrl,
+          makeRenamePackageInfoPathA(),
+          makeRenameOverridePathA(),
+          false
+        );
+
+        const celStream = result.inputs.find((i) => i.type === 'cel')?.streams[0];
+        // Null old value → new package default wins
+        expect(celStream?.vars?.url?.value).toBe('https://graph.microsoft.com');
+      });
+
+      it('uses the package default when the old renamed var is absent from the old stream (Path A)', () => {
+        const policyWithoutRequestUrl: NewPackagePolicy = {
+          ...makeRenameBasePolicyPathA(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {},
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.alert', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '5m' } },
+                },
+              ],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          policyWithoutRequestUrl,
+          makeRenamePackageInfoPathA(),
+          makeRenameOverridePathA(),
+          false
+        );
+
+        const celStream = result.inputs.find((i) => i.type === 'cel')?.streams[0];
+        expect(celStream?.vars?.url?.value).toBe('https://graph.microsoft.com');
+      });
+
+      // Path B: CEL input already existed in the old policy alongside httpjson — goes through
+      // the existing-input branch where new streams are pushed via inline migrateStreamVars.
+      it('carries a renamed stream var to the new name (Path B: partial migration / pre-existing input)', () => {
+        const basePolicyWithBothInputs: NewPackagePolicy = {
+          name: 'rename-partial-migration-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {},
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.alert', type: 'logs' },
+                  vars: {
+                    request_url: { type: 'text', value: 'https://user-regional.example.com' },
+                    interval: { type: 'text', value: '5m' },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {},
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicyWithBothInputs,
+          makeRenamePackageInfoPathA(),
+          makeRenameOverridePathA(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        const alertStream = celInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.alert'
+        );
+        expect(alertStream?.vars?.url?.value).toBe('https://user-regional.example.com');
+        expect(alertStream?.vars?.request_url).toBeUndefined();
       });
     });
 

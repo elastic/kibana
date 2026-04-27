@@ -53,6 +53,7 @@ import {
   checkIntegrationFipsLooseCompatibility,
   hasMultipleEnabledPolicyTemplates,
   getInputEffectiveName,
+  getRegistryStreamWithDataStreamForInputType,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -4036,6 +4037,18 @@ export function updatePackageInputs(
   for (const update of inputsUpdated) {
     let originalInput: NewPackagePolicyInput | undefined;
 
+    // Pre-compute registry definitions for this input type so var-level migrate_from renaming
+    // can be applied in both Path A and Path B migration calls below.
+    const updateType = (update as NewPackagePolicyInput).type;
+    const registryStreams = updateType
+      ? getRegistryStreamWithDataStreamForInputType(updateType, packageInfo)
+      : undefined;
+    const registryInputVarDefs = updateType
+      ? packageInfo.policy_templates
+          ?.flatMap((pt) => getNormalizedInputs(pt))
+          .find((ri) => (ri.name ?? ri.type) === updateType)?.vars
+      : undefined;
+
     if (update.policy_template) {
       // If the updated value defines a policy template, try to find an original input
       // with the same policy template value. Match by name ?? type on both sides
@@ -4069,9 +4082,15 @@ export function updatePackageInputs(
       const originalInputToMigrate = applyInputLevelMigration(
         update,
         basePackagePolicy.inputs,
-        inputs
+        inputs,
+        registryInputVarDefs
       );
-      applyStreamLevelMigration(update, originalInputToMigrate, basePackagePolicy.inputs);
+      applyStreamLevelMigration(
+        update,
+        originalInputToMigrate,
+        basePackagePolicy.inputs,
+        registryStreams
+      );
 
       // Do not enable new inputs for limited packages
       if (limitedPackage) {
@@ -4161,8 +4180,16 @@ export function updatePackageInputs(
             );
             const oldStream = oldInputForStream?.streams[counter];
             if (oldStream) {
+              const registryStream = registryStreams?.find(
+                (rs) => rs.data_stream.dataset === stream.data_stream.dataset
+              );
               originalInput.streams.push(
-                migrateStreamVars(stream as InputsOverride, oldStream, oldInputForStream?.vars)
+                migrateStreamVars(
+                  stream as InputsOverride,
+                  oldStream,
+                  oldInputForStream?.vars,
+                  registryStream?.vars
+                )
               );
               streamMigratedFromOldInput = true;
               if (!oldSourceInput) oldSourceInput = oldInputForStream;
