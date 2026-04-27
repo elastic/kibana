@@ -51,7 +51,7 @@ jest.mock('../utils/report_metrics_grid_error', () => ({
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
@@ -107,7 +107,7 @@ type MockDataView = Pick<DataView, 'getFieldByName' | 'getIndexPattern'> & {
 // derivation in useFetchMetricsData (#264957) is a no-op for existing
 // tests. Tests that exercise the prune behavior override this per-test.
 const createMockDataView = (): MockDataView => ({
-  getFieldByName: jest.fn((name: string) => ({ name })),
+  getFieldByName: jest.fn((name: string) => ({ name } as unknown as DataViewField)),
   getIndexPattern: () => 'metrics-*',
   isTimeBased: () => true,
 });
