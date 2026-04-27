@@ -352,17 +352,29 @@ describe('createEntitySourcesService', () => {
     it('skips cleanup when abort signal fires after plainIndexSync', async () => {
       const controller = new AbortController();
 
+      // Need one active source so the paginated loop calls plainIndexSync at least once
+      mockGetEntitySourceIds.mockResolvedValue(['source-a']);
+      mockListEntitySources.mockResolvedValue({
+        sources: [{ id: 'source-a', type: 'index', identifierField: 'user.id' }],
+      });
+      mockListEntityStoreEntities.mockImplementationOnce(async function* () {
+        yield {
+          entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+          correlationMap: new Map(),
+          watchlistsByEuid: new Map(),
+          maxEntityId: 'user:1',
+        };
+      });
+
       // Abort mid-way through syncWatchlist, after plainIndexSync runs
       mockPlainIndexSync.mockImplementation(async () => {
         controller.abort();
       });
 
-      mockGetEntitySourceIds.mockResolvedValue([]);
-      mockListEntitySources.mockResolvedValue({ sources: [] });
-
       const service = createService();
       await service.syncWatchlist('watchlist-1', controller.signal);
 
+      // First page pass calls plainIndexSync; abort fires so tail pass is skipped
       expect(mockPlainIndexSync).toHaveBeenCalledTimes(1);
       // cleanupOrphanedEntities triggers an esClient.search for orphaned source agg —
       // it should not be called after abort
