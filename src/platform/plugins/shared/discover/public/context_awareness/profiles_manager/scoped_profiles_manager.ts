@@ -58,6 +58,9 @@ export interface ResolveDataSourceProfileResult {
    * Whether the resolved data source profile differs from the previously active profile.
    */
   didProfileChange: boolean;
+  /**
+   * Whether it's the first data source profile resolved since the manager was created.
+   */
   isFirstResolution: boolean;
 }
 

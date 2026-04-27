@@ -403,6 +403,8 @@ export function getDataStateContainer({
                 )
               );
             } else {
+              // If it's not the first profile resolution (i.e. page load or tab init),
+              // and there's no profile state to restore, fall back to shared layout state
               if (!isFirstResolution) {
                 await withSkipNextFetch(async () =>
                   internalState.dispatch(
