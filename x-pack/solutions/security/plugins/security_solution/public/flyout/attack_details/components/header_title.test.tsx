@@ -238,6 +238,22 @@ describe('HeaderTitle', () => {
     expect(screen.queryByTestId('attack-details-schedule-details-flyout')).not.toBeInTheDocument();
   });
 
+  it('does not show a schedule link when alertRuleUuid is empty', () => {
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      attack: { alertRuleUuid: '' },
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId(HEADER_TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+  });
+
   it('does not show a schedule link for ad hoc attack runs', () => {
     mockedUseAttackDetailsContext.mockReturnValue({
       attackId: 'attack-1',

@@ -54,7 +54,7 @@ export const HeaderTitle = memo(() => {
 
   const scheduleIdForLink = useMemo(() => {
     const uuid = attack?.alertRuleUuid;
-    if (uuid == null || uuid === ATTACK_DISCOVERY_AD_HOC_RULE_ID) {
+    if (!uuid || uuid === ATTACK_DISCOVERY_AD_HOC_RULE_ID) {
       return undefined;
     }
     return uuid;
