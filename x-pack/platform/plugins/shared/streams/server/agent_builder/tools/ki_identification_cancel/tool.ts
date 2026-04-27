@@ -38,7 +38,6 @@ export const createKiIdentificationCancelTool = ({
     - On success: task cancel acknowledgement payload with stream, task id, and status
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
-  tags: ['streams', 'significant_events', 'management', 'kis', 'knowledge_indicators'],
   schema: cancelSchema,
   handler: async ({ stream_name: streamName }, { request }) => {
     try {

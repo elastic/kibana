@@ -58,7 +58,6 @@ export const createKiIdentificationStartTool = ({
     - On success: \`{ kibanaPath: "/app/streams/<stream>/management/significantEvents" }\`
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
-  tags: ['streams', 'significant_events', 'management', 'kis', 'knowledge_indicators'],
   schema: onboardingStartSchema,
   handler: async ({ stream_name: streamName, steps, connectors }, { request }) => {
     try {

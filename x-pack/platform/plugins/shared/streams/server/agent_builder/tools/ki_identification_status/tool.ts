@@ -43,7 +43,6 @@ export const createKiIdentificationStatusTool = ({
     - On success: task status payload for the stream (includes terminal results when available)
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
-  tags: ['streams', 'significant_events'],
   schema: onboardingStatusSchema,
   handler: async ({ stream_name: streamName }, { request }) => {
     try {
