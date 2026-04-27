@@ -85,10 +85,10 @@ export const convertFormDataInBaseSchedule = (
   const workflowConfigPayload =
     workflowConfig != null
       ? {
-          alert_retrieval_mode: workflowConfig.alertRetrievalMode,
-          alert_retrieval_workflow_ids: workflowConfig.alertRetrievalWorkflowIds,
-          ...(workflowConfig.esqlQuery != null ? { esql_query: workflowConfig.esqlQuery } : {}),
-          validation_workflow_id: workflowConfig.validationWorkflowId,
+          alertRetrievalMode: workflowConfig.alertRetrievalMode,
+          alertRetrievalWorkflowIds: workflowConfig.alertRetrievalWorkflowIds,
+          ...(workflowConfig.esqlQuery != null ? { esqlQuery: workflowConfig.esqlQuery } : {}),
+          validationWorkflowId: workflowConfig.validationWorkflowId,
         }
       : undefined;
 

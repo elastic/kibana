@@ -13,7 +13,6 @@ import type { RoundCompleteEventData } from '@kbn/agent-builder-common/chat/even
 import { z } from '@kbn/zod/v4';
 import React, { useCallback, useMemo, useRef } from 'react';
 
-import { THREAT_HUNTING_AGENT_ID } from '../../../../../../common/constants';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../../../common/lib/telemetry';
@@ -88,7 +87,6 @@ const EditWithAiComponent: React.FC<EditWithAiProps> = ({ esqlQuery, onEsqlQuery
     telemetry.reportEvent(AttackDiscoveryEventTypes.EditWithAiClicked, {});
 
     agentBuilder.openChat({
-      agentId: THREAT_HUNTING_AGENT_ID,
       attachments: [esqlAttachment],
       autoSendInitialMessage: false,
       browserApiTools: [updateEsqlQueryTool],
