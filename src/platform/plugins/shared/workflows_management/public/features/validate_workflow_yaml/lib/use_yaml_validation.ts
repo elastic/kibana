@@ -13,6 +13,7 @@ import { monaco } from '@kbn/monaco';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { collectAllVariables } from './collect_all_variables';
+import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
@@ -24,7 +25,6 @@ import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
-import { useGetPropertyHandler } from '../../../common/context';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
   selectConnectors,
