@@ -95,7 +95,7 @@ Existing FTR tests continue to run, and teams can migrate them to Scout incremen
 
 #### Q: Should I migrate every FTR test to Scout? [scout-faq-migrate-ftr-to-scout]
 
-Not necessarily: [pick the right test type](./scout/best-practices.md#pick-the-right-test-type) before migrating a test.
+_It, depends_: [pick the right test type](./scout/best-practices.md#pick-the-right-test-type) before migrating a test.
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 
