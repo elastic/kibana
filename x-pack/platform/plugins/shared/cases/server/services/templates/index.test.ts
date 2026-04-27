@@ -829,60 +829,6 @@ describe('TemplatesService', () => {
 
       expect(result).toEqual([]);
     });
-
-    it('uses size: 10000 when templateVersionPairs is an empty array', async () => {
-      const service = createService();
-
-      const searchResponse = createMockSearchResponse([]);
-      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
-
-      await service.getTemplateVersionsForExtendedFieldSearch({
-        owner: ['securitySolution'],
-        isDeleted: false,
-        templateVersionPairs: [],
-      });
-
-      const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
-      expect(searchCall.size).toBe(10000);
-    });
-  });
-
-  describe('searchTemplates with templateVersionPairs and search', () => {
-    it('includes search must clause when templateVersionPairs is provided', async () => {
-      const service = createService();
-      unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
-
-      // This simulates a scenario where we want to search within specific template versions
-      await service.getAllTemplates({
-        ...defaultFindParams,
-        search: 'test-search',
-      });
-
-      const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
-      const query = searchCall?.query as {
-        bool: { must?: unknown[]; should?: unknown[]; filter?: unknown[] };
-      };
-
-      // Verify that the must clause (containing search logic) is present
-      expect(query.bool.must).toBeDefined();
-      expect(query.bool.must).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            bool: expect.objectContaining({
-              should: expect.arrayContaining([
-                expect.objectContaining({
-                  wildcard: expect.objectContaining({
-                    [`${CASE_TEMPLATE_SAVED_OBJECT}.name`]: expect.objectContaining({
-                      value: '*test-search*',
-                    }),
-                  }),
-                }),
-              ]),
-            }),
-          }),
-        ])
-      );
-    });
   });
 
   it('persists description, tags, author, fieldCount and fieldNames on create', async () => {

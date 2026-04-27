@@ -41,6 +41,7 @@ export const search = async (
     authorization,
     logger,
     spaceId,
+    config,
   } = clientArgs;
 
   try {
@@ -48,7 +49,7 @@ export const search = async (
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
     const customFieldsConfiguration: CustomFieldsConfiguration = configurations
-      .map((config) => config.customFields)
+      .map((configuration) => configuration.customFields)
       .flat();
 
     /**
@@ -130,11 +131,13 @@ export const search = async (
      *    correctly match cases created with older template versions where fields may differ.
      * 2. Label enrichment — enrichCasesWithFieldLabels uses the same SOs to populate
      *    extended_fields_labels on returned cases, avoiding redundant fetches.
+     *
      */
-    const templateSOs = await templatesService.getTemplateVersionsForExtendedFieldSearch({
-      owner: ownerArray.length > 0 ? ownerArray : undefined,
-      isDeleted: false,
-    });
+    const templateSOs = config.templates.enabled
+      ? await templatesService.getTemplateVersionsForExtendedFieldSearch({
+          owner: ownerArray.length > 0 ? ownerArray : undefined,
+        })
+      : [];
 
     const rawFilters = paramArgs.extendedFieldFilters;
     const resolvedExtendedFieldFilters =
