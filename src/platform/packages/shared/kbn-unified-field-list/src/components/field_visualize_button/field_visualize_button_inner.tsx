@@ -10,6 +10,7 @@
 import React from 'react';
 import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { VisualizeInformation } from './visualize_trigger_utils';
@@ -36,7 +37,10 @@ export const FieldVisualizeButtonInner: React.FC<FieldVisualizeButtonInnerProps>
         data-test-subj={`fieldVisualize-${field.name}`}
         {...(buttonProps || {})}
         href={visualizeInfo.href}
-        onClick={handleVisualizeLinkClick}
+        onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+          if (hasActiveModifierKey(e)) return;
+          handleVisualizeLinkClick(e);
+        }}
       >
         <FormattedMessage
           id="unifiedFieldList.fieldVisualizeButton.label"
