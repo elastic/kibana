@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/utility-types'
   - '@kbn/security-hardening'
+  - '@kbn/telemetry'
 tags:
   - shared-server
   - package

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
@@ -29,13 +30,15 @@ import {
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { noop } from 'lodash/fp';
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { HuntingLead } from './types';
 import { LeadCard } from './lead_card';
 import * as i18n from './translations';
 import illustrationGenAi from '../../../../common/images/illustration_genai_transparent_background.svg';
 
 const MAX_VISIBLE_CARDS = 5;
-const MIN_CARD_WIDTH = 200;
+const MIN_CARD_WIDTH = 280;
+const MAX_CARD_WIDTH = 480;
 const CARD_GAP = 16; // EUI gutterSize="m"
 
 interface TopThreatHuntingLeadsProps {
@@ -52,7 +55,9 @@ interface TopThreatHuntingLeadsProps {
   onHuntInChat: () => void;
   onGenerate: () => void;
   connectorId: string | undefined;
+  hasValidConnector: boolean;
   onConnectorIdSelected: (id: string) => void;
+  isAgentChatExperienceEnabled: boolean;
 }
 
 export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
@@ -69,7 +74,9 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   onHuntInChat,
   onGenerate,
   connectorId,
+  hasValidConnector,
   onConnectorIdSelected,
+  isAgentChatExperienceEnabled,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -90,7 +97,12 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const closeOptions = useCallback(() => setIsOptionsOpen(false), []);
   const toggleOpen = useCallback(() => setIsOpen((prev) => !prev), []);
 
+  const { getUrlForApp } = useKibana().services.application;
+  const genAiSettingsUrl = getUrlForApp('management', { path: '/ai/genAiSettings' });
+
   const showHeaderGenerate = !isOpen && leads.length === 0 && !hasGenerated;
+  const renderCount = Math.min(leads.length, visibleCardCount);
+  const hasFewLeads = leads.length < visibleCardCount;
 
   return (
     <EuiPanel hasBorder data-test-subj="topThreatHuntingLeads" color="subdued">
@@ -106,9 +118,9 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{i18n.TOP_THREAT_HUNTING_LEADS_TITLE}</h3>
+            <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+              <EuiTitle size="m">
+                <h2 className="eui-textTruncate">{i18n.TOP_THREAT_HUNTING_LEADS_TITLE}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -173,75 +185,93 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             )}
             {showHeaderGenerate && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={!connectorId ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined}
-                >
-                  <AiButton
+                {!isAgentChatExperienceEnabled ? (
+                  <EuiButton
                     size="s"
-                    iconType="sparkles"
-                    isLoading={isGenerating}
-                    isDisabled={!connectorId}
-                    onClick={onGenerate}
-                    data-test-subj="headerGenerateLeadsButton"
+                    fill
+                    iconType="popout"
+                    iconSide="right"
+                    href={genAiSettingsUrl}
+                    target="_blank"
+                    data-test-subj="openGenAiSettingsButton"
                   >
-                    {i18n.GENERATE_LEADS}
-                  </AiButton>
-                </EuiToolTip>
+                    {i18n.OPEN_GENAI_SETTINGS}
+                  </EuiButton>
+                ) : (
+                  <EuiToolTip
+                    content={
+                      !hasValidConnector ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined
+                    }
+                  >
+                    <AiButton
+                      size="s"
+                      iconType="sparkles"
+                      isLoading={isGenerating}
+                      isDisabled={!hasValidConnector}
+                      onClick={onGenerate}
+                      data-test-subj="headerGenerateLeadsButton"
+                    >
+                      {i18n.GENERATE_LEADS}
+                    </AiButton>
+                  </EuiToolTip>
+                )}
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                isOpen={isOptionsOpen}
-                closePopover={closeOptions}
-                ownFocus={false}
-                anchorPosition="downRight"
-                panelPaddingSize="m"
-                aria-label={i18n.OPTIONS}
-                button={
-                  <EuiButtonIcon
-                    iconType="boxesVertical"
-                    aria-label={i18n.OPTIONS}
-                    onClick={toggleOptions}
-                    data-test-subj="leadsOptionsButton"
-                  />
-                }
-              >
-                <div style={{ width: 320 }}>
-                  <EuiFlexGroup direction="column" gutterSize="xs">
-                    <EuiFlexItem>
-                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiIcon type="plugs" aria-hidden={true} />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s">
-                            <strong>{i18n.CONNECTOR_LABEL}</strong>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <ConnectorSelectorInline
-                        fullWidth
-                        onConnectorSelected={noop}
-                        onConnectorIdSelected={onConnectorIdSelected}
-                        selectedConnectorId={connectorId}
-                        loadConnectorFeatureId="lead_generation"
-                        explicitConnectorSelection
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiHorizontalRule margin="s" />
-                  <EuiSwitch
-                    label={i18n.AUTO_GENERATE_LABEL}
-                    checked={isScheduled}
-                    onChange={(e) => onToggleSchedule(e.target.checked)}
-                    disabled={!connectorId}
-                    data-test-subj="autoGenerateSwitch"
-                  />
-                </div>
-              </EuiPopover>
-            </EuiFlexItem>
+            {isAgentChatExperienceEnabled && (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  isOpen={isOptionsOpen}
+                  closePopover={closeOptions}
+                  ownFocus={false}
+                  anchorPosition="downRight"
+                  panelPaddingSize="m"
+                  aria-label={i18n.OPTIONS}
+                  button={
+                    <EuiButtonIcon
+                      iconType="boxesVertical"
+                      aria-label={i18n.OPTIONS}
+                      onClick={toggleOptions}
+                      data-test-subj="leadsOptionsButton"
+                    />
+                  }
+                >
+                  <div style={{ width: 320 }}>
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      <EuiFlexItem>
+                        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="plugs" aria-hidden={true} />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="s">
+                              <strong>{i18n.CONNECTOR_LABEL}</strong>
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <ConnectorSelectorInline
+                          fullWidth
+                          onConnectorSelected={noop}
+                          onConnectorIdSelected={onConnectorIdSelected}
+                          selectedConnectorId={connectorId}
+                          loadConnectorFeatureId="lead_generation"
+                          explicitConnectorSelection
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiHorizontalRule margin="s" />
+                    <EuiSwitch
+                      label={i18n.AUTO_GENERATE_LABEL}
+                      checked={isScheduled}
+                      onChange={(e) => onToggleSchedule(e.target.checked)}
+                      disabled={!connectorId}
+                      data-test-subj="autoGenerateSwitch"
+                    />
+                  </div>
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -279,22 +309,38 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                   title={<h3>{i18n.NO_DATA_TITLE}</h3>}
                   body={<p>{i18n.NO_DATA_DESCRIPTION}</p>}
                   actions={
-                    <EuiToolTip
-                      content={
-                        !connectorId ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined
-                      }
-                    >
-                      <AiButton
+                    !isAgentChatExperienceEnabled ? (
+                      <EuiButton
                         size="s"
-                        iconType="sparkles"
-                        isLoading={isGenerating}
-                        isDisabled={!connectorId}
-                        onClick={onGenerate}
-                        data-test-subj="generateLeadsButton"
+                        fill
+                        iconType="popout"
+                        iconSide="right"
+                        href={genAiSettingsUrl}
+                        target="_blank"
+                        data-test-subj="openGenAiSettingsButton"
                       >
-                        {i18n.GENERATE_LEADS}
-                      </AiButton>
-                    </EuiToolTip>
+                        {i18n.OPEN_GENAI_SETTINGS}
+                      </EuiButton>
+                    ) : (
+                      <EuiToolTip
+                        content={
+                          !hasValidConnector
+                            ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
+                            : undefined
+                        }
+                      >
+                        <AiButton
+                          size="s"
+                          iconType="sparkles"
+                          isLoading={isGenerating}
+                          isDisabled={!hasValidConnector}
+                          onClick={onGenerate}
+                          data-test-subj="generateLeadsButton"
+                        >
+                          {i18n.GENERATE_LEADS}
+                        </AiButton>
+                      </EuiToolTip>
+                    )
                   }
                   data-test-subj="leadsEmptyPrompt"
                 />
@@ -302,24 +348,47 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                 <EuiEmptyPrompt
                   layout="horizontal"
                   color="transparent"
-                  body={<p>{i18n.NO_LEADS_DESCRIPTION}</p>}
+                  style={{ maxWidth: 620 }}
+                  body={
+                    <p>
+                      {!isAgentChatExperienceEnabled
+                        ? i18n.NO_CONNECTOR_DESCRIPTION
+                        : i18n.NO_LEADS_DESCRIPTION}
+                    </p>
+                  }
                   actions={
-                    <EuiToolTip
-                      content={
-                        !connectorId ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined
-                      }
-                    >
-                      <AiButton
+                    !isAgentChatExperienceEnabled ? (
+                      <EuiButton
                         size="s"
-                        iconType="sparkles"
-                        isLoading={isGenerating}
-                        isDisabled={!connectorId}
-                        onClick={onGenerate}
-                        data-test-subj="generateLeadsButton"
+                        fill
+                        iconType="popout"
+                        iconSide="right"
+                        href={genAiSettingsUrl}
+                        target="_blank"
+                        data-test-subj="openGenAiSettingsButton"
                       >
-                        {i18n.GENERATE_LEADS}
-                      </AiButton>
-                    </EuiToolTip>
+                        {i18n.OPEN_GENAI_SETTINGS}
+                      </EuiButton>
+                    ) : (
+                      <EuiToolTip
+                        content={
+                          !hasValidConnector
+                            ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
+                            : undefined
+                        }
+                      >
+                        <AiButton
+                          size="s"
+                          iconType="sparkles"
+                          isLoading={isGenerating}
+                          isDisabled={!hasValidConnector}
+                          onClick={onGenerate}
+                          data-test-subj="generateLeadsButton"
+                        >
+                          {i18n.GENERATE_LEADS}
+                        </AiButton>
+                      </EuiToolTip>
+                    )
                   }
                   icon={<EuiImage size={128} alt="" url={illustrationGenAi} />}
                   data-test-subj="leadsEmptyPrompt"
@@ -327,16 +396,25 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
               )}
             </EuiPanel>
           ) : (
-            <div ref={setCardsContainer} style={{ overflow: 'hidden' }}>
-              <EuiFlexGroup gutterSize="m" responsive={false} wrap={false}>
-                {Array.from({ length: visibleCardCount }, (_, idx) => {
-                  const lead = leads[idx];
-                  return (
-                    <EuiFlexItem key={lead?.id ?? `empty-${idx}`} style={{ minWidth: 0 }}>
-                      {lead ? <LeadCard lead={lead} onClick={onLeadClick} /> : <div />}
-                    </EuiFlexItem>
-                  );
-                })}
+            <div ref={setCardsContainer} style={{ overflow: 'hidden', padding: 16, margin: -8 }}>
+              <EuiFlexGroup
+                gutterSize="m"
+                responsive={false}
+                wrap={false}
+                justifyContent={hasFewLeads ? 'flexStart' : undefined}
+              >
+                {leads.slice(0, renderCount).map((lead) => (
+                  <EuiFlexItem
+                    key={lead.id}
+                    grow={!hasFewLeads}
+                    style={{
+                      minWidth: 0,
+                      maxWidth: hasFewLeads ? MAX_CARD_WIDTH : undefined,
+                    }}
+                  >
+                    <LeadCard lead={lead} onClick={onLeadClick} />
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
             </div>
           )}

@@ -1063,11 +1063,13 @@ export class WorkflowsService {
   }
 
   /**
-   * Disables all enabled workflows across all spaces. Sets `enabled: false`,
-   * patches YAML accordingly, and unschedules any scheduled tasks.
-   * Used when a user opts out of workflows by toggling the global UI setting off.
+   * Disables all enabled workflows. When `spaceId` is set, only workflows in that space;
+   * otherwise across all spaces. Sets `enabled: false`, patches YAML accordingly, and
+   * unschedules any scheduled tasks.
+   * Used when a user opts out of workflows by toggling the per-space UI setting off, or
+   * when availability (license / config) requires bulk disable.
    */
-  public async disableAllWorkflows(): Promise<{
+  public async disableAllWorkflows(spaceId?: string): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
@@ -1083,7 +1085,7 @@ export class WorkflowsService {
 
     const query = {
       bool: {
-        must: [{ term: { enabled: true } }],
+        must: [{ term: { enabled: true } }, ...(spaceId ? [{ term: { spaceId } }] : [])],
         must_not: [{ exists: { field: 'deleted_at' } }],
       },
     };
@@ -1178,12 +1180,16 @@ export class WorkflowsService {
 
     if (hasMore && pageCount >= MAX_PAGES) {
       this.logger.warn(
-        `disableAllWorkflows truncated at ${MAX_PAGES} pages (${totalHits} workflows processed)`
+        `disableAllWorkflows truncated at ${MAX_PAGES} pages (${totalHits} workflows processed)${
+          spaceId ? ` (spaceId=${spaceId})` : ''
+        }`
       );
     }
 
     this.logger.info(
-      `Disabled ${disabledIds.length} workflows across all spaces (${failures.length} failures)`
+      `Disabled ${disabledIds.length} workflows${
+        spaceId ? ` in space ${spaceId}` : ' across all spaces'
+      } (${failures.length} failures)`
     );
 
     return {
