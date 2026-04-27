@@ -9,24 +9,25 @@ import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type {
   PropertySelectionHandler,
-  SelectionOption,
-  SelectionDetails,
   SelectionContext,
+  SelectionDetails,
+  SelectionOption,
 } from '@kbn/workflows';
+import { internalApiPath } from '../../common/constants';
 
 const TRANSLATIONS = {
   service: (service: string) =>
-    i18n.translate('workplace_ai.workflowSteps.rerank.inferenceIdSelection.service', {
+    i18n.translate('xpack.agentBuilder.rerankStep.inferenceIdSelection.service', {
       defaultMessage: 'Service: {service}',
       values: { service },
     }),
   connectedToEndpoint: (service: string) =>
-    i18n.translate('workplace_ai.workflowSteps.rerank.inferenceIdSelection.connectedToEndpoint', {
+    i18n.translate('xpack.agentBuilder.rerankStep.inferenceIdSelection.connectedToEndpoint', {
       defaultMessage: 'Connected to endpoint ({service})',
       values: { service },
     }),
   notFound: (input: string) =>
-    i18n.translate('workplace_ai.workflowSteps.rerank.inferenceIdSelection.notFound', {
+    i18n.translate('xpack.agentBuilder.rerankStep.inferenceIdSelection.notFound', {
       defaultMessage: 'Inference endpoint "{input}" not found',
       values: { input },
     }),
@@ -44,7 +45,7 @@ interface InferenceEndpointsResponse {
 
 async function loadInferenceEndpoints(http: HttpStart): Promise<InferenceEndpoint[]> {
   const response = await http.get<InferenceEndpointsResponse>(
-    '/internal/workplace_ai/inference_endpoints'
+    `${internalApiPath}/inference_endpoints`
   );
   return response.inference_endpoints.filter((ep) => ep.task_type === 'rerank');
 }
