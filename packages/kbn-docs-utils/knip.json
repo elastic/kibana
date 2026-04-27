@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["index.ts","src/index.ts","src/types.ts","**/*.test.{ts,tsx}","**/*.stories.{ts,tsx}","**/__mocks__/**/*.{ts,tsx}","**/__storybook_mocks__/**/*.{ts,tsx}","**/*.mock.{ts,tsx}","**/tsd_tests/test_d/**/*.ts","src/integration_tests/__fixtures__/**/*.{ts,tsx}"],
+  "project": ["server/**/*.{ts,tsx}", "public/**/*.{ts,tsx}", "common/**/*.{ts,tsx}", "src/**/*.{ts,tsx}", "*.{ts,tsx}"],
+  "ignore": ["target/**", "**/*.d.ts"]
+}
