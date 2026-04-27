@@ -31,7 +31,7 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 
 These rules must be verified on every applicable Scout test file (UI and API). Do not skip them:
 
-- **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete instructions in `docs/extend/scout/best-practices.md`
+- **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete guidance in `docs/extend/scout/best-practices.md`
 
 ## Output
 
