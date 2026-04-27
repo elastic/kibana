@@ -1777,6 +1777,8 @@ x-pack/platform/plugins/shared/streams/server/lib/tasks/task_definitions/feature
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
+# common
+x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elastic/obs-sig-events-team
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
