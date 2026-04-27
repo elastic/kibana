@@ -12,6 +12,11 @@ export const AGENT_BUILDER_SIDEBAR_PANEL = '[data-test-subj="sidebarPanel"]';
 export const AGENT_BUILDER_CONVERSATION_INPUT_EDITOR =
   '[data-test-subj="agentBuilderConversationInputEditor"]';
 
+export const ENTITY_ATTACHMENT_CARD_ACTIONS = '[data-test-subj="entityAttachmentCardActions"]';
+
+export const ENTITY_ATTACHMENT_OPEN_ENTITY_ANALYTICS_ACTION =
+  '[data-test-subj="entityAttachmentOpenEntityAnalyticsAction"]';
+
 export const CREATE_RULE_BUTTON = '[data-test-subj="create-rule-button"]';
 
 export const CREATE_RULE_CONTEXT_MENU_POPOVER =

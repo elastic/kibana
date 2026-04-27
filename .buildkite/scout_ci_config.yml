@@ -40,6 +40,7 @@ plugins:
     - search_inference_endpoints
     - security
     - security_solution
+    - serverless_observability
     - share
     - slo
     - spaces

@@ -17,7 +17,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
@@ -78,7 +78,7 @@ export interface AssigneesProps {
 export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: AssigneesProps) => {
   const eventId = useMemo(() => hit.raw._id ?? '', [hit]);
   const isRemoteDocument = useMemo(
-    () => isCCSRemoteIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+    () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
     [hit]
   );
   const initialAssignedUserIds = useMemo(() => {

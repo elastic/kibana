@@ -8,6 +8,7 @@ value:
         label: my-text-field
         required: false
         type: text
+    observableTypes: []
     owner: cases
     created_at: 2024-07-01T17:07:17.767Z
     created_by:

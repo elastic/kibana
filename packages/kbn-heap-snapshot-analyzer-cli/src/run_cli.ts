@@ -86,6 +86,12 @@ interface PackageRow {
   savedBytes: number;
 }
 
+interface PackageAllocRow {
+  package: string;
+  allocPct: number;
+  allocBytes: number;
+}
+
 interface PluginRow {
   plugin: string;
   retainedPct: number;
@@ -111,13 +117,18 @@ interface JsonReport {
   edgeCount: number;
   pluginCount: number;
   hasAllocationTracking: boolean;
+  filter?: string;
   packages: PackageRow[];
   plugins: PluginRow[];
+  modulesAlloc?: PackageAllocRow[];
+  packagesAlloc?: PackageAllocRow[];
   unattributed: {
     package: { retainedBytes: number; pct: number };
     plugins: { retainedBytes: number; pct: number };
     allocSite?: { retainedBytes: number; pct: number };
     allocSiteUntracked?: { retainedBytes: number; pct: number };
+    allocSiteModule?: { retainedBytes: number; pct: number };
+    allocSitePackage?: { retainedBytes: number; pct: number };
   };
   nodeTypes: NodeTypeRow[];
 }
@@ -173,6 +184,9 @@ export function runHeapSnapshotAnalyzerCli(): void {
         '  --counterfactual=N       Top-N packages/plugins for counterfactual shrinkage\n' +
         '                           analysis (default 30).\n' +
         '  --no-counterfactual      Skip counterfactual shrinkage (faster, less info).\n' +
+        '  --filter=<regex>         Restrict allocation-site tables to nodes whose deepest\n' +
+        '                           allocation frame script_name matches <regex>. Example:\n' +
+        '                           --filter=zod for Zod-only allocation attribution.\n' +
         '\n' +
         'Computes two attribution views by default:\n' +
         '  - package: explicit-evidence seeds + dominator propagation (per-package; edge-order invariant)\n' +
@@ -182,6 +196,21 @@ export function runHeapSnapshotAnalyzerCli(): void {
   }
 
   const snapshotPath = positional[0];
+
+  const filterStr = flagValue('filter');
+  let filterRegex: RegExp | undefined;
+  if (filterStr !== undefined) {
+    if (filterStr.length === 0) {
+      process.stderr.write(`--filter requires a value, e.g. --filter=zod\n`);
+      process.exit(1);
+    }
+    try {
+      filterRegex = new RegExp(filterStr);
+    } catch (err) {
+      process.stderr.write(`Invalid --filter regex '${filterStr}': ${(err as Error).message}\n`);
+      process.exit(1);
+    }
+  }
 
   function status(msg: string): void {
     process.stderr.write(msg + '\n');
@@ -767,6 +796,16 @@ export function runHeapSnapshotAnalyzerCli(): void {
   }
   status(`  ${strMapped} strings mapped to ${pkgNames.length} packages in ${elapsed(tStr)}`);
 
+  // Library = third-party package from node_modules. Since extractPkg matches
+  // KBN_RE first, every name starting with @kbn/ is a Kibana package; the rest
+  // are libraries. Used by the alloc-site walk to optionally skip library
+  // frames so attribution lands on the @kbn/ caller (surfaces wrapper packages
+  // like @kbn/connector-schemas that trigger heavy zod allocations).
+  const pkgIsLibrary = new Uint8Array(pkgNames.length);
+  for (let i = 0; i < pkgNames.length; i++) {
+    if (!pkgNames[i].startsWith('@kbn/')) pkgIsLibrary[i] = 1;
+  }
+
   // Discover plugin packages via @kbn/repo-packages (reads precomputed manifest).
   const tPlugins = Date.now();
   status('Discovering plugin packages...');
@@ -1151,7 +1190,21 @@ export function runHeapSnapshotAnalyzerCli(): void {
   // wins. This attributes library-allocated state (zod schemas, langchain
   // objects, etc.) back to the plugin that triggered the allocation.
   const nodePkgAllocSite = new Int32Array(nodeCount).fill(-1);
+  // Parallel attribution: first package frame (any package, not just plugins). When
+  // --filter is active, skip frames matching the filter regex so attribution lands
+  // on the *caller* of the filtered code rather than the filtered code itself.
+  const nodePkgAllocSitePkg = new Int32Array(nodeCount).fill(-1);
+  // Parallel attribution: first non-library package frame (skips third-party
+  // node_modules packages). Surfaces @kbn/* wrapper packages whose own bytes
+  // are tiny but which trigger heavy library allocations (zod schemas, etc.).
+  const nodePkgAllocSiteCaller = new Int32Array(nodeCount).fill(-1);
+  // When --filter is active, marks nodes whose leaf trace frame did NOT match
+  // the regex. Lets the aggregation loop distinguish "filtered out" from
+  // "passed filter but no plugin/package frame above" (the latter must flow
+  // into the unattributed buckets).
+  const nodeFilteredOut = filterRegex ? new Uint8Array(nodeCount) : undefined;
   let allocUntrackedNodes = 0;
+  let allocFilteredOut = 0;
   let allocAttributable = false;
   const traceNodeIdFieldIdx = nodeFields.indexOf('trace_node_id');
   if (
@@ -1163,7 +1216,11 @@ export function runHeapSnapshotAnalyzerCli(): void {
   ) {
     allocAttributable = true;
     const tAlloc = Date.now();
-    status('Attributing (alloc-site mode)...');
+    status(
+      filterRegex
+        ? `Attributing (alloc-site mode, filtered to /${filterStr}/)...`
+        : 'Attributing (alloc-site mode)...'
+    );
 
     const td = root.traceData;
     const tfi = root.traceFunctionInfos;
@@ -1180,9 +1237,36 @@ export function runHeapSnapshotAnalyzerCli(): void {
     const tfiScriptIdx = tfiFields.indexOf('script_name');
     if (tfiScriptIdx === -1) throw new Error('trace_function_info_fields missing script_name');
 
+    // Memoize per-trace-node "does this frame's script match the filter?" so we
+    // don't re-test the same string id repeatedly while walking parents.
+    // 0 = unset, 1 = matches filter, 2 = does not match.
+    const filterCache = filterRegex ? new Uint8Array(strings.length) : undefined;
+    function frameMatchesFilter(scriptStrId: number): boolean {
+      if (!filterRegex || !filterCache) return false;
+      if (scriptStrId < 0 || scriptStrId >= strings.length) return false;
+      const c = filterCache[scriptStrId];
+      if (c === 1) return true;
+      if (c === 2) return false;
+      const matches = filterRegex.test(strings[scriptStrId]);
+      filterCache[scriptStrId] = matches ? 1 : 2;
+      return matches;
+    }
+
+    function leafScriptStrId(traceIdx: number): number {
+      const fnIdx = td.fnInfo[traceIdx];
+      if (fnIdx < 0) return -1;
+      const offset = fnIdx * tfiStride + tfiScriptIdx;
+      if (offset >= tfi.length) return -1;
+      return tfi[offset];
+    }
+
     // Per-trace-node: cached first-plugin package id (memoized walk).
     // -2 = uncomputed, -1 = computed and no plugin found.
     const traceFirstPlugin = new Int32Array(td.parents.length).fill(-2);
+    // Same idea, but for any-package attribution.
+    const traceFirstPkg = new Int32Array(td.parents.length).fill(-2);
+    // And for non-library (Kibana-package) attribution.
+    const traceFirstNonLibPkg = new Int32Array(td.parents.length).fill(-2);
 
     function firstPluginFor(traceIdx: number): number {
       if (traceIdx < 0) return -1;
@@ -1195,7 +1279,7 @@ export function runHeapSnapshotAnalyzerCli(): void {
         if (fnIdx >= 0 && fnIdx * tfiStride + tfiScriptIdx < tfi.length) {
           const scriptStrId = tfi[fnIdx * tfiStride + tfiScriptIdx];
           const pid = scriptStrId >= 0 && scriptStrId < strPkg.length ? strPkg[scriptStrId] : -1;
-          if (pid !== -1 && pluginPkgIdSet.has(pid)) {
+          if (pid !== -1 && pluginPkgIdSet.has(pid) && !frameMatchesFilter(scriptStrId)) {
             // Found a plugin frame here. Backfill the path below it with this pid.
             for (const p of path) traceFirstPlugin[p] = pid;
             return pid;
@@ -1206,6 +1290,57 @@ export function runHeapSnapshotAnalyzerCli(): void {
       // Either ran off the top, or hit a cached entry. Propagate that result.
       const result = cur >= 0 ? traceFirstPlugin[cur] : -1;
       for (const p of path) traceFirstPlugin[p] = result;
+      return result;
+    }
+
+    // Walk to first frame mapped to a known package. When --filter is active,
+    // skip frames whose script matches the filter (so attribution lands on the
+    // caller of the filtered code).
+    function firstPkgFor(traceIdx: number): number {
+      if (traceIdx < 0) return -1;
+      let cur = traceIdx;
+      const path: number[] = [];
+      while (cur >= 0 && traceFirstPkg[cur] === -2) {
+        path.push(cur);
+        const fnIdx = td.fnInfo[cur];
+        if (fnIdx >= 0 && fnIdx * tfiStride + tfiScriptIdx < tfi.length) {
+          const scriptStrId = tfi[fnIdx * tfiStride + tfiScriptIdx];
+          const pid = scriptStrId >= 0 && scriptStrId < strPkg.length ? strPkg[scriptStrId] : -1;
+          if (pid !== -1 && !frameMatchesFilter(scriptStrId)) {
+            for (const p of path) traceFirstPkg[p] = pid;
+            return pid;
+          }
+        }
+        cur = td.parents[cur];
+      }
+      const result = cur >= 0 ? traceFirstPkg[cur] : -1;
+      for (const p of path) traceFirstPkg[p] = result;
+      return result;
+    }
+
+    // Walk to the first @kbn/ (non-library) package frame. Skips library
+    // packages (node_modules deps) and --filter-matched frames. Used for the
+    // by-Package alloc table so wrapper packages like @kbn/connector-schemas
+    // get credit for the library allocations they trigger.
+    function firstNonLibPkgFor(traceIdx: number): number {
+      if (traceIdx < 0) return -1;
+      let cur = traceIdx;
+      const path: number[] = [];
+      while (cur >= 0 && traceFirstNonLibPkg[cur] === -2) {
+        path.push(cur);
+        const fnIdx = td.fnInfo[cur];
+        if (fnIdx >= 0 && fnIdx * tfiStride + tfiScriptIdx < tfi.length) {
+          const scriptStrId = tfi[fnIdx * tfiStride + tfiScriptIdx];
+          const pid = scriptStrId >= 0 && scriptStrId < strPkg.length ? strPkg[scriptStrId] : -1;
+          if (pid !== -1 && !pkgIsLibrary[pid] && !frameMatchesFilter(scriptStrId)) {
+            for (const p of path) traceFirstNonLibPkg[p] = pid;
+            return pid;
+          }
+        }
+        cur = td.parents[cur];
+      }
+      const result = cur >= 0 ? traceFirstNonLibPkg[cur] : -1;
+      for (const p of path) traceFirstNonLibPkg[p] = result;
       return result;
     }
 
@@ -1220,11 +1355,28 @@ export function runHeapSnapshotAnalyzerCli(): void {
         allocUntrackedNodes++;
         continue;
       }
-      const pid = firstPluginFor(tIdx);
-      if (pid !== -1) nodePkgAllocSite[i] = pid;
+      // Apply --filter: include only nodes whose leaf trace frame's script
+      // matches the regex.
+      if (filterRegex) {
+        const leafScriptId = leafScriptStrId(tIdx);
+        if (!frameMatchesFilter(leafScriptId)) {
+          allocFilteredOut++;
+          nodeFilteredOut![i] = 1;
+          continue;
+        }
+      }
+      const plgPid = firstPluginFor(tIdx);
+      if (plgPid !== -1) nodePkgAllocSite[i] = plgPid;
+      const pkgPid = firstPkgFor(tIdx);
+      if (pkgPid !== -1) nodePkgAllocSitePkg[i] = pkgPid;
+      const callerPid = firstNonLibPkgFor(tIdx);
+      if (callerPid !== -1) nodePkgAllocSiteCaller[i] = callerPid;
     }
+    const filterMsg = filterRegex ? `, ${allocFilteredOut} filtered out` : '';
     status(
-      `  alloc-site mode in ${elapsed(tAlloc)} (${allocUntrackedNodes} nodes without trace ctx)`
+      `  alloc-site mode in ${elapsed(
+        tAlloc
+      )} (${allocUntrackedNodes} nodes without trace ctx${filterMsg})`
     );
   } else {
     status('Skipping alloc-site mode (snapshot has no allocation tracking data).');
@@ -1264,18 +1416,44 @@ export function runHeapSnapshotAnalyzerCli(): void {
   // would systematically under-count: each node carries its allocator
   // independently of who dominates it. We sum self_size directly per plugin.
   const pluginAllocBytes = new Float64Array(pkgCount);
+  // Same idea for by-module attribution (first package frame, including
+  // node_modules libraries — zod, joi, etc. dominate this view).
+  const pkgAllocBytes = new Float64Array(pkgCount);
+  // And for by-package attribution (skips library frames so @kbn/* wrappers
+  // get credit for the library allocations they trigger).
+  const pkgCallerBytes = new Float64Array(pkgCount);
   let unattrAllocSite = 0;
   let allocSiteUntrackedBytes = 0;
+  let unattrAllocSiteModule = 0;
+  let unattrAllocSitePackage = 0;
   if (allocAttributable) {
     for (let i = 0; i < nodeCount; i++) {
+      // Filtered-out nodes (leaf frame didn't match --filter) are excluded from
+      // every bucket; they're already counted in allocFilteredOut.
+      if (nodeFilteredOut && nodeFilteredOut[i]) continue;
       const pid = nodePkgAllocSite[i];
+      const pkgPid = nodePkgAllocSitePkg[i];
+      const callerPid = nodePkgAllocSiteCaller[i];
+      const traceId = nodes[i * nf + traceNodeIdFieldIdx];
+
       if (pid === -1) {
-        // Track the "no plugin frame in stack" + "no trace context" buckets.
-        const traceId = nodes[i * nf + traceNodeIdFieldIdx];
         if (traceId <= 0) allocSiteUntrackedBytes += selfSize[i];
         else unattrAllocSite += selfSize[i];
       } else {
         pluginAllocBytes[pid] += selfSize[i];
+      }
+
+      if (pkgPid === -1) {
+        if (traceId > 0) unattrAllocSiteModule += selfSize[i];
+        // pre-tracking nodes are already counted in allocSiteUntrackedBytes
+      } else {
+        pkgAllocBytes[pkgPid] += selfSize[i];
+      }
+
+      if (callerPid === -1) {
+        if (traceId > 0) unattrAllocSitePackage += selfSize[i];
+      } else {
+        pkgCallerBytes[callerPid] += selfSize[i];
       }
     }
   }
@@ -1425,6 +1603,34 @@ export function runHeapSnapshotAnalyzerCli(): void {
       Math.max(a.retainedBytes, a.savedBytes, a.allocBytes)
   );
 
+  // Per-module / per-package allocation rows (only meaningful when allocation
+  // tracking is on). Modules = third-party node_modules libs. Packages =
+  // @kbn/* Kibana packages, attributed via the caller walk so wrappers get
+  // credit for library bytes they trigger.
+  const moduleAllocRows: PackageAllocRow[] = [];
+  const pkgAllocRows: PackageAllocRow[] = [];
+  if (allocAttributable) {
+    for (let i = 0; i < pkgCount; i++) {
+      if (pkgIsLibrary[i]) {
+        if (pkgAllocBytes[i] === 0) continue;
+        moduleAllocRows.push({
+          package: pkgNames[i],
+          allocBytes: pkgAllocBytes[i],
+          allocPct: rootRetained > 0 ? (pkgAllocBytes[i] / rootRetained) * 100 : 0,
+        });
+      } else {
+        if (pkgCallerBytes[i] === 0) continue;
+        pkgAllocRows.push({
+          package: pkgNames[i],
+          allocBytes: pkgCallerBytes[i],
+          allocPct: rootRetained > 0 ? (pkgCallerBytes[i] / rootRetained) * 100 : 0,
+        });
+      }
+    }
+    moduleAllocRows.sort((a, b) => b.allocBytes - a.allocBytes);
+    pkgAllocRows.sort((a, b) => b.allocBytes - a.allocBytes);
+  }
+
   const typeRows: NodeTypeRow[] = [];
   for (const [type, sz] of typeSelf) {
     typeRows.push({
@@ -1444,8 +1650,10 @@ export function runHeapSnapshotAnalyzerCli(): void {
     edgeCount,
     pluginCount: pluginPkgIdSet.size,
     hasAllocationTracking: allocAttributable,
+    ...(filterStr !== undefined ? { filter: filterStr } : {}),
     packages: pkgRows,
     plugins: pluginRows,
+    ...(allocAttributable ? { modulesAlloc: moduleAllocRows, packagesAlloc: pkgAllocRows } : {}),
     unattributed: {
       package: {
         retainedBytes: unattrPackage,
@@ -1464,6 +1672,14 @@ export function runHeapSnapshotAnalyzerCli(): void {
             allocSiteUntracked: {
               retainedBytes: allocSiteUntrackedBytes,
               pct: rootRetained > 0 ? (allocSiteUntrackedBytes / rootRetained) * 100 : 0,
+            },
+            allocSiteModule: {
+              retainedBytes: unattrAllocSiteModule,
+              pct: rootRetained > 0 ? (unattrAllocSiteModule / rootRetained) * 100 : 0,
+            },
+            allocSitePackage: {
+              retainedBytes: unattrAllocSitePackage,
+              pct: rootRetained > 0 ? (unattrAllocSitePackage / rootRetained) * 100 : 0,
             },
           }
         : {}),
@@ -1600,13 +1816,19 @@ export function runHeapSnapshotAnalyzerCli(): void {
 
   // --- Per-plugin allocation-site table (only when tracking is present) ---
   if (allocAttributable) {
+    const filterSuffix = filterRegex ? `, filtered to /${filterStr}/` : '';
     out.write('\n');
-    out.write('=== Allocated by Plugin (allocation site) ===\n');
+    out.write(`=== Allocated by Plugin (allocation site${filterSuffix}) ===\n`);
     out.write(
       'For each live node, walks the allocation-time call stack to the first\n' +
         'plugin frame. Library memory (zod schemas, langchain objects, etc.) rolls\n' +
         'up to the plugin that triggered the allocation, not the dominator chain.\n' +
-        'Self bytes only — no Saved column (counterfactual is a graph property).\n\n'
+        'Self bytes only — no Saved column (counterfactual is a graph property).\n' +
+        (filterRegex
+          ? `Filtered: only nodes whose deepest allocation frame script_name\n` +
+            `matches /${filterStr}/. Attribution skips frames that match the filter\n` +
+            `(walks past them to the caller).\n\n`
+          : '\n')
     );
     const allocHdr = `${pad('Plugin', 55)} | ${pad('Allocated', 9, true)} | ${pad(
       'Alloc MB',
@@ -1636,6 +1858,90 @@ export function runHeapSnapshotAnalyzerCli(): void {
       `${pad('(untracked: pre-tracking / native allocs)', 55)} | ` +
         `${pad((report.unattributed.allocSiteUntracked?.pct ?? 0).toFixed(1) + '%', 9, true)} | ` +
         `${pad(fmtBytes(report.unattributed.allocSiteUntracked?.retainedBytes ?? 0), 9, true)}\n`
+    );
+
+    function writeAllocTable(
+      header: string,
+      description: string,
+      rowLabel: string,
+      rows: PackageAllocRow[],
+      unattrLabel: string,
+      unattrBytes: number,
+      unattrPct: number
+    ): void {
+      out.write('\n');
+      out.write(header);
+      out.write(description);
+      out.write(
+        `${pad(rowLabel, 55)} | ${pad('Allocated', 9, true)} | ${pad('Alloc MB', 9, true)}\n`
+      );
+      out.write(allocSep);
+      let shown = 0;
+      for (const row of rows) {
+        if (row.allocPct < 0.05) continue;
+        if (shown++ >= 60) break;
+        out.write(
+          `${pad(truncate(row.package, 55), 55)} | ` +
+            `${pad(row.allocPct.toFixed(1) + '%', 9, true)} | ` +
+            `${pad(fmtBytes(row.allocBytes), 9, true)}\n`
+        );
+      }
+      out.write(
+        `${pad(unattrLabel, 55)} | ` +
+          `${pad(unattrPct.toFixed(1) + '%', 9, true)} | ` +
+          `${pad(fmtBytes(unattrBytes), 9, true)}\n`
+      );
+      out.write(
+        `${pad('(untracked: pre-tracking / native allocs)', 55)} | ` +
+          `${pad(
+            (report.unattributed.allocSiteUntracked?.pct ?? 0).toFixed(1) + '%',
+            9,
+            true
+          )} | ` +
+          `${pad(fmtBytes(report.unattributed.allocSiteUntracked?.retainedBytes ?? 0), 9, true)}\n`
+      );
+    }
+
+    // --- Per-module allocation-site table (third-party libraries) ---
+    writeAllocTable(
+      `=== Allocated by Module (allocation site${filterSuffix}) ===\n`,
+      "Walks each live node's allocation-time call stack to the first\n" +
+        'package frame and reports rows for third-party `node_modules` libraries\n' +
+        '(zod, joi, require-in-the-middle, etc.). Shows where allocator code lives.\n' +
+        'For "which Kibana code triggered these allocations" see the Allocated\n' +
+        'by Package table below.\n' +
+        'Self bytes only — no Saved column (counterfactual is a graph property).\n' +
+        (filterRegex
+          ? `Filtered: only nodes whose deepest allocation frame matches\n` +
+            `/${filterStr}/. Attribution walks past matched frames so bytes land on\n` +
+            `the package that *called* the filtered code.\n\n`
+          : '\n'),
+      'Module',
+      moduleAllocRows,
+      '(no module frame in alloc stack)',
+      report.unattributed.allocSiteModule?.retainedBytes ?? 0,
+      report.unattributed.allocSiteModule?.pct ?? 0
+    );
+
+    // --- Per-package allocation-site table (Kibana @kbn/* packages) ---
+    writeAllocTable(
+      `=== Allocated by Package (allocation site${filterSuffix}) ===\n`,
+      "Walks each live node's allocation-time call stack to the first\n" +
+        '`@kbn/*` Kibana package frame, skipping third-party library frames.\n' +
+        'Surfaces wrapper packages whose own code is small but which trigger\n' +
+        'heavy library allocations (e.g. @kbn/connector-schemas appears here\n' +
+        'with the zod bytes it allocated).\n' +
+        'Self bytes only — no Saved column (counterfactual is a graph property).\n' +
+        (filterRegex
+          ? `Filtered: only nodes whose deepest allocation frame matches\n` +
+            `/${filterStr}/. Attribution walks past matched frames so bytes land on\n` +
+            `the package that *called* the filtered code.\n\n`
+          : '\n'),
+      'Package',
+      pkgAllocRows,
+      '(no @kbn/ package in alloc stack)',
+      report.unattributed.allocSitePackage?.retainedBytes ?? 0,
+      report.unattributed.allocSitePackage?.pct ?? 0
     );
   } else {
     out.write(
@@ -1683,11 +1989,23 @@ export function runHeapSnapshotAnalyzerCli(): void {
       '   `(untracked)` = allocations made before tracking started or by native\n' +
       '   code that bypasses the JS allocator.\n' +
       '\n' +
+      '5. **Allocated by Module (allocation site)** — same alloc-site walk, but\n' +
+      '   reports rows for third-party `node_modules` libraries (zod, joi,\n' +
+      '   require-in-the-middle, etc.). Tells you *where the allocator code lives*.\n' +
+      '\n' +
+      '6. **Allocated by Package (allocation site)** — same alloc-site walk, but\n' +
+      '   reports rows for `@kbn/*` Kibana packages, skipping library frames so\n' +
+      '   wrapper packages get credit for the library bytes they trigger\n' +
+      '   (e.g. `@kbn/connector-schemas` shows up with the zod bytes its callers\n' +
+      '   allocated). Tells you *which Kibana code triggered the allocations*.\n' +
+      '\n' +
       'Interpretation is case-by-case. Compare (3) vs (4) to spot library cost\n' +
       'driven by a specific plugin: a package showing huge `Saved` in (2) plus a\n' +
       'matching team-side cost in (4) is a candidate for lazy-loading or schema\n' +
-      'cleanup in that plugin. Lead with what is genuinely large or surprising.\n' +
-      'Skip generic advice.\n' +
+      'cleanup in that plugin. Compare (5) vs (6) to find thin Kibana wrappers\n' +
+      'whose own bytes are tiny but which drive a heavy library line in (5) —\n' +
+      'lazy-loading the wrapper recovers the library bytes too. Lead with what\n' +
+      'is genuinely large or surprising. Skip generic advice.\n' +
       '---\n'
   );
 
