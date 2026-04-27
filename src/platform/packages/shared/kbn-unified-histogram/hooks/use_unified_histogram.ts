@@ -82,10 +82,7 @@ export type UnifiedHistogramPartialLayoutProps = Omit<
   'container' | 'unifiedHistogramChart'
 >;
 
-type UnifiedHistogramPartialChartProps = Omit<
-  UnifiedHistogramChartProps,
-  'renderCustomChartToggleActions'
->;
+type UnifiedHistogramPartialChartProps = Omit<UnifiedHistogramChartProps, 'renderToggleActions'>;
 
 export type UseUnifiedHistogramResult =
   | {

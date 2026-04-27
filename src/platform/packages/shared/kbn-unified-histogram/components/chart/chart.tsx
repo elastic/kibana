@@ -57,7 +57,7 @@ export interface UnifiedHistogramChartProps {
   lensVisServiceState: LensVisServiceState;
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
-  renderCustomChartToggleActions: () => ReactElement | undefined;
+  renderToggleActions: () => ReactElement | undefined;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   fetch$: UnifiedHistogramFetch$;
@@ -85,7 +85,7 @@ export function UnifiedHistogramChart({
   chart,
   lensVisService,
   lensVisServiceState,
-  renderCustomChartToggleActions,
+  renderToggleActions,
   fetch$,
   fetchParams,
   lensAdapters,
@@ -227,10 +227,7 @@ export function UnifiedHistogramChart({
     isPlainRecord,
   });
 
-  const toolbarToggleActions = useMemo(
-    () => renderCustomChartToggleActions(),
-    [renderCustomChartToggleActions]
-  );
+  const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
 
   const toolbarSelectors = useMemo(
     () => [

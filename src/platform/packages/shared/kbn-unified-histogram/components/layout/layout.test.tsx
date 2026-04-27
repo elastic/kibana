@@ -112,7 +112,7 @@ describe('Layout', () => {
               {...unifiedHistogram.chartProps}
               hits={resolvedHits}
               chart={resolvedChart}
-              renderCustomChartToggleActions={() => <span data-test-subj="layout-toggle-actions" />}
+              renderToggleActions={() => <span data-test-subj="layout-toggle-actions" />}
             />
           }
           {...unifiedHistogram.layoutProps}

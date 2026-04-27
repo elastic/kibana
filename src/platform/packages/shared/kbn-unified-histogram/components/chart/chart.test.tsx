@@ -138,9 +138,7 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,
     isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
-    renderCustomChartToggleActions: () => (
-      <span data-test-subj={toggleActionsTestId}>Toggle actions</span>
-    ),
+    renderToggleActions: () => <span data-test-subj={toggleActionsTestId}>Toggle actions</span>,
     fetch$: getFetch$Mock(),
     fetchParams,
     dataLoading$: undefined,
