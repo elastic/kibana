@@ -68,25 +68,36 @@ export const PostEnrollmentAPIKeyRequestSchema = {
 };
 
 export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
-  body: schema.object({
-    tokenIds: schema.maybe(schema.arrayOf(schema.string())),
-    kuery: schema.maybe(
-      schema.string({
-        validate: (value: string) => {
-          const validationObj = validateKuery(
-            value,
-            [FLEET_ENROLLMENT_API_PREFIX],
-            ENROLLMENT_API_KEY_MAPPINGS,
-            true
-          );
-          if (validationObj?.error) {
-            return validationObj?.error;
-          }
-        },
-      })
-    ),
-    forceDelete: schema.boolean({ defaultValue: false }),
-  }),
+  body: schema.object(
+    {
+      tokenIds: schema.maybe(schema.arrayOf(schema.string())),
+      kuery: schema.maybe(
+        schema.string({
+          validate: (value: string) => {
+            const validationObj = validateKuery(
+              value,
+              [FLEET_ENROLLMENT_API_PREFIX],
+              ENROLLMENT_API_KEY_MAPPINGS,
+              true
+            );
+            if (validationObj?.error) {
+              return validationObj?.error;
+            }
+          },
+        })
+      ),
+      forceDelete: schema.boolean({ defaultValue: false }),
+    },
+    {
+      validate: (value) => {
+        const hasTokenIds = value.tokenIds && value.tokenIds.length > 0;
+        const hasKuery = value.kuery && value.kuery.trim() !== '';
+        if (!hasTokenIds && !hasKuery) {
+          return 'Either tokenIds or kuery must be provided';
+        }
+      },
+    }
+  ),
 };
 
 export const BulkDeleteEnrollmentAPIKeysResponseSchema = schema.object({
