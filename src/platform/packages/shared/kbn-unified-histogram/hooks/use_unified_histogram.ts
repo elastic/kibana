@@ -82,6 +82,11 @@ export type UnifiedHistogramPartialLayoutProps = Omit<
   'container' | 'unifiedHistogramChart'
 >;
 
+type UnifiedHistogramChartRenderProps = Omit<
+  UnifiedHistogramChartProps,
+  'renderCustomChartToggleActions'
+>;
+
 export type UseUnifiedHistogramResult =
   | {
       isInitialized: false;
@@ -92,7 +97,7 @@ export type UseUnifiedHistogramResult =
   | {
       isInitialized: true;
       api: UnifiedHistogramApi;
-      chartProps: UnifiedHistogramChartProps;
+      chartProps: UnifiedHistogramChartRenderProps;
       layoutProps: UnifiedHistogramPartialLayoutProps;
     };
 
@@ -122,7 +127,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     isPlainRecord: fetchParams?.isESQLQuery,
   });
 
-  const chartProps = useMemo<UnifiedHistogramChartProps | undefined>(() => {
+  const chartProps = useMemo<UnifiedHistogramChartRenderProps | undefined>(() => {
     return lensVisService && lensVisServiceState && fetchParams?.dataView
       ? {
           ...props,
