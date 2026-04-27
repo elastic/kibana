@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { useMutation } from '@kbn/react-query';
 import { usePluginContext } from './use_plugin_context';
 
 export function useRequestCompositeSloSummaryOnListVisit(): void {
   const { sloClient } = usePluginContext();
-  const requestedRef = useRef(false);
+
+  const { mutate } = useMutation(['requestCompositeSloSummaryRefresh'], () =>
+    sloClient.fetch('POST /internal/observability/slos/_composite_summary/refresh')
+  );
 
   useEffect(() => {
-    if (requestedRef.current) {
-      return;
-    }
-    requestedRef.current = true;
-
-    void sloClient
-      .fetch('POST /internal/observability/slos/_composite_summary/refresh', {
-        params: { body: {} },
-      })
-      .catch(() => {});
-  }, [sloClient]);
+    mutate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 }
