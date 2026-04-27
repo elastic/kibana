@@ -106,6 +106,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
