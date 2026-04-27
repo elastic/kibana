@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup, AnalyticsServiceStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type {
   Tag,
@@ -14,6 +15,8 @@ import type {
   ITagsClient,
   TagWithRelations,
 } from '../../../common/types';
+import { TAGS_API_PATH, TAGS_API_VERSION } from '../../../common/api_constants';
+import type { TagResponseItem, TagsListResponseBody } from '../../../server/routes/api/schemas';
 import type { ITagsChangeListener } from './tags_cache';
 
 const BULK_DELETE_TAG_EVENT = 'bulkDeleteTag';
@@ -22,6 +25,16 @@ const DELETE_TAG_EVENT = 'deleteTag';
 const GET_ALL_TAGS_EVENT = 'getAllTag';
 const FIND_TAG_EVENT = 'findTag';
 const UPDATE_TAG_EVENT = 'updateTag';
+
+const buildTagPath = (id: string) => buildPath(`${TAGS_API_PATH}/{id}`, { id });
+
+const toTag = ({ id, data, meta }: TagResponseItem): Tag => {
+  return {
+    id,
+    managed: meta.managed ?? false,
+    ...data,
+  };
+};
 
 export interface TagsClientOptions {
   analytics: AnalyticsServiceStart;
@@ -68,9 +81,11 @@ export class TagsClient implements ITagInternalClient {
 
   public async create(attributes: TagAttributes) {
     const startTime = window.performance.now();
-    const { tag } = await this.http.post<{ tag: Tag }>('/api/saved_objects_tagging/tags/create', {
+    const response = await this.http.post<TagResponseItem>(TAGS_API_PATH, {
+      version: TAGS_API_VERSION,
       body: JSON.stringify(attributes),
     });
+    const tag = toTag(response);
     const duration = window.performance.now() - startTime;
     reportPerformanceMetricEvent(this.analytics, {
       eventName: CREATE_TAG_EVENT,
@@ -88,9 +103,11 @@ export class TagsClient implements ITagInternalClient {
 
   public async update(id: string, attributes: TagAttributes) {
     const startTime = window.performance.now();
-    const { tag } = await this.http.post<{ tag: Tag }>(`/api/saved_objects_tagging/tags/${id}`, {
+    const response = await this.http.put<TagResponseItem>(buildTagPath(id), {
+      version: TAGS_API_VERSION,
       body: JSON.stringify(attributes),
     });
+    const tag = toTag(response);
     const duration = window.performance.now() - startTime;
     reportPerformanceMetricEvent(this.analytics, {
       eventName: UPDATE_TAG_EVENT,
@@ -108,17 +125,17 @@ export class TagsClient implements ITagInternalClient {
   }
 
   public async get(id: string) {
-    const { tag } = await this.http.get<{ tag: Tag }>(`/api/saved_objects_tagging/tags/${id}`);
-    return tag;
+    const response = await this.http.get<TagResponseItem>(buildTagPath(id), {
+      version: TAGS_API_VERSION,
+    });
+    return toTag(response);
   }
 
   public async getAll({ asSystemRequest }: GetAllTagsOptions = {}) {
     const startTime = window.performance.now();
-    const fetchOptions = { asSystemRequest };
-    const { tags } = await this.http.get<{ tags: Tag[] }>(
-      '/api/saved_objects_tagging/tags',
-      fetchOptions
-    );
+    const fetchOptions = { asSystemRequest, version: TAGS_API_VERSION };
+    const { tags: items } = await this.http.get<TagsListResponseBody>(TAGS_API_PATH, fetchOptions);
+    const tags = items.map(toTag);
     const duration = window.performance.now() - startTime;
     reportPerformanceMetricEvent(this.analytics, {
       eventName: GET_ALL_TAGS_EVENT,
@@ -136,7 +153,7 @@ export class TagsClient implements ITagInternalClient {
 
   public async delete(id: string) {
     const startTime = window.performance.now();
-    await this.http.delete<{}>(`/api/saved_objects_tagging/tags/${id}`);
+    await this.http.delete<{}>(buildTagPath(id), { version: TAGS_API_VERSION });
     const duration = window.performance.now() - startTime;
     reportPerformanceMetricEvent(this.analytics, {
       eventName: DELETE_TAG_EVENT,
