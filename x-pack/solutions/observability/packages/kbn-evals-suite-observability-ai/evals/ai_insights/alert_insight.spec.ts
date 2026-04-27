@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import type { LoadResult } from '@kbn/es-snapshot-loader';
+import pRetry from 'p-retry';
 import type { AlertInsightParams } from '../../src/clients/ai_insight_client';
 import {
   replayObservabilityDataStreams,
@@ -15,9 +16,6 @@ import {
 } from '../../src/data_generators/replay';
 import { getAlertScenarios, type AlertScenario } from '../../src/scenarios/alert_scenarios';
 import { evaluate } from './evaluate_ai_insights';
-
-const ALERT_POLL_INTERVAL_MS = 1000;
-const ALERT_POLL_TIMEOUT_MS = 60_000;
 
 const scenarios = getAlertScenarios();
 
@@ -58,37 +56,48 @@ function createScenarioTest(scenario: AlertScenario) {
       });
 
       log.info('Polling for alert to be created');
-      const deadline = Date.now() + ALERT_POLL_TIMEOUT_MS;
 
-      while (Date.now() < deadline) {
-        await new Promise((resolve) => setTimeout(resolve, ALERT_POLL_INTERVAL_MS));
-        await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
+      alertId = await pRetry(
+        async () => {
+          await esClient.indices.refresh({ index: scenario.alertRule.alertsIndex });
 
-        const alertsResponse = await esClient.search({
-          index: scenario.alertRule.alertsIndex,
-          query: {
-            bool: {
-              filter: [
-                { term: { 'kibana.alert.rule.uuid': ruleId } },
-                { term: { 'kibana.alert.status': 'active' } },
-              ],
+          const alertsResponse = await esClient.search({
+            index: scenario.alertRule.alertsIndex,
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'kibana.alert.rule.uuid': ruleId } },
+                  { term: { 'kibana.alert.status': 'active' } },
+                ],
+              },
             },
+            size: 1,
+          });
+
+          const alertDoc = alertsResponse.hits.hits[0];
+          if (!alertDoc) {
+            throw new Error('Alert not yet available');
+          }
+          return alertDoc._id as string;
+        },
+        {
+          retries: 10,
+          factor: 2,
+          minTimeout: 2000,
+          maxTimeout: 15_000,
+          onFailedAttempt: (error) => {
+            if (error.retriesLeft === 0) {
+              log.error(
+                `No alert found for rule ${ruleId} in scenario ${scenario.id} after ${error.attemptNumber} attempts`
+              );
+            } else {
+              log.debug(`Alert not yet available (attempt ${error.attemptNumber}); retrying...`);
+            }
           },
-          size: 1,
-        });
-
-        const alertDoc = alertsResponse.hits.hits[0];
-        if (alertDoc) {
-          alertId = alertDoc._id as string;
-          log.info(`Found alert with ID: ${alertId}`);
-          return;
         }
-        log.debug('Alert not yet available, retrying...');
-      }
-
-      throw new Error(
-        `No alert found for rule ${ruleId} in scenario ${scenario.id} after ${ALERT_POLL_TIMEOUT_MS}ms`
       );
+
+      log.info(`Found alert with ID: ${alertId}`);
     });
 
     evaluate(
