@@ -10,31 +10,14 @@ For test-type-specific guidance, see [UI](./ui-best-practices.md) and [API](./ap
 
 Pick the test type **before** writing the test:
 
-| Test type                                                                                                                                                                                               | Ideal for                                                                                                                                                                                                                                     |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Scout UI test**                                                                                                                                                                                       | • user flows that span multiple pages or components<br>• role-based behavior (e.g. viewer can see X, editor can do Y)<br>• confirming the UI renders and reacts to interaction (not exact data values)                                        |
-| **Scout API test**                                                                                                                                                                                      | • status code, response shape, and key fields of an HTTP endpoint<br>• authorization checks (e.g. role X gets `403` from endpoint Y)<br>• exact data values computed by the backend (counts, aggregations, formulas)                          |
-| **Jest integration test**<br>A Kibana unit test with a real Elasticsearch running ([examples](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations)). | • saved object / data migrations from a previous Kibana version<br>• behavior that depends on a specific Elasticsearch data shape on disk<br>• scenarios that modify the system in ways a real user couldn't (e.g. writing to system indices) |
-| **Jest unit test**<br>Often paired with React Testing Library.                                                                                                                                          | • conditional rendering and component state (loading, error, empty)<br>• field validation, formatters, tooltips<br>• pure business logic (utilities, hooks, reducers)                                                                         |
+| Test type                                                                         | Ideal for                                                                                                                                                                                                                                     |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Scout UI test**                                                                 | • user flows that span multiple pages or components<br>• role-based behavior (e.g. viewer can see X, editor can do Y)<br>• confirming the UI renders and reacts to interaction (not exact data values)                                        |
+| **Scout API test**                                                                | • status code, response shape, and key fields of an HTTP endpoint<br>• authorization checks (e.g. role X gets `403` from endpoint Y)<br>• exact data values computed by the backend (counts, aggregations, formulas)                          |
+| **Jest integration test**<br>A Kibana unit test with a real Elasticsearch running | • saved object / data migrations from a previous Kibana version<br>• behavior that depends on a specific Elasticsearch data shape on disk<br>• scenarios that modify the system in ways a real user couldn't (e.g. writing to system indices) |
+| **Jest unit test**<br>Often paired with the React Testing Library                 | • conditional rendering and component state (loading, error, empty)<br>• field validation, formatters, tooltips<br>• pure business logic (utilities, hooks, reducers)                                                                         |
 
 :::::{dropdown} Examples
-
-✔️ **Do:** use a Jest integration test for data-migration coverage.
-
-Migration tests typically need to load an Elasticsearch data dir snapshot from a previous version, boot Kibana against it, and assert on the resulting indices. That's a poor fit for a Scout API test: no real user can drive a stack upgrade through an HTTP route, and Scout suites share a single Kibana/Elasticsearch instance — so writing directly to system indices from one test leaks state into the rest of the suite. Kibana already has a well-established pattern for this in [`src/core/server/integration_tests/saved_objects/migrations`](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations) — start from one of those tests instead.
-
-✔️ **Do:** use a Scout API test to validate an endpoint's contract.
-
-```ts
-apiTest('returns 200 and the expected fields for a viewer', async ({ apiClient }) => {
-  const response = await apiClient.get('api/my-feature/data', {
-    headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
-  });
-
-  expect(response).toHaveStatusCode(200);
-  expect(response.body).toMatchObject({ items: expect.any(Array) });
-});
-```
 
 ✔️ **Do:** use a Scout UI test to verify behavior, not exact data values.
 
@@ -50,6 +33,23 @@ await expect(page.testSubj.locator('row-0-col-dataset')).not.toHaveText('');
 await expect(page.testSubj.locator('row-0-col-count')).toHaveText('1,024');
 await expect(page.testSubj.locator('row-0-col-avg')).toHaveText('42.7');
 ```
+
+✔️ **Do:** use a Scout API test to validate an endpoint's contract.
+
+```ts
+apiTest('returns 200 and the expected fields for a viewer', async ({ apiClient }) => {
+  const response = await apiClient.get('api/my-feature/data', {
+    headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+  });
+
+  expect(response).toHaveStatusCode(200);
+  expect(response.body).toMatchObject({ items: expect.any(Array) });
+});
+```
+
+✔️ **Do:** use a Jest integration test for data-migration coverage.
+
+Migration tests typically need to load an Elasticsearch data dir snapshot from a previous version, boot Kibana against it, and assert on the resulting indices. That's a poor fit for a Scout API test: no real user can drive a stack upgrade through an HTTP route, and Scout suites share a single Kibana/Elasticsearch instance — so writing directly to system indices from one test leaks state into the rest of the suite. See examples of Jest integration tests: [`src/core/server/integration_tests/saved_objects/migrations`](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations).
 
 :::::
 
