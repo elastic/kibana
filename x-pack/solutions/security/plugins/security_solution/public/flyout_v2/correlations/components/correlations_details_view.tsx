@@ -53,13 +53,7 @@ export interface CorrelationsDetailsViewProps {
  * so it can be used both inside a flyout body and inline in a tab panel.
  */
 export const CorrelationsDetailsView = memo(
-  ({
-    hit,
-    scopeId,
-    isRulePreview,
-    onShowAlert,
-    onShowAttack,
-  }: CorrelationsDetailsViewProps) => {
+  ({ hit, scopeId, isRulePreview, onShowAlert, onShowAttack }: CorrelationsDetailsViewProps) => {
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
       () => ({
@@ -117,7 +111,6 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-
                 />
               </EuiFlexItem>
             )}
@@ -128,7 +121,6 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-
                 />
               </EuiFlexItem>
             )}
@@ -138,7 +130,6 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   documentId={ancestryDocumentId}
                   onShowAlert={onShowAlert}
-
                 />
               </EuiFlexItem>
             )}

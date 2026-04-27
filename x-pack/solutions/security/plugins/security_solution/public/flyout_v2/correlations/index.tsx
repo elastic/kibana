@@ -47,13 +47,7 @@ export interface CorrelationsDetailsProps {
  * This component is meant to be used in a tools flyout, with the new EUI flyout system.
  */
 export const CorrelationsDetails = memo(
-  ({
-    hit,
-    scopeId,
-    isRulePreview,
-    onShowAlert,
-    onShowAttack,
-  }: CorrelationsDetailsProps) => {
+  ({ hit, scopeId, isRulePreview, onShowAlert, onShowAttack }: CorrelationsDetailsProps) => {
     const { euiTheme } = useEuiTheme();
 
     return (

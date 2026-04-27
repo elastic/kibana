@@ -235,5 +235,4 @@ describe('CorrelationsDetailsView', () => {
       queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)
     ).not.toBeInTheDocument();
   });
-
 });
