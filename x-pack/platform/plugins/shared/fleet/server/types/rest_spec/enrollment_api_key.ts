@@ -89,4 +89,6 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
 export const BulkDeleteEnrollmentAPIKeysResponseSchema = schema.object({
   action: schema.string(),
   count: schema.number(),
+  successCount: schema.number(),
+  errorCount: schema.number(),
 });

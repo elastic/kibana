@@ -264,6 +264,8 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     const action = bulkActionPending!;
     setBulkActionPending(null);
 
+    // forceDelete=false (revoke): invalidate API key, mark token inactive.
+    // forceDelete=true (delete): invalidate API key, remove token document.
     const body =
       selectionMode === 'query'
         ? { kuery, forceDelete: action === 'delete' }
@@ -272,19 +274,37 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     try {
       const res = await sendBulkDeleteEnrollmentAPIKeys(body);
       if (res.error) throw res.error;
-      notifications.toasts.addSuccess(
-        action === 'delete'
-          ? i18n.translate('xpack.fleet.enrollmentTokensList.bulkDeleteSuccess', {
-              defaultMessage:
-                '{count, plural, one {# enrollment token deleted} other {# enrollment tokens deleted}}',
-              values: { count: res.data?.count ?? selectedCount },
-            })
-          : i18n.translate('xpack.fleet.enrollmentTokensList.bulkRevokeSuccess', {
-              defaultMessage:
-                '{count, plural, one {# enrollment token revoked} other {# enrollment tokens revoked}}',
-              values: { count: res.data?.count ?? selectedCount },
-            })
-      );
+
+      const count = res.data?.count ?? 0;
+      const successCount = res.data?.successCount ?? 0;
+      const errorCount = res.data?.errorCount ?? 0;
+      const actionLabel = action === 'delete' ? 'deleted' : 'revoked';
+
+      if (count === successCount) {
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionSuccess', {
+            defaultMessage:
+              '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} {actionLabel}',
+            values: { successCount, actionLabel },
+          })
+        );
+      } else if (count === errorCount) {
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionAllErrors', {
+            defaultMessage:
+              'Failed to {actionLabel} {errorCount, plural, one {# enrollment token} other {# enrollment tokens}}',
+            values: { errorCount, actionLabel },
+          })
+        );
+      } else {
+        notifications.toasts.addWarning(
+          i18n.translate('xpack.fleet.enrollmentTokensList.bulkActionPartialErrors', {
+            defaultMessage:
+              '{successCount, plural, one {# enrollment token} other {# enrollment tokens}} {actionLabel}, {errorCount, plural, one {# token} other {# tokens}} failed',
+            values: { successCount, errorCount, actionLabel },
+          })
+        );
+      }
     } catch (err) {
       notifications.toasts.addError(err as Error, { title: 'Error' });
     }

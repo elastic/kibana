@@ -143,16 +143,16 @@ export async function getEnrollmentAPIKey(
 }
 
 /**
- * Invalidate an api key and mark it as inactive
- * @param id
+ * forceDelete=false (revoke): invalidate the ES API key and set active=false on the enrollment token document.
+ * forceDelete=true (delete): invalidate the ES API key and delete the enrollment token document from the index.
  */
 export async function deleteEnrollmentApiKeys(
   esClient: ElasticsearchClient,
   ids: string[],
   forceDelete = false,
   spaceId?: string
-): Promise<number> {
-  if (ids.length === 0) return 0;
+): Promise<{ successCount: number; errorCount: number }> {
+  if (ids.length === 0) return { successCount: 0, errorCount: 0 };
 
   const logger = appContextService.getLogger();
   logger.debug(`Deleting ${ids.length} enrollment API key(s) [forceDelete=${forceDelete}]`);
@@ -191,7 +191,7 @@ export async function deleteEnrollmentApiKeys(
     enrollmentKeys.push(key);
   }
 
-  if (enrollmentKeys.length === 0) return 0;
+  if (enrollmentKeys.length === 0) return { successCount: 0, errorCount: 0 };
 
   for (const key of enrollmentKeys) {
     auditLoggingService.writeCustomAuditLog({
@@ -200,37 +200,58 @@ export async function deleteEnrollmentApiKeys(
   }
 
   const activeKeys = enrollmentKeys.filter((k) => k.active);
-  const inactiveKeys = enrollmentKeys.filter((k) => !k.active);
-
-  let keysToProcess = [...inactiveKeys];
+  const failedToInvalidate = new Set<string>();
 
   if (activeKeys.length > 0) {
     const invalidateRes = await invalidateAPIKeys(activeKeys.map((k) => k.api_key_id));
+
+    logger.debug(
+      `API key invalidation response: invalidated=${
+        invalidateRes?.invalidated_api_keys?.length ?? 0
+      }, previously_invalidated=${
+        invalidateRes?.previously_invalidated_api_keys?.length ?? 0
+      }, error_count=${invalidateRes?.error_count ?? 0}`
+    );
+
+    if (invalidateRes?.error_count && invalidateRes.error_count > 0) {
+      logger.warn(`API key invalidation errors: ${JSON.stringify(invalidateRes.error_details)}`);
+    }
 
     const invalidatedKeyIds = new Set([
       ...(invalidateRes?.invalidated_api_keys ?? []),
       ...(invalidateRes?.previously_invalidated_api_keys ?? []),
     ]);
 
-    const invalidated = activeKeys.filter((k) => invalidatedKeyIds.has(k.api_key_id));
     const failed = activeKeys.filter((k) => !invalidatedKeyIds.has(k.api_key_id));
-
-    keysToProcess = [...keysToProcess, ...invalidated];
-
     if (failed.length > 0) {
-      logger.warn(
-        `Skipping ${
-          failed.length
-        } active enrollment API key(s) whose API keys failed to invalidate: ${failed
-          .map((k) => k.id)
-          .join(', ')}`
-      );
+      if (forceDelete) {
+        logger.warn(
+          `Failed to invalidate ${
+            failed.length
+          } API key(s) during delete, proceeding with document removal: ${failed
+            .map((k) => k.id)
+            .join(', ')}`
+        );
+      } else {
+        for (const k of failed) failedToInvalidate.add(k.id);
+        logger.warn(
+          `Skipping ${
+            failed.length
+          } active enrollment API key(s) whose API keys failed to invalidate: ${failed
+            .map((k) => k.id)
+            .join(', ')}`
+        );
+      }
     }
   }
 
-  if (keysToProcess.length === 0) return 0;
+  const keysToProcess = enrollmentKeys.filter((k) => !failedToInvalidate.has(k.id));
+  const invalidationErrors = failedToInvalidate.size;
 
-  const action = forceDelete ? 'delete' : 'revoke';
+  if (keysToProcess.length === 0) {
+    return { successCount: 0, errorCount: invalidationErrors };
+  }
+
   const bulkBody = forceDelete
     ? keysToProcess.map((key) => ({ delete: { _index: ENROLLMENT_API_KEYS_INDEX, _id: key.id } }))
     : keysToProcess.flatMap((key) => [
@@ -244,21 +265,24 @@ export async function deleteEnrollmentApiKeys(
     for (const item of failedItems) {
       const op = item.delete ?? item.update;
       logger.warn(
-        `Failed to ${action} enrollment API key ${op?._id}: ${JSON.stringify(op?.error)}`
+        `Failed to ${forceDelete ? 'delete' : 'revoke'} enrollment API key ${
+          op?._id
+        }: ${JSON.stringify(op?.error)}`
       );
     }
   }
 
-  const failedCount = bulkRes.errors
+  const bulkErrors = bulkRes.errors
     ? bulkRes.items.filter((item) => item.delete?.error || item.update?.error).length
     : 0;
-  const successCount = keysToProcess.length - failedCount;
+  const errorCount = invalidationErrors + bulkErrors;
+  const successCount = keysToProcess.length - bulkErrors;
 
   logger.debug(
-    `Processed ${successCount}/${enrollmentKeys.length} enrollment API key(s) [forceDelete=${forceDelete}]`
+    `Processed ${successCount}/${enrollmentKeys.length} enrollment API key(s) [forceDelete=${forceDelete}], errors: ${errorCount}`
   );
 
-  return successCount;
+  return { successCount, errorCount };
 }
 
 export async function deleteEnrollmentApiKeyForAgentPolicyId(
@@ -293,12 +317,15 @@ export async function bulkDeleteEnrollmentApiKeys(
     forceDelete?: boolean;
     spaceId?: string;
   }
-): Promise<{ count: number }> {
+): Promise<{ count: number; successCount: number; errorCount: number }> {
   const { tokenIds, kuery, forceDelete = false, spaceId } = options;
-  let count = 0;
+  let successCount = 0;
+  let errorCount = 0;
 
   if (tokenIds && tokenIds.length > 0) {
-    count = await deleteEnrollmentApiKeys(esClient, tokenIds, forceDelete, spaceId);
+    const result = await deleteEnrollmentApiKeys(esClient, tokenIds, forceDelete, spaceId);
+    successCount = result.successCount;
+    errorCount = result.errorCount;
   } else if (kuery) {
     let hasMore = true;
     let page = 1;
@@ -313,16 +340,18 @@ export async function bulkDeleteEnrollmentApiKeys(
         hasMore = false;
         break;
       }
-      count += await deleteEnrollmentApiKeys(
+      const result = await deleteEnrollmentApiKeys(
         esClient,
         items.map((k) => k.id),
         forceDelete,
         spaceId
       );
+      successCount += result.successCount;
+      errorCount += result.errorCount;
     }
   }
 
-  return { count };
+  return { count: successCount, successCount, errorCount };
 }
 
 export async function generateEnrollmentAPIKey(

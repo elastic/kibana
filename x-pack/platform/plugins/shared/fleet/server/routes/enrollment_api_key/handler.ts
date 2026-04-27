@@ -120,16 +120,21 @@ export const bulkDeleteEnrollmentApiKeysHandler: RequestHandler<
   const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
 
   const { tokenIds, kuery, forceDelete } = request.body;
-  const { count } = await APIKeyService.bulkDeleteEnrollmentApiKeys(esClient, {
-    tokenIds,
-    kuery,
-    forceDelete,
-    spaceId: useSpaceAwareness ? currentNamespace : undefined,
-  });
+  const { count, successCount, errorCount } = await APIKeyService.bulkDeleteEnrollmentApiKeys(
+    esClient,
+    {
+      tokenIds,
+      kuery,
+      forceDelete,
+      spaceId: useSpaceAwareness ? currentNamespace : undefined,
+    }
+  );
 
   const body: BulkDeleteEnrollmentAPIKeysResponse = {
     action: forceDelete ? 'deleted' : 'deactivated',
     count,
+    successCount,
+    errorCount,
   };
 
   return response.ok({ body });

@@ -129,7 +129,7 @@ export const UninstallTokenListPage = () => {
             tokenGetter={(response: SendRequestResponse<GetUninstallTokenResponse>) =>
               response.data?.item.token
             }
-            length={32}
+
           />
         ),
       },

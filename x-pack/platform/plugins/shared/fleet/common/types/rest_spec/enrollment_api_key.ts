@@ -55,6 +55,8 @@ export interface BulkDeleteEnrollmentAPIKeysRequest {
   body: {
     tokenIds?: string[];
     kuery?: string;
+    // false (revoke): invalidate the API key and mark the token as inactive.
+    // true (delete): invalidate the API key and remove the token document.
     forceDelete?: boolean;
   };
 }
@@ -62,4 +64,6 @@ export interface BulkDeleteEnrollmentAPIKeysRequest {
 export interface BulkDeleteEnrollmentAPIKeysResponse {
   action: string;
   count: number;
+  successCount: number;
+  errorCount: number;
 }
