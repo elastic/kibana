@@ -19,6 +19,7 @@ import {
   UnifiedHistogramFetchStatus,
   type UnifiedHistogramFetchParamsExternal,
 } from '@kbn/unified-histogram';
+import { createEsqlDataViewEnricher } from '@kbn/data-view-utils';
 import { intersection } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
@@ -208,6 +209,7 @@ export const useDiscoverHistogram = (
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
+  const histogramEsqlDataViewEnricher = useMemo(() => createEsqlDataViewEnricher(), []);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
   const getModifiedVisAttributes = useCallback<
@@ -217,15 +219,30 @@ export const useDiscoverHistogram = (
     [getModifiedVisAttributesAccessor]
   );
 
-  // Use enriched esqlDataView when available in ES|QL mode, otherwise use base dataView
-  const effectiveDataView =
-    isEsqlMode && documentsState?.esqlDataView ? documentsState.esqlDataView : dataView;
+  useEffect(() => {
+    return () => {
+      histogramEsqlDataViewEnricher.clear();
+    };
+  }, [histogramEsqlDataViewEnricher]);
+
+  // Use an enriched dataview dataview for the histogram in ES|QL mode, keeping the time field if it's present
+  // Can't use the documentsState?.esqlDataView because it doesn't have the time field
+  const histogramDataView = useMemo(() => {
+    if (isEsqlMode) {
+      return (
+        histogramEsqlDataViewEnricher.enrich(dataView, documentsState?.esqlQueryColumns, {
+          keepTimeField: true,
+        }) ?? dataView
+      );
+    }
+    return dataView;
+  }, [dataView, documentsState?.esqlQueryColumns, histogramEsqlDataViewEnricher, isEsqlMode]);
 
   const collectedFetchParams: UnifiedHistogramFetchParamsExternal | undefined = useMemo(() => {
     return {
       searchSessionId,
       requestAdapter: inspectorAdapters.requests,
-      dataView: effectiveDataView,
+      dataView: histogramDataView,
       query,
       filters,
       timeRange,
@@ -241,7 +258,7 @@ export const useDiscoverHistogram = (
   }, [
     breakdownField,
     timeInterval,
-    effectiveDataView,
+    histogramDataView,
     currentTabControlState,
     esqlVariables,
     filters,

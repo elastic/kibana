@@ -7,21 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnsToFieldSpecs } from './convert_to_data_view_field_spec';
 
+export interface EsqlDataViewEnrichOptions {
+  keepTimeField?: boolean;
+}
+
 /**
- * Creates a stable signature from ES|QL columns for memoization comparison.
- * The signature includes field name, type, esType, and the base DataView's time field name.
+ * Creates a stable signature from the final field specs used for cloning.
  */
-function getColumnsSignature(columns: DatatableColumn[], timeFieldName?: string): string {
-  const colsSignature = columns
-    .map((col) => `${col.name}:${col.meta?.type ?? 'unknown'}:${col.meta?.esType ?? ''}`)
+function getFieldsSignature(fields: Record<string, FieldSpec>, timeFieldName?: string): string {
+  const colsSignature = Object.values(fields)
+    .map((field) => `${field.name}:${field.type ?? 'unknown'}:${field.esTypes?.join(',') ?? ''}`)
     .sort()
     .join('|');
-
   return `${colsSignature}|tf:${timeFieldName ?? 'none'}`;
+}
+
+function injectTimeFieldSpec({
+  baseDataView,
+  fields,
+  options,
+}: {
+  baseDataView: DataView;
+  fields: Record<string, FieldSpec>;
+  options?: EsqlDataViewEnrichOptions;
+}): Record<string, FieldSpec> {
+  if (
+    !options?.keepTimeField ||
+    !baseDataView.timeFieldName ||
+    fields[baseDataView.timeFieldName]
+  ) {
+    return fields;
+  }
+
+  const timeField = baseDataView.getFieldByName(baseDataView.timeFieldName);
+  if (!timeField) {
+    return fields;
+  }
+
+  return {
+    ...fields,
+    [timeField.name]: {
+      name: timeField.name,
+      type: timeField.type,
+      esTypes: timeField.esTypes,
+      searchable: timeField.searchable,
+      aggregatable: timeField.aggregatable,
+    },
+  };
 }
 
 export interface EsqlDataViewEnricher {
@@ -31,9 +67,14 @@ export interface EsqlDataViewEnricher {
    *
    * @param baseDataView - The base DataView to clone and enrich
    * @param columns - ES|QL query columns from the response
+   * @param options - Enrichment options
    * @returns Enriched DataView or undefined if no columns provided
    */
-  enrich(baseDataView: DataView, columns: DatatableColumn[] | undefined): DataView | undefined;
+  enrich(
+    baseDataView: DataView,
+    columns: DatatableColumn[] | undefined,
+    options?: EsqlDataViewEnrichOptions
+  ): DataView | undefined;
 
   /**
    * Clears the internal cache. Useful for cleanup or testing.
@@ -74,12 +115,21 @@ export function createEsqlDataViewEnricher(): EsqlDataViewEnricher {
   let cachedDataView: DataView | undefined;
 
   return {
-    enrich(baseDataView: DataView, columns: DatatableColumn[] | undefined): DataView | undefined {
+    enrich(
+      baseDataView: DataView,
+      columns: DatatableColumn[] | undefined,
+      options?: EsqlDataViewEnrichOptions
+    ): DataView | undefined {
       if (!columns || columns.length === 0) {
         return undefined;
       }
 
-      const currentSignature = getColumnsSignature(columns, baseDataView.timeFieldName);
+      const fields = injectTimeFieldSpec({
+        baseDataView,
+        fields: convertDatatableColumnsToFieldSpecs(columns),
+        options,
+      });
+      const currentSignature = getFieldsSignature(fields, baseDataView.timeFieldName);
       const baseDataViewId = baseDataView.id;
 
       if (
@@ -89,8 +139,6 @@ export function createEsqlDataViewEnricher(): EsqlDataViewEnricher {
       ) {
         return cachedDataView;
       }
-
-      const fields = convertDatatableColumnsToFieldSpecs(columns);
 
       cachedDataView = baseDataView.cloneWithFields(fields);
       cachedSignature = currentSignature;
