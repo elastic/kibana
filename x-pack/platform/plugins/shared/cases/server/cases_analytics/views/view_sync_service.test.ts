@@ -15,7 +15,12 @@ const setupArgs = () => {
   // No extended fields discovered → no per-owner extended-field EVALs.
   // Tests focused on extended-field discovery live in
   // mapping_fields_loader.test.ts.
-  esClient.fieldCaps.mockResolvedValue({ indices: [], fields: {} } as never);
+  esClient.search.mockResolvedValue({
+    took: 0,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+  } as never);
   esClient.transport.request.mockResolvedValue({ statusCode: 200, body: {} });
   return { esClient, logger };
 };

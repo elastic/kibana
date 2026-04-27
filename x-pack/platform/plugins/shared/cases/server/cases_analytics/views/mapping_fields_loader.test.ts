@@ -61,73 +61,85 @@ describe('loadExtendedFieldsFromMapping', () => {
     return { esClient, logger };
   };
 
-  it('issues a per-owner _field_caps call scoped to the cases.extended_fields parent', async () => {
+  const makeHit = (id: string, extended: Record<string, unknown>) =>
+    ({
+      _id: id,
+      _source: { cases: { extended_fields: extended } },
+    } as never);
+
+  const mockSearch = (
+    esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>,
+    hits: ReturnType<typeof makeHit>[]
+  ) => {
+    esClient.search.mockResolvedValueOnce({
+      took: 0,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: hits.length, relation: 'eq' }, max_score: 0, hits },
+    } as never);
+  };
+
+  it('issues a per-owner search scoped to cases SOs that actually have extended_fields populated', async () => {
     const { esClient, logger } = setup();
-    esClient.fieldCaps.mockResolvedValueOnce({ indices: [], fields: {} } as never);
+    mockSearch(esClient, []);
 
     await loadExtendedFieldsFromMapping('securitySolution', esClient, logger);
 
-    expect(esClient.fieldCaps).toHaveBeenCalledWith({
+    expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana_alerting_cases',
-      fields: 'cases.extended_fields.*',
-      include_unmapped: false,
-      index_filter: {
+      size: 200,
+      _source: ['cases.extended_fields'],
+      sort: [{ 'cases.updated_at': { order: 'desc' } }],
+      query: {
         bool: {
           filter: [
             { term: { type: 'cases' } },
             { term: { 'cases.owner': 'securitySolution' } },
+            { exists: { field: 'cases.extended_fields' } },
           ],
         },
       },
     });
   });
 
-  it('returns the deduplicated (name, type) pairs for every recognized subkey', async () => {
+  it('returns the deduplicated (name, type) pairs unioned across the sampled cases', async () => {
     const { esClient, logger } = setup();
-    esClient.fieldCaps.mockResolvedValueOnce({
-      indices: ['.kibana_alerting_cases-000001'],
-      fields: {
-        'cases.extended_fields.riskScore_as_long': {
-          keyword: { type: 'keyword', searchable: true, aggregatable: true, metadata_field: false },
-        },
-        'cases.extended_fields.incidentDate_as_date': {
-          keyword: { type: 'keyword', searchable: true, aggregatable: true, metadata_field: false },
-        },
-        'cases.extended_fields.summary_as_keyword': {
-          keyword: { type: 'keyword', searchable: true, aggregatable: true, metadata_field: false },
-        },
-      },
-    } as never);
+    mockSearch(esClient, [
+      makeHit('case-1', { riskScore_as_long: 42, summary_as_keyword: 'hello' }),
+      makeHit('case-2', { incidentDate_as_date: '2026-04-27', riskScore_as_long: 99 }),
+      makeHit('case-3', { summary_as_keyword: 'again' }),
+    ]);
 
     const out = await loadExtendedFieldsFromMapping('securitySolution', esClient, logger);
     expect(out).toEqual([
       { name: 'riskScore', type: 'long' },
-      { name: 'incidentDate', type: 'date' },
       { name: 'summary', type: 'keyword' },
+      { name: 'incidentDate', type: 'date' },
     ]);
   });
 
-  it('skips subkeys with unknown types or missing suffixes rather than emitting a bad EVAL', async () => {
+  it('skips keys with unknown types or missing suffixes rather than emitting a bad EVAL', async () => {
+    /*
+     * FAILURE SCENARIO: an SO write set a key that doesn't follow the
+     * `${name}_as_${type}` convention (manual edit, future schema drift).
+     * Including it would either crash the view PUT or silently produce
+     * a wrong cast. Skipping is the safe degradation.
+     */
     const { esClient, logger } = setup();
-    esClient.fieldCaps.mockResolvedValueOnce({
-      indices: [],
-      fields: {
-        'cases.extended_fields.riskScore_as_long': {
-          keyword: { type: 'keyword' } as never,
-        },
-        'cases.extended_fields.legacy_no_suffix': { keyword: { type: 'keyword' } as never },
-        'cases.extended_fields.foo_as_unknown_type': { keyword: { type: 'keyword' } as never },
-        // Sibling field that shouldn't be in the response, but we tolerate it
-        'cases.title': { text: { type: 'text' } as never },
-      },
-    } as never);
+    mockSearch(esClient, [
+      makeHit('case-1', {
+        riskScore_as_long: 42,
+        legacy_no_suffix: 'value',
+        foo_as_unknown_type: 'x',
+      }),
+    ]);
 
     expect(await loadExtendedFieldsFromMapping('securitySolution', esClient, logger)).toEqual([
       { name: 'riskScore', type: 'long' },
     ]);
   });
 
-  it('returns an empty array and logs a warning when _field_caps rejects, so plugin start is never aborted by a transient ES error', async () => {
+  it('returns an empty array and logs a warning when search rejects, so plugin start is never aborted by a transient ES error', async () => {
     /*
      * FAILURE SCENARIO: ES returns 503, the cluster is initializing, or
      * the index has not been created yet on a fresh install. The view
@@ -135,21 +147,36 @@ describe('loadExtendedFieldsFromMapping', () => {
      * yet" rather than throwing and leaving the analytics surface broken.
      */
     const { esClient, logger } = setup();
-    esClient.fieldCaps.mockRejectedValueOnce(new Error('cluster_block'));
+    esClient.search.mockRejectedValueOnce(new Error('cluster_block'));
 
     expect(
       await loadExtendedFieldsFromMapping('securitySolution', esClient, logger)
     ).toEqual([]);
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to load extended-field subkeys via _field_caps for owner=securitySolution')
+      expect.stringContaining(
+        'Failed to discover extended-field subkeys for owner=securitySolution'
+      )
     );
   });
 
   it('returns an empty array when there are no cases for the owner yet', async () => {
     const { esClient, logger } = setup();
-    esClient.fieldCaps.mockResolvedValueOnce({ indices: [], fields: {} } as never);
+    mockSearch(esClient, []);
     expect(
       await loadExtendedFieldsFromMapping('observability', esClient, logger)
     ).toEqual([]);
+  });
+
+  it('tolerates hits whose _source is missing or malformed without crashing', async () => {
+    const { esClient, logger } = setup();
+    mockSearch(esClient, [
+      { _id: 'case-1' } as never, // no _source at all
+      { _id: 'case-2', _source: {} } as never, // no cases.extended_fields
+      { _id: 'case-3', _source: { cases: { extended_fields: null } } } as never,
+      makeHit('case-4', { ok_as_keyword: 'value' }),
+    ]);
+    expect(await loadExtendedFieldsFromMapping('securitySolution', esClient, logger)).toEqual([
+      { name: 'ok', type: 'keyword' },
+    ]);
   });
 });

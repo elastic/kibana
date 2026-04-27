@@ -53,21 +53,33 @@ export const parseExtendedFieldSubkey = (fullPath: string): TemplateFieldRef | n
 };
 
 /**
+ * How many recent cases per owner to inspect when discovering which
+ * extended-field keys have been written. The cases SO `extended_fields`
+ * field is mapped as `flattened`, and ES `_field_caps` returns only the
+ * parent for flattened types — sub-keys are not enumerated. Sampling
+ * `_source` is the reliable cross-version path. 200 is enough to cover
+ * any realistically active template-field set; raise if a deployment
+ * reports missed columns.
+ */
+const SAMPLE_SIZE = 200;
+
+interface CaseSourceShape {
+  cases?: {
+    extended_fields?: Record<string, unknown>;
+  };
+}
+
+/**
  * Discovers the extended-field `(name, type)` pairs for a given owner by
- * asking ES which flattened sub-keys have been indexed under
- * `.kibana_alerting_cases` for that owner's case docs.
+ * sampling recent case SO docs and unioning the keys present in
+ * `_source.cases.extended_fields`. The cases SO mapping is `dynamic:false`
+ * with `extended_fields` typed `flattened`, so neither `_field_caps` nor
+ * the index mapping enumerate sub-paths — `_source` is the only place
+ * the keys are observable.
  *
- * Replaces the templates-driven discovery: instead of parsing every
- * cases-templates SO's YAML and computing a union, we ask the
- * authoritative source — what's actually been written — via
- * `_field_caps`. Reactive (a field shows up only after the first case
- * uses it) but resilient: deleted templates don't strand stale columns,
- * and historical fields stay queryable.
- *
- * `_field_caps` accepts an `index_filter` body that scopes discovery to
- * docs matching the predicate. We filter to `type=cases` AND
- * `cases.owner=<owner>` so each per-owner view only carries its own
- * solution's columns.
+ * Reactive (a key shows up only after the first case uses it) but
+ * resilient: deleted templates don't strand stale columns, and
+ * historical fields stay queryable as long as the data is indexed.
  */
 export const loadExtendedFieldsFromMapping = async (
   owner: Owner,
@@ -75,35 +87,40 @@ export const loadExtendedFieldsFromMapping = async (
   logger: Logger
 ): Promise<TemplateFieldRef[]> => {
   try {
-    const response = await esClient.fieldCaps({
+    const response = await esClient.search<CaseSourceShape>({
       index: CAI_VIEW_SOURCE_INDEX,
-      fields: `${FLATTENED_PARENT_PATH}.*`,
-      include_unmapped: false,
-      index_filter: {
+      size: SAMPLE_SIZE,
+      _source: [FLATTENED_PARENT_PATH],
+      sort: [{ 'cases.updated_at': { order: 'desc' } }],
+      query: {
         bool: {
           filter: [
             { term: { type: 'cases' } },
             { term: { 'cases.owner': owner } },
+            { exists: { field: FLATTENED_PARENT_PATH } },
           ],
         },
       },
     });
 
-    const fields = response.fields ?? {};
     const seen = new Set<string>();
     const out: TemplateFieldRef[] = [];
-    for (const fullPath of Object.keys(fields)) {
-      const parsed = parseExtendedFieldSubkey(fullPath);
-      if (!parsed) continue;
-      const dedupeKey = `${parsed.name}::${parsed.type}`;
-      if (seen.has(dedupeKey)) continue;
-      seen.add(dedupeKey);
-      out.push(parsed);
+    for (const hit of response.hits.hits ?? []) {
+      const extended = hit._source?.cases?.extended_fields;
+      if (!extended || typeof extended !== 'object') continue;
+      for (const subKey of Object.keys(extended)) {
+        const parsed = parseExtendedFieldSubkey(`${FLATTENED_PARENT_PATH}.${subKey}`);
+        if (!parsed) continue;
+        const dedupeKey = `${parsed.name}::${parsed.type}`;
+        if (seen.has(dedupeKey)) continue;
+        seen.add(dedupeKey);
+        out.push(parsed);
+      }
     }
     return out;
   } catch (err) {
     logger.warn(
-      `Failed to load extended-field subkeys via _field_caps for owner=${owner}: ${
+      `Failed to discover extended-field subkeys for owner=${owner}: ${
         err instanceof Error ? err.message : String(err)
       }`
     );
