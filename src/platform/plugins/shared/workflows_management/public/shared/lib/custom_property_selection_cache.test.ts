@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SelectionOption } from '@kbn/workflows/types/v1';
+import type { SelectionDetails, SelectionOption } from '@kbn/workflows/types/v1';
 import {
   cacheSearchOptions,
   clearCache,
-  getCachedOption,
+  getCachedCustomPropertyValidationOutcome,
   getCachedSearchOption,
-  getCacheKeyForValue,
-  setCachedOption,
+  getCustomPropertyValidationOutcomeCacheKey,
+  setCachedCustomPropertyValidationOutcome,
 } from './custom_property_selection_cache';
+import type { CustomPropertyItem } from '../../features/validate_workflow_yaml/model/types';
 
 describe('custom_property_selection_cache', () => {
   const mockOption1: SelectionOption = {
@@ -36,6 +37,8 @@ describe('custom_property_selection_cache', () => {
     label: 'Development Proxy',
   };
 
+  const mockDetails: SelectionDetails = { message: 'ok' };
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
@@ -48,98 +51,86 @@ describe('custom_property_selection_cache', () => {
     jest.clearAllMocks();
   });
 
-  describe('getCacheKeyForValue', () => {
-    it('should generate cache key with string value', () => {
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      expect(key).toBe('step.type:config:proxy.id:proxy-1');
+  function makeItem(overrides: Partial<CustomPropertyItem> = {}): CustomPropertyItem {
+    return {
+      id: 'item-1',
+      stepId: 'step-a',
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: 1,
+      endColumn: 1,
+      yamlPath: ['x'],
+      key: 'x',
+      selectionHandler: {} as CustomPropertyItem['selectionHandler'],
+      context: {
+        stepType: 'step.type',
+        scope: 'config',
+        propertyKey: 'proxy.id',
+        values: { config: {}, input: {} },
+      },
+      propertyValue: 'proxy-1',
+      propertyKey: 'proxy.id',
+      stepType: 'step.type',
+      scope: 'config',
+      type: 'custom-property',
+      ...overrides,
+    };
+  }
+
+  describe('getCustomPropertyValidationOutcomeCacheKey', () => {
+    it('should include step id, context fields, and serialized value', () => {
+      const item = makeItem({
+        stepId: 's1',
+        propertyValue: 'v',
+        context: {
+          stepType: 't',
+          scope: 'input',
+          propertyKey: 'k',
+          values: { config: { a: 1 }, input: {} },
+        },
+      });
+      const key = getCustomPropertyValidationOutcomeCacheKey(item);
+      expect(key).toContain('s1');
+      expect(key).toContain('t');
+      expect(key).toContain('input');
+      expect(key).toContain('k');
+      expect(key).toContain(JSON.stringify({ config: { a: 1 }, input: {} }));
+      expect(key).toContain('"v"');
     });
 
-    it('should generate cache key with number value', () => {
-      const key = getCacheKeyForValue('step.type', 'input', 'port', 8080);
-      expect(key).toBe('step.type:input:port:8080');
-    });
-
-    it('should generate cache key with null value', () => {
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', null);
-      expect(key).toBe('step.type:config:proxy.id:null');
-    });
-
-    it('should generate cache key with undefined value', () => {
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', undefined);
-      expect(key).toBe('step.type:config:proxy.id:undefined');
-    });
-
-    it('should generate different keys for different scopes', () => {
-      const configKey = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      const inputKey = getCacheKeyForValue('step.type', 'input', 'proxy.id', 'proxy-1');
-      expect(configKey).not.toBe(inputKey);
-    });
-
-    it('should generate different keys for different property keys', () => {
-      const key1 = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      const key2 = getCacheKeyForValue('step.type', 'config', 'agent.id', 'proxy-1');
-      expect(key1).not.toBe(key2);
+    it('should produce different keys for different property values', () => {
+      const a = getCustomPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'a' }));
+      const b = getCustomPropertyValidationOutcomeCacheKey(makeItem({ propertyValue: 'b' }));
+      expect(a).not.toBe(b);
     });
   });
 
-  describe('setCachedOption and getCachedOption', () => {
-    it('should store and retrieve cached option', () => {
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      setCachedOption(key, mockOption1);
-
-      const cached = getCachedOption(key);
-      expect(cached).toEqual(mockOption1);
+  describe('getCachedCustomPropertyValidationOutcome and setCachedCustomPropertyValidationOutcome', () => {
+    it('should store and retrieve validation outcome', () => {
+      const key = 'k1';
+      setCachedCustomPropertyValidationOutcome(key, mockOption1, mockDetails);
+      expect(getCachedCustomPropertyValidationOutcome(key)).toEqual({
+        resolvedOption: mockOption1,
+        details: mockDetails,
+      });
     });
 
-    it('should return null for non-existent cache key', () => {
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'non-existent');
-      const cached = getCachedOption(key);
-      expect(cached).toBeNull();
+    it('should return null for missing key', () => {
+      expect(getCachedCustomPropertyValidationOutcome('missing')).toBeNull();
     });
 
-    it('should return null for expired cache entry', () => {
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      setCachedOption(key, mockOption1);
-
+    it('should expire after TTL', () => {
+      const key = 'k-exp';
+      setCachedCustomPropertyValidationOutcome(key, null, mockDetails);
       jest.advanceTimersByTime(30 * 1000 + 1);
-
-      const cached = getCachedOption(key);
-      expect(cached).toBeNull();
+      expect(getCachedCustomPropertyValidationOutcome(key)).toBeNull();
     });
 
-    it('should return cached option within TTL', () => {
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      setCachedOption(key, mockOption1);
-
+    it('should return outcome within TTL', () => {
+      const key = 'k-ok';
+      setCachedCustomPropertyValidationOutcome(key, mockOption1, mockDetails);
       jest.advanceTimersByTime(30 * 1000 - 1);
-
-      const cached = getCachedOption(key);
-      expect(cached).toEqual(mockOption1);
-    });
-
-    it('should update existing cache entry', () => {
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      setCachedOption(key, mockOption1);
-
-      const updatedOption: SelectionOption = {
-        ...mockOption1,
-        label: 'Updated Proxy',
-      };
-      setCachedOption(key, updatedOption);
-
-      const cached = getCachedOption(key);
-      expect(cached).toEqual(updatedOption);
-    });
-
-    it('should handle multiple cache entries independently', () => {
-      const key1 = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      const key2 = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-2');
-
-      setCachedOption(key1, mockOption1);
-      setCachedOption(key2, mockOption2);
-
-      expect(getCachedOption(key1)).toEqual(mockOption1);
-      expect(getCachedOption(key2)).toEqual(mockOption2);
+      expect(getCachedCustomPropertyValidationOutcome(key)?.resolvedOption).toEqual(mockOption1);
     });
   });
 
@@ -155,15 +146,6 @@ describe('custom_property_selection_cache', () => {
       expect(cached1).toEqual(mockOption1);
       expect(cached2).toEqual(mockOption2);
       expect(cached3).toEqual(mockOption3);
-    });
-
-    it('should cache individual options via setCachedOption', () => {
-      const options = [mockOption1];
-      cacheSearchOptions('step.type', 'config', 'proxy.id', options);
-
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      const cached = getCachedOption(key);
-      expect(cached).toEqual(mockOption1);
     });
 
     it('should handle empty options array', () => {
@@ -204,6 +186,23 @@ describe('custom_property_selection_cache', () => {
 
       expect(cached1).toEqual(mockOption1);
       expect(cached2).toEqual(mockOption2);
+    });
+
+    it('should scope search cache by context values', () => {
+      const valuesA = { config: { x: 1 }, input: {} };
+      const valuesB = { config: { x: 2 }, input: {} };
+      cacheSearchOptions('step.type', 'config', 'proxy.id', [mockOption1], valuesA);
+      cacheSearchOptions('step.type', 'config', 'proxy.id', [mockOption2], valuesB);
+
+      expect(getCachedSearchOption('step.type', 'config', 'proxy.id', 'proxy-1', valuesA)).toEqual(
+        mockOption1
+      );
+      expect(getCachedSearchOption('step.type', 'config', 'proxy.id', 'proxy-2', valuesB)).toEqual(
+        mockOption2
+      );
+      expect(
+        getCachedSearchOption('step.type', 'config', 'proxy.id', 'proxy-1', valuesB)
+      ).toBeNull();
     });
   });
 
@@ -267,36 +266,13 @@ describe('custom_property_selection_cache', () => {
   });
 
   describe('cache expiration', () => {
-    it('should expire individual cached options after TTL', () => {
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      setCachedOption(key, mockOption1);
-
-      jest.advanceTimersByTime(30 * 1000 + 1);
-
-      const cached = getCachedOption(key);
-      expect(cached).toBeNull();
-    });
-
-    it('should not expire search cache entries (they persist)', () => {
+    it('should not expire search cache entries by time (list persists until replaced)', () => {
       cacheSearchOptions('step.type', 'config', 'proxy.id', [mockOption1]);
 
       jest.advanceTimersByTime(30 * 1000 + 1);
 
       const cached = getCachedSearchOption('step.type', 'config', 'proxy.id', 'proxy-1');
       expect(cached).toEqual(mockOption1);
-    });
-
-    it('should expire individual options cached via cacheSearchOptions after TTL', () => {
-      cacheSearchOptions('step.type', 'config', 'proxy.id', [mockOption1]);
-
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      jest.advanceTimersByTime(30 * 1000 + 1);
-
-      const cachedViaKey = getCachedOption(key);
-      expect(cachedViaKey).toBeNull();
-
-      const cachedViaSearch = getCachedSearchOption('step.type', 'config', 'proxy.id', 'proxy-1');
-      expect(cachedViaSearch).toEqual(mockOption1);
     });
   });
 
@@ -337,29 +313,25 @@ describe('custom_property_selection_cache', () => {
       expect(cached).toEqual(optionWithObject);
     });
 
-    it('should handle very long cache keys', () => {
+    it('should handle very long option values in search cache', () => {
       const longValue = 'a'.repeat(1000);
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', longValue);
       const option: SelectionOption = {
         value: longValue,
         label: 'Long Value Option',
       };
-
-      setCachedOption(key, option);
-      const cached = getCachedOption(key);
+      cacheSearchOptions('step.type', 'config', 'proxy.id', [option]);
+      const cached = getCachedSearchOption('step.type', 'config', 'proxy.id', longValue);
       expect(cached).toEqual(option);
     });
 
-    it('should handle special characters in cache keys', () => {
+    it('should handle special characters in values for search cache', () => {
       const specialValue = 'proxy:id:with:colons';
-      const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', specialValue);
       const option: SelectionOption = {
         value: specialValue,
         label: 'Special Chars Option',
       };
-
-      setCachedOption(key, option);
-      const cached = getCachedOption(key);
+      cacheSearchOptions('step.type', 'config', 'proxy.id', [option]);
+      const cached = getCachedSearchOption('step.type', 'config', 'proxy.id', specialValue);
       expect(cached).toEqual(option);
     });
   });

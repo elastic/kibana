@@ -275,6 +275,7 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
     updatedAt: _ua,
     createdAt: _ca,
     createdBy: _cb,
+    updatedBy: _ub,
     managed: _m,
     references: _refs,
     attributes: _attrs,
@@ -290,7 +291,9 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
     type: item.type,
     updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
     tags: extractTagIds(item.references),
+    createdAt: item.createdAt,
     createdBy: item.createdBy,
+    updatedBy: item.updatedBy,
     managed: item.managed,
   };
 };

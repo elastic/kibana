@@ -14,6 +14,13 @@ import {
   PROVISION_UIAM_API_KEYS_FEATURE_FLAG,
 } from '../../application/rule/constants';
 
+export const API_KEY_ATTRIBUTES_TO_STRIP = [
+  'apiKey',
+  'apiKeyOwner',
+  'apiKeyCreatedByUser',
+  'uiamApiKey',
+] as const;
+
 interface ApiKeyRuleProperties {
   apiKey: string | null;
   apiKeyOwner: string | null;

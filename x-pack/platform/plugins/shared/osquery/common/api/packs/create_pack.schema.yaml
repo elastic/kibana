@@ -46,49 +46,63 @@ components:
     CreatePacksResponse:
       description: 'The response for creating a pack.'
       type: object
+      required:
+        - data
       properties:
         data:
-          description: 'The created pack.'
           type: object
+          required:
+            - saved_object_id
+            - name
           properties:
             saved_object_id:
               description: 'The saved object ID of the pack.'
               type: string
             name:
-              description: 'The pack name.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackName'
             description:
-              description: 'The pack description.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackDescriptionOrUndefined'
             queries:
-              description: 'The queries in the pack.'
-              type: object
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
             version:
-              description: 'The pack version.'
+              description: 'The pack version number.'
               type: integer
             enabled:
-              description: 'Whether the pack is enabled.'
-              type: boolean
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/EnabledOrUndefined'
             created_at:
-              description: 'The creation timestamp.'
+              description: 'The date and time the pack was created.'
               type: string
+              format: date-time
             created_by:
               description: 'The user who created the pack.'
               type: string
-            updated_at:
-              description: 'The last update timestamp.'
+              nullable: true
+            created_by_profile_uid:
+              description: 'The profile UID of the user who created the pack.'
               type: string
+            updated_at:
+              description: 'The date and time the pack was last updated.'
+              type: string
+              format: date-time
             updated_by:
               description: 'The user who last updated the pack.'
               type: string
+              nullable: true
+            updated_by_profile_uid:
+              description: 'The profile UID of the user who last updated the pack.'
+              type: string
             policy_ids:
-              description: 'A list of agent policy IDs associated with the pack.'
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PolicyIdsOrUndefined'
+            shards:
+              description: 'Shard configuration as an array of key-value pairs.'
               type: array
               items:
-                type: string
-            shards:
-              description: 'Shard configuration for the pack.'
-              type: object
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: number
       example:
         data:
           saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"

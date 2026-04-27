@@ -842,6 +842,58 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
+  it('OTel non-dynamic: data_stream.dataset var overrides stream dataset (e.g. generic → zipkinreceiver)', async () => {
+    // Matches getFullInputStreams: var replaces merged dataset for otelcol. Traces + span-event logs
+    // must use the same effective dataset (previously traces ignored the var).
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-var-over-compiled',
+        name: 'otel-var-beats-compiled',
+        namespace: 'ep',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: { type: 'traces', dataset: 'generic' },
+                compiled_stream: { data_stream: { dataset: 'generic' } },
+                vars: {
+                  [DATASET_VAR_NAME]: { value: 'zipkinreceiver' },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'ep',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-otel-var-over-compiled': {
+        indices: [
+          { names: ['traces-zipkinreceiver-ep'], privileges: ['auto_configure', 'create_doc'] },
+          { names: ['logs-zipkinreceiver-ep'], privileges: ['auto_configure', 'create_doc'] },
+        ],
+      },
+    });
+  });
+
   it('Falls back to stream dataset when OTel traces data_stream.dataset var is an empty object', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
@@ -1074,11 +1126,69 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
-  it('Returns additional logs permissions with dynamic_namespace for OTel traces span events', async () => {
+  it('Returns wildcard traces and logs for OTel traces span events when dynamic_dataset and dynamic_namespace are set (input-type packages)', async () => {
+    // getNormalizedDataStreams always sets both flags for type: input packages; span-event logs must
+    // receive dynamic_dataset too or they stay literal while traces-*-* (regression fixed in code).
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-uuid-test-789',
-        name: 'otel-traces-dynamic-ns',
+        name: 'otel-traces-dynamic-ds-ns',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: {
+                  type: 'traces',
+                  dataset: 'otel-traces',
+                  elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-789': {
+        indices: [
+          {
+            names: ['traces-*-*'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+          {
+            names: ['logs-*-*'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
+
+  it('Uses literal dataset for span-event logs when only dynamic_namespace is set (no dynamic_dataset)', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-span-ns-only',
+        name: 'otel-traces-ns-only',
         namespace: 'test',
         enabled: true,
         package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
@@ -1115,7 +1225,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       packagePolicies
     );
     expect(permissions).toMatchObject({
-      'package-policy-uuid-test-789': {
+      'package-policy-otel-span-ns-only': {
         indices: [
           {
             names: ['traces-otel-traces-*'],
@@ -1123,6 +1233,130 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           },
           {
             names: ['logs-otel-traces-*'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
+
+  it('Propagates dynamic_dataset to span events so logs are not stuck on literal policy dataset (receiver name)', async () => {
+    // Mirrors input-type OTel integrations: registry dataset may differ from OTTL output, but
+    // dynamic_dataset/dynamic_namespace on the traces stream must apply to span-event logs too,
+    // otherwise permissions stay literal (e.g. logs-zipkinreceiver-*) while routing uses wildcards.
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-span-dynamic-dataset',
+        name: 'otel-traces-dynamic-ds',
+        namespace: 'ep',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: {
+                  type: 'traces',
+                  dataset: 'zipkinreceiver',
+                  elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'ep',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-otel-span-dynamic-dataset': {
+        indices: [
+          {
+            names: ['traces-*-*'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+          {
+            names: ['logs-*-*'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
+
+  it('Aligns span-event logs with data_stream.dataset var override when traces are dynamic (registry vs OTTL)', async () => {
+    // Same path as getFullInputStreams: stream var overrides dataset for OTTL; compiled_stream can
+    // still carry the shorter registry name. Span-event permissions must use the override for the
+    // literal case and propagate dynamic_dataset so wildcard indices match traces-*-* / logs-*-*.
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-span-var-plus-dynamic',
+        name: 'otel-zipkin-var',
+        namespace: 'ep',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: {
+                  type: 'traces',
+                  dataset: 'generic',
+                  elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+                },
+                compiled_stream: {
+                  data_stream: { dataset: 'generic' },
+                },
+                vars: {
+                  [DATASET_VAR_NAME]: { value: 'zipkinreceiver' },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'ep',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-otel-span-var-plus-dynamic': {
+        indices: [
+          {
+            names: ['traces-*-*'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+          {
+            names: ['logs-*-*'],
             privileges: ['auto_configure', 'create_doc'],
           },
         ],

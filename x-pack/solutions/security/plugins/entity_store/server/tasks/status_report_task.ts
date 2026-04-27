@@ -19,7 +19,7 @@ import { createAssetManagerClient } from './factories';
 import type { EntityStoreCoreSetup } from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
-import { getEntitiesAlias, ENTITY_LATEST } from '../../common/domain/entity_index';
+import { getLatestEntitiesIndexName } from '../../common/domain/entity_index';
 import { ENTITY_STORE_STATUS } from '../domain/constants';
 import type { GetStatusResult } from '../domain/types';
 import {
@@ -120,7 +120,7 @@ async function runTask({
     analytics: telemetryReporter,
     isServerless: false,
   });
-  const index = getEntitiesAlias(ENTITY_LATEST, namespace);
+  const index = getLatestEntitiesIndexName(namespace);
   const abortSignal = abortController.signal;
 
   // Report Entity Store usage per entity type

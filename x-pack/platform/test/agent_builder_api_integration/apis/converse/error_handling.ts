@@ -89,7 +89,9 @@ export function createErrorHandlingTests(executionMode: ExecutionMode) {
           // Non-JSON tool content; use as-is.
         }
 
-        expect(errorMessage).to.contain('ERROR: called a tool which was not available');
+        expect(errorMessage).to.contain(
+          'ERROR: tool_not_found - called a tool which was not available'
+        );
       });
     });
   };

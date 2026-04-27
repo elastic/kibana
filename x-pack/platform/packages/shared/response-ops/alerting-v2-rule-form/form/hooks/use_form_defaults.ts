@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { DELAY_MODE } from '../types';
 import type { FormValues } from '../types';
 import { useDefaultGroupBy } from './use_default_group_by';
 
@@ -56,8 +57,8 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
       recoveryPolicy: {
         type: 'no_breach',
       },
-      stateTransitionAlertDelayMode: 'immediate',
-      stateTransitionRecoveryDelayMode: 'immediate',
+      stateTransitionAlertDelayMode: DELAY_MODE.immediate,
+      stateTransitionRecoveryDelayMode: DELAY_MODE.immediate,
     }),
     [query, defaultGroupBy]
   );

@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   DataViewId,
@@ -27,99 +27,103 @@ import {
   EntityRiskScoreRecord,
 } from '../common/common.gen';
 
+export const RiskScoresPreviewRequest = lazySchema(() =>
+  z.object({
+    /**
+     * The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
+     */
+    data_view_id: DataViewId,
+    /**
+     * Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
+     */
+    after_keys: AfterKeys.optional(),
+    /**
+     * If set to `true`, a `debug` key is added to the response, containing both the internal request and response with elasticsearch.
+     */
+    debug: z.boolean().optional(),
+    /**
+     * An elasticsearch DSL filter object. Used to filter the data being scored, which implicitly filters the risk scores returned.
+     */
+    filter: Filter.optional(),
+    page_size: PageSize.optional(),
+    /**
+     * Used to restrict the type of risk scores involved. If unspecified, both `host` and `user` scores will be returned.
+     */
+    identifier_type: IdentifierType.optional(),
+    /**
+     * Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
+     */
+    range: DateRange.optional(),
+    weights: RiskScoreWeights.optional(),
+    /**
+     * A list of alert statuses to exclude from the risk score calculation. If unspecified, all alert statuses are included.
+     */
+    exclude_alert_statuses: z.array(z.string()).optional(),
+    /**
+     * A list of alert tags to exclude from the risk score calculation. If unspecified, all alert tags are included.
+     */
+    exclude_alert_tags: z.array(z.string()).optional(),
+    /**
+     * Custom KQL filters to exclude from risk scoring queries, allowing more targeted risk analysis by filtering out specific alerts.
+     */
+    filters: z
+      .array(
+        z.object({
+          /**
+           * The entity types this filter applies to
+           */
+          entity_types: z.array(z.enum(['host', 'user', 'service'])),
+          /**
+           * KQL filter expression to exclude (alerts matching this filter will be excluded from risk score calculation)
+           */
+          filter: z.string(),
+        })
+      )
+      .optional(),
+  })
+);
 export type RiskScoresPreviewRequest = z.infer<typeof RiskScoresPreviewRequest>;
-export const RiskScoresPreviewRequest = z.object({
-  /**
-   * The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
-   */
-  data_view_id: DataViewId,
-  /**
-   * Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
-   */
-  after_keys: AfterKeys.optional(),
-  /**
-   * If set to `true`, a `debug` key is added to the response, containing both the internal request and response with elasticsearch.
-   */
-  debug: z.boolean().optional(),
-  /**
-   * An elasticsearch DSL filter object. Used to filter the data being scored, which implicitly filters the risk scores returned.
-   */
-  filter: Filter.optional(),
-  page_size: PageSize.optional(),
-  /**
-   * Used to restrict the type of risk scores involved. If unspecified, both `host` and `user` scores will be returned.
-   */
-  identifier_type: IdentifierType.optional(),
-  /**
-   * Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
-   */
-  range: DateRange.optional(),
-  weights: RiskScoreWeights.optional(),
-  /**
-   * A list of alert statuses to exclude from the risk score calculation. If unspecified, all alert statuses are included.
-   */
-  exclude_alert_statuses: z.array(z.string()).optional(),
-  /**
-   * A list of alert tags to exclude from the risk score calculation. If unspecified, all alert tags are included.
-   */
-  exclude_alert_tags: z.array(z.string()).optional(),
-  /**
-   * Custom KQL filters to exclude from risk scoring queries, allowing more targeted risk analysis by filtering out specific alerts.
-   */
-  filters: z
-    .array(
-      z.object({
-        /**
-         * The entity types this filter applies to
-         */
-        entity_types: z.array(z.enum(['host', 'user', 'service'])),
-        /**
-         * KQL filter expression to exclude (alerts matching this filter will be excluded from risk score calculation)
-         */
-        filter: z.string(),
+
+export const RiskScoresPreviewResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
+     */
+    after_keys: AfterKeys,
+    /**
+     * Object containing debug information, particularly the internal request and response from elasticsearch
+     */
+    debug: z
+      .object({
+        request: z.string().optional(),
+        response: z.string().optional(),
       })
-    )
-    .optional(),
-});
-
+      .optional(),
+    scores: z.object({
+      /**
+       * A list of host risk scores
+       */
+      host: z.array(EntityRiskScoreRecord).optional(),
+      /**
+       * A list of user risk scores
+       */
+      user: z.array(EntityRiskScoreRecord).optional(),
+      /**
+       * A list of service risk scores
+       */
+      service: z.array(EntityRiskScoreRecord).optional(),
+      /**
+       * A list of generic entities risk scores
+       */
+      generic: z.array(EntityRiskScoreRecord).optional(),
+    }),
+  })
+);
 export type RiskScoresPreviewResponse = z.infer<typeof RiskScoresPreviewResponse>;
-export const RiskScoresPreviewResponse = z.object({
-  /**
-   * Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
-   */
-  after_keys: AfterKeys,
-  /**
-   * Object containing debug information, particularly the internal request and response from elasticsearch
-   */
-  debug: z
-    .object({
-      request: z.string().optional(),
-      response: z.string().optional(),
-    })
-    .optional(),
-  scores: z.object({
-    /**
-     * A list of host risk scores
-     */
-    host: z.array(EntityRiskScoreRecord).optional(),
-    /**
-     * A list of user risk scores
-     */
-    user: z.array(EntityRiskScoreRecord).optional(),
-    /**
-     * A list of service risk scores
-     */
-    service: z.array(EntityRiskScoreRecord).optional(),
-    /**
-     * A list of generic entities risk scores
-     */
-    generic: z.array(EntityRiskScoreRecord).optional(),
-  }),
-});
 
+export const PreviewRiskScoreRequestBody = lazySchema(() => RiskScoresPreviewRequest);
 export type PreviewRiskScoreRequestBody = z.infer<typeof PreviewRiskScoreRequestBody>;
-export const PreviewRiskScoreRequestBody = RiskScoresPreviewRequest;
 export type PreviewRiskScoreRequestBodyInput = z.input<typeof PreviewRiskScoreRequestBody>;
 
+export const PreviewRiskScoreResponse = lazySchema(() => RiskScoresPreviewResponse);
 export type PreviewRiskScoreResponse = z.infer<typeof PreviewRiskScoreResponse>;
-export const PreviewRiskScoreResponse = RiskScoresPreviewResponse;

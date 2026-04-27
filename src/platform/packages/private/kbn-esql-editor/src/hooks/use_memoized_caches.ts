@@ -11,7 +11,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import { memoize } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import type { ILicense } from '@kbn/licensing-types';
-import type { ESQLCallbacks, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLControlVariable, ESQLSourceResult } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
@@ -69,7 +69,13 @@ export const useMemoizedCaches = ({
     // Keying on effectiveProjectRouting ensures a fresh cache (and therefore a fresh fetch)
     // whenever either the SET statement or the picker selection changes.
     const fn = memoize(
-      (...args: [CoreStart, (() => Promise<ILicense | undefined>) | undefined]) => ({
+      (
+        ...args: [
+          CoreStart,
+          (() => Promise<ILicense | undefined>) | undefined,
+          ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+        ]
+      ) => ({
         timestamp: Date.now(),
         result: getESQLSources(...args, undefined, effectiveProjectRouting),
       })

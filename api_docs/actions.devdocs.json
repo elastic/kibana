@@ -5299,6 +5299,48 @@
           "returnComment": [
             "boolean indicating whether the connector was added or not"
           ]
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginStartContract.unregisterDynamicConnector",
+          "type": "Function",
+          "tags": [],
+          "label": "unregisterDynamicConnector",
+          "description": [
+            "\nRemove a previously registered dynamic InMemoryConnector from the inMemoryConnectors list.\nOnly connectors flagged as dynamic (via registerDynamicConnector) can be removed this way;\npreconfigured or system connectors are left untouched."
+          ],
+          "signature": [
+            "(connectorId: string) => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+          "lineNumber": 209,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginStartContract.unregisterDynamicConnector.$1",
+              "type": "string",
+              "tags": [],
+              "label": "connectorId",
+              "description": [
+                "id of the dynamic connector to remove"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+              "lineNumber": 216,
+              "columnNumber": 32,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "boolean indicating whether the connector was removed or not"
+          ]
         }
       ],
       "lifecycle": "start",

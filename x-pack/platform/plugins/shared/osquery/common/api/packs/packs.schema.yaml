@@ -142,9 +142,8 @@ paths:
         The copied pack is always created with `enabled` set to `false`.
       operationId: OsqueryCopyPacks
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
       parameters:
         - name: id
           in: path
@@ -159,3 +158,29 @@ paths:
             application/json:
               schema:
                 $ref: './copy_pack.schema.yaml#/components/schemas/CopyPacksResponse'
+              examples:
+                copyPackExample:
+                  summary: Example response for copying a pack
+                  value:
+                    data:
+                      saved_object_id: '1c266590-381f-428c-878f-c80c1334f856'
+                      name: 'my_pack_copy'
+                      description: 'My pack'
+                      enabled: false
+                      queries:
+                        - id: 'ports'
+                          query: 'SELECT * FROM listening_ports;'
+                          interval: 60
+                          snapshot: true
+                          removed: false
+                          timeout: 120
+                          ecs_mapping:
+                            - key: 'client.port'
+                              value:
+                                field: 'port'
+                      shards: []
+                      policy_ids: []
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: 'elastic'
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: 'elastic'

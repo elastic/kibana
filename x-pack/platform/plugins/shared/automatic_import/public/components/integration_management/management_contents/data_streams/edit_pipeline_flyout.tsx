@@ -120,6 +120,8 @@ export const EditPipelineFlyout = ({
       );
 
       reportPipelineEdited({
+        integrationId,
+        dataStreamId: dataStream.dataStreamId,
         linesAdded,
         linesRemoved,
         netLineChange,
@@ -207,10 +209,10 @@ export const EditPipelineFlyout = ({
         target.closest('.euiCodeBlock__copyButton') ||
         target.getAttribute('aria-label')?.toLowerCase().includes('copy')
       ) {
-        reportCodeEditorCopyClicked();
+        reportCodeEditorCopyClicked({ integrationId, dataStreamId: dataStream.dataStreamId });
       }
     },
-    [reportCodeEditorCopyClicked]
+    [integrationId, dataStream.dataStreamId, reportCodeEditorCopyClicked]
   );
 
   return (
@@ -270,7 +272,10 @@ export const EditPipelineFlyout = ({
           <EuiTab
             isSelected={selectedPipelineTab === 'pipeline'}
             onClick={() => {
-              reportEditPipelineTabOpened();
+              reportEditPipelineTabOpened({
+                integrationId,
+                dataStreamId: dataStream.dataStreamId,
+              });
               selectPipelineTab('pipeline');
             }}
           >

@@ -116,6 +116,8 @@ interface MapPopoverProps {
   start: string;
   end: string;
   onClose: () => void;
+  /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
+  isEmbedded?: boolean;
 }
 
 export function MapPopover({
@@ -127,6 +129,7 @@ export function MapPopover({
   start,
   end,
   onClose,
+  isEmbedded,
 }: MapPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<EuiPopover>(null);
@@ -216,7 +219,8 @@ export function MapPopover({
         closePopover={onClose}
         isOpen={isOpen}
         ref={popoverRef}
-        zIndex={Number(euiTheme.levels.menu)}
+        // Below EUI flyouts so nested SLO / alert flyouts stay on top; above map canvas (content).
+        zIndex={Number(euiTheme.levels.flyout) - 1}
         data-test-subj="serviceMapPopover"
         aria-label={popoverAriaLabel}
         panelProps={{
@@ -234,6 +238,7 @@ export function MapPopover({
           end={end}
           onFocusClick={onFocusClick}
           onOpenDiagnostic={handleOpenDiagnostic}
+          isEmbedded={isEmbedded}
         />
       </EuiPopover>
       {diagnosticFlyoutSelection && (
