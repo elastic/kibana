@@ -27,6 +27,14 @@ describe('buildLifecycleViewQuery', () => {
     expect(out).not.toContain('| STATS');
   });
 
+  it('reads time_to_* via JSON_EXTRACT because they live only in _source on a dynamic:false SO', () => {
+    const out = buildLifecycleViewQuery('securitySolution');
+    expect(out).toContain(
+      'time_to_acknowledge = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_acknowledge"))'
+    );
+    expect(out).toContain('METADATA _id, _source');
+  });
+
   it('computes time_to_close_ms inline from closed_at - created_at so consumers do not have to', () => {
     expect(buildLifecycleViewQuery('securitySolution')).toContain(
       'time_to_close_ms = TO_LONG(TO_DATETIME(cases.closed_at)) - TO_LONG(TO_DATETIME(cases.created_at))'

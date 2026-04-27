@@ -21,9 +21,11 @@ const LIFECYCLE_EVALS = [
   'total_comments = cases.total_comments',
   'total_observables = cases.total_observables',
   'total_assignees = MV_COUNT(cases.assignees.uid)',
-  'time_to_acknowledge = cases.time_to_acknowledge',
-  'time_to_investigate = cases.time_to_investigate',
-  'time_to_resolve = cases.time_to_resolve',
+  // time_to_* live only in _source (cases SO is dynamic: false). Read via
+  // JSON_EXTRACT and TO_LONG, mirroring the pattern in build_case_view.
+  'time_to_acknowledge = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_acknowledge"))',
+  'time_to_investigate = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_investigate"))',
+  'time_to_resolve = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_resolve"))',
 ];
 
 const LIFECYCLE_KEEP_COLUMNS = [
@@ -54,7 +56,7 @@ const LIFECYCLE_KEEP_COLUMNS = [
  */
 export const buildLifecycleViewQuery = (owner: Owner): string =>
   [
-    `FROM ${CAI_VIEW_SOURCE_INDEX} METADATA _id`,
+    `FROM ${CAI_VIEW_SOURCE_INDEX} METADATA _id, _source`,
     `| WHERE type == "cases" AND cases.owner == "${owner}"`,
     `| EVAL ${LIFECYCLE_EVALS.join(', ')}`,
     `| KEEP ${LIFECYCLE_KEEP_COLUMNS.join(', ')}`,

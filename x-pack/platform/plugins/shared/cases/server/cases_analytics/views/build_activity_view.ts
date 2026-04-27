@@ -25,19 +25,24 @@ const ACTIVITY_EVALS = [
   'owner = `cases-user-actions`.owner',
   'space_ids = namespaces',
   /*
-   * `case_id` is sourced from the SO `references` array where type=="cases".
-   * MV_FIRST(MV_FILTER(...)) is the documented ES|QL idiom for predicate
-   * extraction on multi-valued sub-fields. If the snapshot ES build does
-   * not yet support nested predicates on object arrays, the fallback is
-   * to mirror the case-id into a top-level keyword on user-action SO write
-   * — see plan §"Open question — case_id for activity rows".
+   * Per-reference (id, type) pairs are exposed as parallel multi-value
+   * columns rather than a single extracted `case_id`. Snapshot ES|QL
+   * does not yet support MV_FILTER lambdas, and the SO `references`
+   * array flattens to independent multi-value fields once indexed (the
+   * pairing across `.id`/`.type` is lost). To find activity for a
+   * specific case_id, consumers either:
+   *   1. WHERE <case_id_literal> IN references_ids  (and JOIN against
+   *      cases.case.<owner> if they need to confirm the match is a
+   *      case ref vs. an alert ref of the same id-shape), OR
+   *   2. wait for the writer-side `case_id` mirror landing in a follow-up
+   *      change to cases-user-actions SO mapping + service.
    */
-  'case_id = MV_FIRST(MV_FILTER(references.id, ref_id -> ref_id != null))',
+  'references_ids = references.id',
+  'references_types = references.type',
 ];
 
 const ACTIVITY_KEEP_COLUMNS = [
   'user_action_id',
-  'case_id',
   'owner',
   'space_ids',
   'action',
@@ -52,6 +57,8 @@ const ACTIVITY_KEEP_COLUMNS = [
   'created_by_full_name',
   'created_by_email',
   'created_by_profile_uid',
+  'references_ids',
+  'references_types',
 ];
 
 /**

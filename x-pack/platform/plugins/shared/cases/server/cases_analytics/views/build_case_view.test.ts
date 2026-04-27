@@ -52,11 +52,37 @@ describe('buildCaseViewQuery', () => {
     expect(out).toContain('closed_at_ms = TO_LONG(TO_DATETIME(cases.closed_at))');
   });
 
-  it('flattens assignees, custom_fields, and observables to multi-value columns rather than nested rows', () => {
+  it('flattens assignees to multi-value (object-arrays are readable in ES|QL)', () => {
     const out = buildCaseViewQuery('securitySolution', []);
     expect(out).toContain('assignees = cases.assignees.uid');
     expect(out).toContain('total_assignees = MV_COUNT(cases.assignees.uid)');
-    expect(out).toContain('custom_fields_keys = cases.customFields.key');
-    expect(out).toContain('observables_types = cases.observables.typeKey');
+  });
+
+  it('reads time_to_* via JSON_EXTRACT(_source, ...) because the cases SO is dynamic:false and these fields live only in _source', () => {
+    const out = buildCaseViewQuery('securitySolution', []);
+    expect(out).toContain(
+      'time_to_acknowledge = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_acknowledge"))'
+    );
+    expect(out).toContain(
+      'time_to_investigate = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_investigate"))'
+    );
+    expect(out).toContain(
+      'time_to_resolve = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_resolve"))'
+    );
+  });
+
+  it('does not expose customFields or observables (nested mapping types unreadable in current ES|QL)', () => {
+    /*
+     * FAILURE SCENARIO: previously we emitted cases.customFields.* and
+     * cases.observables.* directly. ES rejected the view PUT with
+     * verification_exception ("Unknown column"). Until we add a
+     * flattened mirror at the SO layer or ES|QL gains nested support,
+     * these columns are deliberately absent.
+     */
+    const out = buildCaseViewQuery('securitySolution', []);
+    expect(out).not.toContain('cases.customFields');
+    expect(out).not.toContain('cases.observables');
+    expect(out).not.toContain('custom_fields_');
+    expect(out).not.toContain('observables_');
   });
 });

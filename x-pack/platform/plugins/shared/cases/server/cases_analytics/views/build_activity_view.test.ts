@@ -37,9 +37,19 @@ describe('buildActivityViewQuery', () => {
     );
   });
 
-  it('exposes case_id from the SO references array for joining back to cases.case rows', () => {
-    expect(buildActivityViewQuery('securitySolution')).toContain(
-      'case_id = MV_FIRST(MV_FILTER(references.id'
-    );
+  it('exposes references.id and references.type as parallel multi-value columns instead of an extracted case_id', () => {
+    /*
+     * FAILURE SCENARIO: snapshot ES|QL does not yet support MV_FILTER
+     * lambdas and the SO references array flattens to independent
+     * multi-value fields. Emitting MV_FILTER(...) caused ES to reject
+     * the view PUT with parsing_exception. Exposing the raw arrays
+     * keeps the data accessible until the writer-side case_id mirror
+     * lands.
+     */
+    const out = buildActivityViewQuery('securitySolution');
+    expect(out).toContain('references_ids = references.id');
+    expect(out).toContain('references_types = references.type');
+    expect(out).not.toContain('MV_FILTER');
+    expect(out).not.toContain('case_id');
   });
 });

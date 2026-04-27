@@ -44,14 +44,23 @@ const CASE_BASE_EVALS = [
   'total_alerts = cases.total_alerts',
   'total_comments = cases.total_comments',
   'total_observables = cases.total_observables',
-  'time_to_acknowledge = cases.time_to_acknowledge',
-  'time_to_investigate = cases.time_to_investigate',
-  'time_to_resolve = cases.time_to_resolve',
-  'custom_fields_keys = cases.customFields.key',
-  'custom_fields_types = cases.customFields.type',
-  'custom_fields_values = cases.customFields.value',
-  'observables_types = cases.observables.typeKey',
-  'observables_values = cases.observables.value',
+  /*
+   * The cases SO mapping is `dynamic: false`, so time_to_acknowledge /
+   * time_to_investigate / time_to_resolve are written to _source by the
+   * cases service but never indexed as searchable fields. ES|QL can
+   * still read them via JSON_EXTRACT against _source, layered with
+   * TO_LONG since JSON_EXTRACT always returns a keyword string.
+   */
+  'time_to_acknowledge = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_acknowledge"))',
+  'time_to_investigate = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_investigate"))',
+  'time_to_resolve = TO_LONG(JSON_EXTRACT(_source, "cases.time_to_resolve"))',
+  /*
+   * customFields and observables are mapped as `nested`, which current
+   * ES|QL does not read element-wise. Exposing them properly requires
+   * either a flattened mirror on the SO layer or future ES|QL nested
+   * support; both are deferred. Until then, consumers needing per-row
+   * custom-field / observable data should query the source SO directly.
+   */
 ];
 
 const CASE_BASE_KEEP_COLUMNS = [
@@ -92,11 +101,6 @@ const CASE_BASE_KEEP_COLUMNS = [
   'time_to_acknowledge',
   'time_to_investigate',
   'time_to_resolve',
-  'custom_fields_keys',
-  'custom_fields_types',
-  'custom_fields_values',
-  'observables_types',
-  'observables_values',
 ];
 
 /**
