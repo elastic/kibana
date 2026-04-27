@@ -115,8 +115,8 @@ export const useMockDashboardApi = ({
       },
       setIndicateRelatedPanelsId: (id: string | undefined) => indicateRelatedPanelsId$.next(id),
       indicateRelatedPanelsId$,
-      arePanelsRelated$: new BehaviorSubject((a: string, b: string) => false),
-      getRelatedPanelIds$: (id: string) => [],
+      arePanelsRelated$: new BehaviorSubject<(a: string, b: string) => boolean>(() => false),
+      getRelatedPanelIds$: (id: string) => new BehaviorSubject([] as string[]),
     };
     // only run onMount
     // eslint-disable-next-line react-hooks/exhaustive-deps
