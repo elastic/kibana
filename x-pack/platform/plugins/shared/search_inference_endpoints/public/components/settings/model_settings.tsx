@@ -158,7 +158,7 @@ export const ModelSettings: React.FC = () => {
             data-test-subj="settings-api-documentation"
             href={docLinks.featureSettings}
           >
-            {i18n.translate('xpack.searchInferenceEndpoints.apiDocumentationLink', {
+            {i18n.translate('xpack.searchInferenceEndpoints.settings.documentationLabel', {
               defaultMessage: 'Documentation',
             })}
           </EuiButtonEmpty>,
