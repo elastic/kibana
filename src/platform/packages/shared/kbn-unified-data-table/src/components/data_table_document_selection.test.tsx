@@ -271,14 +271,14 @@ describe('document selection', () => {
             label: 'Never',
             'data-test-subj': 'bulkActionNever',
             onClick: jest.fn(),
-            available: () => false,
+            isAvailable: () => false,
           },
           {
             key: 'when-two',
             label: 'When two',
             'data-test-subj': 'bulkActionWhenTwo',
             onClick: jest.fn(),
-            available: ({ selectedDocIds }: { selectedDocIds: string[] }) =>
+            isAvailable: ({ selectedDocIds }: { selectedDocIds: string[] }) =>
               selectedDocIds.length >= 2,
           },
         ],
