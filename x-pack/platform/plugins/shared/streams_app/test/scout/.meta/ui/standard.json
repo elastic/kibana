@@ -1,5 +1,5 @@
 {
-  "sha1": "0096d80e0560b7aef0b23ffccff5bd6ee5591a25",
+  "sha1": "39ba17ce7701002c5b471d6726c4adca2314b7d5",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -18,12 +18,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 139,
-        "column": 7
+        "line": 141,
+        "column": 9
       }
     },
     {
@@ -32,12 +34,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 146,
-        "column": 7
+        "line": 148,
+        "column": 9
       }
     },
     {
@@ -46,12 +50,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 161,
-        "column": 7
+        "line": 163,
+        "column": 9
       }
     },
     {
@@ -60,39 +66,41 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 201,
-        "column": 7
+        "line": 203,
+        "column": 9
       }
     },
     {
       "id": "ca5617d2526fece-4f1df209bb20bf0",
       "title": "Advanced tab with basic license should NOT show enterprise features on wired stream Advanced tab with basic license",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 35,
+        "line": 38,
         "column": 7
       }
     },
     {
       "id": "ca5617d2526fece-6a2b3b1f642b875",
       "title": "Advanced tab with basic license should NOT show enterprise features on classic stream Advanced tab with basic license",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 76,
+        "line": 79,
         "column": 7
       }
     },
@@ -156,7 +164,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
-        "line": 23,
+        "line": 28,
         "column": 9
       }
     },
@@ -172,7 +180,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
-        "line": 31,
+        "line": 36,
         "column": 9
       }
     },
@@ -188,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
-        "line": 39,
+        "line": 44,
         "column": 9
       }
     },
@@ -849,22 +857,6 @@
       }
     },
     {
-      "id": "b201a68947c8b96-de4f2955b17c644",
-      "title": "Stream data processing - editing steps should handle insufficient privileges gracefully",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 126,
-        "column": 9
-      }
-    },
-    {
       "id": "82b33ef5739b8e3-4c62aa445525a43",
       "title": "Stream data processing - error handling and recovery should handle network failures during a processor creation",
       "expectedStatus": "passed",
@@ -1506,7 +1498,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 83,
+        "line": 84,
         "column": 9
       }
     },
@@ -1522,7 +1514,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 100,
+        "line": 101,
         "column": 9
       }
     },
@@ -1538,7 +1530,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 118,
+        "line": 119,
         "column": 9
       }
     },
@@ -1554,7 +1546,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 9
       }
     },
@@ -1570,7 +1562,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 150,
+        "line": 151,
         "column": 9
       }
     },
@@ -1586,7 +1578,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 183,
+        "line": 184,
         "column": 9
       }
     },
@@ -1602,7 +1594,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 206,
+        "line": 207,
         "column": 9
       }
     },
@@ -1618,7 +1610,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 216,
+        "line": 217,
         "column": 9
       }
     },
@@ -1634,7 +1626,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 241,
+        "line": 242,
         "column": 9
       }
     },
@@ -1650,7 +1642,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 268,
+        "line": 269,
         "column": 9
       }
     },
@@ -1666,7 +1658,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 293,
+        "line": 294,
         "column": 9
       }
     },
@@ -1778,7 +1770,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 60,
+        "line": 63,
         "column": 7
       }
     },
@@ -1794,7 +1786,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 76,
+        "line": 79,
         "column": 7
       }
     },
@@ -1810,7 +1802,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 89,
+        "line": 92,
         "column": 7
       }
     },
@@ -1824,7 +1816,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 105,
+        "line": 108,
         "column": 7
       }
     },
@@ -1840,7 +1832,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 128,
+        "line": 131,
         "column": 7
       }
     },
@@ -1856,7 +1848,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 149,
+        "line": 152,
         "column": 7
       }
     },
@@ -1872,7 +1864,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 165,
+        "line": 168,
         "column": 7
       }
     },
@@ -1888,7 +1880,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 181,
+        "line": 184,
         "column": 7
       }
     },
@@ -1902,7 +1894,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 202,
+        "line": 205,
         "column": 7
       }
     },
@@ -1918,7 +1910,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 225,
+        "line": 228,
         "column": 7
       }
     },
@@ -1934,7 +1926,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 244,
+        "line": 247,
         "column": 7
       }
     },
@@ -1950,7 +1942,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 256,
+        "line": 259,
         "column": 7
       }
     },
@@ -1966,7 +1958,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 278,
+        "line": 281,
         "column": 7
       }
     },
@@ -1982,7 +1974,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 294,
+        "line": 297,
         "column": 7
       }
     },
@@ -1998,7 +1990,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 317,
+        "line": 320,
         "column": 7
       }
     },
@@ -2357,238 +2349,238 @@
     {
       "id": "9349667e5bca40e-4c30a41802efe9b",
       "title": "Stream data routing - AI suggestions button should show button when AI features are enabled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 46,
+        "column": 9
       }
     },
     {
       "id": "9349667e5bca40e-2cd846c5324c829",
       "title": "Stream data routing - AI suggestions button should disable button when no connector is selected",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 52,
+        "column": 9
       }
     },
     {
       "id": "9349667e5bca40e-8238485c9b8c08f",
       "title": "Stream data routing - AI suggestions button should show connector dropdown when multiple connectors exist",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 62,
-        "column": 7
+        "line": 66,
+        "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-098e105b5880d71",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with empty name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-c9fb9d27893c2ba",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name containing dots",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-fe89c36564d8512",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name exceeding max length",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-c0db288e902915d",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with duplicate name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 109,
+        "line": 110,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-255ea6600fc8ce1",
       "title": "Stream data routing - AI suggestions editing validation should allow editing suggestion with valid condition",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 145,
+        "line": 146,
         "column": 9
       }
     },
     {
       "id": "41f986dc7d507af-177423f5f28279b",
       "title": "Stream data routing - AI suggestions generation should successfully generate and display suggestions",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_generation.spec.ts",
-        "line": 49,
+        "line": 50,
         "column": 9
       }
     },
     {
       "id": "41f986dc7d507af-6a6bd738cf29b44",
       "title": "Stream data routing - AI suggestions generation should handle empty suggestions response",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_generation.spec.ts",
-        "line": 59,
+        "line": 60,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-0033ff890a80016",
       "title": "Stream data routing - AI suggestions interactions should preview suggestion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-59031b3e126feaa",
       "title": "Stream data routing - AI suggestions interactions should edit suggestion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 61,
+        "line": 62,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-481f21a0ac903d1",
       "title": "Stream data routing - AI suggestions interactions should reject suggestion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-25b391c252a342c",
       "title": "Stream data routing - AI suggestions interactions should regenerate suggestions",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-599c1773006248e",
       "title": "Stream data routing - AI suggestions interactions should update suggestion name when editing and accepting",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 101,
+        "line": 109,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-8a8b94aca37cb16",
       "title": "Stream data routing - AI suggestions interactions should update suggestion condition when editing and accepting",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 131,
+        "line": 139,
         "column": 9
       }
     },
     {
       "id": "bc6ace18083cf6a-b1112374737687d",
       "title": "Stream data routing - AI suggestions interactions should cancel editing and revert to original suggestion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 165,
+        "line": 173,
         "column": 9
       }
     },
@@ -3348,7 +3340,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 98,
+        "line": 100,
         "column": 9
       }
     },
@@ -3364,7 +3356,23 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 122,
+        "line": 126,
+        "column": 9
+      }
+    },
+    {
+      "id": "caff8dcf425ad2d-d68cdb7b08b22ef",
+      "title": "ES|QL source enrichment - stream description in autocomplete popup shows stream description and management link in ES|QL autocomplete popup",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/esql_source_enrichment.spec.ts",
+        "line": 30,
         "column": 9
       }
     },
@@ -3378,7 +3386,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 38,
+        "line": 42,
         "column": 7
       }
     },
@@ -3392,7 +3400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 47,
+        "line": 51,
         "column": 7
       }
     },
@@ -3406,7 +3414,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 76,
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "7ce2670a3e19b7c-af09f3b002dfd4f",
+      "title": "Query streams - Create query stream rejects invalid child query stream names inline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
+        "line": 119,
         "column": 7
       }
     },
@@ -3422,6 +3444,62 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/delete_query_stream.spec.ts",
         "line": 45,
         "column": 7
+      }
+    },
+    {
+      "id": "1e16afa035dea97-1cd2ae1f95337e5",
+      "title": "Query streams - Inline edit and delete on classic stream partitioning view should edit a query stream inline from the classic stream partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_classic_partitioning.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "1e16afa035dea97-62d132f57e94ce4",
+      "title": "Query streams - Inline edit and delete on classic stream partitioning view should delete a query stream from the inline edit form on classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_classic_partitioning.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "1f578c7e255c724-6d1781c1e9bac72",
+      "title": "Query streams - Inline edit and delete from partitioning view should edit a query stream inline from the partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_partitioning.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "1f578c7e255c724-37017f1fb2cbbbd",
+      "title": "Query streams - Inline edit and delete from partitioning view should delete a query stream from the inline edit form in partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_partitioning.spec.ts",
+        "line": 93,
+        "column": 9
       }
     },
     {

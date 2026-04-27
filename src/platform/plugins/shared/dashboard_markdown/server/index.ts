@@ -14,7 +14,7 @@ export {
   type MarkdownByValueState,
   markdownEmbeddableSchema,
   type MarkdownEmbeddableState,
-} from './schemas';
+} from './embeddable/schemas';
 
 export type {
   MarkdownCreateRequestBody,

@@ -15,6 +15,9 @@ import { Router } from '@kbn/shared-ux-router';
 import { createStore } from 'redux';
 import { AlertFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -55,10 +58,16 @@ jest.mock('../../cases/components/provider/provider', () => ({
 jest.mock('../../assistant/provider', () => ({
   AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+jest.mock('../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: jest.fn(),
+}));
 
 describe('AlertFlyoutHeader', () => {
+  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsInSecurityApp.mockReturnValue(false);
   });
 
   const servicesMock = {
@@ -75,7 +84,11 @@ describe('AlertFlyoutHeader', () => {
   } as unknown as StartServices;
 
   it('wraps the header in KibanaContextProvider and ReactQueryClientProvider', async () => {
-    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
     const storePromise = Promise.resolve(store as never);
     const history = createMemoryHistory({ initialEntries: ['/discover'] });
@@ -115,7 +128,11 @@ describe('AlertFlyoutHeader', () => {
   });
 
   it('renders under an existing parent router without nesting another router', async () => {
-    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
     const history = createMemoryHistory({ initialEntries: ['/discover'] });
 
@@ -136,7 +153,11 @@ describe('AlertFlyoutHeader', () => {
   });
 
   it('renders shared document header in Discover', async () => {
-    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
     const history = createMemoryHistory({ initialEntries: ['/discover'] });
 
@@ -184,11 +205,128 @@ describe('AlertFlyoutHeader', () => {
     expect(servicesMock.overlays.openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
+        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
         ownFocus: false,
         resizable: true,
         size: 'm',
-        type: 'overlay',
       })
     );
+  });
+
+  it('uses Security history key when opened inside Security app', async () => {
+    mockUseIsInSecurityApp.mockReturnValue(true);
+
+    const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/security'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('MockDocumentHeader'));
+
+    expect(servicesMock.overlays.openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: alertFlyoutHistoryKey,
+      })
+    );
+  });
+
+  it('shows a callout when _id or _index are missing from hit.raw', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'Some of the content below might not be loading correctly. To ensure the best experience, please add `METADATA _id,_index` to your query.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('shows a callout when _index is a remote (CCS) index', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'remote-cluster:.alerts-security.alerts-default' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'This event originates from a remote cluster. Some features may not be available.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('does not show the callout when both _id and _index are present in hit.raw', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
+    });
+
+    expect(
+      screen.queryByText(
+        'Some of the content below might not be loading correctly. To ensure the best experience, please add `METADATA _id,_index` to your query.'
+      )
+    ).not.toBeInTheDocument();
   });
 });

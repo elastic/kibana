@@ -14,13 +14,7 @@ import {
   isInlineCast,
   isParamLiteral,
 } from '@elastic/esql';
-import type {
-  ESQLAst,
-  ESQLAstAllCommands,
-  ESQLAstItem,
-  ESQLFunction,
-  ESQLMessage,
-} from '@elastic/esql/types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
 import { FunctionDefinitionTypes } from '../../../../..';
@@ -29,6 +23,7 @@ import { isTimeseriesSourceCommand } from '../timeseries_check';
 import { Location } from '../../../registry/types';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import type {
+  ESQLMessage,
   FunctionDefinition,
   PromQLFunctionDefinition,
   PromQLFunctionParamType,

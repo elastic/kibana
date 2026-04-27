@@ -10,37 +10,28 @@ import { i18n } from '@kbn/i18n';
 export const DEPRECATION_CALLOUT_TITLE = (count: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.deprecation.calloutTitle', {
     defaultMessage:
-      '{count} installed Elastic {count, plural, one {rule has} other {rules have}} been deprecated and {count, plural, one {is} other {are}} no longer maintained',
+      '{count} of your installed Elastic {count, plural, one {rule has} other {rules have}} been deprecated and {count, plural, one {is} other {are}} no longer being maintained',
     values: { count },
   });
-
-export const DEPRECATION_TABLE_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.deprecation.tableCalloutDescription',
-  {
-    defaultMessage:
-      'Delete these rules. If needed, duplicate them as custom rules before deleting to continue using them. This reminder will appear again in 7 days if dismissed.',
-  }
-);
 
 export const DEPRECATION_DETAILS_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.deprecation.detailsCalloutTitle',
   {
-    defaultMessage: 'This rule has been deprecated and is no longer maintained.',
+    defaultMessage: 'This rule has been deprecated and is no longer being maintained.',
   }
 );
 
-export const DEPRECATION_DETAILS_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.deprecation.detailsCalloutDescription',
+export const DELETE_DEPRECATED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.deleteDeprecatedRules',
   {
-    defaultMessage:
-      'Delete this rule. If needed, duplicate it as custom rule before deleting to continue using it.',
+    defaultMessage: 'Delete deprecated rules',
   }
 );
 
 export const REVIEW_DEPRECATED_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.deprecation.reviewDeprecatedRules',
   {
-    defaultMessage: 'View deprecated rules',
+    defaultMessage: 'Review deprecated rules',
   }
 );
 
@@ -50,12 +41,6 @@ export const DELETE_RULE = i18n.translate(
     defaultMessage: 'Delete rule',
   }
 );
-
-export const DELETE_RULES = (count: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.deprecation.deleteRules', {
-    defaultMessage: 'Delete {count, plural, one {rule} other {rules}}',
-    values: { count },
-  });
 
 export const DEPRECATED_RULES_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.deprecation.modalTitle',
@@ -67,7 +52,7 @@ export const DEPRECATED_RULES_MODAL_TITLE = i18n.translate(
 export const DEPRECATED_RULES_MODAL_DESCRIPTION = (count: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.deprecation.modalDescription', {
     defaultMessage:
-      'The {count} installed {count, plural, one {rule} other {rules}} below {count, plural, one {has} other {have}} been deprecated and {count, plural, one {is} other {are}} no longer maintained. Click on a rule name to view the details. If you wish to keep a rule you can duplicate the rule before deletion.',
+      "You have {count} deprecated {count, plural, one {rule} other {rules}} installed. {count, plural, one {This rule is} other {These rules are}} no longer receiving updates or fixes. Click a rule name to see its details. If you'd like to keep using a rule, duplicate it as a custom rule before deleting it.",
     values: { count },
   });
 
@@ -95,7 +80,7 @@ export const DELETE_ALL_CONFIRMATION_DESCRIPTION = (count: number) =>
     'xpack.securitySolution.detectionEngine.deprecation.deleteAllConfirmationDescription',
     {
       defaultMessage:
-        '{count, plural, one {This rule is} other {These rules are}} deprecated and will no longer receive updates. This action cannot be undone.',
+        '{count, plural, one {This rule is} other {These rules are}} deprecated and will no longer receive updates or fixes. This action cannot be undone.',
       values: { count },
     }
   );
@@ -109,6 +94,28 @@ export const CANCEL_DELETE = i18n.translate(
 
 export const DUPLICATE_AND_DELETE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.deprecation.duplicateAndDeleteRule',
+  {
+    defaultMessage: 'Duplicate and delete',
+  }
+);
+
+export const DUPLICATE_AND_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.duplicateAndDeleteConfirmationTitle',
+  {
+    defaultMessage: 'Duplicate and delete this rule?',
+  }
+);
+
+export const DUPLICATE_AND_DELETE_CONFIRMATION_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.duplicateAndDeleteConfirmationDescription',
+  {
+    defaultMessage:
+      'The original deprecated rule will be permanently deleted after duplication. Choose what to include in the duplicate:',
+  }
+);
+
+export const DUPLICATE_AND_DELETE_CONFIRM_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.duplicateAndDeleteConfirmButton',
   {
     defaultMessage: 'Duplicate and delete',
   }

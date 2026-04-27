@@ -14,13 +14,21 @@ import {
   API_VERSIONS,
   EVALUATIONS_INDEX_PATTERN,
 } from '@kbn/evals-common';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { registerGetExampleScoresRoute } from './get_example_scores';
 
 describe('GET /internal/evals/examples/{exampleId}/scores', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetExampleScoresRoute({ router, logger });
+    registerGetExampleScoresRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+      getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_EXAMPLE_SCORES_URL).versions[

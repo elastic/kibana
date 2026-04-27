@@ -9,8 +9,18 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { IStorageClient } from '@kbn/storage-adapter';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import type {
+  IStorageClient,
+  StorageClientSearchRequest,
+  StorageClientSearchResponse,
+} from '@kbn/storage-adapter';
+import { deriveQueryType } from '@kbn/streams-schema/src/helpers/esql_helpers';
+import type { Streams } from '@kbn/streams-schema/src/models/streams';
+import {
+  type QueryType,
+  type StreamQuery,
+  QUERY_TYPE_STATS,
+} from '@kbn/streams-schema/src/queries';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -21,6 +31,7 @@ import {
   type SearchMode,
 } from '../../../../../common/queries';
 import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
+
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
 import {
   ASSET_ID,
@@ -35,6 +46,7 @@ import {
   QUERY_SEARCH_EMBEDDING,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
+  QUERY_TYPE,
   RULE_BACKED,
   RULE_ID,
   STREAM_NAME,
@@ -42,26 +54,14 @@ import {
 import type { QueryStorageSettings } from '../storage_settings';
 import { parseError } from '../../errors/parse_error';
 import { computeRuleId } from './helpers/query';
+import {
+  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  type SigEventsTuningConfig,
+} from '../../../../../common/sig_events_tuning_config';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
 export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
-
-/**
- * Minimum raw ELSER score threshold for semantic search results.
- *
- * We apply min_score directly on the raw ELSER scores rather than using
- * `minmax` normalization because minmax is relative to the current result set:
- * the top result always normalizes to 1.0, so irrelevant queries (e.g.,
- * "test-keyword" against security documents) still return hits. A raw score
- * threshold avoids this — ELSER produces very low scores (typically < 1.0)
- * for nonsensical or completely unrelated queries, while genuinely relevant
- * matches score much higher (5–30+).
- *
- * This threshold may need tuning as the dataset evolves. If legitimate
- * matches are being excluded, lower it; if noise creeps back in, raise it.
- */
-const SEMANTIC_MIN_SCORE = 10;
 
 const SEARCH_SIZE_LIMIT = 10_000;
 
@@ -73,6 +73,7 @@ const LEGACY_RUNTIME_MAPPINGS = {
 export interface QueryLinkFilters {
   ruleUnbacked?: RuleUnbackedFilter;
   queryIds?: string[];
+  minSeverityScore?: number;
 }
 
 interface TermQueryOpts {
@@ -124,6 +125,11 @@ function termsQuery<T extends string>(
   const filteredValues = values.filter((value) => value !== undefined) as TermQueryFieldValue[];
 
   return [{ terms: { [field]: filteredValues } }];
+}
+
+function rangeGteQuery(field: string, value?: number): QueryDslQueryContainer[] {
+  if (value === undefined) return [];
+  return [{ range: { [field]: { gte: value } } }];
 }
 
 function escapeWildcard(input: string): string {
@@ -195,35 +201,46 @@ type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_DESCRIPTION]: string;
   [QUERY_ESQL_QUERY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
+  [QUERY_TYPE]?: string;
 };
 
 export type StoredQueryLink = QueryLinkStorageFields & {
   [STREAM_NAME]: string;
 };
 
-interface QueryBulkIndexOperation {
+interface QueryStorageBulkIndexOperation {
   index: { asset: QueryLinkRequest };
 }
-interface QueryBulkDeleteOperation {
+interface QueryStorageBulkDeleteOperation {
   delete: { asset: QueryUnlinkRequest };
 }
 
-export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
+type QueryStorageBulkOperation = QueryStorageBulkIndexOperation | QueryStorageBulkDeleteOperation;
 
 function fromStorage(link: StoredQueryLink): QueryLink {
+  const esql = link[QUERY_ESQL_QUERY];
+  const storedType = link[QUERY_TYPE] as QueryType | undefined;
+
+  // Trust the persisted type when present (set by toStorage and migration).
+  // Only derive from ES|QL for pre-migration docs that lack the field.
+  const type: QueryType = storedType ?? deriveQueryType(esql);
+
+  const ruleBacked = type === QUERY_TYPE_STATS ? false : link[RULE_BACKED];
+
   return {
     [ASSET_UUID]: link[ASSET_UUID],
     [ASSET_ID]: link[ASSET_ID],
     [ASSET_TYPE]: link[ASSET_TYPE],
     stream_name: link[STREAM_NAME],
-    rule_backed: link[RULE_BACKED],
+    rule_backed: ruleBacked,
     rule_id: link[RULE_ID],
     query: {
       id: link[ASSET_ID],
+      type,
       title: link[QUERY_TITLE],
       description: link[QUERY_DESCRIPTION],
       esql: {
-        query: link[QUERY_ESQL_QUERY],
+        query: esql,
       },
       severity_score: link[QUERY_SEVERITY_SCORE],
       // QUERY_EVIDENCE ('experimental.query.evidence') lives under the dynamic-disabled
@@ -234,7 +251,9 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   };
 }
 
-function mapSearchHits(response: { hits: { hits: Array<{ _source: StoredQueryLink }> } }) {
+function mapSearchHits<TSearchRequest extends StorageClientSearchRequest>(
+  response: StorageClientSearchResponse<StoredQueryLink, TSearchRequest>
+) {
   return response.hits.hits.map((hit) => fromStorage(hit._source));
 }
 
@@ -260,6 +279,7 @@ function toStorage(
 ): StoredQueryLink {
   const link = toQueryLink(definition, request);
   const { query, stream_name, ...rest } = link;
+  const derivedType = deriveQueryType(query.esql.query);
   return {
     ...rest,
     [STREAM_NAME]: definition.name,
@@ -267,6 +287,7 @@ function toStorage(
     [QUERY_DESCRIPTION]: query.description,
     [QUERY_ESQL_QUERY]: query.esql.query,
     [QUERY_SEVERITY_SCORE]: query.severity_score,
+    [QUERY_TYPE]: derivedType,
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
@@ -289,6 +310,10 @@ function toQueryLinkFromQuery({
   stream: string;
   ruleBacked?: boolean;
 }): QueryLink {
+  // Always derive type from the ES|QL source of truth to prevent stale
+  // query.type from causing rule_backed mismatches.
+  const derivedType = deriveQueryType(query.esql.query);
+  const effectiveRuleBacked = derivedType === QUERY_TYPE_STATS ? false : ruleBacked;
   const assetUuid = getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id });
   return {
     'asset.uuid': assetUuid,
@@ -296,9 +321,19 @@ function toQueryLinkFromQuery({
     'asset.id': query.id,
     query,
     stream_name: stream,
-    rule_backed: ruleBacked,
+    rule_backed: effectiveRuleBacked,
     rule_id: computeRuleId(assetUuid, query.esql.query),
   };
+}
+
+/** Operations accepted by {@link QueryClient.bulk} (stream queries + id deletes). */
+export interface QueryClientBulkOperation {
+  index?: StreamQuery;
+  delete?: { id: string };
+}
+/** Index-only bulk operation for {@link QueryClient.bulk}. */
+export interface QueryClientBulkIndexOperation {
+  index: StreamQuery;
 }
 
 export class QueryClient {
@@ -310,7 +345,11 @@ export class QueryClient {
       logger: Logger;
     },
     private readonly isSignificantEventsEnabled: boolean = false,
-    private readonly inferenceAvailable: boolean = false
+    private readonly inferenceAvailable: boolean = false,
+    private readonly config: Pick<
+      SigEventsTuningConfig,
+      'semantic_min_score' | 'rrf_rank_constant'
+    > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
   ) {}
 
   // ==================== Storage Operations ====================
@@ -333,13 +372,17 @@ export class QueryClient {
     const existingQueryLinks = mapSearchHits(assetsResponse);
 
     const nextQueryLinks = links.map((link) => {
-      return { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
+      const ql = { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
+      if (deriveQueryType(ql.query.esql.query) === QUERY_TYPE_STATS) {
+        ql.rule_backed = false;
+      }
+      return ql;
     });
 
     const nextIds = new Set(nextQueryLinks.map((link) => link[ASSET_UUID]));
     const queryLinksDeleted = existingQueryLinks.filter((link) => !nextIds.has(link[ASSET_UUID]));
 
-    const operations: QueryBulkOperation[] = [
+    const operations: QueryStorageBulkOperation[] = [
       ...queryLinksDeleted.map((asset) => ({ delete: { asset } })),
       ...nextQueryLinks.map((asset) => ({ index: { asset } })),
     ];
@@ -387,6 +430,14 @@ export class QueryClient {
 
     assetsResponse.hits.hits.forEach((hit) => {
       const name = hit._source[STREAM_NAME];
+      if (!queriesPerName[name]) {
+        this.dependencies.logger.warn(
+          `Skipping query asset with unexpected stream_name "${name}" (requested: ${names.join(
+            ', '
+          )})`
+        );
+        return;
+      }
       const asset = fromStorage(hit._source);
       queriesPerName[name].push(asset);
     });
@@ -404,6 +455,7 @@ export class QueryClient {
       ...termQuery(ASSET_TYPE, 'query'),
       ...termsQuery(ASSET_ID, filters?.queryIds),
       ...ruleUnbackedFilter(filters?.ruleUnbacked),
+      ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
     ];
 
     const queriesResponse = await this.dependencies.storageClient.search({
@@ -420,27 +472,44 @@ export class QueryClient {
   }
 
   /**
-   * Returns all query links that are stored but do not have a backing Kibana rule for the given stream.
-   * Used internally by promoteQueries.
+   * Returns the raw unbacked set for a stream, including STATS. Used by
+   * {@link promoteQueries} to count STATS it must skip. For the promotable
+   * set (STATS excluded), use {@link getPromotableUnbackedQueries}.
    */
   private async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
     return this.getQueryLinks([streamName], { ruleUnbacked: 'only' });
   }
 
   /**
-   * Returns the count of all query links across streams that do not have a backing Kibana rule.
+   * Shared bool-query shape for the promotable-unbacked set: `rule_backed=false`
+   * AND `type != STATS`, with optional severity floor. Keeps
+   * {@link countPromotableUnbackedQueries} and {@link getPromotableUnbackedQueries}
+   * structurally aligned so the UI callout count and the Promote-All set
+   * can't diverge.
    */
-  async getUnbackedQueriesCount(): Promise<number> {
-    const filter = [...termQuery(ASSET_TYPE, 'query'), ...termQuery(RULE_BACKED, false)];
+  private promotableUnbackedBoolQuery(filters?: { minSeverityScore?: number }) {
+    return {
+      filter: [
+        ...termQuery(ASSET_TYPE, 'query'),
+        ...termQuery(RULE_BACKED, false),
+        ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
+      ],
+      must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
+    };
+  }
 
+  /**
+   * Counts queries promotable to rules — unbacked AND non-STATS. Pairs with
+   * {@link getPromotableUnbackedQueries}.
+   *
+   * Pre-migration docs lacking QUERY_TYPE are safe: STATS were introduced
+   * alongside the type field, so any doc without it is a match query.
+   */
+  async countPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<number> {
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 0,
       track_total_hits: true,
-      query: {
-        bool: {
-          filter,
-        },
-      },
+      query: { bool: this.promotableUnbackedBoolQuery(filters) },
     });
 
     const total = assetsResponse.hits.total;
@@ -448,10 +517,76 @@ export class QueryClient {
   }
 
   /**
-   * Returns all query links across streams that do not have a backing Kibana rule.
+   * Returns all unbacked, non-STATS queries across streams — the list whose
+   * size is {@link countPromotableUnbackedQueries}.
    */
-  async getAllUnbackedQueries(): Promise<QueryLink[]> {
-    return this.getQueryLinks([], { ruleUnbacked: 'only' });
+  async getPromotableUnbackedQueries(filters?: {
+    minSeverityScore?: number;
+  }): Promise<QueryLink[]> {
+    const assetsResponse = await this.dependencies.storageClient.search({
+      size: SEARCH_SIZE_LIMIT,
+      track_total_hits: false,
+      query: { bool: this.promotableUnbackedBoolQuery(filters) },
+    });
+
+    return mapSearchHits(assetsResponse);
+  }
+
+  /**
+   * Promotes the promotable-unbacked set (filtered by `queryIds` if provided)
+   * to rule-backed status, grouped by stream.
+   *
+   * Non-obvious behavior:
+   * - `queryIds` referring to STATS/backed/missing queries are silently
+   *   dropped, so `skipped_stats` is reliably `0` from this entry point.
+   * - `streamDefinitions` is injected because `streamsClient` is not a
+   *   `QueryClient` dependency; callers build it from `listStreams()`.
+   */
+  async promoteUnbackedQueries({
+    queryIds,
+    minSeverityScore,
+    streamDefinitions,
+  }: {
+    queryIds?: string[];
+    minSeverityScore?: number;
+    streamDefinitions: Map<string, Streams.all.Definition>;
+  }): Promise<{ promoted: number; skipped_stats: number }> {
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping promoteUnbackedQueries because significant events feature is disabled.`
+      );
+      return { promoted: 0, skipped_stats: 0 };
+    }
+
+    const candidates = await this.getPromotableUnbackedQueries({ minSeverityScore });
+
+    let toPromote = candidates;
+    if (queryIds && queryIds.length > 0) {
+      const requestedIds = new Set(queryIds);
+      toPromote = candidates.filter((link) => requestedIds.has(link.query.id));
+    }
+
+    const byStream = new Map<string, string[]>();
+    for (const link of toPromote) {
+      const group = byStream.get(link.stream_name) ?? [];
+      group.push(link.query.id);
+      byStream.set(link.stream_name, group);
+    }
+
+    let promoted = 0;
+    let skippedStats = 0;
+    for (const [streamName, ids] of byStream) {
+      const definition = streamDefinitions.get(streamName);
+      if (!definition) {
+        this.dependencies.logger.warn(`Skipping promotion for missing stream ${streamName}`);
+        continue;
+      }
+      const result = await this.promoteQueries(definition, ids);
+      promoted += result.promoted;
+      skippedStats += result.skipped_stats;
+    }
+
+    return { promoted, skipped_stats: skippedStats };
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
@@ -563,7 +698,7 @@ export class QueryClient {
             match: { [QUERY_SEARCH_EMBEDDING]: query },
           },
           filter: { bool: { filter } },
-          min_score: SEMANTIC_MIN_SCORE,
+          min_score: this.config.semantic_min_score,
         },
       },
     });
@@ -594,8 +729,8 @@ export class QueryClient {
                 query: {
                   match: { [QUERY_SEARCH_EMBEDDING]: query },
                 },
-                // See SEMANTIC_MIN_SCORE for rationale.
-                min_score: SEMANTIC_MIN_SCORE,
+                // See config.semantic_min_score for rationale.
+                min_score: this.config.semantic_min_score,
               },
             },
           ],
@@ -607,7 +742,7 @@ export class QueryClient {
           rank_window_size: SEARCH_SIZE_LIMIT,
           // Lower than the ES default (60) to give more weight to top-ranked
           // results from each retriever, improving precision for small catalogs.
-          rank_constant: 20,
+          rank_constant: this.config.rrf_rank_constant,
         },
       },
     });
@@ -615,7 +750,10 @@ export class QueryClient {
     return mapSearchHits(assetsResponse);
   }
 
-  private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {
+  private async bulkStorage(
+    definition: Streams.all.Definition,
+    operations: QueryStorageBulkOperation[]
+  ) {
     return await this.dependencies.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
@@ -688,18 +826,21 @@ export class QueryClient {
     const nextQueriesToCreate: QueryLink[] = [];
     const nextQueriesUpdatedWithBreakingChange: QueryLink[] = [];
     const nextQueriesUpdatedWithoutBreakingChange: QueryLink[] = [];
+    const demotedToStats: QueryLink[] = [];
     const allNextQueryLinks: QueryLink[] = [];
 
     for (const query of queries) {
       const currentLink = currentLinkByQueryId.get(query.id);
+      const isStats = deriveQueryType(query.esql.query) === QUERY_TYPE_STATS;
       if (!currentLink) {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
-      } else if (!currentLink.rule_backed) {
-        // Unbacked queries have no rule, so breaking-change handling doesn't apply.
-        // Preserve the link as-is and update only the query content.
-        allNextQueryLinks.push({ ...currentLink, query });
+      } else if (!currentLink.rule_backed || isStats) {
+        if (currentLink.rule_backed && isStats) {
+          demotedToStats.push(currentLink);
+        }
+        allNextQueryLinks.push({ ...currentLink, query, rule_backed: false });
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesUpdatedWithBreakingChange.push(link);
@@ -719,23 +860,63 @@ export class QueryClient {
       nextQueriesUpdatedWithBreakingChange.some((updated) => updated.query.id === link.query.id)
     );
 
-    await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
-    await this.installQueries(
-      [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange],
-      nextQueriesUpdatedWithoutBreakingChange,
-      definition
+    await this.uninstallQueries([
+      ...currentQueriesToDelete,
+      ...currentQueriesToDeleteBeforeUpdate,
+      ...demotedToStats,
+    ]);
+    const isRuleBacked = (link: QueryLink) => link.rule_backed;
+    const toCreate = [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].filter(
+      isRuleBacked
     );
+    const toUpdate = nextQueriesUpdatedWithoutBreakingChange.filter(isRuleBacked);
 
-    await this.syncQueryList(
-      definition,
-      allNextQueryLinks.map((link) => ({
-        [ASSET_ID]: link[ASSET_ID],
-        [ASSET_TYPE]: link[ASSET_TYPE],
-        query: link.query,
-        rule_backed: link.rule_backed,
-        rule_id: link.rule_id,
-      }))
-    );
+    try {
+      await this.installQueries(toCreate, toUpdate, definition);
+    } catch (installError) {
+      this.dependencies.logger.error(
+        `installQueries failed during syncQueries for stream "${definition.name}". ` +
+          `Attempting to uninstall partially created rules before re-throwing.`
+      );
+      // Only compensate toCreate — toUpdate rules existed before this call
+      // and must not be deleted if the failure occurred during the create phase.
+      await this.uninstallQueries(toCreate).catch((compensateError) => {
+        this.dependencies.logger.error(
+          `Failed to compensate after installQueries failure for stream "${definition.name}": ` +
+            `${
+              compensateError instanceof Error ? compensateError.message : String(compensateError)
+            }`
+        );
+      });
+      throw installError;
+    }
+
+    try {
+      await this.syncQueryList(
+        definition,
+        allNextQueryLinks.map((link) => ({
+          [ASSET_ID]: link[ASSET_ID],
+          [ASSET_TYPE]: link[ASSET_TYPE],
+          query: link.query,
+          rule_backed: link.rule_backed,
+          rule_id: link.rule_id,
+        }))
+      );
+    } catch (syncError) {
+      this.dependencies.logger.error(
+        `syncQueryList failed after installQueries for stream "${definition.name}". ` +
+          `Attempting to uninstall newly created rules to avoid orphans.`
+      );
+      await this.uninstallQueries(toCreate).catch((compensateError) => {
+        this.dependencies.logger.error(
+          `Failed to compensate after syncQueryList failure for stream "${definition.name}": ` +
+            `${
+              compensateError instanceof Error ? compensateError.message : String(compensateError)
+            }`
+        );
+      });
+      throw syncError;
+    }
   }
 
   public async upsert(definition: Streams.all.Definition, query: StreamQuery) {
@@ -778,7 +959,7 @@ export class QueryClient {
 
   public async bulk(
     definition: Streams.all.Definition,
-    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>,
+    operations: QueryClientBulkOperation[],
     options?: { createRules?: boolean }
   ) {
     const stream = definition.name;
@@ -793,12 +974,12 @@ export class QueryClient {
     const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const indexOperationsMap = new Map(
-      operations
-        .filter((operation) => operation.index)
-        .map((operation) => [operation.index!.id, operation.index!])
+      operations.flatMap((operation) =>
+        operation.index ? [[operation.index.id, operation.index] as const] : []
+      )
     );
     const deleteOperationIds = new Set(
-      operations.filter((operation) => operation.delete).map((operation) => operation.delete!.id)
+      operations.flatMap((operation) => (operation.delete ? [operation.delete.id] : []))
     );
 
     const nextQueries: QueryLink[] = [
@@ -808,15 +989,17 @@ export class QueryClient {
           const update = indexOperationsMap.get(link.query.id);
           return update ? { ...link, query: update } : link;
         }),
-      ...operations
-        .filter((operation) => operation.index && !currentIds.has(operation.index.id))
-        .map((operation) =>
-          toQueryLinkFromQuery({
-            query: operation.index!,
-            stream,
-            ruleBacked: options?.createRules !== false,
-          })
-        ),
+      ...operations.flatMap((operation) =>
+        operation.index && !currentIds.has(operation.index.id)
+          ? [
+              toQueryLinkFromQuery({
+                query: operation.index,
+                stream,
+                ruleBacked: options?.createRules !== false,
+              }),
+            ]
+          : []
+      ),
     ];
 
     if (options?.createRules === false) {
@@ -845,44 +1028,67 @@ export class QueryClient {
   public async promoteQueries(
     definition: Streams.all.Definition,
     queryIds: string[]
-  ): Promise<{ promoted: number }> {
+  ): Promise<{ promoted: number; skipped_stats: number }> {
     const streamName = definition.name;
 
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping promoteQueries because significant events feature is disabled.`
       );
-      return { promoted: 0 };
+      return { promoted: 0, skipped_stats: 0 };
     }
 
     const unbacked = await this.getUnbackedQueries(streamName);
     const idSet = new Set(queryIds);
-    const toPromote = unbacked
-      .filter((link) => idSet.has(link.query.id))
+    const candidates = unbacked.filter((link) => idSet.has(link.query.id));
+
+    const skippedStats = candidates.filter((link) => link.query.type === QUERY_TYPE_STATS);
+    if (skippedStats.length > 0) {
+      this.dependencies.logger.info(
+        `Skipping ${skippedStats.length} STATS queries from promotion for stream "${streamName}" (not yet supported as rules).`
+      );
+    }
+
+    const toPromote = candidates
+      .filter((link) => link.query.type !== QUERY_TYPE_STATS)
       .map((link) => toQueryLinkFromQuery({ query: link.query, stream: streamName }));
 
     if (toPromote.length === 0) {
-      return { promoted: 0 };
+      return { promoted: 0, skipped_stats: skippedStats.length };
     }
 
     await this.installQueries(toPromote, [], definition);
 
-    await this.bulkStorage(
-      definition,
-      toPromote.map((link) => ({
-        index: {
-          asset: {
-            [ASSET_ID]: link[ASSET_ID],
-            [ASSET_TYPE]: link[ASSET_TYPE],
-            query: link.query,
-            rule_backed: true,
-            rule_id: link.rule_id,
+    try {
+      await this.bulkStorage(
+        definition,
+        toPromote.map((link) => ({
+          index: {
+            asset: {
+              [ASSET_ID]: link[ASSET_ID],
+              [ASSET_TYPE]: link[ASSET_TYPE],
+              query: link.query,
+              rule_backed: true,
+              rule_id: link.rule_id,
+            },
           },
-        },
-      }))
-    );
+        }))
+      );
+    } catch (storageError) {
+      this.dependencies.logger.error(
+        `Storage update failed after installing rules for stream "${streamName}". Attempting to uninstall orphaned rules.`
+      );
+      await this.uninstallQueries(toPromote).catch((uninstallError) => {
+        this.dependencies.logger.error(
+          `Failed to compensate — orphaned rules may remain for stream "${streamName}": ${
+            uninstallError instanceof Error ? uninstallError.message : String(uninstallError)
+          }`
+        );
+      });
+      throw storageError;
+    }
 
-    return { promoted: toPromote.length };
+    return { promoted: toPromote.length, skipped_stats: skippedStats.length };
   }
 
   /**
@@ -976,12 +1182,15 @@ export class QueryClient {
       return;
     }
 
-    const { rulesClient } = this.dependencies;
+    const { rulesClient, logger } = this.dependencies;
     const ruleIds = queries.map((q) => q.rule_id);
     await rulesClient
       .bulkDeleteRules({ ids: ruleIds, ignoreInternalRuleTypes: false })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 400) {
+          logger.warn(
+            `bulkDeleteRules returned 400 for ${ruleIds.length} rule(s) — some rules may not have existed: ${error.message}`
+          );
           return;
         }
         throw error;

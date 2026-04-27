@@ -10,21 +10,22 @@ import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocuments } from '@kbn/ai-tools';
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/sig_events_tuning_config';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
 
-const SAMPLE_DOCS_MAX = 50;
-
 const addUniqueHitsToSample = ({
   hits,
   docs,
   seen,
+  size,
 }: {
   hits: Array<SearchHit<Record<string, unknown>>>;
   docs: Array<SearchHit<Record<string, unknown>>>;
   seen: Set<string>;
+  size: number;
 }): void => {
   for (const hit of hits) {
     if (!hit._id || !hit.fields || isEmpty(hit.fields)) {
@@ -38,7 +39,7 @@ const addUniqueHitsToSample = ({
     seen.add(hit._id);
     docs.push(hit);
 
-    if (docs.length >= SAMPLE_DOCS_MAX) {
+    if (docs.length >= size) {
       break;
     }
   }
@@ -48,10 +49,12 @@ export const collectSampleDocuments = async ({
   esClient,
   scenario,
   log,
+  size = DEFAULT_SIG_EVENTS_TUNING_CONFIG.sample_size,
 }: {
   esClient: Client;
   scenario: KIFeatureExtractionScenario;
   log: ToolingLog;
+  size?: number;
 }): Promise<Array<SearchHit<Record<string, unknown>>>> => {
   const query = scenario.input.log_query_filter ?? [{ match_all: {} }];
 
@@ -79,38 +82,67 @@ export const collectSampleDocuments = async ({
     })
   );
 
+  const unmatchedFilters: string[] = [];
+  const criterionHitCounts = new Map<string, number>();
+  for (const { hits, criterion, filter } of samplingFilterResults) {
+    const hit = hits[0];
+    if (!hit) {
+      unmatchedFilters.push(`[${criterion.id}] filter: ${JSON.stringify(filter)}`);
+      continue;
+    }
+    criterionHitCounts.set(criterion.id, (criterionHitCounts.get(criterion.id) ?? 0) + 1);
+    log.debug(`  [${criterion.id}] matched doc ${hit._id} via filter ${JSON.stringify(filter)}`);
+  }
+
+  if (unmatchedFilters.length > 0) {
+    throw new Error(
+      `sampling_filters returned no documents for ${unmatchedFilters.length} filter(s) on a predefined dataset. ` +
+        `This indicates a mismatch between the criteria filters and the snapshot data:\n` +
+        unmatchedFilters.map((f) => `  ${f}`).join('\n')
+    );
+  }
+
+  const totalFilterHits = samplingFilterResults.reduce((sum, { hits }) => sum + hits.length, 0);
   addUniqueHitsToSample({
     hits: samplingFilterResults.flatMap(({ hits }) => hits),
     docs,
     seen,
+    size,
   });
+  const criteriaCount = docs.length;
+  const duplicateCount = totalFilterHits - criteriaCount;
+  if (duplicateCount > 0) {
+    log.debug(
+      `${duplicateCount} duplicate doc(s) skipped across criteria filters (multiple filters matched the same document)`
+    );
+  }
 
-  if (docs.length < SAMPLE_DOCS_MAX) {
+  let generalFillCount = 0;
+  if (docs.length < size) {
+    const remaining = size - docs.length;
     const { hits } = await getSampleDocuments({
       esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
       start: 0,
       end: Date.now(),
       filter: [...query, { bool: { must_not: [{ ids: { values: [...seen] } }] } }],
-      size: SAMPLE_DOCS_MAX - docs.length,
+      size: remaining,
     });
 
-    addUniqueHitsToSample({ hits, docs, seen });
+    const beforeFill = docs.length;
+    addUniqueHitsToSample({ hits, docs, seen, size });
+    generalFillCount = docs.length - beforeFill;
   }
 
-  const samplingFiltersWithNoHits = samplingFilterResults.filter(({ hits }) => hits.length === 0);
-  if (samplingFiltersWithNoHits.length > 0) {
-    log.warning(
-      `${samplingFiltersWithNoHits.length} sampling filters returned no matching document:\n
-      ${samplingFiltersWithNoHits
-        .map(({ criterion, filter }) => JSON.stringify({ criterion, filter }, null, 2))
-        .join('\n')}`
-    );
-    return docs;
-  }
+  const criteriaDistribution = [...criterionHitCounts.entries()]
+    .map(([id, count]) => `${id}:${count}`)
+    .join(', ');
 
   log.info(
-    `Successfully collected ${docs.length} sample documents (${criteriaWithFilters.length} criteria with sampling filters)`
+    `Collected ${docs.length} sample document(s) ` +
+      `(${criteriaCount} from ${criterionHitCounts.size} criteria, ${generalFillCount} general fill). ` +
+      `Per-criterion: ${criteriaDistribution}`
   );
+
   return docs;
 };

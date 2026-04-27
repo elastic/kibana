@@ -26,6 +26,16 @@ is_auto_commit_disabled() {
   is_pr_with_label "ci:no-auto-commit"
 }
 
+should_enable_fips() {
+  case "${TEST_ENABLE_FIPS_VERSION:-}" in
+    140-2|140-3)
+      return 0
+      ;;
+  esac
+
+  is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -124,8 +134,46 @@ set_git_merge_base() {
   GITHUB_PR_MERGE_BASE="$(buildkite-agent meta-data get merge-base --default '')"
 
   if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
-    git fetch origin "$GITHUB_PR_TARGET_BRANCH"
-    GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD)"
+    if git fetch origin "$GITHUB_PR_TARGET_BRANCH" 2>/dev/null; then
+      GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+    fi
+
+    if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+      local compare_target="${GITHUB_PR_HEAD_SHA:-}"
+      local github_token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
+      local compare_ref
+
+      if [[ ! "$compare_target" && "${GITHUB_PR_OWNER:-}" && "${GITHUB_PR_BRANCH:-}" ]]; then
+        compare_target="${GITHUB_PR_OWNER}:${GITHUB_PR_BRANCH}"
+      fi
+
+      if [[ ! "$compare_target" ]]; then
+        echo "Failed to resolve PR merge base: PR head ref is not available for gh api fallback" >&2
+        return 1
+      fi
+
+      echo "Falling back to GitHub compare API for PR merge-base"
+      compare_ref="$(
+        jq -rn \
+          --arg base "$GITHUB_PR_TARGET_BRANCH" \
+          --arg head "$compare_target" \
+          '$base + "..." + $head | @uri'
+      )"
+
+      GITHUB_PR_MERGE_BASE="$(
+        curl -fsSL \
+          -H 'Accept: application/vnd.github+json' \
+          -H "Authorization: Bearer ${github_token}" \
+          "https://api.github.com/repos/${GITHUB_PR_BASE_OWNER}/${GITHUB_PR_BASE_REPO}/compare/${compare_ref}" |
+          jq -r '.merge_base_commit.sha // empty' || true
+      )"
+    fi
+
+    if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+      echo "Failed to resolve PR merge base" >&2
+      return 1
+    fi
+
     buildkite-agent meta-data set merge-base "$GITHUB_PR_MERGE_BASE"
   fi
 

@@ -11,7 +11,8 @@ import { useGetWatchlistFormData } from './use_get_watchlist_form_data';
 import type { WatchlistFormState } from './use_watchlist_form_state';
 import {
   getDefaultWatchlist,
-  getWatchlistNameValidation,
+  getWatchlistFieldLengthValidation,
+  getWatchlistRiskModifierValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
 
@@ -37,6 +38,7 @@ export const useEditWatchlistFormState = ({
     useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [watchlist, setWatchlist] = useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [hasUserEdits, setHasUserEdits] = useState(false);
+  const [isSourceValid, setSourceValid] = useState(true);
 
   const setWatchlistField = <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
@@ -66,16 +68,22 @@ export const useEditWatchlistFormState = ({
     }
   }, [normalizedWatchlistId]);
 
-  const isNameChanged = watchlist.name.trim() !== initialWatchlist.name.trim();
-  const { isNameInvalid } = getWatchlistNameValidation(watchlist.name, isNameChanged);
-
   const isMissingId = !normalizedWatchlistId;
   const hasChanges =
     watchlist.name.trim() !== initialWatchlist.name.trim() ||
     watchlist.description?.trim() !== initialWatchlist.description?.trim() ||
     watchlist.riskModifier !== initialWatchlist.riskModifier ||
     JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
-  const isDisabled = isMissingId || isNameInvalid || !hasChanges;
+  const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
+  const { isRiskModifierInvalid } = getWatchlistRiskModifierValidation(watchlist);
+  const isDisabled =
+    isMissingId ||
+    !watchlist.name.trim() ||
+    !hasChanges ||
+    isNameTooLong ||
+    isDescriptionTooLong ||
+    isRiskModifierInvalid ||
+    !isSourceValid;
 
   return {
     watchlist,
@@ -83,7 +91,10 @@ export const useEditWatchlistFormState = ({
     ruleBasedSourceIds: ruleBasedSourceIds ?? {},
     isEditMode: true,
     isDisabled,
-    isNameInvalid,
+    isNameTooLong,
+    isDescriptionTooLong,
+    isRiskModifierInvalid,
     setWatchlistField,
+    setSourceValid,
   };
 };

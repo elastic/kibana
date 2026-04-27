@@ -15,6 +15,8 @@ import { createExampleDataSourceProfileProvider } from './example/example_data_s
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
 import { registerProfileProviders } from './register_profile_providers';
 import type { BaseProfileProvider } from '../profile_service';
+import { SolutionType } from '../profiles';
+import { METRICS_DATA_SOURCE_PROFILE_ID } from './common/metrics_data_source_profile/profile';
 
 const levels = ['root', 'data-source', 'document'];
 let mockAllCollectedProfiles: Array<{ level: string; profileId: string }> = [];
@@ -142,6 +144,32 @@ describe('registerProfileProviders', () => {
 
     const allCollectedProfileIds = mockAllCollectedProfiles.map((p) => p.profileId);
     expect(allCollectedProfileIds).toEqual(uniq(allCollectedProfileIds));
+  });
+
+  it('should resolve metrics profile for TS queries against index patterns matching logs base patterns', async () => {
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    jest.spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable').mockReturnValue(true);
+    const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
+      createContextAwarenessMocks({
+        shouldRegisterProviders: false,
+      });
+    registerProfileProviders({
+      rootProfileService: rootProfileServiceMock,
+      dataSourceProfileService: dataSourceProfileServiceMock,
+      documentProfileService: documentProfileServiceMock,
+      enabledExperimentalProfileIds: [],
+      sharedServices: profileProviderServices,
+      services: profileProviderServices,
+    });
+    const rootContext = await rootProfileServiceMock.resolve({
+      solutionNavId: SolutionType.Observability,
+    });
+    const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+      rootContext,
+      dataSource: createEsqlDataSource(),
+      query: { esql: 'TS metrics-logstash.otel-default' },
+    });
+    expect(dataSourceContext.profileId).toBe(METRICS_DATA_SOURCE_PROFILE_ID);
   });
 
   it('all profile ids should be named appropriate to their context level', async () => {

@@ -8,11 +8,12 @@
  */
 
 import type { DataSourceTypeESQL, DataSourceTypeNoESQL } from './data_source';
-import { dataSourceSchema, dataSourceEsqlTypeSchema } from './data_source';
+import { dataSourceSchema } from './data_source';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   dataViewSchema,
+  esqlDataSourceSchema,
 } from '@kbn/as-code-data-views-schema';
 
 describe('DataSource Schema', () => {
@@ -56,17 +57,15 @@ describe('DataSource Schema', () => {
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
-        runtime_fields: [
-          {
+        field_settings: {
+          my_runtime_field: {
             type: 'keyword',
-            name: 'my_runtime_field',
             format: { type: 'string', params: { id: 'string' } },
           },
-          {
+          another_field: {
             type: 'long',
-            name: 'another_field',
           },
-        ],
+        },
       } satisfies DataSourceTypeNoESQL;
 
       const validated = dataViewSchema.validate(input);
@@ -93,7 +92,7 @@ describe('DataSource Schema', () => {
         query: 'FROM my-index | LIMIT 100',
       } satisfies DataSourceTypeESQL;
 
-      const validated = dataSourceEsqlTypeSchema.validate(input);
+      const validated = esqlDataSourceSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -103,7 +102,7 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore query prop for test purposes
       } satisfies DataSourceTypeESQL;
 
-      expect(() => dataSourceEsqlTypeSchema.validate(input)).toThrow(
+      expect(() => esqlDataSourceSchema.validate(input)).toThrow(
         /\[query\]: expected value of type/
       );
     });
@@ -131,12 +130,12 @@ describe('DataSource Schema', () => {
   });
 
   describe('edge cases', () => {
-    it('validates index configuration with empty runtime fields array', () => {
+    it('validates index configuration with empty field_settings object', () => {
       const input = {
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
-        runtime_fields: [],
+        field_settings: {},
       } satisfies DataSourceTypeNoESQL;
 
       const validated = dataViewSchema.validate(input);
@@ -148,10 +147,9 @@ describe('DataSource Schema', () => {
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'my-index-*',
         time_field: '@timestamp',
-        runtime_fields: [
-          {
+        field_settings: {
+          date_field: {
             type: 'date',
-            name: 'date_field',
             format: {
               type: 'date',
               params: {
@@ -159,12 +157,11 @@ describe('DataSource Schema', () => {
               },
             },
           },
-          {
+          number_field: {
             type: 'double',
-            name: 'number_field',
             format: { type: '', params: { decimals: 2 } },
           },
-        ],
+        },
       } satisfies DataSourceTypeNoESQL;
 
       const validated = dataViewSchema.validate(input);

@@ -35,7 +35,7 @@ export function ServiceHeaderBadges({
 }: ServiceHeaderBadgesProps) {
   const { euiTheme } = useEuiTheme();
   const { core, plugins } = useApmPluginContext();
-  const { capabilities } = core.application;
+  const { capabilities, navigateToUrl } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canReadSlos = !!capabilities.slo?.read;
 
@@ -79,6 +79,16 @@ export function ServiceHeaderBadges({
     return null;
   }
 
+  const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
+    defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
+    values: { count: alertsCount },
+  });
+
+  const onAlertsBadgeClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    navigateToUrl(alertsTabHref);
+  };
+
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -88,19 +98,15 @@ export function ServiceHeaderBadges({
     >
       {showAlertsBadge && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="bottom"
-            content={i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
-              defaultMessage:
-                '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
-              values: { count: alertsCount },
-            })}
-          >
+          <EuiToolTip position="bottom" content={alertsTooltip}>
             <EuiBadge
               data-test-subj="serviceHeaderAlertsBadge"
               color="danger"
               iconType="warning"
-              href={alertsTabHref}
+              onClick={onAlertsBadgeClick}
+              tabIndex={0}
+              role="button"
+              onClickAriaLabel={alertsTooltip}
             >
               {alertsCount}
             </EuiBadge>

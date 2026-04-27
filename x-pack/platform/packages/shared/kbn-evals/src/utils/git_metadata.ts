@@ -13,13 +13,15 @@ export interface GitMetadata {
 }
 
 export function getGitMetadata(): GitMetadata {
-  const branch = tryGitCommand('git rev-parse --abbrev-ref HEAD');
-  const commitSha = tryGitCommand('git rev-parse HEAD');
+  const gitBranch = tryGitCommand('git rev-parse --abbrev-ref HEAD');
+  const gitCommit = tryGitCommand('git rev-parse HEAD');
 
-  return {
-    branch: branch || null,
-    commitSha: commitSha || null,
-  };
+  const branch =
+    gitBranch && gitBranch !== 'HEAD' ? gitBranch : process.env.BUILDKITE_BRANCH ?? null;
+  const bkCommit = process.env.BUILDKITE_COMMIT;
+  const commitSha = (bkCommit && bkCommit !== 'HEAD' ? bkCommit : null) ?? gitCommit ?? null;
+
+  return { branch, commitSha };
 }
 
 function tryGitCommand(command: string): string | null {

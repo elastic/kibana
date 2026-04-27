@@ -39,7 +39,6 @@ describe('ChatHeader', () => {
     loading: false,
     title: 'My title',
     isConversationOwnedByCurrentUser: false,
-    isConversationApp: false,
     onDuplicateConversation: jest.fn(),
     onSaveTitle: jest.fn(),
     onToggleFlyoutPositionMode: jest.fn(),
@@ -50,12 +49,8 @@ describe('ChatHeader', () => {
     copyConversationToClipboard: jest.fn(),
     copyUrl: jest.fn(),
     handleArchiveConversation: jest.fn(),
-    navigateToConnectorsManagementApp: jest.fn(),
+    navigateToModelManagementApp: jest.fn(),
   };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
 
   it('renders the chat actions menu', () => {
     render(

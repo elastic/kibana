@@ -248,7 +248,7 @@
         "label": "DataErrorsControl",
         "description": [],
         "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-        "lineNumber": 28,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -261,7 +261,7 @@
             "label": "enabled",
             "description": [],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -277,7 +277,7 @@
               "(value: boolean) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -293,7 +293,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-                "lineNumber": 30,
+                "lineNumber": 32,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -342,7 +342,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 1536,
+        "lineNumber": 989,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -350,6 +350,93 @@
       }
     ],
     "objects": [],
+    "setup": {
+      "parentPluginId": "esql",
+      "id": "def-public.EsqlPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "EsqlPluginSetup",
+      "description": [],
+      "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+      "lineNumber": 52,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "esql",
+          "id": "def-public.EsqlPluginSetup.registerSourceEnricher",
+          "type": "Function",
+          "tags": [],
+          "label": "registerSourceEnricher",
+          "description": [
+            "\nRegister a function to enrich ES|QL source autocomplete suggestions.\nMultiple plugins can register enrichers; they are chained in registration order."
+          ],
+          "signature": [
+            "(enricher: (sources: ",
+            {
+              "pluginId": "@kbn/esql-types",
+              "scope": "common",
+              "docId": "kibKbnEsqlTypesPluginApi",
+              "section": "def-common.ESQLSourceResult",
+              "text": "ESQLSourceResult"
+            },
+            "[]) => Promise<",
+            {
+              "pluginId": "@kbn/esql-types",
+              "scope": "common",
+              "docId": "kibKbnEsqlTypesPluginApi",
+              "section": "def-common.ESQLSourceResult",
+              "text": "ESQLSourceResult"
+            },
+            "[]>) => void"
+          ],
+          "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+          "lineNumber": 53,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "esql",
+              "id": "def-public.EsqlPluginSetup.registerSourceEnricher.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "enricher",
+              "description": [],
+              "signature": [
+                "(sources: ",
+                {
+                  "pluginId": "@kbn/esql-types",
+                  "scope": "common",
+                  "docId": "kibKbnEsqlTypesPluginApi",
+                  "section": "def-common.ESQLSourceResult",
+                  "text": "ESQLSourceResult"
+                },
+                "[]) => Promise<",
+                {
+                  "pluginId": "@kbn/esql-types",
+                  "scope": "common",
+                  "docId": "kibKbnEsqlTypesPluginApi",
+                  "section": "def-common.ESQLSourceResult",
+                  "text": "ESQLSourceResult"
+                },
+                "[]>"
+              ],
+              "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+              "lineNumber": 58,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
     "start": {
       "parentPluginId": "esql",
       "id": "def-public.EsqlPluginStart",
@@ -358,7 +445,7 @@
       "label": "EsqlPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/esql/public/plugin.ts",
-      "lineNumber": 50,
+      "lineNumber": 62,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -374,7 +461,7 @@
             "EsqlVariablesService"
           ],
           "path": "src/platform/plugins/shared/esql/public/plugin.ts",
-          "lineNumber": 51,
+          "lineNumber": 63,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -387,10 +474,69 @@
           "label": "isServerless",
           "description": [],
           "path": "src/platform/plugins/shared/esql/public/plugin.ts",
-          "lineNumber": 52,
+          "lineNumber": 64,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "esql",
+          "id": "def-public.EsqlPluginStart.enrichSources",
+          "type": "Function",
+          "tags": [],
+          "label": "enrichSources",
+          "description": [],
+          "signature": [
+            "(sources: ",
+            {
+              "pluginId": "@kbn/esql-types",
+              "scope": "common",
+              "docId": "kibKbnEsqlTypesPluginApi",
+              "section": "def-common.ESQLSourceResult",
+              "text": "ESQLSourceResult"
+            },
+            "[]) => Promise<",
+            {
+              "pluginId": "@kbn/esql-types",
+              "scope": "common",
+              "docId": "kibKbnEsqlTypesPluginApi",
+              "section": "def-common.ESQLSourceResult",
+              "text": "ESQLSourceResult"
+            },
+            "[]>"
+          ],
+          "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+          "lineNumber": 65,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "esql",
+              "id": "def-public.EsqlPluginStart.enrichSources.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "sources",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/esql-types",
+                  "scope": "common",
+                  "docId": "kibKbnEsqlTypesPluginApi",
+                  "section": "def-common.ESQLSourceResult",
+                  "text": "ESQLSourceResult"
+                },
+                "[]"
+              ],
+              "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+              "lineNumber": 65,
+              "columnNumber": 19,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -399,56 +545,7 @@
   },
   "server": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "esql",
-        "id": "def-server.buildServerESQLCallbacks",
-        "type": "Function",
-        "tags": [],
-        "label": "buildServerESQLCallbacks",
-        "description": [
-          "\nBuilds the ESQLCallbacks required by the ES|QL validation API\n({@link validateQuery} from @kbn/esql-language) for server-side usage.\n\nUses the Elasticsearch client directly instead of going through\nKibana HTTP routes, unlike the client-side callbacks in @kbn/esql-utils."
-        ],
-        "signature": [
-          "({ client, }: ",
-          "BuildServerESQLCallbacksOptions",
-          ") => ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.ESQLCallbacks",
-            "text": "ESQLCallbacks"
-          }
-        ],
-        "path": "src/platform/plugins/shared/esql/server/services/build_server_esql_callbacks.ts",
-        "lineNumber": 25,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "esql",
-            "id": "def-server.buildServerESQLCallbacks.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  client,\n}",
-            "description": [],
-            "signature": [
-              "BuildServerESQLCallbacksOptions"
-            ],
-            "path": "src/platform/plugins/shared/esql/server/services/build_server_esql_callbacks.ts",
-            "lineNumber": 25,
-            "columnNumber": 42,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

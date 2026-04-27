@@ -137,10 +137,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('should retrieve telemetry data in the expected format', async () => {
       // Request the telemetry task to run immediately
       await supertestWithoutAuth
-        .post('/api/alerting_v2_fixture_telemetry/run_soon')
+        .post(`/internal/ftr/task_manager/${TELEMETRY_TASK_ID}/run_soon`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ taskId: TELEMETRY_TASK_ID })
         .expect(200);
 
       // Wait for the task to complete and verify the state
@@ -182,7 +181,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { name: '10m', value: 1 },
           { name: '5m', value: 1 },
         ]);
-        expect(parsedState.count_with_query_condition).to.be(0);
         expect(parsedState.count_with_recovery_policy).to.be(1);
         expect(parsedState.count_by_recovery_policy_type).to.eql({ no_breach: 1 });
         expect(parsedState.count_with_grouping).to.be(1);

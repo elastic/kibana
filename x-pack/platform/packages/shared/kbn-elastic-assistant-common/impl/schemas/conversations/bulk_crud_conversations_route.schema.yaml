@@ -6,6 +6,15 @@ paths:
   /internal/elastic_assistant/current_user/conversations/_bulk_action:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/internal/elastic_assistant/current_user/conversations/_bulk_action' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"delete":{"query":"category: assistant","ids":[]}}'
       x-labels: [ess, serverless]
       operationId: PerformBulkAction
       summary: Applies a bulk action to multiple conversations
@@ -49,7 +58,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConversationsBulkCrudActionResponse'
         400:
-          description: Generic Error indicating a problem with the bulk action request.
+          description: Bad Request response.
           content:
             application/json:
               schema:

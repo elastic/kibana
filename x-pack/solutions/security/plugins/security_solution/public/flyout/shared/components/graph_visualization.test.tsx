@@ -55,8 +55,22 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
   };
 });
 
+const mockCapabilities = {
+  securitySolutionTimeline: {
+    read: true,
+    crud: true,
+  },
+};
+
 jest.mock('../../../common/lib/kibana', () => ({
   useToasts: () => mockToasts,
+  useKibana: () => ({
+    services: {
+      application: {
+        capabilities: mockCapabilities,
+      },
+    },
+  }),
   KibanaServices: {
     get: () => ({
       uiSettings: {
@@ -203,6 +217,32 @@ describe('GraphVisualization', () => {
 
       const { initialState } = jest.mocked(GraphInvestigation).mock.calls[0][0];
       expect(initialState.timeRange).toEqual({ from: 'now-30d', to: 'now' });
+    });
+  });
+
+  describe('showInvestigateInTimeline', () => {
+    it('passes showInvestigateInTimeline as true when user has timeline read access', async () => {
+      mockCapabilities.securitySolutionTimeline.read = true;
+      render(<GraphVisualization {...EVENT_PROPS} />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      expect(jest.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(true);
+    });
+
+    it('passes showInvestigateInTimeline as false when user has no timeline read access', async () => {
+      mockCapabilities.securitySolutionTimeline.read = false;
+      render(<GraphVisualization {...EVENT_PROPS} />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      expect(jest.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(
+        false
+      );
     });
   });
 

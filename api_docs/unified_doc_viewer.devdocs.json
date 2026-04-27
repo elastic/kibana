@@ -311,7 +311,7 @@
           "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
-          " | undefined; } & React.RefAttributes<",
+          " | undefined; profileId: string; } & React.RefAttributes<",
           {
             "pluginId": "unifiedDocViewer",
             "scope": "public",
@@ -421,7 +421,7 @@
           "DocViewRenderProps",
           " & { indexes: ",
           "ObservabilityIndexes",
-          "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
+          "; profileId: string; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
           " | undefined; } & React.RefAttributes<{}>>"
         ],
@@ -473,7 +473,7 @@
           "TraceWaterfallRestorableState",
           "> & { indexes: ",
           "ObservabilityIndexes",
-          "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
+          "; profileId: string; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
           " | undefined; } & React.RefAttributes<",
           "OverviewApi",
@@ -576,7 +576,7 @@
         "label": "LogsOverviewApi",
         "description": [],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -592,7 +592,7 @@
               "(section: \"stacktrace\" | \"quality_issues\") => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -608,7 +608,7 @@
                   "\"stacktrace\" | \"quality_issues\""
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-                "lineNumber": 62,
+                "lineNumber": 63,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -672,7 +672,7 @@
           ">, \"initialTabId\" | \"onUpdateSelectedTabId\">"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -698,7 +698,7 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -714,7 +714,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -730,7 +730,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -747,7 +747,7 @@
               ".Width<string | number> | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -763,7 +763,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -779,7 +779,7 @@
               "\"push\" | \"overlay\" | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -795,7 +795,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -815,7 +815,7 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -854,7 +854,7 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -867,7 +867,7 @@
             "label": "isEsqlQuery",
             "description": [],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -883,7 +883,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -906,7 +906,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -928,7 +928,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -951,7 +951,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -973,7 +973,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -989,7 +989,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1013,7 +1013,7 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1037,7 +1037,7 @@
               ">) => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1055,7 +1055,7 @@
               ") => React.ReactElement<any>) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1071,7 +1071,7 @@
                   "DocViewRenderProps"
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-                "lineNumber": 63,
+                "lineNumber": 64,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1093,7 +1093,7 @@
               ") => React.ReactElement<any>) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1109,7 +1109,7 @@
                   "DocViewRenderProps"
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-                "lineNumber": 64,
+                "lineNumber": 65,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1137,7 +1137,7 @@
               " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1160,7 +1160,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-                "lineNumber": 65,
+                "lineNumber": 66,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1180,7 +1180,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1198,7 +1198,7 @@
               "(column: string) => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1214,7 +1214,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-                "lineNumber": 67,
+                "lineNumber": 68,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1234,7 +1234,7 @@
               "(column: string) => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1250,7 +1250,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-                "lineNumber": 68,
+                "lineNumber": 69,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1271,7 +1271,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1337,7 +1337,7 @@
           "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
-          " | undefined; }"
+          " | undefined; profileId: string; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
         "lineNumber": 49,

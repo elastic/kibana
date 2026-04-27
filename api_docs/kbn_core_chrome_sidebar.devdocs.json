@@ -1265,7 +1265,7 @@
           "Status of a sidebar app."
         ],
         "signature": [
-          "\"pending\" | \"available\" | \"unavailable\""
+          "\"pending\" | \"unavailable\" | \"available\""
         ],
         "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
         "lineNumber": 69,

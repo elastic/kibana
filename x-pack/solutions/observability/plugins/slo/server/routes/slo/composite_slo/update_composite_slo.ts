@@ -34,7 +34,7 @@ export const updateCompositeSLORoute = createSloServerRoute({
     const updated = {
       ...existing,
       ...params.body,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
       updatedBy: userId ?? existing.updatedBy,
     };
 

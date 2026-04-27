@@ -49,5 +49,3 @@ export const EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE = 'aiops_log_rate_analysis' as co
 
 /**  */
 export const LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME = 'aiopsLogRateAnalysisEmbeddableDataViewId';
-
-export const CASES_ATTACHMENT_LOG_RATE_ANALYSIS = 'aiopsLogRateAnalysisEmbeddable';

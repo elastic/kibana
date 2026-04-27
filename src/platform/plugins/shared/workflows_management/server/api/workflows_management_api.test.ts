@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { type WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { z } from '@kbn/zod/v4';
-import { WorkflowsManagementApi } from './workflows_management_api';
+import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
+import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
@@ -27,6 +28,9 @@ describe('WorkflowsManagementApi', () => {
       getWorkflow: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
+      updateWorkflow: jest.fn(),
+      deleteWorkflows: jest.fn(),
+      bulkCreateWorkflows: jest.fn(),
       validateWorkflow: jest.fn(),
     } as any;
 
@@ -613,6 +617,165 @@ steps:
     });
   });
 
+  describe('SML notifications', () => {
+    let mockSmlIndex: jest.MockedFunction<SmlIndexAttachmentFn>;
+    let mockSmlLogger: jest.Mocked<Logger>;
+
+    const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      description: 'A test workflow',
+      enabled: true,
+      yaml: 'name: Test Workflow',
+      valid: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      createdBy: 'user',
+      lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'user',
+      definition: null,
+      ...overrides,
+    });
+
+    beforeEach(() => {
+      mockSmlIndex = jest.fn().mockResolvedValue(undefined);
+      mockSmlLogger = { warn: jest.fn(), debug: jest.fn(), info: jest.fn() } as any;
+      api.setSmlIndexAttachment(mockSmlIndex, mockSmlLogger);
+    });
+
+    it('does not notify SML when setSmlIndexAttachment has not been called', async () => {
+      const freshApi = new WorkflowsManagementApi(
+        mockWorkflowsService,
+        mockGetWorkflowsExecutionEngine
+      );
+      mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto());
+
+      await freshApi.createWorkflow({ yaml: 'name: Test' }, 'default', mockRequest);
+
+      expect(mockSmlIndex).not.toHaveBeenCalled();
+    });
+
+    it('notifies SML with "create" action on createWorkflow', async () => {
+      mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-new' }));
+
+      await api.createWorkflow({ yaml: 'name: Test' }, 'default', mockRequest);
+
+      expect(mockSmlIndex).toHaveBeenCalledWith({
+        request: mockRequest,
+        originId: 'wf-new',
+        attachmentType: WORKFLOW_SML_TYPE,
+        action: 'create',
+      });
+    });
+
+    it('notifies SML with "create" action on cloneWorkflow', async () => {
+      const original = createWorkflowDto();
+      mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-clone' }));
+
+      await api.cloneWorkflow(original, 'default', mockRequest);
+
+      expect(mockSmlIndex).toHaveBeenCalledWith(
+        expect.objectContaining({
+          originId: 'wf-clone',
+          action: 'create',
+        })
+      );
+    });
+
+    it('notifies SML with "update" action on updateWorkflow', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-upd' }));
+      mockWorkflowsService.updateWorkflow.mockResolvedValue({} as any);
+
+      await api.updateWorkflow('wf-upd', { name: 'Updated' }, 'default', mockRequest);
+
+      expect(mockSmlIndex).toHaveBeenCalledWith({
+        request: mockRequest,
+        originId: 'wf-upd',
+        attachmentType: WORKFLOW_SML_TYPE,
+        action: 'update',
+      });
+    });
+
+    it('notifies SML with "delete" action for each successfully deleted workflow', async () => {
+      mockWorkflowsService.deleteWorkflows.mockResolvedValue({
+        total: 2,
+        deleted: 2,
+        failures: [],
+        successfulIds: ['wf-a', 'wf-b'],
+      });
+
+      await api.deleteWorkflows(['wf-a', 'wf-b'], 'default', mockRequest);
+
+      expect(mockSmlIndex).toHaveBeenCalledTimes(2);
+      expect(mockSmlIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-a', action: 'delete' })
+      );
+      expect(mockSmlIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-b', action: 'delete' })
+      );
+    });
+
+    it('does not notify SML on delete when successfulIds is undefined', async () => {
+      mockWorkflowsService.deleteWorkflows.mockResolvedValue({
+        total: 1,
+        deleted: 0,
+        failures: [{ id: 'wf-x', error: 'not found' }],
+      });
+
+      await api.deleteWorkflows(['wf-x'], 'default', mockRequest);
+
+      expect(mockSmlIndex).not.toHaveBeenCalled();
+    });
+
+    it('notifies SML with "create" for each workflow in bulkCreateWorkflows', async () => {
+      mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({
+        created: [createWorkflowDto({ id: 'wf-b1' }), createWorkflowDto({ id: 'wf-b2' })],
+        failed: [],
+      });
+
+      await api.bulkCreateWorkflows(
+        [{ yaml: 'name: W1' }, { yaml: 'name: W2' }],
+        'default',
+        mockRequest
+      );
+
+      expect(mockSmlIndex).toHaveBeenCalledTimes(2);
+      expect(mockSmlIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-b1', action: 'create' })
+      );
+      expect(mockSmlIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-b2', action: 'create' })
+      );
+    });
+
+    it('uses "update" action in bulkCreateWorkflows when overwrite is true', async () => {
+      mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({
+        created: [createWorkflowDto({ id: 'wf-ow' })],
+        failed: [],
+      });
+
+      await api.bulkCreateWorkflows([{ yaml: 'name: W1' }], 'default', mockRequest, {
+        overwrite: true,
+      });
+
+      expect(mockSmlIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-ow', action: 'update' })
+      );
+    });
+
+    it('logs warning when SML indexing fails but does not throw', async () => {
+      mockSmlIndex.mockRejectedValue(new Error('SML unavailable'));
+      mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto({ id: 'wf-err' }));
+
+      const result = await api.createWorkflow({ yaml: 'name: Test' }, 'default', mockRequest);
+
+      expect(result.id).toBe('wf-err');
+      await new Promise((r) => setImmediate(r));
+      expect(mockSmlLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("Failed to create SML index for workflow 'wf-err'")
+      );
+    });
+  });
+
   describe('scheduleWorkflow', () => {
     it('should pass event-driven trigger id (TriggerId) through to execution engine context', async () => {
       const mockWorkflowsExecutionEngine = {
@@ -689,6 +852,152 @@ steps:
 
       const [, passedContext] = mockWorkflowsExecutionEngine.scheduleWorkflow.mock.calls[0];
       expect(passedContext.metadata).toEqual(scheduleMeta);
+    });
+  });
+
+  describe('bulkScheduleWorkflow', () => {
+    const workflowA = {
+      id: 'wf-a',
+      name: 'Workflow A',
+      enabled: true,
+      definition: { triggers: [{ type: 'manual' }], steps: [] },
+      yaml: 'name: Workflow A',
+    };
+    const workflowB = {
+      id: 'wf-b',
+      name: 'Workflow B',
+      enabled: true,
+      definition: { triggers: [{ type: 'manual' }], steps: [] },
+      yaml: 'name: Workflow B',
+    };
+
+    it('returns an empty result and forwards an empty array to the engine', async () => {
+      const mockWorkflowsExecutionEngine = {
+        bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const result = await api.bulkScheduleWorkflow([], mockRequest);
+
+      expect(result).toEqual([]);
+      expect(mockWorkflowsExecutionEngine.bulkScheduleWorkflow).toHaveBeenCalledWith(
+        [],
+        mockRequest
+      );
+    });
+
+    it('forwards items to the engine with a single per-batch call and the expected context shape', async () => {
+      const engineResults = [
+        { status: 'scheduled' as const, workflowExecutionId: 'exec-1' },
+        { status: 'scheduled' as const, workflowExecutionId: 'exec-2' },
+      ];
+      const mockWorkflowsExecutionEngine = {
+        bulkScheduleWorkflow: jest.fn().mockResolvedValue(engineResults),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const result = await api.bulkScheduleWorkflow(
+        [
+          {
+            workflow: workflowA as any,
+            spaceId: 'space-one',
+            inputs: { event: { k: 1 }, manualKey: 'a' },
+            triggeredBy: 'trigger-a',
+          },
+          {
+            workflow: workflowB as any,
+            spaceId: 'space-two',
+            inputs: { event: { k: 2 } },
+            triggeredBy: 'trigger-b',
+          },
+        ],
+        mockRequest
+      );
+
+      expect(result).toBe(engineResults);
+      expect(mockWorkflowsExecutionEngine.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+
+      const [passedItems, passedRequest] =
+        mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mock.calls[0];
+      expect(passedRequest).toBe(mockRequest);
+      expect(passedItems).toEqual([
+        {
+          workflow: workflowA,
+          context: {
+            event: { k: 1 },
+            spaceId: 'space-one',
+            inputs: { manualKey: 'a' },
+            triggeredBy: 'trigger-a',
+          },
+        },
+        {
+          workflow: workflowB,
+          context: {
+            event: { k: 2 },
+            spaceId: 'space-two',
+            inputs: {},
+            triggeredBy: 'trigger-b',
+          },
+        },
+      ]);
+    });
+
+    it('passes optional metadata on each item into the forwarded execution context', async () => {
+      const mockWorkflowsExecutionEngine = {
+        bulkScheduleWorkflow: jest
+          .fn()
+          .mockResolvedValue([{ status: 'scheduled', workflowExecutionId: 'exec-meta' }]),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const meta = {
+        eventDispatchTimestamp: '2024-01-01T00:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+        eventId: 'evt-1',
+      };
+
+      await api.bulkScheduleWorkflow(
+        [
+          {
+            workflow: workflowA as any,
+            spaceId: 'default',
+            inputs: { event: { x: 1 } },
+            triggeredBy: 'cases.updated',
+            metadata: meta,
+          },
+        ],
+        mockRequest
+      );
+
+      const [passedItems] = mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mock.calls[0];
+      expect(passedItems).toHaveLength(1);
+      expect(passedItems[0].context.metadata).toEqual(meta);
+    });
+
+    it('passes the engine result through unchanged (order + per-item errors)', async () => {
+      const engineResults = [
+        { status: 'scheduled' as const, workflowExecutionId: 'exec-ok' },
+        {
+          status: 'error' as const,
+          error: { message: 'schedule failed', code: 'SCHEDULE_ERR' },
+        },
+        { status: 'scheduled' as const, workflowExecutionId: 'exec-ok-2' },
+      ];
+      const mockWorkflowsExecutionEngine = {
+        bulkScheduleWorkflow: jest.fn().mockResolvedValue(engineResults),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const result = await api.bulkScheduleWorkflow(
+        [
+          { workflow: workflowA as any, spaceId: 'default', inputs: {}, triggeredBy: 't1' },
+          { workflow: workflowB as any, spaceId: 'default', inputs: {}, triggeredBy: 't2' },
+          { workflow: workflowA as any, spaceId: 'default', inputs: {}, triggeredBy: 't3' },
+        ],
+        mockRequest
+      );
+
+      expect(result).toBe(engineResults);
     });
   });
 });

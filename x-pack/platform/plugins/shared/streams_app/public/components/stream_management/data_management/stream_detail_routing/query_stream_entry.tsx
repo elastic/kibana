@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { css as cssReact } from '@emotion/react';
-import { Streams, getEsqlViewName, isChildOf } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName } from '@kbn/streams-schema';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -91,7 +91,7 @@ export function IdleQueryStreamEntry({ streamName, onEdit }: IdleQueryStreamEntr
           >
             <EuiLink
               href={router.link('/{key}/management/{tab}', {
-                path: { key: streamDetailsFetch.value.stream.name, tab: 'partitioning' },
+                path: { key: streamDetailsFetch.value.stream.name, tab: 'overview' },
               })}
               data-test-subj={`streamsAppQueryStreamEntryButton-${streamName}`}
               css={cssReact`
@@ -152,7 +152,7 @@ interface CreatingQueryStreamEntryProps {
   parentStreamName: string;
 }
 
-const deboucingOptions = { wait: 500 };
+const debouncingOptions = { wait: 500 };
 
 /**
  * Inline form for creating a new query stream within the routing page.
@@ -163,6 +163,14 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   const { cancelQueryStreamCreation, saveQueryStream } = useStreamRoutingEvents();
   const { executeQuery } = useQueryStreamCreation();
 
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const isClassicParent = Streams.ClassicStream.Definition.is(definition.stream);
+
+  const existingSiblingNames = useMemo(
+    () => definition.stream.query_streams?.map((ref) => ref.name) ?? [],
+    [definition.stream.query_streams]
+  );
+
   const isSaving = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: { creating: 'saving' } } })
   );
@@ -172,33 +180,27 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
     if (query && query.trim() !== '') {
       executeQuery(query);
     }
-  }, deboucingOptions);
+  }, debouncingOptions);
 
-  // Validate and save the query stream
   const handleSave = useCallback(
     ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
-      // Validate name follows child naming convention
       const fullName = `${parentStreamName}.${name}`;
-      if (!name || name.trim() === '' || !isChildOf(parentStreamName, fullName)) {
-        return;
-      }
-      if (!esqlQuery || esqlQuery.trim() === '') {
-        return;
-      }
-      // Trigger save with the form data
       saveQueryStream({ name: fullName, esqlQuery });
     },
     [parentStreamName, saveQueryStream]
   );
 
+  // Classic streams use the raw stream name; wired/query streams use the $. prefixed view name
+  const initialFromSource = isClassicParent ? parentStreamName : getEsqlViewName(parentStreamName);
+
   return (
     <InlineQueryStreamForm
-      parentStreamName={parentStreamName}
-      initialEsqlQuery={`FROM ${getEsqlViewName(parentStreamName)}`}
+      initialEsqlQuery={`FROM ${initialFromSource}`}
       onSave={handleSave}
       onCancel={cancelQueryStreamCreation}
       onQueryChange={debouncedExecuteQuery}
       isSaving={isSaving}
+      existingSiblingNames={existingSiblingNames}
     />
   );
 }
@@ -251,7 +253,7 @@ export function EditingQueryStreamEntry({
     if (query && query.trim() !== '') {
       executeQuery(query);
     }
-  }, deboucingOptions);
+  }, debouncingOptions);
 
   const handleSave = useCallback(
     ({ esqlQuery }: { name: string; esqlQuery: string }) => {
@@ -301,7 +303,6 @@ export function EditingQueryStreamEntry({
   return (
     <>
       <InlineQueryStreamForm
-        parentStreamName={parentStreamName}
         initialName={suffix}
         initialEsqlQuery={currentEsql}
         onSave={handleSave}

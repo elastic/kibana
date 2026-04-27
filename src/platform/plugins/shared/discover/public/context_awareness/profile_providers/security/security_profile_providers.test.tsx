@@ -132,22 +132,31 @@ describe('createSecurityDocumentProfileProviders', () => {
       expect(registry.add).not.toHaveBeenCalled();
     });
 
-    it('does not override renderHeader for remote (CCS) alert documents', () => {
-      const { result, prevRenderHeader } = getDocViewerResult(
-        createRecord({
-          'event.kind': 'signal',
-          _index: 'remote-cluster:.alerts-security.alerts-default',
-        })
-      );
+    it('does not override renderHeader when event.kind is absent', () => {
+      const { result, prevRenderHeader } = getDocViewerResult(createRecord({}));
 
       expect(result.renderHeader).toBe(prevRenderHeader);
     });
 
-    it('overrides renderHeader for remote (CCS) event documents', () => {
+    it('does not override renderFooter when event.kind is absent', () => {
+      const { result, prevRenderFooter } = getDocViewerResult(createRecord({}));
+
+      expect(result.renderFooter).toBe(prevRenderFooter);
+    });
+
+    it('does not add the overview tab to the registry when event.kind is absent', () => {
+      const { result } = getDocViewerResult(createRecord({}));
+      const registry = { add: jest.fn() };
+      result.docViewsRegistry(registry as never);
+
+      expect(registry.add).not.toHaveBeenCalled();
+    });
+
+    it('overrides renderHeader for remote (CCS/CPS) alert documents', () => {
       const { result, prevRenderHeader } = getDocViewerResult(
         createRecord({
-          'event.kind': 'event',
-          _index: 'remote-cluster:logs-system-default',
+          'event.kind': 'signal',
+          _index: 'remote:.alerts-security.alerts-default',
         })
       );
 
@@ -155,11 +164,47 @@ describe('createSecurityDocumentProfileProviders', () => {
       expect(result.renderHeader).not.toBe(prevRenderHeader);
     });
 
-    it('adds the overview tab for remote (CCS) alert documents', () => {
+    it('overrides renderFooter for remote (CCS/CPS) alert documents', () => {
+      const { result, prevRenderFooter } = getDocViewerResult(
+        createRecord({
+          'event.kind': 'signal',
+          _index: 'remote:.alerts-security.alerts-default',
+        })
+      );
+
+      expect(result.renderFooter).toBeDefined();
+      expect(result.renderFooter).not.toBe(prevRenderFooter);
+    });
+
+    it('overrides renderHeader for remote (CCS/CPS) event documents', () => {
+      const { result, prevRenderHeader } = getDocViewerResult(
+        createRecord({
+          'event.kind': 'event',
+          _index: 'remote:logs-system-default',
+        })
+      );
+
+      expect(result.renderHeader).toBeDefined();
+      expect(result.renderHeader).not.toBe(prevRenderHeader);
+    });
+
+    it('overrides renderFooter for remote (CCS/CPS) event documents', () => {
+      const { result, prevRenderFooter } = getDocViewerResult(
+        createRecord({
+          'event.kind': 'event',
+          _index: 'remote:logs-system-default',
+        })
+      );
+
+      expect(result.renderFooter).toBeDefined();
+      expect(result.renderFooter).not.toBe(prevRenderFooter);
+    });
+
+    it('adds the overview tab for remote (CCS/CPS) alert documents', () => {
       const { result } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
-          _index: 'remote-cluster:.alerts-security.alerts-default',
+          _index: 'remote:.alerts-security.alerts-default',
         })
       );
       const registry = { add: jest.fn() };
@@ -170,11 +215,11 @@ describe('createSecurityDocumentProfileProviders', () => {
       );
     });
 
-    it('adds the overview tab for remote (CCS) event documents', () => {
+    it('adds the overview tab for remote (CCS/CPS) event documents', () => {
       const { result } = getDocViewerResult(
         createRecord({
           'event.kind': 'event',
-          _index: 'remote-cluster:logs-system-default',
+          _index: 'remote:logs-system-default',
         })
       );
       const registry = { add: jest.fn() };

@@ -23,4 +23,11 @@ export const queryKeys = {
   episodeEvents: (episodeId: string) => [...queryKeys.all, 'episode-events', episodeId] as const,
   relatedEpisodes: (ruleId: string, excludeEpisodeId: string, pageSize: number) =>
     [...queryKeys.all, 'related-episodes', ruleId, excludeEpisodeId, pageSize] as const,
+  tagOptionsAll: () => [...queryKeys.all, 'tag-options'] as const,
+  tagOptions: (timeRange?: { from: string; to: string } | null) =>
+    [...queryKeys.tagOptionsAll(), timeRange] as const,
+  tagSuggestions: () => [...queryKeys.all, 'tag-suggestions'] as const,
+  assigneeSuggestions: (searchTerm: string) =>
+    [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
+  bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
 };

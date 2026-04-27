@@ -11,21 +11,15 @@ import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
-import { useKibana } from '../hooks/use_kibana';
-import { isElasticInferenceServiceEnabled } from '../feature_flag';
 import { isEndpointPreconfigured } from '../utils/preconfigured_endpoint_helper';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
-import { InferenceEndpointsHeader } from './inference_endpoints_header';
 import { ExternalInferenceHeader } from './external_inference_header';
 import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
 import { ExternalInferenceEmptyPrompt } from './external_inference_empty_prompt';
 
 export const InferenceEndpoints: React.FC = () => {
-  const { services } = useKibana();
   const { data, isLoading, refetch } = useQueryInferenceEndpoints();
   const [isAddInferenceFlyoutOpen, setIsAddInferenceFlyoutOpen] = useState<boolean>(false);
-
-  const isEisEnabled = isElasticInferenceServiceEnabled(services.uiSettings);
 
   const onFlyoutOpen = useCallback(() => {
     setIsAddInferenceFlyoutOpen(true);
@@ -41,18 +35,15 @@ export const InferenceEndpoints: React.FC = () => {
 
   const inferenceEndpoints = useMemo(() => {
     const endpoints = data || [];
-    if (isEisEnabled) {
-      return endpoints.filter(
-        (ep) =>
-          ep.service !== ServiceProviderKeys.elastic &&
-          ep.service !== ServiceProviderKeys.elasticsearch &&
-          !isEndpointPreconfigured(ep.inference_id)
-      );
-    }
-    return endpoints;
-  }, [data, isEisEnabled]);
+    return endpoints.filter(
+      (ep) =>
+        ep.service !== ServiceProviderKeys.elastic &&
+        ep.service !== ServiceProviderKeys.elasticsearch &&
+        !isEndpointPreconfigured(ep.inference_id)
+    );
+  }, [data]);
 
-  const showEmptyState = isEisEnabled && inferenceEndpoints.length === 0;
+  const showEmptyState = inferenceEndpoints.length === 0;
 
   if (isLoading) {
     return (
@@ -75,13 +66,9 @@ export const InferenceEndpoints: React.FC = () => {
 
   return (
     <>
-      {isEisEnabled ? (
-        <ExternalInferenceHeader onFlyoutOpen={onFlyoutOpen} />
-      ) : (
-        <InferenceEndpointsHeader onFlyoutOpen={onFlyoutOpen} />
-      )}
+      <ExternalInferenceHeader onFlyoutOpen={onFlyoutOpen} />
       <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
-        <TabularPage inferenceEndpoints={inferenceEndpoints} isEisEnabled={isEisEnabled} />
+        <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
       {isAddInferenceFlyoutOpen && (
         <AddInferenceFlyoutWrapper onFlyoutClose={onFlyoutClose} reloadFn={reload} />

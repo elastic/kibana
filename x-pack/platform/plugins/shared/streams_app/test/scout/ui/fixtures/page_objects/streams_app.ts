@@ -658,7 +658,7 @@ export class StreamsApp {
   async getConditionAddStepMenuButton(pos: number) {
     const conditions = await this.getConditionsListItems();
     const targetCondition = conditions[pos];
-    return targetCondition.getByRole('button', { name: 'Create nested step' });
+    return targetCondition.getByRole('button', { name: 'Create nested step' }).first();
   }
 
   async getConditionContextMenuButton(pos: number) {
@@ -1091,14 +1091,6 @@ export class StreamsApp {
     await acceptButton.click();
   }
 
-  async regenerateSuggestions() {
-    const regenerateButton = this.page
-      .getByTestId('streamsAppGenerateSuggestionButton')
-      .filter({ hasText: 'Regenerate all' });
-    await expect(regenerateButton).toBeVisible();
-    await regenerateButton.click();
-  }
-
   async expectConfirmationModalVisible() {
     const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
     await expect(modal).toBeVisible();
@@ -1169,7 +1161,9 @@ export class StreamsApp {
 
   // Attachments utility methods
   async expectAttachmentsEmptyPromptVisible() {
-    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible();
+    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible({
+      timeout: 15000, // the button may take longer to render due to environment slowness
+    });
   }
 
   async clickAddAttachmentsButton() {

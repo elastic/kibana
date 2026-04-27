@@ -69,6 +69,7 @@ export class WorkflowsExtensionsExamplePlugin
         'my-third-proxy': { name: 'Development Proxy', url: 'https://example.com/third' },
         'my-fourth-proxy': { name: 'Testing Proxy', url: 'https://example.com/fourth' },
         'my-fifth-proxy': { name: 'Backup Proxy', url: 'https://example.com/fifth' },
+        'my-sixth-proxy': { name: 'HTTP Proxy', url: 'http://example.com/sixth' },
       }),
     });
     registerTriggerDefinitions(plugins.workflowsExtensions);
