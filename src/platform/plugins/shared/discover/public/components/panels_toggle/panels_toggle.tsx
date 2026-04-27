@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
-import { setChartHidden, setTableHidden } from '@kbn/unified-histogram';
+import { setChartHidden, setTableHidden } from '@kbn/discover-utils';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
 import {

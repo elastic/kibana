@@ -15,11 +15,12 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  getChartHidden,
+  getTableHidden,
   getDefaultSort,
   getSortArray,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { getChartHidden, getTableHidden } from '@kbn/unified-histogram';
 import { cloneDeep } from 'lodash';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';

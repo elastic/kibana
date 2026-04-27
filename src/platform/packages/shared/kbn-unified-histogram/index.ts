@@ -39,14 +39,4 @@ export { useStableCallback } from './hooks/use_stable_callback';
 
 export type { UnifiedHistogramState } from './services/state_service';
 
-export {
-  getChartHidden,
-  getTableHidden,
-  getTopPanelHeight,
-  getBreakdownField,
-  setChartHidden,
-  setTableHidden,
-  setTopPanelHeight,
-  setBreakdownField,
-} from './utils/local_storage_utils';
 export { canImportVisContext } from './utils/external_vis_context';

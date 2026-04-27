@@ -8,7 +8,7 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedHistogramTopPanelHeightContext } from '../types';
+import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 
 export const CHART_HIDDEN_KEY = 'chartHidden';
 export const TABLE_HIDDEN_KEY = 'tableHidden';
@@ -41,7 +41,7 @@ export const getTableHidden = (
 export const getTopPanelHeight = (
   storage: Storage,
   localStorageKeyPrefix: string
-): UnifiedHistogramTopPanelHeightContext | undefined =>
+): ResizableLayoutProps['fixedPanelSize'] | undefined =>
   storage.get(getLocalStorageKey(localStorageKeyPrefix, HISTOGRAM_HEIGHT_KEY)) ?? undefined;
 
 /**
@@ -78,7 +78,7 @@ export const setTableHidden = (
 export const setTopPanelHeight = (
   storage: Storage,
   localStorageKeyPrefix: string,
-  topPanelHeight: UnifiedHistogramTopPanelHeightContext
+  topPanelHeight: ResizableLayoutProps['fixedPanelSize']
 ) => storage.set(getLocalStorageKey(localStorageKeyPrefix, HISTOGRAM_HEIGHT_KEY), topPanelHeight);
 
 /**
