@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/core'
   - '@kbn/test'
-  - '@kbn/security-solution-plugin'
 tags:
   - functional-tests
   - package
