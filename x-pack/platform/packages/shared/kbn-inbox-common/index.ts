@@ -7,4 +7,3 @@
 
 export * from './impl/schemas';
 export * from './constants';
-export { buildRouteValidationWithZod } from './impl/schemas/common';

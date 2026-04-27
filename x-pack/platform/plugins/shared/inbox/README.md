@@ -14,9 +14,10 @@ wiring in `x-pack/solutions/security/plugins/security_solution_{ess,serverless}/
 
 The feature spans two modules:
 
-- `@kbn/inbox-common` - shared schemas (OpenAPI-generated Zod types), URL constants, the
-  `buildRouteValidationWithZod` adapter, and the feature id. Used by both the server routes
-  and the public react-query hooks as the single source of truth for the HTTP contract.
+- `@kbn/inbox-common` - shared schemas (OpenAPI-generated Zod types), URL constants, and the
+  feature id. Used by both the server routes and the public react-query hooks as the single
+  source of truth for the HTTP contract. Server routes adapt these Zod schemas to Kibana's
+  route validation via `buildRouteValidationWithZod` from `@kbn/zod-helpers/v4`.
 - `inbox` plugin (this package) - server routes that read inbox actions (currently stub data),
   plus a React UI for browsing them.
 

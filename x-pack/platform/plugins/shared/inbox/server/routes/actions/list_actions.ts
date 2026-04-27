@@ -10,9 +10,9 @@ import {
   INBOX_ACTIONS_URL,
   INTERNAL_API_ACCESS,
   ListInboxActionsRequestQuery,
-  buildRouteValidationWithZod,
   type ListInboxActionsResponse,
 } from '@kbn/inbox-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { STUB_INBOX_ACTIONS } from './stub_actions';
