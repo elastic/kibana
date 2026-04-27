@@ -145,7 +145,6 @@ export function useFetchMetricsData({
     };
   }, [
     shouldFetch,
-    appliedDimensions,
     fetchParams.dataView,
     fetchParams.timeRange,
     fetchParams.abortController,
