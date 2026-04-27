@@ -14,21 +14,40 @@ export interface TraceWaterfallFlyout {
   readonly spanDetailFlyout: Locator;
   readonly openInDiscoverLink: Locator;
   readonly openInApmLink: Locator;
+  readonly childDocFlyout: {
+    readonly errors: {
+      readonly section: Locator;
+    };
+    readonly logMessage: Locator;
+    close(): Promise<void>;
+  };
   open(): Promise<void>;
   clickSpan(spanName: string): Promise<void>;
   clickErrorBadge(itemName: string): Promise<void>;
-  closeDetailFlyout(): Promise<void>;
   openActionsMenu(): Promise<void>;
 }
 
 export function createTraceWaterfallFlyout(page: ScoutPage): TraceWaterfallFlyout {
   const dialog = page.getByRole('dialog', { name: 'Full trace waterfall flyout' });
+  const spanDetailFlyout = page.getByTestId('apmTraceWaterfallSpanDetailFlyout');
+
   return {
     dialog,
     waterfall: dialog.getByTestId('waterfall'),
-    spanDetailFlyout: page.getByTestId('apmTraceWaterfallSpanDetailFlyout'),
+    spanDetailFlyout,
     openInDiscoverLink: page.getByTestId('apmTraceWaterfallOpenInDiscover'),
     openInApmLink: page.getByTestId('apmTraceWaterfallOpenInApm'),
+
+    childDocFlyout: {
+      errors: {
+        section: spanDetailFlyout.getByTestId('unifiedDocViewerErrorsAccordion'),
+      },
+      logMessage: spanDetailFlyout.getByTestId('unifiedDocViewLogsOverviewMessage'),
+      async close() {
+        await page.keyboard.press('Escape');
+        await spanDetailFlyout.waitFor({ state: 'hidden' });
+      },
+    },
 
     async open() {
       const button = page.getByTestId('apmFullTraceButtonViewFullTraceButton');
@@ -46,12 +65,6 @@ export function createTraceWaterfallFlyout(page: ScoutPage): TraceWaterfallFlyou
         .filter({ hasText: itemName })
         .getByTestId('apmBarDetailsErrorBadge')
         .click();
-    },
-
-    async closeDetailFlyout() {
-      const detailFlyout = page.getByTestId('apmTraceWaterfallSpanDetailFlyout');
-      await page.keyboard.press('Escape');
-      await detailFlyout.waitFor({ state: 'hidden' });
     },
 
     async openActionsMenu() {
