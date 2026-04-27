@@ -39,7 +39,7 @@ describe('dashboard OAS schema hash', () => {
     const schemaHash = createHash('sha256').update(JSON.stringify(dashboardSchema)).digest('hex');
 
     expect(schemaHash).toMatchInlineSnapshot(
-      `"e8c67efaf37d35a56d50be49b3e6e03c3e7955d7b43b11598de1c7dd085f4935"`
+      `"9cf9c8f70ae373fb53f33944acfe0b481d21daa022533af3114daa7eadc4e176"`
     );
   });
 });
