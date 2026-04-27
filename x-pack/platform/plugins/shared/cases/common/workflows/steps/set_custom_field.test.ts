@@ -55,6 +55,17 @@ describe('set_custom_field common step definition', () => {
     expect(
       InputSchema.safeParse({
         case_id: caseIdFixture,
+        owner: 'securitySolution',
+        value: 'new value',
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects invalid input with missing owner', () => {
+    expect(
+      InputSchema.safeParse({
+        case_id: caseIdFixture,
+        field_name: 'cf_text',
         value: 'new value',
       }).success
     ).toBe(false);

@@ -135,6 +135,7 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={panelProps}
+      aria-label={CREATED_BY_LABEL}
     >
       <EuiSelectable
         searchable

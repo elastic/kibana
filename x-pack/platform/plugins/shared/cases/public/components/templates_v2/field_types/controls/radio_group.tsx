@@ -14,6 +14,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   RadioGroupFieldSchema,
   ConditionRenderProps,
@@ -60,7 +61,7 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
         name={name}
         options={options}
         idSelected={idSelected}
-        onChange={(id) => field.setValue(id)}
+        onChange={field.setValue}
       />
     </EuiFormRow>
   );
@@ -98,7 +99,11 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   );
 
   return (
-    <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={config}>
+    <UseField
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
+      config={config}
+    >
       {(field: FieldHook<string>) => (
         <RadioGroupField
           field={field}

@@ -22,7 +22,7 @@ import type {
 import { getLogDocumentById, type LogDocument } from './get_log_document_by_id';
 import { getToolHandler as getTraces } from '../../tools/get_traces/handler';
 import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
-import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
+import { getEntityLinkingInstructions } from '../../utils/get_entity_linking_instructions';
 import { createAiInsightResult, type AiInsightResult } from './types';
 
 export interface GetLogAiInsightsParams {

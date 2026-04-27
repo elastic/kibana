@@ -153,7 +153,7 @@ Extend when you need:
 
 ## Suite Registration
 
-Add an entry to `x-pack/platform/packages/shared/kbn-evals/evals.suites.json`:
+Add an entry to `.buildkite/pipelines/evals/evals.suites.json`:
 
 ```json
 {

@@ -18,7 +18,7 @@ import { extname } from 'path';
 
 import { getFilesForCommit, runFileCasingCheck } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
-import { load as yamlLoad } from 'js-yaml';
+import { parse as yamlParse } from 'yaml';
 import { readFile } from 'fs/promises';
 
 class CheckResult {
@@ -125,9 +125,7 @@ class YamlLintCheck extends PrecommitCheck {
     for (const file of yamlFiles) {
       try {
         const content = await readFile(file.getAbsolutePath(), 'utf8');
-        yamlLoad(content, {
-          filename: file.getRelativePath(),
-        });
+        yamlParse(content);
       } catch (error) {
         errors.push(`Error in ${file.getRelativePath()}:\n${error.message}`);
       }

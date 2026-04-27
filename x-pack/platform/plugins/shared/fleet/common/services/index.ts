@@ -14,6 +14,8 @@ export {
   getStreamsForInputType,
   getRegistryStreamWithDataStreamForInputType,
   varsReducer,
+  getInputEffectiveName,
+  buildInputKey,
 } from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
@@ -129,6 +131,8 @@ export {
 // Cloud Connector accessor module
 export * from './cloud_connectors';
 
+export type { YamlModule } from './yaml_utils';
+export { createYamlKeysSorter, toYaml } from './yaml_utils';
 export {
   packageInfoHasOtelInputs,
   packagePolicyHasOtelInputs,

@@ -10,6 +10,8 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { EVALS_TRACING_PROJECTS_URL, API_VERSIONS, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { registerGetTracingProjectsRoute } from './get_projects';
 
 const buildProjectBucket = ({
@@ -60,7 +62,13 @@ describe('GET /internal/evals/tracing/projects', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetTracingProjectsRoute({ router, logger });
+    registerGetTracingProjectsRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      getEncryptedSavedObjectsStart: async () => ({} as EncryptedSavedObjectsPluginStart),
+      getInternalRemoteConfigsSoClient: async () => ({} as SavedObjectsClientContract),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_TRACING_PROJECTS_URL).versions[
@@ -140,6 +148,62 @@ describe('GET /internal/evals/tracing/projects', () => {
         { range: { '@timestamp': { gte: '2025-01-01T00:00:00Z', lte: '2025-06-01T00:00:00Z' } } },
       ])
     );
+  });
+
+  it('applies name filter as wildcard on name field when provided', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 0 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    await handler(context, makeRequest({ name: 'alert' }), kibanaResponseFactory);
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const filters = searchCall.query.bool.filter;
+    expect(filters).toEqual(
+      expect.arrayContaining([{ wildcard: { name: { value: '*alert*', case_insensitive: true } } }])
+    );
+  });
+
+  it('escapes wildcard metacharacters in the name filter', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 0 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    await handler(context, makeRequest({ name: 'my*project?' }), kibanaResponseFactory);
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const wildcardFilter = searchCall.query.bool.filter.find(
+      (f: Record<string, unknown>) => f.wildcard !== undefined
+    );
+    expect(wildcardFilter).toEqual({
+      wildcard: { name: { value: '*my\\*project\\?*', case_insensitive: true } },
+    });
+  });
+
+  it('does not add name filter when name is not provided', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 0 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    await handler(context, makeRequest(), kibanaResponseFactory);
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const wildcardFilter = searchCall.query.bool.filter.find(
+      (f: Record<string, unknown>) => f.wildcard !== undefined
+    );
+    expect(wildcardFilter).toBeUndefined();
   });
 
   it('returns parsed projects with correct field mappings', async () => {

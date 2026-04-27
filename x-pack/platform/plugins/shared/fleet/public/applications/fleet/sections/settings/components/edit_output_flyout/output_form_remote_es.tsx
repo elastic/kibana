@@ -130,7 +130,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             defaultMessage: 'Specify host URL',
           }
         )}
-        {...inputs.elasticsearchUrlInput.props}
+        {...inputs.remoteElasticsearchUrlInput.props}
         isUrl
       />
       <EuiSpacer size="m" />

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState } from '../../../schema';
+import type { XYConfig } from '../../../schema';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import type { XYVisualizationState } from '@kbn/lens-common';
 
 describe('XY Legend Transforms', () => {
-  type ApiLegend = NonNullable<XYState['legend']>;
+  type ApiLegend = NonNullable<XYConfig['legend']>;
   type StateLegend = XYVisualizationState['legend'];
 
   const roundTripLegend = (stateLegend: StateLegend) => {
@@ -81,6 +81,62 @@ describe('XY Legend Transforms', () => {
         placement: 'outside',
         position: 'left',
         layout: { type: 'grid', truncate: { max_lines: 1 } },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
+      title: 'series header auto (visible, no custom title)',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        shouldTruncate: true,
+        maxLines: 2,
+        isTitleVisible: true,
+        title: undefined,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+        series_header: { visible: true },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
+      title: 'series header custom title',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        shouldTruncate: true,
+        maxLines: 2,
+        isTitleVisible: true,
+        title: 'My series',
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+        series_header: { visible: true, text: 'My series' },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
+      title: 'series header none',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        shouldTruncate: true,
+        maxLines: 2,
+        isTitleVisible: false,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+        series_header: { visible: false },
       },
       forbiddenApiPaths: ['layout.truncate.max_pixels'],
     },

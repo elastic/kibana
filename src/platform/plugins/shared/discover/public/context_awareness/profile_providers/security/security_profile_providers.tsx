@@ -8,10 +8,7 @@
  */
 
 import React from 'react';
-import { getFieldValue } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import {
-  AlertEventOverviewLazy,
   EnhancedAlertEventOverviewLazy,
   EnhancedAlertFlyoutFooterLazy,
   EnhancedAlertFlyoutHeaderLazy,
@@ -29,20 +26,16 @@ export const createSecurityDocumentProfileProviders = (
   const baseProvider = createSecurityDocumentProfileProvider(providerServices);
   const enhancedProvider = extendProfileProvider(baseProvider, {
     profileId: SECURITY_PROFILE_ID.enhanced_document,
-    isExperimental: true,
     profile: {
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
         const isAlert = isAlertDocument(params.record);
         const isEvent = isEventDocument(params.record);
-        const isRemoteDocument = isCCSRemoteIndexName(
-          (getFieldValue(params.record, '_index') as string) ?? ''
-        );
 
         return {
           ...prevDocViewer,
           renderHeader:
-            (isAlert && !isRemoteDocument) || isEvent
+            isAlert || isEvent
               ? (props) => (
                   <EnhancedAlertFlyoutHeaderLazy
                     {...props}
@@ -52,8 +45,7 @@ export const createSecurityDocumentProfileProviders = (
                 )
               : prevDocViewer.renderHeader,
           docViewsRegistry: (registry) => {
-            if ((isAlert || isEvent) && !isRemoteDocument) {
-              // For local alerts or events, use the enhanced overview
+            if (isAlert || isEvent) {
               registry.add({
                 id: 'doc_view_alerts_overview',
                 title: i18n.overviewTabTitle(isAlert),
@@ -61,14 +53,6 @@ export const createSecurityDocumentProfileProviders = (
                 render: (props) => (
                   <EnhancedAlertEventOverviewLazy {...props} providerServices={providerServices} />
                 ),
-              });
-            } else if ((isAlert || isEvent) && isRemoteDocument) {
-              // For remote alerts or events use the basic overview
-              registry.add({
-                id: 'doc_view_alerts_overview',
-                title: i18n.overviewTabTitle(isAlert),
-                order: 0,
-                render: (props) => <AlertEventOverviewLazy {...props} />,
               });
             }
 

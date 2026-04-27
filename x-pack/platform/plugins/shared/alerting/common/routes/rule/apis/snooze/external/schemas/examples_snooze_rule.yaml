@@ -1,0 +1,42 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        snoozeRuleRequest:
+          summary: Snooze a rule for 24 hours
+          description: A request that snoozes a rule for 24 hours starting now.
+          value:
+            schedule:
+              custom:
+                start: "2025-03-12T12:00:00.000Z"
+                duration: 24h
+                timezone: UTC
+        snoozeRuleRecurringRequest:
+          summary: Snooze a rule on a recurring weekly schedule
+          description: A request that snoozes a rule every Monday for 8 hours, for 4 occurrences.
+          value:
+            schedule:
+              custom:
+                start: "2025-03-17T09:00:00.000Z"
+                duration: 8h
+                timezone: UTC
+                recurring:
+                  every: 1w
+                  onWeekDay:
+                    - MO
+                  occurrences: 4
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          snoozeRuleResponse:
+            summary: Snooze schedule response
+            description: A response that contains the created snooze schedule.
+            value:
+              schedule:
+                id: 9ac67950-6737-11ec-8ded-d7f6e1581b26
+                custom:
+                  start: "2025-03-12T12:00:00.000Z"
+                  duration: 24h
+                  timezone: UTC

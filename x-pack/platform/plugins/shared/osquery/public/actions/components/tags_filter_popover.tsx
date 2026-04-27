@@ -110,6 +110,7 @@ const TagsFilterPopoverComponent: React.FC<TagsFilterPopoverProps> = ({
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={PANEL_PROPS}
+      aria-label={TAGS_LABEL}
     >
       <EuiSelectable
         searchable

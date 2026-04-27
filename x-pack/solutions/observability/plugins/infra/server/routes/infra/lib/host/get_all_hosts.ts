@@ -9,7 +9,7 @@ import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import { BasicMetricValueRT } from '@kbn/metrics-data-access-plugin/server';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import { DEFAULT_SCHEMA, HOST_NAME_FIELD } from '../../../../../common/constants';
 import type { InfraEntityMetadataType } from '../../../../../common/http_api';
 import type { GetHostParameters } from '../types';
 import { getInventoryModelAggregations, getDocumentsFilter } from '../helpers/query';
@@ -23,7 +23,7 @@ export const getAllHosts = async ({
   metrics,
   hostNames,
   apmDataAccessServices,
-  schema = 'ecs',
+  schema = DEFAULT_SCHEMA,
 }: Pick<
   GetHostParameters,
   'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics' | 'schema'

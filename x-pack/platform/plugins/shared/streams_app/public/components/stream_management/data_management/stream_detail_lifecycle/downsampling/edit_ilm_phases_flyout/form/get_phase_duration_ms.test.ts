@@ -7,23 +7,20 @@
 
 import { getPhaseDurationMs } from './get_phase_duration_ms';
 
-const createForm = (values: Record<string, unknown>) => {
-  const fields = Object.fromEntries(Object.entries(values).map(([k, v]) => [k, { value: v }]));
-  return {
-    getFields: () => fields,
-  };
+const createGetValues = (values: Record<string, unknown>) => {
+  return (name: string) => values[name];
 };
 
 describe('edit_ilm_phases_flyout/form/get_phase_duration_ms', () => {
   it('returns null when the phase is not enabled', () => {
-    const form = createForm({
+    const getValues = createGetValues({
       '_meta.warm.enabled': false,
       '_meta.warm.minAgeValue': '30',
       '_meta.warm.minAgeUnit': 'd',
     });
 
     expect(
-      getPhaseDurationMs(form, 'warm', {
+      getPhaseDurationMs(getValues, 'warm', {
         valuePathSuffix: 'minAgeValue',
         unitPathSuffix: 'minAgeUnit',
       })
@@ -31,7 +28,7 @@ describe('edit_ilm_phases_flyout/form/get_phase_duration_ms', () => {
   });
 
   it('returns null when extraEnabledPathSuffix is provided but disabled', () => {
-    const form = createForm({
+    const getValues = createGetValues({
       '_meta.warm.enabled': true,
       '_meta.warm.downsampleEnabled': false,
       '_meta.warm.downsample.fixedIntervalValue': '1',
@@ -39,7 +36,7 @@ describe('edit_ilm_phases_flyout/form/get_phase_duration_ms', () => {
     });
 
     expect(
-      getPhaseDurationMs(form, 'warm', {
+      getPhaseDurationMs(getValues, 'warm', {
         valuePathSuffix: 'downsample.fixedIntervalValue',
         unitPathSuffix: 'downsample.fixedIntervalUnit',
         extraEnabledPathSuffix: 'downsampleEnabled',
@@ -48,14 +45,14 @@ describe('edit_ilm_phases_flyout/form/get_phase_duration_ms', () => {
   });
 
   it('returns null when value is empty', () => {
-    const form = createForm({
+    const getValues = createGetValues({
       '_meta.warm.enabled': true,
       '_meta.warm.minAgeValue': '   ',
       '_meta.warm.minAgeUnit': 'd',
     });
 
     expect(
-      getPhaseDurationMs(form, 'warm', {
+      getPhaseDurationMs(getValues, 'warm', {
         valuePathSuffix: 'minAgeValue',
         unitPathSuffix: 'minAgeUnit',
       })
@@ -63,14 +60,14 @@ describe('edit_ilm_phases_flyout/form/get_phase_duration_ms', () => {
   });
 
   it('returns null when the value cannot be converted to milliseconds', () => {
-    const form = createForm({
+    const getValues = createGetValues({
       '_meta.warm.enabled': true,
       '_meta.warm.minAgeValue': 'abc',
       '_meta.warm.minAgeUnit': 'd',
     });
 
     expect(
-      getPhaseDurationMs(form, 'warm', {
+      getPhaseDurationMs(getValues, 'warm', {
         valuePathSuffix: 'minAgeValue',
         unitPathSuffix: 'minAgeUnit',
       })
@@ -78,14 +75,14 @@ describe('edit_ilm_phases_flyout/form/get_phase_duration_ms', () => {
   });
 
   it('returns null for negative durations', () => {
-    const form = createForm({
+    const getValues = createGetValues({
       '_meta.warm.enabled': true,
       '_meta.warm.minAgeValue': '-1',
       '_meta.warm.minAgeUnit': 'd',
     });
 
     expect(
-      getPhaseDurationMs(form, 'warm', {
+      getPhaseDurationMs(getValues, 'warm', {
         valuePathSuffix: 'minAgeValue',
         unitPathSuffix: 'minAgeUnit',
       })
@@ -93,14 +90,14 @@ describe('edit_ilm_phases_flyout/form/get_phase_duration_ms', () => {
   });
 
   it('returns milliseconds for valid value+unit', () => {
-    const form = createForm({
+    const getValues = createGetValues({
       '_meta.warm.enabled': true,
       '_meta.warm.minAgeValue': '2',
       '_meta.warm.minAgeUnit': 'h',
     });
 
     expect(
-      getPhaseDurationMs(form, 'warm', {
+      getPhaseDurationMs(getValues, 'warm', {
         valuePathSuffix: 'minAgeValue',
         unitPathSuffix: 'minAgeUnit',
       })
@@ -108,13 +105,13 @@ describe('edit_ilm_phases_flyout/form/get_phase_duration_ms', () => {
   });
 
   it('defaults unit to days when unit field is missing', () => {
-    const form = createForm({
+    const getValues = createGetValues({
       '_meta.warm.enabled': true,
       '_meta.warm.minAgeValue': '2',
     });
 
     expect(
-      getPhaseDurationMs(form, 'warm', {
+      getPhaseDurationMs(getValues, 'warm', {
         valuePathSuffix: 'minAgeValue',
         unitPathSuffix: 'minAgeUnit',
       })
