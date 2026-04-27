@@ -30,7 +30,7 @@ export async function getEsqlView({
 
   const response = await esClient.transport.request<EsqlViewResponse>({
     method: 'GET',
-    path: `/_query/view/${name}`,
+    path: `/_query/view/${encodeURIComponent(name)}`,
   });
 
   if (isEmpty(response.views)) {
@@ -55,7 +55,7 @@ export async function upsertEsqlView({
 
   await esClient.transport.request({
     method: 'PUT',
-    path: `/_query/view/${name}`,
+    path: `/_query/view/${encodeURIComponent(name)}`,
     body: { query },
   });
 }
@@ -74,7 +74,7 @@ export async function deleteEsqlView({
   await esClient.transport.request(
     {
       method: 'DELETE',
-      path: `/_query/view/${name}`,
+      path: `/_query/view/${encodeURIComponent(name)}`,
     },
     {
       ignore: [404],

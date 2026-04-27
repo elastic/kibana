@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -37,9 +38,15 @@ export const registerDeleteRoute = (
       path: '/{type}/{id}',
       options: {
         summary: `Delete a saved object`,
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Deletes a single Kibana saved object by type and ID.
+
+There is currently no complete replacement for deleting arbitrary saved objects via an HTTP API.`,
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        oasOperationObject: () => path.resolve(__dirname, './delete.examples.yaml'),
       },
       security: {
         authz: {
@@ -49,11 +56,18 @@ export const registerDeleteRoute = (
       },
       validate: {
         params: schema.object({
-          type: schema.string(),
-          id: schema.string(),
+          type: schema.string({ meta: { description: 'The saved object type.' } }),
+          id: schema.string({ meta: { description: 'The saved object identifier.' } }),
         }),
         query: schema.object({
-          force: schema.maybe(schema.boolean()),
+          force: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When true, force deletion of multi-namespace objects from all namespaces.',
+              },
+            })
+          ),
         }),
       },
     },
