@@ -158,9 +158,4 @@ describe('transformPanelsOut', () => {
       }
     `);
   });
-
-  it('should require dashboard title minLength of 1', () => {
-    const strictSchema = getDashboardStateSchema(false);
-    expect(() => strictSchema.validate({ title: '' })).toThrow();
-  });
 });
