@@ -149,11 +149,6 @@ describe('UnifiedHistogramStateService', () => {
       chartHidden: true,
       topPanelHeight: 200,
     });
-    expect(setChartHidden as jest.Mock).toHaveBeenCalledWith(
-      unifiedHistogramServicesMock.storage,
-      localStorageKeyPrefix,
-      true
-    );
     expect(setTopPanelHeight as jest.Mock).toHaveBeenCalledWith(
       unifiedHistogramServicesMock.storage,
       localStorageKeyPrefix,

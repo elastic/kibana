@@ -11,6 +11,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedHistogramTopPanelHeightContext } from '../types';
 
 export const CHART_HIDDEN_KEY = 'chartHidden';
+export const TABLE_HIDDEN_KEY = 'tableHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'histogramHeight';
 export const HISTOGRAM_BREAKDOWN_FIELD_KEY = 'histogramBreakdownField';
 
@@ -32,7 +33,7 @@ export const getTableHidden = (
   storage: Storage,
   localStorageKeyPrefix: string
 ): boolean | undefined =>
-  storage.get(getLocalStorageKey(localStorageKeyPrefix, 'tableHidden')) ?? undefined;
+  storage.get(getLocalStorageKey(localStorageKeyPrefix, TABLE_HIDDEN_KEY)) ?? undefined;
 
 /**
  * Get the top panel height from local storage
@@ -69,7 +70,7 @@ export const setTableHidden = (
   storage: Storage,
   localStorageKeyPrefix: string,
   tableHidden: boolean | undefined
-) => storage.set(getLocalStorageKey(localStorageKeyPrefix, 'tableHidden'), tableHidden);
+) => storage.set(getLocalStorageKey(localStorageKeyPrefix, TABLE_HIDDEN_KEY), tableHidden);
 
 /**
  * Set the top panel height in local storage
