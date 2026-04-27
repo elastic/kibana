@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+
 export interface CompositeAfterKey {
   [key: string]: string | null;
 }
@@ -39,6 +41,14 @@ export interface RelationshipIntegrationConfig {
    * event.outcome == "success" are added automatically.
    */
   esqlWhereClause: string;
+  /**
+   * Additional DSL filters applied to the composite aggregation (Step 1).
+   * Use this when the integration's actors only appear in a specific event subset
+   * (e.g. log_on events for Elastic Defend, ssh_login for system.auth). Without
+   * it, the composite agg finds users from ALL event types and its bucket filter
+   * misses actors who only appear in the target event type.
+   */
+  compositeAggAdditionalFilters?: QueryDslQueryContainer[];
   /**
    * Actor field names used as composite aggregation sources and bucket filter keys.
    * Defaults to ECS user identity fields. Set this for integrations whose actor is

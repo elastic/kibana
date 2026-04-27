@@ -30,6 +30,10 @@ export const buildCompositeAgg = (
     baseFilters.push(euid.dsl.getEuidDocumentsContainsIdFilter('host'));
   }
 
+  if (config.compositeAggAdditionalFilters?.length) {
+    baseFilters.push(...config.compositeAggAdditionalFilters);
+  }
+
   return {
     size: 0,
     query: { bool: { filter: baseFilters } },

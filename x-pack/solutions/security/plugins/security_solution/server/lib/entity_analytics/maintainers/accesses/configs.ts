@@ -20,6 +20,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     targetEntityType: 'host',
     esqlWhereClause: `event.action == "log_on"
     AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive", "Network")`,
+    compositeAggAdditionalFilters: [{ term: { 'event.action': 'log_on' } }],
   },
   {
     id: 'aws_cloudtrail',
@@ -29,6 +30,9 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     targetEntityType: 'host',
     esqlWhereClause: `event.module == "aws"
     AND event.action IN ("StartSession", "SendSSHPublicKey")`,
+    compositeAggAdditionalFilters: [
+      { terms: { 'event.action': ['StartSession', 'SendSSHPublicKey'] } },
+    ],
   },
   {
     id: 'system_auth',
@@ -38,6 +42,7 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     targetEntityType: 'host',
     esqlWhereClause: `event.category IN ("authentication", "session")
     AND event.action == "ssh_login"`,
+    compositeAggAdditionalFilters: [{ term: { 'event.action': 'ssh_login' } }],
   },
   {
     id: 'system_security',
@@ -49,5 +54,8 @@ export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
     AND event.code IN ("4624", "4648")
     AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")
     AND NOT user.name IN (${EXCLUDED_USERNAMES.map((u) => `"${u}"`).join(', ')})`,
+    compositeAggAdditionalFilters: [
+      { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
+    ],
   },
 ];

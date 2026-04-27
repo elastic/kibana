@@ -82,6 +82,23 @@ describe('buildCompositeAgg', () => {
     const result = buildCompositeAgg(accessesConfig, afterKey);
     expect(JSON.stringify(result)).toContain('alice');
   });
+
+  it('appends compositeAggAdditionalFilters to the base filters', () => {
+    const config: RelationshipIntegrationConfig = {
+      ...accessesConfig,
+      compositeAggAdditionalFilters: [{ term: { 'event.action': 'log_on' } }],
+    };
+    const result = buildCompositeAgg(config, undefined);
+    const queryStr = JSON.stringify(result);
+    expect(queryStr).toContain('event.action');
+    expect(queryStr).toContain('log_on');
+  });
+
+  it('does NOT include extra event filters when compositeAggAdditionalFilters is absent', () => {
+    const result = buildCompositeAgg(accessesConfig, undefined);
+    const queryStr = JSON.stringify(result);
+    expect(queryStr).not.toContain('log_on');
+  });
 });
 
 describe('buildBucketFilter', () => {
