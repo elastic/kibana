@@ -302,9 +302,15 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
         color: ${theme.euiTheme.colors.textParagraph} !important;
       }
     }
-    .hover-row.status-bar {
+
+    /* Hide View Problem action, it's always the first action */
+    .monaco-hover .hover-row.status-bar .actions > .action-container:nth-of-type(1) {
       display: none;
     }
+    .monaco-editor .action-widget {
+      min-width: calc(${theme.euiTheme.size.xl} * 6);
+    }
+
     .margin-view-overlays .line-numbers {
       color: ${theme.euiTheme.colors.textDisabled};
     }
@@ -458,4 +464,17 @@ export const trackSuggestionPopupState = (
       isSuggestionPopupOpenRef.current = false;
     });
   }
+};
+
+/**
+ * Checks if the code actions menu is being displayed.
+ * @param editor
+ * @returns
+ */
+export const isCodeActionMenuVisible = (editor: monaco.editor.IStandaloneCodeEditor): boolean => {
+  const actionWidgetList = editor.getDomNode()?.querySelector('.action-widget .actionList');
+  if (actionWidgetList) {
+    return Array.from(actionWidgetList.children).length > 0;
+  }
+  return false;
 };

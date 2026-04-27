@@ -14,11 +14,11 @@ import {
   generateCosmosDBApiRequestHeaders,
   MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
-  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
-  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
-  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
   MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL,
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
@@ -188,6 +188,12 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       `uiam.cosmos.account.endpoint=${MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL}`,
       '--env',
       `uiam.cosmos.container.apikey=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}`,
+      '--env',
+      `uiam.cosmos.container.oauth_authorization_code=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES}`,
+      '--env',
+      `uiam.cosmos.container.oauth_client=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS}`,
+      '--env',
+      `uiam.cosmos.container.oauth_app_connection=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}`,
       '--env',
       `uiam.cosmos.container.token_invalidation=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION}`,
       '--env',
@@ -436,23 +442,28 @@ export async function initializeUiamContainers(log: ToolingLog) {
     );
   }
 
-  // 2. Create collections with their respective partition keys.
-  const collections: Array<{ name: string; partitionKeyPath: string }> = [
-    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS, partitionKeyPath: '/id' },
-    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS, partitionKeyPath: '/id' },
-    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION, partitionKeyPath: '/id' },
-    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS, partitionKeyPath: '/creator_id' },
+  // 2. Create collections.
+  // Partition key paths must match the UIAM service's CosmosDB repository expectations.
+  const collections: Array<{ id: string; partitionKeyPath: string }> = [
+    { id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS, partitionKeyPath: '/id' },
+    { id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS, partitionKeyPath: '/id' },
+    { id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION, partitionKeyPath: '/id' },
     {
-      name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
+      id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
+      partitionKeyPath: '/creator_id',
+    },
+    {
+      id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
       partitionKeyPath: '/id',
     },
     {
-      name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
+      id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
       partitionKeyPath: '/client_id',
     },
   ];
+
   for (const collection of collections) {
-    log.info(chalk.bold(`Creating a Cosmos DB collection (${collection.name})…`));
+    log.info(chalk.bold(`Creating a Cosmos DB collection (${collection.id})…`));
 
     const collectionRes = await fetch(
       `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls`,
@@ -464,7 +475,7 @@ export async function initializeUiamContainers(log: ToolingLog) {
           `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}`
         ),
         body: JSON.stringify({
-          id: collection.name,
+          id: collection.id,
           partitionKey: { paths: [collection.partitionKeyPath], kind: 'Hash' },
         }),
         dispatcher: fetchDispatcher,
@@ -472,12 +483,12 @@ export async function initializeUiamContainers(log: ToolingLog) {
     );
 
     if (collectionRes.status === 201) {
-      log.info(chalk.green(`✓ Collection (${collection.name}) created successfully`));
+      log.info(chalk.green(`✓ Collection (${collection.id}) created successfully`));
     } else if (collectionRes.status === 409) {
-      log.info(chalk.yellow(`✓ Collection (${collection.name}) already exists`));
+      log.info(chalk.yellow(`✓ Collection (${collection.id}) already exists`));
     } else {
       throw new Error(
-        `Failed to create collection (${collection.name}): ${
+        `Failed to create collection (${collection.id}): ${
           collectionRes.status
         } ${await collectionRes.text()}`
       );
