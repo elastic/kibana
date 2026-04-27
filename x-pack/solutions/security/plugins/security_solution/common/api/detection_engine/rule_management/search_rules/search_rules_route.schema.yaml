@@ -43,7 +43,7 @@ paths:
               properties:
                 fields:
                   type: array
-                  description: Subset of rule attributes to return.
+                  description: Restrict the response to only include the specified fields and necessary metadata.
                   items:
                     $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesField'
                 filter:

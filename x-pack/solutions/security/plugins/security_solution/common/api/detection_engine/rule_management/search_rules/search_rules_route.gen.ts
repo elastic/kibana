@@ -55,7 +55,7 @@ export const SearchRulesRequestBody = lazySchema(() =>
   z
     .object({
       /**
-       * Subset of rule attributes to return.
+       * Restrict the response to only include the specified fields and necessary metadata.
        */
       fields: z.array(SearchRulesField).optional(),
       /**

@@ -97,9 +97,8 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             search,
           });
 
-          const hasGapFilters = Boolean(
-            gapFillStatuses && gapFillStatuses.length > 0 && gapsRangeStart && gapsRangeEnd
-          );
+          const hasGapFilters =
+            gapFillStatuses && gapFillStatuses.length > 0 && gapsRangeStart && gapsRangeEnd;
 
           const shouldUseSearchAfter =
             sortField != null &&
@@ -110,7 +109,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
           const ruleIdsWithGaps: string[] = [];
           const warnings: WarningSchema[] = [];
 
-          if (hasGapFilters && gapFillStatuses && gapsRangeStart && gapsRangeEnd) {
+          if (hasGapFilters) {
             const uiSettingsClient = ctx.core.uiSettings.client;
             const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
               EXCLUDED_GAP_REASONS_KEY

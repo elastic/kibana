@@ -1184,7 +1184,7 @@ describe('find()', () => {
     });
   });
 
-  describe('searchAfter, aggs, and aggregations', () => {
+  describe('searchAfter and aggregations', () => {
     const sampleSavedObjectHit = {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
