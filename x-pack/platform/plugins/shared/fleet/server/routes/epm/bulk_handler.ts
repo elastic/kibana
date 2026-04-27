@@ -22,6 +22,10 @@ import type {
 } from '../../types';
 import { updatePackage } from '../../services/epm/packages/update';
 import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
+import {
+  getAllowedNamespacePrefixesForSpace,
+  isNamespaceAllowedByPrefixes,
+} from '../../services/spaces/policy_namespaces';
 
 import type {
   BulkOperationPackagesResponse,
@@ -209,26 +213,44 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
   }
 
   const taskManagerStart = getTaskManagerStart();
+  const allowedPrefixes = await getAllowedNamespacePrefixesForSpace(spaceId);
 
   const items = await pMap(
     packages,
     async (packageName) => {
+      const installation = await getInstallationsByName({
+        savedObjectsClient,
+        pkgNames: [packageName],
+      });
+      if (installation.length === 0) {
+        return {
+          name: packageName,
+          success: false,
+          error: `Package ${packageName} is not installed`,
+        };
+      }
+
+      const current = installation[0].namespace_customization_enabled_for ?? [];
+
       try {
-        const installation = await getInstallationsByName({
-          savedObjectsClient,
-          pkgNames: [packageName],
-        });
-        if (installation.length === 0) {
+        const afterEnable = [...new Set([...current, ...enable])];
+        const newList = afterEnable.filter((ns) => !disable.includes(ns));
+
+        // Gate both added and removed namespaces on the current space's allowed_namespace_prefixes.
+        const added = newList.filter((ns) => !current.includes(ns));
+        const removed = current.filter((ns) => !newList.includes(ns));
+        const changed = [...added, ...removed];
+        const blocked = changed.filter((ns) => !isNamespaceAllowedByPrefixes(ns, allowedPrefixes));
+        if (blocked.length > 0) {
           return {
             name: packageName,
             success: false,
-            error: `Package ${packageName} is not installed`,
+            namespace_customization_enabled_for: current,
+            error: `Cannot change namespace customization for: ${blocked.join(
+              ', '
+            )}. Allowed prefixes in this space: ${(allowedPrefixes ?? []).join(', ')}`,
           };
         }
-
-        const current = installation[0].namespace_customization_enabled_for ?? [];
-        const afterEnable = [...new Set([...current, ...enable])];
-        const newList = afterEnable.filter((ns) => !disable.includes(ns));
 
         const { namespaceCustomizationDiff } = await updatePackage({
           savedObjectsClient,
@@ -257,6 +279,7 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
         return {
           name: packageName,
           success: false,
+          namespace_customization_enabled_for: current,
           error: err instanceof Error ? err.message : String(err),
         };
       }

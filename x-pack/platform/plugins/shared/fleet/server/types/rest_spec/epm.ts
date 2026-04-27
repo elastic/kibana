@@ -692,7 +692,7 @@ export const BulkNamespaceCustomizationResponseSchema = schema.object({
         schema.arrayOf(schema.string(), {
           meta: {
             description:
-              'The resulting opt-in list on the package after the enable/disable deltas were applied. Present when `success` is true.',
+              'The opt-in list on the package. Present whenever the package is installed: the new list on success, or the unchanged list when the request was rejected (e.g. by a namespace-prefix restriction).',
           },
         })
       ),

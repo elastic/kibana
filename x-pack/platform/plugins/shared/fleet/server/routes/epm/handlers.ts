@@ -96,7 +96,16 @@ import {
   licenseService,
   packagePolicyService,
 } from '../../services';
-import { getPackageUsageStats, getPackageDependencies } from '../../services/epm/packages/get';
+import {
+  getInstallation,
+  getPackageUsageStats,
+  getPackageDependencies,
+} from '../../services/epm/packages/get';
+import {
+  getAllowedNamespacePrefixesForSpace,
+  isNamespaceAllowedByPrefixes,
+} from '../../services/spaces/policy_namespaces';
+import { PolicyNamespaceValidationError } from '../../../common/errors';
 import {
   bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
@@ -325,6 +334,28 @@ export const updatePackageHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const savedObjectsClient = (await context.fleet).internalSoClient;
   const { pkgName } = request.params;
+  const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+
+  // Gate both added and removed namespaces on the current space's allowed_namespace_prefixes.
+  const requestedList = request.body.namespace_customization_enabled_for;
+  if (requestedList) {
+    const installation = await getInstallation({ savedObjectsClient, pkgName });
+    const currentList = installation?.namespace_customization_enabled_for ?? [];
+    const added = requestedList.filter((ns) => !currentList.includes(ns));
+    const removed = currentList.filter((ns) => !requestedList.includes(ns));
+    const changed = [...added, ...removed];
+    if (changed.length > 0) {
+      const prefixes = await getAllowedNamespacePrefixesForSpace(spaceId);
+      const blocked = changed.filter((ns) => !isNamespaceAllowedByPrefixes(ns, prefixes));
+      if (blocked.length > 0) {
+        throw new PolicyNamespaceValidationError(
+          `Cannot change namespace customization for: ${blocked.join(
+            ', '
+          )}. Allowed prefixes in this space: ${(prefixes ?? []).join(', ')}`
+        );
+      }
+    }
+  }
 
   const { packageInfo, namespaceCustomizationDiff } = await updatePackage({
     savedObjectsClient,
@@ -337,7 +368,7 @@ export const updatePackageHandler: FleetRequestHandler<
     namespaceCustomizationDiff.removedNamespaces.length > 0
   ) {
     await scheduleSyncNamespaceTemplatesTask(getTaskManagerStart(), {
-      spaceId: savedObjectsClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+      spaceId,
       packageName: pkgName,
       addedNamespaces: namespaceCustomizationDiff.addedNamespaces,
       removedNamespaces: namespaceCustomizationDiff.removedNamespaces,
