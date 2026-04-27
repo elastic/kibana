@@ -188,6 +188,30 @@ export class OverviewTab extends AssetDetailsTab {
       .locator('.echMetricText__value');
   }
 
+  private getKPILoadingIndicator(metric: string): Locator {
+    return this.kpiGrid
+      .getByTestId(`infraAssetDetailsKPI${metric}`)
+      .getByRole('progressbar', { name: 'Loading' });
+  }
+
+  private async waitForKPIValueTitleToBeSet(metric: string, timeout?: number) {
+    const valueLocator = this.getKPIValue(metric);
+    await valueLocator.waitFor({ state: 'attached', timeout });
+    const handle = await valueLocator.elementHandle();
+    if (!handle) {
+      return;
+    }
+
+    await this.page.waitForFunction(
+      (el) => {
+        const title = el.getAttribute('title');
+        return typeof title === 'string' && title.trim().length > 0;
+      },
+      handle,
+      { timeout }
+    );
+  }
+
   /**
    * Waits for all KPI Lens charts to finish rendering in parallel. The
    * `.echMetricText__value` element only appears once elastic-charts has
@@ -197,8 +221,16 @@ export class OverviewTab extends AssetDetailsTab {
    * across all 4 charts instead of cascading it.
    */
   public async waitForKPIChartsToLoad(timeout?: number) {
+    await this.kpiGrid.scrollIntoViewIfNeeded();
+
     await Promise.all(
-      KPI_METRICS.map((metric) => this.getKPIValue(metric).waitFor({ state: 'visible', timeout }))
+      KPI_METRICS.map((metric) =>
+        this.getKPILoadingIndicator(metric).waitFor({ state: 'hidden', timeout })
+      )
+    );
+
+    await Promise.all(
+      KPI_METRICS.map((metric) => this.waitForKPIValueTitleToBeSet(metric, timeout))
     );
   }
 }

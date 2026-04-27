@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
   HOSTS,
+  HOST1_NAME,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
   EXTENDED_TIMEOUT,
@@ -44,7 +45,7 @@ test.describe(
       await test.step('click a host link to navigate to host details', async () => {
         const hostLink = hostsPage.getHostDetailLinks();
         await expect(hostLink).not.toHaveCount(0);
-        const linkRow = hostsPage.getHostRow('host-1');
+        const linkRow = hostsPage.getHostRow(HOST1_NAME);
         await linkRow.getByTestId('hostsViewTableEntryTitleLink').click();
       });
 
