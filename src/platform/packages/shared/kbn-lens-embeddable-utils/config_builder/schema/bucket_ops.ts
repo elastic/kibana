@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { filterWithLabelSchema } from './filter';
 import {
@@ -14,14 +15,24 @@ import {
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
   LENS_HISTOGRAM_GRANULARITY_MAX,
   LENS_HISTOGRAM_GRANULARITY_MIN,
-  LENS_TERMS_SIZE_DEFAULT,
+  LENS_TERMS_LIMIT_DEFAULT,
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+  LENS_PERCENTILE_DEFAULT_VALUE,
+  LENS_PERCENTILE_RANK_DEFAULT_VALUE,
 } from './constants';
 import { formatSchema } from './format';
 import { labelSharedProp } from './shared';
 import { builderEnums } from './enums';
+
+export const BUCKET_OP_TITLES = {
+  dateHistogram: 'Date Histogram Operation',
+  terms: 'Terms Operation',
+  filters: 'Filters Operation',
+  histogram: 'Histogram Operation',
+  ranges: 'Ranges Operation',
+} as const;
 
 export const bucketDateHistogramOperationSchema = schema.object(
   {
@@ -74,7 +85,82 @@ export const bucketDateHistogramOperationSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'dateHistogramOperation', title: 'Date Histogram Operation' } }
+  { meta: { id: 'dateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram } }
+);
+const bucketTermsRankByCustomSharedSchema = schema.object({
+  type: schema.literal('custom'),
+  /**
+   * Field to be used for the custom operation
+   */
+  field: schema.string({
+    meta: {
+      description: 'Numeric field to be used for the custom operation',
+    },
+  }),
+  /**
+   * Direction of the custom operation
+   */
+  direction: builderEnums.direction({
+    meta: {
+      id: 'termsRankByCustomDirection',
+      description: 'Sort direction for custom ranking',
+    },
+  }),
+});
+
+const bucketTermsRankByCustomBaseSchema = bucketTermsRankByCustomSharedSchema.extends({
+  operation: schema.oneOf([
+    schema.literal('min'),
+    schema.literal('max'),
+    schema.literal('average'),
+    schema.literal('median'),
+    schema.literal('standard_deviation'),
+    schema.literal('unique_count'),
+    schema.literal('count'),
+    schema.literal('sum'),
+    schema.literal('last_value'),
+  ]),
+});
+
+const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomSharedSchema.extends(
+  {
+    operation: schema.literal('percentile'),
+    percentile: schema.number({
+      meta: {
+        description:
+          'The percentile threshold (0–100) at which to compute the field value used for ranking terms.',
+      },
+      defaultValue: LENS_PERCENTILE_DEFAULT_VALUE,
+    }),
+  },
+  {
+    meta: {
+      id: 'termsRankByPercentileOperation',
+      title: 'Terms Rank By Percentile Operation',
+      description:
+        'Ranks terms by a percentile value of a numeric field (e.g. the 95th percentile of response time).',
+    },
+  }
+);
+const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSharedSchema.extends(
+  {
+    operation: schema.literal('percentile_rank'),
+    rank: schema.number({
+      meta: {
+        description:
+          'The numeric value for which to compute the percentile rank (the percentage of field values at or below this value).',
+      },
+      defaultValue: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
+    }),
+  },
+  {
+    meta: {
+      id: 'termsRankByPercentileRankOperation',
+      title: 'Terms Rank By Percentile Rank Operation',
+      description:
+        'Ranks terms by the percentile rank of a single value — the proportion of field values at or below that value.',
+    },
+  }
 );
 
 export const bucketTermsOperationSchema = schema.object(
@@ -94,11 +180,11 @@ export const bucketTermsOperationSchema = schema.object(
       { minSize: 1, maxSize: 4 }
     ),
     /**
-     * Size of the terms
+     * Maximum number of terms.
      */
-    size: schema.number({
-      defaultValue: LENS_TERMS_SIZE_DEFAULT,
-      meta: { description: 'Size of the terms' },
+    limit: schema.number({
+      defaultValue: LENS_TERMS_LIMIT_DEFAULT,
+      meta: { description: 'Maximum number of terms' },
     }),
     /**
      * Whether to increase accuracy
@@ -177,7 +263,10 @@ export const bucketTermsOperationSchema = schema.object(
            * Direction of the alphabetical order
            */
           direction: builderEnums.direction({
-            meta: { id: 'termsRankByAlphabeticalDirection' },
+            meta: {
+              id: 'termsRankByAlphabeticalDirection',
+              description: 'Sort direction for alphabetical ranking',
+            },
           }),
         }),
         schema.object({
@@ -195,60 +284,30 @@ export const bucketTermsOperationSchema = schema.object(
           type: schema.literal('significant'),
         }),
         schema.object({
-          type: schema.literal('column'),
-          /**
-           * Metric to be used for the column by index number (0 based)
-           */
-          metric: schema.number({
+          type: schema.literal('metric'),
+          metric_index: schema.number({
+            defaultValue: 0,
+            min: 0,
             meta: {
-              description: 'Metric to be used for the column by index number (0 based)',
+              description:
+                "0-based index into the metrics array (layer's metrics array if XY chart) identifying which metric to rank by. Defaults to 0 (first metric).",
             },
           }),
-          /**
-           * Direction of the column
-           */
+
           direction: builderEnums.direction({
-            meta: { id: 'termsRankByColumnDirection' },
-          }),
-        }),
-        schema.object({
-          type: schema.literal('custom'),
-          /**
-           * Operation type
-           * @TODO handle the different param options for some of these operations
-           */
-          operation: schema.oneOf([
-            schema.literal('min'),
-            schema.literal('max'),
-            schema.literal('average'),
-            schema.literal('median'),
-            schema.literal('standard_deviation'),
-            schema.literal('unique_count'),
-            schema.literal('percentile'),
-            schema.literal('percentile_rank'),
-            schema.literal('count'),
-            schema.literal('sum'),
-            schema.literal('last_value'),
-          ]),
-          /**
-           * Field to be used for the custom operation
-           */
-          field: schema.string({
             meta: {
-              description: 'Field to be used for the custom operation',
+              id: 'termsRankByMetricDirection',
+              description: 'Sort direction for metric-based ranking',
             },
           }),
-          /**
-           * Direction of the custom operation
-           */
-          direction: builderEnums.direction({
-            meta: { id: 'termsRankByCustomDirection' },
-          }),
         }),
+        bucketTermsRankByCustomBaseSchema,
+        bucketTermsRankByPercentileOperationSchema,
+        bucketTermsRankByPercentileRankOperationSchema,
       ])
     ),
   },
-  { meta: { id: 'termsOperation', title: 'Terms Operation' } }
+  { meta: { id: 'termsOperation', title: BUCKET_OP_TITLES.terms } }
 );
 
 export const bucketFiltersOperationSchema = schema.object(
@@ -260,7 +319,7 @@ export const bucketFiltersOperationSchema = schema.object(
      */
     filters: schema.arrayOf(filterWithLabelSchema, { maxSize: 100 }),
   },
-  { meta: { id: 'filtersOperation', title: 'Filters Operation' } }
+  { meta: { id: 'filtersOperation', title: BUCKET_OP_TITLES.filters } }
 );
 
 export const bucketHistogramOperationSchema = schema.object(
@@ -314,7 +373,7 @@ export const bucketHistogramOperationSchema = schema.object(
       defaultValue: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
     }),
   },
-  { meta: { id: 'histogramOperation', title: 'Histogram Operation' } }
+  { meta: { id: 'histogramOperation', title: BUCKET_OP_TITLES.histogram } }
 );
 
 export const bucketRangesOperationSchema = schema.object(
@@ -379,7 +438,7 @@ export const bucketRangesOperationSchema = schema.object(
       { maxSize: 100 }
     ),
   },
-  { meta: { id: 'rangesOperation', title: 'Ranges Operation' } }
+  { meta: { id: 'rangesOperation', title: BUCKET_OP_TITLES.ranges } }
 );
 
 export const bucketOperationDefinitionSchema = schema.oneOf([
@@ -389,6 +448,14 @@ export const bucketOperationDefinitionSchema = schema.oneOf([
   bucketRangesOperationSchema,
   bucketFiltersOperationSchema,
 ]);
+
+export type TermOperationRankByCustomBaseType = TypeOf<typeof bucketTermsRankByCustomBaseSchema>;
+export type TermOperationRankByCustomPercentileType = TypeOf<
+  typeof bucketTermsRankByPercentileOperationSchema
+>;
+export type TermOperationRankByCustomPercentileRankType = TypeOf<
+  typeof bucketTermsRankByPercentileRankOperationSchema
+>;
 
 export type LensApiDateHistogramOperation = typeof bucketDateHistogramOperationSchema.type;
 export type LensApiTermsOperation = typeof bucketTermsOperationSchema.type;

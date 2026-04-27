@@ -17,7 +17,7 @@ import {
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { BaseMetricCard } from '../../common/base_metric_card';
-import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
+import { getTimeSizeAndUnitLabel } from '../../../../../../util/format_size_units';
 import { IlmLink } from '../ilm_link';
 
 export const RetentionCard = ({

@@ -8,7 +8,7 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
-import { EsqlQuery, parse, isHeaderCommand, Walker } from '@elastic/esql';
+import { EsqlQuery, isHeaderCommand, Walker } from '@elastic/esql';
 import type {
   ESQLColumn,
   ESQLAstItem,
@@ -27,8 +27,7 @@ import type {
   ISuggestionItem,
 } from '../../commands/registry/types';
 import { getControlSuggestionIfSupported } from '../../commands/definitions/utils';
-import { correctQuerySyntax } from '../../commands/definitions/utils/ast';
-import { getCursorContext } from '../shared/get_cursor_context';
+import { getAutocompleteCursorContext } from '../shared/parse_for_autocomplete_query';
 import { getFromCommandHelper } from '../shared/resources_helpers';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
@@ -37,7 +36,7 @@ import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_hel
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
-import { attachReplacementRanges } from './utils/prefix_range';
+import { attachReplacementRanges, attachRootQueryReplacementRanges } from './utils/prefix_range';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -57,11 +56,10 @@ export async function suggest(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  const innerText = fullText.substring(0, offset);
-  const correctedQuery = correctQuerySyntax(innerText);
-  const { root } = parse(correctedQuery, { withFormatting: true });
-
-  const astContext = getCursorContext(innerText, root, offset);
+  const { innerText, correctedQuery, root, astContext } = getAutocompleteCursorContext(
+    fullText,
+    offset
+  );
 
   if (astContext.type === 'comment') {
     return [];
@@ -178,13 +176,16 @@ export async function suggest(
         ...recommendedQueriesSuggestionsFromStaticTemplates
       );
 
-      const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
-      return [
-        ...headerCommandsSuggestions,
-        ...sourceCommandsSuggestions,
-        ...recommendedQueriesSuggestions,
-      ];
+      const rootLevelQuerySuggestions = attachRootQueryReplacementRanges(
+        [...suggestions.filter(isSourceCommandSuggestion), ...recommendedQueriesSuggestions],
+        fullText,
+        offset
+      );
+
+      return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
+        command: '',
+      });
     }
 
     return suggestions.filter(

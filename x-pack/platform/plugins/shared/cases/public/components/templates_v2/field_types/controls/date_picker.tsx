@@ -16,6 +16,7 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import React from 'react';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import {
   type DatePickerFieldSchema,
   type ConditionRenderProps,
@@ -55,7 +56,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   return (
     <UseField
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
       serializer={serializer}
       config={{ validations }}
     >

@@ -119,7 +119,7 @@
       "label": "AgentBuilderPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-      "lineNumber": 73,
+      "lineNumber": 75,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -137,7 +137,7 @@
         "\nPublic start contract for the browser-side agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-      "lineNumber": 75,
+      "lineNumber": 77,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -161,7 +161,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 79,
+          "lineNumber": 81,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -185,7 +185,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 83,
+          "lineNumber": 85,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -209,7 +209,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 87,
+          "lineNumber": 89,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -233,7 +233,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 91,
+          "lineNumber": 93,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -254,7 +254,7 @@
             "OpenConversationSidebarReturn"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 95,
+          "lineNumber": 97,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -273,7 +273,7 @@
                 " | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 112,
+              "lineNumber": 114,
               "columnNumber": 14,
               "deprecated": false,
               "trackAdoption": false,
@@ -299,7 +299,7 @@
             " | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 113,
+          "lineNumber": 115,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -316,7 +316,7 @@
                 " | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 118,
+              "lineNumber": 120,
               "columnNumber": 16,
               "deprecated": false,
               "trackAdoption": false,
@@ -338,7 +338,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 119,
+          "lineNumber": 121,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -354,7 +354,7 @@
                 "EmbeddableConversationProps"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 119,
+              "lineNumber": 121,
               "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false,
@@ -374,7 +374,7 @@
             "() => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 120,
+          "lineNumber": 122,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -393,10 +393,10 @@
           "signature": [
             "(attachment: ",
             "AttachmentInput",
-            "<string, Record<string, unknown>>) => void"
+            "<string, unknown>) => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 121,
+          "lineNumber": 123,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -404,7 +404,7 @@
             {
               "parentPluginId": "agentBuilder",
               "id": "def-public.AgentBuilderPluginStart.addAttachment.$1",
-              "type": "CompoundType",
+              "type": "Object",
               "tags": [],
               "label": "attachment",
               "description": [
@@ -412,10 +412,10 @@
               ],
               "signature": [
                 "AttachmentInput",
-                "<string, Record<string, unknown>>"
+                "<string, unknown>"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 127,
+              "lineNumber": 129,
               "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false,
@@ -445,7 +445,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 128,
+          "lineNumber": 130,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -463,7 +463,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 148,
+              "lineNumber": 150,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -482,7 +482,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 149,
+              "lineNumber": 151,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -501,7 +501,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 150,
+              "lineNumber": 152,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -521,6 +521,425 @@
     "classes": [],
     "functions": [],
     "interfaces": [
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ConversationAgentExecution",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationAgentExecution",
+        "description": [
+          "\nAn agent execution in conversation mode — tied to a conversation with persistence."
+        ],
+        "signature": [
+          "ConversationAgentExecution",
+          " extends BaseAgentExecution"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationAgentExecution.executionMode",
+            "type": "string",
+            "tags": [],
+            "label": "executionMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentExecutionMode",
+                "text": "AgentExecutionMode"
+              },
+              ".conversation"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationAgentExecution.agentParams",
+            "type": "Object",
+            "tags": [],
+            "label": "agentParams",
+            "description": [],
+            "signature": [
+              "ConversationExecutionParams"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ConversationExecutionParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationExecutionParams",
+        "description": [
+          "\nExecution parameters for conversation mode — tied to a conversation with persistence."
+        ],
+        "signature": [
+          "ConversationExecutionParams",
+          " extends ",
+          "BaseExecutionParams"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.conversationId",
+            "type": "string",
+            "tags": [],
+            "label": "conversationId",
+            "description": [
+              "Id of the conversation to continue."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.storeConversation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "storeConversation",
+            "description": [
+              "When false, the conversation will not be persisted. Defaults to true."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.autoCreateConversationWithId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoCreateConversationWithId",
+            "description": [
+              "Create conversation with specified ID if not found."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.browserApiTools",
+            "type": "Array",
+            "tags": [],
+            "label": "browserApiTools",
+            "description": [
+              "Browser API tools to make available to the agent."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.BrowserApiToolMetadata",
+                "text": "BrowserApiToolMetadata"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [
+              "The action to perform: \"regenerate\" re-executes the last round with original input (requires conversationId)."
+            ],
+            "signature": [
+              "\"regenerate\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ConversationListOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationListOptions",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/agent_builder/server/services/conversation/client/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationListOptions.agentId",
+            "type": "string",
+            "tags": [],
+            "label": "agentId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_builder/server/services/conversation/client/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ConversationsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationsStart",
+        "description": [
+          "\nAgentBuilder conversations service's start contract (read-only)."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+        "lineNumber": 277,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationsStart.getScopedClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getScopedClient",
+            "description": [
+              "\nReturns a read-only conversation client scoped to the given request's user and space."
+            ],
+            "signature": [
+              "(opts: { request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; }) => Promise<",
+              {
+                "pluginId": "agentBuilder",
+                "scope": "server",
+                "docId": "kibAgentBuilderPluginApi",
+                "section": "def-server.ReadOnlyConversationClient",
+                "text": "ReadOnlyConversationClient"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+            "lineNumber": 281,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.ConversationsStart.getScopedClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+                "lineNumber": 284,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "agentBuilder",
+                    "id": "def-server.ConversationsStart.getScopedClient.$1.request",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "KibanaRequest",
+                      "<unknown, unknown, unknown, any>"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+                    "lineNumber": 284,
+                    "columnNumber": 27,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ReadOnlyConversationClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReadOnlyConversationClient",
+        "description": [
+          "\nA read-only conversation client exposing only get and list operations."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+        "lineNumber": 263,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ReadOnlyConversationClient.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nRetrieve a single conversation by its ID, including all rounds."
+            ],
+            "signature": [
+              "(conversationId: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+            "lineNumber": 267,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.ReadOnlyConversationClient.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "conversationId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+                "lineNumber": 270,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ReadOnlyConversationClient.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [
+              "\nList conversations for the current user, optionally filtered by agent ID."
+            ],
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "agentBuilder",
+                "scope": "server",
+                "docId": "kibAgentBuilderPluginApi",
+                "section": "def-server.ConversationListOptions",
+                "text": "ConversationListOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ConversationWithoutRounds",
+                "text": "ConversationWithoutRounds"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+            "lineNumber": 271,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.ReadOnlyConversationClient.list.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "agentBuilder",
+                    "scope": "server",
+                    "docId": "kibAgentBuilderPluginApi",
+                    "section": "def-server.ConversationListOptions",
+                    "text": "ConversationListOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+                "lineNumber": 274,
+                "columnNumber": 8,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "agentBuilder",
         "id": "def-server.SmlChunk",
@@ -1658,25 +2077,6 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "agentBuilder",
-            "id": "def-server.SmlContext.request",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [
-              "The current user's request, when available. Absent during background crawler runs."
-            ],
-            "signature": [
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any> | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 45,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1732,7 +2132,7 @@
           "\nParameters for the event-driven indexing API."
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-        "lineNumber": 165,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1749,7 +2149,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 169,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1762,7 +2162,7 @@
             "label": "originId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 170,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1775,7 +2175,7 @@
             "label": "attachmentType",
             "description": [],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 171,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1791,7 +2191,7 @@
               "\"create\" | \"update\" | \"delete\""
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 172,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1807,7 +2207,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 173,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1825,7 +2225,7 @@
           "\nAn item returned by the `list` hook of an SML type."
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-        "lineNumber": 58,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1840,7 +2240,7 @@
               "Unique ID of the attachment (e.g., saved object ID)"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1855,7 +2255,7 @@
               "Last updated timestamp — used by crawler for change detection"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1873,7 +2273,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1891,7 +2291,7 @@
           "\nSML (Semantic Metadata Layer) start contract."
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 227,
+        "lineNumber": 241,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1917,7 +2317,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 231,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1939,7 +2339,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                "lineNumber": 235,
+                "lineNumber": 249,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1961,7 +2361,7 @@
           "\nContext passed to the toAttachment hook."
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-        "lineNumber": 49,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1978,7 +2378,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1994,7 +2394,7 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 54,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2007,7 +2407,7 @@
             "label": "spaceId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2025,7 +2425,7 @@
           "\nServer-side type definition for SML (Semantic Metadata Layer).\n\nRegistered via `agentBuilder.sml.registerType()` during plugin setup.\n\nSolutions register these to make their content discoverable via the SML."
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-        "lineNumber": 70,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2040,7 +2440,7 @@
               "Unique identifier for this SML type (e.g., 'dashboard', 'lens', 'esql')"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2074,7 +2474,7 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 81,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2096,7 +2496,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-                "lineNumber": 87,
+                "lineNumber": 85,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2134,7 +2534,7 @@
               " | undefined>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 89,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2150,7 +2550,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-                "lineNumber": 92,
+                "lineNumber": 90,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2173,7 +2573,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-                "lineNumber": 92,
+                "lineNumber": 90,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2207,7 +2607,7 @@
               "<string, unknown> | undefined>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 94,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2223,7 +2623,7 @@
                   "SmlDocument"
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-                "lineNumber": 98,
+                "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2246,7 +2646,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-                "lineNumber": 99,
+                "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2268,7 +2668,7 @@
               "(() => string) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 102,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2288,7 +2688,7 @@
           "\nAgentBuilder tool service's setup contract"
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 84,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2326,7 +2726,7 @@
               ">) => void"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2402,7 +2802,7 @@
           "\nAgentBuilder tool service's start contract"
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 110,
+        "lineNumber": 117,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2436,7 +2836,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2490,7 +2890,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 118,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2503,7 +2903,7 @@
                 "label": "opts",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                "lineNumber": 121,
+                "lineNumber": 128,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2520,7 +2920,7 @@
                       "<unknown, unknown, unknown, any>"
                     ],
                     "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                    "lineNumber": 121,
+                    "lineNumber": 128,
                     "columnNumber": 25,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2541,11 +2941,9 @@
         "type": "Enum",
         "tags": [],
         "label": "ExecutionStatus",
-        "description": [
-          "\nPossible statuses for an agent execution."
-        ],
-        "path": "x-pack/platform/plugins/shared/agent_builder/server/services/execution/types.ts",
-        "lineNumber": 20,
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/execution_status.ts",
+        "lineNumber": 10,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2582,7 +2980,7 @@
           ", \"content\"> & { content?: string | undefined; score: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-        "lineNumber": 133,
+        "lineNumber": 131,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2673,11 +3071,9 @@
       "type": "Interface",
       "tags": [],
       "label": "AgentBuilderPluginSetup",
-      "description": [
-        "\nSetup contract of the agentBuilder plugin."
-      ],
+      "description": [],
       "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 180,
+      "lineNumber": 192,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -2695,7 +3091,7 @@
             "AgentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 184,
+          "lineNumber": 193,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2719,7 +3115,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 188,
+          "lineNumber": 197,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2737,7 +3133,7 @@
             "AttachmentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 192,
+          "lineNumber": 201,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2761,7 +3157,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 196,
+          "lineNumber": 205,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2779,7 +3175,7 @@
             "SkillsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 200,
+          "lineNumber": 209,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2797,7 +3193,7 @@
             "PluginsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 204,
+          "lineNumber": 213,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2815,7 +3211,31 @@
             "SmlSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 208,
+          "lineNumber": 217,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginSetup.topSnippets",
+          "type": "Object",
+          "tags": [],
+          "label": "topSnippets",
+          "description": [
+            "\nTOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.\nExposed so that dependent plugins can pass these values to search utilities."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-genai-utils",
+              "scope": "server",
+              "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
+              "section": "def-server.TopSnippetsConfig",
+              "text": "TopSnippetsConfig"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+          "lineNumber": 222,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2834,7 +3254,7 @@
         "\nStart contract of the agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 249,
+      "lineNumber": 287,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -2852,7 +3272,7 @@
             "AgentsStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 253,
+          "lineNumber": 291,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2876,7 +3296,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 257,
+          "lineNumber": 295,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2894,7 +3314,7 @@
             "SkillsStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 261,
+          "lineNumber": 299,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2912,7 +3332,7 @@
             "PluginsStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 265,
+          "lineNumber": 303,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2930,7 +3350,7 @@
             "ExecutionStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 269,
+          "lineNumber": 307,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2948,7 +3368,7 @@
             "RuntimeStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 273,
+          "lineNumber": 311,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2972,7 +3392,31 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 278,
+          "lineNumber": 316,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginStart.conversations",
+          "type": "Object",
+          "tags": [],
+          "label": "conversations",
+          "description": [
+            "\nConversations service (read-only), to list and retrieve conversations."
+          ],
+          "signature": [
+            {
+              "pluginId": "agentBuilder",
+              "scope": "server",
+              "docId": "kibAgentBuilderPluginApi",
+              "section": "def-server.ConversationsStart",
+              "text": "ConversationsStart"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+          "lineNumber": 321,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

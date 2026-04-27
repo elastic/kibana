@@ -89,8 +89,17 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
     "@kbn/share-plugin",
-    "@kbn/test",
-    "@kbn/tooling-log"
+    "@kbn/core-security-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/management-settings-ids",
+    "@kbn/std",
+    "@kbn/use-observable",
+    "@kbn/cloud-plugin",
+    "@kbn/kbn-client",
+    "@kbn/rule-data-utils",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

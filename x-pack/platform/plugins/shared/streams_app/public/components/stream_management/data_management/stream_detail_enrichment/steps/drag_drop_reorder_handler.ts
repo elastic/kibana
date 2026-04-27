@@ -21,7 +21,7 @@ export function handleDragDropReorder(params: {
   reorderByDragDropFn: (
     sourceStepId: string,
     targetStepId: string,
-    operation: 'before' | 'after' | 'inside'
+    operation: 'before' | 'after' | 'inside' | 'inside-else'
   ) => void;
 }): void {
   const { sourceStepId, targetStepId, instruction, stepRefs, reorderByDragDropFn } = params;

@@ -10,6 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
 import { RuleDetailPage } from './rule_detail_page';
+import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 
 const mockHistoryPush = jest.fn();
@@ -39,21 +40,16 @@ jest.mock('../../hooks/use_delete_rule', () => ({
 }));
 
 jest.mock('./rule_header_description', () => ({
-  RuleTitleWithBadges: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="ruleTitleWithBadges">{rule.metadata?.name}</div>
-  ),
+  RuleTitleWithBadges: () => <div data-test-subj="ruleTitleWithBadges">mocked-title</div>,
   RuleHeaderDescription: () => <div data-test-subj="ruleHeaderDescription" />,
 }));
 
-jest.mock('./rule_conditions', () => ({
-  RuleConditions: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="ruleConditionsSection">conditions-{rule.id}</div>
-  ),
-}));
-
-jest.mock('./rule_metadata', () => ({
-  RuleMetadata: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="ruleMetadataSection">metadata-{rule.id}</div>
+jest.mock('./sidebar/rule_sidebar', () => ({
+  RuleSidebar: () => (
+    <div>
+      <div data-test-subj="ruleConditionsSection">conditions</div>
+      <div data-test-subj="ruleMetadataSection">metadata</div>
+    </div>
   ),
 }));
 
@@ -73,7 +69,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule', labels: ['prod', 'infra'] },
+  metadata: { name: 'Test Signal Rule', tags: ['prod', 'infra'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   evaluation: { query: { base: 'FROM logs-* | STATS count() BY host.name' } },
@@ -87,7 +83,9 @@ const renderPage = (rule: RuleApiResponse) =>
   render(
     <MemoryRouter>
       <I18nProvider>
-        <RuleDetailPage rule={rule} />
+        <RuleProvider rule={rule}>
+          <RuleDetailPage />
+        </RuleProvider>
       </I18nProvider>
     </MemoryRouter>
   );
@@ -106,10 +104,10 @@ describe('RuleDetailPage', () => {
 
   it('renders core page sections and actions', () => {
     renderPage(baseRule);
-    expect(screen.getByTestId('ruleTitleWithBadges')).toHaveTextContent('Test Signal Rule');
+    expect(screen.getByTestId('ruleTitleWithBadges')).toBeInTheDocument();
     expect(screen.getByTestId('ruleHeaderDescription')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleConditionsSection')).toHaveTextContent('conditions-rule-1');
-    expect(screen.getByTestId('ruleMetadataSection')).toHaveTextContent('metadata-rule-1');
+    expect(screen.getByTestId('ruleConditionsSection')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleMetadataSection')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDetailsActionsButton')).toBeInTheDocument();
     expect(screen.getByTestId('openEditRuleFlyoutButton')).toBeInTheDocument();
   });
@@ -118,7 +116,7 @@ describe('RuleDetailPage', () => {
     renderPage(baseRule);
     expect(screen.getByTestId('openEditRuleFlyoutButton')).toHaveAttribute(
       'href',
-      '/app/management/insightsAndAlerting/alerting_v2/edit/rule-1'
+      '/app/management/alertingV2/rules/edit/rule-1'
     );
   });
 

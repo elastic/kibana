@@ -10,6 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { RuleDetailsActionsMenu } from './rule_details_actions_menu';
+import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 
 const mockToggleRuleEnabled = jest.fn();
@@ -34,7 +35,9 @@ const disabledRule = { ...enabledRule, enabled: false } as RuleApiResponse;
 const renderMenu = (rule: RuleApiResponse, showDeleteConfirmation = jest.fn()) =>
   render(
     <I18nProvider>
-      <RuleDetailsActionsMenu rule={rule} showDeleteConfirmation={showDeleteConfirmation} />
+      <RuleProvider rule={rule}>
+        <RuleDetailsActionsMenu showDeleteConfirmation={showDeleteConfirmation} />
+      </RuleProvider>
     </I18nProvider>
   );
 
@@ -91,7 +94,7 @@ describe('RuleDetailsActionsMenu', () => {
     fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
     fireEvent.click(screen.getByTestId('ruleDetailsCloneButton'));
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
+      '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
     );
   });
 

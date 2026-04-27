@@ -7,12 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
-import type { TimeUnit } from './form';
+import type { FieldPath } from 'react-hook-form';
+import type { IlmPhasesFlyoutFormInternal, TimeUnit } from './form';
 export { TIME_UNIT_OPTIONS } from '../shared';
 
 export const ILM_PHASE_ORDER: PhaseName[] = ['hot', 'warm', 'cold', 'frozen', 'delete'];
-
-export const READONLY_ALLOWED_PHASES: PhaseName[] = ['hot', 'warm', 'cold'];
 
 export const PHASE_LABELS: Record<PhaseName, string> = {
   hot: i18n.translate('xpack.streams.editIlmPhasesFlyout.phaseLabelHot', {
@@ -37,7 +36,7 @@ export const DEFAULT_NEW_PHASE_MIN_AGE: { value: string; unit: TimeUnit } = {
   unit: 'd',
 };
 
-export const PHASE_MOUNT_PATHS: Record<PhaseName, ReadonlyArray<string>> = {
+export const PHASE_MOUNT_PATHS = {
   hot: [
     '_meta.hot.enabled',
     '_meta.hot.sizeInBytes',
@@ -53,4 +52,4 @@ export const PHASE_MOUNT_PATHS: Record<PhaseName, ReadonlyArray<string>> = {
   ],
   frozen: ['_meta.frozen.enabled'],
   delete: ['_meta.delete.enabled', '_meta.delete.deleteSearchableSnapshotEnabled'],
-};
+} satisfies Record<PhaseName, ReadonlyArray<FieldPath<IlmPhasesFlyoutFormInternal>>>;

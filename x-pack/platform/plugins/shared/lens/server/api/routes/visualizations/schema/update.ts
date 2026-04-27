@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
+import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 
 import { lensResponseItemSchema } from './common';
 
@@ -14,13 +14,13 @@ export const lensUpdateRequestParamsSchema = schema.object(
   {
     id: schema.string({
       meta: {
-        description: 'The id of a visualization.',
+        description: 'The visualization identifier, as returned by the create or search endpoints.',
       },
     }),
   },
   { unknowns: 'forbid' }
 );
 
-export const lensUpdateRequestBodySchema = lensApiStateSchema;
+export const lensUpdateRequestBodySchema = lensApiConfigSchemaNoESQL;
 
 export const lensUpdateResponseBodySchema = lensResponseItemSchema;

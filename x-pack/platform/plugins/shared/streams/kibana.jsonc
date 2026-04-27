@@ -7,7 +7,10 @@
   "visibility": "shared",
   "plugin": {
     "id": "streams",
-    "configPath": ["xpack", "streams"],
+    "configPath": [
+      "xpack",
+      "streams"
+    ],
     "browser": true,
     "server": true,
     "requiredPlugins": [
@@ -25,8 +28,19 @@
       "usageCollection",
       "fieldsMetadata"
     ],
-    "optionalPlugins": ["agentBuilder", "cloud", "serverless", "globalSearch", "spaces"],
+    "optionalPlugins": [
+      "agentBuilder",
+      "cloud",
+      "esql",
+      "serverless",
+      "globalSearch",
+      "searchInferenceEndpoints",
+      "spaces",
+      "workflowsManagement"
+    ],
     "requiredBundles": [],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

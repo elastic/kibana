@@ -22,7 +22,7 @@
           "<void, void, never, never>"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "lineNumber": 89,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +38,7 @@
               "any"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-            "lineNumber": 95,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -70,7 +70,7 @@
               "[]>) => void; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-            "lineNumber": 99,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -87,7 +87,7 @@
                   "<{}, unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-                "lineNumber": 99,
+                "lineNumber": 93,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -104,7 +104,7 @@
                   "ObservabilitySharedSetup"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-                "lineNumber": 99,
+                "lineNumber": 93,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -148,7 +148,7 @@
               "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-            "lineNumber": 115,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -164,7 +164,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-                "lineNumber": 115,
+                "lineNumber": 109,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -181,7 +181,7 @@
                   "ObservabilitySharedStart"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-                "lineNumber": 115,
+                "lineNumber": 109,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -201,7 +201,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-            "lineNumber": 140,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -596,43 +596,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.FeatureFeedbackButton",
-        "type": "Function",
-        "tags": [],
-        "label": "FeatureFeedbackButton",
-        "description": [],
-        "signature": [
-          "({ formUrl, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => React.JSX.Element | null"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-        "lineNumber": 94,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.FeatureFeedbackButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  formUrl,\n  'data-test-subj': dts,\n  onClickCapture,\n  defaultButton,\n  kibanaVersion,\n  isCloudEnv,\n  isServerlessEnv,\n  sanitizedPath,\n  nodeType,\n  surveyButtonText = FEEDBACK_BUTTON_DEFAULT_TEXT,\n}",
-            "description": [],
-            "signature": [
-              "FeatureFeedbackButtonProps"
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-            "lineNumber": 94,
-            "columnNumber": 39,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-public.FieldValueSelection",
         "type": "Function",
         "tags": [],
@@ -770,7 +733,7 @@
                     "section": "def-public.Trigger",
                     "text": "Trigger"
                   },
-                  "; readonly registerAction: <Context extends object>(definition: ",
+                  "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -778,31 +741,7 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<Context, {}>) => ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Action",
-                    "text": "Action"
-                  },
-                  "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
-                  },
-                  "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
-                  },
-                  "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+                  "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -877,169 +816,6 @@
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
                 "lineNumber": 23,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-public.getSurveyFeedbackURL",
-        "type": "Function",
-        "tags": [],
-        "label": "getSurveyFeedbackURL",
-        "description": [],
-        "signature": [
-          "({ formUrl, kibanaVersion, sanitizedPath, isCloudEnv, isServerlessEnv, nodeType, }: { formUrl: string; kibanaVersion?: string | undefined; deploymentType?: string | undefined; sanitizedPath?: string | undefined; mlJobType?: string | undefined; isCloudEnv?: boolean | undefined; isServerlessEnv?: boolean | undefined; nodeType?: ",
-          "NodeType",
-          " | undefined; }) => string"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-        "lineNumber": 40,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.getSurveyFeedbackURL.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  formUrl,\n  kibanaVersion,\n  sanitizedPath,\n  isCloudEnv,\n  isServerlessEnv,\n  nodeType,\n}",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-            "lineNumber": 47,
-            "columnNumber": 4,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.formUrl",
-                "type": "string",
-                "tags": [],
-                "label": "formUrl",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 48,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.kibanaVersion",
-                "type": "string",
-                "tags": [],
-                "label": "kibanaVersion",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 49,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.deploymentType",
-                "type": "string",
-                "tags": [],
-                "label": "deploymentType",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 50,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.sanitizedPath",
-                "type": "string",
-                "tags": [],
-                "label": "sanitizedPath",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 51,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.mlJobType",
-                "type": "string",
-                "tags": [],
-                "label": "mlJobType",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 52,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.isCloudEnv",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "isCloudEnv",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 53,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.isServerlessEnv",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "isServerlessEnv",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 54,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.nodeType",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "nodeType",
-                "description": [],
-                "signature": [
-                  "NodeType",
-                  " | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3389,7 +3165,7 @@
         "label": "NavigationEntry",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3402,7 +3178,7 @@
             "label": "label",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3415,7 +3191,7 @@
             "label": "app",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3428,7 +3204,7 @@
             "label": "path",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3444,7 +3220,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3460,7 +3236,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3476,7 +3252,7 @@
               "((event: React.MouseEvent<HTMLElement | HTMLButtonElement, MouseEvent>) => void) | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3492,7 +3268,7 @@
                   "React.MouseEvent<HTMLElement | HTMLButtonElement, MouseEvent>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-                "lineNumber": 59,
+                "lineNumber": 60,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3512,7 +3288,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3528,7 +3304,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3544,7 +3320,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3560,7 +3336,7 @@
               "((path: string) => boolean) | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3576,7 +3352,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-                "lineNumber": 67,
+                "lineNumber": 68,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3596,7 +3372,7 @@
         "label": "NavigationSection",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3612,7 +3388,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3625,7 +3401,7 @@
             "label": "sortKey",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3648,7 +3424,7 @@
               "[]"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3664,7 +3440,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4248,7 +4024,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-        "lineNumber": 234,
+        "lineNumber": 245,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4331,7 +4107,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-        "lineNumber": 90,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4358,7 +4134,7 @@
           "[]>) => void; }; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "lineNumber": 64,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4395,7 +4171,7 @@
           "; }) => void; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "lineNumber": 65,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4436,7 +4212,7 @@
           "; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "lineNumber": 66,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

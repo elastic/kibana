@@ -10,15 +10,18 @@ import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mock
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import moment from 'moment';
-import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../resources/datastreams/alert_actions';
 import type {
-  NotificationPolicySavedObjectAttributes,
+  ActionPolicySavedObjectAttributes,
   RuleSavedObjectAttributes,
 } from '../../saved_objects';
 import { createRuleSoAttributes } from '../test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
-import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { createNotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
+import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/action_policy_saved_object_service';
+import { createActionPolicySavedObjectService } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
@@ -65,7 +68,7 @@ function mockRulesFindByIds(
 function mockNpFindAllDecrypted(
   spy: jest.SpyInstance,
   policyIds: string[],
-  overrides: Partial<NotificationPolicySavedObjectAttributes> = {}
+  overrides: Partial<ActionPolicySavedObjectAttributes> = {}
 ) {
   spy.mockResolvedValue(
     policyIds.map((id) => ({
@@ -97,7 +100,7 @@ function buildDispatcherService(deps: {
   queryService: QueryServiceContract;
   storageService: StorageServiceContract;
   rulesSoService: RulesSavedObjectServiceContract;
-  npSoService: NotificationPolicySavedObjectServiceContract;
+  npSoService: ActionPolicySavedObjectServiceContract;
   workflowsManagement: WorkflowsServerPluginSetup['management'];
 }): DispatcherService {
   const { loggerService } = createLoggerService();
@@ -123,7 +126,7 @@ describe('DispatcherService', () => {
   let queryEsClient: DeeplyMockedApi<ElasticsearchClient>;
   let storageEsClient: jest.Mocked<ElasticsearchClient>;
   let rulesSoService: RulesSavedObjectServiceContract;
-  let npSoService: NotificationPolicySavedObjectServiceContract;
+  let npSoService: ActionPolicySavedObjectServiceContract;
   let mockFindByIds: jest.SpyInstance;
   let mockFindAllDecrypted: jest.SpyInstance;
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
@@ -137,8 +140,8 @@ describe('DispatcherService', () => {
     mockFindByIds = rulesMock.mockFindByIds;
     mockRulesFindByIds(mockFindByIds, ['rule-1', 'rule-2']);
 
-    const npMock = createNotificationPolicySavedObjectService();
-    npSoService = npMock.notificationPolicySavedObjectService;
+    const npMock = createActionPolicySavedObjectService();
+    npSoService = npMock.actionPolicySavedObjectService;
     mockFindAllDecrypted = npMock.mockFindAllDecrypted;
     mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456']);
 
@@ -246,7 +249,7 @@ describe('DispatcherService', () => {
       const fireActions = docs.filter((d: any) => d.action_type === 'fire');
       const notifiedActions = docs.filter((d: any) => d.action_type === 'notified');
       expect(fireActions).toHaveLength(alertEpisodes.length);
-      expect(notifiedActions).toHaveLength(0);
+      expect(notifiedActions).toHaveLength(alertEpisodes.length);
 
       expect(docs).toEqual(
         expect.arrayContaining([
@@ -374,8 +377,8 @@ describe('DispatcherService', () => {
         'rule-005',
       ]);
 
-      const npMock = createNotificationPolicySavedObjectService();
-      npSoService = npMock.notificationPolicySavedObjectService;
+      const npMock = createActionPolicySavedObjectService();
+      npSoService = npMock.actionPolicySavedObjectService;
       mockFindAllDecrypted = npMock.mockFindAllDecrypted;
       mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456'], {
         throttle: { interval: '1h' },

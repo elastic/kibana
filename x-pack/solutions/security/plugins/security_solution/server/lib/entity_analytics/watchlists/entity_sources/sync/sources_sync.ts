@@ -7,29 +7,31 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
-import type { WatchlistEntitySourceClient } from '../infra';
-import type { EntityStoreEntityIdsByType } from '../../entities/service';
+import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../entities/service';
 import type { CorrelationMap } from '../../entities/types';
 
 export interface SyncSourceEntry {
-  sourceId: string;
+  source: MonitoringEntitySource;
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType;
   correlationMap?: CorrelationMap;
+  watchlistsByEuid: WatchlistsByEuid;
+  /** entity.id range for this page, used to scope deletion detection. */
+  pageRange?: { gt?: string; lte?: string };
 }
 
 export type SourceProcessor = (
   source: MonitoringEntitySource,
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
-  correlationMap?: CorrelationMap
+  correlationMap: CorrelationMap | undefined,
+  watchlistsByEuid: WatchlistsByEuid,
+  pageRange?: { gt?: string; lte?: string }
 ) => Promise<void>;
 
 export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
   const syncBySourceIds = async ({
-    descriptorClient,
     sources,
     process,
   }: {
-    descriptorClient: WatchlistEntitySourceClient;
     sources: SyncSourceEntry[];
     process: SourceProcessor;
   }): Promise<void> => {
@@ -38,13 +40,23 @@ export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
       return;
     }
 
-    // Process sources sequentially to avoid race conditions
-    for (const { sourceId, entityStoreEntityIdsByType, correlationMap } of sources) {
+    for (const {
+      source,
+      entityStoreEntityIdsByType,
+      correlationMap,
+      watchlistsByEuid,
+      pageRange,
+    } of sources) {
       try {
-        const source = await descriptorClient.get(sourceId);
-        await process(source, entityStoreEntityIdsByType, correlationMap);
+        await process(
+          source,
+          entityStoreEntityIdsByType,
+          correlationMap,
+          watchlistsByEuid,
+          pageRange
+        );
       } catch (error) {
-        logger.warn(`[WatchlistSync] Source processing failed for ${sourceId}: ${String(error)}`);
+        logger.warn(`[WatchlistSync] Source processing failed for ${source.id}: ${String(error)}`);
       }
     }
   };

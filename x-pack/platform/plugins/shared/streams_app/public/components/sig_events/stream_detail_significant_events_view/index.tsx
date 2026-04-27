@@ -4,101 +4,205 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { niceTimeFormatter } from '@elastic/charts';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
+import type { EuiSelectableOption } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { compact, isEqual } from 'lodash';
-import React, { useMemo, useState } from 'react';
-import { useAIFeatures } from '../../../hooks/use_ai_features';
-import { useFetchSignificantEvents } from '../../../hooks/sig_events/use_fetch_significant_events';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import { useQueryClient } from '@kbn/react-query';
+import {
+  TaskStatus,
+  type OnboardingResult,
+  type Streams,
+  type TaskResult,
+} from '@kbn/streams-schema';
+import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import React, { useCallback, useMemo, useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
+import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/sig_events/use_fetch_discovery_queries';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSignificantEventsApi } from '../../../hooks/sig_events/use_significant_events_api';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
-import { useTimefilter } from '../../../hooks/use_timefilter';
-import { LoadingPanel } from '../../loading_panel';
-import { EditSignificantEventFlyout } from './add_significant_event_flyout/edit_significant_event_flyout';
-import type { Flow } from './add_significant_event_flyout/types';
 import { EmptyState } from './empty_state';
-import { SignificantEventsHistogramChart } from './significant_events_histogram';
-import { SignificantEventsTable } from './significant_events_table';
-import { formatChangePoint } from './utils/change_point';
+import { useFetchKnowledgeIndicators } from './hooks/use_knowledge_indicators_data';
+import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
+import { KnowledgeIndicatorDetailsFlyout } from './knowledge_indicator_details_flyout';
+import { useKnowledgeIndicatorsTask } from './hooks/use_knowledge_indicators_task';
+import { KnowledgeIndicatorRulesSelector } from './knowledge_indicator_rules_selector';
+import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_filter';
+import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
+import { RulesTable } from './rules_table';
+import { LoadingPanel } from '../../loading_panel';
+import { PromotionCallout } from './promotion_callout/promotion_callout';
+import { SuggestedRulesFlyout } from './suggested_rules_flyout/suggested_rules_flyout';
+import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 interface Props {
   definition: Streams.all.GetResponse;
 }
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
-  const { rangeFrom, rangeTo, startMs, endMs } = useTimeRange();
-  const { updateTimeRange } = useTimeRangeUpdate();
-  const { refresh } = useTimefilter();
   const {
-    dependencies: {
-      start: { unifiedSearch },
+    core: {
+      notifications: { toasts },
     },
   } = useKibana();
-  const { euiTheme } = useEuiTheme();
-  const aiFeatures = useAIFeatures();
+  const queryClient = useQueryClient();
+  const [tableSearchValue, setTableSearchValue] = useState('');
+  const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
+    .trim()
+    .toLowerCase();
+  const [knowledgeIndicatorStatusFilter, setKnowledgeIndicatorStatusFilter] = useState<
+    'active' | 'excluded'
+  >('active');
+  const [selectedKnowledgeIndicator, setSelectedKnowledgeIndicator] =
+    useState<KnowledgeIndicator | null>(null);
+  const [selectedKnowledgeIndicatorTypes, setSelectedKnowledgeIndicatorTypes] = useState<string[]>(
+    []
+  );
+  const [typeFilterOptions, setTypeFilterOptions] = useState<EuiSelectableOption[]>([
+    {
+      key: 'knowledge_indicator',
+      checked: 'on',
+      label: KNOWLEDGE_INDICATORS_FILTER_LABEL,
+    },
+    {
+      key: 'rule',
+      label: RULES_FILTER_LABEL,
+    },
+  ]);
+  const {
+    knowledgeIndicators,
+    occurrencesByQueryId,
+    isLoading: isKnowledgeIndicatorsLoading,
+    isEmpty,
+    refetch,
+  } = useFetchKnowledgeIndicators({ definition });
+  const onKnowledgeIndicatorsTaskComplete = useCallback(
+    (
+      completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
+    ) => {
+      const queriesTaskResult = completedTaskState.queriesTaskResult;
+      const featuresTaskResult = completedTaskState.featuresTaskResult;
+      const generatedFeaturesCount =
+        featuresTaskResult?.status === TaskStatus.Completed
+          ? featuresTaskResult.features.length
+          : 0;
+      const generatedQueriesCount =
+        queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries.length : 0;
 
-  const xFormatter = useMemo(() => {
-    return niceTimeFormatter([startMs, endMs]);
-  }, [startMs, endMs]);
+      toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.streams.significantEventsTable.generateMoreSuccessToastTitle',
+          {
+            defaultMessage:
+              '{count, plural, one {Generated # knowledge indicator} other {Generated # knowledge indicators}}',
+            values: {
+              count: generatedFeaturesCount + generatedQueriesCount,
+            },
+          }
+        ),
+      });
 
-  const [query, setQuery] = useState<string>('');
-  const significantEventsFetchState = useFetchSignificantEvents({
-    name: definition.stream.name,
-    query,
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: ['features', definition.stream.name] }),
+        queryClient.invalidateQueries({
+          queryKey: ['onboardingTaskStatus', definition.stream.name],
+        }),
+      ]);
+    },
+    [definition.stream.name, queryClient, toasts]
+  );
+
+  const onKnowledgeIndicatorsTaskError = useCallback(
+    (failedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Failed }>) => {
+      toasts.addDanger({
+        title: KNOWLEDGE_INDICATORS_TASK_FAILED_TOAST_TITLE,
+        text: failedTaskState.error,
+      });
+    },
+    [toasts]
+  );
+
+  const {
+    isPending: isKnowledgeIndicatorsGenerationPending,
+    knowledgeIndicatorsTaskState,
+    scheduleKnowledgeIndicatorsTask,
+    cancelKnowledgeIndicatorsTask,
+  } = useKnowledgeIndicatorsTask({
+    streamName: definition.stream.name,
+    onComplete: onKnowledgeIndicatorsTaskComplete,
+    onError: onKnowledgeIndicatorsTaskError,
   });
 
-  const { removeQuery } = useSignificantEventsApi({ name: definition.stream.name });
-  const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
-  const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
+  useInterval(
+    refetch,
+    knowledgeIndicatorsTaskState?.status === TaskStatus.InProgress ? 5000 : null
+  );
 
-  const [queryToEdit, setQueryToEdit] = useState<StreamQuery | undefined>();
-  const [dateRange, setDateRange] = useState<TimeRange>({ from: rangeFrom, to: rangeTo });
+  const ruleKnowledgeIndicators = useMemo(
+    () =>
+      knowledgeIndicators.filter(
+        (knowledgeIndicator) =>
+          knowledgeIndicator.kind === 'query' && knowledgeIndicator.rule.backed
+      ),
+    [knowledgeIndicators]
+  );
+  const [isSuggestedRulesFlyoutOpen, setIsSuggestedRulesFlyoutOpen] = useState(false);
+  const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
+    ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
+    : undefined;
 
-  if (!significantEventsFetchState.data && significantEventsFetchState.isLoading) {
+  const closeFlyout = useCallback(() => {
+    setSelectedKnowledgeIndicator(null);
+  }, []);
+
+  const toggleSelectedKnowledgeIndicator = useCallback((knowledgeIndicator: KnowledgeIndicator) => {
+    setSelectedKnowledgeIndicator((currentKnowledgeIndicator) => {
+      if (!currentKnowledgeIndicator) {
+        return knowledgeIndicator;
+      }
+
+      const currentId = getKnowledgeIndicatorItemId(currentKnowledgeIndicator);
+      const nextId = getKnowledgeIndicatorItemId(knowledgeIndicator);
+
+      return currentId === nextId ? null : knowledgeIndicator;
+    });
+  }, []);
+
+  const isRulesSelected = useMemo(
+    () => typeFilterOptions.some((option) => option.key === 'rule' && option.checked === 'on'),
+    [typeFilterOptions]
+  );
+  const isKnowledgeIndicatorsGenerationCanceling =
+    knowledgeIndicatorsTaskState?.status === TaskStatus.BeingCanceled;
+  const isGenerateButtonDisabled =
+    knowledgeIndicatorsTaskState === null || isKnowledgeIndicatorsGenerationPending;
+
+  if (isKnowledgeIndicatorsLoading) {
     return <LoadingPanel size="xxl" />;
   }
 
-  const editFlyout = (generateOnMount: boolean) => (
-    <EditSignificantEventFlyout
-      setIsEditFlyoutOpen={setIsEditFlyoutOpen}
-      isEditFlyoutOpen={isEditFlyoutOpen}
-      definition={definition}
-      refresh={significantEventsFetchState.refetch}
-      queryToEdit={queryToEdit}
-      setQueryToEdit={setQueryToEdit}
-      initialFlow={initialFlow}
-      generateOnMount={generateOnMount}
-      aiFeatures={aiFeatures}
-    />
-  );
-
-  const noSignificantEvents =
-    !query &&
-    !significantEventsFetchState.isLoading &&
-    significantEventsFetchState.data &&
-    significantEventsFetchState.data.significant_events.length === 0;
-
-  if (noSignificantEvents) {
+  if (isEmpty) {
     return (
-      <>
-        <EmptyState
-          onManualEntryClick={() => {
-            setQueryToEdit(undefined);
-            setInitialFlow('manual');
-            setIsEditFlyoutOpen(true);
-          }}
-          onGenerateSuggestionsClick={() => {
-            setInitialFlow('ai');
-            setIsEditFlyoutOpen(true);
-          }}
-        />
-        {editFlyout(true)}
-      </>
+      <EmptyState
+        isGenerating={isKnowledgeIndicatorsGenerationPending}
+        isCanceling={isKnowledgeIndicatorsGenerationCanceling}
+        isGenerateDisabled={isGenerateButtonDisabled}
+        onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsTask}
+        onCancelGenerationClick={cancelKnowledgeIndicatorsTask}
+      />
     );
   }
 
@@ -106,110 +210,263 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" gutterSize="s">
-            <EuiFlexItem grow>
-              <unifiedSearch.ui.SearchBar
-                appName="streamsApp"
-                showFilterBar={false}
-                showQueryMenu={false}
-                showQueryInput={true}
-                submitButtonStyle="iconOnly"
-                displayStyle="inPage"
-                disableQueryLanguageSwitcher
-                onQuerySubmit={(queryN) => {
-                  setQuery(String(queryN.query?.query ?? ''));
-
-                  if (isEqual(queryN.dateRange, dateRange)) {
-                    refresh();
-                  } else if (queryN.dateRange) {
-                    updateTimeRange(queryN.dateRange);
-                    setDateRange(queryN.dateRange);
-                  }
-                }}
-                query={{
-                  query,
-                  language: 'text',
-                }}
-                isLoading={significantEventsFetchState.isLoading}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill={true}
-                size="s"
-                color="primary"
-                onClick={() => {
-                  setIsEditFlyoutOpen(true);
-                  setQueryToEdit(undefined);
-                }}
-                iconType="plus"
-                data-test-subj="significant_events_existing_queries_open_flyout_button"
-              >
-                {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
-                  defaultMessage: 'Significant events',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiPanel grow={false} hasShadow={false} hasBorder={true}>
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
-                  {
-                    defaultMessage: 'Detected event occurrences ({count})',
-                    values: {
-                      count: (
-                        significantEventsFetchState.data?.aggregated_occurrences ?? []
-                      ).reduce((acc, point) => acc + point.y, 0),
-                    },
-                  }
-                )}
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <SignificantEventsHistogramChart
-                id={'all-events'}
-                occurrences={significantEventsFetchState.data?.aggregated_occurrences ?? []}
-                changes={compact(
-                  (significantEventsFetchState.data?.significant_events ?? []).map((item) =>
-                    formatChangePoint({
-                      query: item.query,
-                      change_points: item.change_points,
-                      occurrences: item.occurrences,
-                    })
-                  )
-                )}
-                xFormatter={xFormatter}
-                compressed={false}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-
-        <EuiFlexItem grow={false}>
-          <SignificantEventsTable
-            loading={significantEventsFetchState.isLoading}
-            definition={definition.stream}
-            items={significantEventsFetchState.data?.significant_events ?? []}
-            onEditClick={(item) => {
-              setIsEditFlyoutOpen(true);
-              setQueryToEdit({ ...item.query });
-            }}
-            onDeleteClick={async (item) => {
-              await removeQuery?.(item.query.id).then(() => {
-                significantEventsFetchState.refetch();
-              });
-            }}
-            xFormatter={xFormatter}
+          <PromotionCallout
+            streamName={definition.stream.name}
+            onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
           />
         </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasBorder={false} hasShadow={true}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              css={css`
+                width: 100%;
+                min-height: 44px;
+              `}
+            >
+              <EuiFlexItem grow={false}>
+                <KnowledgeIndicatorRulesSelector
+                  options={typeFilterOptions}
+                  onChange={setTypeFilterOptions}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFieldSearch
+                  fullWidth
+                  value={tableSearchValue}
+                  onChange={(event) => setTableSearchValue(event.target.value)}
+                  placeholder={
+                    isRulesSelected
+                      ? RULES_SEARCH_PLACEHOLDER
+                      : KNOWLEDGE_INDICATORS_SEARCH_PLACEHOLDER
+                  }
+                  aria-label={
+                    isRulesSelected
+                      ? RULES_SEARCH_ARIA_LABEL
+                      : KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL
+                  }
+                />
+              </EuiFlexItem>
+              {!isRulesSelected ? (
+                <EuiFlexItem grow={false}>
+                  <KnowledgeIndicatorsStatusFilter
+                    knowledgeIndicators={knowledgeIndicators}
+                    searchTerm={debouncedTableSearchValue}
+                    selectedTypes={selectedKnowledgeIndicatorTypes}
+                    statusFilter={knowledgeIndicatorStatusFilter}
+                    onStatusFilterChange={setKnowledgeIndicatorStatusFilter}
+                  />
+                </EuiFlexItem>
+              ) : null}
+              {!isRulesSelected ? (
+                <EuiFlexItem grow={false}>
+                  <KnowledgeIndicatorsTypeFilter
+                    knowledgeIndicators={knowledgeIndicators}
+                    searchTerm={debouncedTableSearchValue}
+                    statusFilter={knowledgeIndicatorStatusFilter}
+                    selectedTypes={selectedKnowledgeIndicatorTypes}
+                    onSelectedTypesChange={setSelectedKnowledgeIndicatorTypes}
+                  />
+                </EuiFlexItem>
+              ) : null}
+              {!isRulesSelected ? (
+                <EuiFlexItem grow={false}>
+                  <KnowledgeIndicatorsGenerationControls
+                    isGenerating={isKnowledgeIndicatorsGenerationPending}
+                    isCanceling={isKnowledgeIndicatorsGenerationCanceling}
+                    isGenerateDisabled={isGenerateButtonDisabled}
+                    onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsTask}
+                    onCancelGenerationClick={cancelKnowledgeIndicatorsTask}
+                  />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            {isRulesSelected ? (
+              <RulesTable
+                rules={ruleKnowledgeIndicators}
+                occurrencesByQueryId={occurrencesByQueryId}
+                searchTerm={debouncedTableSearchValue}
+                selectedKnowledgeIndicatorId={selectedKnowledgeIndicatorId}
+                onViewDetails={toggleSelectedKnowledgeIndicator}
+              />
+            ) : (
+              <KnowledgeIndicatorsTable
+                definition={definition.stream}
+                knowledgeIndicators={knowledgeIndicators}
+                occurrencesByQueryId={occurrencesByQueryId}
+                searchTerm={debouncedTableSearchValue}
+                selectedTypes={selectedKnowledgeIndicatorTypes}
+                statusFilter={knowledgeIndicatorStatusFilter}
+                selectedKnowledgeIndicatorId={selectedKnowledgeIndicatorId}
+                onViewDetails={toggleSelectedKnowledgeIndicator}
+              />
+            )}
+          </EuiPanel>
+        </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout(false)}
+      {selectedKnowledgeIndicator ? (
+        <KnowledgeIndicatorDetailsFlyout
+          knowledgeIndicator={selectedKnowledgeIndicator}
+          occurrencesByQueryId={occurrencesByQueryId}
+          onClose={closeFlyout}
+        />
+      ) : null}
+
+      {isSuggestedRulesFlyoutOpen && (
+        <SuggestedRulesFlyout
+          streamName={definition.stream.name}
+          onClose={() => setIsSuggestedRulesFlyoutOpen(false)}
+        />
+      )}
     </>
   );
 }
+
+function KnowledgeIndicatorsGenerationControls({
+  isGenerating,
+  isCanceling,
+  isGenerateDisabled,
+  onGenerateSuggestionsClick,
+  onCancelGenerationClick,
+}: {
+  isGenerating: boolean;
+  isCanceling: boolean;
+  isGenerateDisabled: boolean;
+  onGenerateSuggestionsClick: () => void;
+  onCancelGenerationClick: () => void;
+}) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+      {isGenerating ? (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={CANCEL_GENERATION_BUTTON_TOOLTIP}>
+              <EuiButtonIcon
+                size="m"
+                aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+                iconType="stop"
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.currentTarget.blur();
+                  onCancelGenerationClick();
+                }}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              width: 1px;
+              align-self: stretch;
+              background-color: currentColor;
+              opacity: 0.15;
+              margin: 0 ${euiTheme.size.s};
+            `}
+          />
+        </>
+      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="primary"
+          isLoading={isGenerating}
+          isDisabled={isGenerateDisabled}
+          onClick={onGenerateSuggestionsClick}
+        >
+          {isGenerating
+            ? isCanceling
+              ? CANCELING_BUTTON_LABEL
+              : GENERATING_BUTTON_LABEL
+            : GENERATE_MORE_BUTTON_LABEL}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+const KNOWLEDGE_INDICATORS_FILTER_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.typeFilter.knowledgeIndicatorsLabel',
+  {
+    defaultMessage: 'Knowledge Indicators',
+  }
+);
+
+const RULES_FILTER_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.typeFilter.rulesLabel',
+  {
+    defaultMessage: 'Rules',
+  }
+);
+
+const KNOWLEDGE_INDICATORS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsSearchPlaceholder',
+  {
+    defaultMessage: 'Search knowledge indicators',
+  }
+);
+
+const KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsSearchAriaLabel',
+  {
+    defaultMessage: 'Search knowledge indicators',
+  }
+);
+
+const RULES_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsTable.rulesSearchPlaceholder',
+  {
+    defaultMessage: 'Search rules',
+  }
+);
+
+const RULES_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.rulesSearchAriaLabel',
+  {
+    defaultMessage: 'Search rules',
+  }
+);
+
+const GENERATE_MORE_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.generateMoreButtonLabel',
+  {
+    defaultMessage: 'Generate more',
+  }
+);
+
+const GENERATING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.generatingButtonLabel',
+  {
+    defaultMessage: 'Generating',
+  }
+);
+
+const CANCELING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.cancelingButtonLabel',
+  {
+    defaultMessage: 'Canceling',
+  }
+);
+
+const CANCEL_GENERATION_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.cancelGenerationButtonAriaLabel',
+  {
+    defaultMessage: 'Cancel generation',
+  }
+);
+
+const CANCEL_GENERATION_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsTable.cancelGenerationButtonTooltip',
+  {
+    defaultMessage: 'Stop this process',
+  }
+);
+
+const KNOWLEDGE_INDICATORS_TASK_FAILED_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsTaskFailedToastTitle',
+  {
+    defaultMessage: 'Failed to generate knowledge indicators',
+  }
+);

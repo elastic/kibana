@@ -7,22 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
+import throttle from 'lodash/throttle';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
@@ -74,7 +67,11 @@ import {
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
-import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
+import type {
+  ActionOptionData,
+  EditorCommand,
+  JumpToStepEntry,
+} from '../../../features/actions_menu_popover/types';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
@@ -99,6 +96,7 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
+import { registerWorkflowDefinitionProvider } from '../lib/monaco_providers/workflow_definition_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
@@ -121,6 +119,8 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   lineNumbers: 'on',
   glyphMargin: true,
   scrollBeyondLastLine: false,
+  folding: true,
+  showFoldingControls: 'always',
   tabSize: 2,
   lineNumbersMinChars: 2,
   insertSpaces: true,
@@ -168,7 +168,6 @@ export const WorkflowYAMLEditor = ({
   onStepRun,
   editorRef: parentEditorRef,
 }: WorkflowYAMLEditorProps) => {
-  const { euiTheme } = useEuiTheme();
   const { notifications, http } = useKibana().services;
 
   const saveYaml = useSaveYaml();
@@ -235,6 +234,8 @@ export const WorkflowYAMLEditor = ({
 
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
+  const workflowLookupRef = useRef(workflowLookup);
+  workflowLookupRef.current = workflowLookup;
 
   // Data
   const connectorsData = useAvailableConnectors();
@@ -332,13 +333,16 @@ export const WorkflowYAMLEditor = ({
       return;
     }
 
-    editorRef.current!.onDidScrollChange(() => {
-      if (!focusedStepInfoRef.current) {
-        return;
-      }
+    const disposeListener = editorRef.current?.onDidScrollChange(
+      throttle(() => {
+        if (!focusedStepInfoRef.current || !editorRef.current) {
+          return;
+        }
 
-      updateContainerPosition(focusedStepInfoRef.current, editorRef.current!);
-    });
+        updateContainerPosition(focusedStepInfoRef.current, editorRef.current);
+      }, 50)
+    );
+    return () => disposeListener?.dispose();
   }, [isEditorMounted]);
 
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
@@ -441,6 +445,13 @@ export const WorkflowYAMLEditor = ({
         // Register the unified hover provider for API documentation and template expressions
         const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
         disposablesRef.current.push(hoverDisposable);
+
+        // Register go-to-definition for step/consts/inputs/variables/foreach references (Cmd+Click)
+        const definitionDisposable = registerWorkflowDefinitionProvider({
+          getWorkflowLookup: () => workflowLookupRef.current,
+          getYamlDocument: () => yamlDocumentRef.current,
+        });
+        disposablesRef.current.push(definitionDisposable);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -517,10 +528,10 @@ export const WorkflowYAMLEditor = ({
   };
 
   useEffect(() => {
-    if (!focusedStepInfo) {
+    if (!focusedStepInfo || !editorRef.current) {
       return;
     }
-    updateContainerPosition(focusedStepInfo, editorRef.current!);
+    updateContainerPosition(focusedStepInfo, editorRef.current);
   }, [isEditorMounted, focusedStepInfo]);
 
   useEffect(() => {
@@ -528,7 +539,7 @@ export const WorkflowYAMLEditor = ({
       return;
     }
 
-    const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
+    const disposable = editorRef.current?.onDidChangeCursorPosition((event) => {
       dispatch(
         setCursorPosition({
           lineNumber: event.position.lineNumber,
@@ -537,7 +548,7 @@ export const WorkflowYAMLEditor = ({
       );
     });
 
-    return () => disposable.dispose();
+    return () => disposable?.dispose();
   }, [isEditorMounted, dispatch]);
 
   // Scroll editor to highlighted step when selected from execution flyout.
@@ -587,6 +598,75 @@ export const WorkflowYAMLEditor = ({
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }
       closeActionsPopover();
+    },
+    [closeActionsPopover]
+  );
+
+  const editorCommands: EditorCommand[] = useMemo(
+    () => [
+      {
+        id: 'foldAll',
+        label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
+          defaultMessage: 'Collapse all',
+        }),
+        iconType: 'minusInCircle',
+      },
+      {
+        id: 'unfoldAll',
+        label: i18n.translate('workflows.yamlEditor.commands.expandAll', {
+          defaultMessage: 'Expand all',
+        }),
+        iconType: 'plusInCircle',
+      },
+      {
+        id: 'find',
+        label: i18n.translate('workflows.yamlEditor.commands.findReplace', {
+          defaultMessage: 'Find and Replace',
+        }),
+        iconType: 'search',
+      },
+    ],
+    []
+  );
+
+  const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
+    if (!workflowLookup) return [];
+    return Object.entries(workflowLookup.steps).map(([stepId, stepInfo]) => ({
+      id: stepId,
+      label: `#${stepId}`,
+      lineStart: stepInfo.lineStart,
+    }));
+  }, [workflowLookup]);
+
+  const handleCommandSelected = useCallback(
+    (commandId: string) => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      switch (commandId) {
+        case 'foldAll':
+          editor.trigger('actionsMenu', 'editor.foldAll', null);
+          break;
+        case 'unfoldAll':
+          editor.trigger('actionsMenu', 'editor.unfoldAll', null);
+          break;
+        case 'find':
+          editor.trigger('actionsMenu', 'editor.action.startFindReplaceAction', null);
+          break;
+      }
+      closeActionsPopover();
+      editor.focus();
+    },
+    [closeActionsPopover]
+  );
+
+  const handleJumpToStep = useCallback(
+    (lineNumber: number) => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      editor.revealLineInCenter(lineNumber);
+      editor.setPosition({ lineNumber, column: 1 });
+      closeActionsPopover();
+      editor.focus();
     },
     [closeActionsPopover]
   );
@@ -659,84 +739,64 @@ export const WorkflowYAMLEditor = ({
     [openActionsPopover]
   );
 
+  // These were triggering rerendering of the actions containers on every scroll, because they were
+  // being re-created on every render. Memoizing them prevents unnecessary child re-renders.
+  const extraActionElement = useMemo(
+    () => <ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />,
+    [extraActions, isExecutionYaml]
+  );
+
+  const actionsMenuPanelProps = useMemo(() => {
+    return {
+      Button: <EuiButton iconType="plusCircle" css={styles.hiddenButtonCss} />,
+      css: { css: styles.actionsMenuPopoverPanel },
+    };
+  }, [styles.actionsMenuPopoverPanel, styles.hiddenButtonCss]);
+
+  const editorWrapperCss = useMemo(
+    () => css([styles.container, stepExecutionStyles]),
+    [styles.container, stepExecutionStyles]
+  );
+
   return (
-    <div css={css([styles.container, stepExecutionStyles])} ref={containerRef}>
+    <div css={editorWrapperCss} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
-        button={<EuiButton iconType="plusCircle" css={{ display: 'none' }} />}
+        button={actionsMenuPanelProps.Button}
         container={containerRef.current ?? undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
-        panelProps={{ css: styles.actionsMenuPopoverPanel }}
+        panelProps={actionsMenuPanelProps.css}
+        commands={editorCommands}
+        jumpToStepEntries={jumpToStepEntries}
+        onCommandSelected={handleCommandSelected}
+        onJumpToStep={handleJumpToStep}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
       <div
         css={styles.stepActionsContainer}
-        style={positionStyles ? positionStyles : {}}
+        style={positionStyles ?? {}}
         data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
       >
         <StepActions onStepRun={onStepRun} />
       </div>
-      {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml && (
-        <div
-          css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {isAgentBuilderAvailable && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="workflows.yamlEditor.aiAgentTooltip"
-                      defaultMessage="Ask AI to help edit this workflow"
-                    />
-                  }
-                >
-                  <EuiButtonEmpty
-                    iconType="sparkles"
-                    size="xs"
-                    aria-label="Open AI Agent"
-                    onClick={() => openAgentChat()}
-                    data-test-subj="workflowYamlEditorAiAgentButton"
-                  >
-                    <FormattedMessage
-                      id="workflows.yamlEditor.aiAgentButtonLabel"
-                      defaultMessage="AI Agent"
-                    />
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            {isDevelopment && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  css={styles.downloadSchemaButton}
-                  iconType={workflowJsonSchemaStrict === null ? 'warning' : 'download'}
-                  size="xs"
-                  aria-label="Download JSON schema for debugging"
-                  onClick={downloadSchema}
-                  tabIndex={0}
-                  disabled={workflowJsonSchemaStrict === null}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.currentTarget.click();
-                    }
-                  }}
-                >
-                  <FormattedMessage
-                    id="workflows.yamlEditor.downloadSchemaButtonLabel"
-                    defaultMessage="JSON Schema"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+      {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml ? (
+        <div css={styles.agentBuilderSectionCss}>
+          <WorkflowYamlEditorAssistActions
+            isAgentBuilderAvailable={isAgentBuilderAvailable}
+            isDevelopment={isDevelopment}
+            workflowJsonSchema={
+              (workflowJsonSchemaStrict ?? null) as SchemasSettings['schema'] | null
+            }
+            onOpenAgentChat={openAgentChat}
+            onDownloadSchema={downloadSchema}
+          />
         </div>
-      )}
+      ) : null}
       <div
         css={styles.editorContainer}
         className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
@@ -760,9 +820,77 @@ export const WorkflowYAMLEditor = ({
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          extraAction={<ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />}
+          extraAction={extraActionElement}
         />
       </div>
     </div>
   );
 };
+
+const WorkflowYamlEditorAssistActions = React.memo(function WorkflowYamlEditorAssistActions({
+  isAgentBuilderAvailable,
+  isDevelopment,
+  workflowJsonSchema,
+  onOpenAgentChat,
+  onDownloadSchema,
+}: {
+  isAgentBuilderAvailable: boolean;
+  isDevelopment: boolean;
+  workflowJsonSchema: SchemasSettings['schema'] | null;
+  onOpenAgentChat: () => void;
+  onDownloadSchema: () => void;
+}) {
+  const styles = useWorkflowEditorStyles();
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      {isAgentBuilderAvailable && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="workflows.yamlEditor.aiAgentTooltip"
+                defaultMessage="Ask AI to help edit this workflow"
+              />
+            }
+          >
+            <EuiButtonEmpty
+              iconType="sparkles"
+              size="xs"
+              aria-label="Open AI Agent"
+              onClick={onOpenAgentChat}
+              data-test-subj="workflowYamlEditorAiAgentButton"
+            >
+              <FormattedMessage
+                id="workflows.yamlEditor.aiAgentButtonLabel"
+                defaultMessage="AI Agent"
+              />
+            </EuiButtonEmpty>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {isDevelopment && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            css={styles.downloadSchemaButton}
+            iconType={workflowJsonSchema === null ? 'warning' : 'download'}
+            size="xs"
+            aria-label="Download JSON schema for debugging"
+            onClick={onDownloadSchema}
+            tabIndex={0}
+            disabled={workflowJsonSchema === null}
+            onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.currentTarget.click();
+              }
+            }}
+          >
+            <FormattedMessage
+              id="workflows.yamlEditor.downloadSchemaButtonLabel"
+              defaultMessage="JSON Schema"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+});

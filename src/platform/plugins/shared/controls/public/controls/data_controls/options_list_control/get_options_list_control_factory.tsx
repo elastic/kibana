@@ -22,11 +22,7 @@ import {
 } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type {
-  OptionsListSelection,
-  OptionsListControlState,
-  OptionsListDSLControlState,
-} from '@kbn/controls-schemas';
+import type { OptionsListSelection, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
@@ -36,7 +32,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
-import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
+import { isValidSearch } from '../../../../common/options_list';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,
@@ -65,7 +61,7 @@ import {
 } from './utils/selection_utils';
 
 export const getOptionsListControlFactory = (): EmbeddableFactory<
-  OptionsListControlState,
+  OptionsListDSLControlState,
   OptionsListControlApi
 > => {
   return {
@@ -73,9 +69,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 
-      if (isOptionsListESQLControlState(state)) {
-        throw new Error('ES|QL control state handling not yet implemented');
-      }
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();
       const selectionsManager = initializeSelectionsManager(state);
@@ -275,9 +268,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           exists_selected: false,
         },
         onReset: (lastSaved) => {
-          if (isOptionsListESQLControlState(lastSaved)) {
-            throw new Error('ES|QL control state handling not yet implemented');
-          }
           dataControlManager.reinitializeState(lastSaved);
           selectionsManager.reinitializeState(lastSaved);
           editorStateManager.reinitializeState(lastSaved);
@@ -310,7 +300,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
 
       const componentApi: DSLOptionsListComponentApi = {
         ...api,
-        ...dataControlManager.api,
         ...editorStateManager.api,
         ...selectionsManager.api,
         ...temporaryStateManager.api,

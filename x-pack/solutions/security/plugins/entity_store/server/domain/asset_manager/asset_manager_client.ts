@@ -17,12 +17,12 @@ import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server'
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
-import { scheduleHistorySnapshotTasks } from '../../tasks/history_snapshot_task';
 import {
-  installSharedElasticsearchAssets,
-  installIndicesAndDataStreams,
-  uninstallElasticsearchAssets,
-} from './install_assets';
+  scheduleHistorySnapshotTasks,
+  stopHistorySnapshotTask,
+} from '../../tasks/history_snapshot_task';
+import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
+import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
@@ -46,7 +46,11 @@ import type {
   GetStatusResult,
 } from '../types';
 import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import {
+  getEntitiesAlias,
+  ENTITY_LATEST,
+  getLatestEntitiesIndexName,
+} from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
@@ -115,8 +119,7 @@ export class AssetManagerClient {
       const logsExtraction = LogExtractionConfig.parse(logsExtractionParams ?? {});
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
-      // Phase 1: Install shared ES assets and run independent setup tasks.
-      // All component templates and index templates must exist before any index is created.
+      // Phase 1: Install shared ES assets/storage and run independent setup tasks.
       await Promise.all([
         this.globalStateClient.init({ historySnapshot, logsExtraction }),
 
@@ -143,7 +146,7 @@ export class AssetManagerClient {
         }),
       ]);
 
-      // Phase 2: Create indices and start engines, now that templates are in place.
+      // Phase 2: Initialize engines and start background tasks.
       await Promise.all([
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
@@ -153,6 +156,13 @@ export class AssetManagerClient {
           namespace: this.namespace,
           request,
           frequency: historySnapshot.frequency,
+        }),
+
+        scheduleStatusReportTask({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
         }),
 
         installEuidStoredScripts({
@@ -231,7 +241,19 @@ export class AssetManagerClient {
       const remainingEngines = await this.engineDescriptorClient.getAll();
       if (remainingEngines.length === 0) {
         this.logger.debug(`Deleting global state because last engine was uninstalled`);
-        await this.globalStateClient.delete();
+        await Promise.all([
+          this.globalStateClient.delete(),
+          stopStatusReportTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+          stopHistorySnapshotTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+        ]);
       }
 
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
@@ -320,7 +342,7 @@ export class AssetManagerClient {
     );
 
     const targetIndexPrivileges = {
-      [getLatestEntitiesIndexName(this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+      [getEntitiesAlias(ENTITY_LATEST, this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
     };
 
     return checkPrivileges({
@@ -340,11 +362,9 @@ export class AssetManagerClient {
       }
 
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
-      // Those 3 operations have to happen in order: 1. Init engine; 2. Install
-      // Indices & Data Streams; 3. Update engine.
+      // Engine installation is per-type. Shared indices and data streams are created once
+      // during `init()` before parallel engine initialization begins.
       await this.engineDescriptorClient.init(type);
-      await installIndicesAndDataStreams(this.esClient, this.namespace, this.logger);
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
       this.logger.debug(`Installed definition: ${type}`);
 
       return true;

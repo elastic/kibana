@@ -11,9 +11,23 @@ import { schema } from '@kbn/config-schema';
 import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 import { dataControlSchema } from './control_schema';
 
-export const rangeValueSchema = schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 });
+export const rangeValueSchema = schema.arrayOf(schema.string(), {
+  minSize: 2,
+  maxSize: 2,
+  meta: {
+    description:
+      'The selected range as a two-element array of strings representing the lower and upper bound values, for example `["10", "50"]`.',
+  },
+});
 
-export const rangeSliderControlSchema = dataControlSchema.extends({
+export const rangeSliderControlSchema = schema.object({
+  ...dataControlSchema.getPropSchemas(),
   value: schema.maybe(rangeValueSchema),
-  step: schema.number({ defaultValue: DEFAULT_RANGE_SLIDER_STATE.step, min: 0 }),
+  step: schema.number({
+    defaultValue: DEFAULT_RANGE_SLIDER_STATE.step,
+    min: 0,
+    meta: {
+      description: 'The step size between selectable range values.',
+    },
+  }),
 });

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { generateWorkflowId } from '../../../../common/lib/import';
 import { isRecord } from '../../../../common/lib/type_guards';
 import { parseYamlToJSONWithoutValidation } from '../../../../common/lib/yaml';
 
@@ -47,12 +48,12 @@ function countInputs(raw: unknown): number {
  * Uses unvalidated parsing so that even partially-valid YAML produces
  * whatever metadata is available.
  */
-export function extractWorkflowPreview(id: string, yaml: string): WorkflowPreview {
+export function extractWorkflowPreview(yaml: string): WorkflowPreview {
   const result = parseYamlToJSONWithoutValidation(yaml);
 
   if (!result.success || result.json == null || typeof result.json !== 'object') {
     return {
-      id,
+      id: generateWorkflowId(null),
       name: null,
       description: null,
       triggers: [],
@@ -64,10 +65,19 @@ export function extractWorkflowPreview(id: string, yaml: string): WorkflowPrevie
 
   const json = result.json;
   const name = typeof json.name === 'string' ? json.name : null;
+  const nameForId = json.name != null && typeof json.name !== 'object' ? String(json.name) : null;
   const description = typeof json.description === 'string' ? json.description : null;
   const triggers = extractTriggers(json.triggers);
   const inputCount = countInputs(json.inputs);
   const stepCount = Array.isArray(json.steps) ? json.steps.length : 0;
 
-  return { id, name, description, triggers, inputCount, stepCount, valid: true };
+  return {
+    id: generateWorkflowId(nameForId),
+    name,
+    description,
+    triggers,
+    inputCount,
+    stepCount,
+    valid: true,
+  };
 }

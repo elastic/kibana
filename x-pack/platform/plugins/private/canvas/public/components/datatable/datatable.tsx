@@ -34,13 +34,13 @@ const getIcon = (type: DatatableColumnType | null) => {
       icon = 'calendar';
       break;
     case 'boolean':
-      icon = 'invert';
+      icon = 'contrast';
       break;
     default:
       icon = 'question';
   }
 
-  return <EuiIcon type={icon} color="subdued" />;
+  return <EuiIcon type={icon} color="subdued" aria-hidden={true} />;
 };
 
 const getColumnName = (col: DatatableColumn) => (typeof col === 'string' ? col : col.name);

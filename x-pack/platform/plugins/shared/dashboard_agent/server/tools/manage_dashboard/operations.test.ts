@@ -14,8 +14,8 @@ import type {
 import { isSection } from '@kbn/dashboard-agent-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { ResolveVisualizationConfig, VisualizationAttempt } from './inline_visualization';
-import type { VisualizationContent } from '@kbn/dashboard-agent-common';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const createMockLogger = (): Logger =>
   ({
@@ -44,27 +44,29 @@ const getPanelsOnly = (panels: DashboardAttachmentData['panels']): AttachmentPan
 
 describe('executeDashboardOperations', () => {
   const logger = createMockLogger();
-  const createLensPanel = (uid: string, gridY = 0): AttachmentPanel => ({
-    type: 'lens',
-    uid,
+  const createLensPanel = (id: string, gridY = 0): AttachmentPanel => ({
+    type: LENS_EMBEDDABLE_TYPE,
+    id,
     config: { type: 'metric' },
     grid: { x: 0, y: gridY, w: 24, h: 9 },
   });
 
   const createSection = (
-    uid: string,
+    id: string,
     title: string,
     gridY: number,
     panels: AttachmentPanel[] = []
   ): DashboardSection => ({
-    uid,
+    id,
     title,
     collapsed: false,
     grid: { y: gridY },
     panels,
   });
 
-  const createResolvedVisualization = (visContent: VisualizationContent): VisualizationAttempt => ({
+  const createResolvedVisualization = (
+    visContent: Pick<AttachmentPanel, 'type' | 'config'>
+  ): VisualizationAttempt => ({
     type: 'success',
     visContent,
   });
@@ -74,7 +76,7 @@ describe('executeDashboardOperations', () => {
   ): ResolveVisualizationConfig => {
     return async ({ identifier }) =>
       resultsByIdentifier[identifier] ??
-      createResolvedVisualization({ type: 'lens', config: { type: 'metric' } });
+      createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric' } });
   };
 
   it('executes operations in order', async () => {
@@ -116,7 +118,7 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.title).toBe('Updated title');
     expect(result.dashboardData.panels).toEqual([
       expect.objectContaining({
-        uid: 'from-attachment-panel',
+        id: 'from-attachment-panel',
         grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
       expect.objectContaining({
@@ -166,7 +168,7 @@ describe('executeDashboardOperations', () => {
     });
 
     expect(result.dashboardData.panels).toEqual([
-      expect.objectContaining({ uid: 'from-attachment' }),
+      expect.objectContaining({ id: 'from-attachment' }),
     ]);
     expect(result.failures).toEqual([
       expect.objectContaining({
@@ -207,7 +209,7 @@ describe('executeDashboardOperations', () => {
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toEqual([
       {
-        uid: 'section-1',
+        id: 'section-1',
         title: 'Section 1',
         collapsed: false,
         grid: { y: 10 },
@@ -241,7 +243,7 @@ describe('executeDashboardOperations', () => {
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toHaveLength(1);
     expect(sections[0]).toEqual({
-      uid: expect.any(String),
+      id: expect.any(String),
       title: 'Overview',
       collapsed: false,
       grid: { y: 12 },
@@ -277,11 +279,11 @@ describe('executeDashboardOperations', () => {
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       resolveVisualizationConfig: createResolveVisualizationConfig({
         'show total requests': createResolvedVisualization({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'metric' },
         }),
         'show error rate': createResolvedVisualization({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'bar' },
         }),
       }),
@@ -293,19 +295,19 @@ describe('executeDashboardOperations', () => {
     expect(panelsOnly).toEqual([]);
     expect(sections).toHaveLength(1);
     expect(sections[0]).toEqual({
-      uid: expect.any(String),
+      id: expect.any(String),
       title: 'Overview',
       collapsed: false,
       grid: { y: 12 },
       panels: [
         expect.objectContaining({
-          type: 'lens',
-          config: { attributes: { type: 'metric' } },
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
           grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
         expect.objectContaining({
-          type: 'lens',
-          config: { attributes: { type: 'bar' } },
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'bar' },
           grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
       ],
@@ -340,7 +342,7 @@ describe('executeDashboardOperations', () => {
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       resolveVisualizationConfig: createResolveVisualizationConfig({
         'show total requests': createResolvedVisualization({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'metric' },
         }),
         'show p95 latency': {
@@ -359,8 +361,8 @@ describe('executeDashboardOperations', () => {
     expect(sections).toHaveLength(1);
     expect(sections[0].panels).toEqual([
       expect.objectContaining({
-        type: 'lens',
-        config: { attributes: { type: 'metric' } },
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
         grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
     ]);
@@ -442,13 +444,13 @@ describe('executeDashboardOperations', () => {
 
     secondSectionPanel.resolve(
       createResolvedVisualization({
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'bar' },
       })
     );
     firstSectionPanel.resolve(
       createResolvedVisualization({
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
       })
     );
@@ -458,11 +460,11 @@ describe('executeDashboardOperations', () => {
     expect(getSections(result.dashboardData.panels)).toEqual([
       expect.objectContaining({
         title: 'Overview',
-        panels: [expect.objectContaining({ config: { attributes: { type: 'metric' } } })],
+        panels: [expect.objectContaining({ config: { type: 'metric' } })],
       }),
       expect.objectContaining({
         title: 'Errors',
-        panels: [expect.objectContaining({ config: { attributes: { type: 'bar' } } })],
+        panels: [expect.objectContaining({ config: { type: 'bar' } })],
       }),
     ]);
   });
@@ -534,13 +536,13 @@ describe('executeDashboardOperations', () => {
 
     topLevelPanel.resolve(
       createResolvedVisualization({
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'bar' },
       })
     );
     sectionPanel.resolve(
       createResolvedVisualization({
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
       })
     );
@@ -550,11 +552,11 @@ describe('executeDashboardOperations', () => {
     expect(getSections(result.dashboardData.panels)).toEqual([
       expect.objectContaining({
         title: 'Overview',
-        panels: [expect.objectContaining({ config: { attributes: { type: 'metric' } } })],
+        panels: [expect.objectContaining({ config: { type: 'metric' } })],
       }),
     ]);
     expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
-      expect.objectContaining({ config: { attributes: { type: 'bar' } } }),
+      expect.objectContaining({ config: { type: 'bar' } }),
     ]);
   });
 
@@ -632,7 +634,7 @@ describe('executeDashboardOperations', () => {
     expect(panelsOnly).toEqual([]);
     expect(sections[0].panels).toEqual([
       expect.objectContaining({
-        uid: 'section-routed-panel',
+        id: 'section-routed-panel',
         grid: { x: 12, y: 0, w: 12, h: 5 },
       }),
     ]);
@@ -651,16 +653,16 @@ describe('executeDashboardOperations', () => {
           ]),
         ],
       },
-      operations: [{ operation: 'remove_section', uid: 'section-a', panelAction: 'promote' }],
+      operations: [{ operation: 'remove_section', id: 'section-a', panelAction: 'promote' }],
       logger,
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toHaveLength(0);
     expect(result.dashboardData.panels).toEqual([
-      expect.objectContaining({ uid: 'top-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
-      expect.objectContaining({ uid: 'section-a-1', grid: { x: 0, y: 9, w: 24, h: 9 } }),
-      expect.objectContaining({ uid: 'section-a-2', grid: { x: 0, y: 18, w: 24, h: 9 } }),
+      expect.objectContaining({ id: 'top-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
+      expect.objectContaining({ id: 'section-a-1', grid: { x: 0, y: 9, w: 24, h: 9 } }),
+      expect.objectContaining({ id: 'section-a-2', grid: { x: 0, y: 18, w: 24, h: 9 } }),
     ]);
   });
 
@@ -674,14 +676,14 @@ describe('executeDashboardOperations', () => {
           createSection('section-a', 'Section A', 10, [createLensPanel('section-a-1', 0)]),
         ],
       },
-      operations: [{ operation: 'remove_section', uid: 'section-a', panelAction: 'delete' }],
+      operations: [{ operation: 'remove_section', id: 'section-a', panelAction: 'delete' }],
       logger,
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });
 
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toHaveLength(0);
-    expect(result.dashboardData.panels).toEqual([expect.objectContaining({ uid: 'top-1' })]);
+    expect(result.dashboardData.panels).toEqual([expect.objectContaining({ id: 'top-1' })]);
   });
 
   it('removes matching panelIds from top-level and section panels', async () => {
@@ -707,11 +709,11 @@ describe('executeDashboardOperations', () => {
     expect(panelsOnly).toEqual([]);
     expect(sections).toEqual([
       {
-        uid: 'section-a',
+        id: 'section-a',
         title: 'Section A',
         collapsed: false,
         grid: { y: 8 },
-        panels: [expect.objectContaining({ uid: 'section-a-2' })],
+        panels: [expect.objectContaining({ id: 'section-a-2' })],
       },
     ]);
   });
@@ -775,7 +777,7 @@ describe('executeDashboardOperations', () => {
       const sections = getSections(result.dashboardData.panels);
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
-          uid: 'section-panel-1',
+          id: 'section-panel-1',
           grid: { x: 12, y: 4, w: 12, h: 6 },
           config: { type: 'metric' },
         }),
@@ -811,7 +813,7 @@ describe('executeDashboardOperations', () => {
       expect(panelsOnly).toEqual([]);
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
-          uid: 'top-1',
+          id: 'top-1',
           grid: { x: 24, y: 0, w: 24, h: 9 },
           config: { type: 'metric' },
         }),
@@ -849,7 +851,7 @@ describe('executeDashboardOperations', () => {
       expect(sections[0].panels).toEqual([]);
       expect(panelsOnly).toEqual([
         expect.objectContaining({
-          uid: 'section-panel-1',
+          id: 'section-panel-1',
           grid: { x: 0, y: 20, w: 24, h: 9 },
           config: { type: 'metric' },
         }),
@@ -911,11 +913,11 @@ describe('executeDashboardOperations', () => {
         resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
           'show total requests': createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'metric' },
           }),
           'show error rate': createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'bar' },
           }),
         }),
@@ -926,21 +928,21 @@ describe('executeDashboardOperations', () => {
 
       expect(topLevelPanels).toEqual([
         expect.objectContaining({
-          type: 'lens',
-          config: { attributes: { type: 'metric' } },
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
           grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
       ]);
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
-          type: 'lens',
-          config: { attributes: { type: 'bar' } },
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'bar' },
           grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
       ]);
     });
 
-    it('edits inline visualization panels while preserving uid and grid', async () => {
+    it('edits inline visualization panels while preserving id and grid', async () => {
       const result = await executeDashboardOperations({
         dashboardData: {
           title: 'Test',
@@ -962,9 +964,12 @@ describe('executeDashboardOperations', () => {
         logger,
         resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
-          'panel-1': createResolvedVisualization({ type: 'lens', config: { type: 'bar' } }),
+          'panel-1': createResolvedVisualization({
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'bar' },
+          }),
           'section-panel-1': createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'line' },
           }),
         }),
@@ -975,16 +980,16 @@ describe('executeDashboardOperations', () => {
 
       expect(topLevelPanels[0]).toEqual(
         expect.objectContaining({
-          uid: 'panel-1',
+          id: 'panel-1',
           grid: { x: 0, y: 5, w: 24, h: 9 },
-          config: { attributes: { type: 'bar' } },
+          config: { type: 'bar' },
         })
       );
       expect(sections[0].panels[0]).toEqual(
         expect.objectContaining({
-          uid: 'section-panel-1',
+          id: 'section-panel-1',
           grid: { x: 0, y: 0, w: 24, h: 9 },
-          config: { attributes: { type: 'line' } },
+          config: { type: 'line' },
         })
       );
     });
@@ -1020,13 +1025,13 @@ describe('executeDashboardOperations', () => {
 
           if (nlQuery === 'make this a bar chart') {
             return createResolvedVisualization({
-              type: 'lens',
+              type: LENS_EMBEDDABLE_TYPE,
               config: { type: 'metric', testStep: 'after-first-edit' },
             });
           }
 
           return createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: {
               type: 'metric',
               testStep: configStep === 'after-first-edit' ? 'after-second-edit' : 'stale-edit',
@@ -1038,8 +1043,8 @@ describe('executeDashboardOperations', () => {
       expect(seenConfigSteps).toEqual(['initial', 'after-first-edit']);
       expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
         expect.objectContaining({
-          uid: 'panel-1',
-          config: { attributes: { type: 'metric', testStep: 'after-second-edit' } },
+          id: 'panel-1',
+          config: { type: 'metric', testStep: 'after-second-edit' },
           grid: { x: 0, y: 5, w: 24, h: 9 },
         })
       );
@@ -1049,7 +1054,9 @@ describe('executeDashboardOperations', () => {
       const resolveVisualizationConfig = jest.fn<
         ReturnType<ResolveVisualizationConfig>,
         Parameters<ResolveVisualizationConfig>
-      >(async () => createResolvedVisualization({ type: 'lens', config: { type: 'bar' } }));
+      >(async () =>
+        createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
+      );
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -1106,7 +1113,7 @@ describe('executeDashboardOperations', () => {
         resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
           'show total requests': createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'metric' },
           }),
           'show p95 latency': {
@@ -1138,7 +1145,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               type: 'aiOpsLogRateAnalysis',
-              uid: 'panel-1',
+              id: 'panel-1',
               config: { seriesType: 'log_rate' },
               grid: { x: 0, y: 5, w: 24, h: 9 },
             },
@@ -1167,7 +1174,7 @@ describe('executeDashboardOperations', () => {
 
       expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
         expect.objectContaining({
-          uid: 'panel-1',
+          id: 'panel-1',
           type: 'aiOpsLogRateAnalysis',
           config: { seriesType: 'log_rate' },
           grid: { x: 0, y: 5, w: 24, h: 9 },

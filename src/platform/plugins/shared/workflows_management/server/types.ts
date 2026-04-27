@@ -24,7 +24,10 @@ import type {
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ServerlessServerSetup } from '@kbn/serverless/server/types';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -38,6 +41,7 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { ZodObject } from '@kbn/zod/v4';
+import type { SmlTypeDefinition } from './agent_builder/sml_types/types';
 import type { WorkflowsManagementApi } from './api/workflows_management_api';
 
 export interface WorkflowsServerPluginSetup {
@@ -67,6 +71,9 @@ export interface AgentBuilderPluginSetupContract {
   skills: {
     register: (definition: SkillDefinition) => void;
   };
+  sml: {
+    registerType: (definition: SmlTypeDefinition) => void;
+  };
 }
 
 export interface WorkflowsServerPluginSetupDeps {
@@ -86,6 +93,7 @@ export interface WorkflowsServerPluginStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{

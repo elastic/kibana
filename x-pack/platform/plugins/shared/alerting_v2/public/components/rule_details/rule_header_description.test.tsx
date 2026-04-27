@@ -9,63 +9,95 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
+import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 
 const baseRule = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'My Rule', labels: ['prod', 'infra'] },
+  metadata: { name: 'My Rule', tags: ['prod', 'infra'] },
 } as RuleApiResponse;
 
-const wrap = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+const wrap = (ui: React.ReactElement, rule: RuleApiResponse = baseRule) =>
+  render(
+    <I18nProvider>
+      <RuleProvider rule={rule}>{ui}</RuleProvider>
+    </I18nProvider>
+  );
 
 describe('RuleHeaderDescription', () => {
   it('renders tags as badges', () => {
-    wrap(<RuleHeaderDescription rule={baseRule} />);
+    wrap(<RuleHeaderDescription />);
     expect(screen.getByTestId('ruleTags')).toBeInTheDocument();
     expect(screen.getByText('prod')).toBeInTheDocument();
     expect(screen.getByText('infra')).toBeInTheDocument();
   });
 
-  it('returns null when labels are empty', () => {
-    const { container } = wrap(
-      <RuleHeaderDescription rule={{ ...baseRule, metadata: { name: 'No Tags' } }} />
+  it('renders description text', () => {
+    const rule = {
+      ...baseRule,
+      metadata: { name: 'My Rule', description: 'Alert when errors exceed threshold.' },
+    } as RuleApiResponse;
+    wrap(<RuleHeaderDescription />, rule);
+    expect(screen.getByTestId('ruleDescription')).toHaveTextContent(
+      'Alert when errors exceed threshold.'
     );
+  });
+
+  it('renders both description and tags when both are present', () => {
+    const rule = {
+      ...baseRule,
+      metadata: {
+        name: 'My Rule',
+        description: 'Some description',
+        tags: ['prod', 'infra'],
+      },
+    } as RuleApiResponse;
+    wrap(<RuleHeaderDescription />, rule);
+    expect(screen.getByTestId('ruleDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTags')).toBeInTheDocument();
+  });
+
+  it('returns null when tags are empty and no description', () => {
+    const { container } = wrap(<RuleHeaderDescription />, {
+      ...baseRule,
+      metadata: { name: 'No Tags' },
+    } as RuleApiResponse);
     expect(container.innerHTML).toBe('');
   });
 
-  it('returns null when labels are undefined', () => {
-    const rule = { ...baseRule, metadata: { name: 'No Labels' } } as RuleApiResponse;
-    const { container } = wrap(<RuleHeaderDescription rule={rule} />);
+  it('returns null when tags are undefined and no description', () => {
+    const rule = { ...baseRule, metadata: { name: 'No Tags' } } as RuleApiResponse;
+    const { container } = wrap(<RuleHeaderDescription />, rule);
     expect(container.innerHTML).toBe('');
   });
 });
 
 describe('RuleTitleWithBadges', () => {
   it('renders the rule name', () => {
-    wrap(<RuleTitleWithBadges rule={baseRule} />);
+    wrap(<RuleTitleWithBadges />);
     expect(screen.getByTestId('ruleName')).toHaveTextContent('My Rule');
   });
 
   it('renders kind as Detect only for signal rules', () => {
-    wrap(<RuleTitleWithBadges rule={baseRule} />);
+    wrap(<RuleTitleWithBadges />);
     expect(screen.getByTestId('kindBadge')).toHaveTextContent('Detect only');
   });
 
-  it('renders kind as Alert for alert rules', () => {
-    wrap(<RuleTitleWithBadges rule={{ ...baseRule, kind: 'alert' }} />);
-    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alert');
+  it('renders kind as Alerting for alert rules', () => {
+    wrap(<RuleTitleWithBadges />, { ...baseRule, kind: 'alert' } as RuleApiResponse);
+    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alerting');
   });
 
   it('renders enabled badge when rule is enabled', () => {
-    wrap(<RuleTitleWithBadges rule={baseRule} />);
+    wrap(<RuleTitleWithBadges />);
     expect(screen.getByTestId('enabledBadge')).toBeInTheDocument();
     expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
   });
 
   it('renders disabled badge when rule is disabled', () => {
-    wrap(<RuleTitleWithBadges rule={{ ...baseRule, enabled: false }} />);
+    wrap(<RuleTitleWithBadges />, { ...baseRule, enabled: false } as RuleApiResponse);
     expect(screen.getByTestId('disabledBadge')).toBeInTheDocument();
     expect(screen.queryByTestId('enabledBadge')).not.toBeInTheDocument();
   });

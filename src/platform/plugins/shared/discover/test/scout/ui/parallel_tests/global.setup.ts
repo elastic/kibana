@@ -9,8 +9,17 @@
 
 import { globalSetupHook } from '@kbn/scout';
 import { getSynthtraceClient } from '@kbn/scout-synthtrace';
-import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
-import { TRACES, richTrace, traceCorrelatedLogs, deepTrace } from '../fixtures/traces_experience';
+import {
+  createMetricsTestIndexIfNeeded,
+  DIMENSIONS_WIPE_CONFIG,
+} from '../fixtures/metrics_experience';
+import {
+  TRACES,
+  richTrace,
+  traceCorrelatedLogs,
+  minimalTraceCorrelatedLogs,
+  deepTrace,
+} from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
@@ -33,8 +42,19 @@ globalSetupHook(
         : '[setup:metrics] metrics test index already exists, skipping'
     );
 
-    // Traces Experience setup (not supported in serverless security - no Fleet/APM privileges)
-    const hasFleetSupport = !(config.serverless && config.projectType === 'security');
+    // Companion index for stream-switch coverage
+    log.debug(
+      '[setup:metrics] creating companion metrics test index (only if it does not exist)...'
+    );
+    const createdOther = await createMetricsTestIndexIfNeeded(esClient, DIMENSIONS_WIPE_CONFIG);
+    log.debug(
+      createdOther
+        ? '[setup:metrics] companion metrics test index created successfully'
+        : '[setup:metrics] companion metrics test index already exists, skipping'
+    );
+
+    // Traces Experience setup (not supported in serverless security or search - no Fleet/APM privileges)
+    const hasFleetSupport = !config.serverless || config.projectType === 'oblt';
     if (hasFleetSupport) {
       if (!config.isCloud) {
         await apiServices.fleet.internal.setup();
@@ -79,6 +99,15 @@ globalSetupHook(
 
       await logsEsClient.index(logData);
       log.debug('[setup:traces] Correlated log data indexed');
+
+      const minimalLogData = minimalTraceCorrelatedLogs({
+        ...timeRange,
+        traceId: correlationIds.minimalTraceId,
+        transactionId: correlationIds.minimalTransactionId,
+      });
+
+      await logsEsClient.index(minimalLogData);
+      log.debug('[setup:traces] Minimal trace log data indexed');
     }
   }
 );

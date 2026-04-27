@@ -115,7 +115,7 @@
             "signature": [
               "{ id: string; name: string; order?: number | undefined; alerting?: ",
               "AlertingKibanaPrivilege",
-              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
+              " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; category: ",
               "AppCategory",
               "; app: readonly string[]; privileges: { all: ",
               {
@@ -421,7 +421,7 @@
         "signature": [
           "{ id: string; name: string; order?: number | undefined; alerting?: ",
           "AlertingKibanaPrivilege",
-          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
+          " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; category: ",
           "AppCategory",
           "; app: readonly string[]; privileges: { all: ",
           {
@@ -993,10 +993,12 @@
           " | ",
           "ProductFeatureRulesKey",
           " | ",
-          "ProductFeatureAlertsKey"
+          "ProductFeatureAlertsKey",
+          " | ",
+          "ProductFeatureWorkflowsKey"
         ],
         "path": "x-pack/solutions/security/packages/features/src/product_features_keys.ts",
-        "lineNumber": 210,
+        "lineNumber": 216,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

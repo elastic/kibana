@@ -83,7 +83,7 @@ export const getLegendActions = (
             defaultMessage: 'Filter for',
           }),
           'data-test-subj': `legend-${title}-filterIn`,
-          icon: <EuiIcon type="plusInCircle" size="m" />,
+          icon: <EuiIcon type="plusCircle" size="m" />,
           onClick: () => {
             setPopoverOpen(false);
             onFilter(filterData);
@@ -94,7 +94,7 @@ export const getLegendActions = (
             defaultMessage: 'Filter out',
           }),
           'data-test-subj': `legend-${title}-filterOut`,
-          icon: <EuiIcon type="minusInCircle" size="m" />,
+          icon: <EuiIcon type="minusCircle" size="m" />,
           onClick: () => {
             setPopoverOpen(false);
             onFilter(filterData, true);
@@ -155,6 +155,10 @@ export const getLegendActions = (
 
     return (
       <EuiPopover
+        aria-label={i18n.translate('expressionPartitionVis.legend.filterOptionsLegend', {
+          defaultMessage: '{legendDataLabel}, filter options',
+          values: { legendDataLabel: title },
+        })}
         button={Button}
         isOpen={popoverOpen}
         closePopover={() => {

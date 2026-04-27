@@ -42,7 +42,7 @@ export async function setupDependencies(
   fakeRequest?: KibanaRequest,
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
 ) {
-  const { coreStart, actions, taskManager } = dependencies;
+  const { coreStart, actions, taskManager, workflowsExtensions } = dependencies;
 
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
@@ -53,6 +53,9 @@ export async function setupDependencies(
     esClient: internalEsClient,
     logger,
   });
+
+  // Wait for the workflows extensions registries to be ready
+  await workflowsExtensions.isReady();
 
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -75,7 +78,7 @@ export async function setupDependencies(
   if (eventChainDepth !== undefined) {
     setWorkflowEventChainContext(fakeRequest, {
       depth: eventChainDepth,
-      sourceWorkflowId: workflowExecution.workflowId,
+      sourceExecutionId: workflowExecution.id,
     });
   }
 
@@ -156,7 +159,8 @@ export async function setupDependencies(
     workflowLogger,
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
-    enhancedDependencies
+    enhancedDependencies,
+    workflowExecutionState
   );
 
   return {

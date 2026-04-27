@@ -20,17 +20,16 @@ import { i18n } from '@kbn/i18n';
 import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
 import { capitalize } from 'lodash';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../../flyout/entity_details/shared/constants';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
-import { getEmptyValue } from '../../../../../common/components/empty_value';
+import { RISK_SCORE_NOT_AVAILABLE } from '../../../entity_resolution/translations';
 import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine';
 import { formatRiskScore } from '../../../../common/utils';
 import { getRiskScoreColors } from '../risk_score_cell';
-import type { EntitiesGroupingAggregation } from './use_fetch_grouped_data';
+import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
 import { ENTITY_GROUPING_OPTIONS } from '../constants';
 
 const entitiesStatLabel = i18n.translate(
@@ -48,13 +47,21 @@ const openEntityFlyoutLabel = i18n.translate(
   { defaultMessage: 'Open entity details' }
 );
 
-const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAggregation> }) => {
+const ResolutionGroupPanel = ({
+  bucket,
+  targetMetadata,
+}: {
+  bucket: RawBucket<EntitiesGroupingAggregation>;
+  targetMetadata: TargetMetadataMap;
+}) => {
   const { openRightPanel } = useExpandableFlyoutApi();
 
-  const targetEntityName = bucket.resolutionEntityName?.name?.buckets?.[0]?.key;
-  const displayName = targetEntityName ?? String(bucket.key_as_string ?? bucket.key);
+  const entityId = String(bucket.key_as_string ?? bucket.key);
+  const metadata = targetMetadata.get(entityId);
+  const targetEntityName = metadata?.name;
+  const displayName = targetEntityName ?? entityId;
 
-  const entityType = bucket.resolutionEntityType?.type?.buckets?.[0]?.key as EntityType | undefined;
+  const entityType = metadata?.type;
 
   const canOpenFlyout = Boolean(targetEntityName && entityType);
 
@@ -71,19 +78,20 @@ const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAg
         id: panelKey,
         params: {
           [panelParam]: targetEntityName,
+          entityId,
           contextID: ENTITY_ANALYTICS_TABLE_ID,
           scopeId: ENTITY_ANALYTICS_TABLE_ID,
         },
       });
     },
-    [openRightPanel, targetEntityName, entityType]
+    [openRightPanel, targetEntityName, entityType, entityId]
   );
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       {canOpenFlyout && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={openEntityFlyoutLabel}>
+          <EuiToolTip content={openEntityFlyoutLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={openEntityFlyoutLabel}
               iconType="expand"
@@ -95,32 +103,44 @@ const ResolutionGroupPanel = ({ bucket }: { bucket: RawBucket<EntitiesGroupingAg
       )}
       <EuiFlexItem grow={false}>
         <EuiText size="s">{displayName}</EuiText>
+        {targetEntityName && (
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.entityId', {
+              defaultMessage: 'Entity ID: {entityId}',
+              values: { entityId },
+            })}
+          </EuiText>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-export const groupPanelRenderer = (
-  selectedGroup: string,
-  bucket: RawBucket<EntitiesGroupingAggregation>,
-  _nullGroupMessage?: string
-) => {
-  if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
-    return <ResolutionGroupPanel bucket={bucket} />;
-  }
+export const createGroupPanelRenderer = (targetMetadata: TargetMetadataMap) => {
+  const GroupPanelRenderer = (
+    selectedGroup: string,
+    bucket: RawBucket<EntitiesGroupingAggregation>,
+    _nullGroupMessage?: string
+  ) => {
+    if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
+      return <ResolutionGroupPanel bucket={bucket} targetMetadata={targetMetadata} />;
+    }
 
-  if (selectedGroup === ENTITY_GROUPING_OPTIONS.ENTITY_TYPE) {
-    const entityType = capitalize(bucket.key_as_string ?? bucket.key.toString());
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{entityType}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+    if (selectedGroup === ENTITY_GROUPING_OPTIONS.ENTITY_TYPE) {
+      const entityType = capitalize(bucket.key_as_string ?? bucket.key.toString());
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{entityType}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
 
-  return undefined;
+    return undefined;
+  };
+
+  return GroupPanelRenderer;
 };
 
 const GroupRiskScoreBadge = ({ riskScore }: { riskScore: number | null | undefined }) => {
@@ -133,8 +153,8 @@ const GroupRiskScoreBadge = ({ riskScore }: { riskScore: number | null | undefin
 
   if (riskScore == null) {
     return (
-      <EuiBadge css={badgeCss} color="hollow">
-        {getEmptyValue()}
+      <EuiBadge css={badgeCss}>
+        <EuiText size="xs">{RISK_SCORE_NOT_AVAILABLE}</EuiText>
       </EuiBadge>
     );
   }
@@ -157,28 +177,36 @@ const GroupRiskScoreBadge = ({ riskScore }: { riskScore: number | null | undefin
   );
 };
 
-export const groupStatsRenderer = (
-  selectedGroup: string,
-  bucket: RawBucket<EntitiesGroupingAggregation>
-): GroupStatsItem[] => {
-  const stats: GroupStatsItem[] = [];
+export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
+  const GroupStatsRenderer = (
+    selectedGroup: string,
+    bucket: RawBucket<EntitiesGroupingAggregation>
+  ): GroupStatsItem[] => {
+    const stats: GroupStatsItem[] = [];
 
-  if (bucket.doc_count) {
-    stats.push({
-      title: entitiesStatLabel,
-      badge: {
-        value: bucket.doc_count,
-        width: 50,
-      },
-    });
-  }
+    if (bucket.doc_count) {
+      stats.push({
+        title: entitiesStatLabel,
+        badge: {
+          value: bucket.doc_count,
+          width: 50,
+        },
+      });
+    }
 
-  if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
-    stats.push({
-      title: riskScoreLabel,
-      component: <GroupRiskScoreBadge riskScore={bucket.resolutionRiskScore?.value} />,
-    });
-  }
+    if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
+      const entityId = String(bucket.key_as_string ?? bucket.key);
+      const metadata = targetMetadata.get(entityId);
+      const riskScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value ?? null;
 
-  return stats;
+      stats.push({
+        title: riskScoreLabel,
+        component: <GroupRiskScoreBadge riskScore={riskScore} />,
+      });
+    }
+
+    return stats;
+  };
+
+  return GroupStatsRenderer;
 };

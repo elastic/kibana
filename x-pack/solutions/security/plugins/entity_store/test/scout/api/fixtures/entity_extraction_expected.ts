@@ -5,9 +5,66 @@
  * 2.0.
  */
 
-export const expectedHostEntities = [
+import { expect } from '@kbn/scout-security/api';
+import type { SearchHitsMetadata } from '@elastic/elasticsearch/lib/api/types';
+import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
+
+const LATEST_INDEX = getLatestEntitiesIndexName('default');
+type Hits = SearchHitsMetadata<unknown>['hits'];
+
+// Takes non sorted hits and compares them by _id, also prints rich information about missing entities
+export function assertEntitiesEqual(
+  expected: Hits,
+  actual: Hits,
+  logError?: (message: string) => void
+) {
+  if (actual.length !== expected.length) {
+    const actualIdSet = new Set(actual.map((h) => h._id));
+    const expectedIdSet = new Set(expected.map((h) => h._id));
+
+    const missingEntities = expected.filter((h) => !actualIdSet.has(h._id));
+    const extraEntities = actual.filter((h) => !expectedIdSet.has(h._id));
+
+    const messageParts: string[] = [];
+    if (missingEntities.length > 0) {
+      logError?.(
+        'Entities present in expected not in actual:' + JSON.stringify(missingEntities, null, 2)
+      );
+      messageParts.push(
+        `Entities present in expected not in actual (${missingEntities.length}): ${missingEntities
+          .map((h) => h._id)
+          .join(', ')}`
+      );
+    }
+    if (extraEntities.length > 0) {
+      logError?.(
+        'Entities present in actual but not in expected:' + JSON.stringify(extraEntities, null, 2)
+      );
+      messageParts.push(
+        `Entities present in actual but not in expected (${extraEntities.length}): ${extraEntities
+          .map((h) => h._id)
+          .join(', ')}`
+      );
+    }
+
+    const lengthMismatchMessage =
+      messageParts.length > 0
+        ? messageParts.join('; ')
+        : `Expected ${expected.length} hits, got ${actual.length} (duplicate _id values may hide which ids differ between expected and actual)`;
+
+    expect(actual, lengthMismatchMessage).toHaveLength(expected.length);
+  }
+
+  for (const expectedHit of expected) {
+    const actualHit = actual.find((h) => h._id === expectedHit._id);
+    expect(actualHit, `Could not find hit with id ${expectedHit._id}`).toBeDefined();
+    expect(actualHit).toMatchObject(expectedHit);
+  }
+}
+
+export const expectedHostEntities: Hits = [
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '5c4590a1e799d5fa9d43908d6f609027f1caa55efef5979757a094cfd80f2f81',
     _source: {
       '@timestamp': '2026-01-20T12:05:00.000Z',
@@ -21,7 +78,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '3ba8efeb63e3aa8c0e7272b25c5e443670e87ac1a78e9e67687da0ee9b7a4b5f',
     _source: {
       '@timestamp': '2026-01-20T12:05:02.000Z',
@@ -35,7 +92,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '59093c7a60d8eb6d70d09ba7cde21ef58774fee0fe3738498b746b98968d8046',
     _source: {
       '@timestamp': '2026-01-20T12:05:03.000Z',
@@ -49,7 +106,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'f8878d2ea2a52d05b08097538e92c89a0146320d0b8f5169d26f7b3d96336918',
     _source: {
       '@timestamp': '2026-01-20T12:05:04.000Z',
@@ -63,7 +120,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '897ba3ebc6ad71a081e7fc69b79473abaf6d425ab3c42a08e3f92b9a6bac7412',
     _source: {
       '@timestamp': '2026-01-20T12:05:05.000Z',
@@ -77,7 +134,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '6746dba00f1e5062c513ff8b4b8707069894308b12a69bd590763ae56880dda9',
     _source: {
       '@timestamp': '2026-01-20T12:05:06.000Z',
@@ -91,7 +148,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '60cde316aec6a9697ea87bfc44cf2b8c492e1a81408b6c955d367a47a77841c9',
     _source: {
       '@timestamp': '2026-01-20T12:05:07.000Z',
@@ -105,7 +162,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '2fb2f574f23c5013662d0e90cb88956b925f54ce381f605ce43970ab9d226fa5',
     _source: {
       '@timestamp': '2026-01-20T12:05:08.000Z',
@@ -119,7 +176,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '09bcd5d78b75a3adef2a52e183f655d678e148594ff151552d119c44a6d0a878',
     _source: {
       '@timestamp': '2026-01-20T12:05:09.000Z',
@@ -133,7 +190,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'b0a7cfbcf83d479cf075035daad72b41c3de8ce811d2f6897318f9bc1bb987ac',
     _source: {
       '@timestamp': '2026-01-20T12:05:10.000Z',
@@ -147,7 +204,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '768eb4b39da6860133158f0bd8e150bb35a6ddafa36a16835876994be3eb1282',
     _source: {
       '@timestamp': '2026-01-20T12:05:10.000Z',
@@ -161,7 +218,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'c08cb55dbe4f377ab1def9e763a82e0f9bf06cf231618e1353982569a7cb0077',
     _source: {
       '@timestamp': '2026-01-20T12:05:11.000Z',
@@ -175,7 +232,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'b15370fcb6af62f86e08adfc76d6a4bbddf608c99dd413a328b141c3bc856baa',
     _source: {
       '@timestamp': '2026-01-20T12:05:11.000Z',
@@ -189,7 +246,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'ef614751487e09e78b059dabbe45f3520990f98ba845ace99f393c77f887d2da',
     _source: {
       '@timestamp': '2026-01-20T12:05:12.000Z',
@@ -203,7 +260,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'a81cc7862183be0830ee40949661eb3892d2b1f0c9d1d536e6f88e6774c7dfdd',
     _source: {
       '@timestamp': '2026-01-20T12:05:13.000Z',
@@ -217,7 +274,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '92a7476f32e5e8edec138184b41959c82fa37050841e24c58d07500addd57aa2',
     _source: {
       '@timestamp': '2026-01-20T12:05:17.000Z',
@@ -231,7 +288,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '1632a83b7ec4a14465d1af6d1896969cf1dc5c212d2a71b2a17087c8de799b7a',
     _source: {
       '@timestamp': '2026-01-20T12:05:17.000Z',
@@ -245,7 +302,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'a8f8ffa08603e5be512b0568c0ac960cac5082415f60a133cc4bac22b87d5e31',
     _source: {
       '@timestamp': '2026-01-20T12:05:18.000Z',
@@ -259,7 +316,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'a46f698d3e156552cbbe33a7640f980187edeaeb241e2b13f3549576f0b67e28',
     _source: {
       '@timestamp': '2026-01-20T12:05:18.000Z',
@@ -273,7 +330,7 @@ export const expectedHostEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'f02169eec02621bcecb234b58b06cec66357c1553c9914fd3f049d234e3008d8',
     _source: {
       '@timestamp': '2026-01-20T12:05:23.000Z',
@@ -286,11 +343,38 @@ export const expectedHostEntities = [
       },
     },
   },
+  {
+    _index: LATEST_INDEX,
+    _id: '461490dda53c8f34ea128a61fb4f9463adddfc4f4073be8c45f3a2f05f13e509',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:24.000Z',
+      data_stream: {
+        dataset: 'jamf',
+      },
+      host: {
+        id: 'macbookpro-123',
+      },
+      entity: {
+        EngineMetadata: {
+          Type: 'host',
+          UntypedId: 'macbookpro-123',
+        },
+        lifecycle: {
+          first_seen: '2026-01-20T12:05:23.000Z',
+          last_seen: '2026-01-20T12:05:24.000Z',
+        },
+        name: 'macbookpro-123',
+        source: 'jamf',
+        id: 'host:macbookpro-123',
+        type: 'Host',
+      },
+    },
+  },
 ];
 
-export const expectedUserEntities = [
+export const expectedUserEntities: Hits = [
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'b567c98b4ef4ba050d3201175d7cbf1ef5a4377e10f1a7ca23f8f7b2c384dbb4',
     _source: {
       '@timestamp': '2026-01-20T12:05:00.000Z',
@@ -305,8 +389,8 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: '3d2e874ed64e8b5c6b3cd7a72f620dd5e4f1be97e6faab4da281f8b8f6c04913',
+    _index: LATEST_INDEX,
+    _id: 'cd38727a29cb7953f67860937ad78e7ccc83bb267d2bdd237c68e8b1c6ca3b88',
     _source: {
       '@timestamp': '2026-01-20T12:05:01.000Z',
       user: { name: 'jane.smith' },
@@ -314,13 +398,13 @@ export const expectedUserEntities = [
       entity: {
         name: 'jane.smith',
         type: 'Identity',
-        id: 'user:jane.smith@entra_id',
-        EngineMetadata: { Type: 'user', UntypedId: 'jane.smith@entra_id' },
+        id: 'user:jane.smith@host-456@local',
+        EngineMetadata: { Type: 'user', UntypedId: 'jane.smith@host-456@local' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'f54b6e21827a7e18b4dfc4736893d3766a9db81bec6e806a1c9afe7fffe3571c',
     _source: {
       '@timestamp': '2026-01-20T12:05:02.000Z',
@@ -335,7 +419,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'f1e9f0712f2e4f2dc13612daebe203fac9c8c56dcc0b4c3575af8cfdbd05e095',
     _source: {
       '@timestamp': '2026-01-20T12:05:03.000Z',
@@ -349,7 +433,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'da02d432b766ee35f68647f9714f619611eb5e05e14bb3ae43e5e4f48e2f6f7e',
     _source: {
       '@timestamp': '2026-01-20T12:05:04.000Z',
@@ -362,7 +446,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'c7ad17bde8724fc1773c8800c2e7adf35ac01661bbd8321fe3f37fd50c5118c6',
     _source: {
       '@timestamp': '2026-01-20T12:05:04.000Z',
@@ -376,7 +460,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'bbbdc4f04c4e3d052dc35f846de9044c144f729499ec0948cf55882e8fc4e33a',
     _source: {
       '@timestamp': '2026-01-20T12:05:05.000Z',
@@ -390,7 +474,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '62c5dd196f6e5e6c82d94043e99b51fcaf6e976bd4e2a9f0a507f27447d5dc3f',
     _source: {
       '@timestamp': '2026-01-20T12:05:06.000Z',
@@ -404,7 +488,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '43d3c510e836c10954b768e31075f42830d555751c01bdcf2c3a068c2e601174',
     _source: {
       '@timestamp': '2026-01-20T12:05:07.000Z',
@@ -418,7 +502,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '05547ae5914edf47b9fbd787dedd38148c3f8240c542c1419851718722e8ed1c',
     _source: {
       '@timestamp': '2026-01-20T12:05:08.000Z',
@@ -432,7 +516,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '526f58f4a72a4e80f9b95d4a3cd3f67f227c06843a2854336a257b844e2a4489',
     _source: {
       '@timestamp': '2026-01-20T12:05:09.000Z',
@@ -446,8 +530,8 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
-    _id: 'a797c8c22378d097a5c2a04496a8d7a62d6f44bf2c4bb3fc59a4863e36e159da',
+    _index: LATEST_INDEX,
+    _id: '16fe33533e168db368bc1fe511528ee3c3fc97f89653d714cb71b7c42a04f350',
     _source: {
       '@timestamp': '2026-01-20T12:05:10.000Z',
       user: { name: 'eve.martin' },
@@ -455,13 +539,13 @@ export const expectedUserEntities = [
       entity: {
         name: 'eve.martin',
         type: 'Identity',
-        id: 'user:eve.martin@microsoft_365',
-        EngineMetadata: { Type: 'user', UntypedId: 'eve.martin@microsoft_365' },
+        id: 'user:eve.martin@host-404@local',
+        EngineMetadata: { Type: 'user', UntypedId: 'eve.martin@host-404@local' },
       },
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'fe44b2619de15aa30170dde991ee224069d210beda4db607e4bce75bae4c1746',
     _source: {
       '@timestamp': '2026-01-20T12:05:11.000Z',
@@ -476,7 +560,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '034deba2c721973f2116bccea7d63b237ac1e380208dc9b1c4d555f616b9adfe',
     _source: {
       '@timestamp': '2026-01-20T12:05:12.000Z',
@@ -490,7 +574,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '42df55aa9b3d15a3b0af954aa93c68556cd5bcae0f61796fff74bffffdb51434',
     _source: {
       '@timestamp': '2026-01-20T12:05:13.000Z',
@@ -504,7 +588,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '1d138cf603a471abef52ffb6333d63dadcf9e34af1788f539cf999c8230727c9',
     _source: {
       '@timestamp': '2026-01-20T12:05:14.000Z',
@@ -518,7 +602,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'd2e88c95d22d9a787c932b72328f7d47cade891dda0bc7d8b823b14cf3fc3e23',
     _source: {
       '@timestamp': '2026-01-20T12:05:15.000Z',
@@ -532,7 +616,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '5404b10c22698b0ec86abec4c3bc429a8f8f063ed1dc6eee24b127a3521e9d63',
     _source: {
       '@timestamp': '2026-01-20T12:05:16.000Z',
@@ -547,7 +631,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '7b4db899b11d212ff774f38b2253ec037fa88c1592ce5df752045879d8c35872',
     _source: {
       '@timestamp': '2026-01-20T12:05:17.000Z',
@@ -562,7 +646,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '1f49dd57680b1986183a83644a0182b64b921c84e3e464a98a25664186b38f30',
     _source: {
       '@timestamp': '2026-01-20T12:05:18.000Z',
@@ -577,7 +661,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '810b6c4feac1dcb16d1d8c428170eae525b7043421d5955a2ebdbe3e811ae5f2',
     _source: {
       '@timestamp': '2026-01-20T12:05:19.000Z',
@@ -591,7 +675,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '6d0b61db6529233f9e39eedfc91919e526d7b55d2d9e395c26f8fbce1b5541b5',
     _source: {
       '@timestamp': '2026-01-20T12:05:20.000Z',
@@ -605,7 +689,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '139e9d308ffadedbca2ecdcc1d2b6f2ebed8f53a3a33f9bc11328574389f76f3',
     _source: {
       '@timestamp': '2026-01-20T12:05:21.000Z',
@@ -619,7 +703,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'fb171d701c968880c3eac6a1375c01a8335220f921d1f6d3d35e01e4396b4b74',
     _source: {
       '@timestamp': '2026-01-20T12:05:22.000Z',
@@ -633,7 +717,7 @@ export const expectedUserEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '18668fc50a8bfceef942a50bc1bb0dad7d1b503efa7dd55b4da8bf5086f9e42d',
     _source: {
       '@timestamp': '2026-01-20T12:05:23.000Z',
@@ -647,11 +731,82 @@ export const expectedUserEntities = [
       },
     },
   },
+  {
+    _index: '.entities.v2.latest.security_default-00001',
+    _id: 'b344de5598be1f9ca0f3438b9e1dc4711a3677cea2c4187bc404013764caa3b5',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:23.000Z',
+      data_stream: {
+        dataset: 'jamf',
+      },
+      host: {
+        id: 'macbookpro-123',
+      },
+      event: {
+        kind: 'asset',
+      },
+      user: {
+        name: 'should-be-local',
+        email: 'should_be_local@example.com',
+      },
+      entity: {
+        lifecycle: {
+          first_seen: '2026-01-20T12:05:23.000Z',
+          last_seen: '2026-01-20T12:05:23.000Z',
+        },
+        EngineMetadata: {
+          Type: 'user',
+          UntypedId: 'should-be-local@macbookpro-123@local',
+        },
+        confidence: 'medium',
+        namespace: 'local',
+        name: 'should-be-local',
+        source: 'jamf',
+        id: 'user:should-be-local@macbookpro-123@local',
+        type: 'Identity',
+      },
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default-00001',
+    _id: '91e6005b85bd2de67e1610f7bb07e2dd8506088f74729d56b9e8867d8f6dc102',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:24.000Z',
+      data_stream: {
+        dataset: 'jamf',
+      },
+      host: {
+        id: 'macbookpro-123',
+      },
+      event: {
+        kind: 'asset',
+      },
+      user: {
+        name: 'root',
+      },
+      entity: {
+        lifecycle: {
+          first_seen: '2026-01-20T12:05:24.000Z',
+          last_seen: '2026-01-20T12:05:24.000Z',
+        },
+        EngineMetadata: {
+          Type: 'user',
+          UntypedId: 'root@jamf',
+        },
+        confidence: 'high',
+        namespace: 'jamf',
+        name: 'root',
+        source: 'jamf',
+        id: 'user:root@jamf',
+        type: 'Identity',
+      },
+    },
+  },
 ];
 
-export const expectedServiceEntities = [
+export const expectedServiceEntities: Hits = [
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: '4a03614567f337f8129a115df2fa0ee23657227a4e3c5bcaf6a06e5a295a77a9',
     _source: {
       '@timestamp': '2026-01-20T12:05:04.000Z',
@@ -664,7 +819,7 @@ export const expectedServiceEntities = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'c3e453f58f98e329531f73ca57250f78449f73989748271ade0a9880d3255a6a',
     _source: {
       '@timestamp': '2026-01-20T12:05:05.000Z',
@@ -678,9 +833,9 @@ export const expectedServiceEntities = [
   },
 ];
 
-export const expectedGenericEntities = [
+export const expectedGenericEntities: Hits = [
   {
-    _index: '.entities.v2.latest.security_default',
+    _index: LATEST_INDEX,
     _id: 'd98cd38cf7da05a3c32920813a0529fbc6fff7312d0bf774e85e1fc273a5ffdb',
     _source: {
       '@timestamp': '2026-01-20T12:05:05.000Z',

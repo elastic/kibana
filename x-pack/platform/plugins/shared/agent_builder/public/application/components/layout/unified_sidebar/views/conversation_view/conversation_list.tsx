@@ -15,23 +15,31 @@ import {
   EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
-import { NoConversationsPrompt } from '../../../../conversations/embeddable_conversation_header/no_conversations_prompt';
+import { ConversationListItemRow } from './conversation_list_item_row';
+
+const newConversationLabel = i18n.translate(
+  'xpack.agentBuilder.sidebar.conversation.newConversation',
+  { defaultMessage: 'New conversation' }
+);
 
 interface ConversationListProps {
   agentId: string;
   currentConversationId: string | undefined;
+  isNewConversationRoute: boolean;
   onItemClick?: () => void;
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
   agentId,
   currentConversationId,
+  isNewConversationRoute,
   onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -58,8 +66,22 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     );
   }
 
+  // If there are no conversations, show 1 mock conversation item that links to the new conversation route
   if (sortedConversations.length === 0) {
-    return <NoConversationsPrompt isFiltered={false} />;
+    return (
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <Link
+            to={appPaths.agent.conversations.new({ agentId })}
+            css={isNewConversationRoute ? activeLinkStyles : linkStyles}
+            data-test-subj="agentBuilderSidebarConversation-new"
+            onClick={onItemClick}
+          >
+            <EuiTextTruncate text={newConversationLabel} />
+          </Link>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   return (
@@ -68,14 +90,14 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         const isActive = currentConversationId === conversation.id;
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
-            <Link
-              to={appPaths.agent.conversations.byId({ agentId, conversationId: conversation.id })}
-              css={isActive ? activeLinkStyles : linkStyles}
-              data-test-subj={`agentBuilderSidebarConversation-${conversation.id}`}
-              onClick={onItemClick}
-            >
-              <EuiTextTruncate text={conversation.title || conversation.id} />
-            </Link>
+            <ConversationListItemRow
+              agentId={agentId}
+              conversationId={conversation.id}
+              title={conversation.title || conversation.id}
+              isActive={isActive}
+              routeConversationId={currentConversationId}
+              onItemClick={onItemClick}
+            />
           </EuiFlexItem>
         );
       })}

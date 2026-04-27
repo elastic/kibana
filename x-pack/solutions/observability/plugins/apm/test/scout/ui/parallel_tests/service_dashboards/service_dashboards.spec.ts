@@ -9,27 +9,20 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
-test.describe(
+test.describe.serial(
   'Service Dashboards',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
+    const testDashboardTitle = `Scout Test - Dashboard for Service Dashboards`;
+    let testDashboardId: string;
 
-    test('displays a linked dashboard with a control group', async ({
-      page,
-      pageObjects: { serviceDetailsPage },
-      kbnClient,
-    }) => {
-      const testDashboardTitle = `Scout Test Dashboard for Service Dashboards ${Date.now()}`;
-      // Create a test dashboard
+    test.beforeAll(async ({ kbnClient }) => {
       const dashboard = await kbnClient.savedObjects.create({
         type: 'dashboard',
         overwrite: false,
         attributes: {
           title: testDashboardTitle,
-          description: 'Test dashboard for rule details Scout test',
+          description: 'Test dashboard for service dashboards Scout test',
           panelsJSON: '[]',
           controlGroupInput: {
             panelsJSON: JSON.stringify({
@@ -55,31 +48,68 @@ test.describe(
             searchSourceJSON: '{}',
           },
         },
+        references: [
+          {
+            type: 'indexpattern',
+            name: 'control-uuid:optionsListDataView',
+            id: 'apm_static_data_view_id_default',
+          },
+        ],
       });
-      const testDashboardId = dashboard.id;
-      try {
-        await test.step('Navigate to dashboard tab', async () => {
-          await serviceDetailsPage.dashboardsTab.goToTab({
-            serviceName: testData.SERVICE_OPBEANS_NODE,
-            rangeFrom: testData.START_DATE,
-            rangeTo: testData.END_DATE,
-          });
-        });
+      testDashboardId = dashboard.id;
+    });
 
-        await test.step('Link the test dashboard', async () => {
-          await serviceDetailsPage.dashboardsTab.linkDashboardByTitle(testDashboardTitle);
-        });
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsAdmin();
+    });
 
-        await test.step('Verify the control group has rendered', async () => {
-          await expect(page.getByTestId('controls-group-wrapper')).toBeVisible();
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.savedObjects.delete({
+        type: 'dashboard',
+        id: testDashboardId,
+      });
+    });
+
+    test('displays a linked dashboard with a control group', async ({
+      page,
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await test.step('Navigate to dashboard tab', async () => {
+        await serviceDetailsPage.dashboardsTab.goToTab({
+          serviceName: testData.SERVICE_OPBEANS_NODE,
+          rangeFrom: testData.START_DATE,
+          rangeTo: testData.END_DATE,
         });
-      } finally {
-        // Clean up: delete the test dashboard
-        await kbnClient.savedObjects.delete({
-          type: 'dashboard',
-          id: testDashboardId,
+        await serviceDetailsPage.dashboardsTab.waitForDashboardsToLoad();
+      });
+
+      await test.step('Link the test dashboard', async () => {
+        await serviceDetailsPage.dashboardsTab.linkDashboardByTitle(testDashboardTitle);
+      });
+
+      await test.step('Verify the control group has rendered', async () => {
+        await expect(page.getByTestId('controls-group-wrapper')).toBeVisible();
+      });
+    });
+
+    test('unlinks a dashboard and shows the empty state', async ({
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await test.step('Navigate to dashboard tab', async () => {
+        await serviceDetailsPage.dashboardsTab.goToTab({
+          serviceName: testData.SERVICE_OPBEANS_NODE,
+          rangeFrom: testData.START_DATE,
+          rangeTo: testData.END_DATE,
         });
-      }
+      });
+
+      await test.step('Unlink the dashboard', async () => {
+        await serviceDetailsPage.dashboardsTab.unlinkDashboard();
+      });
+
+      await test.step('Verify the empty state is shown', async () => {
+        await expect(serviceDetailsPage.dashboardsTab.addServiceDashboardButton).toBeVisible();
+      });
     });
   }
 );

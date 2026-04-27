@@ -11,11 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  isSection,
-  type DashboardAttachmentData,
-} from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE, isSection } from '@kbn/dashboard-agent-common';
 
 import { dashboardTools } from '../../../common';
 import {
@@ -37,17 +33,11 @@ const manageDashboardSchema = z.object({
   operations: z.array(dashboardOperationSchema).min(1),
 });
 
-const createEmptyDashboardData = (): DashboardAttachmentData => ({
-  title: '',
-  description: '',
-  panels: [],
-});
-
 export const manageDashboardTool = (): BuiltinSkillBoundedTool<typeof manageDashboardSchema> => {
   return {
     id: dashboardTools.manageDashboard,
     type: ToolType.builtin,
-    description: `Create or update an in-memory dashboard with visualizations.
+    description: `Create or update an dashboard with visualizations.
 
 This tool executes ordered dashboard operations against a dashboard attachment in conversation context.
 
@@ -70,7 +60,6 @@ Use operations[] to:
         const isNewDashboard = !latestVersion;
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        const currentDashboardData = latestVersion?.data ?? createEmptyDashboardData();
         const resolveVisualizationConfig = createVisualizationResolver({
           logger,
           modelProvider,
@@ -79,7 +68,7 @@ Use operations[] to:
         });
 
         const operationResult = await executeDashboardOperations({
-          dashboardData: currentDashboardData,
+          dashboardData: latestVersion?.data,
           operations,
           logger,
           resolvePanelsFromAttachments: (attachmentInputs) =>
@@ -144,20 +133,20 @@ Use operations[] to:
                     panels: updatedDashboardData.panels.map((widget) => {
                       if (isSection(widget)) {
                         return {
-                          uid: widget.uid,
+                          id: widget.id,
                           title: widget.title,
                           collapsed: widget.collapsed,
                           grid: widget.grid,
                           panels: widget.panels.map((panel) => ({
                             type: panel.type,
-                            uid: panel.uid,
+                            id: panel.id,
                             grid: panel.grid,
                           })),
                         };
                       }
                       return {
                         type: widget.type,
-                        uid: widget.uid,
+                        id: widget.id,
                         grid: widget.grid,
                       };
                     }),

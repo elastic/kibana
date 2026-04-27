@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { createRule, deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
   getCustomQueryRuleParams,
@@ -21,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const { indexListOfDocuments: indexListOfSourceDocuments } = dataGeneratorFactory({
     es,
-    index: 'logs-1',
+    index: 'test-data-1',
     log,
   });
 
@@ -31,29 +32,127 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
 
       await es.indices.delete({
-        index: 'logs-1',
+        index: 'test-data-1,test-data-2',
         ignore_unavailable: true,
       });
-      await es.indices.create({
-        index: 'logs-1',
-        mappings: {
-          properties: {
-            '@timestamp': {
-              type: 'date',
-            },
-            host: {
-              properties: {
-                name: {
-                  type: 'keyword',
-                },
+
+      const mappings: MappingTypeMapping = {
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          host: {
+            properties: {
+              name: {
+                type: 'keyword',
               },
             },
           },
         },
+      };
+      await es.indices.create({
+        index: 'test-data-1',
+        mappings,
+      });
+      await es.indices.create({
+        index: 'test-data-2',
+        mappings,
       });
     });
 
     describe('metrics collection', () => {
+      describe('matched_indices_count', () => {
+        it('records matched_indices_count for one matching index pattern', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getCustomQueryRuleParams({
+            index: ['test-data-1'],
+            query: '*:*',
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(1);
+        });
+
+        it('records matched_indices_count for a single index pattern with wildcard', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getCustomQueryRuleParams({
+            index: ['test-data-*'],
+            query: '*:*',
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+
+        it('records matched_indices_count for multiple matching index patterns', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getCustomQueryRuleParams({
+            index: ['test-da*', 'test-data-1', 'test-data-2'],
+            query: '*:*',
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+      });
+
       describe('alerts_candidate_count', () => {
         it('records alerts_candidate_count value', async () => {
           const timestamp = new Date().toISOString();
@@ -62,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
             host: { name: 'test-1' },
           };
           const rule = getCustomQueryRuleParams({
-            index: ['logs-1'],
+            index: ['test-data-1'],
             query: '*:*',
             from: 'now-35m',
             interval: '30m',
@@ -89,7 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
             host: { name: 'test-1' },
           };
           const rule = getCustomQueryRuleParams({
-            index: ['logs-1'],
+            index: ['test-data-1'],
             query: '*:*',
             alert_suppression: {
               group_by: ['host.name'],
@@ -115,6 +214,70 @@ export default ({ getService }: FtrProviderContext) => {
             await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
 
           expect(alerts_candidate_count).toBe(2);
+        });
+      });
+
+      describe('alerts_suppressed_count', () => {
+        it('records alerts_suppressed_count as 0 when no suppression is configured', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getCustomQueryRuleParams({
+            index: ['test-data-1'],
+            query: '*:*',
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alerts_suppressed_count).toBe(0);
+        });
+
+        it('records alerts_suppressed_count when alerts are suppressed', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getCustomQueryRuleParams({
+            index: ['test-data-1'],
+            query: '*:*',
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'suppress',
+            },
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexListOfSourceDocuments([document, document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alerts_suppressed_count).toBe(1);
         });
       });
     });

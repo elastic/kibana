@@ -14,6 +14,8 @@ export {
   getStreamsForInputType,
   getRegistryStreamWithDataStreamForInputType,
   varsReducer,
+  getInputEffectiveName,
+  buildInputKey,
 } from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
@@ -40,6 +42,9 @@ export {
   isAgentEligibleForPrivilegeLevelChange,
 } from './agent_privilege_level_change_helpers';
 export {
+  addUseAPMVarIfNotPresent,
+  DATA_STREAM_USE_APM_VAR,
+  shouldIncludeUseAPMVar,
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
@@ -49,6 +54,7 @@ export {
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
   packagePolicyInputAllowsUndefinedDataStreamType,
+  hasDynamicSignalTypes,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {
@@ -124,3 +130,11 @@ export {
 
 // Cloud Connector accessor module
 export * from './cloud_connectors';
+
+export type { YamlModule } from './yaml_utils';
+export { createYamlKeysSorter, toYaml } from './yaml_utils';
+export {
+  packageInfoHasOtelInputs,
+  packagePolicyHasOtelInputs,
+  OTEL_INPUTS_MINIMUM_VERSION,
+} from './otelcol_helpers';

@@ -65,6 +65,7 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -73,6 +74,7 @@ import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
+  EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
@@ -93,9 +95,11 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
+  getEmbeddableTransformsEnabled: () => boolean;
 }
 
 export interface DiscoverServices {
+  agentBuilder?: AgentBuilderPluginStart;
   aiops?: AiopsPluginStart;
   alertingVTwo?: AlertingV2PublicStart;
   application: ApplicationStart;
@@ -191,6 +195,7 @@ export const buildServices = ({
   const storage = new Storage(localStorage);
 
   return {
+    agentBuilder: plugins.agentBuilder,
     aiops: plugins.aiops,
     alertingVTwo: plugins.alertingVTwo,
     application: core.application,
@@ -205,9 +210,11 @@ export const buildServices = ({
     discoverShared: plugins.discoverShared,
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
-        core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, false),
+        core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
       getIsEsqlDefault: () =>
         core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
+      getEmbeddableTransformsEnabled: () =>
+        core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, true),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
@@ -259,6 +266,9 @@ export const buildServices = ({
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     cps: plugins.cps,
-    embeddableEditor: new EmbeddableEditorService(plugins.embeddable.getStateTransfer()),
+    embeddableEditor: new EmbeddableEditorService(
+      plugins.embeddable.getStateTransfer(),
+      core.application
+    ),
   };
 };

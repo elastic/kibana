@@ -12,7 +12,7 @@
           "\nA wrapper around the session storage which provides strongly typed helper methods\nfor common incoming and outgoing states used by the embeddable infrastructure.\n"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-        "lineNumber": 23,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25,7 +25,7 @@
             "label": "isTransferInProgress",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 30,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41,7 +41,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 34,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -59,7 +59,7 @@
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 35,
+                "lineNumber": 46,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -77,7 +77,7 @@
                   "<string | undefined>"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 36,
+                "lineNumber": 47,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -96,7 +96,7 @@
                   "> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 37,
+                "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -120,7 +120,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 38,
+                "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -142,7 +142,7 @@
               "(appId: string) => string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 48,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -160,7 +160,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 52,
+                "lineNumber": 64,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -190,7 +190,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 54,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -208,7 +208,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 61,
+                "lineNumber": 79,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -227,7 +227,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 62,
+                "lineNumber": 80,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -249,7 +249,7 @@
               "(appId?: string | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 80,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -267,7 +267,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 86,
+                "lineNumber": 104,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -297,7 +297,7 @@
               "<object>[] | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 98,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -315,7 +315,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 105,
+                "lineNumber": 123,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -334,7 +334,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 106,
+                "lineNumber": 124,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -364,7 +364,7 @@
               "; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 118,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -380,7 +380,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 123,
+                "lineNumber": 141,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -394,7 +394,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 124,
+                "lineNumber": 142,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -410,7 +410,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 125,
+                    "lineNumber": 143,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -426,7 +426,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 126,
+                    "lineNumber": 144,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -442,7 +442,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 127,
+                    "lineNumber": 145,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -464,7 +464,7 @@
                       }
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 128,
+                    "lineNumber": 146,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -495,7 +495,7 @@
               "<SerializedStateType>[]; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 138,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -511,7 +511,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 143,
+                "lineNumber": 161,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -525,7 +525,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 144,
+                "lineNumber": 162,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -541,7 +541,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 144,
+                    "lineNumber": 162,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -564,12 +564,75 @@
                       "<SerializedStateType>[]"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 144,
+                    "lineNumber": 162,
                     "columnNumber": 32,
                     "deprecated": false,
                     "trackAdoption": false
                   }
                 ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableStateTransfer.onTransferEmbeddablePackage$",
+            "type": "Function",
+            "tags": [],
+            "label": "onTransferEmbeddablePackage$",
+            "description": [],
+            "signature": [
+              "(appId: string, removeAfterFetch?: boolean | undefined) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddablePackageState",
+                "text": "EmbeddablePackageState"
+              },
+              "<object>[] | undefined>"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 268,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddableStateTransfer.onTransferEmbeddablePackage$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 268,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddableStateTransfer.onTransferEmbeddablePackage$.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "removeAfterFetch",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 268,
+                "columnNumber": 54,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1181,7 +1244,7 @@
           "(type: string) => Promise<string>"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/index.ts",
-        "lineNumber": 42,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1197,7 +1260,7 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/index.ts",
-            "lineNumber": 42,
+            "lineNumber": 46,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -1597,6 +1660,50 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.EmbeddableEditorBreadcrumb",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddableEditorBreadcrumb",
+        "description": [
+          "\nA serializable breadcrumb entry passed from the originating app to editor apps.\nUses href instead of onClick for sessionStorage serialization."
+        ],
+        "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableEditorBreadcrumb.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableEditorBreadcrumb.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.EmbeddableEditorState",
         "type": "Interface",
         "tags": [],
@@ -1605,7 +1712,7 @@
           "\nA state package that contains information an editor will need to create or edit an embeddable then redirect back."
         ],
         "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-        "lineNumber": 12,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1618,7 +1725,7 @@
             "label": "originatingApp",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 17,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1634,7 +1741,32 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 18,
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableEditorState.breadcrumbs",
+            "type": "Array",
+            "tags": [],
+            "label": "breadcrumbs",
+            "description": [
+              "\nBreadcrumbs from the originating app context (e.g. [Dashboards, Visualizations]).\nConsumers prepend these to their own breadcrumbs. Computed by the originating app\nusing getUrlForApp."
+            ],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableEditorBreadcrumb",
+                "text": "EmbeddableEditorBreadcrumb"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1650,7 +1782,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 19,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1666,7 +1798,7 @@
               "object | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1684,7 +1816,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 22,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1796,7 +1928,7 @@
           "<SerializedState>"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-        "lineNumber": 35,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1809,7 +1941,7 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1825,7 +1957,7 @@
               "SerializedState"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 41,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1841,7 +1973,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1857,7 +1989,7 @@
               "{ width?: number | undefined; height?: number | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1875,7 +2007,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2691,10 +2823,10 @@
         },
         {
           "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableSetup.registerReactEmbeddableFactory",
+          "id": "def-public.EmbeddableSetup.registerEmbeddablePublicDefinition",
           "type": "Function",
           "tags": [],
-          "label": "registerReactEmbeddableFactory",
+          "label": "registerEmbeddablePublicDefinition",
           "description": [
             "\nRegisters an async {@link ReactEmbeddableFactory} getter."
           ],
@@ -2734,20 +2866,20 @@
           "children": [
             {
               "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableSetup.registerReactEmbeddableFactory.$1",
+              "id": "def-public.EmbeddableSetup.registerEmbeddablePublicDefinition.$1",
               "type": "string",
               "tags": [],
               "label": "type",
               "description": [],
               "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-              "lineNumber": 26,
+              "lineNumber": 30,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
             {
               "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableSetup.registerReactEmbeddableFactory.$2",
+              "id": "def-public.EmbeddableSetup.registerEmbeddablePublicDefinition.$2",
               "type": "Function",
               "tags": [],
               "label": "getFactory",
@@ -2764,7 +2896,7 @@
                 "<SerializedState, Api>>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-              "lineNumber": 27,
+              "lineNumber": 31,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false,
@@ -3570,25 +3702,27 @@
         },
         {
           "parentPluginId": "embeddable",
-          "id": "def-server.EmbeddableSetup.registerTransforms",
+          "id": "def-server.EmbeddableSetup.registerEmbeddableServerDefinition",
           "type": "Function",
           "tags": [],
-          "label": "registerTransforms",
-          "description": [],
+          "label": "registerEmbeddableServerDefinition",
+          "description": [
+            "\nRegisters an embeddable server defintion.\nBe sure to register an embeddable public definition for this type."
+          ],
           "signature": [
             "(type: string, transforms: ",
-            "EmbeddableTransformsSetup",
+            "EmbeddableServerDefinition",
             "<any, any>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 54,
+          "lineNumber": 46,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "embeddable",
-              "id": "def-server.EmbeddableSetup.registerTransforms.$1",
+              "id": "def-server.EmbeddableSetup.registerEmbeddableServerDefinition.$1",
               "type": "string",
               "tags": [],
               "label": "type",
@@ -3597,26 +3731,26 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "lineNumber": 54,
-              "columnNumber": 24,
+              "lineNumber": 51,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
             },
             {
               "parentPluginId": "embeddable",
-              "id": "def-server.EmbeddableSetup.registerTransforms.$2",
+              "id": "def-server.EmbeddableSetup.registerEmbeddableServerDefinition.$2",
               "type": "Object",
               "tags": [],
               "label": "transforms",
               "description": [],
               "signature": [
-                "EmbeddableTransformsSetup",
+                "EmbeddableServerDefinition",
                 "<any, any>"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "lineNumber": 54,
-              "columnNumber": 38,
+              "lineNumber": 52,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3642,7 +3776,7 @@
             }
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 55,
+          "lineNumber": 54,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3676,7 +3810,7 @@
           "section": "def-server.EmbeddableStateWithType",
           "text": "EmbeddableStateWithType"
         },
-        "> & { getAllEmbeddableSchemas: () => { [key: string]: ",
+        "> & { getAllEmbeddableSchemas: () => { [key: string]: { schema: ",
         {
           "pluginId": "@kbn/config-schema",
           "scope": "common",
@@ -3684,7 +3818,7 @@
           "section": "def-common.ObjectType",
           "text": "ObjectType"
         },
-        "<any>; }; getTransforms: (type: string) => (",
+        "<any>; title: string; }; }; getTransforms: (type: string) => (",
         {
           "pluginId": "embeddable",
           "scope": "server",
@@ -3703,7 +3837,7 @@
         "<object> | undefined; throwOnUnmappedPanel?: ((config: object) => void) | undefined; }) | undefined; }"
       ],
       "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-      "lineNumber": 58,
+      "lineNumber": 57,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

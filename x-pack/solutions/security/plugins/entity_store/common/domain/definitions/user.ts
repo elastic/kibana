@@ -24,31 +24,25 @@ import { collectValues as collect, newestValue, oldestValue } from './field_rete
 /** Shared post-LOOKUP keep: entity already in store. */
 const entityIdExistsAfterLookup = { field: 'entity.id', exists: true } as const;
 
-/** IDP: document filter (event.kind not enrichment, at least one of user.email/id/name). Reused in documentsFilter. */
-const idpDocumentFilter = {
-  and: [
-    {
-      or: [
-        { field: 'event.kind', exists: false },
-        { field: 'event.kind', neq: 'enrichment' },
-      ],
-    },
-    {
-      or: [
-        isNotEmptyCondition('user.email'),
-        isNotEmptyCondition('user.id'),
-        isNotEmptyCondition('user.name'),
-      ],
-    },
-  ],
-};
-
-const idpPostAggFilter: EntityDefinitionWithoutId['postAggFilter'] = {
+const idpGate: Condition = {
   or: [
     { field: 'event.kind', includes: 'asset' },
+
     {
       and: [
+        {
+          or: [
+            // event.kind is not enrichment
+            { field: 'event.kind', neq: 'enrichment' },
+            // or event.kind doesn't exist
+            { field: 'event.kind', exists: false },
+          ],
+        },
+
+        // and event.category is iam
         { field: 'event.category', includes: 'iam' },
+
+        // and event.type is user, creation, deletion or group
         {
           or: [
             { field: 'event.type', includes: 'user' },
@@ -62,31 +56,77 @@ const idpPostAggFilter: EntityDefinitionWithoutId['postAggFilter'] = {
   ],
 };
 
-const idpEventTypeCondition = idpPostAggFilter;
-
-const nonIdpDocumentFilter: Condition = {
+const localNamespaceGate: Condition = {
   and: [
     isNotEmptyCondition('user.name'),
     isNotEmptyCondition('host.id'),
     fieldNotOneOfCondition('user.name', [...LOCAL_NAMESPACE_EXCLUDED_USER_NAMES]),
   ],
 };
-const nonIdpPostAggFilter = nonIdpDocumentFilter;
 
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   identityField: {
+    /**
+     * UEBA user documents filter (pre-aggregation: which documents enter the pipeline).
+     * event.outcome not failure AND contains id candiate fields.
+     */
+    documentsFilter: {
+      and: [
+        // Can't have a failure outcome
+        {
+          or: [
+            { field: 'event.outcome', exists: false },
+            { field: 'event.outcome', neq: 'failure' },
+          ],
+        },
+
+        // user.email, user.id or user.name is present
+        {
+          or: [
+            isNotEmptyCondition('user.email'),
+            isNotEmptyCondition('user.id'),
+            isNotEmptyCondition('user.name'),
+          ],
+        },
+      ],
+    },
+
     fieldEvaluations: [
       {
+        // Generates the namespace used to classify the entity
         destination: 'entity.namespace',
+
+        // First non empty value is used as source for `sourceMatchesAny`
         sources: [
           { field: 'event.module' },
           { firstChunkOfField: 'data_stream.dataset', splitBy: '.' },
         ],
         fallbackValue: 'unknown',
         whenClauses: [
+          // early match local namespace so we don't override IDP ones
+          {
+            condition: {
+              and: [
+                // contains valid local user.name and host.id
+                localNamespaceGate,
+                {
+                  or: [
+                    // Rule of Host-Authoritative Source Exclusion
+                    // If it's asset, with host.id + user.name, it's asset.
+                    { field: 'event.kind', includes: 'asset' },
+
+                    // Or it's not an IDP event
+                    { not: idpGate },
+                  ],
+                },
+              ],
+            },
+            then: USER_ENTITY_NAMESPACE.Local,
+          },
+
           { sourceMatchesAny: ['okta', 'entityanalytics_okta'], then: 'okta' },
           { sourceMatchesAny: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
           { sourceMatchesAny: ['o365', 'o365_metrics'], then: 'microsoft_365' },
@@ -124,37 +164,27 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
         },
       ],
     },
-    /**
-     * UEBA user documents filter (pre-aggregation: which documents enter the pipeline).
-     * event.outcome not failure AND (idpDocumentFilter OR nonIdpDocumentFilter).
-     */
-    documentsFilter: {
-      and: [
-        {
-          or: [
-            { field: 'event.outcome', exists: false },
-            { field: 'event.outcome', neq: 'failure' },
-          ],
-        },
-        { or: [idpDocumentFilter, nonIdpDocumentFilter] },
-      ],
-    },
   },
   entityTypeFallback: 'Identity',
   indexPatterns: [],
-  /** Post-aggregation filter (after LOOKUP JOIN): keep row when entity.id exists (shared) OR IDP OR non-IDP. Logical field names; main logs ESQL maps STATS destinations to `recent.*`. */
-  postAggFilter: { or: [entityIdExistsAfterLookup, idpPostAggFilter, nonIdpPostAggFilter] },
-  /** Pre-agg: non-IDP local path sets entity.namespace + Medium confidence (before STATS / EU ID). */
-  whenConditionTrueSetFieldsPreAgg: [
-    {
-      condition: { and: [{ not: idpEventTypeCondition }, nonIdpDocumentFilter] },
-      fields: {
-        'entity.namespace': USER_ENTITY_NAMESPACE.Local,
-        'entity.confidence': ENTITY_CONFIDENCE.Medium,
-      },
-    },
-  ],
-  /** Post-STATS: entity.name (local: user.name@host.name when host.name present, else user.name) and High confidence when not local (logs ESQL only). */
+  /** Post-aggregation filter (after LOOKUP JOIN)*/
+  postAggFilter: {
+    or: [
+      // If the entity already exists in the store, it doesn't matter any of the gates
+      entityIdExistsAfterLookup,
+
+      // If it's local namespace, no need to check idps
+      { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+
+      // It's IDP
+      idpGate,
+    ],
+  },
+
+  /**
+   * Post-STATS: entity.name for local vs non-local; entity.confidence from namespace (local → medium,
+   * else → high). Logs ESQL maps to `recent.*` after STATS.
+   */
   whenConditionTrueSetFieldsAfterStats: [
     {
       condition: {
@@ -183,6 +213,12 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       fields: {
         'entity.name': { source: 'user.name' },
         'entity.confidence': ENTITY_CONFIDENCE.High,
+      },
+    },
+    {
+      condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+      fields: {
+        'entity.confidence': ENTITY_CONFIDENCE.Medium,
       },
     },
   ],

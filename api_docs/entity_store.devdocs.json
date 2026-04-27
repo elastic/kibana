@@ -177,11 +177,11 @@
             "section": "def-common.IdentitySourceFields",
             "text": "IdentitySourceFields"
           },
-          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }; }>"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }; }>"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/public/index.ts",
         "lineNumber": 34,
@@ -199,7 +199,7 @@
         "tags": [],
         "label": "searchEntitiesFromEntityStore",
         "description": [
-          "\nList/search Entity Store v2 unified latest index via the internal list-entities route\n(`ENTITY_STORE_ROUTES.CRUD_GET`, page mode). Requires Entity Store v2 feature flag."
+          "\nList/search Entity Store v2 unified latest index via the internal list-entities route\n(`ENTITY_STORE_ROUTES.public.CRUD_GET`, page mode). Requires Entity Store v2 feature flag."
         ],
         "signature": [
           "(http: ",
@@ -339,7 +339,7 @@
           ") => void"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/public/hooks/useInstallEntityStoreV2.tsx",
-        "lineNumber": 56,
+        "lineNumber": 55,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -357,7 +357,7 @@
               "Services"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/public/hooks/useInstallEntityStoreV2.tsx",
-            "lineNumber": 56,
+            "lineNumber": 55,
             "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
@@ -488,7 +488,7 @@
           "\nEUID API surface passed through the entity_store plugin React context and `loadEuidApi()`.\nAligns with the {@link euid} object from this module."
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-        "lineNumber": 105,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -517,14 +517,14 @@
                 "section": "def-common.IdentitySourceFields",
                 "text": "IdentitySourceFields"
               },
-              "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+              "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
               "QueryDslQueryContainer",
               "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
               "QueryDslQueryContainer",
-              "; }; }"
+              "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-            "lineNumber": 110,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -540,7 +540,7 @@
         "label": "IdentitySourceFields",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 95,
+        "lineNumber": 101,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -558,7 +558,7 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-            "lineNumber": 96,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -576,7 +576,7 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-            "lineNumber": 98,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -838,7 +838,7 @@
           "unknown[]"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 91,
+        "lineNumber": 97,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -870,14 +870,14 @@
             "section": "def-common.IdentitySourceFields",
             "text": "IdentitySourceFields"
           },
-          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-        "lineNumber": 102,
+        "lineNumber": 115,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -894,7 +894,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 88,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -911,7 +911,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 89,
+        "lineNumber": 95,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -944,10 +944,10 @@
         "label": "ENTITY_STORE_ROUTES",
         "description": [],
         "signature": [
-          "{ readonly INSTALL: \"/internal/security/entity_store/install\"; readonly UPDATE: \"/internal/security/entity_store\"; readonly UNINSTALL: \"/internal/security/entity_store/uninstall\"; readonly STATUS: \"/internal/security/entity_store/status\"; readonly START: \"/internal/security/entity_store/start\"; readonly STOP: \"/internal/security/entity_store/stop\"; readonly CHECK_PRIVILEGES: \"/internal/security/entity_store/check_privileges\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly CRUD_CREATE: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/internal/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/internal/security/entity_store/entities\"; readonly CRUD_DELETE: \"/internal/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/internal/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/internal/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/internal/security/entity_store/resolution/group\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }"
+          "{ readonly public: { readonly INSTALL: \"/api/security/entity_store/install\"; readonly UPDATE: \"/api/security/entity_store\"; readonly UNINSTALL: \"/api/security/entity_store/uninstall\"; readonly STATUS: \"/api/security/entity_store/status\"; readonly START: \"/api/security/entity_store/start\"; readonly STOP: \"/api/security/entity_store/stop\"; readonly CRUD_CREATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/api/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/api/security/entity_store/entities\"; readonly CRUD_DELETE: \"/api/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/api/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/api/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/api/security/entity_store/resolution/group\"; }; readonly internal: { readonly CHECK_PRIVILEGES: \"/internal/security/entity_store/check_privileges\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_CCS_EXTRACT_TO_UPDATES: \"/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 46,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -956,8 +956,306 @@
     ]
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.ResolutionClient",
+        "type": "Class",
+        "tags": [],
+        "label": "ResolutionClient",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ logger, esClient, namespace }",
+                "description": [],
+                "signature": [
+                  "ResolutionClientOpts"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 67,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.linkEntities",
+            "type": "Function",
+            "tags": [],
+            "label": "linkEntities",
+            "description": [
+              "\nLinks one or more entities to a target entity by setting resolved_to.\nValidates chain prevention (can't link an alias) and has-aliases prevention\n(can't link an entity that has aliases pointing to it)."
+            ],
+            "signature": [
+              "(targetId: string, rawEntityIds: string[]) => Promise<",
+              "LinkResult",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.linkEntities.$1",
+                "type": "string",
+                "tags": [],
+                "label": "targetId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 78,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.linkEntities.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "rawEntityIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 78,
+                "columnNumber": 47,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.unlinkEntities",
+            "type": "Function",
+            "tags": [],
+            "label": "unlinkEntities",
+            "description": [
+              "\nUnlinks alias entities by removing their resolved_to field.\nUnlinked entities become standalone."
+            ],
+            "signature": [
+              "(rawEntityIds: string[]) => Promise<",
+              "UnlinkResult",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.unlinkEntities.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "rawEntityIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 147,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.getResolutionGroup",
+            "type": "Function",
+            "tags": [],
+            "label": "getResolutionGroup",
+            "description": [
+              "\nReturns the resolution group for any entity (target or alias).\nStandalone entities return as the target with empty aliases."
+            ],
+            "signature": [
+              "(entityId: string) => Promise<",
+              "ResolutionGroup",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.getResolutionGroup.$1",
+                "type": "string",
+                "tags": [],
+                "label": "entityId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 190,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.getEntitiesAlias",
+        "type": "Function",
+        "tags": [],
+        "label": "getEntitiesAlias",
+        "description": [],
+        "signature": [
+          "(dataset: Dataset, namespace: string) => `entities-history-${string}` | `entities-latest-${string}` | `entities-updates-${string}`"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getEntitiesAlias.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataset",
+            "description": [],
+            "signature": [
+              "Dataset"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+            "lineNumber": 38,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getEntitiesAlias.$2",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+            "lineNumber": 38,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.getFieldValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldValue",
+        "description": [],
+        "signature": [
+          "(doc: any, field: string) => string | undefined"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/commons.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getFieldValue.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/commons.ts",
+            "lineNumber": 40,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getFieldValue.$2",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/commons.ts",
+            "lineNumber": 40,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "entityStore",
         "id": "def-server.getHistorySnapshotIndexPattern",
@@ -1005,10 +1303,10 @@
         "label": "getLatestEntitiesIndexName",
         "description": [],
         "signature": [
-          "(namespace: string) => `.entities.v${number}.latest.security_${string}`"
+          "(namespace: string) => string"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-        "lineNumber": 40,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1024,7 +1322,7 @@
               "string"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 40,
+            "lineNumber": 52,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -1044,7 +1342,7 @@
         "label": "BulkObject",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-        "lineNumber": 62,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1060,7 +1358,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 63,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1076,7 +1374,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 64,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1092,7 +1390,7 @@
         "label": "BulkObjectResponse",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-        "lineNumber": 67,
+        "lineNumber": 76,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1105,7 +1403,7 @@
             "label": "_id",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 68,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1118,7 +1416,7 @@
             "label": "status",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 69,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1131,7 +1429,7 @@
             "label": "type",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 70,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1144,7 +1442,7 @@
             "label": "reason",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 71,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1160,7 +1458,7 @@
         "label": "RegisterEntityMaintainerConfig",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-        "lineNumber": 78,
+        "lineNumber": 93,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1173,7 +1471,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1189,7 +1487,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 80,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1202,7 +1500,23 @@
             "label": "interval",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 81,
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.RegisterEntityMaintainerConfig.timeout",
+            "type": "string",
+            "tags": [],
+            "label": "timeout",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1218,7 +1532,7 @@
               "EntityMaintainerState"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1231,12 +1545,14 @@
             "label": "run",
             "description": [],
             "signature": [
-              "(context: EntityMaintainerTaskMethodContext) => Promise<",
+              "(context: ",
+              "EntityMaintainerTaskMethodContext",
+              ") => Promise<",
               "EntityMaintainerState",
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1253,7 +1569,7 @@
                   "EntityMaintainerTaskMethodContext"
                 ],
                 "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-                "lineNumber": 75,
+                "lineNumber": 90,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1272,7 +1588,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1288,7 +1604,7 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
-            "lineNumber": 85,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1311,6 +1627,23 @@
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/server/domain/logs_extraction/query_builder_commons.ts",
         "lineNumber": 39,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.ENTITY_LATEST",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_LATEST",
+        "description": [],
+        "signature": [
+          "\"latest\""
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 8,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1343,7 +1676,7 @@
           ">; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-        "lineNumber": 75,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1376,7 +1709,7 @@
           ">; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-        "lineNumber": 81,
+        "lineNumber": 90,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1392,7 +1725,7 @@
       "label": "EntityStoreSetupContract",
       "description": [],
       "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-      "lineNumber": 81,
+      "lineNumber": 86,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1416,7 +1749,7 @@
             ") => void"
           ],
           "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-          "lineNumber": 82,
+          "lineNumber": 87,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1439,7 +1772,7 @@
                 }
               ],
               "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-              "lineNumber": 73,
+              "lineNumber": 77,
               "columnNumber": 41,
               "deprecated": false,
               "trackAdoption": false
@@ -1458,7 +1791,7 @@
       "label": "EntityStoreStartContract",
       "description": [],
       "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-      "lineNumber": 77,
+      "lineNumber": 81,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1483,7 +1816,7 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-          "lineNumber": 78,
+          "lineNumber": 82,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1499,7 +1832,7 @@
                 "ElasticsearchClient"
               ],
               "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-              "lineNumber": 78,
+              "lineNumber": 82,
               "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
@@ -1516,8 +1849,70 @@
                 "string"
               ],
               "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-              "lineNumber": 78,
+              "lineNumber": 82,
               "columnNumber": 53,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "entityStore",
+          "id": "def-server.EntityStoreStartContract.createResolutionClient",
+          "type": "Function",
+          "tags": [],
+          "label": "createResolutionClient",
+          "description": [],
+          "signature": [
+            "(esClient: ",
+            "ElasticsearchClient",
+            ", namespace: string) => ",
+            {
+              "pluginId": "entityStore",
+              "scope": "server",
+              "docId": "kibEntityStorePluginApi",
+              "section": "def-server.ResolutionClient",
+              "text": "ResolutionClient"
+            }
+          ],
+          "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+          "lineNumber": 83,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createResolutionClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "esClient",
+              "description": [],
+              "signature": [
+                "ElasticsearchClient"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 83,
+              "columnNumber": 28,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createResolutionClient.$2",
+              "type": "string",
+              "tags": [],
+              "label": "namespace",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 83,
+              "columnNumber": 59,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1535,33 +1930,50 @@
     "functions": [
       {
         "parentPluginId": "entityStore",
-        "id": "def-common.getEntitiesAliasPattern",
+        "id": "def-common.getEntitiesAlias",
         "type": "Function",
         "tags": [],
-        "label": "getEntitiesAliasPattern",
+        "label": "getEntitiesAlias",
         "description": [],
         "signature": [
-          "<TDataset extends Dataset>({ dataset, }: AliasPatternOptions<TDataset>) => `entities-${TDataset}`"
+          "(dataset: Dataset, namespace: string) => `entities-history-${string}` | `entities-latest-${string}` | `entities-updates-${string}`"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-        "lineNumber": 36,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "entityStore",
-            "id": "def-common.getEntitiesAliasPattern.$1",
-            "type": "Object",
+            "id": "def-common.getEntitiesAlias.$1",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  dataset,\n}",
+            "label": "dataset",
             "description": [],
             "signature": [
-              "AliasPatternOptions<TDataset>"
+              "Dataset"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 36,
-            "columnNumber": 67,
+            "lineNumber": 38,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.getEntitiesAlias.$2",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+            "lineNumber": 38,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1581,7 +1993,7 @@
           "<TDataset extends Dataset>({ schemaVersion, dataset, namespace, }: IndexPatternOptions<TDataset>) => `.entities.v${number}.${TDataset}.security_${string}`"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-        "lineNumber": 29,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1597,7 +2009,7 @@
               "IndexPatternOptions<TDataset>"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 29,
+            "lineNumber": 28,
             "columnNumber": 65,
             "deprecated": false,
             "trackAdoption": false,
@@ -1618,7 +2030,7 @@
           "(error: unknown) => string"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 77,
+        "lineNumber": 83,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1634,7 +2046,7 @@
               "unknown"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-            "lineNumber": 77,
+            "lineNumber": 83,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -1652,10 +2064,10 @@
         "label": "getLatestEntitiesIndexName",
         "description": [],
         "signature": [
-          "(namespace: string) => `.entities.v${number}.latest.security_${string}`"
+          "(namespace: string) => string"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-        "lineNumber": 40,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1671,7 +2083,7 @@
               "string"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
-            "lineNumber": 40,
+            "lineNumber": 52,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -1691,7 +2103,7 @@
         "label": "IdentitySourceFields",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 95,
+        "lineNumber": 101,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1709,7 +2121,7 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-            "lineNumber": 96,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1727,7 +2139,7 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-            "lineNumber": 98,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1796,7 +2208,26 @@
           "unknown[]"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 91,
+        "lineNumber": 97,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.AssetCriticalityLevel",
+        "type": "Any",
+        "tags": [],
+        "label": "AssetCriticalityLevel",
+        "description": [
+          "\nThe criticality level of the asset."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
+        "lineNumber": 282,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1808,32 +2239,13 @@
         "type": "Type",
         "tags": [],
         "label": "AssetCriticalityLevel",
-        "description": [
-          "\nThe criticality level of the asset."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 129,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "entityStore",
-        "id": "def-common.AssetCriticalityLevel",
-        "type": "Any",
-        "tags": [],
-        "label": "AssetCriticalityLevel",
         "description": [],
         "signature": [
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 133,
-        "columnNumber": 14,
+        "lineNumber": 285,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1849,7 +2261,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 355,
+        "lineNumber": 729,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2036,7 +2448,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 88,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2053,7 +2465,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 89,
+        "lineNumber": 95,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2089,6 +2501,23 @@
         "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
         "lineNumber": 29,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.MAPPING_VERSION",
+        "type": "number",
+        "tags": [],
+        "label": "MAPPING_VERSION",
+        "description": [],
+        "signature": [
+          "1"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2138,7 +2567,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 69,
+        "lineNumber": 75,
         "columnNumber": 22,
         "deprecated": false,
         "trackAdoption": false,
@@ -2155,7 +2584,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 69,
+        "lineNumber": 75,
         "columnNumber": 12,
         "deprecated": false,
         "trackAdoption": false,
@@ -2194,7 +2623,7 @@
           "$ZodTypeInternals<any, unknown>>"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 356,
+        "lineNumber": 730,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2208,10 +2637,10 @@
         "label": "ENTITY_STORE_ROUTES",
         "description": [],
         "signature": [
-          "{ readonly INSTALL: \"/internal/security/entity_store/install\"; readonly UPDATE: \"/internal/security/entity_store\"; readonly UNINSTALL: \"/internal/security/entity_store/uninstall\"; readonly STATUS: \"/internal/security/entity_store/status\"; readonly START: \"/internal/security/entity_store/start\"; readonly STOP: \"/internal/security/entity_store/stop\"; readonly CHECK_PRIVILEGES: \"/internal/security/entity_store/check_privileges\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly CRUD_CREATE: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/internal/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/internal/security/entity_store/entities\"; readonly CRUD_DELETE: \"/internal/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/internal/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/internal/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/internal/security/entity_store/resolution/group\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }"
+          "{ readonly public: { readonly INSTALL: \"/api/security/entity_store/install\"; readonly UPDATE: \"/api/security/entity_store\"; readonly UNINSTALL: \"/api/security/entity_store/uninstall\"; readonly STATUS: \"/api/security/entity_store/status\"; readonly START: \"/api/security/entity_store/start\"; readonly STOP: \"/api/security/entity_store/stop\"; readonly CRUD_CREATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/api/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/api/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/api/security/entity_store/entities\"; readonly CRUD_DELETE: \"/api/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/api/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/api/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/api/security/entity_store/resolution/group\"; }; readonly internal: { readonly CHECK_PRIVILEGES: \"/internal/security/entity_store/check_privileges\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_CCS_EXTRACT_TO_UPDATES: \"/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 46,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

@@ -8,7 +8,10 @@
 import React, { useCallback } from 'react';
 
 import InferenceFlyoutWrapper from '@kbn/inference-endpoint-ui-common';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { useKibana } from '../../hooks/use_kibana';
+
+const EXCLUDED_PROVIDERS = [ServiceProviderKeys.elasticsearch, ServiceProviderKeys.elastic];
 
 interface AddInferenceFlyoutWrapperProps {
   onFlyoutClose: () => void;
@@ -38,7 +41,7 @@ export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps>
       enforceAdaptiveAllocations={!!serverless}
       toasts={toasts}
       onSubmitSuccess={onSubmitSuccess}
-      enableEisPromoTour={true}
+      excludeProviders={EXCLUDED_PROVIDERS}
     />
   );
 };

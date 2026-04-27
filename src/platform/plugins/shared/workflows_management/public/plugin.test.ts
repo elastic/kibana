@@ -74,8 +74,7 @@ describe('WorkflowsPlugin', () => {
     });
 
     it('should register the workflows app when workflows UI is enabled', () => {
-      // First call: WORKFLOWS_UI_SETTING_ID -> true, second call: WORKFLOWS_AI_AGENT_SETTING_ID -> false
-      coreSetup.uiSettings.get.mockReturnValueOnce(true).mockReturnValueOnce(false);
+      coreSetup.uiSettings.get.mockReturnValueOnce(true);
 
       const result = plugin.setup(coreSetup, setupDeps as any);
 
@@ -92,16 +91,15 @@ describe('WorkflowsPlugin', () => {
   });
 
   describe('start()', () => {
-    it('should initialize step and trigger schema registries and return an empty object', () => {
+    it('should initialize step and trigger schema registries', () => {
       // Setup first (UI disabled path is fine for start testing)
       coreSetup.uiSettings.get.mockReturnValue(false);
       plugin.setup(coreSetup, setupDeps as any);
 
-      const result = plugin.start(coreStart, startDeps as any);
+      plugin.start(coreStart, startDeps as any);
 
       expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
       expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
-      expect(result).toEqual({});
     });
 
     it('should subscribe to license changes', () => {

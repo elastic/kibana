@@ -50,6 +50,13 @@ describe('StepIcon', () => {
       expect(container.querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
     });
 
+    it('renders document icon for trigger_event (event-driven pseudo-step)', () => {
+      const { container } = render(
+        <StepIcon stepType="trigger_event" executionStatus={undefined} />
+      );
+      expect(container.querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
+    });
+
     it('renders clock icon for trigger_scheduled', () => {
       const { container } = render(
         <StepIcon stepType="trigger_scheduled" executionStatus={undefined} />
@@ -143,6 +150,22 @@ describe('StepIcon', () => {
 
       const { container } = render(<StepIcon stepType="custom_step" executionStatus={undefined} />);
       // When a custom icon is provided, the default "plugs" icon should NOT render
+      expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
+    });
+
+    it('resolves a base type to a registered namespaced step def icon (list aggregation)', () => {
+      // List rows pass the base type (e.g. `cases` from `cases.createCase`). When no step
+      // definition is registered under the bare base type but one exists for `${base}.X`, the
+      // icon should be inherited from that family definition rather than falling through to
+      // actionTypeRegistry or `plugs`.
+      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([
+        { id: 'cases.createCase', icon: 'briefcase' },
+        { id: 'cases.getCase', icon: 'briefcase' },
+      ]);
+
+      const { container } = render(<StepIcon stepType="cases" executionStatus={undefined} />);
+      expect(container.querySelector('[data-euiicon-type="briefcase"]')).toBeInTheDocument();
       expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
     });
   });

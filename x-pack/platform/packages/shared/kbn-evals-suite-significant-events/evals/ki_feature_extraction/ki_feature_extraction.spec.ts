@@ -18,7 +18,7 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
-import { createKIFeatureExtractionEvaluators } from '../../src/evaluators/ki_feature_extraction/evaluators';
+import { createKIFeatureExtractionEvaluators } from '../../src/evaluators/ki_feature_extraction';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
@@ -80,7 +80,11 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
         await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-        sampleDocuments = await collectSampleDocuments({ esClient, scenario, log });
+        sampleDocuments = await collectSampleDocuments({
+          esClient,
+          scenario,
+          log,
+        });
         if (sampleDocuments.length === 0) {
           throw new Error(`No log documents found after replaying snapshot ${source.snapshotName}`);
         }
@@ -92,15 +96,13 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
           await executorClient.runExperiment(
             {
               dataset: {
-                name: `sigevents: KI feature extraction: ${scenario.input.scenario_id} (${dataset.id})`,
-                description: `[${dataset.id}] KI feature extraction from ${scenario.metadata.failure_domain} / ${scenario.metadata.failure_mode}`,
+                name: `sigevents: KI feature extraction (${dataset.id})`,
+                description: `[${dataset.id}] KI feature extraction across scenarios`,
                 examples: [
                   {
+                    id: scenario.input.scenario_id,
                     input: { sample_documents: sampleDocuments },
-                    output: {
-                      ...scenario.output,
-                      expected: scenario.output.expected_ground_truth,
-                    },
+                    output: scenario.output,
                     metadata: scenario.metadata,
                   },
                 ],

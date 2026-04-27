@@ -20,7 +20,7 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../common/url_schema/common';
-import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../common/locators';
+import type { StreamsAppLocator, StreamsAppLocatorDefinitionParams } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
 export interface DiscoverFlyoutStreamProcessingLinkProps {
@@ -41,20 +41,23 @@ export function DiscoverFlyoutStreamProcessingLink({
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
     doc,
+    cpsHasLinkedProjects: renderCpsWarning,
   });
 
   if (loading) return <EuiLoadingSpinner size="s" />;
 
-  if (!value || error) return null;
+  const { name, existsLocally } = value ?? {};
+
+  if (!name || !existsLocally || error) return null;
 
   const href = locator.getRedirectUrl({
-    name: value,
+    name,
     managementTab: 'processing',
     pageState: {
       v: 1,
-      dataSources: [getTargetDataSource(doc, value)],
+      dataSources: [getTargetDataSource(doc, name)],
     },
-  } as StreamsAppLocatorParams);
+  } as StreamsAppLocatorDefinitionParams);
 
   const message = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
     defaultMessage: 'Parse content in Streams',

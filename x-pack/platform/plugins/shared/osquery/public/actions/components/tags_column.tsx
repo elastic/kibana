@@ -62,6 +62,7 @@ const TagsColumnComponent: React.FC<TagsColumnProps> = ({ tags }) => {
           closePopover={closePopover}
           repositionOnScroll
           data-test-subj="tagsColumnPopover"
+          aria-label={POPOVER_TITLE}
         >
           <EuiPopoverTitle>{POPOVER_TITLE}</EuiPopoverTitle>
           <EuiBadgeGroup css={popoverWrapperCss}>

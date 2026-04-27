@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
-import type { EntityStoreEntityIdsByType } from '../../../entities/service';
+import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../entities/service';
 import type { WatchlistBulkEntity } from '../../types';
 import { createWatchlistSyncMarkersService } from '../sync_markers';
 import type { WatchlistEntitySourceClient } from '../../infra';
@@ -26,7 +26,8 @@ export type UpdateDetectionService = ReturnType<typeof createUpdateDetectionServ
 type UpdateDetection = (
   source: WatchlistDataSources.MonitoringEntitySource,
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
-  correlationMap?: CorrelationMap
+  correlationMap: CorrelationMap | undefined,
+  watchlistsByEuid: WatchlistsByEuid
 ) => Promise<WatchlistBulkEntity[]>;
 
 interface MappedBucket {
@@ -53,36 +54,7 @@ const pickLaterTimestamp = (
   return current;
 };
 
-const getExistingEntitiesMap = async (
-  esClient: ElasticsearchClient,
-  targetIndex: string,
-  euids: string[]
-): Promise<Map<string, string>> => {
-  if (euids.length === 0) {
-    return new Map();
-  }
-
-  const uniqueEuids = uniq(euids);
-  const response = await esClient.search<{ entity?: { id?: string } }>({
-    index: targetIndex,
-    size: uniqueEuids.length,
-    query: { terms: { 'entity.id': uniqueEuids } },
-    _source: ['entity.id'],
-  });
-
-  const map = new Map<string, string>();
-  for (const hit of response.hits.hits) {
-    const euid = hit._source?.entity?.id;
-    if (euid && hit._id) {
-      map.set(euid, hit._id);
-    }
-  }
-  return map;
-};
-
 const paginatedDetection = async <B>(
-  esClient: ElasticsearchClient,
-  targetIndex: string,
   search: SearchPage<B>,
   mapBucket: MapBucket<B>
 ): Promise<{ entities: WatchlistBulkEntity[]; maxTimestamp?: string }> => {
@@ -103,11 +75,7 @@ const paginatedDetection = async <B>(
         return acc;
       }, []);
 
-      const batchEuids = mapped.map((m) => m.euid);
-      const existingMap = await getExistingEntitiesMap(esClient, targetIndex, batchEuids);
-
-      for (const { euid, entity, timestamp } of mapped) {
-        entity.existingEntityId = existingMap.get(euid);
+      for (const { entity, timestamp } of mapped) {
         maxTimestamp = pickLaterTimestamp(maxTimestamp, timestamp);
         allEntities.push(entity);
       }
@@ -127,14 +95,16 @@ const getAllowedEntityIds = (
 
 export const createUpdateDetectionService = ({
   esClient,
+  crudClient,
   logger,
-  targetIndex,
   descriptorClient,
+  watchlist,
 }: {
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
   logger: Logger;
-  targetIndex: string;
   descriptorClient?: WatchlistEntitySourceClient;
+  watchlist: { name: string; id: string; index: string };
 }) => {
   const syncMarkersService = descriptorClient
     ? createWatchlistSyncMarkersService(descriptorClient, esClient)
@@ -156,7 +126,9 @@ export const createUpdateDetectionService = ({
         afterKey,
         pageSize,
         syncMarker,
-        allowedEntityIds
+        allowedEntityIds,
+        source.queryRule,
+        source.range
       );
       const response = await esClient.search<never, EntitiesAggregation>({
         index: source.indexPattern,
@@ -182,7 +154,7 @@ export const createUpdateDetectionService = ({
       return { euid, entity, timestamp: typeof ts === 'string' ? ts : undefined };
     };
 
-    return paginatedDetection(esClient, targetIndex, search, mapBucket);
+    return paginatedDetection(search, mapBucket);
   };
 
   const detectForIndexSource = async (
@@ -209,7 +181,8 @@ export const createUpdateDetectionService = ({
         correlationValues,
         afterKey,
         pageSize,
-        source.queryRule
+        source.queryRule,
+        source.range
       );
       const response = await esClient.search<never, IndexSourceAggregation>({
         index: source.indexPattern,
@@ -228,7 +201,7 @@ export const createUpdateDetectionService = ({
       };
     };
 
-    return paginatedDetection(esClient, targetIndex, search, mapBucket);
+    return paginatedDetection(search, mapBucket);
   };
 
   const detectForStoreSource = async (
@@ -243,28 +216,14 @@ export const createUpdateDetectionService = ({
       }
     }
 
-    if (allEntities.length === 0) {
-      return { entities: [] as WatchlistBulkEntity[] };
-    }
-
-    // Check which entities already exist in the target index
-    const pageSize = 100;
-    for (let start = 0; start < allEntities.length; start += pageSize) {
-      const batch = allEntities.slice(start, start + pageSize);
-      const batchEuids = batch.map((e) => e.euid);
-      const existingMap = await getExistingEntitiesMap(esClient, targetIndex, batchEuids);
-      for (const entity of batch) {
-        entity.existingEntityId = existingMap.get(entity.euid);
-      }
-    }
-
     return { entities: allEntities };
   };
 
   const updateDetection: UpdateDetection = async (
     source: WatchlistDataSources.MonitoringEntitySource,
     entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
-    correlationMap?: CorrelationMap
+    correlationMap: CorrelationMap | undefined,
+    watchlistsByEuid: WatchlistsByEuid
   ) => {
     const allEntities: WatchlistBulkEntity[] = [];
     let maxProcessedTimestamp: string | undefined;
@@ -309,12 +268,17 @@ export const createUpdateDetectionService = ({
       allEntities.push(...entities);
     }
 
+    for (const entity of allEntities) {
+      entity.currentWatchlists = watchlistsByEuid.get(entity.euid);
+    }
+
     await applyBulkUpsert({
       esClient,
+      crudClient,
       logger,
       entities: allEntities,
       source,
-      targetIndex,
+      watchlist,
     });
 
     logger.info(
