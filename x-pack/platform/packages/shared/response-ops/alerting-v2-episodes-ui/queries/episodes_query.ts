@@ -58,6 +58,8 @@ export interface EpisodesFilterState {
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
   tags?: string[] | null;
+  /** Assignee UID — episodes whose last assignee matches this user profile UID */
+  assigneeUid?: string;
 }
 
 export interface EpisodesSortState {
@@ -123,7 +125,8 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
 
 /**
  * Builds an ES|QL query that aggregates episode data from `.rule-events` and
- * `.alert-actions` (last tags / deactivate state per group_hash), then episode rows.
+ * `.alert-actions` (last tags / deactivate state per group_hash, last assignee per episode),
+ * then narrows to episode rows and derives `effective_status`.
  */
 export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
   const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
@@ -153,7 +156,8 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
  * Builds an ES|QL query for episodes request with sorting and filtering.
  *
  * Joins `.rule-events` and `.alert-actions` so that user-driven deactivation
- * is reflected in an `effective_status` column used for status filtering.
+ * is reflected in an `effective_status` column, and per-episode assignee info
+ * is available for `assigneeUid` filtering.
  */
 export const buildEpisodesQuery = (
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
@@ -175,6 +179,10 @@ export const buildEpisodesQuery = (
 
   if (filterState?.tags?.length) {
     addTagsFilter(query, filterState.tags);
+  }
+
+  if (filterState?.assigneeUid) {
+    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
   }
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(

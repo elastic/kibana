@@ -238,6 +238,17 @@ export const AlertEpisodesListPage = () => {
     onSuccess: refetch,
   });
 
+  const assigneeUids = useMemo(
+    () => [
+      ...new Set(
+        [...(episodeActionsMap?.values() ?? [])]
+          .map((a) => a.lastAssigneeUid)
+          .filter((uid): uid is string => uid != null)
+      ),
+    ],
+    [episodeActionsMap]
+  );
+
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
     setColumns(cols);
   }, []);
@@ -290,6 +301,7 @@ export const AlertEpisodesListPage = () => {
             timeRange={timeRange}
             onTimeChange={handleTimeChange}
             ruleOptions={ruleOptions}
+            assigneeUids={assigneeUids}
             onRefresh={() => refetch()}
             isLoading={isLoading}
             services={services}

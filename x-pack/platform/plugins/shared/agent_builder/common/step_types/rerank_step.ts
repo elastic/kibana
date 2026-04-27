@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
-import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Step type ID for the rerank workflow step
@@ -86,15 +86,15 @@ export const rerankStepCommonDefinition: CommonStepDefinition<
 > = {
   id: RerankStepTypeId,
   category: StepCategory.Elasticsearch,
-  label: i18n.translate('xpack.workplaceai.rerankStep.label', {
+  label: i18n.translate('xpack.agentBuilder.rerankStep.label', {
     defaultMessage: 'Rerank Results',
   }),
-  description: i18n.translate('xpack.workplaceai.rerankStep.description', {
+  description: i18n.translate('xpack.agentBuilder.rerankStep.description', {
     defaultMessage:
       'Rerank documents using a rerank inference endpoint for improved relevance ordering',
   }),
   documentation: {
-    details: i18n.translate('xpack.workplaceai.rerankStep.documentation.details', {
+    details: i18n.translate('xpack.agentBuilder.rerankStep.documentation.details', {
       defaultMessage: `The rerank step calls a rerank inference endpoint to reorder documents based on relevance to the provided text.
 
 **How it works:**
