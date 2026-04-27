@@ -8,6 +8,7 @@ import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { TopNodesRequest, TopNodesResponse } from '../../../../common/http_api/overview_api';
 import type { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { convertESResponseToTopNodesResponse } from './convert_es_response_to_top_nodes_response';
 import { createTopNodesQuery } from './create_top_nodes_query';
 import type { ESResponseForTopNodes } from './types';
@@ -72,7 +73,7 @@ export const queryTopNodes = async (
   options: TopNodesRequest,
   client: ESSearchClient,
   source: MetricsSourceConfiguration,
-  schemas: DataSchemaFormat[] = ['ecs']
+  schemas: DataSchemaFormat[] = [DEFAULT_SCHEMA]
 ): Promise<TopNodesResponse> => {
   if (schemas.length === 1) {
     return queryTopNodesForSchema(options, client, source, schemas[0]);

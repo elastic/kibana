@@ -70,6 +70,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
 
     return (
       <EuiPopover
+        aria-label={i18n.UPCOMING_EVENTS_POPOVER_ARIA_LABEL}
         button={
           <EuiButtonIcon
             data-test-subj="upcoming-events-icon-button"

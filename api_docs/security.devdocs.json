@@ -6382,16 +6382,16 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "savedObjectsTagging",
-              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/request_handler_context.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/initialization/initialization.ts"
             },
             {
               "plugin": "actions",
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
+            },
+            {
+              "plugin": "savedObjectsTagging",
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/request_handler_context.ts"
             },
             {
               "plugin": "ml",
@@ -6681,6 +6681,10 @@
             {
               "plugin": "cases",
               "path": "x-pack/platform/plugins/shared/cases/server/services/user_profiles/index.ts"
+            },
+            {
+              "plugin": "alertingVTwo",
+              "path": "x-pack/platform/plugins/shared/alerting_v2/server/routes/suggestions/suggest_user_profiles_route.ts"
             },
             {
               "plugin": "osquery",

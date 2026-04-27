@@ -14,7 +14,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/i18n-react",
     "@kbn/logging",
     "@kbn/kibana-utils-plugin",
     "@kbn/core-analytics-browser",
@@ -62,14 +61,13 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/spaces-utils",
     "@kbn/usage-collection-plugin",
-    "@kbn/ai-agent-confirmation-modal",
-    "@kbn/ai-assistant-management-plugin",
     "@kbn/agent-builder-plugin",
     "@kbn/zod",
     "@kbn/search-inference-endpoints",
     "@kbn/inference-connectors",
     "@kbn/react-query",
     "@kbn/shared-ux-ai-components",
+    "@kbn/evals-plugin",
   ],
   "exclude": ["target/**/*"]
 }

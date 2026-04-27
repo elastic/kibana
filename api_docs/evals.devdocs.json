@@ -33,7 +33,7 @@
       "label": "EvalsPublicStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/evals/public/types.ts",
-      "lineNumber": 13,
+      "lineNumber": 85,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -49,10 +49,87 @@
             "React.ComponentClass<{ traceId: string; }, any> | React.FunctionComponent<{ traceId: string; }>"
           ],
           "path": "x-pack/platform/plugins/shared/evals/public/types.ts",
-          "lineNumber": 14,
+          "lineNumber": 86,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "evals",
+          "id": "def-public.EvalsPublicStart.openAddToDatasetFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "openAddToDatasetFlyout",
+          "description": [],
+          "signature": [
+            "(options: ",
+            "AddToDatasetFlyoutOpenOptions",
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/evals/public/types.ts",
+          "lineNumber": 87,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "evals",
+              "id": "def-public.EvalsPublicStart.openAddToDatasetFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "AddToDatasetFlyoutOpenOptions"
+              ],
+              "path": "x-pack/platform/plugins/shared/evals/public/types.ts",
+              "lineNumber": 87,
+              "columnNumber": 28,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "evals",
+          "id": "def-public.EvalsPublicStart.getAddToDatasetAction",
+          "type": "Function",
+          "tags": [],
+          "label": "getAddToDatasetAction",
+          "description": [],
+          "signature": [
+            "(config: ",
+            "AddToDatasetActionConfig",
+            ") => ",
+            "AddToDatasetAction"
+          ],
+          "path": "x-pack/platform/plugins/shared/evals/public/types.ts",
+          "lineNumber": 88,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "evals",
+              "id": "def-public.EvalsPublicStart.getAddToDatasetAction.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "config",
+              "description": [],
+              "signature": [
+                "AddToDatasetActionConfig"
+              ],
+              "path": "x-pack/platform/plugins/shared/evals/public/types.ts",
+              "lineNumber": 88,
+              "columnNumber": 27,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -77,7 +154,7 @@
         "{ [x: string]: never; }"
       ],
       "path": "x-pack/platform/plugins/shared/evals/server/types.ts",
-      "lineNumber": 12,
+      "lineNumber": 14,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -92,7 +169,7 @@
       "label": "EvalsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/evals/server/types.ts",
-      "lineNumber": 13,
+      "lineNumber": 15,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -109,7 +186,7 @@
             " | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/evals/server/types.ts",
-          "lineNumber": 14,
+          "lineNumber": 16,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

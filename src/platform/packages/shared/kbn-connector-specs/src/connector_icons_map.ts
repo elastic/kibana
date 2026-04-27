@@ -112,6 +112,10 @@ export const ConnectorIconsMap: Map<
   ],
   ['.gmail', lazy(() => import(/* webpackChunkName: "connectorIconGmail" */ './specs/gmail/icon'))],
   [
+    '.azure-blob',
+    lazy(() => import(/* webpackChunkName: "connectorIconAzureBlob" */ './specs/azure_blob/icon')),
+  ],
+  [
     '.firecrawl',
     lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
   ],
@@ -187,5 +191,10 @@ export const ConnectorIconsMap: Map<
           /* webpackChunkName: "connectorIconGoogleCloudStorage" */ './specs/google_cloud_storage/icon'
         )
     ),
+  ],
+
+  [
+    '.snowflake',
+    lazy(() => import(/* webpackChunkName: "connectorIconsnowflake" */ './specs/snowflake/icon')),
   ],
 ]);

@@ -15,7 +15,7 @@ import { AppContextProvider } from '../../../../app_context';
 import type { AppDependencies } from '../../../../app_context';
 import { IndexActionsContextMenu } from './index_actions_context_menu';
 import type { Index } from '@kbn/index-management-shared-types';
-import { notificationService } from '../../../../services/notification';
+import { NotificationService } from '../../../../services/notification';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { type DocCountResult, RequestResultType } from '../index_table/get_doc_count';
 
@@ -26,14 +26,6 @@ const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 jest.mock('../../../../services/routing', () => ({
   ...jest.requireActual('../../../../services/routing'),
   getIndexDetailsLink: jest.fn(() => '/indices/some/stats'),
-}));
-
-jest.mock('../../../../services/notification', () => ({
-  ...jest.requireActual('../../../../services/notification'),
-  notificationService: {
-    showSuccessToast: jest.fn(),
-    showDangerToast: jest.fn(),
-  },
 }));
 
 jest.mock(
@@ -58,6 +50,7 @@ jest.mock(
 );
 
 const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDependencies => {
+  const toasts = { add: jest.fn() } as any;
   const base: AppDependencies = {
     core: {
       fatalErrors: {} as unknown as AppDependencies['core']['fatalErrors'],
@@ -92,7 +85,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       } as unknown as AppDependencies['services']['extensionsService'],
       uiMetricService: {} as unknown as AppDependencies['services']['uiMetricService'],
       httpService: {} as unknown as AppDependencies['services']['httpService'],
-      notificationService,
+      notificationService: new NotificationService(toasts),
     },
     config: {
       enableIndexActions: true,

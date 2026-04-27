@@ -137,6 +137,7 @@ describe('MetricsExperienceGrid', () => {
       } as unknown as UnifiedHistogramServices,
       fetch$,
       isComponentVisible: true,
+      profileId: 'test-profile-id',
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -148,19 +149,19 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     useFetchMetricsDataMock.mockReturnValue({
       metricItems,
       allDimensions: dimensions,
+      activeDimensions: [],
       loading: false,
       error: null,
     });
 
     useMetricsGridFullScreenMock.mockReturnValue({
       metricsGridId: 'test-metrics-grid-id',
-      metricsGridWrapper: null,
-      setMetricsGridWrapper: jest.fn(),
       styles: {
         'metricsGrid--fullScreen': 'mock-fullscreen-class',
         'metricsGrid--restrictBody': 'mock-restrict-body-class',
@@ -191,6 +192,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
+      activeDimensions: [],
       loading: false,
       error: new Error('METRICS_INFO failed'),
     });
@@ -215,6 +217,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
+      activeDimensions: [],
       loading: false,
       error: abortError,
     });
@@ -232,6 +235,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
+      activeDimensions: [],
       loading: true,
       error: new Error('stale error while refetching'),
     });
@@ -259,6 +263,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -301,6 +306,7 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      profileId: 'test-profile-id',
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {

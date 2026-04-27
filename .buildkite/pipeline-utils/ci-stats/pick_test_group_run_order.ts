@@ -8,12 +8,11 @@
  */
 
 import * as Fs from 'fs';
-import os from 'os';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
 
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
@@ -219,10 +218,7 @@ export async function pickTestGroupRunOrder() {
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
-  const jestUnitConfigsFiltered = await filterEmptyJestConfigs(
-    jestUnitConfigsWithEmpties,
-    os.availableParallelism()
-  );
+  const jestUnitConfigsFiltered = filterEmptyJestConfigs(jestUnitConfigsWithEmpties);
   // Expand sharded unit configs (e.g. cases/jest.config.js) into shard-annotated entries
   let jestUnitConfigs = expandShardedJestConfigs(jestUnitConfigsFiltered);
 

@@ -48,7 +48,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
 
-  // Streams
+  // Streams – read
   `${internalNamespaces.streams}.list_streams`,
   `${internalNamespaces.streams}.get_stream`,
   `${internalNamespaces.streams}.get_schema`,
@@ -56,6 +56,15 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.get_lifecycle_stats`,
   `${internalNamespaces.streams}.query_documents`,
   `${internalNamespaces.streams}.get_failed_documents`,
+
+  // Streams – write
+  `${internalNamespaces.streams}.set_retention`,
+  `${internalNamespaces.streams}.fork_stream`,
+  `${internalNamespaces.streams}.delete_stream`,
+  `${internalNamespaces.streams}.update_processors`,
+  `${internalNamespaces.streams}.map_fields`,
+  `${internalNamespaces.streams}.set_failure_store`,
+  `${internalNamespaces.streams}.update_stream_description`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -80,7 +89,6 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
-  `${internalNamespaces.observability}.agent`,
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
 ] as const;
@@ -108,8 +116,13 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Dashboard
   'dashboard-management',
 
+  // Platform – Discover
+  'discover-data-analysis',
+
   // Platform – Streams
-  'streams-exploration',
+  'streams-management',
+  'significant-events-memory',
+  'knowledge-indicators-management',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -125,6 +138,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // O11Y
   'observability.rca',
+  'observability.investigation',
+  'observability.service-map',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,

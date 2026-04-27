@@ -63,6 +63,15 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useToasts: () => mockToasts,
+  useKibana: () => ({
+    services: {
+      application: {
+        capabilities: {
+          securitySolutionTimeline: { read: true, crud: true },
+        },
+      },
+    },
+  }),
   KibanaServices: {
     get: () => ({
       uiSettings: {

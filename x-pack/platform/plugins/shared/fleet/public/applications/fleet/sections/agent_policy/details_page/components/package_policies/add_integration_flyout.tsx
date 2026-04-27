@@ -147,7 +147,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>
-                <EuiFlexGroup alignItems="baseline" gutterSize="s">
+                <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiTitle>
                       <h2 id={modalTitleId}>

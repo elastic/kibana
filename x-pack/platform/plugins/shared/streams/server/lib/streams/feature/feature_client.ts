@@ -32,6 +32,7 @@ import {
   FEATURE_EXCLUDED_AT,
   FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
+  FEATURE_RUN_ID,
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
@@ -39,12 +40,10 @@ import type { StoredFeature } from './stored_feature';
 import { StatusError } from '../errors/status_error';
 import { parseError } from '../errors/parse_error';
 import type { SearchMode } from '../../../../common/queries';
-
-/**
- * Minimum raw ELSER score threshold for semantic search results.
- * See query_client.ts for rationale — same threshold applies here.
- */
-const SEMANTIC_MIN_SCORE = 10;
+import {
+  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  type SigEventsTuningConfig,
+} from '../../../../common/sig_events_tuning_config';
 
 const SEARCH_SIZE_LIMIT = 10_000;
 
@@ -182,16 +181,22 @@ export type FeatureBulkOperation =
   | FeatureBulkExcludeOperation
   | FeatureBulkRestoreOperation;
 
-export const MAX_FEATURE_AGE_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
-
 export class FeatureClient {
   constructor(
     private readonly clients: {
       storageClient: IStorageClient<FeatureStorageSettings, StoredFeature>;
       logger: Logger;
     },
-    private readonly inferenceAvailable: boolean = false
+    private readonly inferenceAvailable: boolean = false,
+    private readonly config: Pick<
+      SigEventsTuningConfig,
+      'feature_ttl_days' | 'semantic_min_score' | 'rrf_rank_constant'
+    > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
   ) {}
+
+  private get maxFeatureAgeMs(): number {
+    return this.config.feature_ttl_days * 24 * 60 * 60 * 1000;
+  }
 
   async clean() {
     await this.clients.storageClient.clean();
@@ -417,7 +422,7 @@ export class FeatureClient {
             match: { [FEATURE_SEARCH_EMBEDDING]: query },
           },
           filter: { bool: { filter } },
-          min_score: SEMANTIC_MIN_SCORE,
+          min_score: this.config.semantic_min_score,
         },
       },
     });
@@ -451,8 +456,8 @@ export class FeatureClient {
                 query: {
                   match: { [FEATURE_SEARCH_EMBEDDING]: query },
                 },
-                // See SEMANTIC_MIN_SCORE for rationale.
-                min_score: SEMANTIC_MIN_SCORE,
+                // See config.semantic_min_score for rationale.
+                min_score: this.config.semantic_min_score,
               },
             },
           ],
@@ -464,7 +469,7 @@ export class FeatureClient {
           rank_window_size: limit ?? SEARCH_SIZE_LIMIT,
           // Lower than the ES default (60) to give more weight to top-ranked
           // results from each retriever, improving precision for small catalogs.
-          rank_constant: 20,
+          rank_constant: this.config.rrf_rank_constant,
         },
       },
     });
@@ -545,7 +550,7 @@ export class FeatureClient {
               ...feature,
               excluded_at: undefined,
               last_seen: now,
-              expires_at: new Date(Date.now() + MAX_FEATURE_AGE_MS).toISOString(),
+              expires_at: new Date(Date.now() + this.maxFeatureAgeMs).toISOString(),
             },
           },
         });
@@ -585,6 +590,7 @@ function toStorage(stream: string, feature: Feature, inferenceAvailable: boolean
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
     [FEATURE_EXCLUDED_AT]: feature.excluded_at,
+    [FEATURE_RUN_ID]: feature.run_id,
     [FEATURE_TITLE]: feature.title,
     [FEATURE_FILTER]: feature.filter,
     ...(inferenceAvailable && embeddingText ? { [FEATURE_SEARCH_EMBEDDING]: embeddingText } : {}),
@@ -609,6 +615,7 @@ function fromStorage(feature: StoredFeature): Feature {
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
     excluded_at: feature[FEATURE_EXCLUDED_AT],
+    run_id: feature[FEATURE_RUN_ID],
     title: feature[FEATURE_TITLE],
     filter: feature[FEATURE_FILTER],
   };

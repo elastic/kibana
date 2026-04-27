@@ -14,7 +14,6 @@ import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import type { SlackAssistantSearchContextResponse, SlackErrorFields } from './types';
 
 const SLACK_API_BASE = 'https://slack.com/api';
-const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth support is unblocked.
 const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
 
 // Slack API/connector constants (avoid magic numbers)
@@ -345,36 +344,18 @@ export const Slack: ConnectorSpec = {
 
   auth: {
     types: [
-      ...(ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
-        ? ([
-            {
-              type: 'bearer',
-              defaults: {
-                token: '',
-              },
-              overrides: {
-                meta: {
-                  token: {
-                    sensitive: true,
-                    label: i18n.translate(
-                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.label',
-                      {
-                        defaultMessage: 'Temporary Slack user token',
-                      }
-                    ),
-                    helpText: i18n.translate(
-                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.helpText',
-                      {
-                        defaultMessage:
-                          'Temporary option for testing only. Paste a Slack user token (e.g. xoxp-...) here.',
-                      }
-                    ),
-                  },
-                },
-              },
-            },
-          ] as const)
-        : []),
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://slack.com/oauth/v2/authorize',
+          tokenUrl: 'https://slack.com/api/oauth.v2.access',
+          scope:
+            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+          scopeParamName: 'user_scope',
+          accessTokenPath: 'authed_user.access_token',
+          tokenType: 'Bearer',
+        },
+      },
     ],
   },
 

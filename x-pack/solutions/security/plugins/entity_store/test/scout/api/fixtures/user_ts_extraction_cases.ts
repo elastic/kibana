@@ -65,7 +65,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     expectedMeta: { namespace: 'okta', confidence: ENTITY_CONFIDENCE.High, entityName: 'john.doe' },
   },
   {
-    id: 'idp-asset-azure-user-name',
+    id: 'non-idp-asset-azure-user-name',
     query: {
       bool: {
         must: [{ term: { 'user.name': 'jane.smith' } }, { term: { 'host.id': 'host-456' } }],
@@ -76,10 +76,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'azure' },
       host: { id: 'host-456' },
     },
-    expectedEuid: 'user:jane.smith@entra_id',
+    expectedEuid: 'user:jane.smith@host-456@local',
     expectedMeta: {
-      namespace: 'entra_id',
-      confidence: ENTITY_CONFIDENCE.High,
+      namespace: 'local',
+      confidence: ENTITY_CONFIDENCE.Medium,
       entityName: 'jane.smith',
     },
   },
@@ -221,10 +221,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'o365' },
       host: { entity: { id: '' }, id: 'host-404' },
     },
-    expectedEuid: 'user:eve.martin@microsoft_365',
+    expectedEuid: 'user:eve.martin@host-404@local',
     expectedMeta: {
-      namespace: 'microsoft_365',
-      confidence: ENTITY_CONFIDENCE.High,
+      namespace: 'local',
+      confidence: ENTITY_CONFIDENCE.Medium,
       entityName: 'eve.martin',
     },
   },
@@ -553,7 +553,7 @@ export const USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES: readonly UserScout
 /**
  * Expected number of user documents in `es_archives/updates` that pass
  * `getEuidDslDocumentsContainsIdFilter('user')` (documentsFilter ∧ postAggFilter).
- * Keep in sync: archive user docs with defined EUID = 25; this table lists archive-backed cases with EUID + cases without; ingested-only
+ * Keep in sync: archive user docs with defined EUID; this table lists archive-backed cases with EUID + cases without; ingested-only
  * case is excluded here.
  */
-export const USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT = 25;
+export const USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT = 29;

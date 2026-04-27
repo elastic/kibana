@@ -66,7 +66,7 @@
           "({ isOpen, isTimeseries, preloadedSources, selectedSources, onClose, onSelect, position, }: DataSourceBrowserProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/data_source_browser/data_source_browser.tsx",
-        "lineNumber": 58,
+        "lineNumber": 61,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -82,7 +82,7 @@
               "DataSourceBrowserProps"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/data_source_browser/data_source_browser.tsx",
-            "lineNumber": 58,
+            "lineNumber": 61,
             "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
