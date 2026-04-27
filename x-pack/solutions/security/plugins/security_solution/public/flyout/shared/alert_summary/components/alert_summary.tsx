@@ -7,7 +7,6 @@
 
 import React, { memo, useEffect } from 'react';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -17,15 +16,16 @@ import {
 } from '@elastic/eui';
 import type { PromptContext } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import { ConnectorMissingCallout } from './connector_missing_callout';
 import { useAlertSummary } from '../hooks/use_alert_summary';
 import { MessageText } from './message_text';
 
-export const ALERT_SUMMARY_TEST_ID = 'ease-alert-flyout-alert-summary';
-export const GENERATE_INSIGHTS_BUTTON_TEST_ID = 'ease-alert-flyout-generate-insights-button';
-export const REGENERATE_INSIGHTS_BUTTON_TEST_ID = 'ease-alert-flyout-regenerate-insights-button';
+export const ALERT_SUMMARY_TEST_ID = 'alert-flyout-ai-summary';
+export const GENERATE_INSIGHTS_BUTTON_TEST_ID = 'alert-flyout-ai-summary-generate-insights-button';
+export const REGENERATE_INSIGHTS_BUTTON_TEST_ID =
+  'alert-flyout-ai-summary-regenerate-insights-button';
 
 const RECOMMENDED_ACTIONS = i18n.translate(
   'xpack.securitySolution.alertSummary.recommendedActions',
@@ -71,7 +71,14 @@ export interface AlertSummaryProps {
 }
 
 /**
- * Component generating the AI summary for the visualized alert and showing in the alert summary section of EASE flyout.
+ * Body of the AI summary section: renders the generate / regenerate buttons,
+ * the generating skeleton, and the markdown summary + recommended actions
+ * once a summary has been generated. Falls back to a connector-missing
+ * callout if no default AI connector is configured.
+ *
+ * Shared across the EASE flyout, the legacy expandable flyout, and the v2
+ * flyout. Stateless w.r.t. flyout context — all required values are passed
+ * in as props by the host wrapper.
  */
 export const AlertSummary = memo(
   ({
@@ -101,7 +108,6 @@ export const AlertSummary = memo(
       setHasAlertSummary(hasAlertSummary);
     }, [hasAlertSummary, setHasAlertSummary]);
 
-    // Don't render the summary UI if no connector ID is available
     if (!defaultConnectorId) {
       return <ConnectorMissingCallout canSeeAdvancedSettings={canSeeAdvancedSettings} />;
     }
@@ -148,25 +154,15 @@ export const AlertSummary = memo(
               )}
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
+                  <AiButton
                     onClick={fetchAISummary}
-                    color="primary"
                     size="m"
+                    iconType="aiAssistantLogo"
                     data-test-subj={REGENERATE_INSIGHTS_BUTTON_TEST_ID}
                     isLoading={messageAndReplacements == null}
                   >
-                    <EuiFlexGroup
-                      gutterSize="s"
-                      alignItems="center"
-                      responsive={false}
-                      wrap={false}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <AssistantIcon size="m" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>{REGENERATE}</EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiButton>
+                    {REGENERATE}
+                  </AiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>
@@ -174,20 +170,15 @@ export const AlertSummary = memo(
         ) : (
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <AiButton
                 onClick={fetchAISummary}
-                color="primary"
                 size="m"
+                iconType="aiAssistantLogo"
                 data-test-subj={GENERATE_INSIGHTS_BUTTON_TEST_ID}
                 isLoading={messageAndReplacements == null}
               >
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <AssistantIcon size="m" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{GENERATE}</EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiButton>
+                {GENERATE}
+              </AiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}

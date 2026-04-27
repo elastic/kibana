@@ -11,34 +11,48 @@ import {
   ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID,
   AnonymizationSwitch,
 } from './anonymization_switch';
-import { EaseDetailsContext } from '../context';
 
-const mockSetShowAnonymizedValues = jest.fn();
-const mockContextValue = {
-  showAnonymizedValues: false,
-  setShowAnonymizedValues: mockSetShowAnonymizedValues,
-} as unknown as EaseDetailsContext;
-
-const renderAnonymizedSwitch = (contextValue: EaseDetailsContext, hasAlertSummary: boolean) =>
+const renderAnonymizedSwitch = ({
+  hasAlertSummary,
+  showAnonymizedValues,
+  setShowAnonymizedValues,
+}: {
+  hasAlertSummary: boolean;
+  showAnonymizedValues: boolean | undefined;
+  setShowAnonymizedValues: jest.Mock;
+}) =>
   render(
-    <EaseDetailsContext.Provider value={contextValue}>
-      <AnonymizationSwitch hasAlertSummary={hasAlertSummary} />
-    </EaseDetailsContext.Provider>
+    <AnonymizationSwitch
+      hasAlertSummary={hasAlertSummary}
+      showAnonymizedValues={showAnonymizedValues}
+      setShowAnonymizedValues={setShowAnonymizedValues}
+    />
   );
 
 describe('AnonymizationSwitch', () => {
+  let mockSetShowAnonymizedValues: jest.Mock;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSetShowAnonymizedValues = jest.fn();
   });
 
   it('should render the switch in the unchecked state by default', () => {
-    const { getByTestId } = renderAnonymizedSwitch(mockContextValue, true);
+    const { getByTestId } = renderAnonymizedSwitch({
+      hasAlertSummary: true,
+      showAnonymizedValues: false,
+      setShowAnonymizedValues: mockSetShowAnonymizedValues,
+    });
 
     expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeChecked();
   });
 
   it('should call setShowAnonymizedValues with true when the switch is toggled on', () => {
-    const { getByTestId } = renderAnonymizedSwitch(mockContextValue, true);
+    const { getByTestId } = renderAnonymizedSwitch({
+      hasAlertSummary: true,
+      showAnonymizedValues: false,
+      setShowAnonymizedValues: mockSetShowAnonymizedValues,
+    });
 
     fireEvent.click(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID));
 
@@ -46,12 +60,11 @@ describe('AnonymizationSwitch', () => {
   });
 
   it('should call setShowAnonymizedValues with false when the switch is toggled off', () => {
-    const contextValue = {
-      ...mockContextValue,
+    const { getByTestId } = renderAnonymizedSwitch({
+      hasAlertSummary: true,
       showAnonymizedValues: true,
-    };
-
-    const { getByTestId } = renderAnonymizedSwitch(contextValue, true);
+      setShowAnonymizedValues: mockSetShowAnonymizedValues,
+    });
 
     fireEvent.click(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID));
 
@@ -59,24 +72,31 @@ describe('AnonymizationSwitch', () => {
   });
 
   it('should not render the switch if showAnonymizedValues is undefined', () => {
-    const contextValue = {
-      ...mockContextValue,
+    const { queryByTestId } = renderAnonymizedSwitch({
+      hasAlertSummary: true,
       showAnonymizedValues: undefined,
-    };
-
-    const { queryByTestId } = renderAnonymizedSwitch(contextValue, true);
+      setShowAnonymizedValues: mockSetShowAnonymizedValues,
+    });
 
     expect(queryByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should enable the switch when hasAlertSummary is true', () => {
-    const { getByTestId } = renderAnonymizedSwitch(mockContextValue, true);
+    const { getByTestId } = renderAnonymizedSwitch({
+      hasAlertSummary: true,
+      showAnonymizedValues: false,
+      setShowAnonymizedValues: mockSetShowAnonymizedValues,
+    });
 
     expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeDisabled();
   });
 
   it('should disable the switch when hasAlertSummary is false', () => {
-    const { getByTestId } = renderAnonymizedSwitch(mockContextValue, false);
+    const { getByTestId } = renderAnonymizedSwitch({
+      hasAlertSummary: false,
+      showAnonymizedValues: false,
+      setShowAnonymizedValues: mockSetShowAnonymizedValues,
+    });
 
     expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).toBeDisabled();
   });

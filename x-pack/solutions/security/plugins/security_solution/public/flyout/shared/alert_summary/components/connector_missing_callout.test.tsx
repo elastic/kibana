@@ -15,9 +15,9 @@ import {
 import { useNavigateTo } from '@kbn/security-solution-navigation';
 
 jest.mock('@kbn/security-solution-navigation');
-jest.mock('../../../common/lib/kibana', () => {
+jest.mock('../../../../common/lib/kibana', () => {
   return {
-    ...jest.requireActual('../../../common/lib/kibana'),
+    ...jest.requireActual('../../../../common/lib/kibana'),
   };
 });
 

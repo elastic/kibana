@@ -18,6 +18,9 @@ import { useAlertSummary } from '../hooks/use_alert_summary';
 import { MESSAGE_TEXT_TEST_ID } from './message_text';
 
 jest.mock('../hooks/use_alert_summary');
+jest.mock('@kbn/security-solution-navigation', () => ({
+  useNavigateTo: () => ({ navigateTo: jest.fn() }),
+}));
 
 const promptContext: PromptContext = {
   category: 'alert',
@@ -34,7 +37,6 @@ const defaultProps = {
   alertId: 'test-alert-id',
   canSeeAdvancedSettings: true,
   defaultConnectorId: 'test-connector-id',
-  isContextReady: true,
   promptContext,
   setHasAlertSummary: jest.fn(),
   showAnonymizedValues: false,
@@ -135,5 +137,12 @@ describe('AlertSummary', () => {
     fireEvent.click(screen.getByTestId(REGENERATE_INSIGHTS_BUTTON_TEST_ID));
 
     expect(fetchAISummary).toHaveBeenCalled();
+  });
+
+  it('should render the connector missing callout when no defaultConnectorId is provided', () => {
+    render(<AlertSummary {...defaultProps} defaultConnectorId={undefined} />);
+
+    expect(screen.queryByTestId(ALERT_SUMMARY_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GENERATE_INSIGHTS_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });
