@@ -233,7 +233,7 @@ const colorFromPaletteSchema = schema.object(
       schema.string({
         meta: {
           description:
-            'Name of the palette to select the color from. Accepted values: `default`, `elastic_line_optimized`, `neutral`, `severity`, `cool`, `gray`, `red`, `green`, `warm`, `temperature`, `complementary`, `status`, `compare_to`, `log_level`. When omitted, defaults to `default`.',
+            "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
         },
       })
     ),
