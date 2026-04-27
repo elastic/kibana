@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act, render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import SlackActionFields from './slack_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
@@ -33,21 +32,15 @@ describe('SlackActionFields renders', () => {
       isDeprecated: false,
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').first().prop('value')).toBe(
-      'http://test.com'
-    );
+    const slackWebhookUrlInput = screen.getByTestId('slackWebhookUrlInput') as HTMLInputElement;
+    expect(slackWebhookUrlInput).toBeInTheDocument();
+    expect(slackWebhookUrlInput).toHaveValue('http://test.com');
   });
 
   describe('Validation', () => {
@@ -69,7 +62,7 @@ describe('SlackActionFields renders', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <SlackActionFields
             readOnly={false}
@@ -79,7 +72,7 @@ describe('SlackActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
@@ -109,7 +102,7 @@ describe('SlackActionFields renders', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <SlackActionFields
             readOnly={false}
@@ -119,12 +112,13 @@ describe('SlackActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(getByTestId('slackWebhookUrlInput'));
-      await userEvent.type(getByTestId('slackWebhookUrlInput'), 'no-valid', {
+      const slackWebhookUrlInput = screen.getByTestId('slackWebhookUrlInput');
+      await userEvent.clear(slackWebhookUrlInput);
+      await userEvent.type(slackWebhookUrlInput, 'no-valid', {
         delay: 10,
       });
 
-      await userEvent.click(getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
