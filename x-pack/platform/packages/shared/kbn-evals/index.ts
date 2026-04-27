@@ -119,6 +119,10 @@ export type {
   RetrievedDoc,
 } from './src/evaluators/rag/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
+export {
+  createEsqlValidityEvaluator,
+  ESQL_VALIDITY_EVALUATOR_NAME,
+} from './src/evaluators/esql/validity';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
 export { createConversationCoherenceEvaluator } from './src/evaluators/conversation_coherence';
