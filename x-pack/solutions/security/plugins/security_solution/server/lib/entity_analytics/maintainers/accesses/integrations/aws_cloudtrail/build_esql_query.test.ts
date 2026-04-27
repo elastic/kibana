@@ -13,10 +13,11 @@ describe('AWS CloudTrail buildEsqlQuery', () => {
     expect(buildEsqlQuery('production')).toContain('FROM logs-aws.cloudtrail-production');
   });
 
-  it('filters for AWS module and StartSession action', () => {
+  it('filters for AWS module and StartSession or SendSSHPublicKey actions', () => {
     const query = buildEsqlQuery('default');
     expect(query).toContain('event.module == "aws"');
-    expect(query).toContain('event.action == "StartSession"');
+    expect(query).toContain('"StartSession"');
+    expect(query).toContain('"SendSSHPublicKey"');
   });
 
   it('does not filter on event.provider or logon_type', () => {

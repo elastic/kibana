@@ -8,6 +8,8 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../common/lib/kibana';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
@@ -40,6 +42,7 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
   } = useEntityAnalyticsRoutes();
   const queryClient = useQueryClient();
   const { addSuccess, addError, addWarning } = useAppToasts();
+  const { telemetry } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const [hasGenerated, setHasGenerated] = useState(false);
 
@@ -75,8 +78,21 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
 
           const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
           queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
+          queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], status);
           return 'success';
         }
+      }
+
+      // Poll timed out waiting for the execution uuid to be persisted.
+      // Fetch whatever leads are available so the cache is populated before
+      // isGenerating flips to false, preventing a spurious empty-state flash.
+      if (!signal.aborted) {
+        const [finalResult, finalStatus] = await Promise.all([
+          fetchLeads({ ...FETCH_LEADS_PARAMS, signal }),
+          fetchLeadGenerationStatus({ signal }),
+        ]);
+        queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], finalResult);
+        queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], finalStatus);
       }
       return 'timeout';
     },
@@ -88,6 +104,7 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
+      telemetry.reportEvent(EntityEventTypes.LeadGenerationGenerateClicked, {});
       const { executionUuid } = await generateLeadsApi({ params: { connectorId }, signal });
       return pollForCompletion(executionUuid, signal);
     },

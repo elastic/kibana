@@ -123,6 +123,7 @@ export const useFetchGroupedData = ({
       onError: (err: Error) => showErrorToast(toasts, err),
       enabled: enabled && !!indexPattern,
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
     }
   );
 };
@@ -165,6 +166,7 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
       onError: (err: Error) => showErrorToast(toasts, err),
       enabled: entityIds.length > 0 && !!indexPattern,
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
     }
   );
 

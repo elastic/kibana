@@ -186,7 +186,9 @@ export class CoreKibanaRequest<
     this.injectHostInfo(request);
 
     this.url = request.url ?? new URL('https://fake-request/url');
-    this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
+    this.headers = isRealReq
+      ? (deepFreeze({ ...request.headers }) as unknown as Headers)
+      : (request.headers as unknown as Headers);
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = !isRealReq;
     // set to false if elasticInternalOrigin is explicitly set to false
