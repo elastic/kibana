@@ -440,7 +440,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       it('accepts duplicate ids without repeated delete failures', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId } = response.body;
+
+        const { savedObjectId } = response.body.data && response.body.data.persistTimeline.timeline;
 
         const responseToTest = await supertest
           .delete(TIMELINE_URL)
