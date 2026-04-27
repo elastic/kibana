@@ -113,7 +113,7 @@ describe('Monitor Detail Flyout', () => {
   });
 
   it('renders loading state while fetching', () => {
-    const { getByRole } = render(
+    const { getAllByRole } = render(
       <MonitorDetailFlyout
         configId="123456"
         id="test-id"
@@ -126,13 +126,14 @@ describe('Monitor Detail Flyout', () => {
       {
         state: {
           monitorDetails: {
+            syntheticsMonitor: null,
             syntheticsMonitorLoading: true,
           },
         },
       }
     );
 
-    expect(getByRole('progressbar'));
+    expect(getAllByRole('progressbar').length).toBeGreaterThan(0);
   });
 
   it('renders details for fetch success', () => {
