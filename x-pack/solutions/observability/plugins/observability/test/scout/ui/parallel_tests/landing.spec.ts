@@ -14,7 +14,7 @@ import {
   TEST_START_DATE,
   TEST_END_DATE,
 } from '../fixtures/generators';
-import { BIGGER_TIMEOUT } from '../fixtures/constants';
+import { BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../fixtures/constants';
 
 test.describe(
   'Observability Landing Page',
@@ -42,19 +42,10 @@ test.describe(
         defaultRoute: '/app/metrics',
       });
 
-      await page.goto(kbnUrl.get('/'));
-
-      // If the uiSettings change is slow to propagate, the default route
-      // may still direct to observability landing first. Retry once.
-      await page.waitForURL(/\/app\/(metrics|observability)/, {
-        timeout: BIGGER_TIMEOUT,
-      });
-
-      if (page.url().includes('/app/observability')) {
+      await expect(async () => {
         await page.goto(kbnUrl.get('/'));
-      }
-
-      await expect(page).toHaveURL(/\/app\/metrics/, { timeout: BIGGER_TIMEOUT });
+        await expect(page).toHaveURL(/\/app\/metrics/, { timeout: SHORTER_TIMEOUT });
+      }).toPass({ timeout: BIGGER_TIMEOUT });
 
       // Restore default route
       await kbnClient.uiSettings.update({
