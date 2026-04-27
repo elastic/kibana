@@ -168,21 +168,49 @@ export class ObservabilityAIAssistantEvaluationChatClient implements ChatClient 
 
         const decoder = new TextDecoder();
 
-        // @ts-expect-error upgrade typescript v5.9.3
-        const iterator: NodeJS.AsyncIterator<string> = {
-          async next() {
-            const { done, value } = await reader.read();
-
-            if (done) {
-              const tail = decoder.decode(undefined, { stream: false });
-              return { value: tail || undefined, done: true };
+        let emittedTail = false;
+        const iterator: NodeJS.AsyncIterator<string, undefined> = {
+          async next(): Promise<IteratorResult<string, undefined>> {
+            if (emittedTail) {
+              return {
+                done: true,
+                value: undefined,
+              };
             }
 
-            const text = decoder.decode(value, { stream: true });
-            return { value: text, done: false };
+            while (true) {
+              const { done, value } = await reader.read();
+
+              if (done) {
+                const tail = decoder.decode(undefined, { stream: false });
+                if (tail) {
+                  emittedTail = true;
+                  return {
+                    done: false,
+                    value: tail,
+                  };
+                }
+
+                return {
+                  done: true,
+                  value: undefined,
+                };
+              }
+
+              const text = decoder.decode(value, { stream: true });
+              if (text) {
+                return {
+                  done: false,
+                  value: text,
+                };
+              }
+            }
           },
           [Symbol.asyncIterator]() {
             return this;
+          },
+          async [Symbol.asyncDispose]() {
+            await reader.cancel();
           },
         };
 
