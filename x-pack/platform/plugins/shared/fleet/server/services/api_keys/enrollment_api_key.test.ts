@@ -18,7 +18,7 @@ import { auditLoggingService } from '../audit_logging';
 import { appContextService } from '../app_context';
 
 import {
-  deleteEnrollmentApiKey,
+  deleteEnrollmentApiKeys,
   generateEnrollmentAPIKey,
   getEnrollmentAPIKey,
 } from './enrollment_api_key';
@@ -153,21 +153,25 @@ describe('enrollment api keys', () => {
     });
   });
 
-  describe('deleteEnrollmentApiKey', () => {
+  describe('deleteEnrollmentApiKeys', () => {
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      esClient.update.mockResolvedValue({} as any);
+      esClient.bulk.mockResolvedValue({} as any);
 
-      esClient.get.mockResolvedValue({
-        _id: 'test-id',
-        _index: ENROLLMENT_API_KEYS_INDEX,
-        _source: {
-          active: true,
-          created_at: new Date().toISOString(),
-          api_key_id: 'test-enrollment-api-key-id',
-        },
-        found: true,
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _id: 'test-id',
+            _index: ENROLLMENT_API_KEYS_INDEX,
+            _source: {
+              active: true,
+              created_at: new Date().toISOString(),
+              api_key_id: 'test-enrollment-api-key-id',
+            },
+            found: true,
+          },
+        ],
       });
 
       mockedAppContextService.getSecurity.mockReturnValue({
@@ -178,11 +182,11 @@ describe('enrollment api keys', () => {
         },
       } as any);
 
-      await deleteEnrollmentApiKey(esClient, 'test-enrollment-api-key-id');
+      await deleteEnrollmentApiKeys(esClient, ['test-enrollment-api-key-id']);
 
       expect(auditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message:
-          'User deleting enrollment API key [id=test-id] [api_key_id=test-enrollment-api-key-id]',
+          'User deleting enrollment API key [id=test-id] [api_key_id=test-enrollment-api-key-id] [forceDelete=false]',
       });
     });
   });

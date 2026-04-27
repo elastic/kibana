@@ -89,9 +89,9 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
-    await APIKeyService.deleteEnrollmentApiKey(
+    await APIKeyService.deleteEnrollmentApiKeys(
       esClient,
-      request.params.keyId,
+      [request.params.keyId],
       false,
       useSpaceAwareness ? currentNamespace : undefined
     );
