@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import type {
   CollectorFetchContext,
   UsageCollectionSetup,
@@ -24,6 +25,21 @@ import { getAllCloudAccountsStats } from './cloud_accounts_stats_collector';
 import { getMutedRulesStats } from './muted_rules_stats_collector';
 import { getCspmCloudConnectorUsageStats } from './cspm_cloud_connector_usage_stats_collector';
 import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+
+/**
+ * Maximum number of telemetry collectors that may run concurrently.
+ *
+ * Running all ~9 collectors in full parallel (Promise.all) was causing significant
+ * memory spikes on Serverless because every collector fans out large aggregation
+ * queries and holds the response payloads in memory simultaneously.  A concurrency
+ * cap of 2 limits peak memory to roughly 2/9 of the fully-parallel case while
+ * still completing well within the daily task time-budget.
+ *
+ * If the number of collectors grows substantially in the future, consider lowering
+ * this value further or profiling the heaviest collectors and splitting them into a
+ * separate, lower-priority task.
+ */
+const COLLECTOR_CONCURRENCY_LIMIT = 2;
 
 export function registerCspmUsageCollector(
   logger: Logger,
@@ -64,6 +80,10 @@ export function registerCspmUsageCollector(
         INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
       ]);
 
+      // Run collectors with bounded concurrency to cap peak memory usage.
+      // See COLLECTOR_CONCURRENCY_LIMIT for rationale.
+      const limit = pLimit(COLLECTOR_CONCURRENCY_LIMIT);
+
       const [
         indicesStats,
         accountsStats,
@@ -75,23 +95,33 @@ export function registerCspmUsageCollector(
         mutedRulesStats,
         cspmCloudConnectorUsageStats,
       ] = await Promise.all([
-        awaitPromiseSafe('Indices', getIndicesStats(esClient, soClient, coreServices, logger)),
-        awaitPromiseSafe('Accounts', getAccountsStats(esClient, logger)),
-        awaitPromiseSafe('Resources', getResourcesStats(esClient, logger)),
-        awaitPromiseSafe('Rules', getRulesStats(esClient, logger)),
-        awaitPromiseSafe(
-          'Installation',
-          getInstallationStats(esClient, soClient, coreServices, logger)
+        limit(() =>
+          awaitPromiseSafe('Indices', getIndicesStats(esClient, soClient, coreServices, logger))
         ),
-        awaitPromiseSafe('Alerts', getAlertsStats(esClient, logger)),
-        awaitPromiseSafe(
-          'Cloud Accounts',
-          getAllCloudAccountsStats(esClient, encryptedSoClient, logger)
+        limit(() => awaitPromiseSafe('Accounts', getAccountsStats(esClient, logger))),
+        limit(() => awaitPromiseSafe('Resources', getResourcesStats(esClient, logger))),
+        limit(() => awaitPromiseSafe('Rules', getRulesStats(esClient, logger))),
+        limit(() =>
+          awaitPromiseSafe(
+            'Installation',
+            getInstallationStats(esClient, soClient, coreServices, logger)
+          )
         ),
-        awaitPromiseSafe('Muted Rules', getMutedRulesStats(soClient, encryptedSoClient, logger)),
-        awaitPromiseSafe(
-          'CSPM Cloud Connector Usage',
-          getCspmCloudConnectorUsageStats(soClient, coreServices, logger)
+        limit(() => awaitPromiseSafe('Alerts', getAlertsStats(esClient, logger))),
+        limit(() =>
+          awaitPromiseSafe(
+            'Cloud Accounts',
+            getAllCloudAccountsStats(esClient, encryptedSoClient, logger)
+          )
+        ),
+        limit(() =>
+          awaitPromiseSafe('Muted Rules', getMutedRulesStats(soClient, encryptedSoClient, logger))
+        ),
+        limit(() =>
+          awaitPromiseSafe(
+            'CSPM Cloud Connector Usage',
+            getCspmCloudConnectorUsageStats(soClient, coreServices, logger)
+          )
         ),
       ]);
       return {
