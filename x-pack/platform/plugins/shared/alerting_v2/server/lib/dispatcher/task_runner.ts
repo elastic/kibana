@@ -32,16 +32,17 @@ export class DispatcherTaskRunner {
 
   public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
     const isEnabled = await this.safeIsEnabled();
+    const previousState: DispatcherTaskState = taskInstance.state ?? {};
 
     if (!isEnabled) {
-      return { state: taskInstance.state };
+      return { state: previousState };
     }
 
-    const params = this.createDispatcherParams(taskInstance, abortController);
+    const params = this.createDispatcherParams(previousState, abortController);
 
     const result = await this.dispatcherService.run(params);
 
-    return this.buildRunResult(result);
+    return this.buildRunResult(result, previousState);
   }
 
   private async safeIsEnabled(): Promise<boolean> {
@@ -53,18 +54,32 @@ export class DispatcherTaskRunner {
   }
 
   private createDispatcherParams(
-    taskInstance: TaskRunParams['taskInstance'],
+    state: DispatcherTaskState,
     abortController: AbortController
   ): DispatcherExecutionParams {
-    const state: DispatcherTaskState = taskInstance.state;
-
     return {
       previousStartedAt: state.previousStartedAt ? new Date(state.previousStartedAt) : undefined,
+      eventWatermark: state.eventWatermark ? new Date(state.eventWatermark) : undefined,
       abortController,
     };
   }
 
-  private buildRunResult(result: DispatcherExecutionResult): RunResult {
-    return { state: { previousStartedAt: result.startedAt.toISOString() } };
+  private buildRunResult(
+    result: DispatcherExecutionResult,
+    previousState: DispatcherTaskState
+  ): RunResult {
+    // `previousStartedAt` always advances — it is wall-clock telemetry of the
+    // last tick, not a data-processing watermark.
+    //
+    // `eventWatermark` advances only when the dispatcher returned a
+    // `nextEventWatermark`. If the pipeline threw mid-run, the dispatcher
+    // rethrew and this method never executes, so the prior watermark stays
+    // in place and the failed window is re-read on the next tick.
+    const nextWatermark = result.nextEventWatermark ?? previousState.eventWatermark;
+    const nextState: DispatcherTaskState = {
+      previousStartedAt: result.startedAt.toISOString(),
+      ...(nextWatermark ? { eventWatermark: nextWatermark } : {}),
+    };
+    return { state: nextState };
   }
 }

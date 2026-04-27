@@ -36,15 +36,35 @@ export interface AlertEpisodeSuppression {
 
 export interface DispatcherExecutionParams {
   previousStartedAt?: Date;
+  /**
+   * Upper bound (exclusive after the first run) on `@timestamp` values
+   * already processed by `fetch_episodes`. Drives the per-tick query
+   * window together with `TICK_LOOKBACK_CAP_MINUTES` and
+   * `SETTLE_BUFFER_SECONDS`. When undefined, the dispatcher cold-starts
+   * from `now − LOOKBACK_WINDOW_MINUTES`.
+   */
+  eventWatermark?: Date;
   abortController?: AbortController;
 }
 
 export interface DispatcherExecutionResult {
   startedAt: Date;
+  /**
+   * Watermark to persist for the next tick. Set when the pipeline returned
+   * (i.e. completed or halted on a controlled `no_episodes` / `no_actions`
+   * reason); undefined when the pipeline was unable to bound a window.
+   * If the pipeline throws, `dispatcher.run` rethrows and `task_runner`
+   * never gets a result, so the watermark naturally stays unchanged.
+   */
+  nextEventWatermark?: string;
 }
 
 export interface DispatcherTaskState {
   previousStartedAt?: string;
+  eventWatermark?: string;
+  // Task Manager persists state as `Record<string, unknown>`; the index
+  // signature keeps assignment in both directions safe without per-call casts.
+  [key: string]: unknown;
 }
 
 export interface Rule {
@@ -120,6 +140,7 @@ export interface LastNotifiedInfo {
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly previousStartedAt: Date;
+  readonly eventWatermark?: Date;
 }
 
 export interface DispatcherPipelineState {
@@ -134,13 +155,29 @@ export interface DispatcherPipelineState {
   readonly groups?: ActionGroup[];
   readonly dispatch?: ActionGroup[];
   readonly throttled?: ActionGroup[];
+  /**
+   * Proposed watermark for the next tick. Written by `fetch_episodes`
+   * once it has bounded its query window; left unset when `fetch_episodes`
+   * elects not to query (e.g. settle buffer collapses the window).
+   */
+  readonly nextEventWatermark?: string;
 }
 
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
-  | { type: 'halt'; reason: DispatcherHaltReason };
+  | {
+      type: 'halt';
+      reason: DispatcherHaltReason;
+      /**
+       * Optional state update applied even though the step is halting.
+       * Used by `fetch_episodes` to publish `nextEventWatermark` when it
+       * successfully queried an empty window — the tick is "done" for
+       * that interval and the watermark must still advance.
+       */
+      data?: Partial<Omit<DispatcherPipelineState, 'input'>>;
+    };
 
 export interface DispatcherStep {
   readonly name: string;
