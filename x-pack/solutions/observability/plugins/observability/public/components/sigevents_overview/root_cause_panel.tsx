@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { InfoPanel } from './info_panel';
 import { RootCauseIllustration } from './root_cause_illustration';
+import { DevModePlaceholder } from './dev_mode_placeholder';
 
 const DEFAULT_ILLUSTRATION_SIZE = 48;
 
@@ -29,7 +30,7 @@ const DEFAULT_TITLE = i18n.translate('xpack.observability.sigeventsOverview.root
  * Use for technical tokens inside the root cause description
  * (identifiers, codes, IPs, pod names, protocols).
  */
-export const RootCauseCode = ({ children }: { children: React.ReactNode }) => {
+export function RootCauseCode({ children }: { children: React.ReactNode }) {
   const { euiTheme } = useEuiTheme();
   return (
     <span
@@ -41,9 +42,9 @@ export const RootCauseCode = ({ children }: { children: React.ReactNode }) => {
       {children}
     </span>
   );
-};
+}
 
-const DefaultDescription = () => {
+function DefaultDescription() {
   const { euiTheme } = useEuiTheme();
 
   const codeCss = css`
@@ -54,38 +55,67 @@ const DefaultDescription = () => {
   return (
     <p>
       {"The checkout service's "}
-      <span css={codeCss}>placeOrder</span> <span css={codeCss}>gRPC</span>
+      <span css={codeCss}>
+        {i18n.translate('xpack.observability.defaultDescription.span.placeorderLabel', {
+          defaultMessage: 'placeOrder',
+        })}
+      </span>{' '}
+      <span css={codeCss}>
+        {i18n.translate('xpack.observability.defaultDescription.span.grpcLabel', {
+          defaultMessage: 'gRPC',
+        })}
+      </span>
       {' call fails with '}
-      <span css={codeCss}>ECONNREFUSED</span>
+      <span css={codeCss}>
+        {i18n.translate('xpack.observability.defaultDescription.span.econnrefusedLabel', {
+          defaultMessage: 'ECONNREFUSED',
+        })}
+      </span>
       {' to '}
-      <span css={codeCss}>10.103.136.237:9999</span>
+      <span css={codeCss}>
+        {i18n.translate('xpack.observability.defaultDescription.span.Label', {
+          defaultMessage: '10.103.136.237:9999',
+        })}
+      </span>
       {
         ' — the payment service\'s upstream dependency remains unreachable. Confirmed by KI query "Payment processing failures" returning 5 rows at 09:08 UTC, all showing '
       }
-      <span css={codeCss}>gRPC code 13</span>
+      <span css={codeCss}>
+        {i18n.translate('xpack.observability.defaultDescription.span.grpcCodeLabel', {
+          defaultMessage: 'gRPC code 13',
+        })}
+      </span>
       {' INTERNAL with connection refused errors originating from the frontend pod ('}
-      <span css={codeCss}>frontend-68b84c4d76-g2ztb</span>
+      <span css={codeCss}>
+        {i18n.translate('xpack.observability.defaultDescription.span.frontendbcdgztbLabel', {
+          defaultMessage: 'frontend-68b84c4d76-g2ztb',
+        })}
+      </span>
       {
         ') via the checkout API route. The failure has persisted for 3.5+ hours since onset at ~05:30 UTC with intermittent recovery/resurgence cycles.'
       }
     </p>
   );
-};
+}
 
-export const RootCausePanel = ({
+export function RootCausePanel({
   title = DEFAULT_TITLE,
   children,
   illustrationSize = DEFAULT_ILLUSTRATION_SIZE,
-}: RootCausePanelProps) => {
+}: RootCausePanelProps) {
+  const hasPlaceholderData = !children;
+
   return (
-    <div data-test-subj="sigeventsOverviewRootCausePanel">
-      <InfoPanel
-        color="primary"
-        title={title}
-        titleIcon={<RootCauseIllustration size={illustrationSize} />}
-      >
-        <EuiText size="s">{children ?? <DefaultDescription />}</EuiText>
-      </InfoPanel>
-    </div>
+    <DevModePlaceholder hasPlaceholderData={hasPlaceholderData}>
+      <div data-test-subj="sigeventsOverviewRootCausePanel">
+        <InfoPanel
+          color="primary"
+          title={title}
+          titleIcon={<RootCauseIllustration size={illustrationSize} />}
+        >
+          <EuiText size="s">{children ?? <DefaultDescription />}</EuiText>
+        </InfoPanel>
+      </div>
+    </DevModePlaceholder>
   );
-};
+}

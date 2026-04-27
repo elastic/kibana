@@ -16,6 +16,7 @@ import type { ImpactedService } from './main_significant_event';
 import { ImpactedCard } from './impacted_card';
 import type { ImpactedCardProps } from './impacted_card';
 import { MetadataIconCard } from './metadata_icon_card';
+import { DevModePlaceholder } from './dev_mode_placeholder';
 
 export type SigEventSeverity = 'critical' | 'high' | 'medium' | 'low';
 
@@ -54,7 +55,7 @@ export interface SigeventsOverviewProps {
   onViewDetails?: () => void;
 }
 
-export const SigeventsOverview = ({
+export function SigeventsOverview({
   state = 'critical',
   blastRadiusScore,
   title,
@@ -69,7 +70,7 @@ export const SigeventsOverview = ({
   lastUpdatedLabel,
   onRemediate,
   onViewDetails,
-}: SigeventsOverviewProps) => {
+}: SigeventsOverviewProps) {
   const { euiTheme } = useEuiTheme();
 
   const containerCss = css`
@@ -152,6 +153,7 @@ export const SigeventsOverview = ({
   ];
 
   const resolvedHealthyMetrics = healthyMetrics ?? defaultHealthyMetrics;
+  const isUsingPlaceholderHealthyMetrics = !healthyMetrics;
 
   if (state === 'healthy') {
     return (
@@ -160,26 +162,28 @@ export const SigeventsOverview = ({
 
         <EuiSpacer size="l" />
 
-        <EuiFlexGroup
-          gutterSize="s"
-          responsive={true}
-          wrap
-          data-test-subj="sigeventsOverviewHealthyMetrics"
-        >
-          {resolvedHealthyMetrics.map(
-            ({ id, label, value, iconType, iconBackground, iconColor }) => (
-              <EuiFlexItem key={id} grow={1}>
-                <MetadataIconCard
-                  title={label}
-                  value={value}
-                  iconType={iconType}
-                  color={iconBackground}
-                  iconColor={iconColor}
-                />
-              </EuiFlexItem>
-            )
-          )}
-        </EuiFlexGroup>
+        <DevModePlaceholder hasPlaceholderData={isUsingPlaceholderHealthyMetrics}>
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={true}
+            wrap
+            data-test-subj="sigeventsOverviewHealthyMetrics"
+          >
+            {resolvedHealthyMetrics.map(
+              ({ id, label, value, iconType, iconBackground, iconColor }) => (
+                <EuiFlexItem key={id} grow={1}>
+                  <MetadataIconCard
+                    title={label}
+                    value={value}
+                    iconType={iconType}
+                    color={iconBackground}
+                    iconColor={iconColor}
+                  />
+                </EuiFlexItem>
+              )
+            )}
+          </EuiFlexGroup>
+        </DevModePlaceholder>
       </div>
     );
   }
@@ -236,4 +240,4 @@ export const SigeventsOverview = ({
       />
     </div>
   );
-};
+}
