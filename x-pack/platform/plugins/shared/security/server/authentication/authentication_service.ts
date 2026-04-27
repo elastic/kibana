@@ -19,7 +19,7 @@ import type {
   Logger,
   LoggerFactory,
 } from '@kbn/core/server';
-import type { APIKeysType } from '@kbn/core-security-server';
+import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
@@ -36,6 +36,7 @@ import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
+import { UiamOAuth } from './oauth';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { KIBANA_AUTH_FULL_HEADER, NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
@@ -90,6 +91,7 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'invalidateAsInternalUser'
     | 'uiam'
   >;
+  oauth: UiamOAuthType | null;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
@@ -408,6 +410,14 @@ export class AuthenticationService {
         })
       : null;
 
+    const uiamOAuth = uiam
+      ? new UiamOAuth({
+          logger: this.logger.get('oauth-uiam'),
+          license: this.license,
+          uiam,
+        })
+      : null;
+
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
      * to construct a server base URL (deprecated, used by the SAML provider only).
@@ -463,6 +473,18 @@ export class AuthenticationService {
             }
           : null,
       },
+
+      oauth: uiamOAuth
+        ? {
+            createClient: uiamOAuth.createClient.bind(uiamOAuth),
+            listClients: uiamOAuth.listClients.bind(uiamOAuth),
+            updateClient: uiamOAuth.updateClient.bind(uiamOAuth),
+            revokeClient: uiamOAuth.revokeClient.bind(uiamOAuth),
+            listConnections: uiamOAuth.listConnections.bind(uiamOAuth),
+            updateConnection: uiamOAuth.updateConnection.bind(uiamOAuth),
+            revokeConnection: uiamOAuth.revokeConnection.bind(uiamOAuth),
+          }
+        : null,
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
         const providerIdentifier =
