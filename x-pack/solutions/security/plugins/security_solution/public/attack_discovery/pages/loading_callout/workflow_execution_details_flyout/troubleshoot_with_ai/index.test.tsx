@@ -10,8 +10,6 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import { THREAT_HUNTING_AGENT_ID } from '../../../../../../common/constants';
-
 // Re-exported from @kbn/discoveries-plugin/common/constants
 const DIAGNOSTIC_REPORT_ATTACHMENT_TYPE = 'diagnostic_report';
 import { TestProviders } from '../../../../../common/mock';
@@ -455,7 +453,7 @@ describe('TroubleshootWithAi', () => {
       expect(mockOpenChat).not.toHaveBeenCalled();
     });
 
-    it('passes the correct agentId', async () => {
+    it('does not pass an agentId override to openChat (lets agent builder use its default)', async () => {
       render(
         <TestProviders>
           <TroubleshootWithAi {...defaultProps} />
@@ -465,8 +463,8 @@ describe('TroubleshootWithAi', () => {
       await userEvent.click(screen.getByTestId('troubleshootWithAiButton'));
 
       expect(mockOpenChat).toHaveBeenCalledWith(
-        expect.objectContaining({
-          agentId: THREAT_HUNTING_AGENT_ID,
+        expect.not.objectContaining({
+          agentId: expect.anything(),
         })
       );
     });
