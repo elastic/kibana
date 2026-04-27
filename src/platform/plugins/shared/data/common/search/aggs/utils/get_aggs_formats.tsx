@@ -8,12 +8,14 @@
  */
 
 /* eslint-disable max-classes-per-file */
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type {
   FieldFormatInstanceType,
   FieldFormatsContentType,
   IFieldFormat,
+  ReactContextTypeSingleConvert,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -150,46 +152,89 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'terms';
       static hidden = true;
 
+      private getSpecialBucketLabel(val: unknown): string | null {
+        const { otherBucketLabel, missingBucketLabel } = this._params;
+        if (val === '__other__' && otherBucketLabel) {
+          return `${otherBucketLabel}`;
+        }
+        if (val === MISSING_TOKEN && missingBucketLabel) {
+          return `${missingBucketLabel}`;
+        }
+        return null;
+      }
+
+      private getNestedFormat() {
+        return this.getCachedFormat(this._params as SerializedFieldFormat<{}, SerializableRecord>);
+      }
+
       convert = (val: string, type: FieldFormatsContentType) => {
-        const params = this._params;
-        const format = this.getCachedFormat(
-          params as SerializedFieldFormat<{}, SerializableRecord>
-        );
-
-        if (val === '__other__' && params.otherBucketLabel) {
-          return `${params.otherBucketLabel}`;
-        }
-        if (val === MISSING_TOKEN && params.missingBucketLabel) {
-          return `${params.missingBucketLabel}`;
-        }
-
-        return format.convert(val, type);
+        return this.getSpecialBucketLabel(val) ?? this.getNestedFormat().convert(val, type);
       };
+
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
+
+      reactConvertSingle: ReactContextTypeSingleConvert = (val, options) => {
+        return this.getSpecialBucketLabel(val) ?? this.getNestedFormat().reactConvert(val, options);
+      };
     },
     class AggsMultiTermsFieldFormat extends FieldFormatWithCache {
       static id = 'multi_terms';
       static hidden = true;
 
-      convert = (val: unknown, type: FieldFormatsContentType) => {
-        const params = this._params;
-        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
-          return this.getCachedFormat(fieldParams);
-        });
-
-        if (String(val) === '__other__' && params.otherBucketLabel) {
-          return `${params.otherBucketLabel}`;
+      private getSpecialBucketLabel(val: unknown): string | null {
+        const { otherBucketLabel } = this._params;
+        if (String(val) === '__other__' && otherBucketLabel) {
+          return `${otherBucketLabel}`;
         }
+        return null;
+      }
 
-        const joinTemplate = `${params.separator ?? ' › '}`;
+      private getNestedFormats() {
+        return (this._params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) =>
+          this.getCachedFormat(fieldParams)
+        );
+      }
+
+      private getSeparator(): string {
+        return String(this._params.separator ?? ' › ');
+      }
+
+      convert = (val: unknown, type: FieldFormatsContentType) => {
+        const otherLabel = this.getSpecialBucketLabel(val);
+        if (otherLabel) return otherLabel;
+
+        const keys = (val as unknown as MultiFieldKey)?.keys;
+        if (!keys) return '';
+
+        const formats = this.getNestedFormats();
+        return keys
+          .map((valPart, i) => formats[i].convert(valPart, type))
+          .join(this.getSeparator());
+      };
+
+      getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
+
+      reactConvertSingle: ReactContextTypeSingleConvert = (val, options) => {
+        const otherLabel = this.getSpecialBucketLabel(val);
+        if (otherLabel) return otherLabel;
+
+        const keys = (val as unknown as MultiFieldKey)?.keys;
+        if (!keys) return '';
+
+        const formats = this.getNestedFormats();
+        const separator = this.getSeparator();
 
         return (
-          (val as MultiFieldKey)?.keys
-            ?.map((valPart, i) => formats[i].convert(valPart, type))
-            .join(joinTemplate) ?? ''
+          <>
+            {keys.map((valPart, i) => (
+              <React.Fragment key={i}>
+                {i > 0 ? separator : null}
+                {formats[i].reactConvert(valPart, options)}
+              </React.Fragment>
+            ))}
+          </>
         );
       };
-      getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
     },
   ];
 }
