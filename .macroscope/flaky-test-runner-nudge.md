@@ -100,7 +100,7 @@ Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigge
 /flaky <type>:<path>:30 [<type>:<path>:30 ...]
 ```
 
-This check is experimental. Share your feedback in the #appex-qa channel.
+<sup>Share feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
 ````
 
 ### Rationale line

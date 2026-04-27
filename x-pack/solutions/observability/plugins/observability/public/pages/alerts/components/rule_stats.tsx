@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import type { RulesLocatorParams } from '@kbn/deeplinks-observability';
+import type { RulesLocatorParams } from '@kbn/rule-data-utils';
 
 export interface RuleStatsState {
   total: number;

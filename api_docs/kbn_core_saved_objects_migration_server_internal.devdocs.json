@@ -937,7 +937,7 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_for_unknown_docs.ts",
-        "lineNumber": 111,
+        "lineNumber": 117,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -953,7 +953,7 @@
               "CheckForUnknownDocsParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/check_for_unknown_docs.ts",
-            "lineNumber": 112,
+            "lineNumber": 118,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,

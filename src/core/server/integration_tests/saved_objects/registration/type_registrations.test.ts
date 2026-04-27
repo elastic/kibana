@@ -196,6 +196,9 @@ const previouslyRegisteredTypes = [
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
   'streams-significant-events-settings',
+  'alerting_notification_policy',
+  'alerting_api_key_pending_invalidation',
+  'alerting_rule',
 ].sort();
 
 describe('SO type registrations', () => {
@@ -210,7 +213,21 @@ describe('SO type registrations', () => {
   });
 
   it('does not remove types from registrations without updating excludeOnUpgradeQuery', async () => {
-    root = createRoot({}, { oss: false });
+    root = createRoot(
+      {
+        plugins: {
+          forceEnableAllPlugins: true,
+        },
+        node: {
+          roles: ['ui'],
+        },
+      },
+      {
+        oss: false,
+        // running in 'dev' mode prevents cloud-experiments plugin to fail due to missing config
+        dev: true,
+      }
+    );
     await root.preboot();
     const setup = await root.setup();
     const currentlyRegisteredTypes = setup.savedObjects
