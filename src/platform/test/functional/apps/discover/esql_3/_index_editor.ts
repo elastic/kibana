@@ -243,6 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await es.bulk({
         index: INDEX_NAME_EDITION,
+        refresh: 'wait_for',
         operations: [
           {
             index: { _id: '1' },
@@ -268,6 +269,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
         ],
       });
+
       await browser.refresh();
 
       // Type lookup join query
