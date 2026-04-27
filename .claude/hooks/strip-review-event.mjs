@@ -37,13 +37,20 @@ import { json } from 'node:stream/consumers';
  *   -f 'event=APPROVE'             (whole pair single-quoted)
  *   -f "event=APPROVE"             (whole pair double-quoted)
  *   --field=event='APPROVE'        (ditto with `=` separator)
+ *   -f "event=$(echo APPROVE)"     (shell expansion inside double quotes)
  *
- * Alternation order matters: the value-quoted branches are tried before
- * the unquoted `[^\s'"]*` branch so a zero-length empty match does not win
- * and leave the quoted value dangling in the rewritten command.
+ * Alternation order matters. The value-quoted branch is tried first so a
+ * fully-quoted value matches cleanly. The fallback branch keeps the outer
+ * quotes optional so it still bites on shapes the first branch cannot
+ * close — most importantly shell expansion inside double quotes
+ * (`event=$(echo APPROVE)`), where internal whitespace blocks the value
+ * from being captured as a single token. The fallback partial-strips up
+ * to the first whitespace and leaves an unmatched quote in the rewritten
+ * command; the shell errors before `gh` runs, so `event` never reaches
+ * the API.
  */
 const eventFlag =
-  /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))(?:event=(?:"[^"]*"|'[^']*'|[^\s'"]*)|['"]event=[^\s'"]*['"])/g;
+  /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))(?:event=(?:"[^"]*"|'[^']*')|['"]?event=[^\s'"]*['"]?)/g;
 
 /**
  * Captures the `--input` value (space- or `=`-separated, double-quoted,
