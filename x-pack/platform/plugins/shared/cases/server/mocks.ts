@@ -790,6 +790,9 @@ export const mockCasesContract = (): CasesServerStart => ({
       index: {
         enabled: true,
       },
+      views: {
+        enabled: false,
+      },
     },
     incrementalId: {
       enabled: true,

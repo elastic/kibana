@@ -31,6 +31,9 @@ describe('BackfillTaskRunner', () => {
     index: {
       enabled: true,
     },
+    views: {
+      enabled: false,
+    },
   };
 
   beforeEach(() => {
@@ -157,6 +160,9 @@ describe('BackfillTaskRunner', () => {
   describe('Analytics index disabled', () => {
     const analyticsConfigDisabled = {
       index: {
+        enabled: false,
+      },
+      views: {
         enabled: false,
       },
     };

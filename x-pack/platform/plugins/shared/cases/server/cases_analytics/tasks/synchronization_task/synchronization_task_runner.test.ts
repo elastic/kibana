@@ -58,6 +58,9 @@ describe('SynchronizationTaskRunner', () => {
     index: {
       enabled: true,
     },
+    views: {
+      enabled: false,
+    },
   };
 
   beforeEach(() => {
@@ -480,6 +483,9 @@ describe('SynchronizationTaskRunner', () => {
   describe('Analytics index disabled', () => {
     const analyticsConfigDisabled = {
       index: {
+        enabled: false,
+      },
+      views: {
         enabled: false,
       },
     };

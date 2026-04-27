@@ -35,10 +35,16 @@ describe('SchedulerTaskRunner', () => {
     index: {
       enabled: true,
     },
+    views: {
+      enabled: false,
+    },
   };
 
   const analyticsConfigDisabled = {
     index: {
+      enabled: false,
+    },
+    views: {
       enabled: false,
     },
   };

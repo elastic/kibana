@@ -21,6 +21,20 @@ export const ConfigSchema = schema.object({
         traditional: schema.boolean({ defaultValue: false }),
       }),
     }),
+    views: schema.object({
+      /**
+       * Gate for the ES|QL views path. When true AND the connected ES
+       * cluster exposes the `_query/view` REST API, plugin start switches
+       * the analytics surface from the reindex pipeline to three sets of
+       * cluster-state ES|QL views (one set per owner). Defaults to false
+       * because owner/space DLS is enforced by a parallel kibana-cases-
+       * security plugin change that has not yet shipped.
+       */
+      enabled: offeringBasedSchema({
+        serverless: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
   attachments: schema.object({
     enabled: schema.boolean({ defaultValue: false }),

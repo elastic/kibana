@@ -56,6 +56,11 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import {
+  startViewsPath,
+  type AnalyticsMode,
+  type ViewSyncService,
+} from './cases_analytics/views';
 import { registerCaseWorkflowSteps } from './workflows';
 import { initUiSettings } from './ui_settings';
 
@@ -82,6 +87,8 @@ export class CasePlugin
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
   private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
+  private analyticsMode: AnalyticsMode = 'indices';
+  private viewSyncService: ViewSyncService | null = null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -250,17 +257,34 @@ export class CasePlugin
           CASE_SAVED_OBJECT,
         ]);
         const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
-        scheduleCAISchedulerTask({
-          taskManager: plugins.taskManager,
-          logger: this.logger,
-        }).catch(() => {}); // it shouldn't reject, but just in case
-        createCasesAnalyticsIndexes({
+
+        // The views path supersedes the indices path when both the config
+        // flag and the ES probe agree. Otherwise we fall back to the
+        // legacy indices pipeline so older clusters and serverless keep
+        // their analytics surface.
+        void startViewsPath({
           esClient: core.elasticsearch.client.asInternalUser,
-          logger: this.logger,
-          isServerless: this.isServerless,
-          taskManager: plugins.taskManager,
           savedObjectsClient: internalSavedObjectsClient,
-        }).catch(() => {}); // it shouldn't reject, but just in case
+          logger: this.logger,
+          viewsConfigEnabled: this.caseConfig.analytics.views?.enabled === true,
+        }).then((result) => {
+          this.analyticsMode = result.mode;
+          this.viewSyncService = result.viewSyncService;
+
+          if (result.mode === 'indices') {
+            scheduleCAISchedulerTask({
+              taskManager: plugins.taskManager!,
+              logger: this.logger,
+            }).catch(() => {}); // it shouldn't reject, but just in case
+            createCasesAnalyticsIndexes({
+              esClient: core.elasticsearch.client.asInternalUser,
+              logger: this.logger,
+              isServerless: this.isServerless,
+              taskManager: plugins.taskManager!,
+              savedObjectsClient: internalSavedObjectsClient,
+            }).catch(() => {}); // it shouldn't reject, but just in case
+          }
+        });
       }
     }
 
@@ -322,8 +346,23 @@ export class CasePlugin
     };
   }
 
-  public stop() {
+  public async stop() {
     this.logger.debug(`Stopping Case Workflow`);
+    if (this.viewSyncService) {
+      await this.viewSyncService.stop();
+    }
+  }
+
+  /**
+   * Internal hooks for routes — exposes the analytics mode and view sync
+   * service so the status / legacy-cleanup routes can read them without
+   * reaching back into config detection logic. Used by `getInternalRoutes`.
+   */
+  public getAnalyticsMode(): AnalyticsMode {
+    return this.analyticsMode;
+  }
+  public getViewSyncService(): ViewSyncService | null {
+    return this.viewSyncService;
   }
 
   private createRouteHandlerContext = ({
