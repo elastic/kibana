@@ -1,5 +1,5 @@
 {
-  "sha1": "d6c8ebadd9b52cbb08f9c41ae6db3e4ff54b5b52",
+  "sha1": "39ba17ce7701002c5b471d6726c4adca2314b7d5",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -15,57 +15,65 @@
     {
       "id": "886ec55acce7b69-e0176e372fb48de",
       "title": "Attachments shows empty attachments prompt when navigating to attachments tab",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 140,
-        "column": 7
+        "line": 141,
+        "column": 9
       }
     },
     {
       "id": "886ec55acce7b69-17f1921df3c07a9",
       "title": "Attachments opens add attachment flyout and shows available attachments",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 147,
-        "column": 7
+        "line": 148,
+        "column": 9
       }
     },
     {
       "id": "886ec55acce7b69-78a107722ab10ab",
       "title": "Attachments adds and removes all attachments from the stream",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 162,
-        "column": 7
+        "line": 163,
+        "column": 9
       }
     },
     {
       "id": "886ec55acce7b69-7bcc2f437dac5d2",
       "title": "Attachments opens attachment details flyout and verifies information for each type",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 202,
-        "column": 7
+        "line": 203,
+        "column": 9
       }
     },
     {
@@ -3407,6 +3415,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
         "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "7ce2670a3e19b7c-af09f3b002dfd4f",
+      "title": "Query streams - Create query stream rejects invalid child query stream names inline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
+        "line": 119,
         "column": 7
       }
     },

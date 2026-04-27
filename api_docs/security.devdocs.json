@@ -6683,6 +6683,10 @@
               "path": "x-pack/platform/plugins/shared/cases/server/services/user_profiles/index.ts"
             },
             {
+              "plugin": "alertingVTwo",
+              "path": "x-pack/platform/plugins/shared/alerting_v2/server/routes/suggestions/suggest_user_profiles_route.ts"
+            },
+            {
               "plugin": "osquery",
               "path": "x-pack/platform/plugins/shared/osquery/server/lib/get_user_info.ts"
             },
