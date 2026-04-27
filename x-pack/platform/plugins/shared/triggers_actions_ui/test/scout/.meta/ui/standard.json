@@ -1,5 +1,5 @@
 {
-  "sha1": "77e40558333559e9a83368a7cb551c0cf9c2f393",
+  "sha1": "10a9ccdb8c1925b14d3e6d6ec5648867d949877a",
   "tests": [
     {
       "id": "8f6baf4aef167da-b456d708d2cf55e",
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
-        "line": 63,
+        "line": 65,
         "column": 7
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
-        "line": 120,
+        "line": 124,
         "column": 7
       }
     },
@@ -95,7 +95,77 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
-        "line": 132,
+        "line": 136,
+        "column": 7
+      }
+    },
+    {
+      "id": "4743bb59b7bc878-ff8cac6bb86c5ab",
+      "title": "Maintenance window create form creates a maintenance window with a custom recurring schedule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_create.spec.ts",
+        "line": 91,
+        "column": 7
+      }
+    },
+    {
+      "id": "4743bb59b7bc878-ce9f05d87274a3b",
+      "title": "Maintenance window create form shows a callout when filters toggle is on and scope query is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_create.spec.ts",
+        "line": 126,
+        "column": 7
+      }
+    },
+    {
+      "id": "b6898f62f9fd022-21bd727162c6236",
+      "title": "Maintenance window update form updates a maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_update.spec.ts",
+        "line": 124,
+        "column": 7
+      }
+    },
+    {
+      "id": "b6898f62f9fd022-902f94c166361e6",
+      "title": "Maintenance window update form shows the multiple-solutions callout when editing a MW with legacy multi-category state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_update.spec.ts",
+        "line": 161,
+        "column": 7
+      }
+    },
+    {
+      "id": "b6898f62f9fd022-61a8583b57114af",
+      "title": "Maintenance window update form keeps the callout visible and submits when editing a MW that already has a scope query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_update.spec.ts",
+        "line": 192,
         "column": 7
       }
     },
