@@ -73,6 +73,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/css-utils'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
