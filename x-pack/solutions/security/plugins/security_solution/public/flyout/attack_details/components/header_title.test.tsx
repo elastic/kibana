@@ -254,4 +254,21 @@ describe('HeaderTitle', () => {
     expect(screen.queryByTestId(HEADER_TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
     expect(screen.getByTestId('flyout-title')).toHaveAttribute('data-is-link', 'false');
   });
+
+  it('does not show a schedule link when attack data is unavailable', () => {
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      attack: null,
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
+
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId(HEADER_TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.getByTestId('flyout-title')).toHaveAttribute('data-is-link', 'false');
+  });
 });
