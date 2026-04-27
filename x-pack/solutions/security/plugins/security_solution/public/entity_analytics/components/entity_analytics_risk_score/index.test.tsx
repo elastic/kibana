@@ -15,6 +15,8 @@ import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
+import { useEntityStoreRiskScore } from '../../api/hooks/use_entity_store_risk_score';
+import { useEntityStoreRiskScoreKpi } from '../../api/hooks/use_entity_store_risk_score_kpi';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { capitalize } from 'lodash/fp';
@@ -62,8 +64,12 @@ const defaultProps = {
 };
 const mockUseRiskScore = useRiskScore as jest.Mock;
 const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
+const mockUseEntityStoreRiskScore = useEntityStoreRiskScore as jest.Mock;
+const mockUseEntityStoreRiskScoreKpi = useEntityStoreRiskScoreKpi as jest.Mock;
 jest.mock('../../api/hooks/use_risk_score');
 jest.mock('../../api/hooks/use_risk_score_kpi');
+jest.mock('../../api/hooks/use_entity_store_risk_score');
+jest.mock('../../api/hooks/use_entity_store_risk_score_kpi');
 
 const mockOpenAlertsPageWithFilters = jest.fn();
 jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
@@ -86,8 +92,17 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
       mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,
         loading: false,
+        refetch: jest.fn(),
+        inspect: { dsl: [], response: [] },
       });
       mockUseRiskScore.mockReturnValue(defaultProps);
+      mockUseEntityStoreRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+        refetch: jest.fn(),
+        inspect: { dsl: [], response: [] },
+      });
+      mockUseEntityStoreRiskScore.mockReturnValue(defaultProps);
     });
 
     it('renders enable button when module is disable', () => {

@@ -136,7 +136,7 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
       createToolCallMessage({ toolCallId, toolName: error.meta.toolName, args: callArgs }),
       createToolResultMessage({
         toolCallId,
-        content: `ERROR: called a tool which was not available - ${error.message}`,
+        content: `ERROR: tool_not_found - called a tool which was not available: ${error.message}`,
       }),
     ];
   }
@@ -150,7 +150,7 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
       createToolCallMessage({ toolCallId, toolName: error.meta.toolName, args: callArgs }),
       createToolResultMessage({
         toolCallId,
-        content: `ERROR: called a tool which was not available - ${error.meta.validationError} ${error.message}`,
+        content: `ERROR: tool_validation_error - called a tool with invalid parameters - ${error.meta.validationError} ${error.message}`,
       }),
     ];
   }

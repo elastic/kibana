@@ -23,11 +23,12 @@ export const estimateBucketSpanSchema = schema.object({
         schema.literal(ES_AGGREGATION.PERCENTILES),
         schema.literal(ES_AGGREGATION.CARDINALITY),
       ])
-    )
+    ),
+    { maxSize: 10000 }
   ),
   duration: schema.object({ start: schema.number(), end: schema.number() }),
-  fields: schema.arrayOf(schema.nullable(schema.string())),
-  filters: schema.maybe(schema.arrayOf(schema.any())),
+  fields: schema.arrayOf(schema.nullable(schema.string()), { maxSize: 10000 }),
+  filters: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 10000 })),
   index: schema.string(),
   query: schema.any(),
   splitField: schema.maybe(schema.string()),

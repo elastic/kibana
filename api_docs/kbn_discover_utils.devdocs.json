@@ -1643,19 +1643,11 @@
           " | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-        "lineNumber": 22,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
-          {
-            "plugin": "unifiedDocViewer",
-            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/field_row.ts"
-          },
-          {
-            "plugin": "unifiedDocViewer",
-            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/field_row.ts"
-          },
           {
             "plugin": "discover",
             "path": "src/platform/plugins/shared/discover/public/components/data_types/logs/service_name_cell.tsx"
@@ -1703,7 +1695,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 40,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1728,7 +1720,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 41,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1753,7 +1745,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 42,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1779,7 +1771,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 43,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1805,7 +1797,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 44,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1831,7 +1823,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 45,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1865,7 +1857,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 46,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1892,7 +1884,7 @@
           ") => React.ReactNode"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-        "lineNumber": 82,
+        "lineNumber": 100,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1908,7 +1900,7 @@
               "FormatFieldValueReactParams"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
-            "lineNumber": 82,
+            "lineNumber": 100,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
@@ -1917,6 +1909,49 @@
         ],
         "returnComment": [
           "A ReactNode that can be rendered directly"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.formatFieldValueText",
+        "type": "Function",
+        "tags": [],
+        "label": "formatFieldValueText",
+        "description": [
+          "\nText equivalent of formatFieldValueReact. Returns a plain text string without HTML tags.\nUse this when you need string values for further processing (e.g., in LogDocumentOverview).\n\nNote: Unlike formatFieldValueReact, this does not accept `hit` because text formatters\ndo not apply highlighting (highlighting requires HTML/React markup).\n"
+        ],
+        "signature": [
+          "({ value, fieldFormats, dataView, field, options, }: ",
+          "FormatFieldValueTextParams",
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
+        "lineNumber": 122,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatFieldValueText.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  value,\n  fieldFormats,\n  dataView,\n  field,\n  options,\n}",
+            "description": [],
+            "signature": [
+              "FormatFieldValueTextParams"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_value.ts",
+            "lineNumber": 122,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A plain text string"
         ],
         "initialIsOpen": false
       },
@@ -2757,7 +2792,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
-        "lineNumber": 86,
+        "lineNumber": 76,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2779,7 +2814,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
-            "lineNumber": 86,
+            "lineNumber": 76,
             "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
@@ -4009,149 +4044,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.getTraceDocumentOverview",
-        "type": "Function",
-        "tags": [],
-        "label": "getTraceDocumentOverview",
-        "description": [],
-        "signature": [
-          "(doc: ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.DataTableRecord",
-            "text": "DataTableRecord"
-          },
-          ", { dataView, fieldFormats }: { dataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "; fieldFormats: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "public",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-public.FieldFormatsStart",
-            "text": "FieldFormatsStart"
-          },
-          "; }) => ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TraceDocumentOverview",
-            "text": "TraceDocumentOverview"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
-        "lineNumber": 79,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.getTraceDocumentOverview.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "doc",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
-            "lineNumber": 80,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.getTraceDocumentOverview.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "{ dataView, fieldFormats }",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
-            "lineNumber": 81,
-            "columnNumber": 31,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.getTraceDocumentOverview.$2.dataView",
-                "type": "Object",
-                "tags": [],
-                "label": "dataView",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
-                "lineNumber": 81,
-                "columnNumber": 33,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.getTraceDocumentOverview.$2.fieldFormats",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "fieldFormats",
-                "description": [],
-                "signature": [
-                  "Omit<",
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatsRegistry",
-                    "text": "FieldFormatsRegistry"
-                  },
-                  ", \"register\" | \"init\"> & { deserialize: ",
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FormatFactory",
-                    "text": "FormatFactory"
-                  },
-                  "; }"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
-                "lineNumber": 81,
-                "columnNumber": 53,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],
@@ -6447,120 +6339,6 @@
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "lineNumber": 155,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TraceDocumentOverview",
-        "type": "Interface",
-        "tags": [],
-        "label": "TraceDocumentOverview",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TraceDocumentOverview",
-            "text": "TraceDocumentOverview"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TraceFields",
-            "text": "TraceFields"
-          },
-          ",Partial<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.ServiceFields",
-            "text": "ServiceFields"
-          },
-          ">,Partial<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.SpanFields",
-            "text": "SpanFields"
-          },
-          ">,Partial<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.UserAgentFields",
-            "text": "UserAgentFields"
-          },
-          ">,Partial<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TransactionFields",
-            "text": "TransactionFields"
-          },
-          ">"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-        "lineNumber": 196,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TraceDocumentOverview.duration",
-            "type": "number",
-            "tags": [],
-            "label": "duration",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 202,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TraceDocumentOverview.kind",
-            "type": "string",
-            "tags": [],
-            "label": "kind",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 203,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TraceDocumentOverview.resource.attributes.telemetry.sdk.language",
-            "type": "string",
-            "tags": [],
-            "label": "'resource.attributes.telemetry.sdk.language'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

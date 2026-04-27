@@ -382,7 +382,7 @@
                 "label": "protocol",
                 "description": [],
                 "signature": [
-                  "\"http\" | \"grpc\" | \"proto\""
+                  "\"http\" | \"proto\" | \"grpc\""
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
                 "lineNumber": 19,
