@@ -99,6 +99,7 @@ toc:
           - file: connectors-kibana/sharepoint-server-action-type.md
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/slack-v2-action-type.md
+          - file: connectors-kibana/snowflake-action-type.md
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
