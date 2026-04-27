@@ -97,122 +97,131 @@ const sortingSchema = schema.oneOf(
   }
 );
 
-const datatableStateSharedOptionsSchema = {
-  /**
-   * Density  configuration
-   */
-  density: schema.maybe(
-    schema.object(
-      {
-        /**
-         * Density mode
-         */
-        mode: schema.maybe(
-          schema.oneOf(
-            [schema.literal('compact'), schema.literal('default'), schema.literal('expanded')],
-            {
-              defaultValue: 'default',
-              meta: { description: 'Density mode' },
-            }
-          )
-        ),
-        /**
-         * Height configuration
-         */
-        height: schema.maybe(
-          schema.object({
-            header: schema.maybe(
-              schema.oneOf(
-                [
-                  schema.object({ type: schema.literal('auto') }),
-                  schema.object({
-                    type: schema.literal('custom'),
-                    max_lines: schema.number({
-                      defaultValue: DEFAULT_HEADER_ROW_HEIGHT_LINES,
-                      min: 1,
-                      max: 5,
+const datatableStylingSchema = schema.object(
+  {
+    /**
+     * Density  configuration
+     */
+    density: schema.maybe(
+      schema.object(
+        {
+          /**
+           * Density mode
+           */
+          mode: schema.maybe(
+            schema.oneOf(
+              [schema.literal('compact'), schema.literal('default'), schema.literal('expanded')],
+              {
+                defaultValue: 'default',
+                meta: { description: 'Density mode' },
+              }
+            )
+          ),
+          /**
+           * Height configuration
+           */
+          height: schema.maybe(
+            schema.object({
+              header: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.object({ type: schema.literal('auto') }),
+                    schema.object({
+                      type: schema.literal('custom'),
+                      max_lines: schema.number({
+                        defaultValue: DEFAULT_HEADER_ROW_HEIGHT_LINES,
+                        min: 1,
+                        max: 5,
+                      }),
                     }),
-                  }),
-                ],
-                {
-                  meta: {
-                    description: 'Maximum number of lines to use before header is truncated',
-                  },
-                }
-              )
-            ),
-            value: schema.maybe(
-              schema.oneOf(
-                [
-                  schema.object({ type: schema.literal('auto') }),
-                  schema.object({
-                    type: schema.literal('custom'),
-                    lines: schema.number({
-                      defaultValue: DEFAULT_ROW_HEIGHT_LINES,
-                      min: 1,
-                      max: 20,
+                  ],
+                  {
+                    meta: {
+                      description: 'Maximum number of lines to use before header is truncated',
+                    },
+                  }
+                )
+              ),
+              value: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.object({ type: schema.literal('auto') }),
+                    schema.object({
+                      type: schema.literal('custom'),
+                      lines: schema.number({
+                        defaultValue: DEFAULT_ROW_HEIGHT_LINES,
+                        min: 1,
+                        max: 20,
+                      }),
                     }),
-                  }),
-                ],
-                {
-                  meta: {
-                    description: 'Number of lines to display per table body cell',
-                  },
-                }
-              )
-            ),
-          })
-        ),
-      },
-      {
-        meta: {
-          id: 'datatableDensity',
-          description: 'Density configuration for the datatable',
+                  ],
+                  {
+                    meta: {
+                      description: 'Number of lines to display per table body cell',
+                    },
+                  }
+                )
+              ),
+            })
+          ),
         },
-      }
-    )
-  ),
-  /**
-   * Paging configuration
-   */
-  paging: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal(10),
-        schema.literal(20),
-        schema.literal(30),
-        schema.literal(50),
-        schema.literal(100),
-      ],
-      {
-        meta: {
-          description: 'Enables pagination and sets the number of rows to display per page',
+        {
+          meta: {
+            id: 'datatableDensity',
+            description: 'Density configuration for the datatable',
+          },
+        }
+      )
+    ),
+    /**
+     * Paging configuration
+     */
+    paging: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal(10),
+          schema.literal(20),
+          schema.literal(30),
+          schema.literal(50),
+          schema.literal(100),
+        ],
+        {
+          meta: {
+            description: 'Enables pagination and sets the number of rows to display per page',
+          },
+        }
+      )
+    ),
+    /**
+     * Sorting configuration
+     */
+    sort_by: schema.maybe(sortingSchema),
+    /**
+     * Show row numbers
+     */
+    row_numbers: schema.maybe(
+      schema.object(
+        {
+          visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
         },
-      }
-    )
-  ),
-  /**
-   * Sorting configuration
-   */
-  sort_by: schema.maybe(sortingSchema),
-  /**
-   * Show row numbers
-   */
-  row_numbers: schema.maybe(
-    schema.object(
-      {
-        visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
-      },
-      {
-        meta: {
-          description: 'Configuration for row numbers',
-        },
-      }
-    )
-  ),
-};
+        {
+          meta: {
+            description: 'Configuration for row numbers',
+          },
+        }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'datatableStyling',
+      title: 'Datatable styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
-const datatableStateCommonOptionsSchema = {
+const datatableConfigCommonOptionsSchema = {
   /**
    * Where to apply the color (background, value or badge)
    */
@@ -232,8 +241,8 @@ const datatableStateCommonOptionsSchema = {
   ),
 };
 
-const datatableStateRowsOptionsNoESQLSchema = {
-  ...datatableStateCommonOptionsSchema,
+const datatableConfigRowsOptionsNoESQLSchema = {
+  ...datatableConfigCommonOptionsSchema,
   /**
    * Alignment of the rows
    */
@@ -268,8 +277,8 @@ const datatableStateRowsOptionsNoESQLSchema = {
   collapse_by: schema.maybe(collapseBySchema),
 };
 
-const datatableStateRowsOptionsESQLSchema = {
-  ...datatableStateRowsOptionsNoESQLSchema,
+const datatableConfigRowsOptionsESQLSchema = {
+  ...datatableConfigRowsOptionsNoESQLSchema,
   /**
    * Color configuration
    */
@@ -284,8 +293,8 @@ const datatableStateRowsOptionsESQLSchema = {
   ),
 };
 
-const datatableStateMetricsOptionsSchema = {
-  ...datatableStateCommonOptionsSchema,
+const datatableConfigMetricsOptionsSchema = {
+  ...datatableConfigCommonOptionsSchema,
   /**
    * Color configuration
    */
@@ -334,10 +343,12 @@ interface SortByValidationInput {
   metrics?: Array<{}>;
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
-  sort_by?: {
-    column_type: 'metric' | 'row' | 'pivoted_metric';
-    index?: number;
-    values?: string[];
+  styling?: {
+    sort_by?: {
+      column_type: 'metric' | 'row' | 'pivoted_metric';
+      index?: number;
+      values?: string[];
+    };
   };
 }
 
@@ -345,13 +356,13 @@ function validateSortBy({
   metrics,
   rows,
   split_metrics_by,
-  sort_by,
+  styling,
 }: SortByValidationInput): string | undefined {
-  if (!sort_by) {
+  if (!styling?.sort_by) {
     return;
   }
 
-  const { column_type, index, values } = sort_by;
+  const { column_type, index, values } = styling.sort_by;
 
   const numberOfMetrics = metrics?.length ?? 0;
 
@@ -386,19 +397,19 @@ function validateSortBy({
   }
 }
 
-export const datatableStateSchemaNoESQL = schema.object(
+export const datatableConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    ...datatableStateSharedOptionsSchema,
+    styling: schema.maybe(datatableStylingSchema),
     /**
      * Metric columns configuration, must define operation.
      */
     metrics: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableStateMetricsOptionsSchema),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(datatableConfigMetricsOptionsSchema),
       {
         minSize: 1,
         maxSize: 1000,
@@ -410,7 +421,7 @@ export const datatableStateSchemaNoESQL = schema.object(
      */
     rows: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(datatableStateRowsOptionsNoESQLSchema),
+        mergeAllBucketsWithChartDimensionSchema(datatableConfigRowsOptionsNoESQLSchema),
         {
           minSize: 1,
           maxSize: 50,
@@ -439,19 +450,19 @@ export const datatableStateSchemaNoESQL = schema.object(
   }
 );
 
-export const datatableStateSchemaESQL = schema.object(
+export const datatableConfigSchemaESQL = schema.object(
   {
     type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    ...datatableStateSharedOptionsSchema,
+    styling: schema.maybe(datatableStylingSchema),
     /**
      * Metric columns configuration, must define operation.
      */
     metrics: schema.maybe(
       schema.arrayOf(
-        esqlColumnWithFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+        esqlColumnWithFormatSchema.extends(datatableConfigMetricsOptionsSchema, {
           meta: { id: 'datatableESQLMetric', title: 'Datatable Metric (ES|QL)' },
         }),
         {
@@ -465,7 +476,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(esqlColumnWithFormatSchema.extends(datatableStateRowsOptionsESQLSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(datatableConfigRowsOptionsESQLSchema), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
@@ -503,8 +514,8 @@ export const datatableStateSchemaESQL = schema.object(
   }
 );
 
-export const datatableStateSchema = objectUnion(
-  [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
+export const datatableConfigSchema = objectUnion(
+  [datatableConfigSchemaNoESQL, datatableConfigSchemaESQL],
   {
     meta: {
       id: 'datatableChart',
@@ -514,6 +525,6 @@ export const datatableStateSchema = objectUnion(
   }
 );
 
-export type DatatableState = TypeOf<typeof datatableStateSchema>;
-export type DatatableStateNoESQL = TypeOf<typeof datatableStateSchemaNoESQL>;
-export type DatatableStateESQL = TypeOf<typeof datatableStateSchemaESQL>;
+export type DatatableConfig = TypeOf<typeof datatableConfigSchema>;
+export type DatatableConfigNoESQL = TypeOf<typeof datatableConfigSchemaNoESQL>;
+export type DatatableConfigESQL = TypeOf<typeof datatableConfigSchemaESQL>;

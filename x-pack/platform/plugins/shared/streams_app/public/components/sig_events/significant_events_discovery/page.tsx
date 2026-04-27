@@ -15,8 +15,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useIsMutating } from '@kbn/react-query';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppBreadcrumbs } from '../../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -25,7 +27,11 @@ import { useUnbackedQueriesCount } from '../../../hooks/sig_events/use_unbacked_
 import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { FeaturesTable } from './components/features_table/features_table';
+import {
+  KnowledgeIndicatorsTable,
+  KiGenerationProvider,
+} from './components/knowledge_indicators_table';
+import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
@@ -52,12 +58,26 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsAppParams('/_discovery/{tab}');
 
   const router = useStreamsAppRouter();
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
 
   const {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
   const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
+
+  const onTaskFailed = useCallback(
+    (error: string) => {
+      toasts.addError(getFormattedError(new Error(error)), {
+        title: ONBOARDING_FAILURE_TITLE,
+      });
+    },
+    [toasts]
+  );
 
   const { isMemoryEnabled, isLoading: isSettingsLoading } = useDiscoverySettings();
   const isPromotingQueries = useIsMutating({ mutationKey: ['promoteAll'] }) > 0;
@@ -88,6 +108,11 @@ export function SignificantEventsDiscoveryPage() {
         label: i18n.translate('xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTab', {
           defaultMessage: 'Knowledge Indicators',
         }),
+        append: isPromotingQueries ? (
+          <EuiLoadingSpinner />
+        ) : unbackedQueriesCount > 0 ? (
+          <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
+        ) : undefined,
         href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
         isSelected: tab === 'knowledge_indicators',
       },
@@ -96,11 +121,6 @@ export function SignificantEventsDiscoveryPage() {
         label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
           defaultMessage: 'Rules',
         }),
-        append: isPromotingQueries ? (
-          <EuiLoadingSpinner />
-        ) : unbackedQueriesCount > 0 ? (
-          <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
-        ) : undefined,
         href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
         isSelected: tab === 'queries',
       },
@@ -182,14 +202,16 @@ export function SignificantEventsDiscoveryPage() {
         }
         tabs={tabs}
       />
-      <StreamsAppPageTemplate.Body grow>
-        {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
-        {tab === 'knowledge_indicators' && <FeaturesTable />}
-        {tab === 'queries' && <QueriesTable />}
-        {tab === 'significant_events' && <InsightsTab />}
-        {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
-        {tab === 'settings' && <SettingsTab />}
-      </StreamsAppPageTemplate.Body>
+      <KiGenerationProvider onTaskCompleted={refetch} onTaskFailed={onTaskFailed}>
+        <StreamsAppPageTemplate.Body grow>
+          {tab === 'streams' && <StreamsView />}
+          {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
+          {tab === 'queries' && <QueriesTable />}
+          {tab === 'significant_events' && <InsightsTab />}
+          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
+          {tab === 'settings' && <SettingsTab />}
+        </StreamsAppPageTemplate.Body>
+      </KiGenerationProvider>
     </>
   );
 }

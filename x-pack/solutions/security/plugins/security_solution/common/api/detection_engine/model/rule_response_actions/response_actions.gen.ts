@@ -14,167 +14,189 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ResponseActionTypes = lazySchema(() => z.enum(['.osquery', '.endpoint']));
 export type ResponseActionTypes = z.infer<typeof ResponseActionTypes>;
-export const ResponseActionTypes = z.enum(['.osquery', '.endpoint']);
 export type ResponseActionTypesEnum = typeof ResponseActionTypes.enum;
 export const ResponseActionTypesEnum = ResponseActionTypes.enum;
 
 /**
  * Map Osquery results columns or static values to Elastic Common Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field": "pid"}}
  */
+export const EcsMapping = lazySchema(() =>
+  z.object({}).catchall(
+    z.object({
+      field: z.string().optional(),
+      value: z.union([z.string(), z.array(z.string())]).optional(),
+    })
+  )
+);
 export type EcsMapping = z.infer<typeof EcsMapping>;
-export const EcsMapping = z.object({}).catchall(
+
+export const OsqueryQuery = lazySchema(() =>
   z.object({
-    field: z.string().optional(),
-    value: z.union([z.string(), z.array(z.string())]).optional(),
+    /**
+     * Query ID
+     */
+    id: z.string(),
+    /**
+     * Query to run
+     */
+    query: z.string(),
+    ecs_mapping: EcsMapping.optional(),
+    /**
+     * Query version
+     */
+    version: z.string().optional(),
+    platform: z.string().optional(),
+    removed: z.boolean().optional(),
+    snapshot: z.boolean().optional(),
   })
 );
-
 export type OsqueryQuery = z.infer<typeof OsqueryQuery>;
-export const OsqueryQuery = z.object({
-  /**
-   * Query ID
-   */
-  id: z.string(),
-  /**
-   * Query to run
-   */
-  query: z.string(),
-  ecs_mapping: EcsMapping.optional(),
-  /**
-   * Query version
-   */
-  version: z.string().optional(),
-  platform: z.string().optional(),
-  removed: z.boolean().optional(),
-  snapshot: z.boolean().optional(),
-});
 
+export const OsqueryParams = lazySchema(() =>
+  z.object({
+    /**
+     * To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"
+     */
+    query: z.string().optional(),
+    ecs_mapping: EcsMapping.optional(),
+    queries: z.array(OsqueryQuery).optional(),
+    /**
+     * To specify a query pack, use the packId field. Example: "packId": "processes_elastic"
+     */
+    pack_id: z.string().optional(),
+    /**
+     * To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"
+     */
+    saved_query_id: z.string().optional(),
+    /**
+     * A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: "timeout": 120.
+     */
+    timeout: z.number().optional(),
+  })
+);
 export type OsqueryParams = z.infer<typeof OsqueryParams>;
-export const OsqueryParams = z.object({
-  /**
-   * To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"
-   */
-  query: z.string().optional(),
-  ecs_mapping: EcsMapping.optional(),
-  queries: z.array(OsqueryQuery).optional(),
-  /**
-   * To specify a query pack, use the packId field. Example: "packId": "processes_elastic"
-   */
-  pack_id: z.string().optional(),
-  /**
-   * To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"
-   */
-  saved_query_id: z.string().optional(),
-  /**
-   * A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: "timeout": 120.
-   */
-  timeout: z.number().optional(),
-});
 
+export const OsqueryParamsCamelCase = lazySchema(() =>
+  z.object({
+    query: z.string().optional(),
+    ecsMapping: EcsMapping.optional(),
+    queries: z.array(OsqueryQuery).optional(),
+    packId: z.string().optional(),
+    savedQueryId: z.string().optional(),
+    timeout: z.number().optional(),
+  })
+);
 export type OsqueryParamsCamelCase = z.infer<typeof OsqueryParamsCamelCase>;
-export const OsqueryParamsCamelCase = z.object({
-  query: z.string().optional(),
-  ecsMapping: EcsMapping.optional(),
-  queries: z.array(OsqueryQuery).optional(),
-  packId: z.string().optional(),
-  savedQueryId: z.string().optional(),
-  timeout: z.number().optional(),
-});
 
+export const OsqueryResponseAction = lazySchema(() =>
+  z.object({
+    action_type_id: z.literal('.osquery'),
+    params: OsqueryParams,
+  })
+);
 export type OsqueryResponseAction = z.infer<typeof OsqueryResponseAction>;
-export const OsqueryResponseAction = z.object({
-  action_type_id: z.literal('.osquery'),
-  params: OsqueryParams,
-});
 
+export const RuleResponseOsqueryAction = lazySchema(() =>
+  z.object({
+    actionTypeId: z.literal('.osquery'),
+    params: OsqueryParamsCamelCase,
+  })
+);
 export type RuleResponseOsqueryAction = z.infer<typeof RuleResponseOsqueryAction>;
-export const RuleResponseOsqueryAction = z.object({
-  actionTypeId: z.literal('.osquery'),
-  params: OsqueryParamsCamelCase,
-});
 
+export const DefaultParams = lazySchema(() =>
+  z.object({
+    command: z.literal('isolate'),
+    comment: z.string().optional(),
+  })
+);
 export type DefaultParams = z.infer<typeof DefaultParams>;
-export const DefaultParams = z.object({
-  command: z.literal('isolate'),
-  comment: z.string().optional(),
-});
 
+export const RunScriptOsConfigValues = lazySchema(() =>
+  z.object({
+    scriptId: z.string().optional(),
+    scriptInput: z.string().optional(),
+    /**
+     * Specify the timeout in seconds for the script execution
+     */
+    timeout: z.number().int().optional(),
+  })
+);
 export type RunScriptOsConfigValues = z.infer<typeof RunScriptOsConfigValues>;
-export const RunScriptOsConfigValues = z.object({
-  scriptId: z.string().optional(),
-  scriptInput: z.string().optional(),
-  /**
-   * Specify the timeout in seconds for the script execution
-   */
-  timeout: z.number().int().optional(),
-});
 
 /**
   * > warn
 > This functionality is currently not available
 
   */
+export const RunscriptParams = lazySchema(() =>
+  z.object({
+    command: z.literal('runscript'),
+    /**
+     * Add a note that explains or describes the action. You can find your comment in the response actions history log
+     */
+    comment: z.string().optional(),
+    config: z
+      .object({
+        linux: RunScriptOsConfigValues.optional(),
+        macos: RunScriptOsConfigValues.optional(),
+        windows: RunScriptOsConfigValues.optional(),
+      })
+      .optional(),
+  })
+);
 export type RunscriptParams = z.infer<typeof RunscriptParams>;
-export const RunscriptParams = z.object({
-  command: z.literal('runscript'),
-  /**
-   * Add a note that explains or describes the action. You can find your comment in the response actions history log
-   */
-  comment: z.string().optional(),
-  config: z
-    .object({
-      linux: RunScriptOsConfigValues.optional(),
-      macos: RunScriptOsConfigValues.optional(),
-      windows: RunScriptOsConfigValues.optional(),
-    })
-    .optional(),
-});
 
+export const ProcessesParams = lazySchema(() =>
+  z.object({
+    /**
+     * To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"
+     */
+    command: z.enum(['kill-process', 'suspend-process']),
+    /**
+     * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"
+     */
+    comment: z.string().optional(),
+    config: z.object({
+      /**
+       * Field to use instead of process.pid
+       */
+      field: z.string(),
+      /**
+       * Whether to overwrite field with process.pid
+       */
+      overwrite: z.boolean().optional().default(true),
+    }),
+  })
+);
 export type ProcessesParams = z.infer<typeof ProcessesParams>;
-export const ProcessesParams = z.object({
-  /**
-   * To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"
-   */
-  command: z.enum(['kill-process', 'suspend-process']),
-  /**
-   * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"
-   */
-  comment: z.string().optional(),
-  config: z.object({
-    /**
-     * Field to use instead of process.pid
-     */
-    field: z.string(),
-    /**
-     * Whether to overwrite field with process.pid
-     */
-    overwrite: z.boolean().optional().default(true),
-  }),
-});
 
+export const EndpointResponseAction = lazySchema(() =>
+  z.object({
+    action_type_id: z.literal('.endpoint'),
+    params: z.union([DefaultParams, ProcessesParams, RunscriptParams]),
+  })
+);
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
-export const EndpointResponseAction = z.object({
-  action_type_id: z.literal('.endpoint'),
-  params: z.union([DefaultParams, ProcessesParams, RunscriptParams]),
-});
 
+export const RuleResponseEndpointAction = lazySchema(() =>
+  z.object({
+    actionTypeId: z.literal('.endpoint'),
+    params: z.union([DefaultParams, ProcessesParams, RunscriptParams]),
+  })
+);
 export type RuleResponseEndpointAction = z.infer<typeof RuleResponseEndpointAction>;
-export const RuleResponseEndpointAction = z.object({
-  actionTypeId: z.literal('.endpoint'),
-  params: z.union([DefaultParams, ProcessesParams, RunscriptParams]),
-});
 
+export const ResponseAction = lazySchema(() =>
+  z.discriminatedUnion('action_type_id', [OsqueryResponseAction, EndpointResponseAction])
+);
 export type ResponseAction = z.infer<typeof ResponseAction>;
-export const ResponseAction = z.discriminatedUnion('action_type_id', [
-  OsqueryResponseAction,
-  EndpointResponseAction,
-]);
 
+export const RuleResponseAction = lazySchema(() =>
+  z.discriminatedUnion('actionTypeId', [RuleResponseOsqueryAction, RuleResponseEndpointAction])
+);
 export type RuleResponseAction = z.infer<typeof RuleResponseAction>;
-export const RuleResponseAction = z.discriminatedUnion('actionTypeId', [
-  RuleResponseOsqueryAction,
-  RuleResponseEndpointAction,
-]);

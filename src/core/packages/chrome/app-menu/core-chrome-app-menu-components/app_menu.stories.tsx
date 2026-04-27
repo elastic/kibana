@@ -327,3 +327,29 @@ export const OverflowAndOrdering: Story = {
     config: overflowAndOrderingConfig,
   },
 };
+
+const staticItem: AppMenuWrapperProps['staticItems'] = [
+  {
+    id: 'feedback',
+    order: 1,
+    label: 'Feedback',
+    run: action('feedback-clicked'),
+    iconType: 'comment',
+    testId: 'feedbackButton',
+  },
+];
+
+export const StandaloneStaticItem: Story = {
+  name: 'Static items - standalone',
+  args: {
+    staticItems: staticItem,
+  },
+};
+
+export const DashboardEditModeWithStaticItems: Story = {
+  name: 'Dashboard edit mode with static items',
+  args: {
+    config: dashboardEditModeConfig,
+    staticItems: staticItem,
+  },
+};

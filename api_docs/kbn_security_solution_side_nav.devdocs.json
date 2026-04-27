@@ -363,7 +363,7 @@
         "label": "SolutionSideNavProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-        "lineNumber": 44,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -388,7 +388,7 @@
               "<string>[]"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 45,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -403,7 +403,7 @@
               "The id of the selected item to highlight. It only affects the top level items rendered in the main panel"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 47,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -428,7 +428,7 @@
               "<string>[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 49,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -446,7 +446,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 51,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -464,32 +464,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 53,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.SolutionSideNavProps.navLinkInteractionVariant",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "navLinkInteractionVariant",
-            "description": [
-              "\nPresentation and interaction for panel opener rows. When `unifiedRow`, selected rows use primary background."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/security-solution-side-nav",
-                "scope": "common",
-                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
-                "section": "def-common.SolutionSideNavInteractionVariant",
-                "text": "SolutionSideNavInteractionVariant"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 55,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -514,7 +489,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 59,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -540,25 +515,6 @@
       }
     ],
     "misc": [
-      {
-        "parentPluginId": "@kbn/security-solution-side-nav",
-        "id": "def-common.SolutionSideNavInteractionVariant",
-        "type": "Type",
-        "tags": [],
-        "label": "SolutionSideNavInteractionVariant",
-        "description": [
-          "\n- `splitButton`: separate link row and spaces button to open the secondary panel (default)\n- `unifiedRow`: single row with trailing chevron; primary click navigates to the first child and toggles the panel"
-        ],
-        "signature": [
-          "\"splitButton\" | \"unifiedRow\""
-        ],
-        "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-        "lineNumber": 38,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/security-solution-side-nav",
         "id": "def-common.Tracker",

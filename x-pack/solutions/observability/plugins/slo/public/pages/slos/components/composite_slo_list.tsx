@@ -37,6 +37,7 @@ export function CompositeSloList() {
   const [sortBy, setSortBy] = useState<CompositeSloSortBy>('createdAt');
   const [sortDirection, setSortDirection] = useState<CompositeSloSortDirection>('desc');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   const handleSearchChange = useCallback((value: string) => {
@@ -58,22 +59,30 @@ export function CompositeSloList() {
     setPage(0);
   }, []);
 
+  const handleStatusChange = useCallback((statuses: string[]) => {
+    setSelectedStatuses(statuses);
+    setPage(0);
+  }, []);
+
   const clearFilters = useCallback(() => {
     setSearch('');
     setDebouncedSearch('');
     setSortBy('createdAt');
     setSortDirection('desc');
     setSelectedTags([]);
+    setSelectedStatuses([]);
     setPage(0);
   }, []);
 
   const tagsParam = selectedTags.length > 0 ? selectedTags.join(',') : undefined;
+  const statusParam = selectedStatuses.length > 0 ? selectedStatuses.join(',') : undefined;
 
   const { data, isInitialLoading, isLoading, isError } = useFetchCompositeSloList({
     page: page + 1,
     perPage,
     search: debouncedSearch || undefined,
     tags: tagsParam,
+    status: statusParam,
     sortBy,
     sortDirection,
   });
@@ -87,7 +96,8 @@ export function CompositeSloList() {
     [suggestions]
   );
 
-  const hasActiveFilters = debouncedSearch !== '' || selectedTags.length > 0;
+  const hasActiveFilters =
+    debouncedSearch !== '' || selectedTags.length > 0 || selectedStatuses.length > 0;
 
   const compositeIds = useMemo(
     () => data?.results?.map((item: CompositeSLOItem) => item.id) ?? [],
@@ -122,9 +132,11 @@ export function CompositeSloList() {
         isLoading={isLoading}
         selectedTags={selectedTags}
         availableTags={availableTags}
+        selectedStatuses={selectedStatuses}
         hasActiveFilters={hasActiveFilters}
         onSearchChange={handleSearchChange}
         onTagSelectionChange={handleTagSelection}
+        onStatusChange={handleStatusChange}
         onClearFilters={clearFilters}
       />
       <EuiSpacer size="m" />

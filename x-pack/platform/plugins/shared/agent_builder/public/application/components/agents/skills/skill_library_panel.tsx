@@ -69,7 +69,6 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
       allItems={allSkills}
       activeItemIdSet={activeSkillIdSet}
       onToggleItem={onToggleSkill}
-      mutatingItemId={null}
       flyoutTitleId="skillLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.manage.skills}

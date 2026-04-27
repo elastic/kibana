@@ -8,6 +8,13 @@
 import { get, isArray } from 'lodash';
 import type { Capabilities } from '@kbn/core/public';
 
+export interface OrGroup {
+  or: string[];
+}
+
+const isOrGroup = (item: string | OrGroup): item is OrGroup =>
+  typeof item === 'object' && 'or' in item;
+
 /**
  * The format of defining features supports OR and AND mechanism. To specify features in an OR fashion
  * they can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features
@@ -16,10 +23,13 @@ import type { Capabilities } from '@kbn/core/public';
  * features that all must be and'd together an example would be: [[feature1, feature2]], this would result in the boolean
  * operation feature1 && feature2.
  *
+ * To specify an inner OR within an AND group, use the OrGroup object: [[feature1, { or: [feature2, feature3] }]]
+ * this would result in feature1 && (feature2 || feature3).
+ *
  * The final format is to specify a single feature, this would be like: features: feature1, which is the same as
  * features: [feature1]
  */
-export type RequiredCapabilities = string | Array<string | string[]>;
+export type RequiredCapabilities = string | Array<string | (string | OrGroup)[]>;
 
 /**
  * Checks if the capabilities exist and are enabled in the capabilities object.
@@ -38,7 +48,12 @@ export const hasCapabilities = (
   } else {
     return requiredCapabilities.some((requiredCapsOr) => {
       if (isArray(requiredCapsOr)) {
-        return requiredCapsOr.every((requiredCapsAnd) => get(capabilities, requiredCapsAnd, false));
+        return requiredCapsOr.every((requiredCapsAnd) => {
+          if (isOrGroup(requiredCapsAnd)) {
+            return requiredCapsAnd.or.some((cap) => get(capabilities, cap, false));
+          }
+          return get(capabilities, requiredCapsAnd, false);
+        });
       }
       return get(capabilities, requiredCapsOr, false);
     });
@@ -62,9 +77,12 @@ export const existCapabilities = (
   } else {
     return requiredCapabilities.some((requiredCapsOr) => {
       if (isArray(requiredCapsOr)) {
-        return requiredCapsOr.every(
-          (requiredCapsAnd) => get(capabilities, requiredCapsAnd) != null
-        );
+        return requiredCapsOr.every((requiredCapsAnd) => {
+          if (isOrGroup(requiredCapsAnd)) {
+            return requiredCapsAnd.or.some((cap) => get(capabilities, cap) != null);
+          }
+          return get(capabilities, requiredCapsAnd) != null;
+        });
       }
       return get(capabilities, requiredCapsOr) != null;
     });

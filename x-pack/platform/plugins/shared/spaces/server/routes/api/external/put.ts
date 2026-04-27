@@ -22,6 +22,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space/{id}',
       access: 'public',
       summary: `Update a space`,
+      description: 'Update an existing Kibana space.',
       options: {
         tags: ['oas-tag:spaces'],
       },

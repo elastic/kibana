@@ -215,7 +215,7 @@
         "label": "Dimension",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-        "lineNumber": 35,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -228,7 +228,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 36,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -244,7 +244,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -260,7 +260,7 @@
         "label": "MetricsESQLResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-        "lineNumber": 56,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -273,7 +273,7 @@
             "label": "metric_name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -289,7 +289,7 @@
               "string | string[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 58,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -312,7 +312,7 @@
               "[] | null"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -331,7 +331,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -362,7 +362,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -378,7 +378,7 @@
               "string | string[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -411,7 +411,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-        "lineNumber": 91,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -424,7 +424,7 @@
             "label": "loading",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 92,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -440,7 +440,30 @@
               "Error | null"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 93,
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.MetricsInfo.activeDimensions",
+            "type": "Array",
+            "tags": [],
+            "label": "activeDimensions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-chart-section-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedChartSectionViewerPluginApi",
+                "section": "def-public.Dimension",
+                "text": "Dimension"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -456,7 +479,7 @@
         "label": "MetricsTelemetry",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-        "lineNumber": 74,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -469,7 +492,7 @@
             "label": "total_number_of_metrics",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -482,7 +505,7 @@
             "label": "total_number_of_dimensions",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -498,7 +521,7 @@
               "{ histogram?: number | undefined; summary?: number | undefined; gauge?: number | undefined; counter?: number | undefined; position?: number | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 77,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -514,7 +537,7 @@
               "{ [x: `{${string}}`]: number | undefined; count?: number | undefined; m?: number | undefined; none?: number | undefined; s?: number | undefined; percent?: number | undefined; d?: number | undefined; h?: number | undefined; ms?: number | undefined; bytes?: number | undefined; us?: number | undefined; ns?: number | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -530,7 +553,7 @@
               "{ data_streams: number; field_types: number; metric_types: number; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -546,7 +569,7 @@
         "label": "ParsedMetricItem",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-        "lineNumber": 65,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -559,7 +582,7 @@
             "label": "metricName",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -572,7 +595,7 @@
             "label": "dataStream",
             "description": [],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -589,7 +612,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -606,7 +629,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -629,7 +652,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -652,7 +675,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -668,7 +691,7 @@
         "label": "ParsedMetrics",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-        "lineNumber": 86,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -691,7 +714,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 87,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -714,7 +737,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -747,7 +770,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-        "lineNumber": 96,
+        "lineNumber": 102,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -769,7 +792,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 97,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -885,6 +908,21 @@
           },
           {
             "parentPluginId": "@kbn/unified-chart-section-viewer",
+            "id": "def-public.UnifiedMetricsGridProps.profileId",
+            "type": "string",
+            "tags": [],
+            "label": "profileId",
+            "description": [
+              "\nThe profile ID of the data source profile that renders this grid.\nUsed for execution context labels in APM monitoring."
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-chart-section-viewer",
             "id": "def-public.UnifiedMetricsGridProps.breakdownField",
             "type": "string",
             "tags": [],
@@ -896,7 +934,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 25,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -914,7 +952,7 @@
               "((fieldName?: string | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -930,7 +968,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-                "lineNumber": 32,
+                "lineNumber": 37,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -956,7 +994,7 @@
           "\"count\" | \"m\" | \"s\" | \"percent\" | \"d\" | \"h\" | \"ms\" | \"bytes\" | \"us\" | \"ns\" | `{${string}}`"
         ],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/types.ts",
-        "lineNumber": 40,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

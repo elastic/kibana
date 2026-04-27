@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../common/lib/kibana';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
-const INDEX_REFRESH_DELAY_MS = 2_000;
+const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
+
+const POLL_INTERVAL_MS = 2_000;
+const MAX_POLLS = 30;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
 
 const FETCH_LEADS_PARAMS = {
   params: {
@@ -29,7 +32,7 @@ const FETCH_LEADS_PARAMS = {
   },
 };
 
-export const useHuntingLeads = (isEnabled: boolean = true) => {
+export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) => {
   const {
     fetchLeads,
     generateLeads: generateLeadsApi,
@@ -38,7 +41,8 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     disableLeadGeneration,
   } = useEntityAnalyticsRoutes();
   const queryClient = useQueryClient();
-  const { addSuccess, addError } = useAppToasts();
+  const { addSuccess, addError, addWarning } = useAppToasts();
+  const { telemetry } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const [hasGenerated, setHasGenerated] = useState(false);
 
@@ -48,55 +52,98 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     };
   }, []);
 
-  const { data, isLoading, refetch } = useQuery({
+  const {
+    data,
+    isLoading: isLeadsLoading,
+    refetch,
+  } = useQuery({
     queryKey: [HUNTING_LEADS_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
     enabled: isEnabled,
+    onError: (error: Error) => addError(error, { title: i18n.FETCH_LEADS_ERROR }),
   });
+
+  const pollForCompletion = useCallback(
+    async (executionUuid: string, signal: AbortSignal): Promise<'success' | 'timeout'> => {
+      for (let i = 0; i < MAX_POLLS; i++) {
+        if (signal.aborted) return 'timeout';
+        await delay(POLL_INTERVAL_MS);
+        if (signal.aborted) return 'timeout';
+
+        const status = await fetchLeadGenerationStatus({ signal });
+        if (status.lastExecutionUuid === executionUuid) {
+          if (status.lastError) {
+            throw new Error(status.lastError);
+          }
+
+          const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
+          queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
+          queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], status);
+          return 'success';
+        }
+      }
+
+      // Poll timed out waiting for the execution uuid to be persisted.
+      // Fetch whatever leads are available so the cache is populated before
+      // isGenerating flips to false, preventing a spurious empty-state flash.
+      if (!signal.aborted) {
+        const [finalResult, finalStatus] = await Promise.all([
+          fetchLeads({ ...FETCH_LEADS_PARAMS, signal }),
+          fetchLeadGenerationStatus({ signal }),
+        ]);
+        queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], finalResult);
+        queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], finalStatus);
+      }
+      return 'timeout';
+    },
+    [fetchLeadGenerationStatus, fetchLeads, queryClient]
+  );
 
   const { mutate: generate, isLoading: isGenerating } = useMutation({
     mutationFn: async () => {
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
-      await generateLeadsApi({ params: {} });
-
-      if (signal.aborted) return;
-      await delay(INDEX_REFRESH_DELAY_MS);
-      if (signal.aborted) return;
-
-      const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
-      queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
+      telemetry.reportEvent(EntityEventTypes.LeadGenerationGenerateClicked, {});
+      const { executionUuid } = await generateLeadsApi({ params: { connectorId }, signal });
+      return pollForCompletion(executionUuid, signal);
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       setHasGenerated(true);
-      addSuccess(i18n.GENERATE_SUCCESS);
+      if (result === 'timeout') {
+        addWarning(i18n.GENERATE_TIMEOUT);
+      } else {
+        addSuccess(i18n.GENERATE_SUCCESS);
+      }
     },
     onError: (error: Error) => {
       addError(error, { title: i18n.GENERATE_ERROR });
     },
   });
 
-  const { data: statusData } = useQuery({
+  const { data: statusData, isLoading: isStatusLoading } = useQuery({
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
     enabled: isEnabled,
+    onError: (error: Error) => addError(error, { title: i18n.FETCH_STATUS_ERROR }),
   });
 
   const { mutate: toggleSchedule } = useMutation({
-    mutationFn: (enabled: boolean) => (enabled ? enableLeadGeneration() : disableLeadGeneration()),
+    mutationFn: (enabled: boolean) =>
+      enabled ? enableLeadGeneration({ connectorId }) : disableLeadGeneration(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [LEAD_SCHEDULE_QUERY_KEY] }),
     onError: (error: Error) => addError(error, { title: i18n.SCHEDULE_UPDATE_ERROR }),
   });
 
-  const hasEverGenerated = hasGenerated || statusData?.lastRun != null;
+  const isLoading = isLeadsLoading || isStatusLoading;
 
   return {
     leads: data?.leads?.map(fromApiLead) ?? [],
     totalCount: data?.total ?? 0,
     isLoading,
     isGenerating,
-    hasGenerated: hasEverGenerated,
+    hasGenerated,
+    lastRunTimestamp: statusData?.lastRun ?? null,
     generate,
     refetch,
     isScheduled: statusData?.isEnabled ?? false,

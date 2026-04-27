@@ -87,6 +87,7 @@ const ColumnPickerPopoverComponent: React.FC<ColumnPickerPopoverProps> = ({
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={panelProps}
+      aria-label={COLUMNS_LABEL}
     >
       <EuiSelectable aria-label={COLUMNS_LABEL} options={selectableOptions} onChange={handleChange}>
         {(list) => (

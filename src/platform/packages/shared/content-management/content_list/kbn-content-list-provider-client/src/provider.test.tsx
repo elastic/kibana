@@ -10,6 +10,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import { useContentListConfig } from '@kbn/content-list-provider';
 import { ContentListClientProvider } from './provider';
 import type { ContentListClientProviderProps } from './provider';
@@ -253,6 +254,64 @@ describe('ContentListClientProvider', () => {
       });
 
       expect(result.current.queryKeyScope).toBe('custom-scope');
+    });
+  });
+
+  describe('starred support gating', () => {
+    const createMockFavoritesClient = (): FavoritesClientPublic => ({
+      getFavorites: jest.fn().mockResolvedValue({ favoriteIds: [], favoriteMetadata: {} }),
+      addFavorite: jest.fn(),
+      removeFavorite: jest.fn(),
+      isAvailable: jest.fn().mockResolvedValue(true),
+      getFavoriteType: jest.fn().mockReturnValue('dashboard'),
+      reportAddFavoriteClick: jest.fn(),
+      reportRemoveFavoriteClick: jest.fn(),
+    });
+
+    it('does not crash when favorites service is provided but starred feature is disabled', () => {
+      const mockClient = createMockFavoritesClient();
+
+      expect(() => {
+        renderHook(() => useContentListConfig(), {
+          wrapper: createWrapper({
+            services: { ...createMockServices(), favorites: mockClient },
+            features: { starred: false },
+          }),
+        });
+      }).not.toThrow();
+    });
+
+    it('reports starred as unsupported when the feature is disabled', () => {
+      const mockClient = createMockFavoritesClient();
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          services: { ...createMockServices(), favorites: mockClient },
+          features: { starred: false },
+        }),
+      });
+
+      expect(result.current.supports.starred).toBe(false);
+    });
+
+    it('reports starred as supported when favorites service is provided and feature is not disabled', () => {
+      const mockClient = createMockFavoritesClient();
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          services: { ...createMockServices(), favorites: mockClient },
+        }),
+      });
+
+      expect(result.current.supports.starred).toBe(true);
+    });
+
+    it('reports starred as unsupported when no favorites service is provided', () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.supports.starred).toBe(false);
     });
   });
 });

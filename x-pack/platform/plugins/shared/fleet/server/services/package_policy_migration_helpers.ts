@@ -13,7 +13,7 @@ import type {
   InputsOverride,
 } from '../../common/types';
 import type { NewPackagePolicy } from '../types';
-import { varsReducer } from '../../common/services';
+import { varsReducer, getInputEffectiveName } from '../../common/services';
 
 /**
  * Finds an input in `inputs` matching `type`, preferring a match on `policyTemplate`. Falls back
@@ -22,16 +22,21 @@ import { varsReducer } from '../../common/services';
  */
 export function findInputForMigration(
   inputs: NewPackagePolicyInput[],
-  type: string,
+  idOrType: string,
   policyTemplate: string | undefined
 ): NewPackagePolicyInput | undefined {
+  // Match by effective id (name when set, otherwise type). An input that has an
+  // explicit name must be referenced by that name -- matching by type alone is
+  // ambiguous when multiple inputs share the same type (e.g., two otelcol inputs).
+  const matches = (i: NewPackagePolicyInput) => getInputEffectiveName(i) === idOrType;
+
   if (policyTemplate) {
     return (
-      inputs.find((i) => i.type === type && i.policy_template === policyTemplate) ??
-      inputs.find((i) => i.type === type && !i.policy_template)
+      inputs.find((i) => matches(i) && i.policy_template === policyTemplate) ??
+      inputs.find((i) => matches(i) && !i.policy_template)
     );
   }
-  return inputs.find((i) => i.type === type);
+  return inputs.find(matches);
 }
 
 /**
@@ -194,6 +199,18 @@ export function applyStreamLevelMigration(
   // old input's enabled state over instead of unconditionally enabling the new input.
   if (streamMigrationOccurred && update.migrate_from === undefined) {
     update.enabled = oldInputForStreamMigration?.enabled ?? update.enabled;
+
+    // Also carry input-level vars from the old input to the new input.
+    // This handles packages like SentinelOne where vars like url/api_token remain at
+    // input level in both old and new inputs, but only streams declare migrate_from.
+    if (oldInputForStreamMigration) {
+      const mergedInput = deepMergeVars(
+        { ...update, vars: oldInputForStreamMigration.vars },
+        update,
+        true
+      ) as InputsOverride;
+      update.vars = sanitizeMigratedVars(removeStaleVars(mergedInput, update)).vars;
+    }
   }
 }
 

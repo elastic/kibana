@@ -80,6 +80,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
   onNavigateToDetails: jest.fn(),
+  onExpand: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
   onDelete: jest.fn(),
@@ -475,6 +476,24 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
 
       expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+  });
+
+  describe('expand button', () => {
+    it('renders an expand button for each row', () => {
+      renderTable();
+
+      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
+      expect(screen.getByTestId('expandRule-rule-2')).toBeInTheDocument();
+    });
+
+    it('calls onExpand with the row rule when the expand button is clicked', () => {
+      const onExpand = jest.fn();
+      renderTable({ onExpand });
+
+      fireEvent.click(screen.getByTestId('expandRule-rule-1'));
+
+      expect(onExpand).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
   });
 });

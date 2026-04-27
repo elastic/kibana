@@ -251,7 +251,8 @@ export function useEntityFromStore(
   const entityField = record?.entity;
 
   const firstSeen = entityField?.lifecycle?.first_seen ?? null;
-  const lastSeen = entityField?.lifecycle?.last_activity ?? null;
+  const lastSeen =
+    entityField?.lifecycle?.last_activity ?? entityField?.lifecycle?.last_seen ?? null;
 
   const mappedDetails = useMemo((): HostItem | UserItem | null => {
     if (!record) {

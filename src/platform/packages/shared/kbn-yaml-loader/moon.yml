@@ -9,8 +9,6 @@ owners:
   defaultOwner: '@elastic/fleet'
 toolchains:
   default: node
-  javascript:
-    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/yaml-loader'

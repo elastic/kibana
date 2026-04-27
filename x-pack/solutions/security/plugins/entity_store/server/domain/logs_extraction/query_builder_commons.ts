@@ -78,10 +78,18 @@ export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
   const { indexPatterns, type, fromDateISO, toDateISO, recoveryId, logsPageCursorStart } = params;
+
+  // If recoveryId is set we use an inclusive lower bound because we are recovering
+  //  from a previous extraction and we don't want to miss any logs from the previous window
+  //
+  // If logsPageCursorStart is not set we use a inclusive lower bound because we are starting a new extraction
+  // and we want to include all logs from the new window
+  const inclusiveLowerBound = recoveryId || !logsPageCursorStart ? true : false;
+
   const baseWhere = `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE 
-      ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
+      ${TIMESTAMP_FIELD} ${inclusiveLowerBound ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
       AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
 
@@ -131,16 +139,16 @@ function buildLogsPageEndFilter(end: PaginationParams): string {
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {
   return fields
     .map((field) => {
-      const { retention, destination: dest, source } = field;
+      const { retention, destination: dest } = field;
       const finalDest = renameToRecent ? recentData(dest) : dest;
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_newest_value':
-          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_oldest_value':
-          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         default:
           throw new Error('unknown field operation');
       }

@@ -11,7 +11,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import {
-  DATASET_VAR_NAME,
   FLEET_APM_PACKAGE,
   FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
@@ -35,6 +34,7 @@ import { pkgToPkgKey } from '../epm/registry';
 import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 
 import { extractSignalTypesFromPipelines } from './otel_collector';
+import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -222,8 +222,9 @@ export function storedPackagePoliciesToAgentPermissions(
 
                   const ds: DataStreamMeta = {
                     type: stream.data_stream.type,
-                    dataset:
-                      stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+                    dataset: isOtelInput
+                      ? getEffectiveOtelStreamDataset(stream)
+                      : stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
                   };
 
                   if (stream.data_stream.elasticsearch) {
@@ -233,19 +234,17 @@ export function storedPackagePoliciesToAgentPermissions(
                   dataStreams_.push(ds);
 
                   if (isOtelInput && stream.data_stream.type === 'traces') {
-                    // Span events are logs-*-* using the same data_stream.dataset as OTTL routing
-                    // (getFullInputStreams + generateOtelTypeTransforms spanevent); include stream var override.
-                    const baseDataset =
-                      stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset;
-                    const spanEventDataset =
-                      extractOtelDatasetVarOverride(stream.vars?.[DATASET_VAR_NAME]?.value) ??
-                      baseDataset;
+                    // Span events use the same effective dataset as OTTL (getFullInputStreams merge +
+                    // data_stream.dataset var, then generateOtelTypeTransforms). Propagate
+                    // dynamic_dataset from the traces stream so wildcard indices match traces-*-* when
+                    // the registry marks traces as dynamic (input-type OTel packages).
+                    const spanEventElasticsearch = getOtelSpanEventElasticsearchFromTracesStream(
+                      stream.data_stream.elasticsearch
+                    );
                     dataStreams_.push({
                       type: 'logs',
-                      dataset: spanEventDataset,
-                      elasticsearch: {
-                        dynamic_namespace: stream.data_stream.elasticsearch?.dynamic_namespace,
-                      },
+                      dataset: getEffectiveOtelStreamDataset(stream),
+                      ...(spanEventElasticsearch ? { elasticsearch: spanEventElasticsearch } : {}),
                     });
 
                     if (stream.vars?.[USE_APM_VAR_NAME]?.value === true) {
@@ -303,6 +302,25 @@ export interface DataStreamMeta {
   };
 }
 
+/** Span-event logs inherit only dynamic_dataset/dynamic_namespace from the traces stream; omit when unset. */
+function getOtelSpanEventElasticsearchFromTracesStream(
+  traceElasticsearch: DataStreamMeta['elasticsearch'] | undefined
+):
+  | Pick<NonNullable<DataStreamMeta['elasticsearch']>, 'dynamic_dataset' | 'dynamic_namespace'>
+  | undefined {
+  if (!traceElasticsearch) {
+    return undefined;
+  }
+  const { dynamic_dataset, dynamic_namespace } = traceElasticsearch;
+  if (dynamic_dataset === undefined && dynamic_namespace === undefined) {
+    return undefined;
+  }
+  return {
+    ...(dynamic_dataset !== undefined ? { dynamic_dataset } : {}),
+    ...(dynamic_namespace !== undefined ? { dynamic_namespace } : {}),
+  };
+}
+
 export function getDataStreamPrivileges(
   dataStream: DataStreamMeta,
   namespace: string = '*'
@@ -334,26 +352,6 @@ export function getDataStreamPrivileges(
     privileges,
   };
 }
-
-/** Resolves `data_stream.dataset` stream var for OTel span-event index permissions; invalid shapes fall back via undefined. */
-const extractOtelDatasetVarOverride = (raw: unknown): string | undefined => {
-  if (raw === undefined || raw === null || raw === '') {
-    return undefined;
-  }
-  if (typeof raw === 'string') {
-    const trimmed = raw.trim();
-    return trimmed !== '' ? trimmed : undefined;
-  }
-  if (typeof raw === 'object' && raw !== null && 'dataset' in raw) {
-    const d = (raw as { dataset: unknown }).dataset;
-    if (typeof d === 'string') {
-      const trimmed = d.trim();
-      return trimmed !== '' ? trimmed : undefined;
-    }
-    return undefined;
-  }
-  return undefined;
-};
 
 function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
   const profilingIndexPattern = 'profiling-*';

@@ -7,7 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
-import { ENDPOINT_COPY_SUCCESS } from '../../common/translations';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 
 export const useEndpointActions = () => {
@@ -21,7 +21,10 @@ export const useEndpointActions = () => {
 
   const copyContent = useCallback(
     (inferenceId: string) => {
-      const message = ENDPOINT_COPY_SUCCESS(inferenceId);
+      const message = i18n.translate('xpack.searchInferenceEndpoints.actions.copyIDSuccess', {
+        defaultMessage: 'Inference endpoint ID {inferenceId} copied',
+        values: { inferenceId },
+      });
       navigator.clipboard.writeText(inferenceId).then(
         () => {
           toasts?.addSuccess({

@@ -249,6 +249,59 @@ describe('RuleSettingsModal', () => {
     expect(screen.getByTestId('rule-settings-save')).toBeDisabled();
   });
 
+  it('renders modal with gap scope section when only gapReasonDetectionEnabled is true', () => {
+    mockUseGapAutoFillSchedulerContext.mockReturnValue({
+      canAccessGapAutoFill: false,
+      canEditGapAutoFill: false,
+      hasEnterpriseLicense: false,
+      scheduler: undefined,
+      isSchedulerLoading: false,
+      isSchedulerFetching: false,
+      hasErrors: false,
+      latestErrorTimestamp: undefined,
+      totalErrors: 0,
+    });
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+    render(<RuleSettingsModal isOpen={true} onClose={onClose} />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('rule-settings-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('include-disabled-gaps-checkbox')).toBeInTheDocument();
+    expect(screen.queryByTestId('rule-settings-enable-switch')).not.toBeInTheDocument();
+  });
+
+  it('shows description without auto-fill text when canAccessGapAutoFill is false', () => {
+    mockUseGapAutoFillSchedulerContext.mockReturnValue({
+      canAccessGapAutoFill: false,
+      canEditGapAutoFill: false,
+      hasEnterpriseLicense: false,
+      scheduler: undefined,
+      isSchedulerLoading: false,
+      isSchedulerFetching: false,
+      hasErrors: false,
+      latestErrorTimestamp: undefined,
+      totalErrors: 0,
+    });
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+    render(<RuleSettingsModal isOpen={true} onClose={onClose} />, { wrapper: TestProviders });
+
+    expect(
+      screen.getByText('Define what counts as a gap in your rule monitoring.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/automatic gap filling/)).not.toBeInTheDocument();
+  });
+
+  it('shows description with auto-fill text when canAccessGapAutoFill is true', () => {
+    render(<RuleSettingsModal isOpen={true} onClose={onClose} />, { wrapper: TestProviders });
+
+    expect(
+      screen.getByText(
+        'Define what counts as a gap in your rule monitoring and what will be included in automatic gap filling.'
+      )
+    ).toBeInTheDocument();
+  });
+
   it('disables gap-scope checkbox when advanced settings save is not allowed', () => {
     mockUseGapAutoFillSchedulerContext.mockReturnValue({
       canAccessGapAutoFill: false,

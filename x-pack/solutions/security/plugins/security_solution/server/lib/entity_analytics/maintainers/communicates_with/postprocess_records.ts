@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EntityType } from '@kbn/entity-store/common';
 import type { ProcessedEntityRecord } from './types';
 
 interface EsqlColumn {
@@ -22,7 +23,7 @@ function toStringArray(value: unknown): string[] {
 export function postProcessEsqlResults(
   columns: EsqlColumn[],
   values: unknown[][],
-  entityType: string
+  entityType: EntityType
 ): ProcessedEntityRecord[] {
   return values.map((row) => {
     const record: Record<string, unknown> = {};
@@ -33,7 +34,7 @@ export function postProcessEsqlResults(
     return {
       entityId: toStringArray(record.actorUserId)[0] ?? null,
       entityType,
-      communicates_with: toStringArray(record.communicates_with),
+      communicates_with: { ids: toStringArray(record.communicates_with) },
     };
   });
 }
