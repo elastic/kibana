@@ -27,11 +27,11 @@ Follow `.agents/skills/scout-best-practices-reviewer/SKILL.md` for the checklist
 
 On PR updates, review only the new changes and stay high-signal — not nitpicky.
 
-## Non-negotiable UI test checks
+## Non-negotiable test-type checks
 
-These rules must be verified on every applicable UI test file. Do not skip them:
+These rules must be verified on every applicable Scout test file (UI and API). Do not skip them:
 
-- **Test behavior, not data correctness (UI)**: if a test case is validating data (exact computed values, API response shape, edge-case data), the test belongs in a different layer. Recommend the target layer explicitly in the inline comment — "move to a Scout API test" or "move to an RTL/Jest unit test" — and suggest what the UI test should assert instead.
+- **Pick the right test type**: confirm Scout is the right layer for what the test verifies. If the scenario manipulates the system in a way a real user couldn't (writing directly to system indices, mutating ES data on disk, simulating an upgrade from a previous Kibana version, asserting on a saved object / data migration), the test almost certainly belongs in a **Jest integration test** (see [`src/core/server/integration_tests/saved_objects/migrations`](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations)) rather than Scout. If a UI test is validating exact computed values, API response shape, or edge-case data, recommend a **Scout API test** or **RTL/Jest unit test** instead. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead.
 
 ## Output
 
