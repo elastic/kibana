@@ -12,7 +12,6 @@ import {
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
   type EuiButtonColor,
@@ -620,24 +619,17 @@ const ESQLEditorInternal = function ESQLEditor({
           `}
         >
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={i18n.translate('esqlEditor.query.searchLabel', {
-                defaultMessage: 'Search',
-              })}
+            <EuiButton
+              color={queryRunButtonProperties.color as EuiButtonColor}
+              onClick={() => onQuerySubmit(QuerySource.MANUAL)}
+              size="s"
+              isLoading={isLoading && !allowQueryCancellation}
+              isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+              data-test-subj="ESQLEditor-run-query-button"
+              aria-label={queryRunButtonProperties.label}
             >
-              <EuiButton
-                color={queryRunButtonProperties.color as EuiButtonColor}
-                onClick={() => onQuerySubmit(QuerySource.MANUAL)}
-                size="s"
-                isLoading={isLoading && !allowQueryCancellation}
-                isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                data-test-subj="ESQLEditor-run-query-button"
-                aria-label={queryRunButtonProperties.label}
-              >
-                {queryRunButtonProperties.label}
-              </EuiButton>
-            </EuiToolTip>
+              {queryRunButtonProperties.label}
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ESQLMenu hideHistory={hideQueryHistory} />

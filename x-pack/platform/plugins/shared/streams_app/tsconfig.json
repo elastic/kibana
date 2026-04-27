@@ -114,6 +114,7 @@
     "@kbn/evals-plugin",
     "@kbn/shared-ux-ai-components",
     "@kbn/deeplinks-management",
+    "@kbn/rule-data-utils",
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/inference-connectors",

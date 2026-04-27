@@ -47,7 +47,6 @@ export interface OnboardingTaskParams {
   from: number;
   to: number;
   steps: OnboardingStep[];
-  saveQueries: boolean;
   connectors?: {
     features?: string;
     queries?: string;
@@ -56,9 +55,8 @@ export interface OnboardingTaskParams {
 
 export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 
-export function getOnboardingTaskId(streamName: string, saveQueries: boolean = true) {
-  const base = `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
-  return saveQueries ? base : `${base}_no_save_queries`;
+export function getOnboardingTaskId(streamName: string) {
+  return `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
 }
 
 const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
@@ -99,8 +97,8 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               }
               const { fakeRequest } = runContext;
 
-              const { streamName, from, to, steps, saveQueries, connectors, _task } = runContext
-                .taskInstance.params as TaskParams<OnboardingTaskParams>;
+              const { streamName, from, to, steps, connectors, _task } = runContext.taskInstance
+                .params as TaskParams<OnboardingTaskParams>;
 
               const { taskClient, getQueryClient, streamsClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
@@ -178,12 +176,10 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         return;
                       }
 
-                      if (saveQueries) {
-                        await persistQueries(streamName, queriesTaskResult.queries, {
-                          queryClient: await getQueryClient(),
-                          streamsClient,
-                        });
-                      }
+                      await persistQueries(streamName, queriesTaskResult.queries, {
+                        queryClient: await getQueryClient(),
+                        streamsClient,
+                      });
                       break;
 
                     default:
@@ -198,7 +194,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
-                    saveQueries,
                     connectors,
                   },
                   { featuresTaskResult, queriesTaskResult }
@@ -274,7 +269,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
-                    saveQueries,
                     connectors,
                   },
                   errorMessage

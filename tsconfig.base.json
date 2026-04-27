@@ -1596,6 +1596,8 @@
       "@kbn/mcp-client/*": ["x-pack/platform/packages/shared/kbn-mcp-client/*"],
       "@kbn/mcp-dev-server": ["src/platform/packages/shared/kbn-mcp-dev-server"],
       "@kbn/mcp-dev-server/*": ["src/platform/packages/shared/kbn-mcp-dev-server/*"],
+      "@kbn/measure-component": ["src/platform/packages/shared/kbn-measure-component"],
+      "@kbn/measure-component/*": ["src/platform/packages/shared/kbn-measure-component/*"],
       "@kbn/metrics": ["src/platform/packages/private/opentelemetry/kbn-metrics"],
       "@kbn/metrics/*": ["src/platform/packages/private/opentelemetry/kbn-metrics/*"],
       "@kbn/metrics-config": ["src/platform/packages/private/opentelemetry/kbn-metrics-config"],

@@ -6,7 +6,7 @@ paths:
   /api/attack_discovery/generations/{execution_uuid}:
     get:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |

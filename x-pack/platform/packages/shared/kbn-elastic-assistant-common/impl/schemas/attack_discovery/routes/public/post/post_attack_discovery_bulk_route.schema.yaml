@@ -6,7 +6,7 @@ paths:
   /api/attack_discovery/_bulk:
     post:
       x-codegen-enabled: true
-      x-code-samples:
+      x-codeSamples:
         - lang: curl
           label: Example request
           source: |
@@ -97,11 +97,23 @@ paths:
                     description: Array of updated Attack Discovery alert objects. Each item includes the applied modifications from the bulk update request.
                     items:
                       $ref: '../../../attack_discovery_api_alert.schema.yaml#/components/schemas/AttackDiscoveryApiAlert'
-              example:
-                data:
-                  - id: "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f"
-                    title: "Suspicious process execution on host-01"
-                    workflow_status: "acknowledged"
+              examples:
+                PostAttackDiscoveryBulkResponse200Example:
+                  summary: A successful bulk update response containing the modified Attack discoveries.
+                  value:
+                    data:
+                      - id: "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f"
+                        alert_ids:
+                          - "alert-abc-1"
+                        connector_id: "gen-ai-connector"
+                        connector_name: "OpenAI GPT-4"
+                        details_markdown: "- **Host** `workstation-01` showed credential access patterns consistent with mimikatz."
+                        generation_uuid: "550e8400-e29b-41d4-a716-446655440000"
+                        summary_markdown: "A user account was compromised using mimikatz to dump credentials."
+                        timestamp: "2024-01-15T10:00:00.000Z"
+                        title: "Credential theft via mimikatz"
+                        alert_workflow_status: "acknowledged"
+
         400:
           description: Bad Request response.
           content:

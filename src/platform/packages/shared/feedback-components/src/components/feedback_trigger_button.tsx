@@ -18,7 +18,7 @@ const LazyFeedbackContainer = lazy(() =>
 );
 
 interface Props {
-  getQuestions: (appId: string) => FeedbackRegistryEntry[];
+  getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
   getAppDetails: () => { title: string; id: string; url: string };
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: FeedbackFormData) => Promise<void>;

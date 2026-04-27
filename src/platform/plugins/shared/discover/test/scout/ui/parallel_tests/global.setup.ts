@@ -39,8 +39,8 @@ globalSetupHook(
         : '[setup:metrics] metrics test index already exists, skipping'
     );
 
-    // Traces Experience setup (not supported in serverless security - no Fleet/APM privileges)
-    const hasFleetSupport = !(config.serverless && config.projectType === 'security');
+    // Traces Experience setup (not supported in serverless security or search - no Fleet/APM privileges)
+    const hasFleetSupport = !config.serverless || config.projectType === 'oblt';
     if (hasFleetSupport) {
       if (!config.isCloud) {
         await apiServices.fleet.internal.setup();

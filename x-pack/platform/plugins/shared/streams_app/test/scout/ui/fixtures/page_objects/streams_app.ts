@@ -1091,14 +1091,6 @@ export class StreamsApp {
     await acceptButton.click();
   }
 
-  async regenerateSuggestions() {
-    const regenerateButton = this.page
-      .getByTestId('streamsAppGenerateSuggestionButton')
-      .filter({ hasText: 'Regenerate all' });
-    await expect(regenerateButton).toBeVisible();
-    await regenerateButton.click();
-  }
-
   async expectConfirmationModalVisible() {
     const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
     await expect(modal).toBeVisible();

@@ -16,6 +16,7 @@ import { EntityNameList } from './entity_name_list';
 import { AnomalyHeatmap } from './anomaly_heatmap';
 import { getAnomalyChartStyling } from './anomaly_chart_styling';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { RecentAnomaliesHeatmapNoResults } from './recent_anomalies_heatmap_no_results';
 
 const RECENT_ANOMALIES_QUERY_ID = 'recent-anomalies-query';
 const RECENT_ANOMALIES_CONTEXT_ID = 'RecentAnomalies-table';
@@ -125,6 +126,7 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
           isLoading={isLoading}
           isError={isError}
           compressed
+          noResultsComponent={<RecentAnomaliesHeatmapNoResults />}
         />
       </EuiFlexGroup>
     </>
