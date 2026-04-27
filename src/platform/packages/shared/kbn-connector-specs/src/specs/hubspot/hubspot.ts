@@ -74,7 +74,7 @@ export const HubSpotConnector: ConnectorSpec = {
           authorizationUrl: 'https://app.hubspot.com/oauth/authorize',
           tokenUrl: 'https://api.hubapi.com/oauth/v1/token',
           scope:
-            'crm.objects.contacts.read crm.objects.companies.read crm.objects.deals.read tickets crm.objects.owners.read',
+            'crm.objects.contacts.read crm.objects.companies.read crm.objects.deals.read tickets crm.objects.owners.read sales-email-read',
           useBasicAuth: false,
         },
       },
