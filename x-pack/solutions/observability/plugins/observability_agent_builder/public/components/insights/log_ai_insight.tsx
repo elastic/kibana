@@ -116,6 +116,7 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
   return (
     <>
       <AiInsight
+        insightType="log"
         title={explainLogMessageButtonLabel}
         fetchInsight={fetchInsight}
         buildAttachments={buildAttachments}
