@@ -7,7 +7,7 @@ navigation_title: Best practices
 Best practices specific to Scout **UI tests**.
 
 :::::{tip}
-Before writing a UI test, confirm Scout UI is the right layer for what you're verifying — see [Pick the right test type](./best-practices.md#pick-the-right-test-type). For guidance that applies to both UI and API tests, see the [general Scout best practices](./best-practices.md). Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) also apply.
+For guidance that applies to both UI and API tests, see the [general Scout best practices](./best-practices.md). Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) also apply.
 :::::
 
 ## Prefer parallel runs [run-tests-in-parallel-whenever-possible]

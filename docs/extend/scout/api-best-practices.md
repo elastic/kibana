@@ -7,7 +7,7 @@ navigation_title: Best practices
 Best practices specific to Scout **API tests**.
 
 :::::{tip}
-Before writing an API test, confirm Scout API is the right layer for what you're verifying — see [Pick the right test type](./best-practices.md#pick-the-right-test-type). In particular, **data-migration scenarios are usually a better fit for [Jest integration tests](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations)**, not Scout API tests. For guidance that applies to both UI and API tests, see the [general Scout best practices](./best-practices.md). Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) also apply.
+For guidance that applies to both UI and API tests, see the [general Scout best practices](./best-practices.md). Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) also apply.
 :::::
 
 ## Validate endpoints with `apiClient` [validate-endpoints-with-apiclient-for-readable-and-scoped-tests]
