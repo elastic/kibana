@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './types';
+export type * from './types';
 export * from './create_episode_actions';
 export { bulkCreateAlertActions } from './bulk_create_alert_actions';
 export type { BulkCreateAlertActionsResponse } from './bulk_create_alert_actions';
