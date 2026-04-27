@@ -1117,10 +1117,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           to
         );
         expect(extractionResponse.statusCode).toBe(200);
-        expect(extractionResponse.body).toMatchObject({ success: true });
-        // Before the fix only the first slice (3 entities) was extracted; the second
-        // outer iteration returned 0 documents and processing stopped early.
-        expect(extractionResponse.body.count).toBe(TOTAL_DOCS);
+        expect(extractionResponse.body).toMatchObject({ success: true, count: TOTAL_DOCS });
 
         for (let i = 1; i <= TOTAL_DOCS; i++) {
           const hit = await searchDocById(esClient, `host:ts-collision-host-${i}`);
