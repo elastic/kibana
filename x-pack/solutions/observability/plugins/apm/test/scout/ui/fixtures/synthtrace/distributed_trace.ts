@@ -15,6 +15,7 @@ import {
   SERVICE_WATERFALL_NODE,
   WATERFALL_RUM_TRANSACTION_NAME,
   WATERFALL_NODE_TRANSACTION_NAME,
+  WATERFALL_NODE_DB_SPAN_NAME,
 } from '../constants';
 
 const WATERFALL_NODE_ERROR_MESSAGE = 'Database query failed';
@@ -89,7 +90,7 @@ export function distributedTrace(): SynthtraceGenerator<ApmFields> {
                 .children(
                   nodeService
                     .span({
-                      spanName: 'SELECT * FROM products',
+                      spanName: WATERFALL_NODE_DB_SPAN_NAME,
                       spanType: 'db',
                       spanSubtype: 'postgresql',
                     })
