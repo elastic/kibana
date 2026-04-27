@@ -270,7 +270,7 @@ export const elasticsearchRoleSchema = schema.object(
       schema.arrayOf(
         schema.string({
           meta: {
-            description: 'A user name that the role member can impersonate.',
+            description: 'A username that members of this role can impersonate.',
           },
         }),
         { maxSize: 100 }
