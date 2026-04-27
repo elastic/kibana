@@ -11,12 +11,21 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { get } from 'lodash';
-import type { Entity as EntityStoreEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 
 import type { IntegrationType } from '../entity_sources/infra';
 import type { CorrelationMap } from './types';
 import { getEntityType } from './utils';
+
+/** Reduced `_source` shape returned by the paginated entity store scan. */
+interface EntityStoreSyncHit {
+  entity: {
+    id: string;
+    type?: string;
+    EngineMetadata?: { Type: string };
+    attributes?: { watchlists?: unknown };
+  };
+}
 
 export type EntityStoreEntityIdsByType = Record<EntityType, string[]>;
 
@@ -69,14 +78,23 @@ export const createWatchlistEntitiesService = ({
       throw new Error(`Unsupported identity provider: ${JSON.stringify(idp)}`);
     })();
 
+    const sourceFields: string[] = [
+      'entity.id',
+      'entity.type',
+      'entity.EngineMetadata.Type',
+      'entity.attributes.watchlists',
+      ...(isIndexSync ? [idp.field] : []),
+    ];
+
     let searchAfter: SortResults | undefined;
 
-    while (true) {
-      const response = await esClient.search<EntityStoreEntity>({
+    for (let i = 0; i < MAX_ENTITY_STORE_SCAN_ITERATIONS; i++) {
+      const response = await esClient.search<EntityStoreSyncHit>({
         index: getEntitiesAlias(ENTITY_LATEST, namespace),
         size: pageSize,
         sort: [{ 'entity.id': 'asc' }],
         search_after: searchAfter,
+        _source: sourceFields,
         query,
       });
 
@@ -152,6 +170,7 @@ const createEmptyEntityStoreEntityIdsByType = (): EntityStoreEntityIdsByType => 
 });
 
 export const ENTITY_STORE_PAGE_SIZE = 10_000;
+const MAX_ENTITY_STORE_SCAN_ITERATIONS = 10_000;
 
 const integrationToStoreNamespaceMap: Record<IntegrationType, string> = {
   entityanalytics_okta: 'okta',

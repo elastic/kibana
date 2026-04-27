@@ -157,4 +157,20 @@ describe('Watchlist entities service', () => {
     // host doesn't have user.name so it should not be in correlation map
     expect(result.correlationMap?.has('server-1')).toBe(false);
   });
+
+  it('throws when a hit has no sort value', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValueOnce({
+      hits: {
+        hits: [{ _source: { entity: { id: 'user:a', type: 'user' } }, _index: '1' }],
+      },
+    } as never);
+
+    const service = createWatchlistEntitiesService({ esClient, namespace: 'default' });
+    const gen = service.listEntityStoreEntities({ type: 'store', queryRule: 'entity.type: user' });
+
+    await expect(gen.next()).rejects.toThrow(
+      'Entity store pagination query returned a hit without sort values'
+    );
+  });
 });
