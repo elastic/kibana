@@ -8,7 +8,7 @@
 import React from 'react';
 import type { CoreSetup, HttpStart } from '@kbn/core/public';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { rerankStepCommonDefinition } from '../../../common/steps/rerank/rerank_step';
+import { rerankStepCommonDefinition } from '../../common/step_types/rerank_step';
 import { createInferenceIdSelectionHandler } from './inference_id_selection';
 
 export const createRerankStepDefinition = (core: CoreSetup) => {

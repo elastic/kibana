@@ -63,10 +63,19 @@ export interface SerializedActionWithAllocation {
 export interface SearchableSnapshotAction {
   snapshot_repository: string;
   /**
-   * We do not configure this value in the UI as it is an advanced setting that will
-   * not suit the vast majority of cases.
+   * Controls whether the searchable snapshot action should force merge the managed index to a one segment
+   * before creating the snapshot. Defaults to `true`.
    */
   force_merge_index?: boolean;
+  /**
+   * Controls how the force merge (when enabled) is executed.
+   *
+   * - `true` (default): clone the index with 0 replicas and force merge the clone before creating the snapshot.
+   * - `false`: skip cloning and force merge the managed index directly.
+   *
+   * Only valid when `force_merge_index` is `true`. Introduced in ES 9.2.1+.
+   */
+  force_merge_on_clone?: boolean;
 }
 
 export interface RolloverAction {

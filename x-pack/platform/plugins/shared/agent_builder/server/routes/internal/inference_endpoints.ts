@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { RouteDependencies } from '../types';
+import { internalApiPath } from '../../../common/constants';
 
-export const GET_INFERENCE_ENDPOINTS_PATH = '/internal/workplace_ai/inference_endpoints';
-
-export function registerGetInferenceEndpointsRoute(router: IRouter) {
+export function registerInternalInferenceEndpointsRoute({ router }: RouteDependencies) {
   router.get(
     {
-      path: GET_INFERENCE_ENDPOINTS_PATH,
+      path: `${internalApiPath}/inference_endpoints`,
       security: {
         authz: {
           enabled: false,
           reason: 'This route delegates authorization to the scoped ES client',
         },
       },
+      options: { access: 'internal' },
       validate: {},
     },
-    async (context, request, response) => {
+    async (context, _request, response) => {
       const coreContext = await context.core;
       const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
