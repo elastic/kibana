@@ -10,18 +10,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
-const JIRA_CONNECTOR_TYPE_ID = '.jira';
-
 const SEARCH_INPUT = '[data-test-subj="actionsList"] .euiFieldSearch';
 const ACTIONS_TABLE_LOADED =
   '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)';
-const CONNECTORS_ROW = 'connectors-row';
-const CONNECTOR_NAME_CELL = 'connectorsTableCell-name';
-const CONNECTOR_TYPE_CELL = 'connectorsTableCell-actionType';
-const TEST_CONNECTOR_TAB = 'testConnectorTab';
 const SUMMARY_INPUT = 'summaryInput';
-const CODE_EDITOR = 'kibanaCodeEditor';
 const EXECUTE_BUTTON = 'executeActionButton';
 const EXECUTION_FAILURE_RESULT = 'executionFailureResult';
 const FLYOUT_CLOSE_BUTTON = 'edit-connector-flyout-close-btn';
@@ -42,7 +34,7 @@ interface MonacoBridge {
 // a hidden textarea + virtualized canvas. setValue() also dispatches the
 // onDidChangeContent event so React state stays in sync.
 const setOtherFieldsValue = async (page: ScoutPage, value: string) => {
-  await page.testSubj.locator(CODE_EDITOR).waitFor({ state: 'visible' });
+  await page.testSubj.locator('kibanaCodeEditor').waitFor({ state: 'visible' });
   await page.evaluate((v) => {
     const editor = (window as unknown as MonacoBridge).MonacoEnvironment?.monaco?.editor;
     if (!editor) {
@@ -57,7 +49,7 @@ const setOtherFieldsValue = async (page: ScoutPage, value: string) => {
 
 const openTestConnectorFlyout = async (page: ScoutPage, connectorId: string) => {
   await page.testSubj.click(`edit${connectorId}`);
-  await page.testSubj.click(TEST_CONNECTOR_TAB);
+  await page.testSubj.click('testConnectorTab');
   await page.testSubj.locator(SUMMARY_INPUT).waitFor({ state: 'visible' });
 };
 
@@ -70,7 +62,7 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
     jiraConnectorName = `scout-jira-${Date.now()}`;
     const created = await apiServices.alerting.connectors.create({
       name: jiraConnectorName,
-      connectorTypeId: JIRA_CONNECTOR_TYPE_ID,
+      connectorTypeId: '.jira',
       config: { apiUrl: 'https://test.com', projectKey: 'apiKey' },
       secrets: { email: 'test@elastic.co', apiToken: 'changeme' },
     });
@@ -80,7 +72,7 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+    await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/triggersActionsConnectors'));
     await page.locator(ACTIONS_TABLE_LOADED).waitFor();
   });
 
@@ -97,12 +89,12 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
     await searchBox.press('Enter');
     await page.locator(ACTIONS_TABLE_LOADED).waitFor();
 
-    const rows = page.testSubj.locator(CONNECTORS_ROW);
+    const rows = page.testSubj.locator('connectors-row');
     await expect(rows).toHaveCount(1);
     // The table cells wrap text in an inner `.euiTableCellContent` div
     // alongside icons/tooltips, so toContainText is the right granularity.
-    await expect(rows.getByTestId(CONNECTOR_NAME_CELL)).toContainText(jiraConnectorName);
-    await expect(rows.getByTestId(CONNECTOR_TYPE_CELL)).toContainText('Jira');
+    await expect(rows.getByTestId('connectorsTableCell-name')).toContainText(jiraConnectorName);
+    await expect(rows.getByTestId('connectorsTableCell-actionType')).toContainText('Jira');
   });
 
   test('does not throw a type error for other fields when its valid json', async ({ page }) => {

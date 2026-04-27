@@ -10,25 +10,11 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const MW_APP_PATH = '/app/management/insightsAndAlerting/maintenanceWindows';
-const MW_INTERNAL_PATH = '/internal/alerting/rules/maintenance_window';
-const MW_FIND_PATH = `${MW_INTERNAL_PATH}/_find`;
-const MW_DELETE_PATH = (id: string) => `${MW_INTERNAL_PATH}/${id}`;
-
-const SEARCH_INPUT_CSS = '.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)';
 const TABLE_LOADED_CSS =
   '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)';
 
-const TABLE_ACTIONS_POPOVER = 'table-actions-popover';
-const TABLE_ACTIONS_EDIT = 'table-actions-edit';
-const CREATE_FORM = 'createMaintenanceWindowForm';
-const NAME_INPUT = 'createMaintenanceWindowFormNameInput';
-const REPEAT_SELECT = 'recurringScheduleRepeatSelect';
-const REPEAT_OPTION_DAILY = 'recurringScheduleOptionDaily';
 const SUBMIT_BUTTON = 'create-submit';
-const CONFIRM_MODAL_BUTTON = 'confirmModalConfirmButton';
 const TOAST_TITLE = 'euiToastHeader__title';
-const SCOPE_QUERY = 'maintenanceWindowScopeQuery';
 const MULTIPLE_SOLUTIONS_WARNING = 'maintenanceWindowMultipleSolutionsRemovedWarning';
 
 // Frequency.DAILY == 3 in rrule. Match what the FTR createMaintenanceWindow
@@ -46,7 +32,7 @@ const createMaintenanceWindow = async (
 ): Promise<MaintenanceWindowResponse> => {
   const res = await kbnClient.request<MaintenanceWindowResponse>({
     method: 'POST',
-    path: MW_INTERNAL_PATH,
+    path: '/internal/alerting/rules/maintenance_window',
     headers: { 'kbn-xsrf': 'scout' },
     body,
   });
@@ -79,19 +65,19 @@ const openEditFlow = async (
   kbnUrl: { get: (p: string) => string },
   name: string
 ) => {
-  await page.goto(kbnUrl.get(MW_APP_PATH));
+  await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/maintenanceWindows'));
   await page.locator(TABLE_LOADED_CSS).waitFor();
 
   // The MW page renders a single search field; the unrelated
   // sitewide-search input is excluded by the CSS selector.
-  const searchBox = page.locator(SEARCH_INPUT_CSS);
+  const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
   await searchBox.fill(name);
   await searchBox.press('Enter');
   await page.locator(TABLE_LOADED_CSS).waitFor();
 
-  await page.testSubj.click(TABLE_ACTIONS_POPOVER);
-  await page.testSubj.click(TABLE_ACTIONS_EDIT);
-  await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();
+  await page.testSubj.click('table-actions-popover');
+  await page.testSubj.click('table-actions-edit');
+  await expect(page.testSubj.locator('createMaintenanceWindowForm')).toBeVisible();
 };
 
 test.describe('Maintenance window update form', { tag: tags.stateful.classic }, () => {
@@ -105,7 +91,7 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
     // don't leak windows into the next test.
     const findRes = await kbnClient.request<{ data: Array<{ id: string }> }>({
       method: 'GET',
-      path: MW_FIND_PATH,
+      path: '/internal/alerting/rules/maintenance_window/_find',
       headers: { 'kbn-xsrf': 'scout' },
     });
     const ids = findRes.data?.data?.map((mw) => mw.id) ?? [];
@@ -113,7 +99,7 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
       ids.map((id) =>
         kbnClient.request({
           method: 'DELETE',
-          path: MW_DELETE_PATH(id),
+          path: `/internal/alerting/rules/maintenance_window/${id}`,
           headers: { 'kbn-xsrf': 'scout' },
           ignoreErrors: [404],
         })
@@ -141,17 +127,16 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
 
     await openEditFlow(page, kbnUrl, initialName);
 
-    const nameInput = page.testSubj.locator(NAME_INPUT);
-    await nameInput.fill(updatedName);
+    await page.testSubj.locator('createMaintenanceWindowFormNameInput').fill(updatedName);
 
     // Re-select Daily to exercise the dropdown. The MW was created with the
     // same frequency; the actual mutation under test is the name change.
-    const dailyValue = await getNativeOptionValue(page, REPEAT_OPTION_DAILY);
-    await page.testSubj.locator(REPEAT_SELECT).selectOption(dailyValue);
+    const dailyValue = await getNativeOptionValue(page, 'recurringScheduleOptionDaily');
+    await page.testSubj.locator('recurringScheduleRepeatSelect').selectOption(dailyValue);
 
     await page.testSubj.click(SUBMIT_BUTTON);
     // Edits to a recurring schedule trigger a confirm modal before save.
-    await page.testSubj.click(CONFIRM_MODAL_BUTTON);
+    await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Updated maintenance window '${updatedName}'`
@@ -207,7 +192,7 @@ test.describe('Maintenance window update form', { tag: tags.stateful.classic }, 
 
     await openEditFlow(page, kbnUrl, name);
 
-    await expect(page.testSubj.locator(SCOPE_QUERY)).toBeVisible();
+    await expect(page.testSubj.locator('maintenanceWindowScopeQuery')).toBeVisible();
     await expect(page.testSubj.locator(MULTIPLE_SOLUTIONS_WARNING)).toContainText(
       'Support for multiple solution categories is removed.'
     );

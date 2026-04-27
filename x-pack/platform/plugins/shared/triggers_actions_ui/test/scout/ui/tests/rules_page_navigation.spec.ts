@@ -9,8 +9,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const RULES_APP = 'rules';
-const APP_TITLE_SUBJ = 'appTitle';
 const RULES_LIST_SUBJ = 'rulesList';
 
 // `.es-query` is built-in (Scout's stateful/classic config does not register
@@ -50,7 +48,7 @@ test.describe('Rules page navigation and loading', { tag: tags.stateful.classic 
 
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
-    await page.gotoApp(RULES_APP);
+    await page.gotoApp('rules');
   });
 
   test.afterAll(async ({ apiServices }) => {
@@ -64,7 +62,7 @@ test.describe('Rules page navigation and loading', { tag: tags.stateful.classic 
   });
 
   test('loads with the correct page title', async ({ page }) => {
-    await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
+    await expect(page.testSubj.locator('appTitle')).toHaveText('Rules');
   });
 
   test('displays the rules list', async ({ page }) => {

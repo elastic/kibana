@@ -9,15 +9,12 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const RULES_APP = 'rules';
 const SETTINGS_LINK_SUBJ = 'rulesSettingsLink';
 const FLYOUT_SUBJ = 'rulesSettingsFlyout';
-const FLYOUT_SAVE_BUTTON_SUBJ = 'rulesSettingsFlyoutSaveButton';
 const FLAPPING_OFF_PROMPT_SUBJ = 'rulesSettingsFlappingOffPrompt';
 const FLAPPING_TOGGLE_SUBJ = 'rulesSettingsFlappingEnableSwitch';
 const LOOK_BACK_INPUT_SUBJ = 'lookBackWindowRangeInput';
 const STATUS_CHANGE_INPUT_SUBJ = 'statusChangeThresholdRangeInput';
-const QUERY_DELAY_INPUT_SUBJ = 'queryDelayRangeInput';
 const SPINNER_SUBJ = 'centerJustifiedSpinner';
 
 const DEFAULT_LOOK_BACK = 10;
@@ -80,7 +77,7 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
     createdRuleId = response.data.id;
 
     await browserAuth.loginAsAdmin();
-    await page.gotoApp(RULES_APP);
+    await page.gotoApp('rules');
   });
 
   test.afterEach(async ({ apiServices }) => {
@@ -115,7 +112,7 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
     // Query-delay UI is gated behind a feature flag that is not on in
     // the Scout stateful/classic config (and was disabled in the original
     // FTR spec for the same reason).
-    await expect(page.testSubj.locator(QUERY_DELAY_INPUT_SUBJ)).toBeHidden();
+    await expect(page.testSubj.locator('queryDelayRangeInput')).toBeHidden();
   });
 
   test('modifies the rules settings and persists them', async ({ page }) => {
@@ -144,7 +141,7 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator(FLAPPING_OFF_PROMPT_SUBJ)).toBeVisible();
 
     // Save and verify the flyout closes
-    await page.testSubj.click(FLYOUT_SAVE_BUTTON_SUBJ);
+    await page.testSubj.click('rulesSettingsFlyoutSaveButton');
     await expect(page.testSubj.locator(FLYOUT_SUBJ)).toBeHidden();
 
     // Reopen and confirm the new values were persisted

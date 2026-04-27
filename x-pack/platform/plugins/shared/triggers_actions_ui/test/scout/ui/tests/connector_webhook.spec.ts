@@ -16,7 +16,6 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
-const WEBHOOK_CONNECTOR_TYPE_ID = '.webhook';
 const WEBHOOK_CARD_SUBJ = '.webhook-card';
 
 const ACTIONS_TABLE_LOADED =
@@ -24,25 +23,8 @@ const ACTIONS_TABLE_LOADED =
 const SEARCH_INPUT = '[data-test-subj="actionsList"] .euiFieldSearch';
 
 const CREATE_CONNECTOR_BUTTON = 'createConnectorButton';
-const NAME_INPUT = 'nameInput';
-const WEBHOOK_URL_INPUT = 'webhookUrlText';
-const AUTH_NONE = 'authNone';
-const AUTH_SSL = 'authSSL';
-const VIEW_HEADERS_SWITCH = 'webhookViewHeadersSwitch';
-const ADD_HEADER_BUTTON = 'webhookAddHeaderButton';
 const HEADER_KEY_INPUT = 'webhookHeadersKeyInput';
 const HEADER_VALUE_INPUT = 'webhookHeadersValueInput';
-const HEADER_SECRET_VALUE_INPUT = 'webhookHeadersSecretValueInput';
-const HEADER_TYPE_SELECT = 'webhookHeaderTypeSelect';
-const SAVE_BUTTON = 'create-connector-flyout-save-btn';
-const TOAST_TITLE = 'euiToastHeader__title';
-
-const CERT_TABS = 'webhookCertTypeTabs';
-const CERT_CR_TAB = 'webhookCertTypeCRTab';
-const CERT_PFX_TAB = 'webhookCertTypePFXTab';
-
-const CONNECTORS_ROW = 'connectors-row';
-const CONNECTOR_NAME_CELL = 'connectorsTableCell-name';
 
 test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
   const createdConnectorIds: string[] = [];
@@ -71,17 +53,17 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click(CREATE_CONNECTOR_BUTTON);
     await page.testSubj.click(WEBHOOK_CARD_SUBJ);
 
-    await page.testSubj.click(AUTH_NONE);
-    await page.testSubj.locator(NAME_INPUT).fill(connectorName);
-    await page.testSubj.locator(WEBHOOK_URL_INPUT).fill('https://www.example.com');
+    await page.testSubj.click('authNone');
+    await page.testSubj.locator('nameInput').fill(connectorName);
+    await page.testSubj.locator('webhookUrlText').fill('https://www.example.com');
 
-    await page.testSubj.click(VIEW_HEADERS_SWITCH);
+    await page.testSubj.click('webhookViewHeadersSwitch');
     // After toggling, one default empty header row is present. Add a second.
-    await page.testSubj.click(ADD_HEADER_BUTTON);
+    await page.testSubj.click('webhookAddHeaderButton');
 
     const headerKeys = page.testSubj.locator(HEADER_KEY_INPUT);
     const headerValues = page.testSubj.locator(HEADER_VALUE_INPUT);
-    const headerTypeSelects = page.testSubj.locator(HEADER_TYPE_SELECT);
+    const headerTypeSelects = page.testSubj.locator('webhookHeaderTypeSelect');
 
     await expect(headerKeys).toHaveCount(2);
     await expect(headerValues).toHaveCount(2);
@@ -104,11 +86,13 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await headerTypeSelects.nth(1).click();
     await page.testSubj.click('option-secret');
 
-    const saveButton = page.testSubj.locator(SAVE_BUTTON);
+    const saveButton = page.testSubj.locator('create-connector-flyout-save-btn');
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
 
-    await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(`Created '${connectorName}'`);
+    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+      `Created '${connectorName}'`
+    );
 
     // Find the created connector via API for cleanup. The toast already
     // confirmed creation succeeded; the API call only retrieves the id.
@@ -125,12 +109,12 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click(CREATE_CONNECTOR_BUTTON);
     await page.testSubj.click(WEBHOOK_CARD_SUBJ);
 
-    await page.testSubj.click(AUTH_SSL);
+    await page.testSubj.click('authSSL');
 
-    const tabs = page.testSubj.locator(CERT_TABS).locator('.euiTab');
+    const tabs = page.testSubj.locator('webhookCertTypeTabs').locator('.euiTab');
     await expect(tabs).toHaveCount(2);
-    await expect(page.testSubj.locator(CERT_CR_TAB)).toBeVisible();
-    await expect(page.testSubj.locator(CERT_PFX_TAB)).toBeVisible();
+    await expect(page.testSubj.locator('webhookCertTypeCRTab')).toBeVisible();
+    await expect(page.testSubj.locator('webhookCertTypePFXTab')).toBeVisible();
   });
 
   test('displays headers as expected when the connector was created via API', async ({
@@ -141,7 +125,7 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     const connectorName = `scout-webhook-headers-${Date.now()}`;
     const created = await apiServices.alerting.connectors.create({
       name: connectorName,
-      connectorTypeId: WEBHOOK_CONNECTOR_TYPE_ID,
+      connectorTypeId: '.webhook',
       config: {
         method: 'post',
         hasAuth: false,
@@ -165,11 +149,11 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await searchBox.press('Enter');
     await page.locator(ACTIONS_TABLE_LOADED).waitFor();
 
-    const rows = page.testSubj.locator(CONNECTORS_ROW);
+    const rows = page.testSubj.locator('connectors-row');
     await expect(rows).toHaveCount(1);
 
     // The cell is a button-link to open the edit flyout.
-    await rows.getByTestId(CONNECTOR_NAME_CELL).locator('button').click();
+    await rows.getByTestId('connectorsTableCell-name').locator('button').click();
 
     const headerKeys = page.testSubj.locator(HEADER_KEY_INPUT);
     await expect(headerKeys).toHaveCount(2);
@@ -182,7 +166,7 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await expect(configValue).toHaveCount(1);
     await expect(configValue).toHaveValue('config-value');
 
-    const secretValue = page.testSubj.locator(HEADER_SECRET_VALUE_INPUT);
+    const secretValue = page.testSubj.locator('webhookHeadersSecretValueInput');
     await expect(secretValue).toHaveCount(1);
     await expect(secretValue).toHaveValue('');
   });

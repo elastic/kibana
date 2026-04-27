@@ -12,7 +12,6 @@ import { test } from '../fixtures';
 
 const RULES_APP = 'rules';
 const APP_TITLE_SUBJ = 'appTitle';
-const NO_PERMISSION_PROMPT_SUBJ = 'noPermissionPrompt';
 const RULES_LIST_SUBJ = 'rulesList';
 const RULES_TAB_SUBJ = 'rulesTab';
 
@@ -95,7 +94,7 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginWithCustomRole(ONLY_ACTIONS_ROLE);
     await page.gotoApp(RULES_APP);
 
-    await expect(page.testSubj.locator(NO_PERMISSION_PROMPT_SUBJ)).toBeVisible();
+    await expect(page.testSubj.locator('noPermissionPrompt')).toBeVisible();
   });
 
   test('loads the Rules page as admin', async ({ browserAuth, page }) => {

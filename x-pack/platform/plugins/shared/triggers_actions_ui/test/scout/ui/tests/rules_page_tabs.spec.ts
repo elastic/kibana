@@ -9,7 +9,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const RULES_APP = 'rules';
 const RULES_LIST_SUBJ = 'rulesList';
 const RULES_TAB_SUBJ = 'rulesTab';
 const LOGS_TAB_SUBJ = 'logsTab';
@@ -54,7 +53,7 @@ test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, ()
 
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
-    await page.gotoApp(RULES_APP);
+    await page.gotoApp('rules');
   });
 
   test.afterAll(async ({ apiServices }) => {
@@ -89,9 +88,7 @@ test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, ()
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
   });
 
-  test('updates the URL correctly when switching back and forth between tabs', async ({
-    page,
-  }) => {
+  test('updates the URL correctly when switching back and forth between tabs', async ({ page }) => {
     // Start on Rules
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
 
