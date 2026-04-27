@@ -10,10 +10,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -109,7 +106,6 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     }
 
     agentBuilder.setChatConfig({
-      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           type: OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,

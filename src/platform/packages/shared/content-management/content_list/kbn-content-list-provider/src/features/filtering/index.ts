@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { FilterDisplayState, UseContentListFiltersReturn } from './types';
-export { useFilterDisplay } from './use_filter_display';
+export type { UseContentListFiltersReturn } from './types';
 export { useContentListFilters } from './use_content_list_filters';
-export { useTagFilterToggle } from './use_tag_filter_toggle';
-export { TAG_FILTER_ID } from '../../datasource';
+export { useFilterToggle, useTagFilterToggle, useCreatedByFilterToggle } from './use_filter_toggle';
+export { useFilterFacets } from './use_filter_facets';
+export { TAG_FILTER_ID, CREATED_BY_FILTER_ID } from '../../datasource';

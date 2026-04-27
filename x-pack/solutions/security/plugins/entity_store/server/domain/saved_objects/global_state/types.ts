@@ -37,6 +37,7 @@ const logExtractionSchema = schema.object({
   lookbackPeriod: schema.maybe(schema.string()),
   delay: schema.maybe(schema.string()),
   docsLimit: schema.maybe(schema.number()),
+  maxLogsPerPage: schema.maybe(schema.number()),
   timeout: schema.maybe(schema.string()),
   frequency: schema.maybe(schema.string()),
 });

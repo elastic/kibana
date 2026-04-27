@@ -15,7 +15,6 @@
 import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { EsqlFieldType } from '@kbn/esql-types';
-import { Parser } from '@elastic/esql';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ICommandCallbacks,
@@ -45,7 +44,7 @@ import { FunctionDefinitionTypes } from '../../commands/definitions/types';
 import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../../commands/definitions/utils';
 import { timeUnitsToSuggest } from '../../commands/definitions/constants';
-import { correctQuerySyntax, findAstPosition } from '../../commands/definitions/utils/ast';
+import { findAutocompleteAstPosition } from '../../language/shared/parse_for_autocomplete_query';
 import { FUNCTIONS_TO_IGNORE } from '../../commands/registry/eval/autocomplete';
 import { attachReplacementRanges } from '../../language/autocomplete/utils/prefix_range';
 
@@ -87,16 +86,12 @@ export const suggest = async (
   ) => Promise<ISuggestionItem[]>,
   offset?: number
 ): Promise<ISuggestionItem[]> => {
-  const innerText = query.substring(0, offset ?? query.length);
-  const correctedQuery = correctQuerySyntax(innerText);
-  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-  const headerConstruction = root?.header?.find((cmd) => cmd.name === commandName);
-
   const cursorPosition = offset ?? query.length;
+  const { innerText, root, command } = findAutocompleteAstPosition(query, cursorPosition);
+  const headerConstruction = root?.header?.find((cmd) => cmd.name === commandName);
+  const targetCommand = headerConstruction ?? command;
 
-  const command = headerConstruction ?? findAstPosition(root, cursorPosition).command;
-
-  if (!command) {
+  if (!targetCommand) {
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
   }
 
@@ -104,7 +99,7 @@ export const suggest = async (
 
   const suggestions = await autocomplete(
     query,
-    command,
+    targetCommand,
     mockCallbacks,
     contextWithRoot,
     cursorPosition

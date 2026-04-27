@@ -20,6 +20,8 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space',
       access: 'public',
       summary: `Get all spaces`,
+      description:
+        'Retrieve all available Kibana spaces. The list includes only the spaces that the user is authorized to access.',
       options: {
         tags: ['oas-tag:spaces'],
       },
@@ -36,35 +38,44 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: schema.object({
-              purpose: schema.maybe(
-                schema.oneOf(
-                  [
-                    schema.literal('any'),
-                    schema.literal('copySavedObjectsIntoSpace'),
-                    schema.literal('shareSavedObjectsIntoSpace'),
-                  ],
-                  {
+            query: schema.object(
+              {
+                purpose: schema.maybe(
+                  schema.oneOf(
+                    [
+                      schema.literal('any'),
+                      schema.literal('copySavedObjectsIntoSpace'),
+                      schema.literal('shareSavedObjectsIntoSpace'),
+                    ],
+                    {
+                      meta: {
+                        description:
+                          'Specifies which authorization checks are applied to the API call. The default value is `any`.',
+                      },
+                    }
+                  )
+                ),
+                include_authorized_purposes: schema.maybe(
+                  schema.boolean({
                     meta: {
                       description:
-                        'Specifies which authorization checks are applied to the API call. The default value is `any`.',
+                        'When enabled, the API returns any spaces the user is authorized to access in any capacity, each including the purposes for which the user is authorized. This is useful for identifying spaces the user can read but is not authorized for a given purpose. Without the security plugin, this parameter has no effect, because no authorization checks are performed. This parameter cannot be used together with the `purpose` parameter.',
                     },
+                  })
+                ),
+              },
+              {
+                validate: (value) => {
+                  if (
+                    value.purpose &&
+                    value.include_authorized_purposes !== undefined &&
+                    value.include_authorized_purposes !== false
+                  ) {
+                    return 'include_authorized_purposes can only be false when purpose is specified';
                   }
-                )
-              ),
-              include_authorized_purposes: schema.conditional(
-                schema.siblingRef('purpose'),
-                schema.string(),
-                schema.maybe(schema.literal(false)),
-                schema.maybe(schema.boolean()),
-                {
-                  meta: {
-                    description:
-                      'When enabled, the API returns any spaces that the user is authorized to access in any capacity and each space will contain the purposes for which the user is authorized. This can be useful to determine which spaces a user can read but not take a specific action in. If the security plugin is not enabled, this parameter has no effect, since no authorization checks take place. This parameter cannot be used in with the `purpose` parameter.',
-                  },
-                }
-              ),
-            }),
+                },
+              }
+            ),
           },
           response: {
             200: {

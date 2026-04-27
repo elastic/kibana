@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import {
@@ -29,57 +29,69 @@ import {
 } from '../model/rule_schema/rule_schemas.gen';
 import { NonEmptyString } from '../../model/primitives.gen';
 
+export const RulePreviewParams = lazySchema(() =>
+  z.object({
+    invocationCount: z.number().int(),
+    timeframeEnd: z.string().datetime(),
+  })
+);
 export type RulePreviewParams = z.infer<typeof RulePreviewParams>;
-export const RulePreviewParams = z.object({
-  invocationCount: z.number().int(),
-  timeframeEnd: z.string().datetime(),
-});
 
+export const RulePreviewLoggedRequest = lazySchema(() =>
+  z.object({
+    request: NonEmptyString.optional(),
+    description: NonEmptyString.optional(),
+    duration: z.number().int().optional(),
+    request_type: NonEmptyString.optional(),
+  })
+);
 export type RulePreviewLoggedRequest = z.infer<typeof RulePreviewLoggedRequest>;
-export const RulePreviewLoggedRequest = z.object({
-  request: NonEmptyString.optional(),
-  description: NonEmptyString.optional(),
-  duration: z.number().int().optional(),
-  request_type: NonEmptyString.optional(),
-});
 
+export const RulePreviewLogs = lazySchema(() =>
+  z.object({
+    errors: z.array(NonEmptyString),
+    warnings: z.array(NonEmptyString),
+    /**
+     * Execution duration in milliseconds
+     */
+    duration: z.number().int(),
+    startedAt: NonEmptyString.optional(),
+    requests: z.array(RulePreviewLoggedRequest).optional(),
+  })
+);
 export type RulePreviewLogs = z.infer<typeof RulePreviewLogs>;
-export const RulePreviewLogs = z.object({
-  errors: z.array(NonEmptyString),
-  warnings: z.array(NonEmptyString),
-  /**
-   * Execution duration in milliseconds
-   */
-  duration: z.number().int(),
-  startedAt: NonEmptyString.optional(),
-  requests: z.array(RulePreviewLoggedRequest).optional(),
-});
 
+export const RulePreviewRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Enables logging and returning in response ES queries, performed during rule execution
+     */
+    enable_logged_requests: BooleanFromString.optional(),
+  })
+);
 export type RulePreviewRequestQuery = z.infer<typeof RulePreviewRequestQuery>;
-export const RulePreviewRequestQuery = z.object({
-  /**
-   * Enables logging and returning in response ES queries, performed during rule execution
-   */
-  enable_logged_requests: BooleanFromString.optional(),
-});
 export type RulePreviewRequestQueryInput = z.input<typeof RulePreviewRequestQuery>;
 
+export const RulePreviewRequestBody = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    EqlRuleCreateProps.merge(RulePreviewParams),
+    QueryRuleCreateProps.merge(RulePreviewParams),
+    SavedQueryRuleCreateProps.merge(RulePreviewParams),
+    ThresholdRuleCreateProps.merge(RulePreviewParams),
+    ThreatMatchRuleCreateProps.merge(RulePreviewParams),
+    MachineLearningRuleCreateProps.merge(RulePreviewParams),
+    NewTermsRuleCreateProps.merge(RulePreviewParams),
+    EsqlRuleCreateProps.merge(RulePreviewParams),
+  ])
+);
 export type RulePreviewRequestBody = z.infer<typeof RulePreviewRequestBody>;
-export const RulePreviewRequestBody = z.discriminatedUnion('type', [
-  EqlRuleCreateProps.merge(RulePreviewParams),
-  QueryRuleCreateProps.merge(RulePreviewParams),
-  SavedQueryRuleCreateProps.merge(RulePreviewParams),
-  ThresholdRuleCreateProps.merge(RulePreviewParams),
-  ThreatMatchRuleCreateProps.merge(RulePreviewParams),
-  MachineLearningRuleCreateProps.merge(RulePreviewParams),
-  NewTermsRuleCreateProps.merge(RulePreviewParams),
-  EsqlRuleCreateProps.merge(RulePreviewParams),
-]);
 export type RulePreviewRequestBodyInput = z.input<typeof RulePreviewRequestBody>;
 
+export const RulePreviewResponse = lazySchema(() =>
+  z.object({
+    logs: z.array(RulePreviewLogs),
+    previewId: NonEmptyString.optional(),
+    isAborted: z.boolean().optional(),
+  })
+);
 export type RulePreviewResponse = z.infer<typeof RulePreviewResponse>;
-export const RulePreviewResponse = z.object({
-  logs: z.array(RulePreviewLogs),
-  previewId: NonEmptyString.optional(),
-  isAborted: z.boolean().optional(),
-});

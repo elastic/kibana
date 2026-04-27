@@ -311,7 +311,7 @@
           "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
-          " | undefined; } & React.RefAttributes<",
+          " | undefined; profileId: string; } & React.RefAttributes<",
           {
             "pluginId": "unifiedDocViewer",
             "scope": "public",
@@ -421,7 +421,7 @@
           "DocViewRenderProps",
           " & { indexes: ",
           "ObservabilityIndexes",
-          "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
+          "; profileId: string; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
           " | undefined; } & React.RefAttributes<{}>>"
         ],
@@ -473,7 +473,7 @@
           "TraceWaterfallRestorableState",
           "> & { indexes: ",
           "ObservabilityIndexes",
-          "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
+          "; profileId: string; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
           " | undefined; } & React.RefAttributes<",
           "OverviewApi",
@@ -576,7 +576,7 @@
         "label": "LogsOverviewApi",
         "description": [],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -592,7 +592,7 @@
               "(section: \"stacktrace\" | \"quality_issues\") => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -608,7 +608,7 @@
                   "\"stacktrace\" | \"quality_issues\""
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-                "lineNumber": 62,
+                "lineNumber": 63,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1337,7 +1337,7 @@
           "ObservabilityIndexes",
           "; showTraceWaterfall?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
-          " | undefined; }"
+          " | undefined; profileId: string; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
         "lineNumber": 49,

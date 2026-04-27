@@ -10,12 +10,14 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { SubFeatureCard } from './sub_feature_card';
-import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
+import { useConnectors } from '../../hooks/use_connectors';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
-jest.mock('../../hooks/use_inference_endpoints');
+jest.mock('../../hooks/use_connectors');
 jest.mock('../../hooks/use_registered_features');
 jest.mock('./add_model_popover', () => ({
   AddModelPopover: ({
@@ -31,57 +33,81 @@ jest.mock('./add_model_popover', () => ({
   ),
 }));
 
-const mockUseQueryInferenceEndpoints = useQueryInferenceEndpoints as jest.Mock;
+const mockUseConnectors = useConnectors as jest.Mock;
 const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
 
-const mockEndpoints = [
+const mockConnectors: InferenceConnector[] = [
   {
-    inference_id: 'ep-1',
-    service: 'elastic',
-    task_type: 'chat_completion',
-    service_settings: { model_id: 'claude' },
+    connectorId: 'ep-1',
+    name: 'Claude',
+    type: InferenceConnectorType.Inference,
+    config: { service: 'elastic', modelCreator: 'Anthropic' },
+    capabilities: {},
+    isInferenceEndpoint: true,
+    isPreconfigured: true,
   },
   {
-    inference_id: 'ep-2',
-    service: 'elastic',
-    task_type: 'chat_completion',
-    service_settings: { model_id: 'claude' },
+    connectorId: 'ep-2',
+    name: 'Claude 2',
+    type: InferenceConnectorType.Inference,
+    config: { service: 'elastic', modelCreator: 'Anthropic' },
+    capabilities: {},
+    isInferenceEndpoint: true,
+    isPreconfigured: true,
   },
   {
-    inference_id: 'ep-3',
-    service: 'openai',
-    task_type: 'chat_completion',
-    service_settings: { model_id: 'gpt-4o' },
+    connectorId: 'ep-3',
+    name: 'GPT-4o',
+    type: InferenceConnectorType.OpenAI,
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
   },
   {
-    inference_id: 'ep-4',
-    service: 'openai',
-    task_type: 'chat_completion',
-    service_settings: { model_id: 'gpt-4o-mini' },
+    connectorId: 'ep-4',
+    name: 'GPT-4o-mini',
+    type: InferenceConnectorType.OpenAI,
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
   },
   {
-    inference_id: 'ep-5',
-    service: 'openai',
-    task_type: 'chat_completion',
-    service_settings: { model_id: 'gpt-3.5-turbo' },
+    connectorId: 'ep-5',
+    name: 'GPT-3.5-turbo',
+    type: InferenceConnectorType.OpenAI,
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
   },
   {
-    inference_id: 'ep-6',
-    service: 'openai',
-    task_type: 'chat_completion',
-    service_settings: { model_id: 'o1' },
+    connectorId: 'ep-6',
+    name: 'o1',
+    type: InferenceConnectorType.OpenAI,
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
   },
   {
-    inference_id: 'ep-embed',
-    service: 'elastic',
-    task_type: 'text_embedding',
-    service_settings: { model_id: 'e5' },
+    connectorId: 'ep-embed',
+    name: 'E5',
+    type: InferenceConnectorType.Inference,
+    config: { service: 'elastic' },
+    capabilities: {},
+    isInferenceEndpoint: true,
+    isPreconfigured: true,
   },
   {
-    inference_id: 'ep-beta-tech-preview',
-    service: 'elastic',
-    task_type: 'chat_completion',
-    service_settings: { model_id: 'claude' },
+    connectorId: 'ep-beta-tech-preview',
+    name: 'Claude Beta',
+    type: InferenceConnectorType.Inference,
+    config: { service: 'elastic', modelCreator: 'Anthropic' },
+    capabilities: {},
+    isInferenceEndpoint: true,
+    isPreconfigured: true,
   },
 ];
 
@@ -112,11 +138,20 @@ describe('SubFeatureCard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseQueryInferenceEndpoints.mockReturnValue({ data: mockEndpoints });
+    mockUseConnectors.mockReturnValue({ data: mockConnectors });
     mockUseRegisteredFeatures.mockReturnValue({ features: [], isLoading: false });
   });
 
-  const renderCard = (endpointIds: string[], overrides?: Partial<InferenceFeatureConfig>) =>
+  const renderCard = (
+    endpointIds: string[],
+    overrides?: Partial<InferenceFeatureConfig>,
+    extra?: {
+      invalidEndpointIds?: Set<string>;
+      globalDefaultId?: string;
+      hasSavedObject?: boolean;
+      isFeatureDirty?: boolean;
+    }
+  ) =>
     render(
       <Wrapper>
         <SubFeatureCard
@@ -124,6 +159,10 @@ describe('SubFeatureCard', () => {
           feature={{ ...feature, ...overrides }}
           endpointIds={endpointIds}
           onEndpointsChange={onEndpointsChange}
+          invalidEndpointIds={extra?.invalidEndpointIds ?? new Set()}
+          globalDefaultId={extra?.globalDefaultId ?? 'NO_DEFAULT_MODEL'}
+          hasSavedObject={extra?.hasSavedObject ?? true}
+          isFeatureDirty={extra?.isFeatureDirty ?? false}
         />
       </Wrapper>
     );
@@ -255,5 +294,109 @@ describe('SubFeatureCard', () => {
     fireEvent.click(screen.getByTestId('add-model-button'));
 
     expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-1', 'ep-2']);
+  });
+
+  describe('connector icon mapping', () => {
+    it('renders connector name as endpoint label', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [
+          {
+            connectorId: 'bedrock-1',
+            name: 'My Bedrock Model',
+            type: InferenceConnectorType.Bedrock,
+            config: {},
+            capabilities: {},
+            isInferenceEndpoint: false,
+            isPreconfigured: false,
+          },
+        ],
+      });
+
+      renderCard(['bedrock-1']);
+
+      expect(screen.getByText('My Bedrock Model')).toBeInTheDocument();
+    });
+
+    it('falls back to endpoint ID when connector is not in the map', () => {
+      mockUseConnectors.mockReturnValue({ data: [] });
+
+      renderCard(['unknown-ep']);
+
+      expect(screen.getByText('unknown-ep')).toBeInTheDocument();
+    });
+
+    it('renders Azure OpenAI icon for OpenAI connectors with Azure provider', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [
+          {
+            connectorId: 'azure-1',
+            name: 'Azure GPT',
+            type: InferenceConnectorType.OpenAI,
+            config: { apiProvider: 'Azure OpenAI' },
+            capabilities: {},
+            isInferenceEndpoint: false,
+            isPreconfigured: false,
+          },
+        ],
+      });
+
+      renderCard(['azure-1']);
+
+      expect(screen.getByText('Azure GPT')).toBeInTheDocument();
+    });
+  });
+
+  describe('global default row', () => {
+    it('does not render greyed row when feature has a saved object', () => {
+      renderCard(['ep-1'], undefined, {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: true,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('does not render greyed row when global default is unset', () => {
+      renderCard(['ep-1'], undefined, {
+        globalDefaultId: 'NO_DEFAULT_MODEL',
+        hasSavedObject: false,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('renders greyed row with badge when no saved object, default set, and not dirty', () => {
+      renderCard(['ep-1'], undefined, {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: false,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+      expect(screen.getByTestId('global-default-badge-test_feature')).toBeInTheDocument();
+    });
+
+    it('renders greyed row without badge when feature has been edited', () => {
+      renderCard(['ep-1'], undefined, {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: false,
+        isFeatureDirty: true,
+      });
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+      expect(screen.queryByTestId('global-default-badge-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('hides the per-endpoint Default badge when the global default row is shown', () => {
+      renderCard(['ep-1', 'ep-2'], undefined, {
+        globalDefaultId: 'ep-3',
+        hasSavedObject: false,
+        isFeatureDirty: false,
+      });
+
+      expect(screen.queryByText('Default')).not.toBeInTheDocument();
+    });
   });
 });

@@ -21,17 +21,18 @@ const badgeCss = (euiTheme: EuiThemeComputed) => css`
 
 const euiPaletteRed9 = euiPaletteRed(14);
 interface EventTypeProps {
-  eventTypeValue: React.ReactNode;
+  eventTypeValue: string | undefined;
 }
 export function EventType({ eventTypeValue }: EventTypeProps) {
   const { euiTheme } = useEuiTheme();
+
+  if (!eventTypeValue) {
+    return null;
+  }
+
   return (
     <EuiBadge color={euiPaletteRed9[9]} data-test-subj={dataTestSubj} css={badgeCss(euiTheme)}>
-      <EuiText
-        size="xs"
-        // Value returned from formatFieldValue is always sanitized
-        dangerouslySetInnerHTML={{ __html: eventTypeValue ?? '' }}
-      />
+      <EuiText size="xs">{eventTypeValue}</EuiText>
     </EuiBadge>
   );
 }

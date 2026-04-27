@@ -643,6 +643,44 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "customIntegrations",
+          "id": "def-server.CustomIntegrationsPluginSetup.registerDeferredIntegrations",
+          "type": "Function",
+          "tags": [],
+          "label": "registerDeferredIntegrations",
+          "description": [
+            "\nRegisters a deferred initializer that will be called (once, in registration order) the\nfirst time the integration list is read.  Use this to avoid evaluating i18n strings and\nbuilding registration payloads at plugin start time — work is deferred to the first\nincoming HTTP request instead."
+          ],
+          "signature": [
+            "(init: () => void) => void"
+          ],
+          "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
+          "lineNumber": 15,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "customIntegrations",
+              "id": "def-server.CustomIntegrationsPluginSetup.registerDeferredIntegrations.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "init",
+              "description": [],
+              "signature": [
+                "() => void"
+              ],
+              "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
+              "lineNumber": 21,
+              "columnNumber": 32,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -656,7 +694,7 @@
       "label": "CustomIntegrationsPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
-      "lineNumber": 18,
+      "lineNumber": 25,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

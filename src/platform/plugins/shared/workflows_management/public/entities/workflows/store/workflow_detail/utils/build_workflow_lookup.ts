@@ -11,6 +11,7 @@
 
 import type { LineCounter } from 'yaml';
 import YAML from 'yaml';
+import type { RecursivePartial } from '@kbn/utility-types';
 import { isBuiltInStepProperty, type StepSelectionValues } from '@kbn/workflows';
 import { isRecord } from '../../../../../../common/lib/type_guards';
 
@@ -222,12 +223,14 @@ function visitStepProps(node: any, stack: string[] = []): Record<string, StepPro
   return result;
 }
 
+// Path segments come from YAML keys; use null-prototype objects so keys like "__proto__"
+// cannot resolve inherited accessors or pollute Object.prototype when nesting.
 function setNested(obj: Record<string, unknown>, segments: string[], value: unknown): void {
   let current = obj;
   for (let i = 0; i < segments.length - 1; i++) {
     const seg = segments[i];
     if (!isRecord(current[seg])) {
-      current[seg] = {};
+      current[seg] = Object.create(null) as Record<string, unknown>;
     }
     current = current[seg] as Record<string, unknown>;
   }
@@ -235,22 +238,53 @@ function setNested(obj: Record<string, unknown>, segments: string[], value: unkn
 }
 
 /**
+ * Whether a leaf dotted path (e.g. `config.proxy.ssl`) should be included for the given
+ * `valuePaths` (from `dependsOnValues`). Matches exact paths, ancestors, or descendants.
+ */
+function leafPathMatchesValuePaths(dottedLeafKey: string, valuePaths: readonly string[]): boolean {
+  return valuePaths.some(
+    (vp) =>
+      dottedLeafKey === vp ||
+      dottedLeafKey.startsWith(`${vp}.`) ||
+      vp.startsWith(`${dottedLeafKey}.`)
+  );
+}
+
+/**
  * Builds structured config/input values from a step's scalar leaf properties.
  * Properties under the `with` block are placed in `input`; all others in `config`.
+ *
+ * When `valuePaths` is provided (e.g. from `selection.dependsOnValues`), only properties
+ * whose dotted `config.*` / `input.*` path matches are included — single pass over `propInfos`.
  */
-export function buildStepSelectionValues(step: StepInfo): StepSelectionValues {
-  const config: Record<string, unknown> = {};
-  const input: Record<string, unknown> = {};
+export function buildStepSelectionValues(
+  step: StepInfo,
+  valuePaths?: readonly string[]
+): StepSelectionValues {
+  // Same null-prototype initialization as setNested (see comment there) — required to avoid prototype pollution.
+  const config = Object.create(null) as RecursivePartial<Record<string, unknown>>;
+  const input = Object.create(null) as RecursivePartial<Record<string, unknown>>;
+
+  const pathsToMatch = valuePaths && valuePaths.length > 0 ? valuePaths : undefined;
+  if (!pathsToMatch) {
+    return { config, input };
+  }
 
   for (const propInfo of Object.values(step.propInfos)) {
     const rootKey = propInfo.path[0];
     if (rootKey === 'with') {
       const inputPath = propInfo.path.slice(1);
       if (inputPath.length > 0) {
-        setNested(input, inputPath, getValueFromValueNode(propInfo.valueNode));
+        const dottedKey = `input.${inputPath.join('.')}`;
+        if (leafPathMatchesValuePaths(dottedKey, pathsToMatch)) {
+          setNested(input, inputPath, getValueFromValueNode(propInfo.valueNode));
+        }
       }
     } else if (typeof rootKey !== 'string' || !isBuiltInStepProperty(rootKey)) {
-      setNested(config, propInfo.path, getValueFromValueNode(propInfo.valueNode));
+      const dottedKey = `config.${propInfo.path.join('.')}`;
+      if (leafPathMatchesValuePaths(dottedKey, pathsToMatch)) {
+        setNested(config, propInfo.path, getValueFromValueNode(propInfo.valueNode));
+      }
     }
   }
 

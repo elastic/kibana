@@ -3194,7 +3194,7 @@
           "<{}, {}>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3216,7 +3216,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -3829,7 +3829,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/parallel_run_fixtures.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4020,7 +4020,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/single_thread_fixtures.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4348,6 +4348,38 @@
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
             "lineNumber": 39,
             "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-security",
+        "id": "def-common.ApiServicesFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiServicesFixture",
+        "description": [],
+        "path": "x-pack/platform/plugins/private/logstash/test/scout/api/fixtures/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 3,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ApiServicesFixture.logstash",
+            "type": "Object",
+            "tags": [],
+            "label": "logstash",
+            "description": [],
+            "signature": [
+              "LogstashApiService"
+            ],
+            "path": "x-pack/platform/plugins/private/logstash/test/scout/api/fixtures/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8353,7 +8385,7 @@
               "\nAllows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),\n[ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and\n[accessible name](https://w3c.github.io/accname/#dfn-accessible-name).\n\n**Usage**\n\nConsider the following DOM structure.\n\n```html\n<h3>Sign up</h3>\n<label>\n  <input type=\"checkbox\" /> Subscribe\n</label>\n<br/>\n<button>Submit</button>\n```\n\nYou can locate each element by its implicit role:\n\n```js\nawait expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();\n\nawait page.getByRole('checkbox', { name: 'Subscribe' }).check();\n\nawait page.getByRole('button', { name: /submit/i }).click();\n```\n\n**Details**\n\nRole selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback\nabout the ARIA guidelines.\n\nMany html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)\nthat is recognized by the role selector. You can find all the\n[supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**\nduplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values."
             ],
             "signature": [
-              "(role: \"log\" | \"search\" | \"term\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"code\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
+              "(role: \"log\" | \"search\" | \"term\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"code\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"generic\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
@@ -8372,7 +8404,7 @@
                   "Required aria role."
                 ],
                 "signature": [
-                  "\"log\" | \"search\" | \"term\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"code\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
+                  "\"log\" | \"search\" | \"term\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"code\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"generic\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
                 "lineNumber": 13716,
@@ -9399,10 +9431,6 @@
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": [
-                      {
-                        "plugin": "@kbn/scout",
-                        "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
-                      },
                       {
                         "plugin": "@kbn/scout",
                         "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
@@ -11285,7 +11313,7 @@
         "label": "SamlAuth",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-        "lineNumber": 50,
+        "lineNumber": 87,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11307,7 +11335,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 51,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11320,7 +11348,7 @@
             "label": "customRoleName",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 52,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11352,7 +11380,7 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 53,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11382,7 +11410,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-                "lineNumber": 53,
+                "lineNumber": 90,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11428,7 +11456,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 55,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11461,7 +11489,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-                "lineNumber": 85,
+                "lineNumber": 122,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11720,6 +11748,19 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ScoutParallelWorkerFixtures.isSnapshotBuild",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSnapshotBuild",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -11807,7 +11848,7 @@
         "label": "ScoutServerConfig",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-        "lineNumber": 12,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11823,7 +11864,23 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 13,
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ScoutServerConfig.http2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "http2",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11837,17 +11894,17 @@
             "description": [],
             "signature": [
               "{ kibana: ",
-              "UrlParts",
+              "ServerUrlParts",
               "; elasticsearch: ",
-              "UrlParts",
+              "ServerUrlParts",
               "; linkedElasticsearch?: ",
-              "UrlParts",
+              "ServerUrlParts",
               " | undefined; fleet?: ",
-              "UrlParts",
+              "ServerUrlParts",
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 14,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11863,7 +11920,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 20,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11879,7 +11936,7 @@
               "{ from: string; license?: string | undefined; files: string[]; serverArgs: string[]; ssl: boolean; secureFiles?: string[] | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 21,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11892,10 +11949,10 @@
             "label": "esServerlessOptions",
             "description": [],
             "signature": [
-              "{ uiam: boolean; cps?: boolean | undefined; } | undefined"
+              "{ uiam: boolean; uiamOAuth?: boolean | undefined; cps?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 29,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11911,7 +11968,7 @@
               "{ env: any; buildArgs: string[]; sourceArgs: string[]; serverArgs: string[]; useDedicatedTestRunner?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 30,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11947,13 +12004,26 @@
           },
           {
             "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ScoutTestConfig.http2",
+            "type": "boolean",
+            "tags": [],
+            "label": "http2",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
             "id": "def-common.ScoutTestConfig.uiam",
             "type": "boolean",
             "tags": [],
             "label": "uiam",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11969,7 +12039,7 @@
               "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11985,7 +12055,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 16,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11998,7 +12068,7 @@
             "label": "isCloud",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 17,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12014,7 +12084,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12027,7 +12097,7 @@
             "label": "cloudUsersFilePath",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12040,7 +12110,7 @@
             "label": "license",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12056,7 +12126,7 @@
               "{ kibana: string; elasticsearch: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12072,7 +12142,7 @@
               "{ username: string; password: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12088,7 +12158,7 @@
               "{ hosts: { elasticsearch: string; }; auth: { username: string; password: string; }; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12104,7 +12174,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12507,6 +12577,19 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ScoutWorkerFixtures.isSnapshotBuild",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSnapshotBuild",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12536,7 +12619,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12552,7 +12635,7 @@
               "DetectionRuleApiService"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12568,7 +12651,7 @@
               "DetectionAlertsApiService"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12584,7 +12667,7 @@
               "EntityAnalyticsApiService"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12600,7 +12683,7 @@
               "CloudConnectorApiService"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12616,7 +12699,23 @@
               "TimelineApiService"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.SecurityApiServicesFixture.attackDiscovery",
+            "type": "Object",
+            "tags": [],
+            "label": "attackDiscovery",
+            "description": [],
+            "signature": [
+              "AttackDiscoveryApiService"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12649,7 +12748,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12665,7 +12764,7 @@
               "AlertsTablePage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12681,7 +12780,7 @@
               "AlertDetailsRightPanelPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12697,7 +12796,7 @@
               "EntityAnalyticsDashboardsPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12713,7 +12812,7 @@
               "EntityAnalyticsManagementPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12729,7 +12828,7 @@
               "CspmIntegrationPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12745,7 +12844,7 @@
               "TimelinePage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12761,7 +12860,23 @@
               "DetectionsAttackDiscoveryPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.SecurityPageObjects.attackDetailsRightPanelPage",
+            "type": "Object",
+            "tags": [],
+            "label": "attackDetailsRightPanelPage",
+            "description": [],
+            "signature": [
+              "AttackDetailsRightPanelPage"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12794,7 +12909,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-        "lineNumber": 46,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12810,7 +12925,7 @@
               "DetectionRuleApiService"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12826,7 +12941,7 @@
               "CloudConnectorApiService"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 48,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12859,7 +12974,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-        "lineNumber": 41,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12875,7 +12990,7 @@
               "SecurityBrowserAuthFixture"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12897,7 +13012,7 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12930,7 +13045,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-        "lineNumber": 51,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12952,7 +13067,7 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12985,7 +13100,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-        "lineNumber": 32,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13001,7 +13116,7 @@
               "SecurityBrowserAuthFixture"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13023,7 +13138,7 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 34,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13056,7 +13171,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-        "lineNumber": 37,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13078,7 +13193,7 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

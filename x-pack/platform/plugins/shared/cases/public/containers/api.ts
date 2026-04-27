@@ -386,6 +386,7 @@ export const patchCase = async ({
     | 'category'
     | 'customFields'
     | 'extended_fields'
+    | 'template'
   >;
   version: string;
   signal?: AbortSignal;

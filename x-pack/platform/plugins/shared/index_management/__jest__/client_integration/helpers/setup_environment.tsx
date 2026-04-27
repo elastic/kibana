@@ -42,7 +42,7 @@ import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { documentationService } from '../../../public/application/services/documentation';
-import { notificationService } from '../../../public/application/services/notification';
+import { NotificationService } from '../../../public/application/services/notification';
 import { ExtensionsService } from '../../../public/services';
 import { UiMetricService } from '../../../public/application/services/ui_metric';
 import { setUiMetricService } from '../../../public/application/services/api';
@@ -57,10 +57,11 @@ import { init as initHttpRequests } from './http_requests';
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export const createServices = () => {
+  const notifications = notificationServiceMock.createStartContract();
   const services: AppDependencies['services'] = {
     extensionsService: new ExtensionsService(),
     uiMetricService: new UiMetricService('index_management'),
-    notificationService,
+    notificationService: new NotificationService(notifications.toasts),
     httpService,
   };
   services.uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
@@ -145,7 +146,6 @@ export const kibanaVersion = new SemVer(MAJOR_VERSION);
 export const setupEnvironment = () => {
   breadcrumbService.setup(() => undefined);
   documentationService.setup(docLinksServiceMock.createStartContract());
-  notificationService.setup(notificationServiceMock.createStartContract());
 
   // Reset httpService singleton to ensure clean state between tests
   // This is critical - if httpService.httpClient is undefined, components will crash

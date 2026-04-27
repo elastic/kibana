@@ -8,7 +8,6 @@ import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
-import { dump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt, minVersion, gt } from 'semver';
 import type {
@@ -33,6 +32,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
+
+import yaml from 'yaml';
 
 import { copyPackagePolicy } from '../../common/services/copy_package_policy_utils';
 
@@ -146,9 +147,9 @@ import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
 import { getAgentsByKuery, unenrollForAgentPolicyId } from './agents';
 import {
+  getCompiledVersionsForAgentPolicy,
   getPackagePolicySavedObjectType,
   packagePolicyService,
-  getCompiledVersionsForAgentPolicy,
 } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
@@ -2133,7 +2134,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, dump);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, yaml);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
@@ -2760,9 +2761,17 @@ class AgentPolicyService {
 
     logger.info(`${VERIFY_PERMISSIONS_TASK} Deploying verifier policy ${agentPolicy.id}`);
 
-    await this.deployPolicy(soClient, agentPolicy.id, undefined, {
-      throwOnAgentlessError: true,
-    });
+    try {
+      await this.deployPolicy(soClient, agentPolicy.id, undefined, {
+        throwOnAgentlessError: true,
+      });
+    } catch (err) {
+      logger.error(
+        `${VERIFY_PERMISSIONS_TASK} Failed to deploy verifier policy ${agentPolicy.id}, rolling back: ${err}`
+      );
+      await this.deleteVerifierPolicy(soClient, esClient, agentPolicy.id);
+      throw err;
+    }
 
     return { policyId: agentPolicy.id };
   }
@@ -2805,7 +2814,7 @@ function buildVerifierCredentialVars(
   } else if (provider === 'gcp') {
     const gcpVars = connectorVars as GcpCloudConnectorVars;
     vars.credentials_service_account_email = gcpVars.service_account;
-    vars.credentials_workload_identity_provider = gcpVars.audience;
+    vars.credentials_audience = gcpVars.audience;
   }
 
   return vars;

@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { agentBuilderDefaultAgentId, AgentVisibility } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest } from '../../../common/agents';
 
 export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
   id: agentBuilderDefaultAgentId,
-  name: 'Elastic AI Agent',
-  description: 'Elastic AI Agent',
+  name: i18n.translate('xpack.agentBuilder.builtin.defaultAgent.name', {
+    defaultMessage: 'Elastic AI Agent',
+  }),
+  description: i18n.translate('xpack.agentBuilder.builtin.defaultAgent.description', {
+    defaultMessage:
+      'The built-in agent for interacting with Elastic. Leverages built in skills, tools, and plugins, customizable as your use cases evolve. Use it for day-to-day work over your Elastic data, configuration, and capabilities (debugging, analysis, retrieval, operations, and more).',
+  }),
   visibility: AgentVisibility.Public,
   configuration: {
     // enable built-in skills and default set of tools for the default agent

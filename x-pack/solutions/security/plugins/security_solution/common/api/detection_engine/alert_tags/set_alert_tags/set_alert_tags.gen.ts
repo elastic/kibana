@@ -14,16 +14,16 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { SetAlertTagsBody } from '../../model/set_alert_tags_body.gen';
 
+export const SetAlertTagsRequestBody = lazySchema(() => SetAlertTagsBody);
 export type SetAlertTagsRequestBody = z.infer<typeof SetAlertTagsRequestBody>;
-export const SetAlertTagsRequestBody = SetAlertTagsBody;
 export type SetAlertTagsRequestBodyInput = z.input<typeof SetAlertTagsRequestBody>;
 
 /**
  * Elasticsearch update by query response
  */
+export const SetAlertTagsResponse = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type SetAlertTagsResponse = z.infer<typeof SetAlertTagsResponse>;
-export const SetAlertTagsResponse = z.object({}).catchall(z.unknown());
