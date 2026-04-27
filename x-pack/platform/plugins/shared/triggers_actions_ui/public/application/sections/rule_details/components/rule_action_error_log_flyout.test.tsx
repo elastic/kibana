@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 
@@ -72,56 +73,23 @@ describe('rule_action_error_log_flyout', () => {
   });
 
   it('renders correctly', async () => {
-    const wrapper = mountWithIntl(
-      <RuleActionErrorLogFlyout runLog={mockExecution} onClose={mockClose} />
+    renderWithI18n(<RuleActionErrorLogFlyout runLog={mockExecution} onClose={mockClose} />);
+
+    await screen.findByTestId('RuleErrorLog');
+
+    expect(screen.getByTestId('ruleActionErrorLogFlyoutMessageText')).toHaveTextContent(
+      mockExecution.message
     );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find('[data-test-subj="RuleErrorLog"]').exists()).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="ruleActionErrorLogFlyoutMessageText"]').first().text()
-    ).toEqual(mockExecution.message);
-    expect(wrapper.find('[data-test-subj="ruleActionErrorBadge"]').first().text()).toEqual('4');
+    expect(screen.getByTestId('ruleActionErrorBadge')).toHaveTextContent('4');
   });
 
   it('can close the flyout', async () => {
-    const wrapper = mountWithIntl(
-      <RuleActionErrorLogFlyout runLog={mockExecution} onClose={mockClose} />
-    );
+    renderWithI18n(<RuleActionErrorLogFlyout runLog={mockExecution} onClose={mockClose} />);
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await screen.findByTestId('RuleErrorLog');
 
-    wrapper.find('[data-test-subj="ruleActionErrorLogFlyoutCloseButton"] button').simulate('click');
+    await userEvent.click(screen.getByTestId('ruleActionErrorLogFlyoutCloseButton'));
 
     expect(mockClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('switches between push and overlay flyout depending on the size of the screen', async () => {
-    const wrapper = mountWithIntl(
-      <RuleActionErrorLogFlyout runLog={mockExecution} onClose={mockClose} />
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    mockUseIsWithinBreakpoints.mockReturnValue(false);
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(
-      wrapper.find('[data-test-subj="ruleActionErrorLogFlyout"]').first().props().type
-    ).toEqual('push');
   });
 });

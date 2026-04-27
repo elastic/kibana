@@ -2823,10 +2823,10 @@
         },
         {
           "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableSetup.registerReactEmbeddableFactory",
+          "id": "def-public.EmbeddableSetup.registerEmbeddablePublicDefinition",
           "type": "Function",
           "tags": [],
-          "label": "registerReactEmbeddableFactory",
+          "label": "registerEmbeddablePublicDefinition",
           "description": [
             "\nRegisters an async {@link ReactEmbeddableFactory} getter."
           ],
@@ -2866,20 +2866,20 @@
           "children": [
             {
               "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableSetup.registerReactEmbeddableFactory.$1",
+              "id": "def-public.EmbeddableSetup.registerEmbeddablePublicDefinition.$1",
               "type": "string",
               "tags": [],
               "label": "type",
               "description": [],
               "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-              "lineNumber": 26,
+              "lineNumber": 30,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
             {
               "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableSetup.registerReactEmbeddableFactory.$2",
+              "id": "def-public.EmbeddableSetup.registerEmbeddablePublicDefinition.$2",
               "type": "Function",
               "tags": [],
               "label": "getFactory",
@@ -2896,7 +2896,7 @@
                 "<SerializedState, Api>>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-              "lineNumber": 27,
+              "lineNumber": 31,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false,
@@ -3702,25 +3702,27 @@
         },
         {
           "parentPluginId": "embeddable",
-          "id": "def-server.EmbeddableSetup.registerTransforms",
+          "id": "def-server.EmbeddableSetup.registerEmbeddableServerDefinition",
           "type": "Function",
           "tags": [],
-          "label": "registerTransforms",
-          "description": [],
+          "label": "registerEmbeddableServerDefinition",
+          "description": [
+            "\nRegisters an embeddable server defintion.\nBe sure to register an embeddable public definition for this type."
+          ],
           "signature": [
             "(type: string, transforms: ",
-            "EmbeddableTransformsSetup",
+            "EmbeddableServerDefinition",
             "<any, any>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 55,
+          "lineNumber": 46,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "embeddable",
-              "id": "def-server.EmbeddableSetup.registerTransforms.$1",
+              "id": "def-server.EmbeddableSetup.registerEmbeddableServerDefinition.$1",
               "type": "string",
               "tags": [],
               "label": "type",
@@ -3729,26 +3731,26 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "lineNumber": 55,
-              "columnNumber": 24,
+              "lineNumber": 51,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
             },
             {
               "parentPluginId": "embeddable",
-              "id": "def-server.EmbeddableSetup.registerTransforms.$2",
+              "id": "def-server.EmbeddableSetup.registerEmbeddableServerDefinition.$2",
               "type": "Object",
               "tags": [],
               "label": "transforms",
               "description": [],
               "signature": [
-                "EmbeddableTransformsSetup",
+                "EmbeddableServerDefinition",
                 "<any, any>"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "lineNumber": 55,
-              "columnNumber": 38,
+              "lineNumber": 52,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3774,7 +3776,7 @@
             }
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 56,
+          "lineNumber": 54,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3835,7 +3837,7 @@
         "<object> | undefined; throwOnUnmappedPanel?: ((config: object) => void) | undefined; }) | undefined; }"
       ],
       "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-      "lineNumber": 59,
+      "lineNumber": 57,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
