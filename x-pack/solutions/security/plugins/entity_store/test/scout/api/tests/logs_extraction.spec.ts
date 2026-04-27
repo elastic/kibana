@@ -627,7 +627,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
-    'Should set entity.namespace to local and entity.name to user.name@host.name for non-IDP documents',
+    'Should set entity.namespace to local and entity.name to user.name and host.name for non-IDP documents',
     async ({ apiClient, esClient }) => {
       // Non-IDP: user.name + host.id present, user.name not in excluded list.
       // Event must NOT be asset/iam so identity fieldEvaluations (condition whenClause) set entity.namespace = 'local'.
