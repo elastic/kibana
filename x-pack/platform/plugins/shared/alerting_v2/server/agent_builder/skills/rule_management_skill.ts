@@ -51,7 +51,13 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter to breach conditions.
 - Prefer \`FROM <index-pattern> | STATS ... BY <group-field> | WHERE <condition>\` for threshold-based alerting.
+- **Never** use backtick quoting around index names or field names in ES|QL. Standard index patterns (letters, digits, dashes, dots, underscores, wildcards, and colons for CCS) do not require backticks. Backticks break cross-cluster search and are almost never needed in practice. Write \`FROM remote_cluster:metrics-system.cpu-default\`, not \`FROM \\\`remote_cluster:metrics-system.cpu-default\\\`\`.
 - The \`set_schedule\` lookback should be >= the execution interval (\`every\`).
+- The \`set_query\` operation validates the query against Elasticsearch automatically.
+  If the query references an unknown index or field, the tool will return an error
+  with the Elasticsearch error message. Inspect the error, fix the query, and retry.
+- If grouping fields are set after a query, they are validated against the query's
+  output columns. Use fields that appear in the query results.
 
 ## State Transition and Recovery
 

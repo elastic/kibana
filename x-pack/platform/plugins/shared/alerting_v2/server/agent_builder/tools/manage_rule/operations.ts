@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
   metadataSchema,
@@ -91,13 +92,38 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
 
 export type RuleOperation = z.infer<typeof ruleOperationSchema>;
 
+// ─── ES|QL query validation ───────────────────────────────────────────────────
+
+interface EsqlColumn {
+  name: string;
+  type: string;
+}
+
+async function validateEsqlQueryAgainstCluster(
+  esClient: IScopedClusterClient,
+  query: string
+): Promise<EsqlColumn[]> {
+  try {
+    const response = await esClient.asCurrentUser.esql.query({
+      query: `${query} | LIMIT 0`,
+      format: 'json',
+    });
+    return (response as { columns?: EsqlColumn[] }).columns ?? [];
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`Invalid ES|QL query: ${message}`);
+  }
+}
+
 // ─── Execution ────────────────────────────────────────────────────────────────
 
-export const executeRuleOperations = (
+export const executeRuleOperations = async (
   data: Partial<RuleAttachmentData>,
-  operations: RuleOperation[]
-): Partial<RuleAttachmentData> => {
+  operations: RuleOperation[],
+  esClient?: IScopedClusterClient
+): Promise<Partial<RuleAttachmentData>> => {
   let next = { ...data };
+  let lastQueryColumns: EsqlColumn[] | undefined;
 
   for (const op of operations) {
     switch (op.operation) {
@@ -133,6 +159,9 @@ export const executeRuleOperations = (
       }
 
       case 'set_query':
+        if (esClient) {
+          lastQueryColumns = await validateEsqlQueryAgainstCluster(esClient, op.base);
+        }
         next = {
           ...next,
           evaluation: {
@@ -142,12 +171,23 @@ export const executeRuleOperations = (
         };
         break;
 
-      case 'set_grouping':
+      case 'set_grouping': {
+        if (lastQueryColumns && lastQueryColumns.length > 0) {
+          const columnNames = new Set(lastQueryColumns.map((c) => c.name));
+          const missing = op.fields.filter((f) => !columnNames.has(f));
+          if (missing.length > 0) {
+            throw new Error(
+              `Grouping fields not found in query output columns: ${missing.join(', ')}. ` +
+                `Available columns: ${[...columnNames].join(', ')}`
+            );
+          }
+        }
         next = {
           ...next,
           grouping: { fields: op.fields },
         };
         break;
+      }
 
       case 'set_state_transition':
         next = {

@@ -46,7 +46,7 @@ Use operations[] to:
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
-    { logger, attachments }
+    { logger, attachments, esClient }
   ) => {
     try {
       const existingRecord = previousAttachmentId
@@ -58,7 +58,11 @@ Use operations[] to:
 
       const currentData: Partial<RuleAttachmentData> = existingRecord?.versions.at(-1)?.data ?? {};
 
-      const updatedData = executeRuleOperations(currentData, operations) as RuleAttachmentData;
+      const updatedData = (await executeRuleOperations(
+        currentData,
+        operations,
+        esClient
+      )) as RuleAttachmentData;
 
       if (isNew && !updatedData.metadata?.name) {
         return {
