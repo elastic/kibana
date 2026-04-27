@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { privateLocationSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 import {
   syntheticsMonitorSavedObjectType,
   legacySyntheticsMonitorTypeSingle,
@@ -74,6 +75,18 @@ const runTests = (
     if (!customPrivateLocation) return data;
     const { locations, ...rest } = data as any;
     return { ...rest, private_locations: [customPrivateLocation.id] };
+  };
+
+  const sharePrivateLocationToSpaces = async (spacesToAdd: string[]) => {
+    if (!usePrivateLocations || !privateLocation || spacesToAdd.length === 0) {
+      return;
+    }
+    const res = await supertestEditorWithApiKey.post('/api/spaces/_update_objects_spaces').send({
+      objects: [{ type: privateLocationSavedObjectName, id: privateLocation.id }],
+      spacesToAdd,
+      spacesToRemove: [],
+    });
+    expect(res.status).eql(200, JSON.stringify(res.body));
   };
 
   before(async () => {
@@ -216,6 +229,8 @@ const runTests = (
       await kibanaServer.spaces.create({ id: NEW_SPACE, name: `Edit Space ${uuid}` });
       spacesToDeleteIds.push(NEW_SPACE);
 
+      await sharePrivateLocationToSpaces([NEW_SPACE]);
+
       await editMonitor(
         legacy.id,
         { spaces: ['default', NEW_SPACE], name: `legacy-now-multi-${uuid}` },
@@ -249,6 +264,8 @@ const runTests = (
       await kibanaServer.spaces.create({ id: SPACE1, name: `Multi Space 1 ${uuid}` });
       await kibanaServer.spaces.create({ id: SPACE2, name: `Multi Space 2 ${uuid}` });
       spacesToDeleteIds.push(SPACE1, SPACE2);
+
+      await sharePrivateLocationToSpaces([SPACE1, SPACE2]);
 
       await editMonitor(
         multi.id,
@@ -288,6 +305,8 @@ const runTests = (
       const DEL_SPACE = `del-space-${uuid}`;
       await kibanaServer.spaces.create({ id: DEL_SPACE, name: `Del Space ${uuid}` });
       spacesToDeleteIds.push(DEL_SPACE);
+
+      await sharePrivateLocationToSpaces([DEL_SPACE]);
 
       await editMonitor(
         legacy.id,
