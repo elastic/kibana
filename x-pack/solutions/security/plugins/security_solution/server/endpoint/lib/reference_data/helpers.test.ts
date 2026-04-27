@@ -226,6 +226,13 @@ describe('initializeEndpointExceptionsPerPolicyOptInStatus', () => {
           id: REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
         })
       );
+      expect(soClientMock.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'exception-list-agnostic',
+          filter: `exception-list-agnostic.attributes.list_id: ${ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id} AND exception-list-agnostic.attributes.list_type: list`,
+          perPage: 1,
+        })
+      );
     });
 
     it('should not opt-in when FF is disabled', async () => {
