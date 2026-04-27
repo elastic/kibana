@@ -8,13 +8,13 @@
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   uiMetricService,
   GRAPH_INVESTIGATION,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useStableExpandableFlyoutState } from '../../../shared/hooks/use_stable_expandable_flyout_state';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
@@ -88,7 +88,7 @@ const graphVisualizationButton: EuiButtonGroupOptionProps = {
 export const VisualizeTab = memo(() => {
   const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
     useDocumentDetailsContext();
-  const panels = useExpandableFlyoutState();
+  const panels = useStableExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
     panels.left?.path?.subTab ?? SESSION_VIEW_ID
   );
