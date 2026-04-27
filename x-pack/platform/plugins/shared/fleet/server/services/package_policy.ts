@@ -574,6 +574,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
     }
 
+    if (
+      packagePolicy.global_data_tags?.length &&
+      !(
+        agentPolicies.every((policy) => policy?.supports_agentless) ||
+        packagePolicy.supports_agentless
+      )
+    ) {
+      throw new PackagePolicyValidationError(
+        '`global_data_tags` can only be set on agentless integration policies'
+      );
+    }
+
     const spaceIds = agentPolicies.flatMap((ap) => ap.space_ids ?? []);
     // trailing whitespace causes issues creating API keys
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
@@ -1645,6 +1657,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (packagePolicy.supports_agentless && !isAgentlessIntegration(pkgInfo)) {
         throw new PackagePolicyValidationError(
           `Package "${pkgInfo.name}" does not support agentless deployment mode`
+        );
+      }
+
+      // Validate that global_data_tags is only set on agentless package policies
+      if (
+        packagePolicy.global_data_tags?.length &&
+        !(packagePolicy.supports_agentless || agentPolicy?.supports_agentless)
+      ) {
+        throw new PackagePolicyValidationError(
+          '`global_data_tags` can only be set on agentless integration policies'
         );
       }
 
