@@ -8,8 +8,8 @@
 import { randomUUID } from 'crypto';
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
+import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 import { buildOsqueryAlertTestRule } from '../helpers/detection_rule_lifecycle';
 import { getFirstOnlineAgent, waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 import {
@@ -18,9 +18,7 @@ import {
   seedAlertForRule,
 } from '../helpers/seed_alert';
 
-const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-
-test.describe('Osquery parameter substitution from alerts', { tag: localTags }, () => {
+test.describe('Osquery parameter substitution from alerts', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
   let ruleId: string;
   let ruleName: string;
   let embeddedRuleBody: ReturnType<typeof buildOsqueryAlertTestRule>;

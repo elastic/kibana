@@ -100,7 +100,7 @@ describe('ALL - Custom space', () => {
       it('runs packs normally', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
-        cy.getBySel(`play-${packName}-button`).click();
+        cy.getBySel(`play-pack-${packId}-button`).click();
         selectAllAgents();
         cy.contains('Submit').click();
         checkResults();

@@ -6,11 +6,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
+import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 import { uiTest as test } from '../fixtures';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
-
-const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 interface UnifiedHistoryRow {
   id: string;
@@ -21,7 +19,7 @@ interface UnifiedHistoryRow {
   packName?: string;
 }
 
-test.describe('Pack agent-triggered results', { tag: localTags }, () => {
+test.describe('Pack agent-triggered results', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
   const transientPackIds: string[] = [];
 
   test.afterEach(async ({ apiServices }) => {

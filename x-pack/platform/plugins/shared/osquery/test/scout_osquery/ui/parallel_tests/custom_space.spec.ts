@@ -15,8 +15,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
+import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 import { customSpaceUiTest as test } from '../fixtures';
 import {
   shareOsqueryPoliciesWithSpace,
@@ -71,9 +71,7 @@ async function waitForPolicySpaceShareVisible(
   );
 }
 
-const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-
-test.describe('Osquery in a custom space', { tag: localTags }, () => {
+test.describe('Osquery in a custom space', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
   let packId: string | undefined;
   let restoreOsqueryPolicies: (() => Promise<void>) | undefined;
 
@@ -171,7 +169,7 @@ test.describe('Osquery in a custom space', { tag: localTags }, () => {
     packId = (packResp.data as { data: { saved_object_id: string } }).data.saved_object_id;
 
     await pageObjects.osqueryCustomSpace.gotoPacksInSpace(scoutSpace.id);
-    await pageObjects.osqueryCustomSpace.runPackByName(packName);
+    await pageObjects.osqueryCustomSpace.runPackBySavedObjectId(packId);
     await pageObjects.osqueryLiveQueryForm.selectAllAgents();
     const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
     if (actionId) {

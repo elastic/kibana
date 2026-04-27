@@ -6,16 +6,24 @@
  */
 
 import execa from 'execa';
-import { globalSetupHook, tags } from '@kbn/scout';
-import type { KbnClient } from '@kbn/scout';
-import { maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import {
   CA_TRUSTED_FINGERPRINT,
   FLEET_SERVER_CERT_PATH,
   FLEET_SERVER_KEY_PATH,
   fleetServerDevServiceAccount,
+  isAxiosResponseError,
 } from '@kbn/dev-utils';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
+import type {
+  CreatePackagePolicyResponse,
+  GetAgentsResponse,
+  Output,
+  PostFleetSetupResponse,
+} from '@kbn/fleet-plugin/common';
+import { maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
+import { globalSetupHook, tags } from '@kbn/scout';
+import type { KbnClient } from '@kbn/scout';
 import { getOsqueryApiService } from '../../common/services/osquery_api_service';
 import {
   ALL_SCOUT_PACK_PREFIXES,
@@ -28,6 +36,50 @@ const FLEET_SERVER_CONTAINER = 'scout-fleet-server';
 const AGENT_CONTAINER_PREFIX = 'scout-osquery-agent';
 const EXPECTED_AGENT_COUNT = 2;
 const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
+
+/** Matches Fleet `POST /api/fleet/service_tokens` response shape. */
+interface FleetServiceTokenBody {
+  name: string;
+  value: string;
+}
+
+interface LiveQuerySubmitResponse {
+  data?: { action_id?: string };
+}
+
+interface LiveQueryDetailsResponse {
+  data?: {
+    queries?: Array<{
+      successful?: number;
+      failed?: number;
+      docs?: number;
+      status?: string;
+    }>;
+  };
+}
+
+type SetupLog = { info: (msg: string) => void };
+
+/** HTTP status from errors thrown by `KbnClient` (Axios or wrapped `KbnClientRequesterError`). */
+function httpErrorStatus(caught: unknown): number | undefined {
+  if (isAxiosResponseError(caught)) {
+    return caught.response?.status;
+  }
+  if (caught instanceof KbnClientRequesterError) {
+    return caught.axiosError?.status;
+  }
+  return undefined;
+}
+
+/** Fleet output create/update responses expose `item` with at least `id`. */
+type FleetOutputMutationResponse = { item: Output };
+
+function errorMessage(error: unknown, maxLen: number): string {
+  if (error instanceof Error) {
+    return error.message.slice(0, maxLen);
+  }
+  return String(error).slice(0, maxLen);
+}
 
 // Fleet + agent container IDs (teardown on signals only).
 const containerIds: string[] = [];
@@ -67,7 +119,7 @@ async function isContainerRunning(name: string): Promise<boolean> {
 
 async function getOnlineAgentCount(kbnClient: KbnClient): Promise<number> {
   try {
-    const { data } = await kbnClient.request<any>({
+    const { data } = await kbnClient.request<GetAgentsResponse>({
       method: 'GET',
       path: '/api/fleet/agents',
       query: { perPage: 100 },
@@ -75,7 +127,7 @@ async function getOnlineAgentCount(kbnClient: KbnClient): Promise<number> {
 
     // Count online + degraded (osquery still works in degraded).
     return data.items.filter(
-      (agent: { status: string }) => agent.status === 'online' || agent.status === 'degraded'
+      (agent) => agent.status === 'online' || agent.status === 'degraded'
     ).length;
   } catch {
     return 0;
@@ -98,8 +150,8 @@ async function findOrCreateAgentPolicy(
     });
 
     return data.item.id;
-  } catch (e: any) {
-    if (e?.response?.status === 409) {
+  } catch (e: unknown) {
+    if (httpErrorStatus(e) === 409) {
       const { data: listData } = await kbnClient.request<{
         items: Array<{ id: string; name: string }>;
       }>({
@@ -127,7 +179,7 @@ async function getAgentVersion(kbnClient: KbnClient): Promise<string> {
 
 async function waitForAgents(
   kbnClient: KbnClient,
-  log: any,
+  log: SetupLog,
   expectedCount: number,
   timeoutMs = 240_000
 ) {
@@ -158,12 +210,12 @@ async function waitForAgents(
   );
 }
 
-async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 300_000) {
+async function waitForOsqueryReady(kbnClient: KbnClient, log: SetupLog, timeoutMs = 300_000) {
   const start = Date.now();
 
   while (Date.now() - start < timeoutMs) {
     try {
-      const { data: queryResponse } = await kbnClient.request<any>({
+      const { data: queryResponse } = await kbnClient.request<LiveQuerySubmitResponse>({
         method: 'POST',
         path: '/api/osquery/live_queries',
         body: {
@@ -184,7 +236,7 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
       for (let i = 0; i < 12; i++) {
         await new Promise((r) => setTimeout(r, 5_000));
         try {
-          const { data: detailsResponse } = await kbnClient.request<any>({
+          const { data: detailsResponse } = await kbnClient.request<LiveQueryDetailsResponse>({
             method: 'GET',
             path: `/api/osquery/live_queries/${actionId}`,
           });
@@ -197,7 +249,7 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
               `[osquery-warmup] Query status: successful=${successful}, failed=${failed}, docs=${docs}, status=${qStatus}`
             );
 
-            if (successful > 0 || docs > 0) {
+            if ((successful ?? 0) > 0 || (docs ?? 0) > 0) {
               log.info(
                 `[osquery-warmup] Osquery is ready! (successful=${successful}, docs=${docs})`
               );
@@ -205,8 +257,8 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
               return;
             }
           }
-        } catch (e: any) {
-          log.info(`[osquery-warmup] Details check failed: ${e.message?.slice(0, 80)}`);
+        } catch (e: unknown) {
+          log.info(`[osquery-warmup] Details check failed: ${errorMessage(e, 80)}`);
         }
       }
 
@@ -215,9 +267,9 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
           (Date.now() - start) / 1000
         )}s elapsed), submitting new query...`
       );
-    } catch (e: any) {
+    } catch (e: unknown) {
       log.info(
-        `[osquery-warmup] Query attempt failed (${e.message?.slice(0, 100)}), retrying in 10s...`
+        `[osquery-warmup] Query attempt failed (${errorMessage(e, 100)}), retrying in 10s...`
       );
       await new Promise((r) => setTimeout(r, 10_000));
     }
@@ -374,7 +426,7 @@ globalSetupHook(
     }
 
     log.info('[osquery-setup] Calling Fleet setup...');
-    await kbnClient.request<any>({ method: 'POST', path: '/api/fleet/setup' });
+    await kbnClient.request<PostFleetSetupResponse>({ method: 'POST', path: '/api/fleet/setup' });
     log.info('[osquery-setup] Fleet setup complete');
 
     const dockerEsHost = `http://${host}:${esPort}`;
@@ -406,7 +458,7 @@ globalSetupHook(
               `Ensure --serverConfigSet osquery is used so the preconfigured output points to the Docker-accessible ES host.`
           );
         } else {
-          await kbnClient.request<any>({
+          await kbnClient.request<FleetOutputMutationResponse>({
             method: 'PUT',
             path: `/api/fleet/outputs/${defaultOutput.id}`,
             body: { hosts: [dockerEsHost] },
@@ -415,7 +467,7 @@ globalSetupHook(
         }
       } else {
         log.info('[osquery-setup] No default output found, creating one...');
-        await kbnClient.request<any>({
+        await kbnClient.request<FleetOutputMutationResponse>({
           method: 'POST',
           path: '/api/fleet/outputs',
           body: {
@@ -429,8 +481,8 @@ globalSetupHook(
         });
         log.info('[osquery-setup] Fleet output created');
       }
-    } catch (e: any) {
-      log.info(`[osquery-setup] Fleet output configuration: ${e?.message?.slice(0, 200) || e}`);
+    } catch (e: unknown) {
+      log.info(`[osquery-setup] Fleet output configuration: ${errorMessage(e, 200)}`);
     }
 
     let serviceToken = '';
@@ -455,12 +507,12 @@ globalSetupHook(
       );
     } else {
       log.info('[osquery-setup] Generating Fleet service token...');
-      const { data: tokenResponse } = await kbnClient.request<any>({
+      const { data: tokenResponse } = await kbnClient.request<FleetServiceTokenBody>({
         method: 'POST',
         path: '/api/fleet/service_tokens',
         body: {},
       });
-      serviceToken = (tokenResponse as any).value;
+      serviceToken = tokenResponse.value;
       log.info('[osquery-setup] Service token generated');
 
       log.info('[osquery-setup] Creating Fleet Server agent policy...');
@@ -546,7 +598,7 @@ globalSetupHook(
     // Agents in Docker need host.docker.internal to reach Fleet on the host.
     log.info('[osquery-setup] Registering Fleet Server host in Fleet settings...');
     try {
-      await kbnClient.request<any>({
+      await kbnClient.request<{ item: { id: string } }>({
         method: 'POST',
         path: '/api/fleet/fleet_server_hosts',
         body: {
@@ -556,8 +608,8 @@ globalSetupHook(
         },
       });
       log.info('[osquery-setup] Fleet Server host registered');
-    } catch (e: any) {
-      log.info(`[osquery-setup] Fleet Server host registration: ${e.message?.slice(0, 100)}`);
+    } catch (e: unknown) {
+      log.info(`[osquery-setup] Fleet Server host registration: ${errorMessage(e, 100)}`);
       try {
         const { data: hostsResponse } = await kbnClient.request<{
           items: Array<{ id: string; is_default: boolean }>;
@@ -567,7 +619,7 @@ globalSetupHook(
         });
         const defaultHost = hostsResponse.items.find((h) => h.is_default);
         if (defaultHost) {
-          await kbnClient.request<any>({
+          await kbnClient.request<{ item: { id: string } }>({
             method: 'PUT',
             path: `/api/fleet/fleet_server_hosts/${defaultHost.id}`,
             body: {
@@ -580,8 +632,8 @@ globalSetupHook(
             '[osquery-setup] Updated existing Fleet Server host to use Docker-reachable URL'
           );
         }
-      } catch (updateErr: any) {
-        log.info(`[osquery-setup] Fleet Server host update: ${updateErr.message?.slice(0, 100)}`);
+      } catch (updateErr: unknown) {
+        log.info(`[osquery-setup] Fleet Server host update: ${errorMessage(updateErr, 100)}`);
       }
     }
 
@@ -619,7 +671,7 @@ globalSetupHook(
       log.info(`[osquery-setup] Created "${policyName}" policy: ${policyId}`);
 
       try {
-        await kbnClient.request<any>({
+        await kbnClient.request<CreatePackagePolicyResponse>({
           method: 'POST',
           path: '/api/fleet/package_policies',
           body: {
@@ -634,8 +686,8 @@ globalSetupHook(
           },
         });
         log.info(`[osquery-setup] osquery_manager added to "${policyName}"`);
-      } catch (e: any) {
-        if (e?.response?.status === 409) {
+      } catch (e: unknown) {
+        if (httpErrorStatus(e) === 409) {
           log.info(`[osquery-setup] osquery_manager already exists on "${policyName}"`);
         } else {
           throw e;

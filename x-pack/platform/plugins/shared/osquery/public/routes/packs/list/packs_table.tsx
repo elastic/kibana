@@ -213,7 +213,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
             isDisabled={!canRun}
             onClick={handlePlayClick(item)}
             aria-label={playText}
-            data-test-subj={`play-${item.name}-button`}
+            data-test-subj={`play-pack-${item.saved_object_id}-button`}
           />
         </EuiToolTip>
       );

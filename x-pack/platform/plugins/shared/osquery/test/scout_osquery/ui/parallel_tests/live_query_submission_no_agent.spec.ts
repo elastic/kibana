@@ -6,12 +6,10 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
+import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 
-const noAgentTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-
-test.describe('Live query submission without enrolled agents', { tag: noAgentTags }, () => {
+test.describe('Live query submission without enrolled agents', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();

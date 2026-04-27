@@ -8,8 +8,8 @@
 import { randomUUID } from 'crypto';
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
+import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 import {
   buildOsqueryAlertTestRule,
   createDetectionRule,
@@ -22,11 +22,9 @@ import {
   seedAlertForRule,
 } from '../helpers/seed_alert';
 
-const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-
 test.describe(
   'Osquery rule editor and alert flyout (investigation guide + timeline)',
-  { tag: localTags },
+  { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS },
   () => {
     let editorRuleId: string;
     let editorRuleName: string;

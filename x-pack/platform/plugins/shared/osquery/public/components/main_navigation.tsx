@@ -124,7 +124,7 @@ export const MainNavigation = () => {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  data-test-subj="newLiveQueryButton"
+                  data-test-subj="osqueryNavNewLiveQueryButton"
                   {...newQueryNavProps}
                   isDisabled={!canRunQuery}
                 >

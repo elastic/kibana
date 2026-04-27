@@ -6,16 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
+import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
 
-const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-
 const SAVED_QUERY_BODY = 'select * from uptime;';
 
-test.describe('Live query saved-query dropdown', { tag: localTags }, () => {
+test.describe('Live query saved-query dropdown', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
   let savedQueryId: string;
   let savedObjectId: string;
 

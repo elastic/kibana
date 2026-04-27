@@ -52,10 +52,9 @@ export class CustomSpacePage {
     }
   }
 
-  /** Runs an existing pack by clicking its "play" button. */
-  async runPackByName(packName: string): Promise<void> {
-    // Explicit wait on play button (packs list still loading in fresh spaces).
-    const playBtn = this.page.testSubj.locator(`play-${packName}-button`);
+  /** Runs an existing pack by clicking its play action (stable `data-test-subj` uses saved object id). */
+  async runPackBySavedObjectId(savedObjectId: string): Promise<void> {
+    const playBtn = this.page.testSubj.locator(`play-pack-${savedObjectId}-button`);
     await playBtn.waitFor({ state: 'visible', timeout: 60_000 });
     await playBtn.click();
   }

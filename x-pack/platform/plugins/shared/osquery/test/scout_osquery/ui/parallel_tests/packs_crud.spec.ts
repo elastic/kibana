@@ -6,13 +6,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
 import { getMinimalSavedQuery } from '../../api/fixtures/constants';
+import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 
-const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-
-test.describe('Pack CRUD from UI', { tag: localTags }, () => {
+test.describe('Pack CRUD from UI', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
   let savedQueryId: string;
   let savedQueryLabel: string;
   // Extra saved query for edit attach (primary id already in pack — avoids flyout id collision).

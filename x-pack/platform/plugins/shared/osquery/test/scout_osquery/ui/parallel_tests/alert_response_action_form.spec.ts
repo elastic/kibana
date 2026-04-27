@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
+import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 import {
   buildOsqueryAlertTestRule,
   createDetectionRule,
@@ -24,9 +24,7 @@ import { getMinimalPack } from '../../api/fixtures/constants';
  * combobox value persisting across edit-mode re-entry.
  */
 
-const localTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
-
-test.describe('Pack-based Osquery response actions in the rule editor', { tag: localTags }, () => {
+test.describe('Pack-based Osquery response actions in the rule editor', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
   let ruleId: string;
   let ruleName: string;
   let singleQueryPackId: string;

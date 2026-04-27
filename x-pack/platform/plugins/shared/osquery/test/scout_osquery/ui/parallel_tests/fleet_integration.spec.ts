@@ -6,13 +6,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { uiTest as test } from '../fixtures';
-
-const mkiTags = [...tags.stateful.classic, ...tags.serverless.security.complete];
+import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 
 /** UI Fleet add flow; API pack-in-policy checks live under Scout API tests. */
-test.describe('Fleet integration', { tag: mkiTags }, () => {
+test.describe('Fleet integration', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
   let agentPolicyId: string | undefined;
   let packagePolicyId: string | undefined;
   const uiCreatedIntegrationNames: string[] = [];

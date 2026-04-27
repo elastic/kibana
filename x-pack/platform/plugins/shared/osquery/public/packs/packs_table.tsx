@@ -151,7 +151,7 @@ const PacksTableComponent = () => {
             iconType="play"
             onClick={handlePlayClick(item)}
             isDisabled={!enabled}
-            data-test-subj={`play-${item.name}-button`}
+            data-test-subj={`play-pack-${item.saved_object_id}-button`}
             aria-label={playText}
           />
         </EuiToolTip>

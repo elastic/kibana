@@ -35,7 +35,7 @@ export class LiveQueryFormPage {
     this.resultsTable = this.page.testSubj.locator('osqueryResultsTable');
     this.agentSelection = this.page.testSubj.locator('agentSelection');
     this.resultsPanel = this.page.testSubj.locator('osqueryResultsPanel');
-    this.newLiveQueryButton = this.page.testSubj.locator('newLiveQueryButton');
+    this.newLiveQueryButton = this.page.testSubj.locator('osqueryNavNewLiveQueryButton');
     this.resultsTab = this.page.testSubj.locator('osquery-results-tab');
     this.statusTab = this.page.testSubj.locator('osquery-status-tab');
     this.packResultsHeading = this.page.getByRole('heading', { name: 'Results' });
