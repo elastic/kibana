@@ -572,17 +572,21 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         )}
         loading={isLoading}
         noItemsMessage={
-          isLoading ? (
-            <FormattedMessage
-              id="xpack.fleet.enrollemntAPIKeyList.loadingTokensMessage"
-              defaultMessage="Loading enrollment tokens..."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.enrollemntAPIKeyList.emptyMessage"
-              defaultMessage="No enrollment tokens found."
-            />
-          )
+          <>
+            <EuiSpacer size="s" />
+            {isLoading ? (
+              <FormattedMessage
+                id="xpack.fleet.enrollemntAPIKeyList.loadingTokensMessage"
+                defaultMessage="Loading enrollment tokens..."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.enrollemntAPIKeyList.emptyMessage"
+                defaultMessage="No enrollment tokens found."
+              />
+            )}
+            <EuiSpacer size="s" />
+          </>
         }
         items={total ? rowItems : []}
         itemId="id"
