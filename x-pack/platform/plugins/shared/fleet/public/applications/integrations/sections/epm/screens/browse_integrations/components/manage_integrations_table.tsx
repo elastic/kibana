@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -131,13 +131,16 @@ export const ManageIntegrationsTable: React.FC<{
     userProfile: userProfileService,
   } = useStartServices();
 
+  const hasReportedView = useRef(false);
   useEffect(() => {
-    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
-      'automatic_import_manage_integrations_table_viewed',
-      {}
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!isLoading && !hasReportedView.current) {
+      (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+        'automatic_import_manage_integrations_table_viewed',
+        {}
+      );
+      hasReportedView.current = true;
+    }
+  }, [isLoading, automaticImport]);
 
   const integrationsWithActions = useMemo(() => {
     return integrations.map((item) => {

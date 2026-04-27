@@ -3993,7 +3993,7 @@
         "label": "pValueToLabel",
         "description": [],
         "signature": [
-          "(pValue: number) => \"medium\" | \"high\" | \"low\""
+          "(pValue: number) => \"high\" | \"medium\" | \"low\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/utils/p_value_to_label.ts",
         "lineNumber": 11,
