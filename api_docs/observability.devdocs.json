@@ -1069,6 +1069,45 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.AnomalyThreshold",
+        "type": "Function",
+        "tags": [],
+        "label": "AnomalyThreshold",
+        "description": [],
+        "signature": [
+          "({\n  chartProps: { theme, baseTheme },\n  id,\n  severity,\n  severityThreshold,\n}: ",
+          "AnomalyThresholdProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/public/components/custom_threshold/components/anomaly_threshold.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.AnomalyThreshold.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  chartProps: { theme, baseTheme },\n  id,\n  severity,\n  severityThreshold,\n}",
+            "description": [],
+            "signature": [
+              "AnomalyThresholdProps"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/components/custom_threshold/components/anomaly_threshold.tsx",
+            "lineNumber": 24,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.AutocompleteField",
         "type": "Function",
         "tags": [],
