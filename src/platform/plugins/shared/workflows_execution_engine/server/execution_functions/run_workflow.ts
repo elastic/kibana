@@ -69,14 +69,7 @@ export async function runWorkflow({
   );
   setupSpan?.end();
 
-  const execution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId,
-    spaceId
-  );
-  if (!execution) {
-    logger.warn(`Skipping workflow run ${workflowRunId}: execution not found`);
-    return;
-  }
+  const execution = workflowExecutionState.getWorkflowExecution();
   if (isTerminalStatus(execution.status)) {
     logger.debug(
       `Skipping workflow run ${workflowRunId}: execution already terminal [${execution.status}]`
