@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const securityService = getService('security');
   const filterBar = getService('filterBar');
   const log = getService('log');
+  const testSubjects = getService('testSubjects');
   const { common, header, discover, security, timePicker } = getPageObjects([
     'common',
     'header',
@@ -55,16 +56,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.save({ withRefresh: true });
 
         // Dismiss the "Background search created" toast
-        await toasts.dismissAll();
+        await toasts.dismissAllWithChecks();
         await searchSessions.openCompletedSearchFromToast();
 
         // Wait for discover to load
         await header.waitUntilLoadingHasFinished();
         await discover.waitForDocTableLoadingComplete();
 
-        if ((await toasts.getCount()) > 0) {
-          const title = await toasts.getTitleAndDismiss();
-          log.debug(`Session restoration related warnings found: ${title}`);
+        const currentToasts = await toasts.getAll();
+        if (currentToasts.length > 0) {
+          const titles = [];
+          for (const toast of currentToasts) {
+            const title = await testSubjects.findDescendant('euiToastHeader', toast);
+            titles.push(await title.getVisibleText());
+          }
+          log.debug(`Session restoration related warnings found: ${titles.join(', ')}`);
           throw new Error('Session restoration related warnings found');
         }
 
