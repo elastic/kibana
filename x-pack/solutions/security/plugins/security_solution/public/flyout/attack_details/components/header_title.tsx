@@ -18,6 +18,7 @@ import { Assignees } from './assignees';
 import { Notes } from '../../../flyout_v2/shared/components/notes';
 import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
 import { DetailsFlyout } from '../../../attack_discovery/pages/settings_flyout/schedule/details_flyout';
+import { OPEN_SCHEDULE_DETAILS } from '../../../attack_discovery/pages/results/attack_discovery_panel/panel_header/primary_interactions/title/translations';
 import {
   HEADER_ALERTS_BLOCK_TEST_ID,
   HEADER_ASSIGNEES_BLOCK_TEST_ID,
@@ -33,13 +34,6 @@ const ATTACK_HEADER_BADGE = i18n.translate(
   'xpack.securitySolution.attackDetailsFlyout.header.badge.attackLabel',
   {
     defaultMessage: 'Attack',
-  }
-);
-
-const OPEN_SCHEDULE_DETAILS_LABEL = i18n.translate(
-  'xpack.securitySolution.attackDetailsFlyout.header.title.openScheduleDetails',
-  {
-    defaultMessage: 'Open attack discovery schedule details',
   }
 );
 
@@ -76,7 +70,7 @@ export const HeaderTitle = memo(() => {
     () =>
       scheduleIdForLink ? (
         <EuiLink
-          aria-label={OPEN_SCHEDULE_DETAILS_LABEL}
+          aria-label={OPEN_SCHEDULE_DETAILS}
           data-test-subj={HEADER_TITLE_LINK_TEST_ID}
           onClick={onOpenScheduleDetails}
         >
