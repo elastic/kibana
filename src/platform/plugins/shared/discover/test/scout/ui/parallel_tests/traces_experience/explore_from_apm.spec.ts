@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags, type ScoutPage } from '@kbn/scout';
+import { tags, type Locator, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
@@ -22,11 +22,13 @@ import {
 // 10s actionTimeout in CI, so navigation gets its own budget.
 const DISCOVER_NAVIGATION_TIMEOUT = 30000;
 
-const clickAndWaitForDiscover = (page: ScoutPage, testSubj: string) =>
-  Promise.all([
+const clickAndWaitForDiscover = (page: ScoutPage, target: string | Locator) => {
+  const locator = typeof target === 'string' ? page.testSubj.locator(target) : target;
+  return Promise.all([
     page.waitForURL('**/app/discover**', { timeout: DISCOVER_NAVIGATION_TIMEOUT }),
-    page.testSubj.locator(testSubj).click(),
+    locator.click(),
   ]);
+};
 
 const APM_TIME_RANGE = {
   rangeFrom: TRACES.DEFAULT_START_TIME,
@@ -290,10 +292,10 @@ spaceTest.describe(
         await spaceTest.step(
           'warning "view in Discover" link opens traces experience',
           async () => {
-            await Promise.all([
-              page.waitForURL('**/app/discover**', { timeout: DISCOVER_NAVIGATION_TIMEOUT }),
-              pageObjects.tracesExperience.apm.waterfall.sizeWarningDiscoverLink.click(),
-            ]);
+            await clickAndWaitForDiscover(
+              page,
+              pageObjects.tracesExperience.apm.waterfall.sizeWarningDiscoverLink
+            );
             await expectTracesExperienceEnabled(pageObjects);
             await page.unrouteAll({ behavior: 'wait' });
           }
