@@ -141,10 +141,9 @@ export interface EpisodeStatusFilterOption {
 export const EPISODE_STATUS_FILTER_OPTIONS: EpisodeStatusFilterOption[] = [
   {
     value: 'active',
-    title: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.quickFilters.status.active.title',
-      { defaultMessage: 'Active' }
-    ),
+    title: i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.status.active.title', {
+      defaultMessage: 'Active',
+    }),
     badgeColor: 'danger',
     description: i18n.translate(
       'xpack.alertingV2.actionPolicy.form.quickFilters.status.active.description',
@@ -165,10 +164,9 @@ export const EPISODE_STATUS_FILTER_OPTIONS: EpisodeStatusFilterOption[] = [
   },
   {
     value: 'pending',
-    title: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.quickFilters.status.pending.title',
-      { defaultMessage: 'Pending' }
-    ),
+    title: i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.status.pending.title', {
+      defaultMessage: 'Pending',
+    }),
     badgeColor: 'warning',
     description: i18n.translate(
       'xpack.alertingV2.actionPolicy.form.quickFilters.status.pending.description',
@@ -177,10 +175,9 @@ export const EPISODE_STATUS_FILTER_OPTIONS: EpisodeStatusFilterOption[] = [
   },
   {
     value: 'inactive',
-    title: i18n.translate(
-      'xpack.alertingV2.actionPolicy.form.quickFilters.status.inactive.title',
-      { defaultMessage: 'Inactive' }
-    ),
+    title: i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.status.inactive.title', {
+      defaultMessage: 'Inactive',
+    }),
     badgeColor: 'default',
     description: i18n.translate(
       'xpack.alertingV2.actionPolicy.form.quickFilters.status.inactive.description',
