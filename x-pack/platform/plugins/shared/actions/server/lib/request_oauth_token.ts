@@ -112,7 +112,13 @@ export async function requestOAuthToken<T>(
     const tokenTypeField = tokenResponseOptions?.tokenTypePath ?? 'token_type';
 
     const accessToken = get(res.data, accessTokenField);
-    const tokenType = tokenResponseOptions?.tokenType ?? get(res.data, tokenTypeField);
+    const rawTokenType: string = tokenResponseOptions?.tokenType ?? get(res.data, tokenTypeField);
+    // Normalize to Title Case ("bearer" → "Bearer") — some providers (e.g. HubSpot) return
+    // lowercase, but APIs like HubSpot's CRM are case-sensitive about the scheme name.
+    const tokenType =
+      rawTokenType && rawTokenType.length > 0
+        ? rawTokenType.charAt(0).toUpperCase() + rawTokenType.slice(1)
+        : rawTokenType;
 
     if (!accessToken) {
       logger.warn(

@@ -356,7 +356,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'bearer',
+      tokenType: 'Bearer',
       accessToken: 'xoxp-slack-user-token',
       expiresIn: 7200,
       refreshToken: 'nested-refresh',
@@ -421,7 +421,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'bearer',
+      tokenType: 'Bearer',
       accessToken: 'xoxp-user-token',
       expiresIn: 43200,
       refreshToken: 'top-level-refresh',
@@ -456,7 +456,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'bearer',
+      tokenType: 'Bearer',
       accessToken: 'nested-token',
       expiresIn: 100,
       refreshToken: 'nested-refresh',
@@ -548,7 +548,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'bearer',
+      tokenType: 'Bearer',
       accessToken: 'xoxp-slack-user-token',
       expiresIn: undefined,
       refreshToken: undefined,
