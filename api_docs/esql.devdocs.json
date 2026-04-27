@@ -248,7 +248,7 @@
         "label": "DataErrorsControl",
         "description": [],
         "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -261,7 +261,7 @@
             "label": "enabled",
             "description": [],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -277,7 +277,7 @@
               "(value: boolean) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -293,7 +293,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-                "lineNumber": 31,
+                "lineNumber": 32,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -342,7 +342,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 981,
+        "lineNumber": 989,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -545,56 +545,7 @@
   },
   "server": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "esql",
-        "id": "def-server.buildServerESQLCallbacks",
-        "type": "Function",
-        "tags": [],
-        "label": "buildServerESQLCallbacks",
-        "description": [
-          "\nBuilds the ESQLCallbacks required by the ES|QL validation API\n({@link validateQuery} from @kbn/esql-language) for server-side usage.\n\nUses the Elasticsearch client directly instead of going through\nKibana HTTP routes, unlike the client-side callbacks in @kbn/esql-utils."
-        ],
-        "signature": [
-          "({ client, }: ",
-          "BuildServerESQLCallbacksOptions",
-          ") => ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.ESQLCallbacks",
-            "text": "ESQLCallbacks"
-          }
-        ],
-        "path": "src/platform/plugins/shared/esql/server/services/build_server_esql_callbacks.ts",
-        "lineNumber": 25,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "esql",
-            "id": "def-server.buildServerESQLCallbacks.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  client,\n}",
-            "description": [],
-            "signature": [
-              "BuildServerESQLCallbacksOptions"
-            ],
-            "path": "src/platform/plugins/shared/esql/server/services/build_server_esql_callbacks.ts",
-            "lineNumber": 25,
-            "columnNumber": 42,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

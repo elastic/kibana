@@ -364,6 +364,14 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/conversations/conversation_input/input_actions/connector_selector/connector_selector.tsx"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts"
+              },
+              {
                 "plugin": "@kbn/elastic-assistant",
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_selector/index.tsx"
               },
@@ -396,24 +404,12 @@
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete.ts"
               },
               {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/conversations/conversation_input/input_actions/connector_selector/connector_selector.tsx"
-              },
-              {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts"
-              },
-              {
                 "plugin": "automaticImport",
                 "path": "x-pack/platform/plugins/shared/automatic_import/public/common/components/connector_selector.tsx"
               },
               {
                 "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_genai_connectors.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_inference_feature_connectors.ts"
               },
               {
                 "plugin": "observabilityAgentBuilder",

@@ -14,30 +14,34 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { UpdateEntitySourceNoadditionalProps, MonitoringEntitySource } from './common.gen';
 
+export const UpdateWatchlistEntitySourceRequestParams = lazySchema(() =>
+  z.object({
+    watchlist_id: z.string(),
+    id: z.string(),
+  })
+);
 export type UpdateWatchlistEntitySourceRequestParams = z.infer<
   typeof UpdateWatchlistEntitySourceRequestParams
 >;
-export const UpdateWatchlistEntitySourceRequestParams = z.object({
-  watchlist_id: z.string(),
-  id: z.string(),
-});
 export type UpdateWatchlistEntitySourceRequestParamsInput = z.input<
   typeof UpdateWatchlistEntitySourceRequestParams
 >;
 
+export const UpdateWatchlistEntitySourceRequestBody = lazySchema(
+  () => UpdateEntitySourceNoadditionalProps
+);
 export type UpdateWatchlistEntitySourceRequestBody = z.infer<
   typeof UpdateWatchlistEntitySourceRequestBody
 >;
-export const UpdateWatchlistEntitySourceRequestBody = UpdateEntitySourceNoadditionalProps;
 export type UpdateWatchlistEntitySourceRequestBodyInput = z.input<
   typeof UpdateWatchlistEntitySourceRequestBody
 >;
 
+export const UpdateWatchlistEntitySourceResponse = lazySchema(() => MonitoringEntitySource);
 export type UpdateWatchlistEntitySourceResponse = z.infer<
   typeof UpdateWatchlistEntitySourceResponse
 >;
-export const UpdateWatchlistEntitySourceResponse = MonitoringEntitySource;

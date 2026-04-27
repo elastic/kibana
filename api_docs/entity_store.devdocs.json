@@ -181,7 +181,7 @@
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }; }>"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }; }>"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/public/index.ts",
         "lineNumber": 34,
@@ -488,7 +488,7 @@
           "\nEUID API surface passed through the entity_store plugin React context and `loadEuidApi()`.\nAligns with the {@link euid} object from this module."
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-        "lineNumber": 111,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -521,10 +521,10 @@
               "QueryDslQueryContainer",
               "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
               "QueryDslQueryContainer",
-              "; }; }"
+              "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-            "lineNumber": 116,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -874,10 +874,10 @@
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
-          "; }; }"
+          "; }; kql: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-        "lineNumber": 108,
+        "lineNumber": 115,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2217,7 +2217,7 @@
       {
         "parentPluginId": "entityStore",
         "id": "def-common.AssetCriticalityLevel",
-        "type": "Type",
+        "type": "Any",
         "tags": [],
         "label": "AssetCriticalityLevel",
         "description": [
@@ -2227,8 +2227,8 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 178,
-        "columnNumber": 1,
+        "lineNumber": 282,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2236,7 +2236,7 @@
       {
         "parentPluginId": "entityStore",
         "id": "def-common.AssetCriticalityLevel",
-        "type": "Any",
+        "type": "Type",
         "tags": [],
         "label": "AssetCriticalityLevel",
         "description": [],
@@ -2244,8 +2244,8 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 182,
-        "columnNumber": 14,
+        "lineNumber": 285,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2261,7 +2261,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 437,
+        "lineNumber": 729,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2623,7 +2623,7 @@
           "$ZodTypeInternals<any, unknown>>"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 438,
+        "lineNumber": 730,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

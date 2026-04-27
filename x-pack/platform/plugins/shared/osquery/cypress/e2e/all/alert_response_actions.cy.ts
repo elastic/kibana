@@ -39,7 +39,8 @@ import {
   interceptCaseId,
 } from '../../tasks/integrations';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/264525
+describe.skip(
   'Alert Response Actions',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

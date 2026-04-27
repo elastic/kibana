@@ -22,6 +22,7 @@ import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
+import { ConversationListItemRow } from './conversation_list_item_row';
 
 const newConversationLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.newConversation',
@@ -89,14 +90,14 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         const isActive = currentConversationId === conversation.id;
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
-            <Link
-              to={appPaths.agent.conversations.byId({ agentId, conversationId: conversation.id })}
-              css={isActive ? activeLinkStyles : linkStyles}
-              data-test-subj={`agentBuilderSidebarConversation-${conversation.id}`}
-              onClick={onItemClick}
-            >
-              <EuiTextTruncate text={conversation.title || conversation.id} />
-            </Link>
+            <ConversationListItemRow
+              agentId={agentId}
+              conversationId={conversation.id}
+              title={conversation.title || conversation.id}
+              isActive={isActive}
+              routeConversationId={currentConversationId}
+              onItemClick={onItemClick}
+            />
           </EuiFlexItem>
         );
       })}

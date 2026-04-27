@@ -32,10 +32,7 @@ describe('<ContentEditorFlyoutContent />', () => {
       id: '123',
       title: 'Foo',
       description: 'Some description',
-      tags: [
-        { id: 'id-1', name: 'tag1', type: 'tag' },
-        { id: 'id-2', name: 'tag2', type: 'tag' },
-      ],
+      tags: ['id-1', 'id-2'],
     };
 
     const mockedServices = getMockServices();
@@ -228,6 +225,20 @@ describe('<ContentEditorFlyoutContent />', () => {
         />,
         'Houston we got a problem'
       );
+    });
+
+    test('should render tags in read-only mode', async () => {
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { exists, component } = testBed!;
+
+      expect(exists('tagList')).toBe(true);
+
+      const tagListHtml = component.find('[data-test-subj="tagList"]').text();
+      expect(tagListHtml).toContain('id-1');
+      expect(tagListHtml).toContain('id-2');
     });
 
     test('should update the tag selection', async () => {

@@ -13,14 +13,12 @@ interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
   dashboardApi: DashboardApi;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
-  updateOrigin: (origin: string) => Promise<unknown>;
 }
 
 export const previewAttachmentInDashboard = async ({
   attachment,
   dashboardApi,
   checkSavedDashboardExist,
-  updateOrigin,
 }: PreviewAttachmentInDashboardParams) => {
   const dashboardState = attachmentDataToDashboardState(attachment.data);
   const currentSavedObjectId = dashboardApi.savedObjectId$.getValue();
