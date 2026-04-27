@@ -14,28 +14,28 @@ export const CALL_OUT_TITLE = i18n.translate('xpack.securitySolution.indexPatter
 export const CALL_OUT_DEPRECATED_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.callOutDeprecxatedTitle',
   {
-    defaultMessage: 'This timeline uses a legacy data view selector',
+    defaultMessage: 'This Timeline uses a legacy data view selector',
   }
 );
 
 export const CALL_OUT_DEPRECATED_TEMPLATE_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.callOutDeprecxatedTemplateTitle',
   {
-    defaultMessage: 'This timeline template uses a legacy data view selector',
+    defaultMessage: 'This Timeline template uses a legacy data view selector',
   }
 );
 
 export const CALL_OUT_MISSING_PATTERNS_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.callOutMissingPatternsTitle',
   {
-    defaultMessage: 'This timeline is out of date with the Security Data View',
+    defaultMessage: 'This Timeline is out of date with the Security Data View',
   }
 );
 
 export const CALL_OUT_MISSING_PATTERNS_TEMPLATE_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.callOutMissingPatternsTemplateTitle',
   {
-    defaultMessage: 'This timeline template is out of date with the Security Data View',
+    defaultMessage: 'This Timeline template is out of date with the Security Data View',
   }
 );
 
@@ -185,7 +185,7 @@ export const INACTIVE_PATTERNS = i18n.translate('xpack.securitySolution.indexPat
 
 export const NO_DATA = i18n.translate('xpack.securitySolution.indexPatterns.noData', {
   defaultMessage:
-    "The index pattern on this timeline doesn't match any data streams, indices, or index aliases.",
+    "The index pattern on this Timeline doesn't match any data streams, indices, or index aliases.",
 });
 
 export const PICK_INDEX_PATTERNS = i18n.translate(

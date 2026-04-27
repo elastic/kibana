@@ -12494,7 +12494,7 @@
         "label": "streamIntoObservable",
         "description": [],
         "signature": [
-          "(readable: NodeJS.AsyncIterator<string, any, any>) => ",
+          "(readable: NodeJS.AsyncIterator<string, undefined, any>) => ",
           "Observable",
           "<any>"
         ],
@@ -12512,7 +12512,7 @@
             "label": "readable",
             "description": [],
             "signature": [
-              "NodeJS.AsyncIterator<string, any, any>"
+              "NodeJS.AsyncIterator<string, undefined, any>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/util/stream_into_observable.ts",
             "lineNumber": 10,

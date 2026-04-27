@@ -36,7 +36,7 @@ const getExpectedPanelGroupOrder = (config: ScoutTestConfig) => {
 };
 
 const getExpectedPanelTypeCount = (config: ScoutTestConfig) => {
-  return config.serverless && config.productTier === 'logs_essentials' ? 13 : 25;
+  return config.serverless && config.productTier === 'logs_essentials' ? 13 : 26;
 };
 
 spaceTest.describe(
