@@ -43,6 +43,20 @@ describe('StepIcon', () => {
       expect(container.querySelector('[data-euiicon-type="warning"]')).toBeInTheDocument();
     });
 
+    it('renders document icon for trigger_document', () => {
+      const { container } = render(
+        <StepIcon stepType="trigger_document" executionStatus={undefined} />
+      );
+      expect(container.querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
+    });
+
+    it('renders document icon for trigger_event (event-driven pseudo-step)', () => {
+      const { container } = render(
+        <StepIcon stepType="trigger_event" executionStatus={undefined} />
+      );
+      expect(container.querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
+    });
+
     it('renders clock icon for trigger_scheduled', () => {
       const { container } = render(
         <StepIcon stepType="trigger_scheduled" executionStatus={undefined} />
