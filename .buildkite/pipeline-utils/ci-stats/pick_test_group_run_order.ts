@@ -486,17 +486,13 @@ export async function pickTestGroupRunOrder() {
 
   // Register cancelable child keys before uploading so a concurrent gate failure
   // can discover and short-circuit these jobs immediately.
-  if (unit.count > 0) {
-    bk.setMetadata('cancel_on_gate_failure:jest', 'true');
-  }
-  if (integration.count > 0) {
-    bk.setMetadata('cancel_on_gate_failure:jest-integration', 'true');
-  }
-  // Register child step keys (not the group key) because `buildkite-agent step cancel`
+  // Child step keys (not group keys) are registered because `buildkite-agent step cancel`
   // does not work on group keys.
-  for (const fg of functionalGroups) {
-    bk.setMetadata(`cancel_on_gate_failure:${fg.key}`, 'true');
-  }
+  const cancelKeys: string[] = [];
+  if (unit.count > 0) cancelKeys.push('jest');
+  if (integration.count > 0) cancelKeys.push('jest-integration');
+  for (const fg of functionalGroups) cancelKeys.push(fg.key);
+  bk.setMetadata('cancel_on_gate_failure_batch:test_groups', JSON.stringify(cancelKeys));
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(steps);
