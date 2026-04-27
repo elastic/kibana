@@ -62,7 +62,12 @@ export const useFetchSameRuleEpisodesQuery = ({
   const otherKey = currentGroupHash ?? 'rule-only';
 
   return useQuery({
-    queryKey: queryKeys.relatedOtherEpisodes(ruleId ?? '', pageSize, otherKey),
+    queryKey: queryKeys.relatedOtherEpisodes(
+      ruleId ?? '',
+      pageSize,
+      otherKey,
+      excludeEpisodeId ?? ''
+    ),
     queryFn: ({ signal }) => {
       const rId = ruleId as string;
       const exId = excludeEpisodeId as string;
