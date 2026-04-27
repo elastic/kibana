@@ -7,70 +7,74 @@
 
 import { z } from '@kbn/zod/v4';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import {
+  metadataSchema,
+  ruleKindSchema,
+  scheduleEverySchema,
+  esqlQuerySchema,
+  groupingSchema,
+  stateTransitionSchema,
+  recoveryPolicyTypeSchema,
+  durationSchema,
+  isStateTransitionAllowed,
+  isRecoveryPolicyQueryProvided,
+} from '@kbn/alerting-v2-schemas';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
+// Field-level schemas are imported from the shared alerting-v2-schemas package
+// so that tool-level validation matches the CRUD API constraints.
+
+const metadataPartial = metadataSchema.partial();
 
 export const setMetadataOperationSchema = z.object({
   operation: z.literal('set_metadata'),
-  name: z.string().min(1).max(256).optional().describe('Rule name.'),
-  description: z.string().max(1024).optional().describe('Human-readable description.'),
-  tags: z.array(z.string()).optional().describe('Tags for categorization.'),
+  name: metadataPartial.shape.name.describe('Rule name.'),
+  description: metadataPartial.shape.description.describe('Human-readable description.'),
+  tags: metadataPartial.shape.tags.describe('Tags for categorization.'),
 });
 
 export const setKindOperationSchema = z.object({
   operation: z.literal('set_kind'),
-  kind: z.enum(['alert', 'signal']).describe('Rule kind.'),
+  kind: ruleKindSchema.describe('Rule kind.'),
 });
 
 export const setScheduleOperationSchema = z.object({
   operation: z.literal('set_schedule'),
-  every: z.string().min(1).optional().describe('Execution interval, e.g. 1m, 5m.'),
-  lookback: z.string().optional().describe('Lookback window for the query, e.g. 5m, 1h.'),
+  every: scheduleEverySchema.optional().describe('Execution interval, e.g. 1m, 5m.'),
+  lookback: durationSchema.optional().describe('Lookback window for the query, e.g. 5m, 1h.'),
 });
 
 export const setQueryOperationSchema = z.object({
   operation: z.literal('set_query'),
-  base: z
-    .string()
-    .min(1)
-    .describe(
-      'Base ES|QL query. Must not include time filters — those are applied automatically via the lookback window.'
-    ),
+  base: esqlQuerySchema.describe(
+    'Base ES|QL query. Must not include time filters — those are applied automatically via the lookback window.'
+  ),
 });
 
 export const setGroupingOperationSchema = z.object({
   operation: z.literal('set_grouping'),
-  fields: z
-    .array(z.string().min(1))
-    .min(1)
+  fields: groupingSchema.shape.fields
     .describe('Fields to group alerts by (e.g. ["host.name", "service.name"]).'),
 });
 
+const stateTransitionInner = stateTransitionSchema.unwrap().unwrap();
+
 export const setStateTransitionOperationSchema = z.object({
   operation: z.literal('set_state_transition'),
-  pending_count: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
+  pending_count: stateTransitionInner.shape.pending_count
     .describe('Consecutive breaches before transitioning to active.'),
-  pending_timeframe: z.string().optional().describe('Time window for pending evaluation, e.g. 5m.'),
-  recovering_count: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
+  pending_timeframe: stateTransitionInner.shape.pending_timeframe
+    .describe('Time window for pending evaluation, e.g. 5m.'),
+  recovering_count: stateTransitionInner.shape.recovering_count
     .describe('Consecutive recoveries before transitioning to inactive.'),
-  recovering_timeframe: z
-    .string()
-    .optional()
+  recovering_timeframe: stateTransitionInner.shape.recovering_timeframe
     .describe('Time window for recovering evaluation, e.g. 5m.'),
 });
 
 export const setRecoveryPolicyOperationSchema = z.object({
   operation: z.literal('set_recovery_policy'),
-  type: z.enum(['query', 'no_breach']).describe('Recovery detection type.'),
-  query: z.string().optional().describe('Recovery ES|QL query. Required when type is "query".'),
+  type: recoveryPolicyTypeSchema.describe('Recovery detection type.'),
+  query: esqlQuerySchema.optional().describe('Recovery ES|QL query. Required when type is "query".'),
 });
 
 // ─── Discriminated union ──────────────────────────────────────────────────────
@@ -172,6 +176,14 @@ export const executeRuleOperations = (
         };
         break;
     }
+  }
+
+  if (!isStateTransitionAllowed(next)) {
+    throw new Error('state_transition is only allowed when kind is "alert".');
+  }
+
+  if (!isRecoveryPolicyQueryProvided(next)) {
+    throw new Error('recovery_policy.query.base is required when recovery_policy.type is "query".');
   }
 
   return next;

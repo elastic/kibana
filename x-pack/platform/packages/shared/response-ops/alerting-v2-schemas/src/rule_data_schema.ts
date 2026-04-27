@@ -18,7 +18,7 @@ import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
 
 /** Primitives */
 
-const esqlQuerySchema = z
+export const esqlQuerySchema = z
   .string()
   .min(1)
   .max(10000)
@@ -37,7 +37,7 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 
 /** Metadata (required) */
 
-const metadataSchema = z
+export const metadataSchema = z
   .object({
     name: z.string().min(1).max(256).describe('Unique rule name/identifier.'),
     description: z
@@ -57,14 +57,14 @@ const metadataSchema = z
 
 /** Schedule (required) */
 
-const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
+export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
   const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
   if (error) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
   }
 });
 
-const scheduleSchema = z
+export const scheduleSchema = z
   .object({
     every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m.'),
     lookback: durationSchema
@@ -76,7 +76,7 @@ const scheduleSchema = z
 
 /** Evaluation (required) */
 
-const evaluationQuerySchema = z
+export const evaluationQuerySchema = z
   .object({
     base: esqlQuerySchema.describe('Base ES|QL query.'),
   })
@@ -95,7 +95,7 @@ export const recoveryPolicyTypeSchema = z.enum(['query', 'no_breach']);
 export const recoveryPolicyType = recoveryPolicyTypeSchema.enum;
 export type RecoveryPolicyType = z.infer<typeof recoveryPolicyTypeSchema>;
 
-const recoveryPolicySchema = z
+export const recoveryPolicySchema = z
   .object({
     type: recoveryPolicyTypeSchema.describe('Recovery detection type.'),
     query: z
@@ -111,9 +111,9 @@ const recoveryPolicySchema = z
 
 /** State transition (optional, alert-only) */
 
-const stateTransitionOperatorSchema = z.enum(['AND', 'OR']);
+export const stateTransitionOperatorSchema = z.enum(['AND', 'OR']);
 
-const stateTransitionSchema = z
+export const stateTransitionSchema = z
   .object({
     pending_operator: stateTransitionOperatorSchema
       .optional()
@@ -147,7 +147,7 @@ const stateTransitionSchema = z
 
 /** Grouping (optional) */
 
-const groupingSchema = z
+export const groupingSchema = z
   .object({
     fields: z
       .array(z.string().max(256))
@@ -217,28 +217,28 @@ const createRuleDataBaseSchema = z
   })
   .strip();
 
-/**
- * The `.refine` method adds a custom validation to the schema.
- * In this case, it enforces that the `state_transition` property is only allowed when `kind` is "alert".
- * The predicate `data.kind === 'alert' || data.state_transition == null` means:
- * - If the rule kind is "alert", `state_transition` may be present (or absent).
- * - For any other `kind`, `state_transition` must be `null` or `undefined`.
- * If validation fails, the specified error message will be associated with the `state_transition` field.
- */
+/** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
+
+export const isStateTransitionAllowed = (data: {
+  kind?: string;
+  state_transition?: unknown;
+}): boolean => data.kind === 'alert' || data.state_transition == null;
+
+export const isRecoveryPolicyQueryProvided = (data: {
+  recovery_policy?: { type?: string; query?: { base?: string } };
+}): boolean =>
+  data.recovery_policy?.type !== 'query' ||
+  (data.recovery_policy.query?.base != null && data.recovery_policy.query.base.length > 0);
+
 export const createRuleDataSchema = createRuleDataBaseSchema
-  .refine((data) => data.kind === 'alert' || data.state_transition == null, {
+  .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
-  .refine(
-    (data) =>
-      data.recovery_policy?.type !== 'query' ||
-      (data.recovery_policy.query?.base != null && data.recovery_policy.query.base.length > 0),
-    {
-      message: 'recovery_policy.query.base is required when recovery_policy.type is "query".',
-      path: ['recovery_policy', 'query', 'base'],
-    }
-  );
+  .refine(isRecoveryPolicyQueryProvided, {
+    message: 'recovery_policy.query.base is required when recovery_policy.type is "query".',
+    path: ['recovery_policy', 'query', 'base'],
+  });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
