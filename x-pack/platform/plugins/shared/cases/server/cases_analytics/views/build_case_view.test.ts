@@ -8,12 +8,12 @@
 import { buildCaseViewQuery } from './build_case_view';
 
 describe('buildCaseViewQuery', () => {
-  it('emits a stable query for the empty template-fields set', () => {
-    expect(buildCaseViewQuery([])).toMatchSnapshot();
+  it('emits a stable query for the empty template-fields set (securitySolution)', () => {
+    expect(buildCaseViewQuery('securitySolution', [])).toMatchSnapshot();
   });
 
   it('appends one EVAL and one KEEP column per template field, after the base columns, in input order', () => {
-    const out = buildCaseViewQuery([
+    const out = buildCaseViewQuery('securitySolution', [
       { name: 'riskScore', type: 'long' },
       { name: 'incidentDate', type: 'date' },
       { name: 'summary', type: 'keyword' },
@@ -21,14 +21,22 @@ describe('buildCaseViewQuery', () => {
     expect(out).toMatchSnapshot();
   });
 
-  it('reads from the alerting-cases SO index with the type filter and metadata directives required by JSON_EXTRACT', () => {
-    const out = buildCaseViewQuery([]);
-    expect(out).toMatch(/^FROM \.kibana_alerting_cases METADATA _id, _source/);
-    expect(out).toContain('| WHERE type == "cases"');
+  it('scopes by owner in the WHERE clause so kibana-cases-security can grant role patterns by view name', () => {
+    expect(buildCaseViewQuery('securitySolution', [])).toContain(
+      '| WHERE type == "cases" AND cases.owner == "securitySolution"'
+    );
+    expect(buildCaseViewQuery('observability', [])).toContain('cases.owner == "observability"');
+    expect(buildCaseViewQuery('cases', [])).toContain('cases.owner == "cases"');
+  });
+
+  it('reads from the alerting-cases SO index with the metadata directives required by JSON_EXTRACT', () => {
+    expect(buildCaseViewQuery('securitySolution', [])).toMatch(
+      /^FROM \.kibana_alerting_cases METADATA _id, _source/
+    );
   });
 
   it('decodes status and severity numeric codes inline so consumers do not need to know the enum encoding', () => {
-    const out = buildCaseViewQuery([]);
+    const out = buildCaseViewQuery('securitySolution', []);
     expect(out).toContain(
       'status = CASE(cases.status == 0, "open", cases.status == 10, "in-progress", cases.status == 20, "closed", "")'
     );
@@ -38,14 +46,14 @@ describe('buildCaseViewQuery', () => {
   });
 
   it('exposes both ISO and ms-epoch forms for created_at, updated_at, and closed_at', () => {
-    const out = buildCaseViewQuery([]);
+    const out = buildCaseViewQuery('securitySolution', []);
     expect(out).toContain('created_at = TO_DATETIME(cases.created_at)');
     expect(out).toContain('created_at_ms = TO_LONG(TO_DATETIME(cases.created_at))');
     expect(out).toContain('closed_at_ms = TO_LONG(TO_DATETIME(cases.closed_at))');
   });
 
   it('flattens assignees, custom_fields, and observables to multi-value columns rather than nested rows', () => {
-    const out = buildCaseViewQuery([]);
+    const out = buildCaseViewQuery('securitySolution', []);
     expect(out).toContain('assignees = cases.assignees.uid');
     expect(out).toContain('total_assignees = MV_COUNT(cases.assignees.uid)');
     expect(out).toContain('custom_fields_keys = cases.customFields.key');

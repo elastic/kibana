@@ -8,19 +8,27 @@
 import { buildActivityViewQuery } from './build_activity_view';
 
 describe('buildActivityViewQuery', () => {
-  it('emits a stable query (no parameters; output never varies)', () => {
-    expect(buildActivityViewQuery()).toMatchSnapshot();
+  it('emits a stable query for the securitySolution owner', () => {
+    expect(buildActivityViewQuery('securitySolution')).toMatchSnapshot();
   });
 
-  it('filters to cases-user-actions SOs and pulls the user-action metadata required for activity dashboards', () => {
-    const out = buildActivityViewQuery();
-    expect(out).toContain('| WHERE type == "cases-user-actions"');
+  it('scopes by owner in the WHERE clause', () => {
+    expect(buildActivityViewQuery('securitySolution')).toContain(
+      '| WHERE type == "cases-user-actions" AND `cases-user-actions`.owner == "securitySolution"'
+    );
+    expect(buildActivityViewQuery('observability')).toContain(
+      '`cases-user-actions`.owner == "observability"'
+    );
+  });
+
+  it('pulls the user-action metadata required for activity dashboards', () => {
+    const out = buildActivityViewQuery('securitySolution');
     expect(out).toContain('action = `cases-user-actions`.action');
     expect(out).toContain('user_action_type = `cases-user-actions`.type');
   });
 
   it('preserves the payload only for matching user_action_type so consumers can SUM/COUNT by intent without ambiguity', () => {
-    const out = buildActivityViewQuery();
+    const out = buildActivityViewQuery('securitySolution');
     expect(out).toContain(
       'payload_status = CASE(`cases-user-actions`.type == "status", `cases-user-actions`.payload.status, null)'
     );
@@ -30,6 +38,8 @@ describe('buildActivityViewQuery', () => {
   });
 
   it('exposes case_id from the SO references array for joining back to cases.case rows', () => {
-    expect(buildActivityViewQuery()).toContain('case_id = MV_FIRST(MV_FILTER(references.id');
+    expect(buildActivityViewQuery('securitySolution')).toContain(
+      'case_id = MV_FIRST(MV_FILTER(references.id'
+    );
   });
 });

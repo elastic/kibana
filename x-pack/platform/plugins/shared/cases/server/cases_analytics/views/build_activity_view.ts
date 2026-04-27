@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Owner } from '../../../common/constants/types';
 import { CAI_VIEW_SOURCE_INDEX } from './constants';
 
 const ACTIVITY_EVALS = [
@@ -54,13 +55,15 @@ const ACTIVITY_KEEP_COLUMNS = [
 ];
 
 /**
- * One row per cases-user-actions SO. Activity rows do not consume template
- * extended fields, so this builder takes no parameters.
+ * One row per cases-user-actions SO scoped to a given owner. Activity rows
+ * do not consume template extended fields, so this builder is parameterized
+ * only by owner. Owner appears in the WHERE clause so the view is
+ * solution-scoped at the cluster-state level.
  */
-export const buildActivityViewQuery = (): string =>
+export const buildActivityViewQuery = (owner: Owner): string =>
   [
     `FROM ${CAI_VIEW_SOURCE_INDEX} METADATA _id`,
-    `| WHERE type == "cases-user-actions"`,
+    `| WHERE type == "cases-user-actions" AND \`cases-user-actions\`.owner == "${owner}"`,
     `| EVAL ${ACTIVITY_EVALS.join(', ')}`,
     `| KEEP ${ACTIVITY_KEEP_COLUMNS.join(', ')}`,
   ].join('\n');

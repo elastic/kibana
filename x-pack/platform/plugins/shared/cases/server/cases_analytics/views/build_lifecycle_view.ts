@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Owner } from '../../../common/constants/types';
 import { CAI_VIEW_SOURCE_INDEX } from './constants';
 
 const LIFECYCLE_EVALS = [
@@ -44,16 +45,17 @@ const LIFECYCLE_KEEP_COLUMNS = [
 ];
 
 /**
- * One row per case with pre-computed lifecycle metrics — the ES|QL view
- * equivalent of the legacy lifecycle pivot transform. The fields consumed
- * (total_alerts, total_comments, time_to_*) are already maintained by the
- * cases service on each write, so no aggregation across user-actions or
- * comments is required at view-eval time.
+ * One row per case (scoped to an owner) with pre-computed lifecycle
+ * metrics — the ES|QL view equivalent of the legacy lifecycle pivot
+ * transform. The fields consumed (total_alerts, total_comments, time_to_*)
+ * are already maintained by the cases service on each write, so no
+ * aggregation across user-actions or comments is required at view-eval
+ * time.
  */
-export const buildLifecycleViewQuery = (): string =>
+export const buildLifecycleViewQuery = (owner: Owner): string =>
   [
     `FROM ${CAI_VIEW_SOURCE_INDEX} METADATA _id`,
-    `| WHERE type == "cases"`,
+    `| WHERE type == "cases" AND cases.owner == "${owner}"`,
     `| EVAL ${LIFECYCLE_EVALS.join(', ')}`,
     `| KEEP ${LIFECYCLE_KEEP_COLUMNS.join(', ')}`,
   ].join('\n');

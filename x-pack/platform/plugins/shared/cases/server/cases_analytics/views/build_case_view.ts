@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Owner } from '../../../common/constants/types';
 import { CAI_VIEW_SOURCE_INDEX } from './constants';
 import { extendedFieldsToEval, type TemplateFieldRef } from './extended_fields_to_eval';
 
@@ -99,22 +100,28 @@ const CASE_BASE_KEEP_COLUMNS = [
 ];
 
 /**
- * One row per case SO. `templateFields` is the union of (name, type) pairs
- * across every cases-templates SO; each pair becomes an EVAL'd column
- * with a JSON_EXTRACT-based read and a TO_* cast appropriate for the type.
+ * One row per case SO for the given owner. `templateFields` is the union
+ * of (name, type) pairs declared by that owner's cases-templates SOs;
+ * each pair becomes an EVAL'd column with a JSON_EXTRACT-based read and
+ * a TO_* cast appropriate for the type.
+ *
+ * Owner appears in the WHERE clause so the view is solution-scoped at
+ * the cluster-state level — kibana-cases-security plugin grants role
+ * patterns by view name (`cases.case.<owner>`), and namespace DLS
+ * inside the SO index handles space isolation.
  *
  * The output column set is stable across regenerations: column order is
  * always [base columns, ...extended-field columns in input order]. This
  * keeps Lens / Discover saved queries from breaking when a new template
  * field is added.
  */
-export const buildCaseViewQuery = (templateFields: TemplateFieldRef[]): string => {
+export const buildCaseViewQuery = (owner: Owner, templateFields: TemplateFieldRef[]): string => {
   const extendedEvals = extendedFieldsToEval(templateFields);
   const allEvals = [...CASE_BASE_EVALS, ...extendedEvals.map((e) => e.evalLine)];
   const allKeepColumns = [...CASE_BASE_KEEP_COLUMNS, ...extendedEvals.map((e) => e.camelKey)];
   return [
     `FROM ${CAI_VIEW_SOURCE_INDEX} METADATA _id, _source`,
-    `| WHERE type == "cases"`,
+    `| WHERE type == "cases" AND cases.owner == "${owner}"`,
     `| EVAL ${allEvals.join(', ')}`,
     `| KEEP ${allKeepColumns.join(', ')}`,
   ].join('\n');
