@@ -21,6 +21,17 @@ type CommonlyUsedTimeRange =
   | 'Last_90 days'
   | 'Last_1 year';
 
+/**
+ * Drilldown trigger ids registered via Kibana's UI Actions. These are the
+ * identifiers that `ActionWizard` uses in `data-test-subj={`triggerPicker-${trigger}`}`
+ * (`src/platform/plugins/shared/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx`).
+ */
+export type DrilldownTriggerId =
+  | 'VALUE_CLICK_TRIGGER'
+  | 'SELECT_RANGE_TRIGGER'
+  | 'IMAGE_CLICK_TRIGGER'
+  | 'CONTEXT_MENU_TRIGGER';
+
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
@@ -42,7 +53,6 @@ export class DashboardApp {
   // Save flows
   private readonly savedObjectTitleInput;
   private readonly confirmSaveButton;
-  private readonly quickSaveSecondaryButton;
   private readonly interactiveSaveMenuItem;
 
   // Library flyout
@@ -90,9 +100,6 @@ export class DashboardApp {
     // Save flows
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
-    this.quickSaveSecondaryButton = this.page.testSubj.locator(
-      'dashboardQuickSaveMenuItem-secondary-button'
-    );
     this.interactiveSaveMenuItem = this.page.testSubj.locator('dashboardInteractiveSaveMenuItem');
 
     // Library flyout
@@ -139,13 +146,10 @@ export class DashboardApp {
   }
 
   async openSettingsFlyout() {
-    // typically serverless projects
-    if (await this.settingsButton.isVisible()) {
-      await this.settingsButton.click();
-    } else {
-      // typically stateful deployments
-      await this.page.getByRole('button', { name: 'Open dashboard settings' }).click();
-    }
+    // The settings top-nav entry uses the same `data-test-subj="dashboardSettingsButton"`
+    // in both stateful and serverless (see `use_dashboard_menu_items.tsx`). It is only
+    // rendered in edit mode, so callers must switch to edit mode first.
+    await this.settingsButton.click();
     await expect(this.getSettingsFlyout()).toBeVisible();
   }
 
@@ -221,6 +225,9 @@ export class DashboardApp {
     await this.savedObjectTitleInput.fill(name);
     await this.confirmSaveButton.click();
     await expect(this.confirmSaveButton).toBeHidden();
+    // After saving a new dashboard Kibana navigates from /create to /view/{id}. Wait for the
+    // viewport and all panels to re-render before the next interaction.
+    await this.waitForRenderComplete();
   }
 
   async saveChangesToExistingDashboard() {
@@ -614,9 +621,18 @@ export class DashboardApp {
   }
 
   async setCustomPanelTitle(customTitle: string) {
+    // Ensure "Show title" switch is on, otherwise the title input is disabled and
+    // `fill` silently no-ops which leaves the panel with its default/empty title.
+    const showTitleSwitch = this.page.testSubj.locator('customEmbeddablePanelHideTitleSwitch');
+    if ((await showTitleSwitch.getAttribute('aria-checked')) !== 'true') {
+      await showTitleSwitch.click();
+    }
+
     const titleInput = this.page.testSubj.locator('customEmbeddablePanelTitleInput');
     await titleInput.click();
     await titleInput.fill(customTitle);
+    // Verify the React-controlled value actually committed before moving on.
+    await expect(titleInput).toHaveValue(customTitle);
   }
 
   async resetCustomPanelTitle() {
@@ -648,6 +664,9 @@ export class DashboardApp {
   async saveCustomizePanel() {
     await this.customizePanelSaveButton.click();
     await expect(this.customizePanelFlyout).toBeHidden();
+    // The save applies title/description/timeRange changes to the panel API which re-renders
+    // the panel. Wait for the panel to settle so subsequent title-based locators resolve.
+    await this.waitForRenderComplete();
   }
 
   async expectTimeRangeBadgeExists() {
@@ -928,11 +947,13 @@ export class DashboardApp {
   }
 
   /**
-   * Opens the "Save as..." dialog via the quick-save dropdown,
+   * Opens the "Save as..." dialog via the interactive-save top-nav item,
    * fills in the new title, and confirms.
+   *
+   * In edit mode on an existing dashboard, `dashboardInteractiveSaveMenuItem`
+   * opens the save modal used to create a copy of the current dashboard.
    */
   async saveDashboardAsCopy(dashboardTitle: string) {
-    await this.quickSaveSecondaryButton.click();
     await this.interactiveSaveMenuItem.click();
     await expect(this.savedObjectTitleInput).toBeVisible();
     await this.savedObjectTitleInput.fill(dashboardTitle);
@@ -940,11 +961,27 @@ export class DashboardApp {
     await expect(this.confirmSaveButton).toBeHidden();
   }
 
-  /** Selects a drilldown trigger and submits the drilldown wizard. */
-  async selectDrilldownTriggerAndSubmit(
-    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu'
-  ) {
-    await this.page.testSubj.click(`triggerPicker-${trigger}`);
+  /**
+   * Selects a drilldown trigger and submits the drilldown wizard.
+   *
+   * Trigger ids must match Kibana's registered trigger identifiers
+   * (`VALUE_CLICK_TRIGGER`, etc.), which is what `ActionWizard` uses in
+   * `data-test-subj={`triggerPicker-${trigger}`}` (see `action_wizard.tsx`).
+   * The trigger picker is only rendered when the drilldown factory supports
+   * more than one trigger, so if the picker is absent we skip straight to
+   * submit.
+   */
+  async selectDrilldownTriggerAndSubmit(trigger: DrilldownTriggerId) {
+    const triggerPickerContainer = this.page.testSubj.locator('triggerPicker');
+    if (await triggerPickerContainer.isVisible()) {
+      // `EuiCheckableCard` renders the test-subj on its outer wrapper; click the
+      // inner radio input directly so the onChange always fires (matches the FTR
+      // pattern in `src/platform/test/functional/services/dashboard/drilldowns_manage.ts`).
+      const radio = this.page.testSubj
+        .locator(`triggerPicker-${trigger}`)
+        .locator('input[type="radio"]');
+      await radio.click();
+    }
     await expect(this.drilldownWizardSubmit).toBeEnabled();
     await this.drilldownWizardSubmit.click();
   }
@@ -1010,15 +1047,20 @@ export class DashboardApp {
   async createUrlDrilldown(
     name: string,
     url: string,
-    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value'
+    trigger: DrilldownTriggerId = 'VALUE_CLICK_TRIGGER'
   ) {
-    await this.page.testSubj.click('drilldownFactoryItem-url_drilldown');
+    // Drilldown factory items render as `actionFactoryItem-${factory.id}` (see
+    // `presentable_picker_item.tsx`). The URL drilldown's id is `URL_DRILLDOWN`
+    // (defined in `x-pack/platform/plugins/private/drilldowns/url_drilldown`).
+    await this.page.testSubj.click('actionFactoryItem-URL_DRILLDOWN');
     await this.page.testSubj.locator('drilldownNameInput').fill(name);
 
+    // The URL template editor has no `data-test-subj`; it renders a wrapping div with
+    // `className="urlTemplateEditor__container"` (see
+    // `src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx`).
+    // Match the FTR selector in `drilldowns_manage.ts` so behaviour stays consistent.
     const selectAll = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
-    const monacoEditor = this.page.locator(
-      '[data-test-subj="url-template-editor-container"] .monaco-editor'
-    );
+    const monacoEditor = this.page.locator('.urlTemplateEditor__container .monaco-editor');
     await monacoEditor.click();
     await this.page.keyboard.press(selectAll);
     await this.page.keyboard.type(url);
