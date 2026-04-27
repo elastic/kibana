@@ -56,8 +56,9 @@ description: GitHub interactions via gh CLI for the Kibana repo. Use when perfor
 ### Core Rule: Pending vs Published
 
 - Never include `event` in a review-creation payload (`POST /repos/{o}/{r}/pulls/{n}/reviews`). Without `event` the review stays `PENDING`; with it, the review is **immediately and irreversibly published**.
-- Always verify that the `event` key is absent from your review-creation payload before executing the command.
-- To publish a review, you must use the separate submission endpoint: `POST /repos/{o}/{r}/pulls/{n}/reviews/{id}/events` with `-f event=APPROVE` (or COMMENT / REQUEST_CHANGES).
+- Always create reviews via `gh api repos/{o}/{r}/pulls/{n}/reviews --input <file>` with the body in a JSON file. Do not pass `-f event=...` or `-F event=...` to the review-creation endpoint — every quoting form (bare, single-quoted, double-quoted, whole-pair quoted, `$(...)`, backticks, `${VAR:-...}`) is denied by the strip-review-event hook because the only safe sanitisation is parsing the JSON file.
+- Verify the JSON file contains no top-level `"event"` key before submitting.
+- To publish a review, use the separate submission endpoint: `POST /repos/{o}/{r}/pulls/{n}/reviews/{id}/events` with `-f event=APPROVE` (or COMMENT / REQUEST_CHANGES). The hook only denies `event=` on the review-**creation** endpoint, not on submission.
 
 ## Posting PR Review Comments
 

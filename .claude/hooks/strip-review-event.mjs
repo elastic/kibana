@@ -3,21 +3,34 @@
 /**
  * PreToolUse hook (Claude Code): keep PR review creation in PENDING state.
  *
- * Rewrites `gh api` review-creation calls to drop the `event` field, so the
- * review is created but not published. The user submits it explicitly via the
- * `/reviews/{id}/events` endpoint.
+ * The hook never rewrites the shell command. It denies any review-creation
+ * shape that would publish the review, and sanitises the only allowed
+ * shape — `--input <file>` — by stripping a stray `event` key from the
+ * JSON payload on disk via a real parser.
  *
- * Rewritten:
- *   POST /repos/{o}/{r}/pulls/{n}/reviews                  (review creation)
- *
- * Left alone (these legitimately require an `event` value):
- *   POST /repos/{o}/{r}/pulls/{n}/reviews/{id}/events      (submission)
- *   PUT  /repos/{o}/{r}/pulls/{n}/reviews/{id}/dismissals  (dismissal)
+ * Allowed:
+ *   POST /pulls/{n}/reviews --input <file>                 (file-based body;
+ *                                                           file rewritten on
+ *                                                           disk to remove
+ *                                                           any `event` key)
+ *   POST /pulls/{n}/reviews/{id}/events                    (submission)
+ *   PUT  /pulls/{n}/reviews/{id}/dismissals                (dismissal)
  *   anything else under /reviews/{id}/...
  *
- * Denied (cannot be made safe by rewrite):
- *   `gh api .../reviews --input -`                         (body from stdin)
- *   `gh pr review --approve | --request-changes | --comment` (immediate publish)
+ * Denied:
+ *   gh api .../reviews -f event=...                        (any quoting form;
+ *                                                           detected via
+ *                                                           prefix-only
+ *                                                           regex)
+ *   gh api .../reviews --input -                           (stdin body —
+ *                                                           opaque to the hook)
+ *   gh api .../reviews --input <path-with-shell-expansion> (opaque to the hook)
+ *   gh pr review --approve | --request-changes | --comment (immediate publish)
+ *
+ * Known limitation: a heredoc anywhere in the raw command bypasses the deny
+ * — without a real shell parser the hook can't tell whether a heredoc body
+ * is just text fed to `cat` or a payload going to `gh`. The layered defense
+ * (skill + warn-github-mcp + human-in-the-loop) covers it.
  *
  * @see .cursor/hooks/strip-review-event.mjs for the Cursor counterpart.
  */
@@ -26,31 +39,17 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { json } from 'node:stream/consumers';
 
 /**
- * Matches `-f|-F|--field|--raw-field (space|=)…event=…` flag pairs in a
- * `gh api` invocation. Covers all four flag names, both separators, and
- * every common shell-quoting shape so a silent-publish bypass via quoting
- * is impossible:
- *
- *   -f event=APPROVE               (bare)
- *   -f event='APPROVE'             (value single-quoted)
- *   -f event="APPROVE"             (value double-quoted)
- *   -f 'event=APPROVE'             (whole pair single-quoted)
- *   -f "event=APPROVE"             (whole pair double-quoted)
- *   --field=event='APPROVE'        (ditto with `=` separator)
- *   -f "event=$(echo APPROVE)"     (shell expansion inside double quotes)
- *
- * Alternation order matters. The value-quoted branch is tried first so a
- * fully-quoted value matches cleanly. The fallback branch keeps the outer
- * quotes optional so it still bites on shapes the first branch cannot
- * close — most importantly shell expansion inside double quotes
- * (`event=$(echo APPROVE)`), where internal whitespace blocks the value
- * from being captured as a single token. The fallback partial-strips up
- * to the first whitespace and leaves an unmatched quote in the rewritten
- * command; the shell errors before `gh` runs, so `event` never reaches
- * the API.
+ * Detects an `event=` flag pair on `gh api .../reviews` regardless of how
+ * the value is quoted. Only the prefix
+ * `(-f|-F|--field|--raw-field …)['"]?event=` matters — the regex never
+ * consumes the value, so every value-side shell-quoting and shell-expansion
+ * shape is covered without alternation: bare, single-quoted, double-quoted,
+ * whole-pair quoted, `$(…)`, backticks, `${VAR:-…}`. The match drives a
+ * `deny` decision pointing the agent at the canonical `--input <file>`
+ * path; quote-aware iteration in `hasEventFlagOutsideQuotes` ignores
+ * literal `event=` text inside a `-f body="…"` argument.
  */
-const eventFlag =
-  /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))(?:event=(?:"[^"]*"|'[^']*')|['"]?event=[^\s'"]*['"]?)/g;
+const eventFlag = /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))['"]?event=/g;
 
 /**
  * Captures the `--input` value (space- or `=`-separated, double-quoted,
@@ -91,9 +90,9 @@ const prReviewPublishFlag =
 /**
  * Heredoc opener: `<<EOF`, `<<-EOF`, `<<'EOF'`, `<<"EOF"`, `<<\EOF`. The
  * backslash form is valid shell syntax equivalent to `<<'EOF'`, so it must
- * gate the rewrite the same way the other quoted forms do — otherwise the
- * heredoc body can look like a stray `gh api .../reviews` segment and get
- * its `event=...` flags stripped in place.
+ * trigger the bail the same way the other quoted forms do — otherwise the
+ * heredoc body can look like a stray `gh api .../reviews` segment and the
+ * deny check would false-trigger on text that's only being fed to `cat`.
  */
 const heredoc = /<<-?\s*['"\\]?\w/;
 
@@ -154,29 +153,19 @@ const isInsideAnyRange = (idx, ranges) => {
 };
 
 /**
- * Strips every `eventFlag` match in `segment` that lies outside any quoted
- * region. Matches inside quoted regions are preserved so that a body argument
- * like `-f body='example -f event=test'` is not corrupted by the rewrite.
+ * Returns `true` if any `eventFlag` match in `segment` lies outside a
+ * shell-quoted region. Matches inside quoted regions are ignored so that a
+ * body argument like `-f body='example -f event=test'` does not
+ * false-trigger a deny.
  */
-const stripEventFlagsOutsideQuotes = (segment) => {
+const hasEventFlagOutsideQuotes = (segment) => {
   const ranges = getQuotedRanges(segment);
-  const matches = [];
-  let m;
   eventFlag.lastIndex = 0;
+  let m;
   while ((m = eventFlag.exec(segment)) !== null) {
-    if (!isInsideAnyRange(m.index, ranges)) {
-      matches.push({ start: m.index, end: m.index + m[0].length });
-    }
+    if (!isInsideAnyRange(m.index, ranges)) return true;
   }
-  if (matches.length === 0) return { result: segment, dirty: false };
-  let result = '';
-  let cursor = 0;
-  for (const { start, end } of matches) {
-    result += segment.slice(cursor, start);
-    cursor = end;
-  }
-  result += segment.slice(cursor);
-  return { result, dirty: true };
+  return false;
 };
 
 /**
@@ -278,16 +267,17 @@ const raw = input?.tool_input?.command ?? '';
 if (typeof raw !== 'string' || raw === '') process.exit(0);
 
 // Normalize line continuations the way bash does: `\<newline>` (both
-// outside and inside double quotes) is removed entirely, not replaced with
-// a space. Inserting a space corrupts double-quoted bodies like
-// `-f body="line1 \<nl>line2"` — bash yields `line1 line2`, the space
-// variant would yield `line1  line2` and that lands in the rewritten
-// command emitted to the agent.
+// outside and inside double quotes) is removed entirely, not replaced
+// with a space. Without this, `findSegmentSlice` splits on the bare
+// `\n` and a multi-line `gh api .../reviews \<nl> -f event=APPROVE`
+// invocation would be seen as two separate segments, with `event=...`
+// landing in a segment that no longer matches the review-creation
+// regex and slipping past the deny.
 const cmd = raw.replace(/\\\n/g, '');
 
 if (findSegmentSlice(cmd, isPrReviewPublish)) {
   deny(
-    '`gh pr review --approve | --request-changes | --comment` publishes the review immediately. Create the review in PENDING state with `gh api repos/{owner}/{repo}/pulls/{number}/reviews` (no `event` field), then submit it explicitly via `gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/events -f event=APPROVE`.'
+    '`gh pr review --approve | --request-changes | --comment` publishes the review immediately. Create the review in PENDING state by writing the request body to a JSON file (no `event` key) and submitting it via `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`, then submit the review explicitly with `gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/events -f event=APPROVE`.'
   );
 }
 
@@ -329,17 +319,16 @@ if (filePath && filePathSource !== 'singleQuoted') {
 
 // Heredocs can embed text that looks like a `gh api` invocation. Without a
 // shell parser we can't tell whether the matched segment is the real call or
-// a heredoc body, so bail rather than risk corrupting heredoc content. This
+// a heredoc body, so bail rather than risk denying on heredoc content. This
 // runs after the stdin/pr-review deny checks so heredoc-fed stdin payloads
 // are denied instead of silently allowed.
 if (heredoc.test(raw)) process.exit(0);
 
-let mutated = segment;
-let dirty = false;
-
-const stripped = stripEventFlagsOutsideQuotes(mutated);
-mutated = stripped.result;
-if (stripped.dirty) dirty = true;
+if (hasEventFlagOutsideQuotes(segment)) {
+  deny(
+    'Passing `event` on the `gh api .../reviews` command line publishes the review immediately. Write the request body to a JSON file (omitting `event`) and submit it via `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`. The hook reads the file and strips any stray `event` key before `gh` runs. Submit the review explicitly later via `gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/events -f event=APPROVE`.'
+  );
+}
 
 if (filePath) {
   try {
@@ -347,29 +336,10 @@ if (filePath) {
     if ('event' in payload) {
       delete payload.event;
       writeFileSync(filePath, JSON.stringify(payload, null, 2));
-      dirty = true;
     }
   } catch {
     /* file doesn't exist or isn't JSON — skip */
   }
 }
 
-if (!dirty) process.exit(0);
-
-const next = cmd.slice(0, slice.start) + mutated + cmd.slice(slice.end);
-
-process.stdout.write(
-  JSON.stringify(
-    {
-      hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        permissionDecision: 'allow',
-        permissionDecisionReason:
-          'Stripped event from review creation payload to keep the review in PENDING state.',
-        updatedInput: { ...input.tool_input, command: next },
-      },
-    },
-    null,
-    2
-  )
-);
+process.exit(0);

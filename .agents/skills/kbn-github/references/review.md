@@ -4,6 +4,9 @@ Detailed reference for creating, verifying, and submitting PR reviews via `gh ap
 
 ## Creating a Pending Review
 
+- Always submit the review-creation request via `--input <file>` pointing at a JSON file. The strip-review-event hook denies every `-f event=...` / `-F event=...` / `--field event=...` flag shape on the creation endpoint because the only safe sanitisation is parsing the JSON file.
+- The `--input` path must not contain `$VAR`, `$(...)`, backticks, or a leading `~`; the hook reads the literal path and cannot expand shell metacharacters. Pass an absolute or already-expanded path.
+- `--input -` (stdin) is denied — the hook can't inspect or rewrite stdin.
 - Include all inline comments in the `comments` array in the same request.
 - Every inline comment must resolve to a valid diff anchor.
 - GitHub allows only one `PENDING` review per user per PR. Pending comments are not editable via API — do not try to PATCH them or attach new comments via the PR comments endpoint (it won't accept `pull_request_review_id`). If you need to change bodies or anchors, delete the pending review and recreate it.
