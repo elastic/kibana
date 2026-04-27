@@ -15,6 +15,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CASE_EXTENDED_FIELDS } from '../../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../../common/utils';
 import type {
   UserPickerFieldSchema,
   ConditionRenderProps,
@@ -106,7 +107,11 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   );
 
   return (
-    <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={fieldConfig}>
+    <UseField
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
+      config={fieldConfig}
+    >
       {renderField}
     </UseField>
   );

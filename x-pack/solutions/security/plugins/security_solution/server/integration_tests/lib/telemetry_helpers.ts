@@ -427,6 +427,11 @@ const fakeKibanaRequest = {
       url: '/',
     },
   },
+  serverTiming: {
+    start: () => {
+      return { end: () => {} };
+    },
+  },
 } as unknown as KibanaRequest;
 
 export function getTelemetryTaskType(task: SecurityTelemetryTask): string {

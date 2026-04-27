@@ -10,9 +10,6 @@ import type { Filter } from '@kbn/es-query';
 /** Stable id for ad-hoc data view (Entity Store v2 unified latest index). */
 export const ENTITY_STORE_V2_HOSTS_KPI_LENS_AD_HOC_ID = '7f2a9c1e-4b8d-4e6f-a3c2-9d1e8f7a6b5c';
 
-export const getEntityStoreV2LatestHostsIndexTitle = (spaceId?: string) =>
-  `.entities.v2.latest.security_${spaceId ?? 'default'}`;
-
 export const getEntityStoreV2HostOnlyFilter = (): Filter => ({
   meta: {
     alias: null,

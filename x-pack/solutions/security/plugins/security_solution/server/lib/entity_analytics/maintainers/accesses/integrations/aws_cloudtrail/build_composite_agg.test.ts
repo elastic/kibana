@@ -13,9 +13,11 @@ describe('AWS CloudTrail buildCompositeAggQuery', () => {
     expect(query.query.bool.filter).toContainEqual({ term: { 'event.module': 'aws' } });
   });
 
-  it('filters for StartSession action', () => {
+  it('filters for StartSession and SendSSHPublicKey actions', () => {
     const query = buildCompositeAggQuery();
-    expect(query.query.bool.filter).toContainEqual({ term: { 'event.action': 'StartSession' } });
+    expect(query.query.bool.filter).toContainEqual({
+      terms: { 'event.action': ['StartSession', 'SendSSHPublicKey'] },
+    });
   });
 
   it('does not filter on logon_type or event.provider', () => {

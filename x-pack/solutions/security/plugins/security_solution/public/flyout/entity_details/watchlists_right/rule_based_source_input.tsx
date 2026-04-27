@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, type FC } from 'react';
+import React, { useEffect, useMemo, type FC } from 'react';
 import {
   EuiButtonGroup,
   EuiComboBox,
@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiSuperDatePicker,
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
@@ -33,6 +34,7 @@ import {
   WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL,
   WATCHLIST_INDEX_PATTERN_LABEL,
   WATCHLIST_INDEX_PATTERN_PLACEHOLDER,
+  WATCHLIST_LOOKBACK_PERIOD_LABEL,
 } from './translations';
 
 const DEBOUNCE_OPTIONS = { wait: 300 };
@@ -46,6 +48,7 @@ interface FilterQueryRowProps {
   onChangedQuery: (query: Query) => void;
   savedQuery: SavedQuery | undefined;
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
+  isInvalid?: boolean;
 }
 
 const FilterQueryRow: FC<FilterQueryRowProps> = ({
@@ -57,8 +60,9 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
   onChangedQuery,
   savedQuery,
   onSavedQuery,
+  isInvalid,
 }) => (
-  <EuiFormRow label={WATCHLIST_FILTER_QUERY_LABEL}>
+  <EuiFormRow label={WATCHLIST_FILTER_QUERY_LABEL} isInvalid={isInvalid}>
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
         {dataView ? (
@@ -72,7 +76,7 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
             onChangedQuery={onChangedQuery}
             savedQuery={savedQuery}
             onSavedQuery={onSavedQuery}
-            hideSavedQuery={false}
+            hideSavedQuery={true}
             displayStyle="inPage"
             dataTestSubj="watchlistFilterQuery"
           />
@@ -98,6 +102,7 @@ export interface RuleBasedSourceInputProps {
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
   initialEntitySources?: CreateWatchlistRequestBodyInput['entitySources'];
+  onSourceValidationChange: (valid: boolean) => void;
 }
 
 export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
@@ -106,6 +111,7 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   isManaged = false,
   onFieldChange,
   initialEntitySources,
+  onSourceValidationChange,
 }) => {
   const { dataView, filters, filterManager } = useDataViewSetup();
 
@@ -113,7 +119,10 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
     filterQuery,
     selectedIndexPatterns,
     entityField,
+    range,
+    isNone,
     isEntityStore,
+    validation,
     savedQuery,
     toggleButtons,
     activeToggle,
@@ -122,6 +131,7 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
     onSavedQueryChange,
     onIndexPatternsChange,
     onEntityFieldChange,
+    onRangeChange,
   } = useRuleBasedSourceState({
     watchlistName,
     isEditMode,
@@ -129,6 +139,10 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
     initialEntitySources,
     onFieldChange,
   });
+
+  useEffect(() => {
+    onSourceValidationChange(validation.isValid);
+  }, [validation.isValid, onSourceValidationChange]);
 
   const [indexSearchQuery, setIndexSearchQuery] = React.useState<string | undefined>(undefined);
   const {
@@ -176,8 +190,12 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
       </EuiFormRow>
       <EuiSpacer size="m" />
 
-      {!isEntityStore && (
-        <EuiFormRow label={WATCHLIST_INDEX_PATTERN_LABEL} fullWidth>
+      {!isNone && !isEntityStore && (
+        <EuiFormRow
+          label={WATCHLIST_INDEX_PATTERN_LABEL}
+          fullWidth
+          isInvalid={validation.errors.indexPattern}
+        >
           <EuiComboBox
             isLoading={isLoadingIndices && !indicesError}
             fullWidth
@@ -186,6 +204,10 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
             options={indexOptions}
             selectedOptions={selectedIndexPatterns}
             onChange={onIndexPatternsChange}
+            onCreateOption={(value) => {
+              onIndexPatternsChange([...selectedIndexPatterns, { label: value }]);
+            }}
+            customOptionText="Add {searchValue} as an index pattern"
             isClearable={true}
             onSearchChange={(query) => debouncedSetIndexSearchQuery.run(query)}
             async
@@ -195,19 +217,38 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
         </EuiFormRow>
       )}
 
-      <FilterQueryRow
-        dataView={dataView}
-        filterQuery={filterQuery}
-        filterManager={filterManager}
-        filters={filters}
-        onSubmitQuery={onQueryChange}
-        onChangedQuery={onQueryChange}
-        savedQuery={savedQuery}
-        onSavedQuery={onSavedQueryChange}
-      />
+      {!isNone && (
+        <FilterQueryRow
+          dataView={dataView}
+          filterQuery={filterQuery}
+          filterManager={filterManager}
+          filters={filters}
+          onSubmitQuery={onQueryChange}
+          onChangedQuery={onQueryChange}
+          savedQuery={savedQuery}
+          onSavedQuery={onSavedQueryChange}
+          isInvalid={validation.errors.filterQuery}
+        />
+      )}
 
-      {!isEntityStore && (
-        <EuiFormRow label={WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL}>
+      {!isNone && !isEntityStore && (
+        <EuiFormRow label={WATCHLIST_LOOKBACK_PERIOD_LABEL} isInvalid={validation.errors.range}>
+          <EuiSuperDatePicker
+            start={range.start}
+            end={range.end}
+            onTimeChange={({ start, end }) => onRangeChange({ start, end })}
+            width="auto"
+            compressed={true}
+            showUpdateButton={false}
+          />
+        </EuiFormRow>
+      )}
+
+      {!isNone && !isEntityStore && (
+        <EuiFormRow
+          label={WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL}
+          isInvalid={validation.errors.entityField}
+        >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiSuperSelect

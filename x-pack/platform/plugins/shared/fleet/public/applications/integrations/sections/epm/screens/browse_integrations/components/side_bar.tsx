@@ -115,7 +115,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <StickySidebar>
       {CreateIntegrationCardButton && !isLoadingCreatedIntegrations && (
         <>
-          <EuiSpacer size="s" />
           {hasCreatedIntegrations ? (
             <EuiLink
               color="text"

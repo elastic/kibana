@@ -2524,6 +2524,8 @@
                   },
                   ") => void; registerApiKeyInvalidateFn: (fn?: ",
                   "ApiKeyInvalidationFn",
+                  " | undefined) => void; registerUiamApiKeyInvalidateFn: (fn?: ",
+                  "UiamApiKeyInvalidationFn",
                   " | undefined) => void; }"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
