@@ -70,6 +70,18 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(req.query).toContain('JSON_EXTRACT(_source, "$.data")');
   });
 
+  it('drops _source after JSON_EXTRACT and before INLINE STATS to keep sub-plan buffers small', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    const extractIdx = req.query.indexOf('JSON_EXTRACT(_source');
+    const dropIdx = req.query.indexOf('DROP episode.id, rule.id, episode.status, _source');
+    const inlineStatsIdx = req.query.indexOf('INLINE STATS');
+
+    expect(extractIdx).toBeGreaterThan(-1);
+    expect(dropIdx).toBeGreaterThan(extractIdx);
+    expect(inlineStatsIdx).toBeGreaterThan(dropIdx);
+  });
+
   it('aggregates data_json using LAST by timestamp', () => {
     const req = getDispatchableAlertEventsQuery();
 
