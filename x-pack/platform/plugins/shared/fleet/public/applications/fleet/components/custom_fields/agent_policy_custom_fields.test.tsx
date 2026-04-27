@@ -8,28 +8,28 @@
 import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 
-import type { TestRenderer } from '../../../../../../../mock';
-import { createFleetTestRendererMock } from '../../../../../../../mock';
+import type { TestRenderer } from '../../../../mock';
+import { createFleetTestRendererMock } from '../../../../mock';
 
-import type { NewAgentPolicy, AgentPolicy, PackagePolicyInput } from '../../../../../types';
+import type { NewAgentPolicy, AgentPolicy, PackagePolicyInput } from '../../types';
 
-import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../../../../../../common/constants';
+import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../../../common/constants';
 
-import {
-  createAgentPolicyMock,
-  createPackagePolicyMock,
-} from '../../../../../../../../common/mocks';
+import { createAgentPolicyMock, createPackagePolicyMock } from '../../../../../common/mocks';
 
-import { CustomFields } from '.';
+import { AgentPolicyCustomFields } from './agent_policy_custom_fields';
 
-describe('CustomFields', () => {
+describe('AgentPolicyCustomFields', () => {
   let testRenderer: TestRenderer;
   let renderResult: RenderResult;
   const mockUpdateAgentPolicy = jest.fn();
 
   const renderComponent = (agentPolicy: Partial<AgentPolicy | NewAgentPolicy>) => {
     renderResult = testRenderer.render(
-      <CustomFields agentPolicy={agentPolicy} updateAgentPolicy={mockUpdateAgentPolicy} />
+      <AgentPolicyCustomFields
+        agentPolicy={agentPolicy}
+        updateAgentPolicy={mockUpdateAgentPolicy}
+      />
     );
   };
 
