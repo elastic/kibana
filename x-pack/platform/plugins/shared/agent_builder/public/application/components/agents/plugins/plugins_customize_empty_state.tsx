@@ -105,7 +105,7 @@ export const PluginsCustomizeEmptyState: React.FC<PluginsCustomizeEmptyStateProp
       illustrationSrc={pluginsIllustration}
       title={labels.agentPlugins.emptyStateTitle}
       description={description}
-      learnMoreHref={docLinksService.agentBuilderAgents}
+      learnMoreHref={docLinksService.agentBuilderPlugins}
       learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
       learnMoreSuffix={labels.agentPlugins.emptyStateLearnMoreSuffix}
       footer={footer}
