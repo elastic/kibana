@@ -28,7 +28,6 @@ export interface UseFetchAlertSummaryParams {
  *
  * @returns {useQuery} hook for getting the status of the alert_summary
  */
-
 export const useFetchAlertSummary = ({
   alertId,
   connectorId,

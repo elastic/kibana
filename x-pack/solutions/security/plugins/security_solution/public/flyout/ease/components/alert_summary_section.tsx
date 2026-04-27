@@ -5,21 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { type PromptContext } from '@kbn/elastic-assistant';
-import { i18n } from '@kbn/i18n';
-import { AlertSummary } from './alert_summary';
-import { AlertSummaryOptionsMenu } from './settings_menu';
-import { useKibana } from '../../../common/lib/kibana';
+import React, { memo } from 'react';
+import { AlertSummarySection as SharedAlertSummarySection } from '../../shared/alert_summary';
 import { useEaseDetailsContext } from '../context';
-import { useDefaultAIConnectorId } from '../../../common/hooks/use_default_ai_connector_id';
 
 export const ALERT_SUMMARY_SECTION_TEST_ID = 'ease-alert-flyout-alert-summary-section';
-
-const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummarySection.title', {
-  defaultMessage: 'AI summary',
-});
 
 export interface AlertSummarySectionProps {
   /**
@@ -31,56 +21,20 @@ export interface AlertSummarySectionProps {
 
 /**
  * Alert summary section of EASE alert summary alert flyout.
+ *
+ * Thin wrapper around the shared `AlertSummarySection` — pulls the alert id
+ * from `useEaseDetailsContext` and forwards it as a prop so the shared
+ * component stays context-agnostic.
  */
 export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySectionProps) => {
-  const [hasAlertSummary, setHasAlertSummary] = useState(false);
-
-  const {
-    application: { capabilities },
-  } = useKibana().services;
-
-  const { eventId, showAnonymizedValues } = useEaseDetailsContext();
-  const { defaultConnectorId, isLoading: isLoadingDefaultConnectorId } = useDefaultAIConnectorId();
-
-  const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
-
-  const promptContext: PromptContext = useMemo(
-    () => ({
-      category: 'alert',
-      description: 'Alert summary',
-      getPromptContext,
-      id: `contextId-${eventId}`,
-      tooltip: '', // empty as tooltip is only used within Assistant, but in the flyout
-    }),
-    [eventId, getPromptContext]
-  );
+  const { eventId } = useEaseDetailsContext();
 
   return (
-    <>
-      <EuiFlexGroup data-test-subj={ALERT_SUMMARY_SECTION_TEST_ID} justifyContent={'spaceBetween'}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size={'s'}>
-            <h2>{AI_SUMMARY}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AlertSummaryOptionsMenu hasAlertSummary={hasAlertSummary} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      {isLoadingDefaultConnectorId ? (
-        <EuiSkeletonText lines={3} size="s" />
-      ) : (
-        <AlertSummary
-          alertId={eventId}
-          canSeeAdvancedSettings={canSeeAdvancedSettings}
-          defaultConnectorId={defaultConnectorId}
-          promptContext={promptContext}
-          setHasAlertSummary={setHasAlertSummary}
-          showAnonymizedValues={showAnonymizedValues}
-        />
-      )}
-    </>
+    <SharedAlertSummarySection
+      alertId={eventId}
+      getPromptContext={getPromptContext}
+      data-test-subj={ALERT_SUMMARY_SECTION_TEST_ID}
+    />
   );
 });
 
