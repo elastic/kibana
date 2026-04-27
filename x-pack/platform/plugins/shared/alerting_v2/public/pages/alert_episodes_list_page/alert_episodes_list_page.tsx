@@ -52,6 +52,7 @@ import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_
 import { paths } from '../../constants';
 import { useEpisodesTimeRange } from './hooks/use_episodes_time_range';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
 
 const PAGE_SIZE = 1000;
 
@@ -60,6 +61,7 @@ const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection
 const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
     duration: { width: 100 },
+    assignees: { width: 120 },
     actions: { width: 360 },
     'episode.status': { width: 220 },
   },
@@ -68,11 +70,15 @@ const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   actions: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
-    displayAsText: i18n.COLUMN_ACTIONS,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_ACTIONS,
   }),
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
-    displayAsText: i18n.COLUMN_TAGS,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
+  }),
+  assignees: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
   }),
 };
 
@@ -119,6 +125,7 @@ export const AlertEpisodesListPage = () => {
     'rule.id',
     'duration',
     'tags',
+    'assignees',
     'actions',
   ]);
   const [rowHeight, setRowHeight] = useState(2);
@@ -259,6 +266,17 @@ export const AlertEpisodesListPage = () => {
           rowHeight={rowHeight}
         />
       ),
+      assignees: (props) => {
+        const episodeId = props.row.flattened['episode.id'] as string;
+        const assigneeUid = episodeActionsMap?.get(episodeId)?.lastAssigneeUid;
+
+        return (
+          <EpisodeAssigneeCell
+            assigneeUid={assigneeUid}
+            userProfile={services.userProfile}
+          />
+        );
+      },
     }),
     [episodeActionsMap, groupActionsMap, rulesCache, isLoadingRules, rowHeight, services]
   );
@@ -274,7 +292,7 @@ export const AlertEpisodesListPage = () => {
         min-width: 0;
       `}
     >
-      <EuiPageHeader bottomBorder pageTitle={i18n.LIST_PAGE_TITLE} />
+      <EuiPageHeader bottomBorder pageTitle={i18n.EPISODES_LIST_PAGE_TITLE} />
       <EuiSpacer size="m" />
 
       <EuiFlexGroup
@@ -307,7 +325,7 @@ export const AlertEpisodesListPage = () => {
             getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
           >
             <EuiScreenReaderOnly>
-              <span id="alertingEpisodesTableAriaLabel">{i18n.TABLE_ARIA_LABEL}</span>
+              <span id="alertingEpisodesTableAriaLabel">{i18n.EPISODES_LIST_TABLE_ARIA_LABEL}</span>
             </EuiScreenReaderOnly>
             {!dataView ? (
               <EuiLoadingSpinner />

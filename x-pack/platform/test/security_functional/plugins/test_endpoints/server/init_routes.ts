@@ -402,20 +402,28 @@ export function initRoutes(
         esClient.openPointInTime = async function (params, options) {
           const { index } = params;
           if (index.includes('kibana_security_session')) {
-            return {
+            // Throw a ResponseError to match the real ES client behaviour: the client never
+            // returns a plain 503 response object; it always throws for non-ignored status codes.
+            // `cleanUp` in session_index.ts catches ResponseError with statusCode 503 and
+            // message matching 'no_shard_available_action_exception' to increment the counter.
+            throw new errors.ResponseError({
               statusCode: 503,
-              meta: {},
               body: {
                 error: {
+                  root_cause: [
+                    {
+                      type: 'no_shard_available_action_exception',
+                      reason: 'no shard available for [open]',
+                    },
+                  ],
                   type: 'no_shard_available_action_exception',
                   reason: 'no shard available for [open]',
                 },
+                status: 503,
               },
-            };
-            return {
-              statusCode: 503,
-              message: 'no_shard_available_action_exception',
-            } as unknown as DiagnosticResult;
+              warnings: null,
+              headers: {},
+            } as DiagnosticResult);
           }
           return originalOpenPointInTime.call(this, params, options);
         };

@@ -16,6 +16,7 @@ import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { LatencyAggregationTypeSelect } from '../../../shared/charts/latency_chart/latency_aggregation_type_select';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -27,7 +28,6 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { isLatencyThresholdRuleType } from './helpers';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
@@ -76,7 +76,7 @@ export function LatencyChart({
   threshold?: ReactElement;
   kuery?: string;
   filters?: BoolQuery;
-  ruleTypeId?: string;
+  ruleTypeId?: ApmRuleType;
 }) {
   const {
     services: { uiSettings },
@@ -137,7 +137,7 @@ export function LatencyChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     customAlertEvaluationThreshold,
-    isMatchingRuleType: isLatencyThresholdRuleType,
+    showAnnotations: !!threshold,
     dateFormat,
   });
 
