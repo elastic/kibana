@@ -46,7 +46,6 @@ export const createIndexSyncService = ({
 
   const plainIndexSync = async (sources: SyncSourceEntry[]) => {
     await sourcesSyncService.syncBySourceIds({
-      descriptorClient,
       sources,
       process: async (
         source,

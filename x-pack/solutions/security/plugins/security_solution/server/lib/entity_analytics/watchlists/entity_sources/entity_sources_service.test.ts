@@ -126,7 +126,7 @@ describe('createEntitySourcesService', () => {
 
     expect(mockPlainIndexSync).toHaveBeenCalledWith([
       expect.objectContaining({
-        sourceId: 'source-a',
+        source: expect.objectContaining({ id: 'source-a' }),
         entityStoreEntityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
         correlationMap: expect.any(Map),
         watchlistsByEuid: expect.any(Map),
@@ -135,13 +135,13 @@ describe('createEntitySourcesService', () => {
     ]);
     expect(mockPlainIndexSync).toHaveBeenCalledWith([
       expect.objectContaining({
-        sourceId: 'source-a',
+        source: expect.objectContaining({ id: 'source-a' }),
         entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
       }),
     ]);
     expect(mockPlainIndexSync).toHaveBeenCalledWith([
       expect.objectContaining({
-        sourceId: 'source-c',
+        source: expect.objectContaining({ id: 'source-c' }),
         entityStoreEntityIdsByType: {
           user: ['user:2'],
           host: ['host:1'],
@@ -154,7 +154,7 @@ describe('createEntitySourcesService', () => {
     ]);
     expect(mockPlainIndexSync).toHaveBeenCalledWith([
       expect.objectContaining({
-        sourceId: 'source-c',
+        source: expect.objectContaining({ id: 'source-c' }),
         entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
       }),
     ]);

@@ -277,7 +277,7 @@ export const createEntitySourcesService = ({
 
             await indexSyncService.plainIndexSync([
               {
-                sourceId: source.id,
+                source,
                 entityStoreEntityIdsByType: page.entityIdsByType,
                 correlationMap: page.correlationMap,
                 watchlistsByEuid: page.watchlistsByEuid,
@@ -296,7 +296,7 @@ export const createEntitySourcesService = ({
           // Tail pass: catch watchlist entries with entity.id beyond the last store page.
           await indexSyncService.plainIndexSync([
             {
-              sourceId: source.id,
+              source,
               entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
               watchlistsByEuid: lastWatchlistsByEuid,
               pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,
