@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { probeViewSupport } from './probe';
 import { ViewSyncService } from './view_sync_service';
 
@@ -13,7 +13,6 @@ export type AnalyticsMode = 'views' | 'indices';
 
 export interface StartViewsPathArgs {
   esClient: ElasticsearchClient;
-  savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
   /** From `xpack.cases.analytics.views.enabled`. */
   viewsConfigEnabled: boolean;
@@ -28,11 +27,15 @@ export interface StartViewsPathResult {
  * Decides whether plugin start should run the views path or fall back to
  * the legacy analytics-indices path. On `views`, instantiates the sync
  * service and kicks off the initial regenerate so the views are present
- * before the first SO write arrives.
+ * with the current set of extended-field columns.
+ *
+ * Subsequent regeneration is operator-triggered via the rebuild route.
+ * The mapping-based field loader sees what's actually been indexed in
+ * `cases.extended_fields`, so deleted templates do not strand stale
+ * columns and historical fields stay queryable as long as the data is.
  */
 export const startViewsPath = async ({
   esClient,
-  savedObjectsClient,
   logger,
   viewsConfigEnabled,
 }: StartViewsPathArgs): Promise<StartViewsPathResult> => {
@@ -46,13 +49,12 @@ export const startViewsPath = async ({
     return { mode: 'indices', viewSyncService: null };
   }
 
-  const viewSyncService = new ViewSyncService({ esClient, savedObjectsClient, logger });
+  const viewSyncService = new ViewSyncService({ esClient, logger });
   // Kick off the initial regenerate but do not block plugin start on it —
-  // a slow ES means a slow plugin start, and the templates client write
-  // path will re-trigger regeneration on the first write anyway.
+  // a slow ES means a slow plugin start.
   void viewSyncService.regenerateNow();
 
-  logger.info('Cases analytics ES|QL views path active (9 views, regenerated on template writes)');
+  logger.info('Cases analytics ES|QL views path active (9 views)');
   return { mode: 'views', viewSyncService };
 };
 

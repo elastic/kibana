@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { OWNERS } from '../../../common/constants/owners';
 import { buildActivityViewQuery } from './build_activity_view';
 import { buildCaseViewQuery } from './build_case_view';
@@ -15,7 +15,7 @@ import {
   CAI_VIEW_NAMES,
   getCAIViewName,
 } from './constants';
-import { loadTemplateFieldsUnion } from './template_fields_loader';
+import { loadExtendedFieldsFromMapping } from './mapping_fields_loader';
 
 export interface ViewSyncStatus {
   /** Last time `regenerateNow` resolved successfully, or null if never. */
@@ -28,7 +28,6 @@ export interface ViewSyncStatus {
 
 interface ViewSyncServiceArgs {
   esClient: ElasticsearchClient;
-  savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
   /** Optional debounce override; defaults to CAI_VIEW_REGEN_DEBOUNCE_MS. */
   debounceMs?: number;
@@ -45,7 +44,6 @@ interface ViewSyncServiceArgs {
  */
 export class ViewSyncService {
   private readonly esClient: ElasticsearchClient;
-  private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly logger: Logger;
   private readonly debounceMs: number;
 
@@ -59,9 +57,8 @@ export class ViewSyncService {
     regenInFlight: false,
   };
 
-  constructor({ esClient, savedObjectsClient, logger, debounceMs }: ViewSyncServiceArgs) {
+  constructor({ esClient, logger, debounceMs }: ViewSyncServiceArgs) {
     this.esClient = esClient;
-    this.savedObjectsClient = savedObjectsClient;
     this.logger = logger;
     this.debounceMs = debounceMs ?? CAI_VIEW_REGEN_DEBOUNCE_MS;
   }
@@ -145,11 +142,7 @@ export class ViewSyncService {
 
   private async regenerateInternal(): Promise<void> {
     for (const owner of OWNERS) {
-      const fields = await loadTemplateFieldsUnion(
-        owner,
-        this.savedObjectsClient,
-        this.logger
-      );
+      const fields = await loadExtendedFieldsFromMapping(owner, this.esClient, this.logger);
       await this.putView(getCAIViewName('case', owner), buildCaseViewQuery(owner, fields));
       await this.putView(
         getCAIViewName('case_activity', owner),

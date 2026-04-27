@@ -258,18 +258,12 @@ export class CasePlugin
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
       }
       if (this.caseConfig.analytics.index?.enabled) {
-        const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
-          CASE_SAVED_OBJECT,
-        ]);
-        const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
-
         // The views path supersedes the indices path when both the config
         // flag and the ES probe agree. Otherwise we fall back to the
         // legacy indices pipeline so older clusters and serverless keep
         // their analytics surface.
         void startViewsPath({
           esClient: core.elasticsearch.client.asInternalUser,
-          savedObjectsClient: internalSavedObjectsClient,
           logger: this.logger,
           viewsConfigEnabled: this.caseConfig.analytics.views?.enabled === true,
         }).then((result) => {
@@ -277,6 +271,12 @@ export class CasePlugin
           this.viewSyncService = result.viewSyncService;
 
           if (result.mode === 'indices') {
+            const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+              CASE_SAVED_OBJECT,
+            ]);
+            const internalSavedObjectsClient = new SavedObjectsClient(
+              internalSavedObjectsRepository
+            );
             scheduleCAISchedulerTask({
               taskManager: plugins.taskManager!,
               logger: this.logger,

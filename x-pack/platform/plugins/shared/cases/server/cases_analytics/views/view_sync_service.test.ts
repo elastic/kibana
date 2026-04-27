@@ -5,34 +5,25 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ViewSyncService } from './view_sync_service';
 
 const setupArgs = () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  const savedObjectsClient = savedObjectsClientMock.create();
   const logger = loggingSystemMock.createLogger();
-  // No templates → no extended-field EVALs. Tests focused on extended fields
-  // are in extended_fields_to_eval.test.ts and template_fields_loader.test.ts.
-  savedObjectsClient.find.mockResolvedValue({
-    total: 0,
-    page: 1,
-    per_page: 200,
-    saved_objects: [],
-  });
+  // No extended fields discovered → no per-owner extended-field EVALs.
+  // Tests focused on extended-field discovery live in
+  // mapping_fields_loader.test.ts.
+  esClient.fieldCaps.mockResolvedValue({ indices: [], fields: {} } as never);
   esClient.transport.request.mockResolvedValue({ statusCode: 200, body: {} });
-  return { esClient, savedObjectsClient, logger };
+  return { esClient, logger };
 };
 
 describe('ViewSyncService', () => {
   describe('regenerateNow', () => {
     it('PUTs all 9 views (3 owners × 3 surfaces) on a single regenerate', async () => {
-      const { esClient, savedObjectsClient, logger } = setupArgs();
-      const svc = new ViewSyncService({ esClient, savedObjectsClient, logger });
+      const { esClient, logger } = setupArgs();
+      const svc = new ViewSyncService({ esClient, logger });
       await svc.regenerateNow();
       expect(esClient.transport.request).toHaveBeenCalledTimes(9);
       const putPaths = esClient.transport.request.mock.calls.map(([params]) => {
@@ -56,8 +47,8 @@ describe('ViewSyncService', () => {
     });
 
     it('records lastRegenAt and clears lastRegenError on success', async () => {
-      const { esClient, savedObjectsClient, logger } = setupArgs();
-      const svc = new ViewSyncService({ esClient, savedObjectsClient, logger });
+      const { esClient, logger } = setupArgs();
+      const svc = new ViewSyncService({ esClient, logger });
       await svc.regenerateNow();
       const status = svc.getStatus();
       expect(status.lastRegenAt).toBeInstanceOf(Date);
@@ -72,9 +63,9 @@ describe('ViewSyncService', () => {
        * path (fire-and-forget); throwing here would surface ES errors
        * inside template create/update/delete responses, which is wrong.
        */
-      const { esClient, savedObjectsClient, logger } = setupArgs();
+      const { esClient, logger } = setupArgs();
       esClient.transport.request.mockRejectedValueOnce(new Error('cluster_block'));
-      const svc = new ViewSyncService({ esClient, savedObjectsClient, logger });
+      const svc = new ViewSyncService({ esClient, logger });
       await expect(svc.regenerateNow()).resolves.toBeUndefined();
       const status = svc.getStatus();
       expect(status.lastRegenError).toBe('cluster_block');
@@ -86,7 +77,7 @@ describe('ViewSyncService', () => {
     });
 
     it('returns the same in-flight promise when called concurrently (single-flight)', async () => {
-      const { esClient, savedObjectsClient, logger } = setupArgs();
+      const { esClient, logger } = setupArgs();
       // Hold the first regen open until we explicitly release it so we can
       // observe the second concurrent call piggybacking on it.
       let release!: () => void;
@@ -98,7 +89,7 @@ describe('ViewSyncService', () => {
         return { statusCode: 200, body: {} };
       });
 
-      const svc = new ViewSyncService({ esClient, savedObjectsClient, logger });
+      const svc = new ViewSyncService({ esClient, logger });
       const first = svc.regenerateNow();
       const second = svc.regenerateNow();
       // Both promises represent the same "current" in-flight regen.
@@ -123,8 +114,8 @@ describe('ViewSyncService', () => {
     });
 
     it('coalesces a burst of writes into one regenerate after the debounce window', async () => {
-      const { esClient, savedObjectsClient, logger } = setupArgs();
-      const svc = new ViewSyncService({ esClient, savedObjectsClient, logger, debounceMs: 100 });
+      const { esClient, logger } = setupArgs();
+      const svc = new ViewSyncService({ esClient, logger, debounceMs: 100 });
 
       svc.scheduleRegeneration();
       svc.scheduleRegeneration();
@@ -144,8 +135,8 @@ describe('ViewSyncService', () => {
     });
 
     it('resets the debounce window when called again before the timer fires', async () => {
-      const { esClient, savedObjectsClient, logger } = setupArgs();
-      const svc = new ViewSyncService({ esClient, savedObjectsClient, logger, debounceMs: 100 });
+      const { esClient, logger } = setupArgs();
+      const svc = new ViewSyncService({ esClient, logger, debounceMs: 100 });
 
       svc.scheduleRegeneration();
       await jest.advanceTimersByTimeAsync(50);
@@ -166,8 +157,8 @@ describe('ViewSyncService', () => {
     it('cancels a pending debounced regenerate', async () => {
       jest.useFakeTimers();
       try {
-        const { esClient, savedObjectsClient, logger } = setupArgs();
-        const svc = new ViewSyncService({ esClient, savedObjectsClient, logger, debounceMs: 100 });
+        const { esClient, logger } = setupArgs();
+        const svc = new ViewSyncService({ esClient, logger, debounceMs: 100 });
         svc.scheduleRegeneration();
         await svc.stop();
         jest.advanceTimersByTime(500);
@@ -180,8 +171,8 @@ describe('ViewSyncService', () => {
 
   describe('getViewNames', () => {
     it('returns the 9 owned view names so the status route and legacy-cleanup route share one source of truth', () => {
-      const { esClient, savedObjectsClient, logger } = setupArgs();
-      const svc = new ViewSyncService({ esClient, savedObjectsClient, logger });
+      const { esClient, logger } = setupArgs();
+      const svc = new ViewSyncService({ esClient, logger });
       expect(svc.getViewNames()).toEqual(
         expect.arrayContaining([
           'cases.case.securitysolution',
