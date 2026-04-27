@@ -297,6 +297,51 @@ describe('deserializer and serializer', () => {
     expect(result.phases.cold!.actions.searchable_snapshot).toBeUndefined();
   });
 
+  it('preserves searchable_snapshot.force_merge_on_clone when configured', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_index = true;
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone).toBe(false);
+  });
+
+  it('serializes searchable_snapshot.force_merge_on_clone when updated in the form', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone = true;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone).toBeUndefined();
+  });
+
+  it('serializes searchable_snapshot.force_merge_index when updated in the form', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_index = true;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_index).toBeUndefined();
+  });
+
+  it('does not serialize searchable_snapshot.force_merge_on_clone when set to true', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_index = false;
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone = true;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_index).toBe(false);
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone).toBeUndefined();
+  });
+
+  it('does not serialize searchable_snapshot.force_merge_on_clone when force_merge_index is false', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_index = false;
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_index).toBe(false);
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone).toBeUndefined();
+  });
+
   it('correctly serializes a minimal policy', () => {
     policy = cloneDeep(originalMinimalPolicy);
     const formInternalPolicy = cloneDeep(originalMinimalPolicy);
