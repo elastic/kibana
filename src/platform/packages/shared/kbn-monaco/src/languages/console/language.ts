@@ -87,10 +87,14 @@ export const ConsoleLang: LangModuleType = {
   languageConfiguration,
   foldingRangeProvider,
   onLanguage: async () => {
-    // Ensure the embedded ES|QL grammar is registered before Console tokenization runs.
-    await ESQLLang.onLanguage();
     workerProxyService.setup();
     setupConsoleErrorsProvider(workerProxyService);
+    // Best-effort: ES|QL is only needed for highlighting/suggestions. Console syntax markers must
+    // remain available even if ES|QL fails to load.
+
+    try {
+      await ESQLLang.onLanguage();
+    } catch {}
   },
   languageThemeResolver: buildConsoleTheme,
   getSuggestionProvider: (
