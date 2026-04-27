@@ -1777,6 +1777,8 @@ x-pack/platform/plugins/shared/streams/server/lib/tasks/task_definitions/feature
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
+# common
+x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elastic/obs-sig-events-team
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -2733,6 +2735,11 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-pds-deployment
 
 ## Security Solution sub teams - Cloud Security Posture
 
@@ -3077,11 +3084,6 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-data-analytics
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
