@@ -145,7 +145,6 @@ src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-components @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
-src/core/packages/chrome/navigation @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar-components @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar-context @elastic/appex-sharedux
@@ -348,6 +347,7 @@ src/core/packages/user-settings/server-internal @elastic/kibana-security
 src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
+src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/dashboard/dashboard-navigation-options-common @elastic/kibana-presentation
 src/platform/packages/private/dashboard/dashboard-navigation-options-components @elastic/kibana-presentation
@@ -553,6 +553,7 @@ src/platform/packages/shared/kbn-esql-composer @elastic/obs-presentation-team @e
 src/platform/packages/shared/kbn-esql-language @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-resource-browser @elastic/kibana-management
 src/platform/packages/shared/kbn-esql-resource-browser/.storybook @elastic/kibana-management
+src/platform/packages/shared/kbn-esql-server-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-eval-kql @elastic/workflows-eng
@@ -973,6 +974,7 @@ x-pack/platform/packages/shared/agent-builder/agent-builder-browser @elastic/wor
 x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-server @elastic/workchat-eng
+x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder @elastic/workchat-eng
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
@@ -1048,6 +1050,7 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/response-ops/alert-snooze @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form @elastic/rna-project-team
@@ -1746,6 +1749,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_policies.test.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.test.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/failure_store.ts @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/lifecycle_retention.ts @elastic/kibana-management
 
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management
@@ -1889,7 +1895,6 @@ x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/
 
 # Observability-ui
 /x-pack/solutions/observability/test/serverless/api_integration/configs/index.ts @elastic/observability-ui
-/x-pack/solutions/observability/test/functional_solution_sidenav/ @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/page_objects/observability_page.ts @elastic/observability-ui
 /x-pack/solutions/observability/plugins/observability/server/services/index.ts @elastic/observability-ui
 
@@ -2280,7 +2285,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
-/src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
+/src/platform/packages/private/kbn-validate-oas/src/oas_error_baseline.json
 # Exclude usage collection schemas from @elastic/kibana-core ownership
 /src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
 /src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts
@@ -2289,8 +2294,13 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-telemetry
-/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-telemetry
+## Remove the ownership of the telemetry schemas to avoid the need of a human PR review every time the schemas are updated.
+/src/platform/plugins/shared/telemetry/schema/*.json
+/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/*.json
+## But keep the ownership of the snapshots for the tests: they are updated when human review is needed (refer to the tests in src/platform/plugins/shared/telemetry/schema/schema_checks.test.ts)
+/src/platform/plugins/shared/telemetry/schema/__snapshots__/ @elastic/kibana-telemetry
+## The test is co-owned by the telemetry team and the core team.
+/src/platform/plugins/shared/telemetry/schema/schema_checks.test.ts @elastic/kibana-telemetry @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
@@ -2471,6 +2481,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** 
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/snowflake/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
@@ -2722,6 +2733,11 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-pds-deployment
+x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-pds-deployment
 
 ## Security Solution sub teams - Cloud Security Posture
 
@@ -2804,7 +2820,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /x-pack/solutions/security/plugins/security_solution/public/detections/pages @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/detections/utils @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout/document_details @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/public/flyout/network_details @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout/shared @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-threat-hunting
@@ -3067,11 +3082,6 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-data-analytics
-x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-data-analytics
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
@@ -3214,7 +3224,8 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 
 # Shared UX
 /src/core/packages/chrome @elastic/appex-sharedux
-/src/core/packages/chrome/navigation @elastic/appex-sharedux
+/src/platform/kbn-ui/_tooling @elastic/appex-sharedux
+/src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
 /src/platform/test/api_integration/apis/unused_urls_task/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/220138
@@ -3260,6 +3271,7 @@ oas_docs/overlays                             @elastic/experience-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
 oas_docs/kibana.info.yaml                     @elastic/experience-docs
 oas_docs/output                               @elastic/ski-docs
+oas_docs/scripts                              @elastic/kibana-core
 
 # Documentation settings files
 docs/settings-gen                             @elastic/experience-docs
@@ -3298,6 +3310,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /**/scout_*/.meta/**
 
 # Macroscope Check Run Agents
+/.macroscope/backport-review.md @elastic/appex-qa
 /.macroscope/scout-review.md @elastic/appex-qa
 /.macroscope/flaky-test-runner-nudge.md @elastic/appex-qa
 
@@ -3348,6 +3361,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.coderabbit.yml @elastic/kibana-operations
 
 # Buildkite overrides, and ownership shares
+/.buildkite/scripts/steps/checks/api_contracts.sh @elastic/kibana-core
+/.buildkite/scripts/steps/checks/capture_oas_snapshot.sh @elastic/kibana-core
+/.buildkite/scripts/steps/checks/notify_api_contract_owners.ts @elastic/kibana-core
+/.buildkite/scripts/steps/checks/notify_api_contract_owners.test.ts @elastic/kibana-core
 /.buildkite/pipelines/performance/streams_weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-streams-performance-weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team

@@ -155,23 +155,18 @@ export class LogsExtractionClient {
         return operationResult;
       }
 
-      await this.engineDescriptorClient.updateWith(type, (current) => ({
-        ...current,
+      await this.engineDescriptorClient.update(type, {
         logExtractionState: {
-          // we went through all the pages,
-          // therefore we can leave the lastExecutionTimestamp as the beginning of the next
-          // window
-          paginationTimestamp: undefined,
-          paginationId: undefined,
-          logsPageCursorStartTimestamp: undefined,
-          logsPageCursorStartId: undefined,
-          logsPageCursorEndTimestamp: undefined,
-          logsPageCursorEndId: undefined,
-          // Store last searched timestamp to start window from here
+          paginationTimestamp: null,
+          paginationId: null,
+          logsPageCursorStartTimestamp: null,
+          logsPageCursorStartId: null,
+          logsPageCursorEndTimestamp: null,
+          logsPageCursorEndId: null,
           lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
         },
-        error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : undefined,
-      }));
+        error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
+      });
 
       return operationResult;
     } catch (error) {
@@ -326,8 +321,8 @@ export class LogsExtractionClient {
     const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
     opts?.abortController?.signal.addEventListener('abort', onAbort);
 
-    /** One-shot `paginationId` from a prior run: first bounded query may use recovery `>=` (see query builder). */
-    let recoveryId = initialEngineState.paginationId;
+    /** One-shot `paginationId` from a prior run: consumed by the first bounded extraction batch for entity-level pagination. */
+    let recoveryId = initialEngineState.paginationId ?? undefined;
     if (recoveryId) {
       this.logger.warn(
         `Resuming with paginationId ${recoveryId} and extraction window from ${fromDateISO} (entity pagination at ${
@@ -569,8 +564,8 @@ export class LogsExtractionClient {
           paginationId: pagination.idCursor,
           logsPageCursorEndTimestamp: logsPageCursorEnd.timestampCursor,
           logsPageCursorEndId: logsPageCursorEnd.idCursor,
-          logsPageCursorStartTimestamp: logsPageCursorStart?.timestampCursor,
-          logsPageCursorStartId: logsPageCursorStart?.idCursor,
+          logsPageCursorStartTimestamp: logsPageCursorStart?.timestampCursor ?? null,
+          logsPageCursorStartId: logsPageCursorStart?.idCursor ?? null,
         };
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
       }
@@ -590,10 +585,9 @@ export class LogsExtractionClient {
       ...state,
       // this is the leading state for the next log page if we break in the middle of the processing
       paginationTimestamp: logsPageCursorEnd.timestampCursor,
-
-      paginationId: undefined,
-      logsPageCursorEndTimestamp: undefined,
-      logsPageCursorEndId: undefined,
+      paginationId: null,
+      logsPageCursorEndTimestamp: null,
+      logsPageCursorEndId: null,
       logsPageCursorStartTimestamp: logsPageCursorEnd.timestampCursor,
       logsPageCursorStartId: logsPageCursorEnd.idCursor,
     };
@@ -724,8 +718,8 @@ export class LogsExtractionClient {
 }
 
 function paginationFromOptionalFields(
-  ts: string | undefined,
-  id: string | undefined
+  ts: string | null,
+  id: string | null
 ): PaginationParams | undefined {
   if (id && ts) {
     return { timestampCursor: ts, idCursor: id };

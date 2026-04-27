@@ -1825,7 +1825,7 @@
             "label": "confidence",
             "description": [],
             "signature": [
-              "\"medium\" | \"high\" | \"low\" | undefined"
+              "\"high\" | \"medium\" | \"low\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
             "lineNumber": 134,
@@ -10966,7 +10966,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; user?: { name: string; } | undefined; title?: string | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "{ id: string; text: string; user?: { name: string; } | undefined; title?: string | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"high\" | \"medium\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 779,
@@ -11032,7 +11032,7 @@
                         "section": "def-common.KnowledgeBaseEntryRole",
                         "text": "KnowledgeBaseEntryRole"
                       },
-                      "; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"high\" | \"medium\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 816,
@@ -12494,7 +12494,7 @@
         "label": "streamIntoObservable",
         "description": [],
         "signature": [
-          "(readable: NodeJS.AsyncIterator<string, any, any>) => ",
+          "(readable: NodeJS.AsyncIterator<string, undefined, any>) => ",
           "Observable",
           "<any>"
         ],
@@ -12512,7 +12512,7 @@
             "label": "readable",
             "description": [],
             "signature": [
-              "NodeJS.AsyncIterator<string, any, any>"
+              "NodeJS.AsyncIterator<string, undefined, any>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/util/stream_into_observable.ts",
             "lineNumber": 10,
@@ -15066,7 +15066,7 @@
             "label": "confidence",
             "description": [],
             "signature": [
-              "\"medium\" | \"high\" | \"low\" | undefined"
+              "\"high\" | \"medium\" | \"low\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
             "lineNumber": 134,
