@@ -154,9 +154,9 @@ export class LlmProxy {
         if (matchingInterceptor) {
           this.log.info(`Handling interceptor "${matchingInterceptor.name}"`);
           matchingInterceptor.handle(request, response, requestBody);
-
-          this.log.debug(`Removing interceptor "${matchingInterceptor.name}"`);
-          pull(this.interceptors, matchingInterceptor);
+          // Do not remove the interceptor here: `completeAfterIntercept` may still be
+          // streaming the HTTP response. `waitForAllInterceptorsToHaveBeenCalled` must
+          // observe an empty list only after the response is fully written.
           return;
         }
 
@@ -282,9 +282,12 @@ export class LlmProxy {
     waitForIntercept: () => Promise<LlmResponseSimulator>;
     completeAfterIntercept: () => Promise<LlmResponseSimulator>;
   } {
+    type InterceptorEntry = RequestInterceptor & { handle: RequestHandler };
+    let interceptorEntry!: InterceptorEntry;
+
     const waitForInterceptPromise = Promise.race([
       new Promise<LlmResponseSimulator>((outerResolve) => {
-        this.interceptors.push({
+        interceptorEntry = {
           name,
           when,
           handle: (_request, response, requestBody) => {
@@ -337,7 +340,8 @@ export class LlmProxy {
 
             outerResolve(simulator);
           },
-        });
+        };
+        this.interceptors.push(interceptorEntry);
       }),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error(`Interceptor "${name}" was not called`)), 30000)
@@ -365,21 +369,25 @@ export class LlmProxy {
           return [llmMessage];
         }
 
-        const llmMessage = isFunction(responseChunks)
-          ? responseChunks(simulator.requestBody)
-          : responseChunks;
+        try {
+          const llmMessage = isFunction(responseChunks)
+            ? responseChunks(simulator.requestBody)
+            : responseChunks;
 
-        if (simulator.stream) {
-          const parsedChunks = getParsedChunks(llmMessage);
-          for (const chunk of parsedChunks) {
-            await simulator.next(chunk);
+          if (simulator.stream) {
+            const parsedChunks = getParsedChunks(llmMessage);
+            for (const chunk of parsedChunks) {
+              await simulator.next(chunk);
+            }
+          } else {
+            await simulator.rawWrite(JSON.stringify(createOpenAIResponse(llmMessage)));
           }
-        } else {
-          await simulator.rawWrite(JSON.stringify(createOpenAIResponse(llmMessage)));
-        }
 
-        await simulator.complete();
-        return simulator;
+          await simulator.complete();
+          return simulator;
+        } finally {
+          pull(this.interceptors, interceptorEntry);
+        }
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
