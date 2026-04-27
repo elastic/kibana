@@ -10,10 +10,11 @@
  * `PUT /_query/datasource/{id}` and the internal Kibana proxy route).
  */
 
-export interface DataSourceCommon {
-  type: DataSourceType;
+export interface DataSourceCommon<T extends DataSourceType, S extends {}> {
+  type: T;
   description: string;
   id: string;
+  settings: S;
 }
 
 export type DataSource =
@@ -44,14 +45,9 @@ export const ALL_DATA_SOURCE_TYPES: DataSourceType[] = [
   'flight',
 ];
 
-export interface S3DataSource extends DataSourceCommon {
-  type: 's3';
-  settings: S3DataSourceSettings;
-}
+export type S3DataSource = DataSourceCommon<'s3', S3DataSourceSettings>;
 
-export interface S3DataSourceWithSecrets extends S3DataSource {
-  settings: S3DataSourceSettingsWithSecrets;
-}
+export type S3DataSourceWithSecrets = DataSourceCommon<'s3', S3DataSourceSettingsWithSecrets>;
 
 export interface S3DataSourceSettings {
   region?: string;
@@ -64,14 +60,9 @@ export interface S3DataSourceSettingsWithSecrets extends S3DataSourceSettings {
   secret_key?: string;
 }
 
-export interface GCSDataSource extends DataSourceCommon {
-  type: 'gcs';
-  settings: GCSDataSourceSettings;
-}
+export type GCSDataSource = DataSourceCommon<'gcs', GCSDataSourceSettings>;
 
-export interface GCSDataSourceWithSecrets extends GCSDataSource {
-  settings: GCSDataSourceSettingsWithSecrets;
-}
+export type GCSDataSourceWithSecrets = DataSourceCommon<'gcs', GCSDataSourceSettingsWithSecrets>;
 
 export interface GCSDataSourceSettings {
   project_id?: string;
@@ -84,14 +75,12 @@ export interface GCSDataSourceSettingsWithSecrets extends GCSDataSourceSettings 
   credentials?: {};
 }
 
-export interface AzureBlobDataSource extends DataSourceCommon {
-  type: 'azure_blob';
-  settings: AzureBlobDataSourceSettings;
-}
+export type AzureBlobDataSource = DataSourceCommon<'azure_blob', AzureBlobDataSourceSettings>;
 
-export interface AzureBlobDataSourceWithSecrets extends AzureBlobDataSource {
-  settings: AzureBlobDataSourceSettingsWithSecrets;
-}
+export type AzureBlobDataSourceWithSecrets = DataSourceCommon<
+  'azure_blob',
+  AzureBlobDataSourceSettingsWithSecrets
+>;
 
 export interface AzureBlobDataSourceSettings {
   endpoint?: string;
@@ -105,14 +94,12 @@ export interface AzureBlobDataSourceSettingsWithSecrets extends AzureBlobDataSou
   sas_token?: string;
 }
 
-export interface IcebergDataSource extends DataSourceCommon {
-  type: 'iceberg';
-  settings: IcebergDataSourceSettings;
-}
+export type IcebergDataSource = DataSourceCommon<'iceberg', IcebergDataSourceSettings>;
 
-export interface IcebergDataSourceWithSecrets extends IcebergDataSource {
-  settings: IcebergDataSourceSettingsWithSecrets;
-}
+export type IcebergDataSourceWithSecrets = DataSourceCommon<
+  'iceberg',
+  IcebergDataSourceSettingsWithSecrets
+>;
 
 export interface IcebergDataSourceSettings {
   region?: string;
@@ -126,16 +113,11 @@ export interface IcebergDataSourceSettingsWithSecrets extends IcebergDataSourceS
   secret_key?: string;
 }
 
-export interface JdbcDataSource extends DataSourceCommon {
-  type: 'jdbc';
-  settings: JdbcDataSourceSettings;
-}
+export type JdbcDataSource = DataSourceCommon<'jdbc', JdbcDataSourceSettings>;
 
-export interface JdbcDataSourceWithSecrets extends JdbcDataSource {
-  settings: JdbcDataSourceSettingsWithSecrets;
-}
+export type JdbcDataSourceWithSecrets = DataSourceCommon<'jdbc', JdbcDataSourceSettingsWithSecrets>;
 
-export interface JdbcDataSourceSettings extends DataSourceCommon {
+export interface JdbcDataSourceSettings {
   host: string;
   port: string;
   database: string;
@@ -147,10 +129,9 @@ export interface JdbcDataSourceSettingsWithSecrets extends JdbcDataSourceSetting
   password?: string;
 }
 
-export interface FlightDataSource extends DataSourceCommon {
-  type: 'flight';
-  settings: {
-    host: string;
-    port?: number;
-  };
+export type FlightDataSource = DataSourceCommon<'flight', FlightDataSourceSettings>;
+
+export interface FlightDataSourceSettings {
+  host: string;
+  port?: number;
 }
