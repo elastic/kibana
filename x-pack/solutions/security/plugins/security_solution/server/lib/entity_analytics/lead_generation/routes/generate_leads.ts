@@ -60,7 +60,7 @@ export const generateLeadsRoute = (
           const executionUuid = uuidv4();
           const riskScoreDataClient = secSol.getRiskScoreDataClient();
 
-          const [, startPlugins] = await getStartServices();
+          const [coreStart, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
           const { connectorId } = request.body;
 
@@ -83,6 +83,7 @@ export const generateLeadsRoute = (
                 riskScoreDataClient,
                 executionId: executionUuid,
                 sourceType: 'adhoc',
+                analytics: coreStart.analytics,
                 chatModel,
               });
               await upsertLeadGenerationConfig(soClient, spaceId, {

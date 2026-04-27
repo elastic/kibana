@@ -284,8 +284,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     endDate: to,
     startDate: from,
     userName: detailName,
+    entityId: entityStoreV2Enabled ? entityFromStoreResult?.entityRecord?.entity?.id : undefined,
     indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0 || entityStoreV2Enabled,
+    skip: selectedPatterns.length === 0,
   });
 
   const userDetailsForOverview = entityStoreV2Enabled ? observedUser.details : userOverview;

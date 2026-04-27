@@ -8,7 +8,12 @@
 import type { ZodObject } from '@kbn/zod/v4';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
-import { createBadRequestError, HookLifecycle, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  createBadRequestError,
+  HookLifecycle,
+  ToolResultType,
+  AgentExecutionMode,
+} from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   AfterToolCallHookContext,
@@ -104,9 +109,22 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const beforeToolHooksResult = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
   toolParams = beforeToolHooksResult.toolParams;
 
+  const isStandaloneExecution = manager.deps.executionMode === AgentExecutionMode.standalone;
+
   // only perform pre-call confirmation prompt when the agent is calling the tool
   if (tool.confirmation && source === 'agent') {
     if (tool.confirmation.askUser === 'once' || tool.confirmation.askUser === 'always') {
+      // In sub-agent mode, HITL is not available — auto-decline
+      if (isStandaloneExecution) {
+        return {
+          results: [
+            createErrorResult(
+              'Agent running in non-interactive mode, user input not available - execution was declined'
+            ),
+          ],
+        };
+      }
+
       const confirmationId = toolConfirmationId({
         toolId: tool.id,
         toolCallId,
@@ -190,7 +208,18 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       duration,
     });
   } else {
-    runToolReturn = { prompt: toolReturn.prompt };
+    // On-demand HITL prompt from tool handler
+    if (isStandaloneExecution) {
+      runToolReturn = {
+        results: [
+          createErrorResult(
+            'Agent running in non-interactive mode, user input not available - execution was declined'
+          ),
+        ],
+      };
+    } else {
+      runToolReturn = { prompt: toolReturn.prompt };
+    }
   }
 
   const postContext: AfterToolCallHookContext = {
@@ -276,6 +305,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
     runContext: manager.context,
+    executionMode: manager.deps.executionMode,
   };
 };
 

@@ -54,11 +54,12 @@ export const createToolEventEmitter = ({
   }
 
   return {
-    reportProgress: (progressMessage) => {
+    reportProgress: (progressMessage, options) => {
       const event: InternalToolProgressEvent = {
         type: ChatEventType.toolProgress,
         data: {
           message: progressMessage,
+          ...(options?.metadata ? { metadata: options.metadata } : {}),
         },
       };
       eventHandler(event);

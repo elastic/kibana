@@ -14,5 +14,5 @@ const CM_KEYS_ORDER = ['apiVersion', 'kind', 'metadata', 'data'];
 
 export const fullAgentConfigMapToYaml = (policy: FullAgentConfigMap, yaml: YamlModule): string => {
   const sortCmKeys = createYamlKeysSorter(CM_KEYS_ORDER, yaml);
-  return toYaml(policy, { sortMapEntries: sortCmKeys, strict: false }, yaml);
+  return toYaml(policy, { sortMapEntries: sortCmKeys, strict: false, schema: 'yaml-1.1' }, yaml);
 };
