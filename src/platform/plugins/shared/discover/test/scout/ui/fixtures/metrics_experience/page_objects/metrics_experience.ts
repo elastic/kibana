@@ -97,9 +97,9 @@ export class MetricsExperiencePage {
     // `chrome.setIsVisible(false)` asynchronously. Wait for the chrome header
     // to actually hide/show before resolving, otherwise subsequent clicks on
     // the toolbar can be intercepted by the still-sticky chrome header.
-    const wasFullscreen = await this.fullscreen.isVisible();
+    const isFullscreen = await this.fullscreen.isVisible();
     await this.fullscreenButton.click();
-    await this.chromeHeader.waitFor({ state: wasFullscreen ? 'visible' : 'hidden' });
+    await this.chromeHeader.waitFor({ state: isFullscreen ? 'visible' : 'hidden' });
   }
 
   /**
