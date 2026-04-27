@@ -67,16 +67,13 @@ describe('getPackageReleaseLabel', () => {
   });
 });
 
-const dualModeTemplate = (
-  release?: AgentlessDeploymentReleaseStatus,
-  isDefault?: boolean
-): RegistryPolicyTemplate =>
+const dualModeTemplate = (release?: AgentlessDeploymentReleaseStatus): RegistryPolicyTemplate =>
   ({
     name: 'tmpl',
     title: 'T',
     description: '',
     deployment_modes: {
-      agentless: { enabled: true, release, is_default: isDefault },
+      agentless: { enabled: true, release },
       default: { enabled: true },
     },
   } as RegistryPolicyTemplate);
@@ -102,24 +99,40 @@ describe('getAgentlessReleaseOverride', () => {
     expect(getAgentlessReleaseOverride(packageInfo)).toBeUndefined();
   });
 
-  it('should return GA as-is for a default-agentless integration with GA release', () => {
+  it('should return undefined for a dual-mode integration without agentless context', () => {
     const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA, true)],
+      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.Beta)],
       version: '1.0.0',
     };
-    expect(getAgentlessReleaseOverride(packageInfo, 'tmpl')).toBe(
-      AgentlessDeploymentReleaseStatus.GA
+    expect(getAgentlessReleaseOverride(packageInfo, 'tmpl')).toBeUndefined();
+  });
+
+  it('should return beta for an only-agentless template in a multi-template package', () => {
+    const packageInfo = {
+      policy_templates: [
+        dualModeTemplate(),
+        {
+          name: 'agentless_only',
+          title: 'T',
+          description: '',
+          deployment_modes: {
+            agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.Beta },
+          },
+        } as RegistryPolicyTemplate,
+      ],
+      version: '1.0.0',
+    };
+    expect(getAgentlessReleaseOverride(packageInfo, 'agentless_only')).toBe(
+      AgentlessDeploymentReleaseStatus.Beta
     );
   });
 
-  it('should return beta for a default-agentless integration with beta release', () => {
+  it('should return undefined for a single only-agentless template (defers to semver)', () => {
     const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.Beta, true)],
+      policy_templates: [onlyAgentlessTemplate(AgentlessDeploymentReleaseStatus.Beta)],
       version: '1.0.0',
     };
-    expect(getAgentlessReleaseOverride(packageInfo, 'tmpl')).toBe(
-      AgentlessDeploymentReleaseStatus.Beta
-    );
+    expect(getAgentlessReleaseOverride(packageInfo, 'tmpl')).toBeUndefined();
   });
 });
 
@@ -128,25 +141,17 @@ describe('resolveEffectiveRelease', () => {
     expect(resolveEffectiveRelease(undefined)).toBe('ga');
   });
 
-  it('should return beta when agentless override is beta', () => {
+  it('should fall through to semver for a dual-mode integration without agentless context', () => {
     const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.Beta, true)],
-      version: '1.0.0',
-    };
-    expect(resolveEffectiveRelease(packageInfo, 'tmpl')).toBe('beta');
-  });
-
-  it('should defer to semver when agentless override is GA and semver is ga', () => {
-    const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA, true)],
+      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA)],
       version: '1.0.0',
     };
     expect(resolveEffectiveRelease(packageInfo, 'tmpl')).toBe('ga');
   });
 
-  it('should defer to semver when agentless override is GA and semver is preview', () => {
+  it('should fall through to semver for a dual-mode integration with preview semver', () => {
     const packageInfo = {
-      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA, true)],
+      policy_templates: [dualModeTemplate(AgentlessDeploymentReleaseStatus.GA)],
       version: '1.0.0-preview',
     };
     expect(resolveEffectiveRelease(packageInfo, 'tmpl')).toBe('preview');

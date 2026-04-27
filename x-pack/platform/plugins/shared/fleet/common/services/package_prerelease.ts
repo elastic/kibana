@@ -10,7 +10,6 @@ import type { IntegrationCardReleaseLabel, RegistryRelease } from '../types';
 
 import {
   getAgentlessRelease,
-  isDefaultAgentlessIntegration,
   isOnlyAgentlessIntegration,
   type PackageWithDeploymentInfo,
 } from './agentless_policy_helper';
@@ -46,11 +45,7 @@ export function getAgentlessReleaseOverride(
   integrationToEnable?: string,
   options?: { isAgentlessContext?: boolean }
 ): AgentlessDeploymentReleaseStatus | undefined {
-  if (
-    isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
-    isDefaultAgentlessIntegration(packageInfo, integrationToEnable) ||
-    options?.isAgentlessContext
-  ) {
+  if (isOnlyAgentlessIntegration(packageInfo, integrationToEnable) || options?.isAgentlessContext) {
     return getAgentlessRelease(packageInfo, integrationToEnable);
   }
   return undefined;
