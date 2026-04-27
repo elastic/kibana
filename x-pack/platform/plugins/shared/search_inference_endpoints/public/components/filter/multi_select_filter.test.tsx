@@ -65,6 +65,20 @@ describe('MultiSelectFilter', () => {
     });
   });
 
+  it('should not set aria-label on the filter button so the active filter count is announced by screen readers', () => {
+    const { getByRole } = render(
+      <MultiSelectFilter
+        onChange={() => {}}
+        options={options}
+        buttonLabel="Filter Options"
+        ariaLabel="Filter Options"
+        selectedOptionKeys={['1', '2']}
+      />
+    );
+    const button = getByRole('button', { name: /Filter Options/ });
+    expect(button).not.toHaveAttribute('aria-label');
+  });
+
   it('should call the onChange function with the updated options when an option is clicked', async () => {
     const onChange = jest.fn();
     const { getByText } = render(
