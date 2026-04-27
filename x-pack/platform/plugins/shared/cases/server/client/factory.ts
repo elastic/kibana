@@ -85,6 +85,8 @@ interface CasesClientFactoryArgs {
     owner: string,
     request: KibanaRequest
   ) => Promise<boolean>;
+  /** Lazy accessor for the ES|QL view sync service; null in indices mode. */
+  getViewSyncService?: () => import('../cases_analytics/views').ViewSyncService | null;
 }
 
 /**
@@ -188,6 +190,7 @@ export class CasesClientFactory {
       usageCounter: this.options.usageCounter,
       config: this.options.config,
       closeReasonValidator: boundCloseReasonValidator,
+      getViewSyncService: this.options.getViewSyncService,
     });
   }
 

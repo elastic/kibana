@@ -33,6 +33,7 @@ import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
 import type { ConfigType } from '../config';
+import type { ViewSyncService } from '../cases_analytics/views';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -68,6 +69,13 @@ export interface CasesClientArgs {
   readonly usageCounter?: IUsageCounter;
   readonly config: ConfigType;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
+  /**
+   * Lazy accessor for the cases-analytics ES|QL view sync service. Returns
+   * `null` when the plugin started in indices mode (the legacy reindex
+   * path) — callers should treat that as a no-op. The accessor pattern
+   * lets template client construction occur before plugin start completes.
+   */
+  readonly getViewSyncService?: () => ViewSyncService | null;
 }
 
 export type CasesSearchParams = Partial<

@@ -39,8 +39,19 @@ export interface TemplatesSubClient {
  * @ignore
  */
 export const createTemplatesSubClient = (clientArgs: CasesClientArgs): TemplatesSubClient => {
-  const { services, authorization, user } = clientArgs;
+  const { services, authorization, user, getViewSyncService } = clientArgs;
   const { templatesService } = services;
+
+  /*
+   * Fire-and-forget regeneration trigger. Called after each successful
+   * template write. The view sync service debounces bursts (~30s) and is
+   * single-flight, so a flurry of bulk template writes still produces at
+   * most one regenerate per quiet window. In indices mode (no view sync
+   * service) this is a no-op.
+   */
+  const scheduleViewRegen = () => {
+    getViewSyncService?.()?.scheduleRegeneration();
+  };
 
   const templatesSubClient: TemplatesSubClient = {
     getAllTemplates: (params: TemplatesFindRequest) => templatesService.getAllTemplates(params),
@@ -54,7 +65,9 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
         operation: Operations.manageTemplate,
         entities: [{ owner: input.owner, id }],
       });
-      return templatesService.createTemplate(input, user.username ?? 'unknown', id);
+      const created = await templatesService.createTemplate(input, user.username ?? 'unknown', id);
+      scheduleViewRegen();
+      return created;
     },
 
     updateTemplate: async (templateId: string, input: UpdateTemplateInput) => {
@@ -66,7 +79,9 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
         operation: Operations.manageTemplate,
         entities: [{ owner: template.attributes.owner, id: template.id }],
       });
-      return templatesService.updateTemplate(templateId, input);
+      const updated = await templatesService.updateTemplate(templateId, input);
+      scheduleViewRegen();
+      return updated;
     },
 
     deleteTemplate: async (templateId: string) => {
@@ -78,7 +93,8 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
         operation: Operations.manageTemplate,
         entities: [{ owner: template.attributes.owner, id: template.id }],
       });
-      return templatesService.deleteTemplate(templateId);
+      await templatesService.deleteTemplate(templateId);
+      scheduleViewRegen();
     },
 
     getTags: () => templatesService.getTags(),
