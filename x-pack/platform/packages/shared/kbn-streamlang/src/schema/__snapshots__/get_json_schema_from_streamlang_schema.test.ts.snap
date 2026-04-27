@@ -2469,7 +2469,7 @@ Object {
                     "type": "boolean",
                   },
                   "to": Object {
-                    "description": "Target field / column prefix for the extracted URI components (defaults to \\"url\\"). May equal \`from\` — the canonical ECS shape parses the \`url\` field in place. Note: combining \`to === from\` with \`remove_if_successful: true\` nulls the parsed object after writing it (mirrors ES ingest behavior).",
+                    "description": "Target field / column prefix for the extracted URI components (defaults to \\"url\\"). May equal \`from\` — the canonical ECS shape parses the \`url\` field in place. Note: combining \`to === from\` with \`remove_if_successful: true\` nulls the parsed object after writing it.",
                     "minLength": 1,
                     "type": "string",
                   },
