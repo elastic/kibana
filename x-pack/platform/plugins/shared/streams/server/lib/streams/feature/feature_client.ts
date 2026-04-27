@@ -218,8 +218,8 @@ export class FeatureClient {
     if (resolvedOperations.length === 0) {
       return { applied: 0, skipped };
     }
-      
-    return await bulkWithInferenceFallback(this.clients.logger, ({ includeEmbedding }) =>
+
+    await bulkWithInferenceFallback(this.clients.logger, ({ includeEmbedding }) =>
       this.clients.storageClient.bulk({
         operations: resolvedOperations.map((operation) => {
           if ('index' in operation) {
@@ -237,6 +237,8 @@ export class FeatureClient {
         throwOnFail: true,
       })
     );
+
+    return { applied: resolvedOperations.length, skipped };
   }
 
   async getFeatures(
