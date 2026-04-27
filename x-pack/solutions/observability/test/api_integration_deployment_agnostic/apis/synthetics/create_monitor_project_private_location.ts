@@ -2101,7 +2101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(resp.status).to.eql(403);
         expect(resp.body.message).to.eql(
-          'You do not have sufficient permissions to update monitors in all required spaces.'
+          'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.'
         );
       } finally {
         await monitorTestService.deleteMonitorByJourney(
@@ -2161,7 +2161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(resp.status).to.eql(403);
         expect(resp.body.message).to.eql(
-          'You do not have sufficient permissions to update monitors in all required spaces.'
+          'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.'
         );
       } finally {
         await monitorTestService.deleteMonitorByJourney(
