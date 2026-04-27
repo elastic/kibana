@@ -23,7 +23,6 @@ type AllRelatedPanelPropsOrNone = RelatedPanelProps | { [K in keyof RelatedPanel
 type Props = Partial<EuiToolTipProps> & {
   panelLabel?: string;
   panelTooltipLabel?: string;
-  isOpen?: boolean;
 } & AllRelatedPanelPropsOrNone;
 
 export const ControlLabelTooltip: React.FC<Props> = ({
@@ -32,7 +31,6 @@ export const ControlLabelTooltip: React.FC<Props> = ({
   numberOfRelatedPanels,
   panelLabel,
   panelTooltipLabel,
-  isOpen,
   ...rest
 }) => {
   const relatedPanelCountBadge =
