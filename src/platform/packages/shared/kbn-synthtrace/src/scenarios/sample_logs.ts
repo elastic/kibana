@@ -24,21 +24,15 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
   const client = new SampleParserClient({ logger });
 
-  const {
-    rpm,
-    streamType,
-    systems,
-    isLogsEnabled,
-    skipFork,
-    loghubTimestampLayout,
-  } = (runOptions.scenarioOpts ?? {}) as {
-    rpm?: number;
-    systems?: string | string[];
-    streamType?: 'classic' | 'wired';
-    skipFork?: boolean;
-    isLogsEnabled?: boolean;
-    loghubTimestampLayout?: LoghubTimestampLayout;
-  };
+  const { rpm, streamType, systems, isLogsEnabled, skipFork, loghubTimestampLayout } =
+    (runOptions.scenarioOpts ?? {}) as {
+      rpm?: number;
+      systems?: string | string[];
+      streamType?: 'classic' | 'wired';
+      skipFork?: boolean;
+      isLogsEnabled?: boolean;
+      loghubTimestampLayout?: LoghubTimestampLayout;
+    };
 
   const generators = await client.getLogGenerators({
     rpm,

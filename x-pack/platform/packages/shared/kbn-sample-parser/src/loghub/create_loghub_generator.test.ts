@@ -149,5 +149,4 @@ describe('createLoghubGenerator', () => {
       expect(secondBatch[0]['@timestamp']).toBe(startTime + 500);
     });
   });
-
 });
