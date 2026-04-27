@@ -75,7 +75,7 @@ export const SharepointOnline: ConnectorSpec = {
       {
         type: 'oauth_authorization_code',
         defaults: {
-          scope: 'Sites.Read.All Files.Read.All offline_access',
+          scope: 'Sites.Selected Files.Read.All offline_access',
         },
         overrides: {
           meta: {
@@ -108,7 +108,7 @@ export const SharepointOnline: ConnectorSpec = {
         },
         defaults: {
           provider: 'microsoft',
-          scope: 'Sites.Read.All Files.Read.All offline_access',
+          scope: 'Sites.Selected Files.Read.All offline_access',
         },
       },
     ],
