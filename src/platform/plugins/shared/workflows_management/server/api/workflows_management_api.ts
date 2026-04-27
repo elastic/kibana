@@ -306,12 +306,12 @@ export class WorkflowsManagementApi {
     return result;
   }
 
-  public async disableAllWorkflows(): Promise<{
+  public async disableAllWorkflows(spaceId?: string): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
-    return this.workflowsService.disableAllWorkflows();
+    return this.workflowsService.disableAllWorkflows(spaceId);
   }
 
   public async runWorkflow(
