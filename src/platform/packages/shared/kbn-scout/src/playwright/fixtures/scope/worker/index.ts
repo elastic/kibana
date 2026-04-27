@@ -27,12 +27,8 @@ export type { LinkedProjectFixture } from './linked_es_archiver';
 export { uiSettingsFixture } from './ui_settings';
 export type { UiSettingsFixture } from './ui_settings';
 
-export { scoutSpaceParallelFixture, scoutSpaceFixture } from './scout_space';
-export type {
-  ScoutSpaceParallelFixture,
-  ScoutSpaceFixture,
-  SpaceSolutionView,
-} from './scout_space';
+export { scoutSpaceParallelFixture } from './scout_space';
+export type { ScoutSpaceParallelFixture, SpaceSolutionView } from './scout_space';
 
 export { apiServicesFixture } from './apis';
 export type { ApiServicesFixture } from './apis';

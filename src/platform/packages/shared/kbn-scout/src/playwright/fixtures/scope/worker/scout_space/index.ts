@@ -49,18 +49,4 @@ export interface ScoutSpaceParallelFixture {
   setSolutionView: (solution: SpaceSolutionView) => Promise<void>;
 }
 
-/**
- * Lighter space fixture for sequential (single-threaded) tests.
- * Operates on the default Kibana space and auto-resets the solution view on teardown.
- */
-export interface ScoutSpaceFixture {
-  id: string;
-  /**
-   * Sets the solution view for the default space.
-   * @param solution - The solution to set ('es', 'oblt', 'security', or 'classic')
-   */
-  setSolutionView: (solution: SpaceSolutionView) => Promise<void>;
-}
-
 export { scoutSpaceParallelFixture } from './parallel';
-export { scoutSpaceFixture } from './single_thread';

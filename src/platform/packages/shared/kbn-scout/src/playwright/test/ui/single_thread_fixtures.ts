@@ -15,13 +15,11 @@ import {
   linkedEsFixtures,
   uiSettingsFixture,
   lighthouseFixture,
-  scoutSpaceFixture,
 } from '../../fixtures/scope/worker';
 import type {
   ApiServicesFixture,
   EsArchiverFixture,
   LinkedProjectFixture,
-  ScoutSpaceFixture,
   EsClient,
   KbnClient,
   KibanaUrl,
@@ -53,7 +51,6 @@ export const scoutFixtures = mergeTests(
   esArchiverFixture,
   linkedEsFixtures,
   uiSettingsFixture,
-  scoutSpaceFixture,
   // api fixtures
   apiServicesFixture,
   // test scope fixtures
@@ -82,7 +79,6 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   esArchiver: EsArchiverFixture;
   linkedProject: LinkedProjectFixture;
   uiSettings: UiSettingsFixture;
-  scoutSpace: ScoutSpaceFixture;
   apiServices: ApiServicesFixture;
   isSnapshotBuild: boolean;
 }
