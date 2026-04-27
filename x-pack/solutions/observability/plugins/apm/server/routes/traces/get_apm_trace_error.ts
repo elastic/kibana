@@ -66,7 +66,7 @@ export async function getApmTraceError(params: {
       service: { name: unflattened.service.name },
       error: {
         exception:
-          (errorSource?.error.exception?.length ?? 0) > 0
+          (errorSource?.error?.exception?.length ?? 0) > 0
             ? errorSource?.error?.exception?.[0]
             : error.exception,
         grouping_key: error?.grouping_key,
