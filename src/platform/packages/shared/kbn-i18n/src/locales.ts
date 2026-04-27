@@ -7,22 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const LOCALE_IDS = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'] as const;
+const KNOWN_LOCALE_IDS = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'] as const;
 
 /**
- * A supported locale code (e.g., `"en"`, `"fr-FR"`).
+ * A supported locale code (e.g., `"en"`, `"fr-FR"`). Widened to `string` so
+ * deployments can configure additional locales via `kibana.yml` (`i18n.locales`)
+ * — for instance, plugins shipping their own translation files.
  */
-export type SupportedLocaleId = (typeof LOCALE_IDS)[number];
+export type SupportedLocaleId = string;
 
 /**
- * List of all locales that are officially supported by Kibana.
- * Widened to `readonly string[]` so it can be used with `Array.prototype.includes`
- * and similar methods that take an unnarrowed string argument.
+ * Default list of locale ids Kibana ships translations for. Used as the
+ * default value of `i18n.locales` in the config schema and as a fallback
+ * when there is no runtime configuration available (e.g., test fixtures,
+ * Storybook). It is **not** an authoritative runtime allow-list — admins
+ * can curate or extend the list via `kibana.yml`.
  */
-export const SUPPORTED_LOCALE_IDS: readonly string[] = LOCALE_IDS;
+export const SUPPORTED_LOCALE_IDS: readonly string[] = KNOWN_LOCALE_IDS;
 
 /**
- * Supported locales with human-readable labels.
+ * Friendly labels for the locales Kibana ships translations for. Used as
+ * a label registry: when the configured `i18n.locales` includes a known
+ * id, the picker shows the friendly label; for unknown ids the picker
+ * falls back to the id itself.
  */
 export const SUPPORTED_LOCALES: ReadonlyArray<{ id: SupportedLocaleId; label: string }> = [
   { id: 'en', label: 'English' },
@@ -33,12 +40,52 @@ export const SUPPORTED_LOCALES: ReadonlyArray<{ id: SupportedLocaleId; label: st
 ];
 
 /**
- * Returns the canonical-casing supported locale id matching the given locale string,
- * or `"en"` if no match is found. The i18n engine lowercases locales internally
- * (so `fr-FR` becomes `fr-fr`), but UI options and persistence expect canonical
- * casing (`fr-FR`).
+ * Returns the friendly label for a known locale id, or the id itself when
+ * no label is registered (e.g., admin-installed custom locales).
  */
-export const toCanonicalLocaleId = (locale: string): SupportedLocaleId => {
-  const lc = locale.toLowerCase();
-  return SUPPORTED_LOCALES.find(({ id }) => id.toLowerCase() === lc)?.id ?? 'en';
+export const getLocaleLabel = (id: SupportedLocaleId): string => {
+  const lc = id.toLowerCase();
+  return SUPPORTED_LOCALES.find((entry) => entry.id.toLowerCase() === lc)?.label ?? id;
 };
+
+/**
+ * Returns the canonical-casing locale id matching the given locale string
+ * against the supplied list (or the known-locales registry when no list is
+ * provided), or `"en"` if no match is found. The i18n engine lowercases
+ * locales internally (so `fr-FR` becomes `fr-fr`), but UI options and
+ * persistence expect canonical casing (`fr-FR`).
+ */
+export const toCanonicalLocaleId = (
+  locale: string,
+  availableLocales: ReadonlyArray<{ id: string }> = SUPPORTED_LOCALES
+): SupportedLocaleId => {
+  const lc = locale.toLowerCase();
+  return availableLocales.find(({ id }) => id.toLowerCase() === lc)?.id ?? 'en';
+};
+
+/**
+ * A locale that the running Kibana instance offers in the language picker.
+ */
+export interface AvailableLocale {
+  id: SupportedLocaleId;
+  label: string;
+}
+
+let availableLocales: ReadonlyArray<AvailableLocale> = [];
+
+/**
+ * Sets the list of locales the current Kibana instance offers in the
+ * language picker. Called once during browser bootstrap with the values
+ * the server derived from `i18n.locales`. An empty list means the picker
+ * UI is disabled for this deployment.
+ */
+export const setAvailableLocales = (locales: ReadonlyArray<AvailableLocale>): void => {
+  availableLocales = locales.map(({ id, label }) => ({ id, label }));
+};
+
+/**
+ * Returns the list of locales the current Kibana instance offers in the
+ * language picker. Returns an empty array if `setAvailableLocales` has not
+ * been called or if the deployment has disabled the picker.
+ */
+export const getAvailableLocales = (): ReadonlyArray<AvailableLocale> => availableLocales;

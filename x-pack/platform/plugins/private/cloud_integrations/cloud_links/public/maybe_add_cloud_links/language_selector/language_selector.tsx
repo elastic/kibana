@@ -7,7 +7,7 @@
 
 import React, { useRef } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n, getAvailableLocales } from '@kbn/i18n';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -33,6 +33,7 @@ export const LanguageSelector = ({ security, core, closePopover }: Props) => {
 
 function LanguageSelectorUI({ security, core, closePopover }: Props) {
   const { isVisible } = useLanguage();
+  const hasConfiguredLocales = getAvailableLocales().length > 0;
 
   const modalRef = useRef<OverlayRef | null>(null);
 
@@ -53,7 +54,7 @@ function LanguageSelectorUI({ security, core, closePopover }: Props) {
     );
   };
 
-  if (!isVisible) {
+  if (!isVisible || !hasConfiguredLocales) {
     return null;
   }
 

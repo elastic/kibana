@@ -35,7 +35,7 @@ import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
-import { i18n, SUPPORTED_LOCALES, toCanonicalLocaleId } from '@kbn/i18n';
+import { getAvailableLocales, i18n, toCanonicalLocaleId } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -285,7 +285,12 @@ export const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ for
     return null;
   }
 
-  const localeOptions = SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label }));
+  const availableLocales = getAvailableLocales();
+  if (availableLocales.length === 0) {
+    return null;
+  }
+
+  const localeOptions = availableLocales.map(({ id, label }) => ({ value: id, text: label }));
 
   return (
     <EuiDescribedFormGroup
@@ -889,7 +894,9 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           userSettings: {
             darkMode: data.userSettings?.darkMode || 'space_default',
             contrastMode: data.userSettings?.contrastMode || 'system',
-            locale: data.userSettings?.locale || toCanonicalLocaleId(i18n.getLocale()),
+            locale:
+              data.userSettings?.locale ||
+              toCanonicalLocaleId(i18n.getLocale(), getAvailableLocales()),
           },
         }
       : undefined,

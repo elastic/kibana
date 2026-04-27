@@ -11,10 +11,9 @@ import { basename } from 'path';
 import { fromRoot } from '@kbn/repo-info';
 import { asyncMapWithLimit } from '@kbn/std';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
-import { SUPPORTED_LOCALE_IDS } from '@kbn/i18n';
 import { getTranslationPaths } from './get_translation_paths';
 
-const discoverAllTranslationPaths = async (pluginPaths: string[]): Promise<string[]> => {
+export const discoverAllTranslationPaths = async (pluginPaths: string[]): Promise<string[]> => {
   const translationPaths = await Promise.all([
     getTranslationPaths({
       cwd: fromRoot('.'),
@@ -47,9 +46,14 @@ export const getKibanaTranslationFiles = async (
   return allPaths.filter((translationPath) => basename(translationPath, '.json') === locale);
 };
 
-export const getAllKibanaTranslationFiles = async (pluginPaths: string[]): Promise<string[]> => {
+export const getAllKibanaTranslationFiles = async (
+  pluginPaths: string[],
+  supportedLocales: readonly string[]
+): Promise<string[]> => {
+  if (supportedLocales.length === 0) {
+    return [];
+  }
   const allPaths = await discoverAllTranslationPaths(pluginPaths);
-  return allPaths.filter((translationPath) =>
-    SUPPORTED_LOCALE_IDS.includes(basename(translationPath, '.json'))
-  );
+  const allowed = new Set(supportedLocales);
+  return allPaths.filter((translationPath) => allowed.has(basename(translationPath, '.json')));
 };

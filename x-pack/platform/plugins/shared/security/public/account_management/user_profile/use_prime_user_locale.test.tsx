@@ -10,7 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { i18n } from '@kbn/i18n';
+import { i18n, setAvailableLocales } from '@kbn/i18n';
 
 import { usePrimeUserLocale } from './use_prime_user_locale';
 import { UserProfileAPIClient } from './user_profile_api_client';
@@ -48,10 +48,20 @@ describe('usePrimeUserLocale', () => {
 
     // Default: i18n.getLocale returns lowercased config locale.
     jest.spyOn(i18n, 'getLocale').mockReturnValue('fr-fr');
+
+    // Picker enabled with the five bundled locales — matches the schema default.
+    setAvailableLocales([
+      { id: 'en', label: 'English' },
+      { id: 'fr-FR', label: 'Français' },
+      { id: 'ja-JP', label: '日本語' },
+      { id: 'zh-CN', label: '中文' },
+      { id: 'de-DE', label: 'Deutsch' },
+    ]);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+    setAvailableLocales([]);
   });
 
   it('does nothing while the user profile has not finished loading', async () => {
@@ -117,6 +127,21 @@ describe('usePrimeUserLocale', () => {
     await Promise.resolve();
 
     expect(coreStart.http.post).toHaveBeenCalledTimes(1);
+  });
+
+  it('does nothing when no locales are configured (i18n.locales: [])', async () => {
+    setAvailableLocales([]);
+    coreStart.http.get.mockResolvedValue({ data: { userSettings: {} } });
+    await userProfiles.getCurrent({ dataPath: 'userSettings' });
+
+    renderHook(() => usePrimeUserLocale(), { wrapper });
+
+    await Promise.resolve();
+
+    expect(coreStart.http.post).not.toHaveBeenCalledWith(
+      '/internal/security/user_profile/_data',
+      expect.anything()
+    );
   });
 
   it('does not show a success notification for the silent save', async () => {

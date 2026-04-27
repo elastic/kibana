@@ -20,12 +20,16 @@ import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
-const getConfigService = (locale = 'en') => {
+const getConfigService = (
+  defaultLocale = 'en',
+  locales: string[] = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE']
+) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
     if (path === 'i18n') {
       return new BehaviorSubject({
-        locale,
+        defaultLocale,
+        locales,
       });
     }
     return new BehaviorSubject({});
@@ -62,7 +66,13 @@ describe('I18nService', () => {
       await service.preboot({ pluginPaths, http: httpPreboot });
 
       expect(getAllKibanaTranslationFilesMock).toHaveBeenCalledTimes(1);
-      expect(getAllKibanaTranslationFilesMock).toHaveBeenCalledWith(pluginPaths);
+      expect(getAllKibanaTranslationFilesMock).toHaveBeenCalledWith(pluginPaths, [
+        'en',
+        'fr-FR',
+        'ja-JP',
+        'zh-CN',
+        'de-DE',
+      ]);
     });
 
     it('calls `initTranslations` with the correct parameters', async () => {
@@ -105,7 +115,13 @@ describe('I18nService', () => {
       await service.setup({ pluginPaths, http: httpSetup });
 
       expect(getAllKibanaTranslationFilesMock).toHaveBeenCalledTimes(1);
-      expect(getAllKibanaTranslationFilesMock).toHaveBeenCalledWith(pluginPaths);
+      expect(getAllKibanaTranslationFilesMock).toHaveBeenCalledWith(pluginPaths, [
+        'en',
+        'fr-FR',
+        'ja-JP',
+        'zh-CN',
+        'de-DE',
+      ]);
     });
 
     it('calls `initTranslations` with the correct parameters', async () => {
@@ -134,13 +150,44 @@ describe('I18nService', () => {
       const translationFiles = ['/path/to/file', 'path/to/another/file'];
       getAllKibanaTranslationFilesMock.mockResolvedValue(translationFiles);
 
-      const { getLocale, getTranslationFiles } = await service.setup({
+      const { getLocale, getLocales, getAvailableLocales, getTranslationFiles } =
+        await service.setup({
+          pluginPaths: [],
+          http: httpSetup,
+        });
+
+      expect(getLocale()).toEqual('en');
+      expect(getLocales()).toEqual(['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE']);
+      expect(getAvailableLocales()).toEqual([
+        { id: 'en', label: 'English' },
+        { id: 'fr-FR', label: 'Français' },
+        { id: 'ja-JP', label: '日本語' },
+        { id: 'zh-CN', label: '中文' },
+        { id: 'de-DE', label: 'Deutsch' },
+      ]);
+      expect(getTranslationFiles()).toEqual(translationFiles);
+    });
+
+    it('hashes the defaultLocale even when i18n.locales is empty', async () => {
+      configService = getConfigService('en', []);
+      coreContext = mockCoreContext.create({ configService });
+      service = new I18nService(coreContext);
+      await service.preboot({ pluginPaths: [], http: httpPreboot });
+      registerRoutesMock.mockClear();
+
+      const { getLocales, getAvailableLocales } = await service.setup({
         pluginPaths: [],
         http: httpSetup,
       });
 
-      expect(getLocale()).toEqual('en');
-      expect(getTranslationFiles()).toEqual(translationFiles);
+      expect(getLocales()).toEqual([]);
+      expect(getAvailableLocales()).toEqual([]);
+      expect(registerRoutesMock).toHaveBeenCalledWith({
+        locale: 'en',
+        router: expect.any(Object),
+        isDist: coreContext.env.packageInfo.dist,
+        translationHashes: expect.objectContaining({ en: expect.any(String) }),
+      });
     });
   });
 });

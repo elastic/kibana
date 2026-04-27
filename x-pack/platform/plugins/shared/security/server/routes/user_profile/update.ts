@@ -67,6 +67,7 @@ export function defineUpdateUserProfileDataRoute({
   getUserProfileService,
   logger,
   getAuthenticationService,
+  i18n: i18nService,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -132,6 +133,17 @@ export function defineUpdateUserProfileDataRoute({
         if (!isValidColor) {
           return response.customError({
             body: 'Invalid hex color',
+            statusCode: 400,
+          });
+        }
+      }
+
+      const requestedLocale = userProfileData.userSettings?.locale;
+      if (requestedLocale) {
+        const allowedLocales = i18nService.getLocales();
+        if (!allowedLocales.includes(requestedLocale)) {
+          return response.customError({
+            body: `Locale "${requestedLocale}" is not enabled for this deployment`,
             statusCode: 400,
           });
         }

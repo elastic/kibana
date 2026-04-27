@@ -276,9 +276,10 @@ export class RenderingService {
 
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
+    const availableLocales = i18n.getAvailableLocales();
     // Resolve the effective locale server-side using the priority chain:
     // 1. User profile setting
-    // 2. kibana.yml i18n.locale (configLocale)
+    // 2. kibana.yml i18n.defaultLocale (configLocale)
     const effectiveLocale =
       userSettingLocale && translationHashes[userSettingLocale] ? userSettingLocale : configLocale;
     let translationsUrl: string;
@@ -328,6 +329,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          availableLocales: availableLocales.map(({ id, label }) => ({ id, label })),
         },
         theme: {
           darkMode,

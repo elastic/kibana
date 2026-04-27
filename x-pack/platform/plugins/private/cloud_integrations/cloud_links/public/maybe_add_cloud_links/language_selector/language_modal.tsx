@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import type { Theme } from '@emotion/react';
 import { css } from '@emotion/react';
-import { i18n, SUPPORTED_LOCALES } from '@kbn/i18n';
+import { i18n, getAvailableLocales } from '@kbn/i18n';
 import type { LocaleValue } from '@kbn/user-profile-components';
 
 import { useLanguage } from './use_language_hook';
@@ -44,7 +44,7 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
 
   const { value: locale, initialValue: initialLocaleValue, isLoading, onChange } = useLanguage();
 
-  const localeOptions = SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label }));
+  const localeOptions = getAvailableLocales().map(({ id, label }) => ({ value: id, text: label }));
 
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>

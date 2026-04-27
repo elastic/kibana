@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apmSystem, fatalErrorMock, i18nLoad } from './kbn_bootstrap.test.mocks';
+import {
+  apmSystem,
+  fatalErrorMock,
+  i18nLoad,
+  setAvailableLocalesMock,
+} from './kbn_bootstrap.test.mocks';
 import { __kbnBootstrap__ } from '.';
 
-const setMetadata = (translationsUrl = '/translations/abc123/en.json') => {
+const setMetadata = (
+  translationsUrl = '/translations/abc123/en.json',
+  availableLocales: Array<{ id: string; label: string }> = [{ id: 'en', label: 'English' }]
+) => {
   const metadata = {
-    i18n: { translationsUrl },
+    i18n: { translationsUrl, availableLocales },
     vars: { apmConfig: null },
   };
   // eslint-disable-next-line no-unsanitized/property
@@ -51,5 +59,17 @@ describe('kbn_bootstrap', () => {
     await __kbnBootstrap__();
 
     expect(i18nLoad).toHaveBeenCalledWith('/translations/ghi789/ja-JP.json');
+  });
+
+  it('hydrates the available locale registry from injected metadata', async () => {
+    const availableLocales = [
+      { id: 'en', label: 'English' },
+      { id: 'ja-JP', label: '日本語' },
+    ];
+    setMetadata('/translations/abc123/en.json', availableLocales);
+
+    await __kbnBootstrap__();
+
+    expect(setAvailableLocalesMock).toHaveBeenCalledWith(availableLocales);
   });
 });

@@ -7,7 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 
-import { i18n, toCanonicalLocaleId } from '@kbn/i18n';
+import { getAvailableLocales, i18n, toCanonicalLocaleId } from '@kbn/i18n';
 import { useUpdateUserProfile } from '@kbn/user-profile-components';
 
 /**
@@ -34,7 +34,13 @@ export const usePrimeUserLocale = () => {
     if (!userProfileLoaded) return;
     if (userProfileData?.userSettings?.locale) return;
 
+    const availableLocales = getAvailableLocales();
+    // No picker is enabled in this deployment, so there is nothing to prime.
+    if (availableLocales.length === 0) return;
+
     hasPrimed.current = true;
-    update({ userSettings: { locale: toCanonicalLocaleId(i18n.getLocale()) } });
+    update({
+      userSettings: { locale: toCanonicalLocaleId(i18n.getLocale(), availableLocales) },
+    });
   }, [update, userProfileData, userProfileLoaded]);
 };
