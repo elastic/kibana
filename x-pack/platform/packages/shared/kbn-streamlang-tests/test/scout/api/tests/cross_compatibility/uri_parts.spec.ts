@@ -451,8 +451,8 @@ apiTest.describe(
       };
       await testBed.ingest('esql-uri-parts-where', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-uri-parts-where', query);
-      const processedEsql = esqlResult.documents.find((d) => d.case === 'processed');
-      const skippedEsql = esqlResult.documents.find((d) => d.case === 'skipped');
+      const processedEsql = esqlResult.documentsWithoutKeywords.find((d) => d.case === 'processed');
+      const skippedEsql = esqlResult.documentsWithoutKeywords.find((d) => d.case === 'skipped');
 
       const processedIngest = ingestResult.find((d) => d.case === 'processed')!;
       const skippedIngest = ingestResult.find((d) => d.case === 'skipped')!;

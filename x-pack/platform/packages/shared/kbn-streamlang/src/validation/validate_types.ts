@@ -293,6 +293,9 @@ export function getProcessorOutputType(
 
     case 'uri_parts': {
       const prefix = processor.to || URI_PARTS_DEFAULT_TARGET;
+      if (processor.remove_if_successful === true && fieldName === processor.from) {
+        return 'unknown';
+      }
       const subfield = subfieldAfterPrefix(fieldName, prefix);
       if (
         subfield !== null &&
