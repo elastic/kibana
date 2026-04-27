@@ -14,25 +14,27 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const DeleteNoteRequestBody = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        /**
+         * Saved object ID of the note to delete.
+         */
+        noteId: z.string(),
+      })
+      .nullable(),
+    z
+      .object({
+        /**
+         * Saved object IDs of the notes to delete.
+         */
+        noteIds: z.array(z.string()).nullable(),
+      })
+      .nullable(),
+  ])
+);
 export type DeleteNoteRequestBody = z.infer<typeof DeleteNoteRequestBody>;
-export const DeleteNoteRequestBody = z.union([
-  z
-    .object({
-      /**
-       * Saved object ID of the note to delete.
-       */
-      noteId: z.string(),
-    })
-    .nullable(),
-  z
-    .object({
-      /**
-       * Saved object IDs of the notes to delete.
-       */
-      noteIds: z.array(z.string()).nullable(),
-    })
-    .nullable(),
-]);
 export type DeleteNoteRequestBodyInput = z.input<typeof DeleteNoteRequestBody>;

@@ -501,6 +501,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
+          entityRecord={observedUser.entityRecord}
           identityFields={userIdentityFields ?? {}}
           entityType={EntityType.user}
           queryId={`${USER_DETAILS_INSIGHTS_ID}-alerts-by-status`}

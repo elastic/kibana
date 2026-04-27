@@ -39,6 +39,14 @@ const entityWithWatchlists = {
   },
 } as unknown as Entity;
 
+const entityWithMultipleSources = {
+  ...mockEntityRecord,
+  entity: {
+    ...mockEntityRecord.entity,
+    source: ['okta', 'entityanalytics_okta'],
+  },
+} as unknown as Entity;
+
 describe('EntitySummaryGrid', () => {
   it('renders four panels', () => {
     const { getByText } = render(
@@ -63,14 +71,28 @@ describe('EntitySummaryGrid', () => {
     expect(getByText('test-entity-id-host-abc123')).toBeInTheDocument();
   });
 
-  it('displays data source', () => {
-    const { getByText } = render(
+  it('displays data source formatted (capitalized, separators replaced with spaces)', () => {
+    const { getByText, queryByText } = render(
       <TestProviders>
         <EntitySummaryGrid entityRecord={entityWithSource} />
       </TestProviders>
     );
 
-    expect(getByText('logs-endpoint')).toBeInTheDocument();
+    expect(getByText('Logs Endpoint')).toBeInTheDocument();
+    expect(queryByText('logs-endpoint')).not.toBeInTheDocument();
+  });
+
+  it('displays first data source inline and a "+N" overflow badge when entity.source is an array', () => {
+    const { getByText, queryByText, getByTestId } = render(
+      <TestProviders>
+        <EntitySummaryGrid entityRecord={entityWithMultipleSources} />
+      </TestProviders>
+    );
+
+    expect(getByText('Okta')).toBeInTheDocument();
+    expect(queryByText('okta')).not.toBeInTheDocument();
+    expect(queryByText('entityanalytics_okta')).not.toBeInTheDocument();
+    expect(getByTestId('entitySourceValue-more')).toHaveTextContent('+1');
   });
 
   it('renders asset criticality badge', () => {
@@ -133,13 +155,13 @@ describe('EntitySummaryGrid', () => {
     expect(getByText('First Watchlist')).toBeInTheDocument();
   });
 
-  it('displays +N More for additional watchlists', () => {
-    const { getByText } = render(
+  it('displays a +N overflow badge for additional watchlists', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <EntitySummaryGrid entityRecord={entityWithWatchlists} />
       </TestProviders>
     );
 
-    expect(getByText(/\+1.*More/)).toBeInTheDocument();
+    expect(getByTestId('entityWatchlistsCell-more')).toHaveTextContent('+1');
   });
 });
