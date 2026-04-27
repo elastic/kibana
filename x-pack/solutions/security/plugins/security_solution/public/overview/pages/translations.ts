@@ -53,7 +53,7 @@ export const NEWS_FEED_TITLE = i18n.translate(
 export const RECENT_TIMELINES = i18n.translate(
   'xpack.securitySolution.overview.recentTimelinesSidebarTitle',
   {
-    defaultMessage: 'Recent timelines',
+    defaultMessage: 'Recent Timelines',
   }
 );
 
