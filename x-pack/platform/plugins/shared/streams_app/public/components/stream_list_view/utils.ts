@@ -19,7 +19,7 @@ import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { Direction } from '@elastic/eui';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
-import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers/helpers';
+import { parseDurationInSeconds } from '../../util/parse_duration';
 
 const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
 
@@ -193,6 +193,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     stream: node.stream,
     effective_lifecycle: node.effective_lifecycle,
     data_stream: node.data_stream,
+    privileges: node.privileges,
     nameSortKey,
     documentsCount: 0,
     retentionMs,

@@ -97,9 +97,12 @@ export class MonitoringEntitySourceDataClient {
     return this.monitoringEntitySourceClient.delete(id);
   }
 
-  public async list(query: ListEntitySourcesRequestQuery): Promise<ListEntitySourcesResponse> {
+  public async list(
+    query: ListEntitySourcesRequestQuery,
+    ids?: string[]
+  ): Promise<ListEntitySourcesResponse> {
     this.log('debug', 'Finding all Monitoring Entity Source Sync saved objects');
-    return this.monitoringEntitySourceClient.list(query);
+    return this.monitoringEntitySourceClient.list(query, ids);
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

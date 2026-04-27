@@ -21,7 +21,10 @@ import {
   MOCK_IDP_UIAM_ORGANIZATION_ID,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
+import {
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+} from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
 
@@ -197,7 +200,9 @@ export const defaultConfig: ScoutServerConfig = {
           type: 'elasticsearch',
           is_default: true,
           is_default_monitoring: true,
-          hosts: ['https://localhost:9200'],
+          hosts: [
+            `${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
+          ],
         },
       ])}`,
       // Agent policies are now created via Fleet API using the helper function from @kbn-scout

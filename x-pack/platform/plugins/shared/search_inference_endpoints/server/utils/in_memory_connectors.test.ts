@@ -6,38 +6,56 @@
  */
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointWithMetadata } from '../types';
 import { mockEISPreconfiguredEndpoints } from '../__mocks__/inference_endpoints';
 import {
   filterPreconfiguredEndpoints,
   findEndpointsWithoutConnectors,
+  findStaleDynamicConnectorIds,
   connectorFromEndpoint,
   getConnectorIdFromEndpoint,
   getConnectorNameFromEndpoint,
 } from './in_memory_connectors';
 
 const makeEndpoint = (
-  overrides: Partial<InferenceInferenceEndpointInfo> = {}
-): InferenceInferenceEndpointInfo => ({
+  overrides: Partial<InferenceEndpointWithMetadata> = {}
+): InferenceEndpointWithMetadata => ({
   inference_id: '.test-model-chat_completion',
   task_type: 'chat_completion',
   service: 'elastic',
   service_settings: { model_id: 'test-model' },
+  metadata: {
+    heuristics: {
+      properties: ['kibana-connector'],
+    },
+  },
   ...overrides,
 });
 
 describe('filterPreconfiguredEndpoints', () => {
-  it('returns endpoints that are elastic service, start with ".", and are chat_completion', () => {
+  it('returns endpoints that have kibana-connector in metadata.heuristics.properties and are chat_completion', () => {
     const endpoint = makeEndpoint();
     expect(filterPreconfiguredEndpoints([endpoint])).toEqual([endpoint]);
   });
 
-  it('filters out endpoints where service is not elastic', () => {
-    const endpoint = makeEndpoint({ service: 'openai' });
+  it('filters out endpoints without metadata', () => {
+    const endpoint: InferenceInferenceEndpointInfo = {
+      inference_id: '.test-model-chat_completion',
+      task_type: 'chat_completion',
+      service: 'elastic',
+      service_settings: { model_id: 'test-model' },
+    };
     expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
   });
 
-  it('filters out endpoints where inference_id does not start with "."', () => {
-    const endpoint = makeEndpoint({ inference_id: 'test-model-chat_completion' });
+  it('filters out endpoints where kibana-connector is not in metadata.heuristics.properties', () => {
+    const endpoint = makeEndpoint({
+      metadata: {
+        heuristics: {
+          properties: ['multilingual', 'multimodal'],
+        },
+      },
+    });
     expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
   });
 
@@ -55,9 +73,14 @@ describe('filterPreconfiguredEndpoints', () => {
     const valid = makeEndpoint();
     const results = filterPreconfiguredEndpoints([
       valid,
-      makeEndpoint({ service: 'elasticsearch' }),
-      makeEndpoint({ inference_id: 'no-dot-chat_completion' }),
+      makeEndpoint({ metadata: { heuristics: { properties: ['multilingual'] } } }),
       makeEndpoint({ task_type: 'sparse_embedding' }),
+      {
+        inference_id: 'no-metadata-chat_completion',
+        task_type: 'chat_completion',
+        service: 'elastic',
+        service_settings: {},
+      },
     ]);
     expect(results).toEqual([valid]);
   });
@@ -66,12 +89,12 @@ describe('filterPreconfiguredEndpoints', () => {
     expect(filterPreconfiguredEndpoints([])).toEqual([]);
   });
 
-  it('filters the EIS mock endpoints to only chat_completion elastic endpoints with a "." prefix', () => {
+  it('filters the EIS mock endpoints to only chat_completion endpoints with kibana-connector property', () => {
     const results = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
     expect(results.length).toBeGreaterThan(0);
     results.forEach((endpoint) => {
-      expect(endpoint.service).toBe('elastic');
-      expect(endpoint.inference_id).toMatch(/^\./);
+      const ep = endpoint as InferenceEndpointWithMetadata;
+      expect(ep.metadata?.heuristics?.properties).toContain('kibana-connector');
       expect(endpoint.task_type).toBe('chat_completion');
     });
   });
@@ -106,6 +129,50 @@ describe('findEndpointsWithoutConnectors', () => {
     expect(
       findEndpointsWithoutConnectors([endpointA, endpointB], [connectorA, connectorB])
     ).toEqual([]);
+  });
+});
+
+describe('findStaleDynamicConnectorIds', () => {
+  const endpointA = makeEndpoint({ inference_id: '.model-a-chat_completion' });
+  const endpointB = makeEndpoint({ inference_id: '.model-b-chat_completion' });
+  const dynamicConnectorA = { ...connectorFromEndpoint(endpointA), isDynamic: true };
+  const dynamicConnectorB = { ...connectorFromEndpoint(endpointB), isDynamic: true };
+
+  it('returns connector ids that no longer have a matching endpoint', () => {
+    expect(
+      findStaleDynamicConnectorIds([endpointA], [dynamicConnectorA, dynamicConnectorB])
+    ).toEqual([dynamicConnectorB.id]);
+  });
+
+  it('returns an empty array when all dynamic connectors still have matching endpoints', () => {
+    expect(
+      findStaleDynamicConnectorIds([endpointA, endpointB], [dynamicConnectorA, dynamicConnectorB])
+    ).toEqual([]);
+  });
+
+  it('returns all dynamic connector ids when no endpoints remain', () => {
+    expect(findStaleDynamicConnectorIds([], [dynamicConnectorA, dynamicConnectorB])).toEqual([
+      dynamicConnectorA.id,
+      dynamicConnectorB.id,
+    ]);
+  });
+
+  it('ignores non-dynamic connectors even if their endpoint is missing', () => {
+    const nonDynamicConnector = { ...connectorFromEndpoint(endpointA), isDynamic: false };
+    expect(findStaleDynamicConnectorIds([], [nonDynamicConnector])).toEqual([]);
+  });
+
+  it('ignores connectors that are not .inference connectors', () => {
+    const otherConnector = {
+      ...dynamicConnectorA,
+      actionTypeId: '.slack',
+    };
+    expect(findStaleDynamicConnectorIds([], [otherConnector])).toEqual([]);
+  });
+
+  it('ignores dynamic connectors without an inferenceId in config', () => {
+    const connectorWithoutInferenceId = { ...dynamicConnectorA, config: {} };
+    expect(findStaleDynamicConnectorIds([], [connectorWithoutInferenceId])).toEqual([]);
   });
 });
 
@@ -147,6 +214,19 @@ describe('getConnectorIdFromEndpoint', () => {
 });
 
 describe('getConnectorNameFromEndpoint', () => {
+  it('returns display name from metadata if available', () => {
+    const endpoint = makeEndpoint({
+      inference_id: '.my-model-chat_completion',
+      service_settings: {},
+      metadata: {
+        display: {
+          name: 'Name Provided by EIS',
+        },
+      },
+    });
+    expect(getConnectorNameFromEndpoint(endpoint)).toBe('Name Provided by EIS');
+  });
+
   it('falls back to inference_id when service_settings has no model_id', () => {
     const endpoint = makeEndpoint({
       inference_id: '.my-model-chat_completion',

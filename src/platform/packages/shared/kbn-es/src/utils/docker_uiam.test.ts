@@ -190,6 +190,8 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=DEBUG",
             "--env",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor\\".level=INFO",
+            "--env",
             "quarkus.log.console.json.enabled=false",
             "--env",
             "quarkus.log.level=INFO",
@@ -207,6 +209,12 @@ describe(`#runUiamContainer()`, () => {
             "uiam.cosmos.account.endpoint=https://uiam-cosmosdb:8081",
             "--env",
             "uiam.cosmos.container.apikey=api-keys",
+            "--env",
+            "uiam.cosmos.container.oauth_authorization_code=oauth-authorization-codes",
+            "--env",
+            "uiam.cosmos.container.oauth_client=oauth-clients",
+            "--env",
+            "uiam.cosmos.container.oauth_app_connection=oauth-app-connections",
             "--env",
             "uiam.cosmos.container.token_invalidation=token-invalidation",
             "--env",
@@ -392,7 +400,7 @@ describe('#initializeUiamContainers', () => {
     expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
     expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(mockUndiciFetch).toHaveBeenCalledTimes(4);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(7);
     expect(mockUndiciFetch.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -463,6 +471,57 @@ describe('#initializeUiamContainers', () => {
             "method": "POST",
           },
         ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"oauth-clients\\",\\"partitionKey\\":{\\"paths\\":[\\"/creator_id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"oauth-authorization-codes\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"oauth-app-connections\\",\\"partitionKey\\":{\\"paths\\":[\\"/client_id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
       ]
     `);
   });
@@ -475,7 +534,7 @@ describe('#initializeUiamContainers', () => {
     expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
     expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(mockUndiciFetch).toHaveBeenCalledTimes(4);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(7);
   });
 
   test('fails if cannot create database', async () => {

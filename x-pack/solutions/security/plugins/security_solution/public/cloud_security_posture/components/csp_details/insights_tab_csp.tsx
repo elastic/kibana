@@ -10,8 +10,8 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { useStableExpandableFlyoutState } from '../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { MisconfigurationFindingsDetailsTable } from './misconfiguration_findings_details_table';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
@@ -47,12 +47,16 @@ export const InsightsTabCsp = memo(
     value,
     field,
     scopeId,
+    entityId,
+    entityType,
   }: {
     value: string;
     field: CloudPostureEntityIdentifier;
     scopeId: string;
+    entityId?: string;
+    entityType?: string;
   }) => {
-    const panels = useExpandableFlyoutState();
+    const panels = useStableExpandableFlyoutState();
 
     let hasMisconfigurationFindings = false;
     let hasVulnerabilitiesFindings = false;
@@ -169,11 +173,23 @@ export const InsightsTabCsp = memo(
         />
         <EuiSpacer size="xl" />
         {activeInsightsId === CspInsightLeftPanelSubTab.MISCONFIGURATIONS ? (
-          <MisconfigurationFindingsDetailsTable field={field} value={value} scopeId={scopeId} />
+          <MisconfigurationFindingsDetailsTable
+            field={field}
+            value={value}
+            scopeId={scopeId}
+            entityId={entityId}
+            entityType={entityType}
+          />
         ) : activeInsightsId === CspInsightLeftPanelSubTab.VULNERABILITIES ? (
-          <VulnerabilitiesFindingsDetailsTable value={value} scopeId={scopeId} />
+          <VulnerabilitiesFindingsDetailsTable
+            identityField={field}
+            value={value}
+            scopeId={scopeId}
+            entityId={entityId}
+            entityType={entityType}
+          />
         ) : (
-          <AlertsDetailsTable field={field} value={value} />
+          <AlertsDetailsTable field={field} value={value} entityId={entityId} />
         )}
       </>
     );

@@ -822,8 +822,18 @@ describe('Auth', () => {
       {
         path: '/',
         validate: false,
-        security: { authz: { enabled: false, reason: '' } },
-        options: { authRequired: false },
+        security: {
+          authc: {
+            enabled: false,
+            reason:
+              'This route is part of an HTTP integration test and does not require authentication.',
+          },
+          authz: {
+            enabled: false,
+            reason:
+              'This route is part of an HTTP integration test and does not require authorization.',
+          },
+        },
       },
       (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
@@ -846,7 +856,6 @@ describe('Auth', () => {
         path: '/',
         validate: false,
         security: { authz: { enabled: false, reason: '' } },
-        options: { authRequired: true },
       },
       (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
@@ -1675,7 +1684,7 @@ describe('runs with default preResponse handlers', () => {
 
 describe('runs with default preResponse deprecation handlers', () => {
   const deprecationMessage = 'This is a deprecated endpoint for testing reasons';
-  const warningString = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+  const warningString = `299 Kibana-${kibanaVersion} "${encodeURIComponent(deprecationMessage)}"`;
 
   it('should handle a deprecated route and include deprecation warning headers', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);

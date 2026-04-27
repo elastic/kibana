@@ -4,15 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export interface FullTraceWaterfallProps {
+type FullTraceWaterfallScrollProps =
+  | { scrollStrategy?: 'window'; contextSpanIds?: string[] }
+  | { scrollStrategy: 'parent'; contextSpanIds?: string[]; scrollToContextOnMount?: boolean };
+
+export type FullTraceWaterfallProps = {
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
-  serviceName: string;
+  serviceName?: string;
   scrollElement?: Element;
   onNodeClick?: (nodeSpanId: string) => void;
   onErrorClick?: FullTraceWaterfallOnErrorClick;
-}
+} & FullTraceWaterfallScrollProps;
 
 export type FullTraceWaterfallOnErrorClick = (params: {
   traceId: string;

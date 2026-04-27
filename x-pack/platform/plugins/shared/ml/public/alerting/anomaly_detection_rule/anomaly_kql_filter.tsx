@@ -159,7 +159,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
           {unifiedSearch ? (
             <unifiedSearch.ui.SearchBar
               appName="ML"
-              iconType="search"
+              iconType="magnify"
               placeholder={i18n.translate('xpack.ml.anomalyDetectionAlert.kqlFilter.placeholder', {
                 defaultMessage: 'Filter anomalies using KQL syntax',
               })}
@@ -203,7 +203,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
                   defaultMessage: 'Invalid KQL query',
                 })}
                 color="danger"
-                iconType="alert"
+                iconType="warning"
                 size="s"
               >
                 {errors.map((error, index) => (

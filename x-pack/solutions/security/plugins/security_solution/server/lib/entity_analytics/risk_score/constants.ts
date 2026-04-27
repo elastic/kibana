@@ -46,3 +46,16 @@ export const RISK_SCORING_NORMALIZATION_MAX = 100;
  * This value represents the max amount of alert inputs we store, per entity, in the risk document.
  */
 export const MAX_INPUTS_COUNT = 10;
+
+/**
+ * Aligns maintainer resolution-member fetch bounds with entity_store resolution APIs,
+ * which cap resolution search responses at 10k and treat larger groups as truncated.
+ */
+export const MAX_RESOLUTION_MEMBER_FETCH_COUNT = 10_000;
+
+/**
+ * Page size for auxiliary entity store searches (e.g. resolution-member lookups).
+ * Kept well below Elasticsearch's default index.max_result_window (10,000) to
+ * avoid search_phase_execution_exception on any index configuration.
+ */
+export const MAX_ENTITY_SEARCH_PAGE_SIZE = 1_000;

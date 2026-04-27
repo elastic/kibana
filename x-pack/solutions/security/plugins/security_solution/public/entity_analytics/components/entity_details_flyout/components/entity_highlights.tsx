@@ -21,12 +21,13 @@ import {
   EuiFlexGroup,
   EuiPanel,
 } from '@elastic/eui';
-import { useFetchAnonymizationFields } from '@kbn/elastic-assistant';
+import { useFetchAnonymizationFields, useMaybeAssistantContext } from '@kbn/elastic-assistant';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add_connector_modal';
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -37,40 +38,45 @@ import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
-import { useLoadInferenceConnectors } from '../hooks/use_inference_connectors';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
 }> = ({ entityType, entityIdentifier }) => {
+  // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
+  // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
+  const assistantContext = useMaybeAssistantContext();
   const { data: anonymizationFields, isLoading: isAnonymizationFieldsLoading } =
     useFetchAnonymizationFields();
   const {
     triggersActionsUi: { actionTypeRegistry },
     http,
+    settings,
   } = useKibana().services;
   const { data: actionTypes } = useLoadActionTypes({ http });
   const {
     isLoading: isLoadingConnectors,
     data: aiConnectors,
     refetch: refetchAiConnectors,
-  } = useLoadInferenceConnectors();
+  } = useLoadConnectors({
+    http,
+    featureId: 'entity_ai_highlight_summary',
+    settings,
+  });
   const spaceId = useSpaceId();
   const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(spaceId ?? '');
   const connectorId = useMemo(() => {
-    if (!aiConnectors || !aiConnectors.connectors) return '';
+    if (!aiConnectors || !aiConnectors.length) return '';
     // try to find the stored connector id in the list of available connectors
-    const storedConnector = aiConnectors.connectors.find(
-      (c) => c.connectorId === storedConnectorId
-    );
-    const firstConnector = aiConnectors.connectors[0];
-    const cId = storedConnector?.connectorId ?? firstConnector?.connectorId ?? '';
+    const storedConnector = aiConnectors.find((c) => c.id === storedConnectorId);
+    const firstConnector = aiConnectors[0];
+    const cId = storedConnector?.id ?? firstConnector?.id ?? '';
     return cId;
   }, [aiConnectors, storedConnectorId]);
 
   const connectorName = useMemo(() => {
-    if (!aiConnectors || !aiConnectors.connectors) return '';
-    const cName = aiConnectors.connectors.find((c) => c.connectorId === connectorId)?.name ?? '';
+    if (!aiConnectors || !aiConnectors.length) return '';
+    const cName = aiConnectors.find((c) => c.id === connectorId)?.name ?? '';
     return cName;
   }, [aiConnectors, connectorId]);
 
@@ -128,6 +134,12 @@ export const EntityHighlightsAccordion: React.FC<{
   }, []);
 
   const disabled = useMemo(() => {
+    // No `AssistantProvider` in the tree, e.g. Agent Builder attachment Canvas. Highlights
+    // relies on assistant context (anonymization fields, shared state), so hide the UI entirely.
+    if (!assistantContext) {
+      return true;
+    }
+
     if (!hasEntityHighlightsLicense) {
       return true;
     }
@@ -140,6 +152,7 @@ export const EntityHighlightsAccordion: React.FC<{
     // if user does not have access to assistant or agent builder, disable entity highlights
     return !(hasAssistantPrivilege || hasAgentBuilderPrivilege);
   }, [
+    assistantContext,
     hasConnectorsReadPrivilege,
     hasAgentBuilderPrivilege,
     hasAssistantPrivilege,
@@ -179,7 +192,7 @@ export const EntityHighlightsAccordion: React.FC<{
         }
         data-test-subj="asset-criticality-selector"
         extraAction={
-          aiConnectors?.hasConnectors && (
+          (aiConnectors?.length ?? 0) > 0 && (
             <EntityHighlightsSettings
               assistantResult={assistantResult}
               showAnonymizedValues={showAnonymizedValues}
@@ -280,7 +293,7 @@ export const EntityHighlightsAccordion: React.FC<{
                   )}
                 </EuiText>
               </EuiFlexItem>
-              {aiConnectors?.hasConnectors ? (
+              {(aiConnectors?.length ?? 0) > 0 ? (
                 <EuiFlexItem grow={1}>
                   <EuiButton
                     onClick={fetchEntityHighlights}

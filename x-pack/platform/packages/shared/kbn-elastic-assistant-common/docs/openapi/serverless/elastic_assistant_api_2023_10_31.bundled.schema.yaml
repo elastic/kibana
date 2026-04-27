@@ -21,6 +21,28 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              PerformAnonymizationFieldsBulkActionRequest:
+                value:
+                  create:
+                    - allowed: true
+                      anonymized: false
+                      field: host.name
+                    - allowed: false
+                      anonymized: true
+                      field: user.name
+                  delete:
+                    ids:
+                      - field5
+                      - field6
+                    query: 'field: host.name'
+                  update:
+                    - allowed: true
+                      anonymized: false
+                      id: field8
+                    - allowed: false
+                      anonymized: true
+                      id: field9
             schema:
               example:
                 create:
@@ -77,56 +99,60 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                anonymization_fields_count: 5
-                attributes:
-                  results:
-                    created:
-                      - allowed: false
-                        anonymized: true
-                        createdAt: '2023-10-31T12:00:00Z'
-                        createdBy: user1
-                        field: host.name
-                        id: field2
-                        namespace: default
-                        timestamp: '2023-10-31T12:00:00Z'
-                        updatedAt: '2023-10-31T12:00:00Z'
-                        updatedBy: user1
-                    deleted:
-                      - field3
-                    skipped:
-                      - id: field4
-                        name: user.name
-                        skip_reason: ANONYMIZATION_FIELD_NOT_MODIFIED
-                    updated:
-                      - allowed: true
-                        anonymized: false
-                        createdAt: '2023-10-31T12:00:00Z'
-                        createdBy: user1
-                        field: url.domain
-                        id: field8
-                        namespace: default
-                        timestamp: '2023-10-31T12:00:00Z'
-                        updatedAt: '2023-10-31T12:00:00Z'
-                        updatedBy: user1
-                  summary:
-                    failed: 1
-                    skipped: 1
-                    succeeded: 2
-                    total: 5
-                message: Bulk action completed successfully
-                status_code: 200
-                success: true
+              examples:
+                PerformAnonymizationFieldsBulkActionResponse200Example:
+                  value:
+                    anonymization_fields_count: 4
+                    attributes:
+                      results:
+                        created:
+                          - allowed: false
+                            anonymized: true
+                            createdAt: '2023-10-31T12:00:00Z'
+                            createdBy: user1
+                            field: host.name
+                            id: field2
+                            namespace: default
+                            timestamp: '2023-10-31T12:00:00Z'
+                            updatedAt: '2023-10-31T12:00:00Z'
+                            updatedBy: user1
+                        deleted:
+                          - field3
+                        skipped:
+                          - id: field4
+                            name: user.name
+                            skip_reason: ANONYMIZATION_FIELD_NOT_MODIFIED
+                        updated:
+                          - allowed: true
+                            anonymized: false
+                            createdAt: '2023-10-31T12:00:00Z'
+                            createdBy: user1
+                            field: url.domain
+                            id: field8
+                            namespace: default
+                            timestamp: '2023-10-31T12:00:00Z'
+                            updatedAt: '2023-10-31T12:00:00Z'
+                            updatedBy: user1
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 3
+                        total: 4
+                    message: Bulk action completed successfully
+                    status_code: 200
+                    success: true
               schema:
                 $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResponse'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request body
-                statusCode: 400
+              examples:
+                PerformAnonymizationFieldsBulkActionResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid request body
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -139,11 +165,20 @@ paths:
                   statusCode:
                     description: Status code of the response.
                     type: number
-          description: Generic Error
+          description: Bad Request response.
       summary: Apply a bulk action to anonymization fields
       tags:
         - Security AI Assistant API
         - Bulk API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/anonymization_fields/_bulk_action' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"create":[{"field":"host.name","allowed":true,"anonymized":false}]}'
   /api/security_ai_assistant/anonymization_fields/_find:
     get:
       description: Get a list of all anonymization fields.
@@ -213,41 +248,43 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                aggregations:
-                  anonymized:
-                    buckets:
-                      allowed:
-                        doc_count: 1
-                      anonymized:
-                        doc_count: 1
-                      denied:
-                        doc_count: 1
-                all:
-                  - allowed: true
-                    anonymized: true
-                    createdAt: '2023-10-31T12:00:00Z'
-                    createdBy: user1
-                    field: user.name
-                    id: '1'
-                    namespace: default
-                    timestamp: '2023-10-31T12:00:00Z'
-                    updatedAt: '2023-10-31T12:00:00Z'
-                    updatedBy: user1
-                data:
-                  - allowed: true
-                    anonymized: true
-                    createdAt: '2023-10-31T12:00:00Z'
-                    createdBy: user1
-                    field: user.name
-                    id: '1'
-                    namespace: default
-                    timestamp: '2023-10-31T12:00:00Z'
-                    updatedAt: '2023-10-31T12:00:00Z'
-                    updatedBy: user1
-                page: 1
-                perPage: 20
-                total: 100
+              examples:
+                FindAnonymizationFieldsResponse200Example:
+                  value:
+                    aggregations:
+                      field_status:
+                        buckets:
+                          allowed:
+                            doc_count: 1
+                          anonymized:
+                            doc_count: 1
+                          denied:
+                            doc_count: 1
+                    all:
+                      - allowed: true
+                        anonymized: true
+                        createdAt: '2023-10-31T12:00:00Z'
+                        createdBy: user1
+                        field: user.name
+                        id: '1'
+                        namespace: default
+                        timestamp: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
+                        updatedBy: user1
+                    data:
+                      - allowed: true
+                        anonymized: true
+                        createdAt: '2023-10-31T12:00:00Z'
+                        createdBy: user1
+                        field: user.name
+                        id: '1'
+                        namespace: default
+                        timestamp: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
+                        updatedBy: user1
+                    page: 1
+                    perPage: 20
+                    total: 100
               schema:
                 type: object
                 properties:
@@ -297,14 +334,16 @@ paths:
                   - perPage
                   - total
                   - data
-          description: Successful response
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters
-                statusCode: 400
+              examples:
+                FindAnonymizationFieldsResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -314,11 +353,18 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Generic Error
+          description: Bad Request response.
       summary: Get anonymization fields
       tags:
         - Security AI Assistant API
         - AnonymizationFields API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/anonymization_fields/_find?page=1&per_page=20' \
+             --header "Authorization: $API_KEY"
   /api/security_ai_assistant/chat/complete:
     post:
       description: Create a model response for the given chat conversation.
@@ -335,24 +381,26 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              connectorId: conn-001
-              conversationId: abc123
-              isStream: true
-              langSmithApiKey: sk-abc123
-              langSmithProject: security_ai_project
-              messages:
-                - content: What are some common phishing techniques?
-                  data:
-                    user_id: user_789
-                  fields_to_anonymize:
-                    - user.name
-                    - source.ip
-                  role: user
-              model: gpt-4
-              persist: true
-              promptId: prompt_456
-              responseLanguage: en
+            examples:
+              ChatCompleteRequest:
+                value:
+                  connectorId: conn-001
+                  conversationId: abc123
+                  isStream: true
+                  langSmithApiKey: <LANGSMITH_API_KEY>
+                  langSmithProject: security_ai_project
+                  messages:
+                    - content: What are some common phishing techniques?
+                      data:
+                        user_id: user_789
+                      fields_to_anonymize:
+                        - user.name
+                        - source.ip
+                      role: user
+                  model: gpt-4
+                  persist: true
+                  promptId: prompt_456
+                  responseLanguage: en
             schema:
               $ref: '#/components/schemas/ChatCompleteProps'
         required: true
@@ -360,6 +408,9 @@ paths:
         '200':
           content:
             application/octet-stream:
+              examples:
+                ChatCompleteResponse200Example:
+                  value: (streaming binary response)
               schema:
                 format: binary
                 type: string
@@ -367,6 +418,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                ChatCompleteResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid request payload.
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -382,11 +439,20 @@ paths:
                     description: HTTP status code.
                     example: 400
                     type: number
-          description: Generic Error
+          description: Bad Request response.
       summary: Create a model response
       tags:
         - Security AI Assistant API
         - Chat Complete API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/chat/complete' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"connectorId":"conn-001","persist":true,"messages":[{"role":"user","content":"What are common phishing techniques?"}]}'
   /api/security_ai_assistant/current_user/conversations:
     delete:
       description: This endpoint allows users to permanently delete all conversations.
@@ -394,6 +460,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              DeleteAllConversationsRequest:
+                value:
+                  excludedIds:
+                    - abc123
+                    - def456
             schema:
               type: object
               properties:
@@ -410,8 +482,12 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                success: true
+              examples:
+                DeleteAllConversationsResponse200Example:
+                  value:
+                    failures: []
+                    success: true
+                    totalDeleted: 10
               schema:
                 type: object
                 properties:
@@ -431,6 +507,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                DeleteAllConversationsResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid conversation ID
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -443,11 +525,20 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: Generic Error. This response indicates an issue with the request.
+          description: Bad Request response.
       summary: Delete conversations
       tags:
         - Security AI Assistant API
         - Conversation API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request DELETE 'http://localhost:5601/api/security_ai_assistant/current_user/conversations' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"excludedIds":["abc123"]}'
     post:
       description: >-
         Create a new Security AI Assistant conversation. This endpoint allows
@@ -457,18 +548,20 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              apiConfig:
-                actionTypeId: '67890'
-                connectorId: '12345'
-              category: assistant
-              excludeFromLastConversationStorage: false
-              messages:
-                - content: Hello, how can I assist you today?
-                  role: system
-                  timestamp: '2023-10-31T12:00:00Z'
-              replacements: {}
-              title: Security Discussion
+            examples:
+              CreateConversationRequest:
+                value:
+                  apiConfig:
+                    actionTypeId: '67890'
+                    connectorId: '12345'
+                  category: assistant
+                  excludeFromLastConversationStorage: false
+                  messages:
+                    - content: Hello, how can I assist you today?
+                      role: system
+                      timestamp: '2023-10-31T12:00:00Z'
+                  replacements: {}
+                  title: Security Discussion
             schema:
               $ref: '#/components/schemas/ConversationCreateProps'
         required: true
@@ -476,24 +569,30 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                apiConfig:
-                  actionTypeId: '67890'
-                  connectorId: '12345'
-                category: assistant
-                createdAt: '2023-10-31T12:01:00Z'
-                excludeFromLastConversationStorage: false
-                id: abc123
-                messages:
-                  - content: Hello, how can I assist you today?
-                    role: system
-                    timestamp: '2023-10-31T12:00:00Z'
-                replacements: {}
-                title: Security Discussion
-                updatedAt: '2023-10-31T12:01:00Z'
-                users:
-                  - id: user1
-                    name: John Doe
+              examples:
+                CreateConversationResponse200Example:
+                  value:
+                    apiConfig:
+                      actionTypeId: '67890'
+                      connectorId: '12345'
+                    category: assistant
+                    createdAt: '2023-10-31T12:01:00Z'
+                    createdBy:
+                      id: user1
+                      name: John Doe
+                    excludeFromLastConversationStorage: false
+                    id: abc123
+                    messages:
+                      - content: Hello, how can I assist you today?
+                        role: system
+                        timestamp: '2023-10-31T12:00:00Z'
+                    namespace: default
+                    replacements: {}
+                    title: Security Discussion
+                    updatedAt: '2023-10-31T12:01:00Z'
+                    users:
+                      - id: user1
+                        name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
           description: >-
@@ -502,6 +601,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                CreateConversationResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: 'Missing required parameter: title'
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -514,13 +619,20 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: >-
-            Generic Error. This response indicates an issue with the request,
-            such as missing required parameters or incorrect data.
+          description: Bad Request response.
       summary: Create a conversation
       tags:
         - Security AI Assistant API
         - Conversation API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/current_user/conversations' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"title":"Security Discussion","category":"assistant","messages":[{"content":"Hello","role":"system","timestamp":"2023-10-31T12:00:00Z"}],"apiConfig":{"connectorId":"12345","actionTypeId":"67890"},"replacements":{},"excludeFromLastConversationStorage":false}'
   /api/security_ai_assistant/current_user/conversations/_find:
     get:
       description: >-
@@ -602,6 +714,28 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                FindConversationsResponse200Example:
+                  value:
+                    data:
+                      - category: assistant
+                        createdAt: '2023-10-31T12:00:00Z'
+                        createdBy:
+                          id: user1
+                          name: John Doe
+                        excludeFromLastConversationStorage: false
+                        id: conv-abc123
+                        messages: []
+                        namespace: default
+                        replacements: {}
+                        title: Security Discussion
+                        updatedAt: '2023-10-31T12:05:00Z'
+                        users:
+                          - id: user1
+                            name: John Doe
+                    page: 1
+                    perPage: 20
+                    total: 5
               schema:
                 type: object
                 properties:
@@ -635,6 +769,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                FindConversationsResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid filter parameter.
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -647,13 +787,18 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: >-
-            Generic Error. The request could not be processed due to an invalid
-            query parameter or other issue.
+          description: Bad Request response.
       summary: Get conversations
       tags:
         - Security AI Assistant API
         - Conversations API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/_find?page=1&per_page=20' \
+             --header "Authorization: $API_KEY"
   /api/security_ai_assistant/current_user/conversations/{id}:
     delete:
       description: >-
@@ -672,24 +817,30 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                apiConfig:
-                  actionTypeId: '67890'
-                  connectorId: '12345'
-                category: assistant
-                createdAt: '2023-10-31T12:01:00Z'
-                excludeFromLastConversationStorage: false
-                id: abc123
-                messages:
-                  - content: The conversation has been deleted.
-                    role: system
-                    timestamp: '2023-10-31T12:35:00Z'
-                replacements: {}
-                title: Deleted Security Discussion
-                updatedAt: '2023-10-31T12:01:00Z'
-                users:
-                  - id: user1
-                    name: John Doe
+              examples:
+                DeleteConversationResponse200Example:
+                  value:
+                    apiConfig:
+                      actionTypeId: '67890'
+                      connectorId: '12345'
+                    category: assistant
+                    createdAt: '2023-10-31T12:01:00Z'
+                    createdBy:
+                      id: user1
+                      name: John Doe
+                    excludeFromLastConversationStorage: false
+                    id: abc123
+                    messages:
+                      - content: The conversation has been deleted.
+                        role: system
+                        timestamp: '2023-10-31T12:35:00Z'
+                    namespace: default
+                    replacements: {}
+                    title: Deleted Security Discussion
+                    updatedAt: '2023-10-31T12:01:00Z'
+                    users:
+                      - id: user1
+                        name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
           description: >-
@@ -698,6 +849,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                DeleteConversationResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid conversation ID
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -710,11 +867,18 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: Generic Error. This response indicates an issue with the request.
+          description: Bad Request response.
       summary: Delete a conversation
       tags:
         - Security AI Assistant API
         - Conversation API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request DELETE 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/abc123' \
+             --header "Authorization: $API_KEY"
     get:
       description: >-
         Get the details of an existing conversation using the conversation ID.
@@ -735,30 +899,42 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                apiConfig:
-                  actionTypeId: '67890'
-                  connectorId: '12345'
-                category: assistant
-                createdAt: '2023-10-31T12:01:00Z'
-                excludeFromLastConversationStorage: false
-                id: abc123
-                messages:
-                  - content: Hello, how can I assist you today?
-                    role: system
-                    timestamp: '2023-10-31T12:00:00Z'
-                replacements: {}
-                title: Security Discussion
-                updatedAt: '2023-10-31T12:01:00Z'
-                users:
-                  - id: user1
-                    name: John Doe
+              examples:
+                ReadConversationResponse200Example:
+                  value:
+                    apiConfig:
+                      actionTypeId: '67890'
+                      connectorId: '12345'
+                    category: assistant
+                    createdAt: '2023-10-31T12:01:00Z'
+                    createdBy:
+                      id: user1
+                      name: John Doe
+                    excludeFromLastConversationStorage: false
+                    id: abc123
+                    messages:
+                      - content: Hello, how can I assist you today?
+                        role: system
+                        timestamp: '2023-10-31T12:00:00Z'
+                    namespace: default
+                    replacements: {}
+                    title: Security Discussion
+                    updatedAt: '2023-10-31T12:01:00Z'
+                    users:
+                      - id: user1
+                        name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
           description: Indicates a successful call. The conversation details are returned.
         '400':
           content:
             application/json:
+              examples:
+                ReadConversationResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid conversation ID
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -771,11 +947,18 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: Generic Error. The request could not be processed due to an error.
+          description: Bad Request response.
       summary: Get a conversation
       tags:
         - Security AI Assistant API
         - Conversations API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/abc123' \
+             --header "Authorization: $API_KEY"
     put:
       description: >-
         Update an existing conversation using the conversation ID. This endpoint
@@ -792,18 +975,20 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              apiConfig:
-                actionTypeId: '09876'
-                connectorId: '54321'
-              category: insights
-              excludeFromLastConversationStorage: true
-              messages:
-                - content: The issue was resolved.
-                  role: assistant
-                  timestamp: '2023-10-31T12:30:00Z'
-              replacements: {}
-              title: Updated Security Discussion
+            examples:
+              UpdateConversationRequest:
+                value:
+                  apiConfig:
+                    actionTypeId: '09876'
+                    connectorId: '54321'
+                  category: insights
+                  excludeFromLastConversationStorage: true
+                  messages:
+                    - content: The issue was resolved.
+                      role: assistant
+                      timestamp: '2023-10-31T12:30:00Z'
+                  replacements: {}
+                  title: Updated Security Discussion
             schema:
               $ref: '#/components/schemas/ConversationUpdateProps'
         required: true
@@ -811,24 +996,30 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                apiConfig:
-                  actionTypeId: '09876'
-                  connectorId: '54321'
-                category: insights
-                createdAt: '2023-10-31T12:01:00Z'
-                excludeFromLastConversationStorage: true
-                id: abc123
-                messages:
-                  - content: The issue was resolved.
-                    role: assistant
-                    timestamp: '2023-10-31T12:30:00Z'
-                replacements: {}
-                title: Updated Security Discussion
-                updatedAt: '2023-10-31T12:31:00Z'
-                users:
-                  - id: user1
-                    name: John Doe
+              examples:
+                UpdateConversationResponse200Example:
+                  value:
+                    apiConfig:
+                      actionTypeId: '09876'
+                      connectorId: '54321'
+                    category: insights
+                    createdAt: '2023-10-31T12:01:00Z'
+                    createdBy:
+                      id: user1
+                      name: John Doe
+                    excludeFromLastConversationStorage: true
+                    id: abc123
+                    messages:
+                      - content: The issue was resolved.
+                        role: assistant
+                        timestamp: '2023-10-31T12:30:00Z'
+                    namespace: default
+                    replacements: {}
+                    title: Updated Security Discussion
+                    updatedAt: '2023-10-31T12:31:00Z'
+                    users:
+                      - id: user1
+                        name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
           description: >-
@@ -837,6 +1028,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                UpdateConversationResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: 'Missing required field: title'
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -849,13 +1046,20 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: >-
-            Generic Error. This response indicates an issue with the request,
-            such as missing required parameters or incorrect data.
+          description: Bad Request response.
       summary: Update a conversation
       tags:
         - Security AI Assistant API
         - Conversation API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/abc123' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"title":"Updated Security Discussion","category":"insights","messages":[{"content":"Resolved.","role":"assistant","timestamp":"2023-10-31T12:30:00Z"}],"apiConfig":{"connectorId":"54321","actionTypeId":"09876"},"replacements":{},"excludeFromLastConversationStorage":true}'
   /api/security_ai_assistant/knowledge_base:
     get:
       description: Read a single KB
@@ -883,14 +1087,30 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                GetKnowledgeBaseResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid resource ID provided.
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
-          description: Generic Error
+          description: Bad Request response.
       summary: Read a KnowledgeBase
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/knowledge_base' \
+             --header "Authorization: $API_KEY"
     post:
+      description: >-
+        Create a knowledge base. Use this endpoint when no specific resource
+        identifier is needed.
       operationId: PostKnowledgeBase
       parameters:
         - description: >-
@@ -939,11 +1159,18 @@ paths:
                     Expected boolean, received string"
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
-          description: Generic Error
+          description: Bad Request response.
       summary: Create a KnowledgeBase
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/knowledge_base?ignoreSecurityLabs=false' \
+             --header "Authorization: $API_KEY"
   /api/security_ai_assistant/knowledge_base/{resource}:
     get:
       description: Read a knowledge base with a specific resource identifier.
@@ -979,13 +1206,26 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                ReadKnowledgeBaseResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid resource ID provided.
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
-          description: Generic Error
+          description: Bad Request response.
       summary: Read a KnowledgeBase for a resource
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/knowledge_base/kb12345' \
+             --header "Authorization: $API_KEY"
     post:
       description: Create a knowledge base with a specific resource identifier.
       operationId: CreateKnowledgeBase
@@ -1043,11 +1283,18 @@ paths:
                     Expected boolean, received string"
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
-          description: Generic Error
+          description: Bad Request response.
       summary: Create a KnowledgeBase for a resource
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/knowledge_base/kb12345?ignoreSecurityLabs=false' \
+             --header "Authorization: $API_KEY"
   /api/security_ai_assistant/knowledge_base/entries:
     post:
       description: Create a Knowledge Base Entry
@@ -1055,15 +1302,16 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              content: >-
-                To reset your password, go to the settings page and click 'Reset
-                Password'.
-              tags:
-                - password
-                - reset
-                - help
-              title: How to reset a password
+            examples:
+              CreateKnowledgeBaseEntryRequest:
+                value:
+                  kbResource: user
+                  name: How to reset a password
+                  source: manual
+                  text: >-
+                    To reset your password, go to the settings page and click
+                    'Reset Password'.
+                  type: document
             schema:
               $ref: '#/components/schemas/KnowledgeBaseEntryCreateProps'
         required: true
@@ -1071,34 +1319,50 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                content: >-
-                  To reset your password, go to the settings page and click
-                  'Reset Password'.
-                id: '12345'
-                tags:
-                  - password
-                  - reset
-                  - help
-                title: How to reset a password
+              examples:
+                CreateKnowledgeBaseEntryResponse200Example:
+                  value:
+                    createdAt: '2024-01-15T10:00:00.000Z'
+                    createdBy: user@example.com
+                    global: false
+                    id: '12345'
+                    kbResource: user
+                    name: How to reset a password
+                    namespace: default
+                    source: manual
+                    text: >-
+                      To reset your password, go to the settings page and click
+                      'Reset Password'.
+                    type: document
+                    updatedAt: '2024-01-15T10:00:00.000Z'
+                    updatedBy: user@example.com
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
           description: Successful request returning Knowledge Base Entries
         '400':
           content:
             application/json:
-              example:
-                error: Invalid input
-                message: The 'title' field is required.
+              examples:
+                CreateKnowledgeBaseEntryResponse400Example:
+                  value:
+                    error: Invalid input
+                    message: The 'name' field is required.
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: >-
-            A generic error occurred, such as invalid input or missing required
-            fields.
+          description: Bad Request response.
       summary: Create a Knowledge Base Entry
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"name":"How to reset a password","type":"document","kbResource":"user","source":"manual","text":"To reset your password, go to the settings page and click Reset Password."}'
   /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
     post:
       description: >-
@@ -1108,14 +1372,36 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              PerformKnowledgeBaseEntryBulkActionRequest:
+                value:
+                  create:
+                    - kbResource: user
+                      name: New Entry
+                      source: manual
+                      text: This is the content of the new entry.
+                      type: document
+                  delete:
+                    ids:
+                      - '789'
+                  update:
+                    - id: '123'
+                      kbResource: user
+                      name: Updated Entry
+                      source: manual
+                      text: Updated content.
+                      type: document
             schema:
               type: object
               properties:
                 create:
                   description: List of Knowledge Base Entries to create.
                   example:
-                    - content: This is the content of the new entry.
-                      title: New Entry
+                    - kbResource: user
+                      name: New Entry
+                      source: manual
+                      text: This is the content of the new entry.
+                      type: document
                   items:
                     $ref: '#/components/schemas/KnowledgeBaseEntryCreateProps'
                   type: array
@@ -1139,9 +1425,12 @@ paths:
                 update:
                   description: List of Knowledge Base Entries to update.
                   example:
-                    - content: Updated content.
-                      id: '123'
-                      title: Updated Entry
+                    - id: '123'
+                      kbResource: user
+                      name: Updated Entry
+                      source: manual
+                      text: Updated content.
+                      type: document
                   items:
                     $ref: '#/components/schemas/KnowledgeBaseEntryUpdateProps'
                   type: array
@@ -1149,19 +1438,77 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                PerformKnowledgeBaseEntryBulkActionResponse200Example:
+                  value:
+                    attributes:
+                      results:
+                        created:
+                          - createdAt: '2024-01-15T10:00:00.000Z'
+                            createdBy: user@example.com
+                            global: false
+                            id: '456'
+                            kbResource: user
+                            name: New Entry
+                            namespace: default
+                            source: manual
+                            text: This is the content of the new entry.
+                            type: document
+                            updatedAt: '2024-01-15T10:00:00.000Z'
+                            updatedBy: user@example.com
+                        deleted:
+                          - '789'
+                        skipped: []
+                        updated:
+                          - createdAt: '2024-01-14T09:00:00.000Z'
+                            createdBy: user@example.com
+                            global: false
+                            id: '123'
+                            kbResource: user
+                            name: Updated Entry
+                            namespace: default
+                            source: manual
+                            text: Updated content.
+                            type: document
+                            updatedAt: '2024-01-15T10:00:00.000Z'
+                            updatedBy: user@example.com
+                      summary:
+                        failed: 0
+                        skipped: 0
+                        succeeded: 3
+                        total: 3
+                    knowledgeBaseEntriesCount: 3
+                    message: Bulk action completed successfully.
+                    statusCode: 200
+                    success: true
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionResponse'
           description: Successful bulk operation request
         '400':
           content:
             application/json:
+              examples:
+                PerformKnowledgeBaseEntryBulkActionResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid request body.
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: Generic Error
+          description: Bad Request response.
       summary: Applies a bulk action to multiple Knowledge Base Entries
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries Bulk API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/_bulk_action' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"create":[{"name":"Runbook","type":"document","kbResource":"user","source":"manual","text":"Steps to triage an alert."}]}'
   /api/security_ai_assistant/knowledge_base/entries/_find:
     get:
       description: Finds Knowledge Base Entries that match the given query.
@@ -1175,7 +1522,7 @@ paths:
           required: false
           schema:
             example:
-              - title
+              - name
               - created_at
             items:
               type: string
@@ -1223,6 +1570,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                FindKnowledgeBaseEntriesResponse200Example:
+                  value:
+                    data:
+                      - createdAt: '2024-01-15T10:00:00.000Z'
+                        createdBy: user@example.com
+                        global: false
+                        id: '12345'
+                        kbResource: user
+                        name: How to reset a password
+                        namespace: default
+                        source: manual
+                        text: >-
+                          To reset your password, go to the settings page and
+                          click 'Reset Password'.
+                        type: document
+                        updatedAt: '2024-01-15T10:00:00.000Z'
+                        updatedBy: user@example.com
+                    page: 1
+                    perPage: 20
+                    total: 100
               schema:
                 type: object
                 properties:
@@ -1252,6 +1620,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                FindKnowledgeBaseEntriesResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: 'Invalid query parameter: sort_order'
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -1267,11 +1641,18 @@ paths:
                     description: The HTTP status code of the error.
                     example: 400
                     type: number
-          description: Generic Error indicating an issue with the request.
+          description: Bad Request response.
       summary: Finds Knowledge Base Entries that match the given query.
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/_find?page=1&per_page=20' \
+             --header "Authorization: $API_KEY"
   /api/security_ai_assistant/knowledge_base/entries/{id}:
     delete:
       description: Delete a Knowledge Base Entry by its unique `id`.
@@ -1288,9 +1669,11 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                id: '12345'
-                message: Knowledge Base Entry successfully deleted.
+              examples:
+                DeleteKnowledgeBaseEntryResponse200Example:
+                  value:
+                    id: '12345'
+                    message: Knowledge Base Entry successfully deleted.
               schema:
                 $ref: '#/components/schemas/DeleteResponseFields'
           description: >-
@@ -1299,18 +1682,25 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Not Found
-                message: No Knowledge Base Entry found with the provided `id`.
+              examples:
+                DeleteKnowledgeBaseEntryResponse400Example:
+                  value:
+                    error: Not Found
+                    message: No Knowledge Base Entry found with the provided `id`.
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: >-
-            A generic error occurred, such as an invalid `id` or the entry not
-            being found.
+          description: Bad Request response.
       summary: Deletes a single Knowledge Base Entry using the `id` field
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request DELETE 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/12345' \
+             --header "Authorization: $API_KEY"
     get:
       description: Retrieve a Knowledge Base Entry by its unique `id`.
       operationId: ReadKnowledgeBaseEntry
@@ -1328,34 +1718,48 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                content: >-
-                  To reset your password, go to the settings page and click
-                  'Reset Password'.
-                id: '12345'
-                tags:
-                  - password
-                  - reset
-                  - help
-                title: How to reset a password
+              examples:
+                ReadKnowledgeBaseEntryResponse200Example:
+                  value:
+                    createdAt: '2024-01-15T10:00:00.000Z'
+                    createdBy: user@example.com
+                    global: false
+                    id: '12345'
+                    kbResource: user
+                    name: How to reset a password
+                    namespace: default
+                    source: manual
+                    text: >-
+                      To reset your password, go to the settings page and click
+                      'Reset Password'.
+                    type: document
+                    updatedAt: '2024-01-15T10:00:00.000Z'
+                    updatedBy: user@example.com
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
           description: Successful request returning the requested Knowledge Base Entry.
         '400':
           content:
             application/json:
-              example:
-                error: Not Found
-                message: No Knowledge Base Entry found with the provided `id`.
+              examples:
+                ReadKnowledgeBaseEntryResponse400Example:
+                  value:
+                    error: Not Found
+                    message: No Knowledge Base Entry found with the provided `id`.
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: >-
-            A generic error occurred, such as an invalid `id` or the entry not
-            being found.
+          description: Bad Request response.
       summary: Read a Knowledge Base Entry
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/12345' \
+             --header "Authorization: $API_KEY"
     put:
       description: Update an existing Knowledge Base Entry by its unique `id`.
       operationId: UpdateKnowledgeBaseEntry
@@ -1370,16 +1774,16 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              content: >-
-                To reset your password, go to the settings page, click 'Reset
-                Password', and follow the instructions.
-              tags:
-                - password
-                - reset
-                - help
-                - update
-              title: How to reset a password (updated)
+            examples:
+              UpdateKnowledgeBaseEntryRequest:
+                value:
+                  kbResource: user
+                  name: How to reset a password (updated)
+                  source: manual
+                  text: >-
+                    Updated: go to settings and click Reset Password, then
+                    follow the on-screen instructions.
+                  type: document
             schema:
               $ref: '#/components/schemas/KnowledgeBaseEntryUpdateRouteProps'
         required: true
@@ -1387,35 +1791,50 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                content: >-
-                  To reset your password, go to the settings page, click 'Reset
-                  Password', and follow the instructions.
-                id: '12345'
-                tags:
-                  - password
-                  - reset
-                  - help
-                  - update
-                title: How to reset a password (updated)
+              examples:
+                UpdateKnowledgeBaseEntryResponse200Example:
+                  value:
+                    createdAt: '2024-01-15T10:00:00.000Z'
+                    createdBy: user@example.com
+                    global: false
+                    id: '12345'
+                    kbResource: user
+                    name: How to reset a password (updated)
+                    namespace: default
+                    source: manual
+                    text: >-
+                      Updated: go to settings and click Reset Password, then
+                      follow the on-screen instructions.
+                    type: document
+                    updatedAt: '2024-01-15T10:05:00.000Z'
+                    updatedBy: user@example.com
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
           description: Successful request returning the updated Knowledge Base Entry.
         '400':
           content:
             application/json:
-              example:
-                error: Invalid input
-                message: The 'content' field cannot be empty.
+              examples:
+                UpdateKnowledgeBaseEntryResponse400Example:
+                  value:
+                    error: Invalid input
+                    message: The 'text' field cannot be empty.
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryErrorSchema'
-          description: >-
-            A generic error occurred, such as invalid input or the entry not
-            being found.
+          description: Bad Request response.
       summary: Update a Knowledge Base Entry
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/12345' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"name":"How to reset a password (updated)","type":"document","kbResource":"user","source":"manual","text":"Updated: go to settings and click Reset Password, then follow the on-screen instructions."}'
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
       description: >-
@@ -1426,18 +1845,20 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              create:
-                - content: Please verify the security settings.
-                  name: New Security Prompt
-                  promptType: system
-              delete:
-                ids:
-                  - prompt1
-                  - prompt2
-              update:
-                - content: Updated content for security prompt.
-                  id: prompt123
+            examples:
+              PerformPromptsBulkActionRequest:
+                value:
+                  create:
+                    - content: Please verify the security settings.
+                      name: New Security Prompt
+                      promptType: system
+                  delete:
+                    ids:
+                      - prompt1
+                      - prompt2
+                  update:
+                    - content: Updated content for security prompt.
+                      id: prompt123
             schema:
               type: object
               properties:
@@ -1510,6 +1931,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                PerformPromptsBulkActionResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid prompt ID or missing required fields.
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -1525,11 +1952,20 @@ paths:
                     description: The HTTP status code for the error.
                     example: 400
                     type: number
-          description: Indicates a generic error due to a bad request.
+          description: Bad Request response.
       summary: Apply a bulk action to prompts
       tags:
         - Security AI Assistant API
         - Bulk API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/prompts/_bulk_action' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"delete":{"query":"name: test","ids":[]}}'
   /api/security_ai_assistant/prompts/_find:
     get:
       description: >-
@@ -1590,6 +2026,33 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                FindPromptsResponse200Example:
+                  value:
+                    data:
+                      - categories:
+                          - troubleshooting
+                          - logging
+                        color: '#FF5733'
+                        consumer: security
+                        content: If you encounter an error, check the logs and retry.
+                        createdAt: '2025-04-20T21:00:00Z'
+                        createdBy: jdoe
+                        id: prompt-123
+                        isDefault: true
+                        isNewConversationDefault: false
+                        name: Error Troubleshooting Prompt
+                        namespace: default
+                        promptType: standard
+                        timestamp: '2025-04-30T22:30:00Z'
+                        updatedAt: '2025-04-30T22:45:00Z'
+                        updatedBy: jdoe
+                        users:
+                          - full_name: John Doe
+                            username: jdoe
+                    page: 1
+                    perPage: 20
+                    total: 142
               schema:
                 example:
                   data:
@@ -1646,6 +2109,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                FindPromptsResponse400Example:
+                  value:
+                    error: Bad Request
+                    message: Invalid sort order value provided.
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -1666,6 +2135,13 @@ paths:
       tags:
         - Security AI Assistant API
         - Prompts API
+      x-codeSamples:
+        - label: Example request
+          lang: curl
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/prompts/_find?page=1&per_page=20' \
+             --header "Authorization: $API_KEY"
 components:
   schemas:
     AnonymizationFieldCreateProps:
@@ -1946,7 +2422,7 @@ components:
         connectorId: conn-001
         conversationId: abc123
         isStream: true
-        langSmithApiKey: sk-abc123
+        langSmithApiKey: <LANGSMITH_API_KEY>
         langSmithProject: security_ai_project
         messages:
           - content: How do I detect ransomware on my endpoints?
@@ -1975,7 +2451,7 @@ components:
           type: boolean
         langSmithApiKey:
           description: API key for LangSmith integration.
-          example: sk-abc123
+          example: <LANGSMITH_API_KEY>
           type: string
         langSmithProject:
           description: LangSmith project name for tracing.
@@ -2688,9 +3164,12 @@ components:
         created:
           description: List of Knowledge Base Entries that were successfully created.
           example:
-            - content: This is the content of the new entry.
-              id: '456'
-              title: New Entry
+            - id: '456'
+              kbResource: user
+              name: New Entry
+              source: manual
+              text: This is the content of the new entry.
+              type: document
           items:
             $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
           type: array
@@ -2717,9 +3196,12 @@ components:
         updated:
           description: List of Knowledge Base Entries that were successfully updated.
           example:
-            - content: Updated content.
-              id: '123'
-              title: Updated Entry
+            - id: '123'
+              kbResource: user
+              name: Updated Entry
+              source: manual
+              text: Updated content.
+              type: document
           items:
             $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
           type: array
@@ -2784,6 +3266,9 @@ components:
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
         - $ref: '#/components/schemas/IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/DocumentEntryCreateFields'
+          index: '#/components/schemas/IndexEntryCreateFields'
         propertyName: type
     KnowledgeBaseEntryDetailsInError:
       type: object
@@ -2823,18 +3308,27 @@ components:
         - $ref: '#/components/schemas/DocumentEntry'
         - $ref: '#/components/schemas/IndexEntry'
       discriminator:
+        mapping:
+          document: '#/components/schemas/DocumentEntry'
+          index: '#/components/schemas/IndexEntry'
         propertyName: type
     KnowledgeBaseEntryUpdateProps:
       anyOf:
         - $ref: '#/components/schemas/DocumentEntryUpdateFields'
         - $ref: '#/components/schemas/IndexEntryUpdateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/DocumentEntryUpdateFields'
+          index: '#/components/schemas/IndexEntryUpdateFields'
         propertyName: type
     KnowledgeBaseEntryUpdateRouteProps:
       anyOf:
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
         - $ref: '#/components/schemas/IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/DocumentEntryCreateFields'
+          index: '#/components/schemas/IndexEntryCreateFields'
         propertyName: type
     KnowledgeBaseReadResponse200:
       type: object

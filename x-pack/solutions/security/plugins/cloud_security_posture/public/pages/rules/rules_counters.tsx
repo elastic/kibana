@@ -217,7 +217,7 @@ export const RulesCounters = ({
       button: (
         <EuiButtonEmpty
           data-test-subj={RULE_COUNTERS_TEST_SUBJ.INTEGRATIONS_EVALUATED_BUTTON}
-          iconType="listAdd"
+          iconType="plusCircle"
           href={benchmarkValues.integrationLink}
         >
           {i18n.translate('xpack.csp.rulesCounters.accountsEvaluatedButton', {
@@ -266,7 +266,7 @@ export const RulesCounters = ({
       button: (
         <EuiButtonEmpty
           data-test-subj={RULE_COUNTERS_TEST_SUBJ.DISABLED_RULES_BUTTON}
-          iconType="search"
+          iconType="magnify"
           onClick={() => setEnabledDisabledItemsFilter('disabled')}
         >
           {i18n.translate('xpack.csp.rulesCounters.disabledRulesCounterButton', {

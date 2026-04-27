@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
+import type {
+  ScriptLibraryAllowedFileType,
+  ScriptTagKey,
+} from '../service/script_library/constants';
 import type { SupportedHostOsType } from '../constants';
 
-export interface EndpointScript<TFileType extends 'script' | 'archive' = 'script' | 'archive'> {
+export interface EndpointScript<
+  TFileType extends ScriptLibraryAllowedFileType | undefined = ScriptLibraryAllowedFileType
+> {
   id: string;
   name: string;
   platform: Array<SupportedHostOsType>;
@@ -27,7 +32,7 @@ export interface EndpointScript<TFileType extends 'script' | 'archive' = 'script
   /**
    * The URI relative to Kibana's base path + space if any) to download the script associated with this script entry */
   downloadUri: string;
-  tags: Array<keyof typeof SCRIPT_TAGS>;
+  tags: Array<ScriptTagKey>;
   description?: string;
   instructions?: string;
   example?: string;

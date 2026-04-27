@@ -132,7 +132,7 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS: Omit<
   ),
   emptyUnexistingImportButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklist.empty.unexisting.importAction',
-    { defaultMessage: 'Import blocklist' }
+    { defaultMessage: 'Import blocklist entries' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.blocklists.list.totalItemCount', {

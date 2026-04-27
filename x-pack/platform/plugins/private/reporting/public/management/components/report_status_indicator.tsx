@@ -67,7 +67,7 @@ export const ReportStatusIndicator: FC<Props> = ({ job }) => {
         statusText = i18nTexts.completedWithWarnings;
         break;
       }
-      icon = <EuiIcon type="checkInCircleFilled" color="success" />;
+      icon = <EuiIcon type="checkCircleFill" color="success" />;
       statusText = i18nTexts.completed;
       break;
     case JOB_STATUS.WARNINGS:

@@ -11,6 +11,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { PublicStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { PublicTriggerRegistry } from './trigger_registry';
+import { registerInternalTriggerDefinitions } from './triggers';
 import type {
   WorkflowsExtensionsPublicPluginSetup,
   WorkflowsExtensionsPublicPluginSetupDeps,
@@ -30,8 +31,8 @@ export class WorkflowsExtensionsPublicPlugin
   private readonly stepRegistry: PublicStepRegistry;
   private readonly triggerRegistry: PublicTriggerRegistry;
 
-  constructor(_initializerContext: PluginInitializerContext) {
-    this.stepRegistry = new PublicStepRegistry();
+  constructor(initializerContext: PluginInitializerContext) {
+    this.stepRegistry = new PublicStepRegistry(initializerContext.logger.get());
     this.triggerRegistry = new PublicTriggerRegistry();
   }
 
@@ -40,6 +41,7 @@ export class WorkflowsExtensionsPublicPlugin
     _plugins: WorkflowsExtensionsPublicPluginSetupDeps
   ): WorkflowsExtensionsPublicPluginSetup {
     registerInternalStepDefinitions(this.stepRegistry);
+    registerInternalTriggerDefinitions(this.triggerRegistry);
 
     return {
       registerStepDefinition: (definition) => this.stepRegistry.register(definition),
@@ -70,8 +72,8 @@ export class WorkflowsExtensionsPublicPlugin
       hasTriggerDefinition: (triggerId: string) => {
         return this.triggerRegistry.has(triggerId);
       },
-      isReady: () => {
-        return this.stepRegistry.whenReady();
+      isReady: async () => {
+        await Promise.all([this.stepRegistry.whenReady(), this.triggerRegistry.whenReady()]);
       },
     };
   }

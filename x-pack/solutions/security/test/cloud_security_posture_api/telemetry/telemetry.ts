@@ -24,8 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const logger = getService('log');
   const findingsIndexProvider = new EsIndexDataProvider(es, FINDINGS_INDEX);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/247313
-  describe.skip('Verify cloud_security_posture telemetry payloads', async () => {
+  describe('Verify cloud_security_posture telemetry payloads', async () => {
     before(async () => {
       await waitForPluginInitialized({ retry, logger, supertest });
     });
@@ -35,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes only KSPM findings', async () => {
-      await findingsIndexProvider.addBulk(data.kspmFindings, false);
+      await findingsIndexProvider.addBulk(data.kspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
@@ -91,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes only CSPM findings', async () => {
-      await findingsIndexProvider.addBulk(data.cspmFindings, false);
+      await findingsIndexProvider.addBulk(data.cspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
@@ -139,8 +138,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes CSPM and KSPM findings', async () => {
-      await findingsIndexProvider.addBulk(data.kspmFindings, false);
-      await findingsIndexProvider.addBulk(data.cspmFindings, false);
+      await findingsIndexProvider.addBulk(data.kspmFindings);
+      await findingsIndexProvider.addBulk(data.cspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
@@ -222,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`'includes only KSPM findings without posture_type'`, async () => {
-      await findingsIndexProvider.addBulk(data.kspmFindingsNoPostureType, false);
+      await findingsIndexProvider.addBulk(data.kspmFindingsNoPostureType);
 
       const {
         body: [{ stats: apiResponse }],
@@ -279,8 +278,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes KSPM findings without posture_type and CSPM findings as well', async () => {
-      await findingsIndexProvider.addBulk(data.kspmFindingsNoPostureType, false);
-      await findingsIndexProvider.addBulk(data.cspmFindings, false);
+      await findingsIndexProvider.addBulk(data.kspmFindingsNoPostureType);
+      await findingsIndexProvider.addBulk(data.cspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
@@ -399,7 +398,8 @@ export default function ({ getService }: FtrProviderContext) {
       // - packagePolicyCount: number
     });
 
-    it('includes asset_inventory_cloud_connector_usage_stats in telemetry', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/247313
+    it.skip('includes asset_inventory_cloud_connector_usage_stats in telemetry', async () => {
       const {
         body: [{ stats: apiResponse }],
       } = await supertest

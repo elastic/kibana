@@ -82,7 +82,9 @@ export class AIAssistantManagementSelectionPlugin
 
     // Register chat experience setting for both stateful and serverless (except workplaceai)
     if (serverlessProjectType !== 'workplaceai') {
-      // Default Agent for Elasticsearch solution view, Classic for all other cases
+      // Agent is the default chat experience for Elasticsearch, Security, Observability,
+      // and Kibana Classic solution spaces. Other non-null space solutions (for example
+      // future or specialized views) use Classic unless overridden in config.
       core.uiSettings.register({
         [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
           ...chatExperienceSetting,
@@ -94,15 +96,24 @@ export class AIAssistantManagementSelectionPlugin
                 const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
                   request
                 );
-                if (activeSpace?.solution === 'es') {
+                const solution = activeSpace?.solution;
+                if (
+                  solution === 'es' ||
+                  solution === 'security' ||
+                  solution === 'oblt' ||
+                  solution === 'classic'
+                ) {
                   return AIChatExperience.Agent;
+                }
+                if (solution != null) {
+                  return AIChatExperience.Classic;
                 }
               }
             } catch (e) {
               this.logger.error('Error getting active space:');
               this.logger.error(e);
             }
-            return this.config.preferredChatExperience ?? AIChatExperience.Classic;
+            return this.config.preferredChatExperience ?? AIChatExperience.Agent;
           },
         },
       });

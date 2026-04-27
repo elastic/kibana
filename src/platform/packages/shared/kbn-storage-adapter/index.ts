@@ -18,8 +18,18 @@ import type {
   Result,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { TransportRequestOptions } from '@elastic/transport';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { StorageFieldTypeOf, StorageMappingProperty } from './types';
+
+/**
+ * Curated subset of transport-level options that can be forwarded
+ * to the underlying Elasticsearch client on a per-request basis.
+ */
+export type StorageTransportOptions = Pick<
+  TransportRequestOptions,
+  'requestTimeout' | 'maxResponseSize' | 'maxCompressedResponseSize' | 'signal'
+>;
 
 interface StorageSchemaProperties {
   [x: string]: StorageMappingProperty;
@@ -52,6 +62,13 @@ export type StorageClientSearchResponse<
 export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
   | {
       index: { document: Omit<TDocument, '_id'>; _id?: string };
+    }
+  | {
+      /**
+       * ES bulk `create` action: fails with a 409 conflict if `_id` already exists.
+       * Use `index` instead if you want silent upsert (overwrite) behaviour.
+       */
+      create: { document: Omit<TDocument, '_id'>; _id?: string };
     }
   | { delete: { _id: string } };
 
@@ -97,7 +114,8 @@ export type StorageClientGetResponse<TDocument extends { _id?: string }> = GetRe
 export type StorageClientSearch<TDocumentType = never> = <
   TSearchRequest extends StorageClientSearchRequest
 >(
-  request: TSearchRequest
+  request: TSearchRequest,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientSearchResponse<TDocumentType, TSearchRequest>>;
 
 /**
@@ -108,21 +126,25 @@ export type StorageClientSearch<TDocumentType = never> = <
  * to throw a BulkOperationError when any operation fails.
  */
 export type StorageClientBulk<TDocumentType extends { _id?: string } = never> = (
-  request: StorageClientBulkRequest<TDocumentType>
+  request: StorageClientBulkRequest<TDocumentType>,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientBulkResponse>;
 
 export type StorageClientIndex<TDocumentType = never> = (
-  request: StorageClientIndexRequest<TDocumentType>
+  request: StorageClientIndexRequest<TDocumentType>,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientIndexResponse>;
 
 export type StorageClientDelete = (
-  request: StorageClientDeleteRequest
+  request: StorageClientDeleteRequest,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientDeleteResponse>;
 
 export type StorageClientClean = () => Promise<StorageClientCleanResponse>;
 
 export type StorageClientGet<TDocumentType extends { _id?: string } = never> = (
-  request: StorageClientGetRequest
+  request: StorageClientGetRequest,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientGetResponse<TDocumentType>>;
 
 export type StorageClientExistsIndex = () => Promise<boolean>;
@@ -176,5 +198,7 @@ export type StorageDocumentOf<TStorageSettings extends StorageSettings> = Partia
 export { StorageIndexAdapter } from './src/index_adapter';
 
 export { BulkOperationError } from './src/errors';
+
+export { getSchemaVersion } from './src/get_schema_version';
 
 export { types } from './types';

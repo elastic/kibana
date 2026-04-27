@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Case, Attachments, Attachment } from '../../../common/types/domain';
+import type { Case, AttachmentsV2, AttachmentV2 } from '../../../common/types/domain';
 import type {
   DocumentResponse,
   AttachmentsFindResponse,
-  BulkGetAttachmentsResponse,
+  BulkGetAttachmentsResponseV2,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
@@ -47,7 +47,7 @@ export interface AttachmentsSubClient {
    */
   add(params: AddArgs): Promise<Case>;
   bulkCreate(params: BulkCreateArgs): Promise<Case>;
-  bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponse>;
+  bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponseV2>;
   /**
    * Deletes all attachments associated with a single case.
    */
@@ -68,11 +68,11 @@ export interface AttachmentsSubClient {
   /**
    * Gets all attachments for a single case.
    */
-  getAll(getAllArgs: GetAllArgs): Promise<Attachments>;
+  getAll(getAllArgs: GetAllArgs): Promise<AttachmentsV2>;
   /**
    * Retrieves a single attachment for a case.
    */
-  get(getArgs: GetArgs): Promise<Attachment>;
+  get(getArgs: GetArgs): Promise<AttachmentV2>;
   /**
    * Updates a specific attachment.
    *

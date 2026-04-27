@@ -20,6 +20,7 @@ import {
 import {
   AWS_ACCOUNT_TYPE_VAR_NAME,
   AZURE_ACCOUNT_TYPE_VAR_NAME,
+  GCP_ACCOUNT_TYPE_VAR_NAME,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
   CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
@@ -32,6 +33,7 @@ import type {
   PackageInfo,
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
+  GcpCloudConnectorVars,
 } from '../../../common/types';
 import type { NewPackagePolicy } from '../../types';
 
@@ -61,6 +63,8 @@ export function extractAccountType(
       rawAccountType = vars[AWS_ACCOUNT_TYPE_VAR_NAME]?.value;
     } else if (cloudProvider === 'azure') {
       rawAccountType = vars[AZURE_ACCOUNT_TYPE_VAR_NAME]?.value;
+    } else if (cloudProvider === 'gcp') {
+      rawAccountType = vars[GCP_ACCOUNT_TYPE_VAR_NAME]?.value;
     }
 
     const validated = validateAccountType(rawAccountType);
@@ -153,6 +157,38 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
       for (const key of clientIdKeys) {
         if (key in updatedVars) {
           updatedVars[key] = azureVars.client_id;
+          break;
+        }
+      }
+    }
+  } else if (cloudProvider === 'gcp') {
+    const gcpVars = cloudConnectorVars as GcpCloudConnectorVars;
+    // Update service_account with secret reference using schema-defined keys
+    if (gcpVars.service_account) {
+      const serviceAccountKeys = getAllVarKeys(schema.fields.serviceAccount);
+      for (const key of serviceAccountKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = gcpVars.service_account;
+          break;
+        }
+      }
+    }
+    // Update audience with secret reference using schema-defined keys
+    if (gcpVars.audience) {
+      const audienceKeys = getAllVarKeys(schema.fields.audience);
+      for (const key of audienceKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = gcpVars.audience;
+          break;
+        }
+      }
+    }
+    // Update gcp_credentials_cloud_connector_id with secret reference using schema-defined keys
+    if (gcpVars.gcp_credentials_cloud_connector_id) {
+      const connectorIdKeys = getAllVarKeys(schema.fields.gcp_credentials_cloud_connector_id);
+      for (const key of connectorIdKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = gcpVars.gcp_credentials_cloud_connector_id;
           break;
         }
       }

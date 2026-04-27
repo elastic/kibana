@@ -30,6 +30,7 @@ import {
   getLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getLiveQueryDetailsResponseSchema } from './response_schemas';
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -59,6 +60,11 @@ export const getLiveQueryDetailsRoute = (
               GetLiveQueryDetailsRequestQuerySchema
             >(getLiveQueryDetailsRequestQuerySchema),
           },
+          response: {
+            200: {
+              body: () => getLiveQueryDetailsResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
@@ -82,7 +88,7 @@ export const getLiveQueryDetailsRoute = (
           );
 
           const queries = actionDetails?._source?.queries;
-          const expirationDate = actionDetails?.fields?.expiration[0];
+          const expirationDate = actionDetails?.fields?.expiration?.[0];
 
           const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 
@@ -111,7 +117,8 @@ export const getLiveQueryDetailsRoute = (
                   'user_profile_uid',
                   'pack_id',
                   'pack_name',
-                  'prebuilt_pack'
+                  'prebuilt_pack',
+                  'tags'
                 ),
                 queries: reduce<
                   {

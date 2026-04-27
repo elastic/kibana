@@ -102,6 +102,10 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | `user.email` | Email address of the user at the time of the action. |
 | `user.roles` | Kibana roles of the user at the time of the action. |
 
+:::::{note}
+Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthenticated requests. For these events, the `user.*` and `session.id` fields may not be populated. The identity of the user can still be determined from the `object.*` fields.
+:::::
+
 ### Client and HTTP fields
 
 | **Field** | **Description** |

@@ -5,12 +5,30 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
-import { renderWithTheme } from '../../../../../../utils/test_helpers';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { Waterfall } from '.';
 import type { IWaterfall } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallLegendType } from '../../../../../../../common/waterfall/legend';
+
+const renderWaterfall = (ui: React.ReactElement) =>
+  render(
+    <I18nProvider>
+      <EuiThemeProvider>{ui}</EuiThemeProvider>
+    </I18nProvider>
+  );
+
+jest.mock('../../../../../../hooks/use_apm_params', () => ({
+  useAnyOfApmParams: () => ({
+    query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+  }),
+}));
+
+jest.mock('../../../../../shared/links/discover_links/use_discover_href', () => ({
+  useDiscoverHref: () => 'https://discover-link',
+}));
 
 describe('Waterfall', () => {
   const createMockWaterfall = (overrides?: Partial<IWaterfall>): IWaterfall => {
@@ -33,10 +51,9 @@ describe('Waterfall', () => {
 
   it('does not render warning when exceedsMax is false', () => {
     const waterfall = createMockWaterfall({ exceedsMax: false });
-    renderWithTheme(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
+    renderWaterfall(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
 
-    const warning = screen.queryByTestId('apmWaterfallSizeWarning');
-    expect(warning).not.toBeInTheDocument();
+    expect(screen.queryByTestId('apmWaterfallSizeWarning')).not.toBeInTheDocument();
   });
 
   it('renders warning when exceedsMax is true', () => {
@@ -45,42 +62,21 @@ describe('Waterfall', () => {
       traceDocsTotal: 15551,
       maxTraceItems: 5000,
     });
-    renderWithTheme(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
+    renderWaterfall(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
 
-    const warning = screen.getByTestId('apmWaterfallSizeWarning');
-    expect(warning).toBeInTheDocument();
+    expect(screen.getByTestId('apmWaterfallSizeWarning')).toBeInTheDocument();
   });
 
-  it('displays correct warning text with traceDocsTotal and maxTraceItems', () => {
+  it('passes discoverHref to the warning callout', () => {
     const waterfall = createMockWaterfall({
       exceedsMax: true,
       traceDocsTotal: 15551,
       maxTraceItems: 5000,
     });
-    renderWithTheme(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
+    renderWaterfall(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
 
-    const warning = screen.getByTestId('apmWaterfallSizeWarning');
-    const warningText = warning.textContent;
-
-    expect(warningText).toContain('15551');
-    expect(warningText).toContain('5000');
-    expect(warningText).toContain('xpack.apm.ui.maxTraceItems');
-  });
-
-  it('displays warning with different traceDocsTotal and maxTraceItems values', () => {
-    const waterfall = createMockWaterfall({
-      exceedsMax: true,
-      traceDocsTotal: 10000,
-      maxTraceItems: 3000,
-    });
-    renderWithTheme(<Waterfall waterfall={waterfall} showCriticalPath={false} />);
-
-    const warning = screen.getByTestId('apmWaterfallSizeWarning');
-    const warningText = warning.textContent;
-
-    expect(warningText).toContain('10000');
-    expect(warningText).toContain('3000');
-    expect(warningText).toContain('xpack.apm.ui.maxTraceItems');
+    const link = screen.getByTestId('apmWaterfallSizeWarningDiscoverLink');
+    expect(link).toHaveAttribute('href', 'https://discover-link');
   });
 
   describe('serviceBadgesHeight prop', () => {
@@ -121,11 +117,10 @@ describe('Waterfall', () => {
 
     it('accepts serviceBadgesHeight prop with default value of 0', () => {
       const waterfall = createMockWaterfall();
-      const { container } = renderWithTheme(
+      const { container } = renderWaterfall(
         <Waterfall waterfall={waterfall} showCriticalPath={false} />
       );
 
-      // Component should render without errors when serviceBadgesHeight is not provided
       expect(container).toBeInTheDocument();
     });
 
@@ -133,7 +128,7 @@ describe('Waterfall', () => {
       const waterfall = createMockWaterfall();
       const serviceBadgesHeight = 50;
 
-      renderWithTheme(
+      renderWaterfall(
         <Waterfall
           waterfall={waterfall}
           showCriticalPath={false}
@@ -141,10 +136,7 @@ describe('Waterfall', () => {
         />
       );
 
-      // Find the timeline container directly by test id
       const timelineContainer = screen.getByTestId('apmWaterfallTimelineContainer');
-
-      expect(timelineContainer).toBeInTheDocument();
       const styles = window.getComputedStyle(timelineContainer);
       expect(styles.position).toBe('sticky');
       expect(styles.top).toContain('calc');
@@ -154,14 +146,11 @@ describe('Waterfall', () => {
     it('when serviceBadgesHeight is 0, uses default sticky positioning', () => {
       const waterfall = createMockWaterfall();
 
-      renderWithTheme(
+      renderWaterfall(
         <Waterfall waterfall={waterfall} showCriticalPath={false} serviceBadgesHeight={0} />
       );
 
-      // Find the timeline container directly by test id
       const timelineContainer = screen.getByTestId('apmWaterfallTimelineContainer');
-
-      expect(timelineContainer).toBeInTheDocument();
       const styles = window.getComputedStyle(timelineContainer);
       expect(styles.position).toBe('sticky');
       expect(styles.top).toContain('calc');
@@ -172,7 +161,7 @@ describe('Waterfall', () => {
       const waterfall = createMockWaterfall();
       const serviceBadgesHeight = 100;
 
-      renderWithTheme(
+      renderWaterfall(
         <Waterfall
           waterfall={waterfall}
           showCriticalPath={false}
@@ -180,10 +169,7 @@ describe('Waterfall', () => {
         />
       );
 
-      // Find the timeline container directly by test id
       const timelineContainer = screen.getByTestId('apmWaterfallTimelineContainer');
-
-      expect(timelineContainer).toBeInTheDocument();
       const styles = window.getComputedStyle(timelineContainer);
       expect(styles.position).toBe('sticky');
       expect(styles.top).toContain(`${serviceBadgesHeight}px`);
@@ -192,7 +178,7 @@ describe('Waterfall', () => {
     it('in embeddable mode (isEmbeddable=true), uses position relative instead of sticky', () => {
       const waterfall = createMockWaterfall();
 
-      renderWithTheme(
+      renderWaterfall(
         <Waterfall
           waterfall={waterfall}
           showCriticalPath={false}
@@ -201,14 +187,9 @@ describe('Waterfall', () => {
         />
       );
 
-      // Find the timeline container directly by test id
       const timelineContainer = screen.getByTestId('apmWaterfallTimelineContainer');
-
-      expect(timelineContainer).toBeInTheDocument();
       const styles = window.getComputedStyle(timelineContainer);
-      // In embeddable mode, should be relative, not sticky
       expect(styles.position).toBe('relative');
-      // Should not contain the calc with serviceBadgesHeight
       expect(styles.top).not.toContain('calc');
     });
   });

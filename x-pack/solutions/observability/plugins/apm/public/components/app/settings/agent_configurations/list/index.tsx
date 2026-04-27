@@ -51,7 +51,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
 
   const emptyStatePrompt = (
     <EuiEmptyPrompt
-      iconType="controlsHorizontal"
+      iconType="controls"
       title={
         <h2>
           {i18n.translate('xpack.apm.agentConfig.configTable.emptyPromptTitle', {

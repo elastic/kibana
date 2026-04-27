@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: DeleteMonitoringEngine
       summary: Delete the Privilege Monitoring Engine
+      description: Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
       parameters:
         - in: query
           name: data
@@ -31,3 +32,8 @@ paths:
                     type: boolean
                 required:
                   - deleted
+              examples:
+                DeleteMonitoringEngineResponse:
+                  summary: Engine deleted successfully
+                  value:
+                    deleted: true

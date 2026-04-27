@@ -32,7 +32,7 @@ import type { Config } from '@jest/types';
 
 import jestFlags from './jest_flags.json';
 import { isInBuildkite, isConfigCompleted, markConfigCompletedSync } from './buildkite_checkpoint';
-import { parseShardAnnotation } from './shard_config';
+import { parseShardAnnotation, annotateConfigWithShard } from './shard_config';
 
 const JEST_CACHE_DIR = 'data/jest-cache';
 
@@ -97,8 +97,12 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
 
   // Buildkite checkpoint resume: skip this config if it already passed on a previous attempt.
   // Use relative path for checkpoint key so it's stable across different CI agents.
+  // Include shard annotation when sharding is active so each shard has its own checkpoint.
   if (isInBuildkite() && resolvedConfigPath) {
-    const relConfigForCheckpoint = relative(REPO_ROOT, resolvedConfigPath);
+    const relConfig = relative(REPO_ROOT, resolvedConfigPath);
+    const relConfigForCheckpoint = parsedArguments.shard
+      ? annotateConfigWithShard(relConfig, parsedArguments.shard)
+      : relConfig;
     log.info(
       `[jest-checkpoint] Checking prior completion for ${relConfigForCheckpoint} (step=${
         process.env.BUILDKITE_STEP_ID || ''
@@ -181,13 +185,16 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     //
     // Uses synchronous markConfigCompletedSync because async is not supported in 'exit' handlers.
     if (isInBuildkite() && resolvedConfigPath) {
-      const relConfig = relative(REPO_ROOT, resolvedConfigPath);
+      const relCfg = relative(REPO_ROOT, resolvedConfigPath);
+      const checkpointKey = parsedArguments.shard
+        ? annotateConfigWithShard(relCfg, parsedArguments.shard)
+        : relCfg;
       process.on('exit', () => {
         // process.exitCode is 0 or undefined for success (Jest only sets it for failures).
         // Both are falsy, while failure codes (1, etc.) are truthy.
         if (!process.exitCode) {
-          log.info(`[jest-checkpoint] Marking ${relConfig} as completed`);
-          markConfigCompletedSync(relConfig);
+          log.info(`[jest-checkpoint] Marking ${checkpointKey} as completed`);
+          markConfigCompletedSync(checkpointKey);
         }
       });
     }

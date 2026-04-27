@@ -397,58 +397,6 @@
             "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/index.ts"
           },
           {
-            "plugin": "@kbn/security-ui-components",
-            "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "@kbn/security-ui-components",
-            "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "@kbn/security-ui-components",
-            "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
             "plugin": "dataViewFieldEditor",
             "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/helpers/index.ts"
           }

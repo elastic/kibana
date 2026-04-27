@@ -10,7 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { DiscoverServices } from '../build_services';
-import type { EmbeddableEditorService } from '../plugin_imports/embeddable_editor_service';
+import {
+  TransferAction,
+  type EmbeddableEditorService,
+} from '../plugin_imports/embeddable_editor_service';
 
 const rootPath = '#/';
 
@@ -36,7 +39,9 @@ function getRootBreadcrumbs({
           }),
       deepLinkId: isEmbeddedEditor ? 'dashboards' : 'discover',
       href,
-      onClick: isEmbeddedEditor ? () => embeddable.transferBackToEditor() : undefined,
+      onClick: isEmbeddedEditor
+        ? () => embeddable.transferBackToEditor(TransferAction.Cancel)
+        : undefined,
     },
   ];
 }
@@ -56,7 +61,7 @@ export function setBreadcrumbs({
 }) {
   const embeddable = services.embeddableEditor;
   const isEmbeddedEditor = embeddable.isEmbeddedEditor();
-  const byValueTitle = embeddable.getByValueInput()?.label;
+  const byValueTitle = embeddable.getByValueTab()?.label;
 
   const breadcrumbTitle = byValueTitle || titleBreadcrumbText;
 

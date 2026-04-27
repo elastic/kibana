@@ -46,6 +46,8 @@ export interface FilterPopoverProps extends Pick<EuiFilterButtonProps, 'data-tes
   title: string;
   /** Label displayed on the filter button (defaults to `title`). */
   buttonLabel?: string;
+  /** Total item count shown in parens next to the title (e.g. "Tags (1000)"). */
+  totalCount?: number;
   /** Number of active filters (shows badge on button). */
   activeCount?: number;
   /** Whether the popover is open. */
@@ -94,6 +96,7 @@ export interface FilterPopoverProps extends Pick<EuiFilterButtonProps, 'data-tes
 export const FilterPopover = ({
   title,
   buttonLabel,
+  totalCount,
   activeCount = 0,
   isOpen,
   onToggle,
@@ -124,7 +127,7 @@ export const FilterPopover = ({
       aria-labelledby={titleId}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={onToggle}
           data-test-subj={dataTestSubj}
@@ -145,6 +148,7 @@ export const FilterPopover = ({
     >
       <EuiPopoverTitle paddingSize="s" id={titleId}>
         {title}
+        {totalCount !== undefined && ` (${totalCount})`}
       </EuiPopoverTitle>
       {children}
     </EuiPopover>

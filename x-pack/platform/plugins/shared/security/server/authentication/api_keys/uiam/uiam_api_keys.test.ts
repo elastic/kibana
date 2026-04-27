@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -47,6 +49,14 @@ describe('UiamAPIKeys', () => {
       grantApiKey: jest.fn(),
       revokeApiKey: jest.fn(),
       convertApiKeys: jest.fn(),
+      exchangeOAuthToken: jest.fn(),
+      createOAuthClient: jest.fn(),
+      listOAuthClients: jest.fn(),
+      updateOAuthClient: jest.fn(),
+      revokeOAuthClient: jest.fn(),
+      listOAuthConnections: jest.fn(),
+      updateOAuthConnection: jest.fn(),
+      revokeOAuthConnection: jest.fn(),
     };
 
     uiamApiKeys = new UiamAPIKeys({
@@ -271,7 +281,7 @@ describe('UiamAPIKeys', () => {
       expect(logger.debug).toHaveBeenCalledWith('API key key_id_123 was invalidated successfully');
     });
 
-    it('returns error details when UIAM API key invalidation fails', async () => {
+    it('returns error details with type "exception" when a non-Boom error occurs', async () => {
       const request = createMockRequest('ApiKey essu_uiam_credential_123');
       const error = new Error('Revocation failed');
       mockUiam.revokeApiKey.mockRejectedValue(error);
@@ -294,6 +304,47 @@ describe('UiamAPIKeys', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to invalidate API key key_id_123: Revocation failed'
       );
+    });
+
+    it('surfaces the UIAM error code in error_details type when a Boom error with payload occurs', async () => {
+      const request = createMockRequest('ApiKey essu_uiam_credential_123');
+      const boomError = new Boom.Boom('APIKEY_REVOKED');
+      boomError.output = {
+        statusCode: 404,
+        payload: { error: { code: '0xD38358', message: 'APIKEY_REVOKED' } } as any,
+        headers: {},
+      };
+      mockUiam.revokeApiKey.mockRejectedValue(boomError);
+
+      const result = await uiamApiKeys.invalidate(request, {
+        id: 'key_id_123',
+      });
+
+      expect(result).toEqual({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 1,
+        error_details: [
+          {
+            type: 'exception',
+            reason: expect.stringContaining('Failed to invalidate API key key_id_123'),
+            code: '0xD38358',
+          },
+        ],
+      });
+    });
+
+    it('does not include code when Boom error has no UIAM error code', async () => {
+      const request = createMockRequest('ApiKey essu_uiam_credential_123');
+      const boomError = new Boom.Boom('Bad request', { statusCode: 400 });
+      mockUiam.revokeApiKey.mockRejectedValue(boomError);
+
+      const result = await uiamApiKeys.invalidate(request, {
+        id: 'key_id_123',
+      });
+
+      expect(result!.error_details![0].type).toBe('exception');
+      expect(result!.error_details![0].code).toBeUndefined();
     });
   });
 

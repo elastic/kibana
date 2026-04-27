@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type DatasetSummary = z.infer<typeof DatasetSummary>;
 export const DatasetSummary = z.object({
@@ -29,7 +29,7 @@ export const DatasetSummary = z.object({
 export type GetEvaluationDatasetsRequestQuery = z.infer<typeof GetEvaluationDatasetsRequestQuery>;
 export const GetEvaluationDatasetsRequestQuery = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
-  per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
+  per_page: z.coerce.number().int().min(1).max(1000).optional().default(25),
 });
 export type GetEvaluationDatasetsRequestQueryInput = z.input<
   typeof GetEvaluationDatasetsRequestQuery

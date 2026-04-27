@@ -723,7 +723,7 @@
         "label": "Accessor",
         "description": [],
         "signature": [
-          "\"_a\" | \"_g\""
+          "\"_g\" | \"_a\""
         ],
         "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "lineNumber": 45,
@@ -773,7 +773,7 @@
             "label": "accessor",
             "description": [],
             "signature": [
-              "\"_a\" | \"_g\""
+              "\"_g\" | \"_a\""
             ],
             "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "lineNumber": 47,

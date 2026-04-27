@@ -32,6 +32,6 @@ export const metricsInfoCommand: ICommand = {
     examples: ['TS index | METRICS_INFO'],
     preview: true,
     requiresTimeseriesSource: true,
-    hiddenAfterCommands: [Commands.STATS, Commands.INLINE_STATS],
+    hiddenAfterCommands: [Commands.STATS, Commands.INLINE_STATS, Commands.TS_INFO],
   },
 };

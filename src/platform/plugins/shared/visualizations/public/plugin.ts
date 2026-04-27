@@ -67,7 +67,11 @@ import type {
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
-import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  VisualizeConstants,
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VISUALIZE_SAVED_OBJECT_TYPE,
+} from '@kbn/visualizations-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
@@ -475,13 +479,9 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
-    embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const {
-        plugins: { embeddable: embeddableStart },
-      } = start();
-
-      const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
-      return getVisualizeEmbeddableFactory({ embeddableStart });
+    embeddable.registerEmbeddablePublicDefinition(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const { visualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
+      return visualizeEmbeddableFactory;
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
@@ -497,7 +497,7 @@ export class VisualizationsPlugin
           }
         );
       },
-      savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectType: VISUALIZE_SAVED_OBJECT_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
         defaultMessage: 'Visualization',
       }),

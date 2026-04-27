@@ -67,7 +67,7 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       */
   copyTimeline(props: CopyTimelineProps, kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/api/timeline/_copy', kibanaSpace))
+      .post(getRouteUrlForSpace('/api/timeline/_copy', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -85,8 +85,13 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .send(props.body as object);
   },
   /**
-   * Delete a note from a Timeline using the note ID.
-   */
+      * Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
+
+The response has HTTP 200 with an empty body on success.
+
+Requires the **Timeline and Notes** write privilege (`notes_write`).
+
+      */
   deleteNote(props: DeleteNoteProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(getRouteUrlForSpace('/api/note', kibanaSpace))
@@ -130,8 +135,19 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .query(props.query);
   },
   /**
-   * Get all notes for a given document.
-   */
+      * Returns Security Timeline notes as saved objects.
+
+**Query modes (mutually exclusive branches on the server):**
+
+1. **`documentIds` is set** — Returns notes whose `eventId` matches the given Elasticsearch document `_id` (single string or array). Pagination query parameters (`page`, `perPage`, etc.) are **not** applied; the server uses a fixed page size (up to 10000 notes).
+
+2. **`savedObjectIds` is set** — Returns notes linked to the given Timeline saved object id(s). Same fixed cap as above; list-mode query parameters are **not** applied.
+
+3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using saved-objects find semantics: `page` (default 1), `perPage` (default 10), optional `search`, `sortField`, `sortOrder`, `filter`, `createdByFilter`, and `associatedFilter`.
+
+Requires the **Timeline and Notes** read privilege (`notes_read`).
+
+      */
   getNotes(props: GetNotesProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/note', kibanaSpace))
@@ -210,8 +226,15 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .send(props.body as object);
   },
   /**
-   * Add a note to a Timeline or update an existing note.
-   */
+      * Creates a new note or updates an existing one.
+
+**Create:** Send `note` and omit `noteId` to create a new saved object.
+
+**Update:** Send `note` with the changed fields and set `noteId` to the note's saved object ID. Optionally include `version` for optimistic concurrency when the client has it from a prior read.
+
+Requires the **Timeline and Notes** write privilege (`notes_write`).
+
+      */
   persistNoteRoute(props: PersistNoteRouteProps, kibanaSpace: string = 'default') {
     return supertest
       .patch(getRouteUrlForSpace('/api/note', kibanaSpace))
@@ -231,6 +254,9 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
+   */
   resolveTimeline(props: ResolveTimelineProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/timeline/resolve', kibanaSpace))
@@ -247,11 +273,11 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     ...securitySolutionApiServiceFactory(supertestService),
-    withUser: (user: { username: string; password: string }) => {
+    withUser: (user: { username: string; password?: string }) => {
       const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
       return securitySolutionApiServiceFactory(
-        supertest_.agent(kbnUrl).auth(user.username, user.password)
+        supertest_.agent(kbnUrl).auth(user.username, user.password ?? 'changeme')
       );
     },
   };

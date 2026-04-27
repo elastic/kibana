@@ -16,21 +16,24 @@ import {
   enableQueryStreams,
 } from '../../fixtures/query_stream_helpers';
 
+const ROOT_STREAM_NAMES = ['logs.ecs', 'logs.otel'];
 const STREAM_NAMES_CREATED_BY_SPEC = ['logs.ecs.host-1', 'test-query-stream'];
 
-// Failing: See https://github.com/elastic/kibana/issues/256974
-test.describe.skip('Query streams - Create query stream', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
+test.describe('Query streams - Create query stream', { tag: tags.stateful.classic }, () => {
+  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient, apiServices }) => {
     await browserAuth.loginAsAdmin();
     await enableQueryStreams(kbnClient);
+    for (const rootStreamName of ROOT_STREAM_NAMES) {
+      await apiServices.streams.restoreDataStream(rootStreamName);
+    }
     await createRootStreamViews(esClient);
     await pageObjects.streams.gotoStreamMainPage();
   });
 
   test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
+    await deleteRootStreamViews(esClient);
     for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
       const esqlViewName = `$.${streamName}`;
-      await deleteRootStreamViews(esClient);
       await deleteQueryStream(apiServices, esClient, streamName, esqlViewName);
     }
     await disableQueryStreams(kbnClient);
@@ -39,6 +42,7 @@ test.describe.skip('Query streams - Create query stream', { tag: tags.stateful.c
   test('should properly handle errors for invalid query streams', async ({ pageObjects }) => {
     await pageObjects.streams.clickCreateQueryStreamButton();
     await pageObjects.streams.fillRoutingRuleName('test-query-stream');
+    await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
     await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue('INVALID QUERY');
     await pageObjects.streams.clickQueryStreamFlyoutSaveButton();
     await expect(pageObjects.streams.queryStreamCreateErrorToast).toBeVisible();
@@ -52,6 +56,7 @@ test.describe.skip('Query streams - Create query stream', { tag: tags.stateful.c
     await pageObjects.streams.clickCreateQueryStreamButton();
     await expect(pageObjects.streams.queryStreamFlyout).toBeVisible();
     await pageObjects.streams.fillRoutingRuleName(rootQueryStreamName);
+    await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
     await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(rootQueryStreamEsqlQuery);
     await pageObjects.streams.clickQueryStreamFlyoutSaveButton();
     await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
@@ -87,10 +92,11 @@ test.describe.skip('Query streams - Create query stream', { tag: tags.stateful.c
     await pageObjects.streams.selectChildStreamType('Query');
     await pageObjects.streams.clickQueryModeCreateQueryStreamButton();
     await pageObjects.streams.fillRoutingRuleName(childStreamName);
+    await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
     await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
     await pageObjects.streams.clickQueryStreamFormCreateButton();
 
-    // child query stream created in the UI
+    // child query stream created appears in the UI
     await expect(pageObjects.streams.childQueryStreamCreatedSuccessToast).toBeVisible();
     await pageObjects.streams.selectChildStreamType('Query');
     await expect(
@@ -108,5 +114,21 @@ test.describe.skip('Query streams - Create query stream', { tag: tags.stateful.c
     expect(response.views?.length).toBeGreaterThanOrEqual(1);
     expect(response.views![0].name).toBe(viewName);
     expect(response.views![0].query).toBe(esqlQuery);
+  });
+
+  test('rejects invalid child query stream names inline', async ({ page, pageObjects }) => {
+    const parentStreamName = 'logs.ecs';
+
+    await pageObjects.streams.clickStreamNameLink(parentStreamName);
+    await pageObjects.streams.gotoPartitioningTab(parentStreamName);
+    await pageObjects.streams.selectChildStreamType('Query');
+    await pageObjects.streams.clickQueryModeCreateQueryStreamButton();
+
+    await pageObjects.streams.fillRoutingRuleName('InvalidName');
+    await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue('FROM $.logs.ecs');
+
+    const saveButton = page.getByTestId('streamsAppQueryStreamFormSaveButton');
+    await expect(saveButton).toBeDisabled();
   });
 });

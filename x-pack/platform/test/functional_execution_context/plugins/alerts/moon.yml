@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/fec-alerts-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/fec-alerts-test-plugin'
+  title: '@kbn/fec-alerts-test-plugin'
   description: Moon project for @kbn/fec-alerts-test-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: x-pack/platform/test/functional_execution_context/plugins/alerts
+  sourceRoot: x-pack/platform/test/functional_execution_context/plugins/alerts
 dependsOn:
   - '@kbn/apm-config-loader'
   - '@kbn/repo-info'

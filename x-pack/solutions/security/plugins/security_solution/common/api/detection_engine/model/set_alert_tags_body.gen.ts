@@ -14,21 +14,25 @@
  *   version: 1.0.0
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AlertIds, AlertTags } from '../../model/alert.gen';
 
 /**
  * Object with list of tags to add and remove.
  */
+export const SetAlertTags = lazySchema(() =>
+  z.object({
+    tags_to_add: AlertTags,
+    tags_to_remove: AlertTags,
+  })
+);
 export type SetAlertTags = z.infer<typeof SetAlertTags>;
-export const SetAlertTags = z.object({
-  tags_to_add: AlertTags,
-  tags_to_remove: AlertTags,
-});
 
+export const SetAlertTagsBody = lazySchema(() =>
+  z.object({
+    ids: AlertIds,
+    tags: SetAlertTags,
+  })
+);
 export type SetAlertTagsBody = z.infer<typeof SetAlertTagsBody>;
-export const SetAlertTagsBody = z.object({
-  ids: AlertIds,
-  tags: SetAlertTags,
-});

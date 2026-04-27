@@ -107,6 +107,7 @@ export class Config {
   public getScoutTestConfig(): ScoutTestConfig {
     return {
       serverless: this.get('serverless'),
+      http2: this.get('http2'),
       uiam: this.get('esServerlessOptions.uiam', false),
       projectType: this.get('serverless')
         ? getProjectType(this.get('kbnTestServer.serverArgs'))
@@ -133,6 +134,24 @@ export class Config {
         username: this.get('servers.kibana.username'),
         password: this.get('servers.kibana.password'),
       },
+
+      ...(this.get('esServerlessOptions.cps', false) && this.get('servers.linkedElasticsearch.port')
+        ? {
+            linkedProject: {
+              hosts: {
+                elasticsearch: Url.format({
+                  protocol: this.get('servers.linkedElasticsearch.protocol'),
+                  hostname: this.get('servers.linkedElasticsearch.hostname'),
+                  port: this.get('servers.linkedElasticsearch.port'),
+                }),
+              },
+              auth: {
+                username: this.get('servers.linkedElasticsearch.username'),
+                password: this.get('servers.linkedElasticsearch.password'),
+              },
+            },
+          }
+        : {}),
 
       metadata: {
         generatedOn: formatCurrentDate(),

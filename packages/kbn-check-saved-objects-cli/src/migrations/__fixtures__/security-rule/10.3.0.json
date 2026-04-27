@@ -1,0 +1,22 @@
+{
+  "10.2.0": [
+    {
+      "rule_id": "sample-rule-id",
+      "version": 1,
+      "name": "Sample rule name",
+      "tags": ["tag"],
+      "severity": "low",
+      "risk_score": 21
+    }
+  ],
+  "10.3.0": [
+    {
+      "rule_id": "sample-rule-id",
+      "version": 1,
+      "name": "Sample rule name",
+      "tags": ["tag"],
+      "severity": "low",
+      "risk_score": 21
+    }
+  ]
+}

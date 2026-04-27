@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inference-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/inference-plugin'
+  title: '@kbn/inference-plugin'
   description: Moon project for @kbn/inference-plugin
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/inference
+  sourceRoot: x-pack/platform/plugins/shared/inference
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/esql-language'
@@ -46,6 +45,8 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
+  - '@kbn/utility-types'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
@@ -62,16 +63,6 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

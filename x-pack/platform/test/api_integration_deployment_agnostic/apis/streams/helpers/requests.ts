@@ -10,12 +10,91 @@ import type { Client } from '@elastic/elasticsearch';
 import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/types';
-import type { Streams } from '@kbn/streams-schema';
+import type { BaseFeature, Feature, Streams } from '@kbn/streams-schema';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
 import type { StreamsSupertestRepositoryClient } from './repository_client';
+
+// ---------------------------------------------------------------------------
+// Elasticsearch resource helpers
+// ---------------------------------------------------------------------------
+
+export interface EsqlView {
+  name: string;
+  query: string;
+}
+
+export async function getEsqlView(esClient: Client, viewName: string): Promise<EsqlView> {
+  const encoded = encodeURIComponent(viewName);
+  const response = await esClient.transport.request<{ views: EsqlView[] }>({
+    method: 'GET',
+    path: `/_query/view/${encoded}`,
+  });
+  return response.views[0];
+}
+
+export async function createEsqlView(
+  esClient: Client,
+  viewName: string,
+  query: string
+): Promise<void> {
+  const encoded = encodeURIComponent(viewName);
+  await esClient.transport.request({
+    method: 'PUT',
+    path: `/_query/view/${encoded}`,
+    body: { query },
+  });
+}
+
+export async function deleteEsqlView(esClient: Client, viewName: string): Promise<void> {
+  const encoded = encodeURIComponent(viewName);
+  try {
+    await esClient.transport.request({
+      method: 'DELETE',
+      path: `/_query/view/${encoded}`,
+    });
+  } catch {
+    // Ignore if view doesn't exist
+  }
+}
+
+export async function esqlViewExists(esClient: Client, viewName: string): Promise<boolean> {
+  const encoded = encodeURIComponent(viewName);
+  return esClient.transport
+    .request({ method: 'GET', path: `/_query/view/${encoded}` })
+    .then(() => true)
+    .catch(() => false);
+}
+
+export async function dataStreamExists(esClient: Client, name: string): Promise<boolean> {
+  return esClient.indices
+    .getDataStream({ name })
+    .then(() => true)
+    .catch(() => false);
+}
+
+export async function ingestPipelineExists(esClient: Client, id: string): Promise<boolean> {
+  return esClient.ingest
+    .getPipeline({ id })
+    .then(() => true)
+    .catch(() => false);
+}
+
+export async function componentTemplateExists(esClient: Client, name: string): Promise<boolean> {
+  return esClient.cluster
+    .getComponentTemplate({ name })
+    .then((r) => r.component_templates.length > 0)
+    .catch(() => false);
+}
+
+export async function indexTemplateExists(esClient: Client, name: string): Promise<boolean> {
+  return esClient.indices
+    .getIndexTemplate({ name })
+    .then((r) => r.index_templates.length > 0)
+    .catch(() => false);
+}
 
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
   await client.fetch('POST /api/streams/_enable 2023-10-31').expect(200);
@@ -32,6 +111,21 @@ export async function indexDocument(
   refresh: Refresh = 'wait_for'
 ) {
   const response = await esClient.index({ index, document, refresh });
+  return response;
+}
+
+export async function executeEsql(
+  esClient: Client,
+  query: string
+): Promise<{ columns: Array<{ name: string; type: string }>; values: unknown[][] }> {
+  const response = await esClient.transport.request<{
+    columns: Array<{ name: string; type: string }>;
+    values: unknown[][];
+  }>({
+    method: 'POST',
+    path: '/_query',
+    body: { query },
+  });
   return response;
 }
 
@@ -124,6 +218,28 @@ export async function getStream(
     .then((response) => response.body);
 }
 
+export async function putIngest(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: ClientRequestParamsOf<
+    StreamsRouteRepository,
+    'PUT /api/streams/{name}/_ingest 2023-10-31'
+  >['params']['body'],
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
+      params: {
+        path: {
+          name,
+        },
+        body,
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
 export async function deleteStream(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,
@@ -199,6 +315,38 @@ export async function getQueries(
 ) {
   return await apiClient
     .fetch('GET /api/streams/{name}/queries 2023-10-31', {
+      params: {
+        path: { name },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function putQueryStream(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: { query: { esql: string }; field_descriptions?: Record<string, string> },
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('PUT /api/streams/{name}/_query 2023-10-31', {
+      params: {
+        path: { name },
+        body,
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function getQueryStream(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /api/streams/{name}/_query 2023-10-31', {
       params: {
         path: { name },
       },
@@ -394,4 +542,84 @@ export async function importContent(
     })
     .expect(expectStatusCode)
     .then((response) => response.body);
+}
+
+export async function upsertFeature(
+  client: StreamsSupertestRepositoryClient,
+  streamName: string,
+  feature: BaseFeature,
+  expectedStatusCode = 200
+): Promise<{ uuid: string }> {
+  await client
+    .fetch('POST /internal/streams/{name}/features', {
+      params: {
+        path: { name: streamName },
+        body: feature,
+      },
+    })
+    .expect(expectedStatusCode);
+
+  const { features } = await listFeatures(client, streamName);
+  const created = features.find((f) => f.id === feature.id);
+
+  if (!created) {
+    throw new Error(`Feature with id "${feature.id}" not found after upsert`);
+  }
+
+  return { uuid: created.uuid };
+}
+
+export async function listFeatures(
+  client: StreamsSupertestRepositoryClient,
+  streamName: string,
+  opts?: { includeExcluded?: boolean },
+  expectedStatusCode = 200
+) {
+  return client
+    .fetch('GET /internal/streams/{name}/features', {
+      params: {
+        path: { name: streamName },
+        query: opts?.includeExcluded ? { include_excluded: true } : undefined,
+      },
+    })
+    .expect(expectedStatusCode)
+    .then((response) => response.body as { features: Feature[] });
+}
+
+export async function bulkFeatures(
+  client: StreamsSupertestRepositoryClient,
+  streamName: string,
+  operations: Array<
+    | { index: { feature: Feature } }
+    | { delete: { id: string } }
+    | { exclude: { id: string } }
+    | { restore: { id: string } }
+  >,
+  expectedStatusCode = 200
+) {
+  return client
+    .fetch('POST /internal/streams/{name}/features/_bulk', {
+      params: {
+        path: { name: streamName },
+        body: { operations },
+      },
+    })
+    .expect(expectedStatusCode)
+    .then((response) => response.body as { acknowledged: boolean });
+}
+
+export async function deleteFeature(
+  client: StreamsSupertestRepositoryClient,
+  streamName: string,
+  uuid: string,
+  expectedStatusCode = 200
+) {
+  return client
+    .fetch('DELETE /internal/streams/{name}/features/{uuid}', {
+      params: {
+        path: { name: streamName, uuid },
+      },
+    })
+    .expect(expectedStatusCode)
+    .then((response) => response.body as { acknowledged: boolean });
 }

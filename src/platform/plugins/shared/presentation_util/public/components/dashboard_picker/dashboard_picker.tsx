@@ -53,7 +53,7 @@ async function searchDashboards(search?: string): Promise<Dashboard[]> {
         resolve(dashboards);
       },
       search: {
-        search,
+        query: search,
         per_page: 30,
       },
       trigger: { id: 'searchDashbaords' },

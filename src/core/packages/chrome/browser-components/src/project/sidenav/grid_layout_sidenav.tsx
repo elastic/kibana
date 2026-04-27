@@ -7,24 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import useObservable from 'react-use/lib/useObservable';
-import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
 import { css, Global } from '@emotion/react';
-import { useChromeComponentsDeps } from '../../context';
+import { useSideNavCollapsed, useSidebarWidth } from '@kbn/core-chrome-browser-hooks';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { Navigation } from './navigation';
+import { useAutoCollapse } from './use_auto_collapse';
+
+function useSideNavSetWidth(): (width: number) => void {
+  const chrome = useChromeService();
+  return useCallback((width: number) => chrome.sideNav.setWidth(width), [chrome]);
+}
 
 export const GridLayoutProjectSideNav = () => {
-  const { basePath, application, project, navLinks$, sideNav } = useChromeComponentsDeps();
-
-  const isCollapsed = useObservable(sideNav.collapsed$, sideNav.initialCollapsed);
-  const updateLayout = useLayoutUpdate();
-  const setWidth = useCallback(
-    (width: number) => {
-      updateLayout({ navigationWidth: width });
-    },
-    [updateLayout]
-  );
+  const { isCollapsed, setIsCollapsed: onToggleCollapsed } = useSideNavCollapsed();
+  const setWidth = useSideNavSetWidth();
+  const sidebarWidth = useSidebarWidth();
+  const isAutoCollapsed = useAutoCollapse(sidebarWidth);
 
   return (
     <>
@@ -36,13 +35,12 @@ export const GridLayoutProjectSideNav = () => {
         `}
       />
       <Navigation
-        isCollapsed={isCollapsed}
+        isCollapsed={isCollapsed || isAutoCollapsed}
         setWidth={setWidth}
-        basePath={basePath}
-        application={application}
-        navigation$={project.navigation$}
-        navLinks$={navLinks$}
-        onToggleCollapsed={sideNav.onToggleCollapsed}
+        // Hide the toggle button when the viewport forces collapse — the user
+        // cannot override it, so showing an unresponsive "expand" button would
+        // be confusing. Navigation omits the button when this prop is undefined.
+        onToggleCollapsed={isAutoCollapsed ? undefined : onToggleCollapsed}
       />
     </>
   );

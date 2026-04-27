@@ -36,10 +36,17 @@ import {
 
 import {
   AgentPolicySchemaV3,
+  AgentPolicySchemaV4,
+  AgentPolicySchemaV5,
+  EpmPackagesSchemaV6,
+  EpmPackagesSchemaV7,
+  EpmPackagesSchemaV8,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
   SettingsSchemaV8,
+  PackagePolicySchemaV22,
+  CloudConnectorSchemaV4,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -346,6 +353,9 @@ export const getSavedObjectTypes = (
           monitoring_diagnostics: { type: 'flattened', index: false },
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
+          is_verifier: { type: 'boolean' },
+          min_agent_version: { type: 'keyword' },
+          package_agent_version_conditions: { dynamic: false, properties: {} },
         },
       },
       migrations: {
@@ -447,6 +457,35 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                min_agent_version: { type: 'keyword' },
+                package_agent_version_conditions: { dynamic: false, properties: {} },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_verifier: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -497,6 +536,9 @@ export const getSavedObjectTypes = (
           },
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
+          is_verifier: { type: 'boolean' },
+          min_agent_version: { type: 'keyword' },
+          package_agent_version_conditions: { dynamic: false, properties: {} },
         },
       },
       modelVersions: {
@@ -532,6 +574,35 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                min_agent_version: { type: 'keyword' },
+                package_agent_version_conditions: { dynamic: false, properties: {} },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_verifier: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -556,6 +627,8 @@ export const getSavedObjectTypes = (
           service_token: { type: 'keyword', index: false },
           config: { type: 'flattened' },
           config_yaml: { type: 'text' },
+          otel_exporter_config_yaml: { type: 'text' },
+          otel_disable_beatsauth: { type: 'boolean' },
           is_preconfigured: { type: 'boolean', index: false },
           is_internal: { type: 'boolean', index: false },
           ssl: { type: 'binary' },
@@ -763,6 +836,46 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otel_exporter_config_yaml: { type: 'text' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const { otel_exporter_config_yaml: _, ...rest } = unknownAttributes as Record<
+                string,
+                unknown
+              >;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otel_disable_beatsauth: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const { otel_disable_beatsauth: _, ...rest } = unknownAttributes as Record<
+                string,
+                unknown
+              >;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
       },
       migrations: {
         '7.13.0': migrateOutputToV7130,
@@ -817,6 +930,7 @@ export const getSavedObjectTypes = (
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
+          package_agent_version_condition: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1030,6 +1144,20 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '22': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package_agent_version_condition: { type: 'keyword' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1096,6 +1224,7 @@ export const getSavedObjectTypes = (
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
+          package_agent_version_condition: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1168,6 +1297,20 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package_agent_version_condition: { type: 'keyword' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -1184,6 +1327,13 @@ export const getSavedObjectTypes = (
           name: { type: 'keyword' },
           version: { type: 'keyword' },
           internal: { type: 'boolean' },
+          dependencies: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              version: { type: 'keyword' },
+            },
+          },
           keep_policies_up_to_date: { type: 'boolean', index: false },
           es_index_patterns: {
             dynamic: false,
@@ -1219,6 +1369,11 @@ export const getSavedObjectTypes = (
           install_version: { type: 'keyword' },
           install_status: { type: 'keyword' },
           install_source: { type: 'keyword' },
+          is_dependency_of: {
+            dynamic: false,
+            properties: {},
+          },
+          installed_as_dependency: { type: 'boolean' },
           install_format_schema_version: { type: 'version' },
           experimental_data_stream_features: {
             type: 'nested',
@@ -1303,118 +1458,46 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: schema.object(
-              {
-                name: schema.string(),
-                version: schema.string(),
-                internal: schema.maybe(schema.boolean()),
-                keep_policies_up_to_date: schema.maybe(schema.boolean()),
-                es_index_patterns: schema.maybe(schema.any()),
-                verification_status: schema.string(),
-                verification_key_id: schema.maybe(schema.string()),
-                installed_es: schema.maybe(
-                  schema.arrayOf(
-                    schema.object({
-                      id: schema.string(),
-                      type: schema.string(),
-                      version: schema.maybe(schema.string()),
-                      deferred: schema.maybe(schema.boolean()),
-                    }),
-                    { maxSize: 10000 }
-                  )
-                ),
-                latest_install_failed_attempts: schema.maybe(schema.any()),
-                latest_executed_state: schema.maybe(schema.any()),
-                installed_kibana: schema.maybe(schema.any()),
-                installed_kibana_space_id: schema.maybe(schema.string()),
-                package_assets: schema.maybe(schema.any()),
-                additional_spaces_installed_kibana: schema.maybe(schema.any()),
-                install_started_at: schema.string(),
-                install_version: schema.string(),
-                install_status: schema.string(),
-                install_source: schema.string(),
-                install_format_schema_version: schema.maybe(schema.string()),
-                experimental_data_stream_features: schema.maybe(
-                  schema.arrayOf(
-                    schema.object({
-                      data_stream: schema.string(),
-                      features: schema.maybe(
-                        schema.arrayOf(
-                          schema.object(
-                            {
-                              synthetic_source: schema.maybe(schema.boolean()),
-                              tsdb: schema.maybe(schema.boolean()),
-                            },
-                            { unknowns: 'ignore' }
-                          ),
-                          { maxSize: 10 }
-                        )
-                      ),
-                    }),
-                    { maxSize: 1000 }
-                  )
-                ),
-                previous_version: schema.maybe(schema.string()),
-                pending_upgrade_review: schema.maybe(schema.any()),
+            forwardCompatibility: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                dependencies: {
+                  type: 'nested',
+                  properties: {
+                    name: { type: 'keyword' },
+                    version: { type: 'keyword' },
+                  },
+                },
               },
-              { unknowns: 'ignore' }
-            ),
-            create: schema.object(
-              {
-                name: schema.string(),
-                version: schema.string(),
-                internal: schema.maybe(schema.boolean()),
-                keep_policies_up_to_date: schema.maybe(schema.boolean()),
-                es_index_patterns: schema.maybe(schema.any()),
-                verification_status: schema.string(),
-                verification_key_id: schema.maybe(schema.string()),
-                installed_es: schema.maybe(
-                  schema.arrayOf(
-                    schema.object({
-                      id: schema.string(),
-                      type: schema.string(),
-                      version: schema.maybe(schema.string()),
-                      deferred: schema.maybe(schema.boolean()),
-                    }),
-                    { maxSize: 10000 }
-                  )
-                ),
-                latest_install_failed_attempts: schema.maybe(schema.any()),
-                latest_executed_state: schema.maybe(schema.any()),
-                installed_kibana: schema.maybe(schema.any()),
-                installed_kibana_space_id: schema.maybe(schema.string()),
-                package_assets: schema.maybe(schema.any()),
-                additional_spaces_installed_kibana: schema.maybe(schema.any()),
-                install_started_at: schema.string(),
-                install_version: schema.string(),
-                install_status: schema.string(),
-                install_source: schema.string(),
-                install_format_schema_version: schema.maybe(schema.string()),
-                experimental_data_stream_features: schema.maybe(
-                  schema.arrayOf(
-                    schema.object({
-                      data_stream: schema.string(),
-                      features: schema.maybe(
-                        schema.arrayOf(
-                          schema.object(
-                            {
-                              synthetic_source: schema.maybe(schema.boolean()),
-                              tsdb: schema.maybe(schema.boolean()),
-                            },
-                            { unknowns: 'ignore' }
-                          ),
-                          { maxSize: 10 }
-                        )
-                      ),
-                    }),
-                    { maxSize: 1000 }
-                  )
-                ),
-                previous_version: schema.maybe(schema.string()),
-                pending_upgrade_review: schema.maybe(schema.any()),
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV7,
+          },
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_dependency_of: {
+                  dynamic: false,
+                  properties: {},
+                },
+                installed_as_dependency: { type: 'boolean' },
               },
-              { unknowns: 'ignore' }
-            ),
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV8,
           },
         },
       },
@@ -1612,6 +1695,9 @@ export const getSavedObjectTypes = (
           packagePolicyCount: { type: 'integer' },
           created_at: { type: 'date' },
           updated_at: { type: 'date' },
+          verification_status: { type: 'keyword' },
+          verification_started_at: { type: 'date' },
+          verification_failed_at: { type: 'date' },
         },
       },
       modelVersions: {
@@ -1709,6 +1795,22 @@ export const getSavedObjectTypes = (
               created_at: schema.string(),
               updated_at: schema.string(),
             }),
+          },
+        },
+        4: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                verification_status: { type: 'keyword' },
+                verification_started_at: { type: 'date' },
+                verification_failed_at: { type: 'date' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
+            create: CloudConnectorSchemaV4,
           },
         },
       },

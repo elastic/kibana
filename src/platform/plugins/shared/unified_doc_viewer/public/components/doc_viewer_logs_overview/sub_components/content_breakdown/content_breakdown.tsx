@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -21,35 +21,50 @@ import {
   type DataTableRecord,
   type LogDocumentOverview,
 } from '@kbn/discover-utils';
-import { escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Badges } from '../badges/badges';
 import { HoverActionPopover } from '../hover_popover_action';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 export const ContentBreakdown = ({
   dataView,
   formattedDoc,
   hit,
   renderFlyoutStreamProcessingLink,
+  renderCpsWarning,
 }: {
   dataView: DataView;
   formattedDoc: LogDocumentOverview;
   hit: DataTableRecord;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+  renderCpsWarning?: boolean;
 }) => {
+  const { fieldFormats } = getUnifiedDocViewerServices();
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(hit.flattened, {
     includeFormattedValue: true,
   });
 
   const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
 
-  const messageCodeBlockProps = formattedValue
-    ? { language: 'json', children: formattedValue }
-    : {
-        language: 'txt',
-        dangerouslySetInnerHTML: { __html: escapeAndPreserveHighlightTags(value ?? '') },
-      };
+  const messageCodeBlockProps = useMemo(
+    () =>
+      formattedValue
+        ? { language: 'json', children: formattedValue }
+        : {
+            language: 'txt',
+            // Pass field name for highlight lookup in hit.highlight.
+            // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
+            children: fieldFormats
+              .getDefaultInstance(KBN_FIELD_TYPES.STRING)
+              .reactConvert(value ?? '', {
+                hit: hit.raw,
+                field: field ? dataView.fields.getByName(field) ?? { name: field } : undefined,
+              }),
+          },
+    [dataView.fields, field, fieldFormats, formattedValue, hit.raw, value]
+  );
   const hasMessageField = field && value;
 
   return (
@@ -76,6 +91,7 @@ export const ContentBreakdown = ({
                 hit={hit}
                 formattedDoc={formattedDoc}
                 renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+                renderCpsWarning={renderCpsWarning}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

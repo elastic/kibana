@@ -47,6 +47,7 @@ describe('Config.getScoutTestConfig', () => {
 
     const expectedConfig = {
       serverless: false,
+      http2: false,
       uiam: false,
       projectType: undefined,
       isCloud: false,
@@ -106,6 +107,7 @@ describe('Config.getScoutTestConfig', () => {
     const scoutConfig = config.getScoutTestConfig();
     const expectedConfig = {
       serverless: true,
+      http2: false,
       uiam: false,
       projectType: 'es',
       isCloud: false,
@@ -166,6 +168,7 @@ describe('Config.getScoutTestConfig', () => {
     const scoutConfig = config.getScoutTestConfig();
     const expectedConfig = {
       serverless: true,
+      http2: false,
       uiam: true,
       projectType: 'es',
       organizationId: 'org123',
@@ -187,5 +190,105 @@ describe('Config.getScoutTestConfig', () => {
     };
 
     expect(scoutConfig).toEqual(expectedConfig);
+  });
+
+  it(`should return a properly structured 'ScoutTestConfig' object for 'serverless=security' in UIAM+CPS mode`, async () => {
+    const config = new Config({
+      serverless: true,
+      servers: {
+        elasticsearch: {
+          protocol: 'https',
+          hostname: 'localhost',
+          port: 9220,
+          username: 'elastic_serverless',
+          password: 'changeme',
+        },
+        linkedElasticsearch: {
+          protocol: 'https',
+          hostname: 'localhost',
+          port: 9230,
+          username: 'elastic_serverless',
+          password: 'changeme',
+        },
+        kibana: {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: 5620,
+          username: 'elastic_serverless',
+          password: 'changeme',
+        },
+      },
+      dockerServers: {},
+      esTestCluster: {
+        from: 'serverless',
+        files: [],
+        serverArgs: [],
+        ssl: true,
+      },
+      esServerlessOptions: { uiam: true, cps: true },
+      kbnTestServer: {
+        buildArgs: [],
+        env: {},
+        sourceArgs: [],
+        serverArgs: ['--serverless=security', '--xpack.cloud.organization_id=org123'],
+      },
+    });
+
+    const scoutConfig = config.getScoutTestConfig();
+
+    expect(scoutConfig.linkedProject).toBeDefined();
+    expect(scoutConfig.linkedProject).toEqual({
+      hosts: {
+        elasticsearch: 'https://localhost:9230',
+      },
+      auth: {
+        username: 'elastic_serverless',
+        password: 'changeme',
+      },
+    });
+
+    expect(scoutConfig.serverless).toBe(true);
+    expect(scoutConfig.uiam).toBe(true);
+    expect(scoutConfig.projectType).toBe('security');
+    expect(scoutConfig.hosts.elasticsearch).toBe('https://localhost:9220');
+  });
+
+  it(`should not include linkedProject when CPS is not enabled`, async () => {
+    const config = new Config({
+      serverless: true,
+      servers: {
+        elasticsearch: {
+          protocol: 'https',
+          hostname: 'localhost',
+          port: 9220,
+          username: 'elastic_serverless',
+          password: 'changeme',
+        },
+        kibana: {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: 5620,
+          username: 'elastic_serverless',
+          password: 'changeme',
+        },
+      },
+      dockerServers: {},
+      esTestCluster: {
+        from: 'serverless',
+        files: [],
+        serverArgs: [],
+        ssl: true,
+      },
+      esServerlessOptions: { uiam: true },
+      kbnTestServer: {
+        buildArgs: [],
+        env: {},
+        sourceArgs: [],
+        serverArgs: ['--serverless=es'],
+      },
+    });
+
+    const scoutConfig = config.getScoutTestConfig();
+    expect(scoutConfig.linkedProject).toBeUndefined();
   });
 });

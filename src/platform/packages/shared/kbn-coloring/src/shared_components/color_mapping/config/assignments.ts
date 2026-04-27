@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import type { ColorMapping } from '.';
 
 export function updateAssignmentsPalette(
   assignments: ColorMapping.Config['assignments'],
   colorMode: ColorMapping.Config['colorMode'],
-  paletteId: string,
+  paletteId: KbnPaletteId,
   palettes: KbnPalettes,
   preserveColorChanges: boolean
 ): ColorMapping.Config['assignments'] {
@@ -41,7 +41,7 @@ export function updateAssignmentsPalette(
 
 export function updateColorModePalette(
   colorMode: ColorMapping.Config['colorMode'],
-  paletteId: string,
+  paletteId: KbnPaletteId,
   preserveColorChanges: boolean
 ): ColorMapping.Config['colorMode'] {
   return colorMode.type === 'categorical'

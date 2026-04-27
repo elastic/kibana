@@ -96,14 +96,10 @@ export const HelpPopover: React.FC<{
 
     const getDataViewForQuery = async () => {
       const currentQuery = currentQueryRef.current;
-      if (!currentQuery) {
-        resetDataviewDerived();
-        return;
-      }
       try {
         const dataView = await getESQLAdHocDataview({
           dataViewsService: data.dataViews,
-          query: currentQuery,
+          query: currentQuery || '',
           http,
         });
         if (!isMounted) return;
@@ -301,6 +297,7 @@ export const HelpPopover: React.FC<{
   return (
     <>
       <EuiPopover
+        aria-label={helpLabel}
         button={
           <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
             <EuiButtonIcon

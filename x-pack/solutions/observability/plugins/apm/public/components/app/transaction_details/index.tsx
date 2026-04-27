@@ -7,10 +7,7 @@
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import React, { useEffect } from 'react';
 import { Redirect, useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -77,8 +74,7 @@ export function TransactionDetails() {
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
-      agentId: OBSERVABILITY_AGENT_ID,
+    agentBuilder.setChatConfig({
       attachments: [
         {
           type: OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
@@ -103,7 +99,7 @@ export function TransactionDetails() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [
     agentBuilder,

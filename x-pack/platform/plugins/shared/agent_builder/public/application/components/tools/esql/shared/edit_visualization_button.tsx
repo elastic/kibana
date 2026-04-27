@@ -28,12 +28,21 @@ export const saveButtonLabel = i18n.translate(
   }
 );
 
+export const dashboardWriteControlsDisabledReason = i18n.translate(
+  'xpack.agentBuilder.conversation.visualization.dashboardWriteControlsDisabledReason',
+  {
+    defaultMessage:
+      'You need dashboard write permissions to edit visualizations or save them to a dashboard.',
+  }
+);
+
 interface Props {
   uiActions: UiActionsStart;
   lensInput: TypedLensByValueInput | undefined;
   lensLoadEvent: InlineEditLensEmbeddableContext['lensEvent'] | null;
   onAttributesChange: (a: TypedLensByValueInput['attributes']) => void;
   onApply: () => void;
+  canWriteDashboards: boolean;
 }
 
 export function EditVisualizationButton({
@@ -42,6 +51,7 @@ export function EditVisualizationButton({
   lensLoadEvent,
   onAttributesChange,
   onApply,
+  canWriteDashboards,
 }: Props) {
   const editModalOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
     if (!lensInput?.attributes) {
@@ -59,20 +69,28 @@ export function EditVisualizationButton({
     };
   }, [lensInput, lensLoadEvent, onAttributesChange, onApply]);
 
+  const button = (
+    <EuiButtonIcon
+      display="base"
+      color="text"
+      size="s"
+      iconType="pencil"
+      aria-label={editButtonLabel}
+      isDisabled={!canWriteDashboards}
+      onClick={() => {
+        if (canWriteDashboards && editModalOptions) {
+          uiActions.executeTriggerActions('IN_APP_EMBEDDABLE_EDIT_TRIGGER', editModalOptions);
+        }
+      }}
+    />
+  );
+
   return (
-    <EuiToolTip content={editButtonLabel} disableScreenReaderOutput>
-      <EuiButtonIcon
-        display="base"
-        color="text"
-        size="s"
-        iconType="pencil"
-        aria-label={editButtonLabel}
-        onClick={() => {
-          if (editModalOptions) {
-            uiActions.executeTriggerActions('IN_APP_EMBEDDABLE_EDIT_TRIGGER', editModalOptions);
-          }
-        }}
-      />
+    <EuiToolTip
+      content={canWriteDashboards ? editButtonLabel : dashboardWriteControlsDisabledReason}
+      disableScreenReaderOutput
+    >
+      {canWriteDashboards ? button : <span tabIndex={0}>{button}</span>}
     </EuiToolTip>
   );
 }

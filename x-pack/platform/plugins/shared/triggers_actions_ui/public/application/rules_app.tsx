@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type {
-  ChromeBreadcrumb,
+  ChromeStart,
   CoreStart,
   I18nStart,
   ScopedHistory,
@@ -76,7 +76,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   spaces?: SpacesPluginStart;
   storage?: Storage;
   isCloud: boolean;
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
   history: ScopedHistory;
@@ -131,7 +131,10 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
   return (
     <ConnectorProvider
-      value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
+      value={{
+        services: { validateEmailAddresses, enabledEmailServices },
+        isServerless,
+      }}
     >
       <Routes>
         <Route

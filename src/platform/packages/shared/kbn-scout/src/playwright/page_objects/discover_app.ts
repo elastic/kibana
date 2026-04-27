@@ -14,7 +14,7 @@ import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export class DiscoverApp {
-  private readonly codeEditor: KibanaCodeEditorWrapper;
+  public readonly codeEditor: KibanaCodeEditorWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
@@ -22,7 +22,13 @@ export class DiscoverApp {
 
   async goto() {
     await this.page.gotoApp('discover');
-    await this.waitForDataViewSwitch();
+    await this.waitForDiscoverPage();
+  }
+
+  private async waitForDiscoverPage() {
+    // Discover initialization in serverless CI environments regularly exceeds the default 10s,
+    // likely due to additional plugin overhead and root profile resolution.
+    await expect(this.page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
   }
 
   private async getVisibleDataViewSwitch() {
@@ -43,10 +49,6 @@ export class DiscoverApp {
     }
 
     return discoverVisible ? discoverSwitch : fallbackSwitch;
-  }
-
-  private async waitForDataViewSwitch() {
-    await this.getVisibleDataViewSwitch();
   }
 
   async selectDataView(name: string) {
@@ -76,10 +78,47 @@ export class DiscoverApp {
       .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
-  async clickNewSearch() {
-    await this.page.testSubj.hover('discoverNewButton');
-    await this.page.testSubj.click('discoverNewButton');
-    await this.page.testSubj.hover('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
+  private async clickAppMenuItem(
+    testId: string,
+    { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
+  ) {
+    const item = this.page.testSubj.locator(testId);
+    if (!isInOverflowMenu && (await item.isVisible())) {
+      await item.click();
+      return;
+    }
+    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    const popover = this.page.testSubj.locator('app-menu-popover');
+
+    // Dismiss any stale popovers
+    if (await popover.isVisible()) {
+      await overflowButton.click();
+      await expect(popover).toBeHidden();
+    }
+
+    await expect(overflowButton).toBeVisible();
+    await overflowButton.click();
+
+    // If the click was consumed by closing a stale overlay, the popover won't be open.
+    // Click the overflow button again if needed.
+    const popoverOpened = await popover
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!popoverOpened) {
+      await overflowButton.click();
+    }
+
+    await expect(popover).toBeVisible();
+    const menuItem = this.page.testSubj.locator(testId);
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
+  }
+
+  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
+    await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
+    await this.waitForDiscoverPage();
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
@@ -106,7 +145,7 @@ export class DiscoverApp {
   }
 
   async loadSavedSearch(searchName: string) {
-    await this.page.testSubj.click('discoverOpenButton');
+    await this.clickAppMenuItem('discoverOpenButton');
     await this.page.testSubj.waitForSelector('loadSearchForm', { state: 'visible' });
 
     // Filter for the search
@@ -120,7 +159,6 @@ export class DiscoverApp {
   }
 
   async getHitCountInt(): Promise<number> {
-    await this.page.waitForLoadingIndicatorHidden();
     const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
     return parseInt(hitCount.replace(/,/g, ''), 10);
   }
@@ -149,11 +187,11 @@ export class DiscoverApp {
   // Waits for the document table to be fully rendered and stable
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
-    await expect(table).toBeVisible();
-
     const minDurationMs = 2_000;
     const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
+
+    await expect(table).toBeVisible({ timeout: totalTimeoutMs });
 
     let stableSince: number | null = null;
 
@@ -250,6 +288,13 @@ export class DiscoverApp {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
   }
 
+  public readonly controls = {
+    getControlFrame: (controlId: string): Locator =>
+      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
+    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
+      this.controls.getControlFrame(controlId).getByText(value),
+  };
+
   async clickFieldSort(field: string, sortOption: string) {
     const header = this.getColumnHeader(field);
     await header.click();
@@ -337,7 +382,8 @@ export class DiscoverApp {
   async selectTextBaseLang() {
     if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
       await this.page.testSubj.click('select-text-based-language-btn');
-      await this.waitForDocTableRendered();
+      await this.waitUntilSearchingHasFinished();
+      await this.codeEditor.waitCodeEditorReady('ESQLEditor');
     }
   }
 
@@ -359,5 +405,103 @@ export class DiscoverApp {
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
     await rowLocator.waitFor({ state: 'visible', timeout });
+  }
+
+  public get esqlMenuPopover(): Locator {
+    return this.page.testSubj.locator('esql-menu-popover');
+  }
+
+  async openRecommendedQueriesPanel() {
+    const menuPopover = this.esqlMenuPopover;
+    if (!(await menuPopover.isVisible())) {
+      await this.page.testSubj.click('esql-help-popover-button');
+    }
+
+    await menuPopover.waitFor({ state: 'visible' });
+
+    const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
+    await expect(recommendedQueriesButton).toBeVisible();
+    await recommendedQueriesButton.click();
+    await this.page.testSubj.locator('contextMenuPanelTitleButton').waitFor({ state: 'visible' });
+  }
+
+  async runRecommendedEsqlQuery(queryLabel: string) {
+    await this.openRecommendedQueriesPanel();
+
+    const queryOption = this.esqlMenuPopover.getByRole('button', {
+      exact: true,
+      name: queryLabel,
+    });
+
+    await expect(queryOption).toBeVisible();
+    await queryOption.click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
+    return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
+  async addBreakdownFieldFromSidebar(field: string) {
+    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
+    if (await sidebarToggleButton.isVisible()) {
+      await sidebarToggleButton.click();
+    }
+
+    await this.waitUntilFieldListHasCountOfFields();
+
+    const fieldLocator = this.page.testSubj.locator(`field-${field}`);
+    await fieldLocator.hover();
+    await fieldLocator.click();
+    await this.waitUntilFieldPopoverIsLoaded();
+
+    await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  private async waitUntilFieldPopoverIsLoaded() {
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await expect(this.page.locator('[data-test-subj*="-statsLoading"]')).toBeHidden();
+  }
+
+  /**
+   * Scrolls through the virtualized doc table grid to assert that the given
+   * text exists somewhere in the rendered rows. Necessary because virtual
+   * scrolling only keeps a subset of rows in the DOM at any time.
+   */
+  async expectDocTableToContainText(text: string) {
+    // 200px per step × 50 steps = 10 000px of total scroll coverage,
+    // enough for grids with hundreds of rows at default row height (~34px).
+    const SCROLL_STEP_PX = 200;
+    const MAX_SCROLL_STEPS = 50;
+    // Per-position timeout: long enough for Playwright to retry through
+    // transient re-renders, short enough to not stall at positions where
+    // the text genuinely isn't in the DOM.
+    const PER_POSITION_TIMEOUT_MS = 500;
+
+    await this.waitUntilSearchingHasFinished();
+    const docTable = this.page.testSubj.locator('discoverDocTable');
+    await expect(docTable).toBeVisible();
+
+    const grid = docTable.locator('.euiDataGrid__virtualized');
+    await grid.evaluate((el) => el.scrollTo(0, 0));
+
+    for (let i = 0; i < MAX_SCROLL_STEPS; i++) {
+      try {
+        await expect(docTable).toContainText(text, { timeout: PER_POSITION_TIMEOUT_MS });
+        return;
+      } catch {
+        // Text not found at this scroll position, continue scrolling
+      }
+
+      const atBottom = await grid.evaluate((el, step) => {
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight) return true;
+        el.scrollBy(0, step);
+        return false;
+      }, SCROLL_STEP_PX);
+      if (atBottom) break;
+    }
+
+    await expect(docTable).toContainText(text);
   }
 }

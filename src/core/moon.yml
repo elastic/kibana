@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core'
+  title: '@kbn/core'
   description: Moon project for @kbn/core
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/core
+  sourceRoot: src/core
 dependsOn:
   - '@kbn/core-base-common'
   - '@kbn/config'
@@ -181,6 +180,7 @@ dependsOn:
   - '@kbn/migrator-test-kit'
   - '@kbn/core-user-activity-server-mocks'
   - '@kbn/core-user-activity-server-internal'
+  - '@kbn/scout'
 tags:
   - core
   - package
@@ -193,6 +193,7 @@ fileGroups:
     - server/**/*
     - types/**/*
     - test_helpers/**/*
+    - test/scout/**/*
     - utils/**/*
     - index.ts
     - '!target/**/*'

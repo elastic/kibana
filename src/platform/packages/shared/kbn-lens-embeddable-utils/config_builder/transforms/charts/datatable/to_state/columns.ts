@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ColumnState } from '@kbn/lens-common';
-import type { DatatableState } from '../../../../schema';
+import type { DatatableConfig } from '../../../../schema';
 import {
   fromColorMappingAPIToLensState,
   fromColorByValueAPIToLensState,
@@ -15,7 +15,7 @@ import {
   isColorByValueColor,
   isLegacyColorPalette,
 } from '../../../coloring';
-import { getAccessorName } from '../helpers';
+import { getAccessorName, applyColorToToColorMode } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,
@@ -24,11 +24,11 @@ import {
 
 function buildColorProps(
   config:
-    | NonNullable<DatatableState['metrics']>[number]
-    | NonNullable<DatatableState['rows']>[number]
+    | NonNullable<DatatableConfig['metrics']>[number]
+    | NonNullable<DatatableConfig['rows']>[number]
 ): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode'>> {
   if (!config.apply_color_to) return {};
-  const colorMode = config.apply_color_to === 'value' ? 'text' : 'cell';
+  const colorMode = applyColorToToColorMode(config.apply_color_to);
 
   if (isColorMappingColor(config.color)) {
     const color = fromColorMappingAPIToLensState(config.color);
@@ -47,8 +47,8 @@ function buildColorProps(
 
 function buildCommonMetricRowState(
   config:
-    | NonNullable<DatatableState['metrics']>[number]
-    | NonNullable<DatatableState['rows']>[number]
+    | NonNullable<DatatableConfig['metrics']>[number]
+    | NonNullable<DatatableConfig['rows']>[number]
 ): Pick<
   ColumnState,
   'hidden' | 'alignment' | 'colorMode' | 'isTransposed' | 'palette' | 'colorMapping' | 'width'
@@ -62,7 +62,7 @@ function buildCommonMetricRowState(
   };
 }
 
-export function buildMetricsState(metrics: DatatableState['metrics']): ColumnState[] {
+export function buildMetricsState(metrics: DatatableConfig['metrics']): ColumnState[] {
   if (!metrics) return [];
 
   return metrics.map((metric, index) => {
@@ -82,7 +82,7 @@ export function buildMetricsState(metrics: DatatableState['metrics']): ColumnSta
   });
 }
 
-export function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
+export function buildRowsState(rows: DatatableConfig['rows']): ColumnState[] {
   if (!rows) return [];
 
   return rows.map((row, index) => {
@@ -98,7 +98,7 @@ export function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
 }
 
 export function buildSplitMetricsByState(
-  splitMetrics: DatatableState['split_metrics_by']
+  splitMetrics: DatatableConfig['split_metrics_by']
 ): ColumnState[] {
   if (!splitMetrics) return [];
 
