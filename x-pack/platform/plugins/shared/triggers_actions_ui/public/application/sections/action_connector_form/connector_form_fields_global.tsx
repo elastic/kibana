@@ -209,6 +209,14 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
   const handleIdChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
+      if (newValue === '') {
+        // Clearing the id should resume auto-generation from the connector name. Otherwise
+        // `''` !== slug(name) and we mark the field as "custom", which blocks the sync effect
+        // when the name is re-entered after both fields were cleared.
+        setUsingCustomIdentifier(false);
+        setFieldValue('id', newValue);
+        return;
+      }
       const expectedValue = toSlugIdentifier(name || '');
       setUsingCustomIdentifier(newValue !== expectedValue);
       setFieldValue('id', newValue);

@@ -249,6 +249,49 @@ describe('ConnectorFormFieldsGlobal', () => {
     });
   });
 
+  it('re-auto-populates connector ID from name after the ID field is cleared while name is set', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const nameInput = screen.getByTestId('nameInput');
+    const idInput = screen.getByTestId('connectorIdInput');
+    await userEvent.type(nameInput, 'My Connector');
+    await waitFor(() => {
+      expect(idInput).toHaveValue('my-connector');
+    });
+
+    await userEvent.clear(idInput);
+    await waitFor(() => {
+      expect(idInput).toHaveValue('my-connector');
+    });
+  });
+
+  it('re-auto-populates connector ID from name after clearing name and id then re-entering name', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const nameInput = screen.getByTestId('nameInput');
+    const idInput = screen.getByTestId('connectorIdInput');
+    await userEvent.type(nameInput, 'First');
+    await waitFor(() => {
+      expect(idInput).toHaveValue('first');
+    });
+
+    await userEvent.clear(nameInput);
+    await userEvent.clear(idInput);
+    await userEvent.type(nameInput, 'Second');
+
+    await waitFor(() => {
+      expect(idInput).toHaveValue('second');
+    });
+  });
+
   it('truncates auto-populated connector ID to 36 characters', async () => {
     render(
       <FormTestProvider onSubmit={onSubmit}>
