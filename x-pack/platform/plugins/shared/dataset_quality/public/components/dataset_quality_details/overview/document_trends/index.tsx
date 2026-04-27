@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiSkeletonRectangle,
   EuiSpacer,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
@@ -23,8 +22,6 @@ import {
   openInDiscoverText,
   createAlertText,
   editFailureStoreText,
-  degradedDocsOverTimeText,
-  failedDocsOverTimeText,
 } from '../../../../../common/translations';
 import {
   useDatasetDetailsTelemetry,
@@ -50,7 +47,7 @@ export default function DocumentTrends({
     displayEditFailureStore: boolean;
   };
 }) {
-  const { timeRange, updateTimeRange, docsTrendChart } = useDatasetQualityDetailsState();
+  const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
   const {
     dataView,
     breakdown,
@@ -90,30 +87,23 @@ export default function DocumentTrends({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>
-              {docsTrendChart === 'degraded' ? degradedDocsOverTimeText : failedDocsOverTimeText}
-            </strong>
-          </EuiText>
+      <EuiFlexGroup alignItems="stretch" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
+            <UnifiedBreakdownFieldSelector
+              dataView={dataView!}
+              breakdown={{
+                field:
+                  breakdown.dataViewField && breakdown.fieldSupportsBreakdown
+                    ? breakdown.dataViewField
+                    : undefined,
+              }}
+              onBreakdownFieldChange={onBreakdownFieldChange}
+            />
+          </EuiSkeletonRectangle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
-                <UnifiedBreakdownFieldSelector
-                  dataView={dataView!}
-                  breakdown={{
-                    field:
-                      breakdown.dataViewField && breakdown.fieldSupportsBreakdown
-                        ? breakdown.dataViewField
-                        : undefined,
-                  }}
-                  onBreakdownFieldChange={onBreakdownFieldChange}
-                />
-              </EuiSkeletonRectangle>
-            </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiToolTip content={openInDiscoverText}>
               <EuiButtonIcon
                 display="base"
