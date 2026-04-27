@@ -1,0 +1,28 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-genai-utils",
+    "@kbn/agent-builder-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/logging",
+    "@kbn/utility-types",
+    "@kbn/workflows",
+    "@kbn/workflows-management-plugin",
+    "@kbn/zod"
+  ]
+}
