@@ -6,8 +6,8 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { MONACO_TO_RHF_SETTLE_MS } from '../../common/constants';
 import { submitLiveQuery } from '../../common/submit_live_query';
-import { waitForMonacoContains } from '../../common/monaco_helpers';
 import { selectSingleAsPlainTextOption } from '../../common/combo_box_helpers';
 
 const FLYOUT_OSQUERY_EDITOR = 'flyout-body-osquery';
@@ -94,7 +94,7 @@ export class AlertFlyoutPage {
     await this.flyoutOsqueryEditor.click();
   }
 
-  // Blur + wait for Monaco model so RHF sees query before Submit (avoids empty-query validation).
+  // Blur editor, then brief settle so debounced onChange can flush into RHF before Submit.
   async inputFlyoutQuery(query: string): Promise<void> {
     await this.waitForFlyoutEditorReady();
     await this.flyoutOsqueryEditor.click();
@@ -105,8 +105,10 @@ export class AlertFlyoutPage {
       el.querySelector<HTMLTextAreaElement>('textarea')?.blur();
     });
 
-    // Model text is source of truth (textarea alone is insufficient).
-    await waitForMonacoContains(this.page, query, { timeoutMs: 10_000 });
+    // Editor debounces onChange at 500ms (`public/editor/index.tsx`); give RHF time after typing.
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, MONACO_TO_RHF_SETTLE_MS);
+    });
   }
 
   async waitForFlyoutEditorReady(): Promise<void> {

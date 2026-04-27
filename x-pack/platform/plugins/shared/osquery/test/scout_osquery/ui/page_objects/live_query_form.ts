@@ -101,8 +101,7 @@ export class LiveQueryFormPage {
   /**
    * Wait for aggregate `osqueryResultsTable` (single-query mode).
    * Pass `resultsContainer` when the form lives in a flyout (e.g. `osqueryAlertFlyout.flyoutBody`):
-   * the wait is then scoped to that subtree and races the table with a `dataGridRowCell` like
-   * `waitForPackResults`, so we do not resolve a page-wide `osqueryResultsTable` to a hidden node.
+   * the wait is then scoped to that subtree and races signals that mean "run is actionable in UI".
    */
   async waitForSingleQueryResults(resultsContainer?: Locator): Promise<void> {
     if (resultsContainer) {

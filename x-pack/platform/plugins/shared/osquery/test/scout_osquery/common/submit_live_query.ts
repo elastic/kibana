@@ -7,8 +7,9 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 // eslint-disable-next-line no-restricted-imports
-import type { Response } from 'playwright/test';
+import { expect, type Response } from '@playwright/test';
 
+import { LIVE_QUERY_SUBMIT_PRE_CLICK_MS, MONACO_TO_RHF_SETTLE_MS } from './constants';
 import { dismissVisibleToasts } from './dismiss_toasts';
 
 /**
@@ -36,6 +37,11 @@ import { dismissVisibleToasts } from './dismiss_toasts';
  *
  * This helper centralises that strategy so every page object that submits a
  * live-query form behaves the same way.
+ *
+ * Implementation notes: register `waitForResponse` **before** `click` each attempt (Playwright
+ * guidance — avoids missing fast responses). Assert Submit is enabled before clicking; retry
+ * after `MONACO_TO_RHF_SETTLE_MS` so debounced Monaco → RHF sync can complete. A fixed
+ * `LIVE_QUERY_SUBMIT_PRE_CLICK_MS` pause runs immediately before each Submit click.
  */
 
 const LIVE_QUERY_URL_RE = /\/api\/osquery\/live_queries(\?|$)/;
@@ -95,18 +101,30 @@ export async function submitLiveQuery(
     const attemptTimeout = Math.min(perAttemptTimeoutMs, remaining);
 
     try {
-      const [response] = await Promise.all([
-        page.waitForResponse(
-          (resp) => LIVE_QUERY_URL_RE.test(resp.url()) && resp.request().method() === 'POST',
-          { timeout: attemptTimeout }
-        ),
-        // `force: true` bypasses Playwright's actionability check (covered
-        // elsewhere overlay, stale hit-test). The network-assertion above is
-        // what confirms the click actually reached RHF's handleSubmit.
-        // Align click timeout with `waitForResponse`: default action timeout (10s)
-        // is shorter than `perAttemptTimeoutMs` and causes false failures on cold CI.
-        submitButton.click({ force: true, timeout: attemptTimeout }),
-      ]);
+      if (attempt > 1) {
+        await dismissVisibleToasts(page);
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, MONACO_TO_RHF_SETTLE_MS);
+        });
+      }
+
+      await submitButton.scrollIntoViewIfNeeded();
+      await expect(submitButton).toBeEnabled({
+        timeout: Math.min(25_000, attemptTimeout),
+      });
+
+      const responsePromise = page.waitForResponse(
+        (resp) => LIVE_QUERY_URL_RE.test(resp.url()) && resp.request().method() === 'POST',
+        { timeout: attemptTimeout }
+      );
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, LIVE_QUERY_SUBMIT_PRE_CLICK_MS);
+      });
+
+      // `force: true` bypasses hit-target overlays; `expect(enabled)` above catches disabled/loading.
+      await submitButton.click({ force: true, timeout: attemptTimeout });
+      const response = await responsePromise;
 
       if (response.status() >= 400) {
         const body = await response.text().catch(() => '<unreadable body>');
@@ -129,10 +147,6 @@ export async function submitLiveQuery(
       return { response, actionId };
     } catch (error) {
       lastError = error;
-      // No hard sleep between attempts — the next `Promise.all([
-      //   waitForResponse, click({ force: true })])` re-evaluates
-      // actionability and the Monaco debounce (500 ms) will have flushed
-      // before the subsequent click lands under the per-attempt wait budget.
     }
   }
 
