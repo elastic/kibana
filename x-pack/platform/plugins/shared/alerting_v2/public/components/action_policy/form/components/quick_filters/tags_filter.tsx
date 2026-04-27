@@ -115,10 +115,9 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           'data-test-subj': 'quickFilterTagsList',
           ...SELECTABLE_LIST_PROPS,
         }}
-        emptyMessage={i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.quickFilters.tags.empty',
-          { defaultMessage: 'No tags found on rules' }
-        )}
+        emptyMessage={i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.tags.empty', {
+          defaultMessage: 'No tags found on rules',
+        })}
       >
         {(list, searchField) => (
           <>

@@ -108,10 +108,9 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.alertingV2.actionPolicy.form.quickFilters.rule.selectedOnly',
-                { defaultMessage: 'Selected' }
-              )}
+              {i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.rule.selectedOnly', {
+                defaultMessage: 'Selected',
+              })}
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
