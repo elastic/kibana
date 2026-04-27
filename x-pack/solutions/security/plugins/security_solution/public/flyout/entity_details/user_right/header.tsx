@@ -96,24 +96,28 @@ export const UserPanelHeader = ({
             alignItems="flexStart"
           >
             <EuiFlexItem grow={false}>
-              <SecuritySolutionLinkAnchor
-                deepLinkId={SecurityPageName.users}
-                path={getTabsOnUsersDetailsUrl(
-                  userName,
-                  UsersTableType.events,
-                  undefined,
-                  entityId,
-                  identityFields && Object.keys(identityFields).length > 0
-                    ? identityFields
-                    : undefined
-                )}
-                target={'_blank'}
-                external={false}
-                css={linkTitleCSS}
-                override={urlParamOverride}
-              >
-                <FlyoutTitle title={userName} iconType={'user'} isLink />
-              </SecuritySolutionLinkAnchor>
+              {isEntityInStore ? (
+                <FlyoutTitle title={userName} iconType={'user'} />
+              ) : (
+                <SecuritySolutionLinkAnchor
+                  deepLinkId={SecurityPageName.users}
+                  path={getTabsOnUsersDetailsUrl(
+                    userName,
+                    UsersTableType.events,
+                    undefined,
+                    entityId,
+                    identityFields && Object.keys(identityFields).length > 0
+                      ? identityFields
+                      : undefined
+                  )}
+                  target={'_blank'}
+                  external={false}
+                  css={linkTitleCSS}
+                  override={urlParamOverride}
+                >
+                  <FlyoutTitle title={userName} iconType={'user'} isLink />
+                </SecuritySolutionLinkAnchor>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

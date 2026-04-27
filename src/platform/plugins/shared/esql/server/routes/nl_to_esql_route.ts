@@ -20,7 +20,7 @@ import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 import type { EsqlServerPluginStart } from '../types';
 
