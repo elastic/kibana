@@ -48,14 +48,17 @@ export const buildProcessingChain = (
 const buildFieldEntry = (
   source: string,
   fieldName: string,
-  fieldDef: { type?: string; [key: string]: unknown }
+  fieldDef: { type?: string }
 ): FieldMappingEntry => {
   const entry: FieldMappingEntry = {
     source,
     name: fieldName,
     type: fieldDef.type || 'object',
   };
-  const params = getAdvancedParameters(fieldName, fieldDef as Parameters<typeof getAdvancedParameters>[1]);
+  const params = getAdvancedParameters(
+    fieldName,
+    fieldDef as Parameters<typeof getAdvancedParameters>[1]
+  );
   if (Object.keys(params).length > 0) {
     entry.parameters = params;
   }
