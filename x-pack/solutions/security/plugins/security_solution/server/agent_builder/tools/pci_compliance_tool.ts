@@ -310,10 +310,6 @@ function buildCheckResponse({
       ];
 
       results.push({
-        type: ToolResultType.query,
-        data: { esql: 'PCI DSS v4.0.1 Compliance Violations' },
-      });
-      results.push({
         tool_result_id: getToolResultId(),
         type: ToolResultType.esqlResults,
         data: {
@@ -386,10 +382,6 @@ function buildReportResponse({
     data: Record<string, unknown>;
     tool_result_id?: string;
   }> = [
-    {
-      type: ToolResultType.query,
-      data: { esql: 'PCI DSS v4.0.1 Compliance Report' },
-    },
     {
       tool_result_id: getToolResultId(),
       type: ToolResultType.esqlResults,
