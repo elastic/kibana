@@ -554,6 +554,130 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.OtelAppenderConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "OtelAppenderConfig",
+        "description": [
+          "\nConfiguration of an OpenTelemetry (OTLP) log appender.\nShips log records to an OTLP-compatible endpoint over HTTP.\n"
+        ],
+        "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Discriminator for this appender type."
+            ],
+            "signature": [
+              "\"otel\""
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.protocol",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "protocol",
+            "description": [
+              "\nThe protocol to use for the OTLP exporter.\nDefaults to 'grpc'."
+            ],
+            "signature": [
+              "\"http\" | \"proto\" | \"grpc\""
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "OTLP HTTP endpoint URL, e.g. https://collector:4318/v1/logs"
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.headers",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "\nOptional HTTP headers sent with every request, e.g. for authentication.\nDefaults to an empty object."
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [
+              "\nControls how the log record body is serialised.\n\n- `pattern` (**default**): the message is formatted to a human-readable string\n  and indexed as `body.text` in Elastic. Elastic's ingest aliases `body.text`\n  to the ECS `message` field, so records are visible in Logs Explorer.\n  When no explicit `pattern` string is provided, the appender uses\n  `%message %error` - level, timestamp, and logger name are omitted because\n  they are already captured as dedicated top-level OTLP fields.\n  Meta fields are included as a `log.meta` attribute.\n\n- `json`: the full `LogRecord` is sent as a structured object and indexed as\n  `body.structured`. **Note**: the ECS `message` field will be empty in Logs\n  Explorer because it aliases `body.text`, which JSON layout does not populate.\n  Use this only when the consuming backend natively handles `body.structured`.\n  Meta fields are part of the body (not repeated in attributes)."
+            ],
+            "signature": [
+              "LayoutConfigType",
+              " | undefined"
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.OtelAppenderConfig.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [
+              "\nAdditional resource attributes merged on top of the auto-detected host,\nprocess, OS and service attributes. Can be used to override defaults such\nas `service.name`. Because Kibana expands dotted YAML keys into nested\nobjects, wrap dotted attribute names in `[brackets]`:\n`\"[service.name]\": my-kibana`"
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/core/packages/logging/server/src/appenders/otel.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
         "id": "def-server.PatternLayoutConfigType",
         "type": "Interface",
         "tags": [],
@@ -1021,12 +1145,14 @@
           " | ",
           "FileAppenderConfig",
           " | ",
+          "OtelAppenderConfig",
+          " | ",
           "RewriteAppenderConfig",
           " | ",
           "RollingFileAppenderConfig"
         ],
         "path": "src/core/packages/logging/server/src/appenders/index.ts",
-        "lineNumber": 33,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
