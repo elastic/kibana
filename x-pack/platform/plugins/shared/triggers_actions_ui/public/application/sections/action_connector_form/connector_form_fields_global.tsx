@@ -196,15 +196,18 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
 }) => {
   const { http } = useKibana().services;
   const { setFieldValue } = useFormContext();
-  const [{ name }] = useFormData<ConnectorFormData>({ watch: ['name', 'id'] });
+  const [{ name, id }] = useFormData<ConnectorFormData>({ watch: ['name', 'id'] });
   const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false);
 
+  // `id` is a dep so the slug sync re-runs when the id is cleared to '' while
+  // `usingCustomIdentifier` is already false (no state update). Otherwise the
+  // id stays empty until the name field changes.
   useEffect(() => {
     if (!isEdit && !usingCustomIdentifier && name) {
       const slug = toSlugIdentifier(name).slice(0, CONNECTOR_ID_MAX_LENGTH);
       setFieldValue('id', slug);
     }
-  }, [name, isEdit, setFieldValue, usingCustomIdentifier]);
+  }, [name, id, isEdit, setFieldValue, usingCustomIdentifier]);
 
   const handleIdChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
