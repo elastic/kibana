@@ -81,7 +81,7 @@ export const LogsSearchBarHeader = () => {
       <EuiFlexItem grow={false}>
         <OpenInLogsExplorerButton
           href={logsUrl}
-          testSubject={'infraAssetDetailsLogsTabOpenInLogsButton'}
+          testSubject="infraAssetDetailsLogsTabOpenInLogsButton"
           size="xs"
           flush="both"
         />

@@ -110,23 +110,11 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         children: isProfilingTab ? (
           <ProfilingSearchBarHeader />
         ) : isLogsTab ? (
-          <>
-            <LogsSearchBarHeader />
-            <EuiSpacer size="s" />
-            <DatePicker />
-          </>
+          <SearchBarWithDatePicker searchBar={<LogsSearchBarHeader />} />
         ) : isMetadataTab ? (
-          <>
-            <MetadataSearchBarHeader />
-            <EuiSpacer size="s" />
-            <DatePicker />
-          </>
+          <SearchBarWithDatePicker searchBar={<MetadataSearchBarHeader />} />
         ) : isProcessesTab ? (
-          <>
-            <ProcessesSearchBarHeader />
-            <EuiSpacer size="s" />
-            <DatePicker />
-          </>
+          <SearchBarWithDatePicker searchBar={<ProcessesSearchBarHeader />} />
         ) : showDatePicker ? (
           <DatePicker />
         ) : undefined,
@@ -139,6 +127,14 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     </InfraPageTemplate>
   );
 };
+
+const SearchBarWithDatePicker = ({ searchBar }: { searchBar: React.ReactNode }) => (
+  <>
+    {searchBar}
+    <EuiSpacer size="s" />
+    <DatePicker />
+  </>
+);
 
 const ProfilingSearchBarHeader = () => {
   const { dateRange, setDateRange } = useDatePickerContext();

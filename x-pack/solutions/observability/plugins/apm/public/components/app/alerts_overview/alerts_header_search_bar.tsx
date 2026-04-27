@@ -47,7 +47,7 @@ export function AlertsHeaderSearchBar() {
   return (
     <EuiFlexItem grow={false}>
       <ObservabilityAlertSearchBar
-        appName={'apmApp'}
+        appName="apmApp"
         kuery={kuery}
         onRangeFromChange={(value) => push(history, { query: { rangeFrom: value } })}
         onRangeToChange={(value) => push(history, { query: { rangeTo: value } })}
