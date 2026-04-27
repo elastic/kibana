@@ -9,6 +9,8 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 // eslint-disable-next-line no-restricted-imports
 import type { Response } from 'playwright/test';
 
+import { dismissVisibleToasts } from './dismiss_toasts';
+
 /**
  * Why this helper exists
  * ----------------------
@@ -76,6 +78,11 @@ export async function submitLiveQuery(
 ): Promise<SubmitLiveQueryResult> {
   const { timeoutMs = 120_000, perAttemptTimeoutMs = 25_000, maxAttempts = 4 } = options;
 
+  // Toasts and combo-box popovers from prior steps (alerts, Fleet) can intercept clicks.
+  for (let round = 0; round < 2; round++) {
+    await dismissVisibleToasts(page);
+  }
+
   await submitButton.waitFor({ state: 'visible', timeout: 30_000 });
   await submitButton.scrollIntoViewIfNeeded();
 
@@ -96,7 +103,9 @@ export async function submitLiveQuery(
         // `force: true` bypasses Playwright's actionability check (covered
         // elsewhere overlay, stale hit-test). The network-assertion above is
         // what confirms the click actually reached RHF's handleSubmit.
-        submitButton.click({ force: true }),
+        // Align click timeout with `waitForResponse`: default action timeout (10s)
+        // is shorter than `perAttemptTimeoutMs` and causes false failures on cold CI.
+        submitButton.click({ force: true, timeout: attemptTimeout }),
       ]);
 
       if (response.status() >= 400) {

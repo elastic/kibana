@@ -163,9 +163,9 @@ test.describe(
       await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
       await pageObjects.osqueryAlertFlyout.inputFlyoutQuery('select * from uptime;');
       await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-      await page.testSubj
-        .locator('osqueryResultsTable')
-        .waitFor({ state: 'visible', timeout: 180_000 });
+      await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults(
+        pageObjects.osqueryAlertFlyout.flyoutBody
+      );
 
       const { violations } = await page.checkA11y({
         include: ['[data-test-subj="flyout-body-osquery"]'],

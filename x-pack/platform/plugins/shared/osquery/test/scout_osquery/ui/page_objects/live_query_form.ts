@@ -16,26 +16,6 @@ import {
 } from '../../common/monaco_helpers';
 import { selectSingleAsPlainTextOption } from '../../common/combo_box_helpers';
 
-async function dismissVisibleToasts(page: ScoutPage): Promise<void> {
-  const closeButtons = await page.testSubj
-    .locator('globalToastList')
-    .locator('[data-test-subj="toastCloseButton"]')
-    .all();
-  for (const btn of closeButtons) {
-    await btn.click().catch(() => {});
-  }
-
-  if (closeButtons.length > 0) {
-    await page.testSubj
-      .locator('globalToastList')
-      .locator('[data-test-subj="toastCloseButton"]')
-      // eslint-disable-next-line playwright/no-nth-methods -- toast stack cleared
-      .first()
-      .waitFor({ state: 'hidden', timeout: 5_000 })
-      .catch(() => {});
-  }
-}
-
 export class LiveQueryFormPage {
   public readonly queryEditor: Locator;
   public readonly submitButton: Locator;
@@ -113,18 +93,32 @@ export class LiveQueryFormPage {
 
   /** Submit; returns `action_id` when parseable (else undefined). Pair with poll/history waiters. */
   async submitQuery(): Promise<string | undefined> {
-    // Dismiss toasts that can intercept Submit.
-    for (let dismissRound = 0; dismissRound < 2; dismissRound++) {
-      await dismissVisibleToasts(this.page);
-    }
-
     const { actionId } = await submitLiveQuery(this.page, this.submitButton);
 
     return actionId;
   }
 
-  /** Wait for aggregate `osqueryResultsTable` (single-query mode). */
-  async waitForSingleQueryResults(): Promise<void> {
+  /**
+   * Wait for aggregate `osqueryResultsTable` (single-query mode).
+   * Pass `resultsContainer` when the form lives in a flyout (e.g. `osqueryAlertFlyout.flyoutBody`):
+   * the wait is then scoped to that subtree and races the table with a `dataGridRowCell` like
+   * `waitForPackResults`, so we do not resolve a page-wide `osqueryResultsTable` to a hidden node.
+   */
+  async waitForSingleQueryResults(resultsContainer?: Locator): Promise<void> {
+    if (resultsContainer) {
+      const table = resultsContainer.getByTestId('osqueryResultsTable');
+      const dataCell = resultsContainer
+        .getByTestId('osqueryResultsPanel')
+        .getByTestId('dataGridRowCell')
+        // eslint-disable-next-line playwright/no-nth-methods -- first data cell in panel
+        .first();
+      await Promise.race([
+        table.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS }),
+        dataCell.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS }),
+      ]);
+      return;
+    }
+
     await this.resultsTable.waitFor({ state: 'visible', timeout: OSQUERY_UI_RESULTS_TIMEOUT_MS });
   }
 

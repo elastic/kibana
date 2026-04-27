@@ -95,7 +95,9 @@ test.describe('Alert flyout Osquery case creation', { tag: localTags }, () => {
       await pageObjects.osqueryAlertFlyout.waitForFlyoutEditorReady();
       await pageObjects.osqueryAlertFlyout.inputFlyoutQuery('select * from uptime;');
       await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
-      await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
+      await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults(
+        pageObjects.osqueryAlertFlyout.flyoutBody
+      );
     });
 
     await test.step('attach results to the pre-seeded existing case', async () => {
