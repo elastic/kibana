@@ -160,11 +160,12 @@ describe('getAggsFormats', () => {
 
     expect(format.convert({ gte: 1, lt: 20, label: 'custom' })).toBe('custom');
     expect(getReactConvertText(format, { gte: 1, lt: 20, label: 'custom' })).toBe('custom');
+    // underlying formatter is not called because custom label can be used directly
     expect(getFormat).toHaveBeenCalledTimes(0);
   });
 
-  describe('terms', () => {
-    const termsMapping = {
+  test('creates custom format for terms', () => {
+    const mapping = {
       id: 'terms',
       params: {
         otherBucketLabel: 'other bucket',
@@ -172,136 +173,156 @@ describe('getAggsFormats', () => {
       },
     };
 
-    test('creates custom format for terms', () => {
-      const format = getAggFormat(termsMapping, getFormat);
+    const format = getAggFormat(mapping, getFormat);
 
-      expect(format.convert('machine.os.keyword')).toBe('machine.os.keyword');
-      expect(getReactConvertText(format, 'machine.os.keyword')).toBe('machine.os.keyword');
-      expect(format.convert('__other__')).toBe(termsMapping.params.otherBucketLabel);
-      expect(format.convert(MISSING_TOKEN)).toBe(termsMapping.params.missingBucketLabel);
-      expect(getFormat).toHaveBeenCalledTimes(1);
-    });
-
-    test('returns special bucket labels directly without calling nested formatter', () => {
-      const mockReactConvert = jest.fn();
-      const mockNestedFormat = createMockNestedFormat({ reactConvert: mockReactConvert });
-
-      const format = getAggFormat(termsMapping, () => mockNestedFormat);
-
-      expect(format.convert('__other__')).toBe('other bucket');
-      expect(format.reactConvert('__other__')).toBe('other bucket');
-      expect(format.convert(MISSING_TOKEN)).toBe('missing bucket');
-      expect(format.reactConvert(MISSING_TOKEN)).toBe('missing bucket');
-      expect(mockReactConvert).not.toHaveBeenCalled();
-    });
-
-    test('renders links from URL-formatted nested formatter', () => {
-      const mockReactConvert = jest.fn().mockReturnValue(
-        <a href="http://example.com" target="_blank" rel="noopener noreferrer">
-          example.com
-        </a>
-      );
-      const mockNestedFormat = createMockNestedFormat({ reactConvert: mockReactConvert });
-
-      const format = getAggFormat(termsMapping, () => mockNestedFormat);
-      const result = format.reactConvert('http://example.com');
-      expect(isValidElement(result)).toBe(true);
-
-      const { container } = render(<>{result}</>);
-      const link = container.querySelector('a');
-
-      expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute('href', 'http://example.com');
-      expect(link).toHaveTextContent('example.com');
-    });
+    expect(format.convert('machine.os.keyword')).toBe('machine.os.keyword');
+    expect(getReactConvertText(format, 'machine.os.keyword')).toBe('machine.os.keyword');
+    expect(format.convert('__other__')).toBe(mapping.params.otherBucketLabel);
+    expect(format.convert(MISSING_TOKEN)).toBe(mapping.params.missingBucketLabel);
+    expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
-  describe('multi_terms', () => {
-    const multiTermsMapping = {
+  test('uses a default separator for multi terms', () => {
+    const terms = ['source', 'geo.src', 'geo.dest'];
+    const mapping = {
       id: 'multi_terms',
       params: {
         paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
       },
     };
 
-    test('uses a default separator for multi terms', () => {
-      const terms = ['source', 'geo.src', 'geo.dest'];
-      const format = getAggFormat(multiTermsMapping, getFormat);
+    const format = getAggFormat(mapping, getFormat);
 
-      expect(format.convert(new MultiFieldKey({ key: terms }))).toBe('source › geo.src › geo.dest');
-      expect(getReactConvertText(format, new MultiFieldKey({ key: terms }))).toBe(
-        'source › geo.src › geo.dest'
-      );
-      expect(getFormat).toHaveBeenCalledTimes(terms.length);
-    });
+    expect(format.convert(new MultiFieldKey({ key: terms }))).toBe('source › geo.src › geo.dest');
+    expect(getReactConvertText(format, new MultiFieldKey({ key: terms }))).toBe(
+      'source › geo.src › geo.dest'
+    );
+    expect(getFormat).toHaveBeenCalledTimes(terms.length);
+  });
 
-    test('uses a custom separator for multi terms when passed', () => {
-      const terms = ['source', 'geo.src', 'geo.dest'];
-      const mapping = {
-        id: 'multi_terms',
-        params: {
-          paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
-          separator: ' - ',
-        },
-      };
+  test('uses a custom separator for multi terms when passed', () => {
+    const terms = ['source', 'geo.src', 'geo.dest'];
+    const mapping = {
+      id: 'multi_terms',
+      params: {
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
+        separator: ' - ',
+      },
+    };
 
-      const format = getAggFormat(mapping, getFormat);
+    const format = getAggFormat(mapping, getFormat);
 
-      expect(format.convert(new MultiFieldKey({ key: terms }))).toBe('source - geo.src - geo.dest');
-      expect(getReactConvertText(format, new MultiFieldKey({ key: terms }))).toBe(
-        'source - geo.src - geo.dest'
-      );
-      expect(getFormat).toHaveBeenCalledTimes(terms.length);
-    });
+    expect(format.convert(new MultiFieldKey({ key: terms }))).toBe('source - geo.src - geo.dest');
+    expect(getReactConvertText(format, new MultiFieldKey({ key: terms }))).toBe(
+      'source - geo.src - geo.dest'
+    );
+    expect(getFormat).toHaveBeenCalledTimes(terms.length);
+  });
 
-    test('returns empty string for non-MultiFieldKey values', () => {
-      const format = getAggFormat(multiTermsMapping, getFormat);
+  test('not fails for non multiField Key values', () => {
+    const mapping = {
+      id: 'multi_terms',
+      params: {
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
+        separator: ' - ',
+      },
+    };
 
-      expect(format.convert('text')).toBe('');
-      expect(getReactConvertText(format, 'text')).toBe('');
-    });
+    const format = getAggFormat(mapping, getFormat);
 
-    test('returns other bucket label directly without calling nested formatter', () => {
-      const mockReactConvert = jest.fn();
-      const mockNestedFormat = createMockNestedFormat({ reactConvert: mockReactConvert });
+    expect(format.convert('text')).toBe('');
+    expect(getReactConvertText(format, 'text')).toBe('');
+  });
 
-      const format = getAggFormat(
-        {
-          ...multiTermsMapping,
-          params: { ...multiTermsMapping.params, otherBucketLabel: 'Other' },
-        },
-        () => mockNestedFormat
-      );
+  test('terms returns special bucket labels directly without calling nested formatter', () => {
+    const mapping = {
+      id: 'terms',
+      params: {
+        otherBucketLabel: 'other bucket',
+        missingBucketLabel: 'missing bucket',
+      },
+    };
+    const mockReactConvert = jest.fn();
+    const mockNestedFormat = createMockNestedFormat({ reactConvert: mockReactConvert });
 
-      expect(format.convert('__other__')).toBe('Other');
-      expect(format.reactConvert('__other__')).toBe('Other');
-      expect(mockReactConvert).not.toHaveBeenCalled();
-    });
+    const format = getAggFormat(mapping, () => mockNestedFormat);
 
-    test('renders links from URL-formatted nested formatters', () => {
-      const mockReactConvert = jest.fn().mockImplementation((val) => (
-        <a href={`http://${val}`} target="_blank" rel="noopener noreferrer">
-          {val}
-        </a>
-      ));
-      const mockNestedFormat = createMockNestedFormat({ reactConvert: mockReactConvert });
+    expect(format.convert('__other__')).toBe('other bucket');
+    expect(format.reactConvert('__other__')).toBe('other bucket');
+    expect(format.convert(MISSING_TOKEN)).toBe('missing bucket');
+    expect(format.reactConvert(MISSING_TOKEN)).toBe('missing bucket');
+    expect(mockReactConvert).not.toHaveBeenCalled();
+  });
 
-      const format = getAggFormat(
-        {
-          ...multiTermsMapping,
-          params: { paramsPerField: [{ id: 'url' }, { id: 'url' }], separator: ' | ' },
-        },
-        () => mockNestedFormat
-      );
-      const result = format.reactConvert(new MultiFieldKey({ key: ['a.com', 'b.com'] }));
+  test('terms renders links from URL-formatted nested formatter', () => {
+    const mapping = {
+      id: 'terms',
+      params: {
+        otherBucketLabel: 'other bucket',
+        missingBucketLabel: 'missing bucket',
+      },
+    };
+    const mockReactConvert = jest.fn().mockReturnValue(
+      <a href="http://example.com" target="_blank" rel="noopener noreferrer">
+        example.com
+      </a>
+    );
+    const mockNestedFormat = createMockNestedFormat({ reactConvert: mockReactConvert });
 
-      const { container } = render(<>{result}</>);
-      const links = container.querySelectorAll('a');
+    const format = getAggFormat(mapping, () => mockNestedFormat);
+    const result = format.reactConvert('http://example.com');
+    expect(isValidElement(result)).toBe(true);
 
-      expect(links).toHaveLength(2);
-      expect(links[0]).toHaveAttribute('href', 'http://a.com');
-      expect(links[1]).toHaveAttribute('href', 'http://b.com');
-      expect(container.textContent).toContain(' | ');
-    });
+    const { container } = render(<>{result}</>);
+    const link = container.querySelector('a');
+
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'http://example.com');
+    expect(link).toHaveTextContent('example.com');
+  });
+
+  test('multi_terms returns other bucket label directly without calling nested formatter', () => {
+    const mapping = {
+      id: 'multi_terms',
+      params: {
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
+        otherBucketLabel: 'Other',
+      },
+    };
+    const mockReactConvert = jest.fn();
+    const mockNestedFormat = createMockNestedFormat({ reactConvert: mockReactConvert });
+
+    const format = getAggFormat(mapping, () => mockNestedFormat);
+
+    expect(format.convert('__other__')).toBe('Other');
+    expect(format.reactConvert('__other__')).toBe('Other');
+    expect(mockReactConvert).not.toHaveBeenCalled();
+  });
+
+  test('multi_terms renders links from URL-formatted nested formatters', () => {
+    const mapping = {
+      id: 'multi_terms',
+      params: {
+        paramsPerField: [{ id: 'url' }, { id: 'url' }],
+        separator: ' | ',
+      },
+    };
+    const mockReactConvert = jest.fn().mockImplementation((val) => (
+      <a href={`http://${val}`} target="_blank" rel="noopener noreferrer">
+        {val}
+      </a>
+    ));
+    const mockNestedFormat = createMockNestedFormat({ reactConvert: mockReactConvert });
+
+    const format = getAggFormat(mapping, () => mockNestedFormat);
+    const result = format.reactConvert(new MultiFieldKey({ key: ['a.com', 'b.com'] }));
+
+    const { container } = render(<>{result}</>);
+    const links = container.querySelectorAll('a');
+
+    expect(links).toHaveLength(2);
+    expect(links[0]).toHaveAttribute('href', 'http://a.com');
+    expect(links[1]).toHaveAttribute('href', 'http://b.com');
+    expect(container.textContent).toContain(' | ');
   });
 });
