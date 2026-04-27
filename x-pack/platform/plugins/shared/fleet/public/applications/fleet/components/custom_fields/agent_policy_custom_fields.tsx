@@ -5,18 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiDescribedFormGroup, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type {
-  NewAgentPolicy,
-  AgentPolicy,
-  PackagePolicy,
-  PackagePolicyInput,
-} from '../../../../../types';
+import type { NewAgentPolicy, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../types';
 
-import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../../../../../../common/constants';
+import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../../../common/constants';
 
 import { GlobalDataTagsTable } from './global_data_tags_table';
 
@@ -33,7 +28,7 @@ const DescribedFormGroup = styled(EuiDescribedFormGroup)`
   }
 `;
 
-export const CustomFields: React.FunctionComponent<Props> = ({
+export const AgentPolicyCustomFields: React.FunctionComponent<Props> = ({
   agentPolicy,
   updateAgentPolicy,
   isDisabled,
