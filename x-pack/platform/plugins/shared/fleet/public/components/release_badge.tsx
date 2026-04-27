@@ -28,7 +28,7 @@ export const RELEASE_BADGE_DESCRIPTION: {
 } = {
   beta: i18n.translate('xpack.fleet.epm.releaseBadge.betaDescription', {
     defaultMessage:
-      'This integration is not recommended for use in production environments. For beta features, the design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features. Specific Support terms apply.',
+      'This integration is not recommended for use in production environments. Beta features are not subject to the support SLA of official GA features.',
   }),
   preview: i18n.translate('xpack.fleet.epm.releaseBadge.technicalPreviewDescription', {
     defaultMessage:
