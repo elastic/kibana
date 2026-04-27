@@ -158,9 +158,12 @@ describe('I18nService', () => {
 
       expect(getLocale()).toEqual('en');
       expect(getLocales()).toEqual(['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE']);
+      // Labels come from Intl.DisplayNames in the endonym pattern. Each
+      // language's own orthographic convention applies — French does not
+      // capitalise language names, hence "français" (lowercase).
       expect(getAvailableLocales()).toEqual([
         { id: 'en', label: 'English' },
-        { id: 'fr-FR', label: 'Français' },
+        { id: 'fr-FR', label: 'français' },
         { id: 'ja-JP', label: '日本語' },
         { id: 'zh-CN', label: '中文' },
         { id: 'de-DE', label: 'Deutsch' },

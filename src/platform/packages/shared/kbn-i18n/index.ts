@@ -51,7 +51,6 @@ export type { Translation, TranslationInput } from './src/translation';
 export type { Formats, TranslateArguments } from './src/core';
 export {
   SUPPORTED_LOCALE_IDS,
-  SUPPORTED_LOCALES,
   getLocaleLabel,
   toCanonicalLocaleId,
   setAvailableLocales,

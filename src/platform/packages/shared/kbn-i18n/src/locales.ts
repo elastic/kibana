@@ -9,6 +9,8 @@
 
 const KNOWN_LOCALE_IDS = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'] as const;
 
+const KNOWN_LOCALE_LIST: ReadonlyArray<{ id: string }> = KNOWN_LOCALE_IDS.map((id) => ({ id }));
+
 /**
  * A supported locale code (e.g., `"en"`, `"fr-FR"`). Widened to `string` so
  * deployments can configure additional locales via `kibana.yml` (`i18n.locales`)
@@ -26,38 +28,38 @@ export type SupportedLocaleId = string;
 export const SUPPORTED_LOCALE_IDS: readonly string[] = KNOWN_LOCALE_IDS;
 
 /**
- * Friendly labels for the locales Kibana ships translations for. Used as
- * a label registry: when the configured `i18n.locales` includes a known
- * id, the picker shows the friendly label; for unknown ids the picker
- * falls back to the id itself.
- */
-export const SUPPORTED_LOCALES: ReadonlyArray<{ id: SupportedLocaleId; label: string }> = [
-  { id: 'en', label: 'English' },
-  { id: 'fr-FR', label: 'Français' },
-  { id: 'ja-JP', label: '日本語' },
-  { id: 'zh-CN', label: '中文' },
-  { id: 'de-DE', label: 'Deutsch' },
-];
-
-/**
- * Returns the friendly label for a known locale id, or the id itself when
- * no label is registered (e.g., admin-installed custom locales).
+ * Returns the friendly label for a locale id, using `Intl.DisplayNames`
+ * in the **endonym** pattern: each locale is rendered in its own
+ * language (`fr-FR` → `"français"`, `ja-JP` → `"日本語"`). This means a
+ * user stuck in a language they cannot read still sees their preferred
+ * language listed in a script they recognise.
+ *
+ * Region is dropped before lookup so the label is the bare language
+ * name, following each language's own orthographic conventions (French
+ * does not capitalise language names; English and German do).
+ *
+ * Falls back to the locale id when `Intl.DisplayNames` is unavailable
+ * (e.g., minimal-ICU Node builds) or cannot resolve the locale.
  */
 export const getLocaleLabel = (id: SupportedLocaleId): string => {
-  const lc = id.toLowerCase();
-  return SUPPORTED_LOCALES.find((entry) => entry.id.toLowerCase() === lc)?.label ?? id;
+  try {
+    const baseLanguage = id.split('-')[0];
+    return new Intl.DisplayNames([id], { type: 'language' }).of(baseLanguage) ?? id;
+  } catch {
+    return id;
+  }
 };
 
 /**
  * Returns the canonical-casing locale id matching the given locale string
- * against the supplied list (or the known-locales registry when no list is
- * provided), or `"en"` if no match is found. The i18n engine lowercases
- * locales internally (so `fr-FR` becomes `fr-fr`), but UI options and
- * persistence expect canonical casing (`fr-FR`).
+ * against the supplied list (or the bundled known-locale list when no
+ * list is provided), or `"en"` if no match is found. The i18n engine
+ * lowercases locales internally (so `fr-FR` becomes `fr-fr`), but UI
+ * options and persistence expect canonical casing (`fr-FR`).
  */
 export const toCanonicalLocaleId = (
   locale: string,
-  availableLocales: ReadonlyArray<{ id: string }> = SUPPORTED_LOCALES
+  availableLocales: ReadonlyArray<{ id: string }> = KNOWN_LOCALE_LIST
 ): SupportedLocaleId => {
   const lc = locale.toLowerCase();
   return availableLocales.find(({ id }) => id.toLowerCase() === lc)?.id ?? 'en';

@@ -12,7 +12,6 @@ import * as i18nCore from './core';
 export const i18n = i18nCore;
 export {
   SUPPORTED_LOCALE_IDS,
-  SUPPORTED_LOCALES,
   getLocaleLabel,
   toCanonicalLocaleId,
   setAvailableLocales,
