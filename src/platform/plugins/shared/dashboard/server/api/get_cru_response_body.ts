@@ -53,6 +53,8 @@ export function getDashboardCRUResponseBody(
     sanatizedDashboardState = dashboardStateSchema.validate(dashboardState);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
+  } finally {
+    timer?.end();
   }
 
   const result = {
@@ -68,8 +70,6 @@ export function getDashboardCRUResponseBody(
     meta: getMeta(savedObject),
     ...(operation === 'read' && warnings?.length && { warnings }),
   };
-
-  timer?.end();
 
   return result;
 }
