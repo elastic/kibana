@@ -113,6 +113,26 @@ describe('executeRuleOperations', () => {
   });
 
   describe('cross-field validation', () => {
+    it('throws when isNew is true and no name is provided', async () => {
+      const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'alert' }];
+
+      await expect(
+        executeRuleOperations({}, ops, undefined, { isNew: true })
+      ).rejects.toThrow(
+        'A rule name is required when creating a new rule. Use a set_metadata operation with a name.'
+      );
+    });
+
+    it('does not throw when isNew is true and a name is provided', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'My Rule' },
+      ];
+
+      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+
+      expect(result.metadata?.name).toBe('My Rule');
+    });
+
     it('throws when state_transition is set on a non-alert kind', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_kind', kind: 'signal' },

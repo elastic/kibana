@@ -105,7 +105,8 @@ async function validateEsqlQuery(
 export const executeRuleOperations = async (
   data: Partial<RuleAttachmentData>,
   operations: RuleOperation[],
-  esClient?: IScopedClusterClient
+  esClient?: IScopedClusterClient,
+  { isNew = false }: { isNew?: boolean } = {}
 ): Promise<Partial<RuleAttachmentData>> => {
   let next = { ...data };
   let lastQueryColumns: EsqlColumn[] | undefined;
@@ -201,6 +202,12 @@ export const executeRuleOperations = async (
         };
         break;
     }
+  }
+
+  if (isNew && !next.metadata?.name) {
+    throw new Error(
+      'A rule name is required when creating a new rule. Use a set_metadata operation with a name.'
+    );
   }
 
   if (!isStateTransitionAllowed(next)) {

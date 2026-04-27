@@ -61,22 +61,9 @@ Use operations[] to:
       const updatedData = (await executeRuleOperations(
         currentData,
         operations,
-        esClient
+        esClient,
+        { isNew }
       )) as RuleAttachmentData;
-
-      if (isNew && !updatedData.metadata?.name) {
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                message:
-                  'A rule name is required when creating a new rule. Use a set_metadata operation with a name.',
-              },
-            },
-          ],
-        };
-      }
 
       const attachmentInput = {
         id: attachmentId,
