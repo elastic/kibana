@@ -52,7 +52,7 @@ To import the eval data into a remote dev cluster (e.g. Elastic Cloud):
 | Spec                                    | Skill / Tool                        | What it asserts                                                                                    |
 | --------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `full compliance report`                | `pci_compliance` (`mode: "report"`) | Full scorecard across all 12 requirements with correct RED/AMBER/GREEN status.                     |
-| `requirement 8.3.4 — brute force`       | `pci_compliance` (`mode: "check"`)  | Detects 7 failed logins for jdoe (exceeds threshold of 6), RED status.                             |
+| `requirement 8.3.4 — brute force`       | `pci_compliance` (`mode: "check"`)  | Detects 12 failed logins for jdoe (exceeds threshold of 10), RED status.                           |
 | `requirement 4.1 — weak TLS`            | `pci_compliance` (`mode: "check"`)  | Flags TLS 1.0, TLS 1.1, and plain HTTP as violations.                                             |
 | `requirement 2.2.4 — default accounts`  | `pci_compliance` (`mode: "check"`)  | Flags admin and root successful logins as default-account violations.                              |
 | `scope discovery`                       | `pci_scope_discovery`               | Identifies 4 ECS indices and classifies them (identity, network, endpoint).                        |
@@ -68,7 +68,7 @@ provisions five data streams:
 
 | Index                     | Contents                                             | Doc count |
 | ------------------------- | ---------------------------------------------------- | --------- |
-| `logs-pci-auth-eval`      | ECS auth events: 7 failed logins (jdoe), admin/root successes, IAM events | 13        |
+| `logs-pci-auth-eval`      | ECS auth events: 12 failed logins (jdoe), admin/root successes, IAM events | 18       |
 | `logs-pci-network-eval`   | TLS 1.3/1.2 (good), TLS 1.0/1.1 (weak), plain HTTP | 6         |
 | `logs-pci-vuln-eval`      | Critical/high CVEs, IDS alerts (exploit, port scan)  | 4         |
 | `logs-pci-endpoint-eval`  | Malware detection, suspicious process execution      | 2         |
