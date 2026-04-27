@@ -44,37 +44,37 @@ export const anomalyExplorerQuestions: FeedbackRegistryEntry[] = [
   },
 ];
 
-export const resultExplorerQuestions: FeedbackRegistryEntry[] = [
+export const dfaResultsExplorerQuestions: FeedbackRegistryEntry[] = [
   {
-    id: 'ml_dfa_result_explorer_use_case',
+    id: 'ml_dfa_results_explorer_use_case',
     order: 1,
     placeholder: {
-      i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q1Placeholder',
+      i18nId: 'xpack.feedbackRegistry.ml.dfaResultsExplorer.q1Placeholder',
       defaultMessage: 'Share your use case',
     },
     label: {
-      i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q1Label',
+      i18nId: 'xpack.feedbackRegistry.ml.dfaResultsExplorer.q1Label',
       defaultMessage: 'What were you trying to evaluate or inspect just now?',
     },
     ariaLabel: {
-      i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q1AriaLabel',
+      i18nId: 'xpack.feedbackRegistry.ml.dfaResultsExplorer.q1AriaLabel',
       defaultMessage: 'What were you trying to evaluate or inspect just now?',
     },
     question: 'What were you trying to evaluate or inspect just now?',
   },
   {
-    id: 'ml_dfa_result_explorer_improvements',
+    id: 'ml_dfa_results_explorer_improvements',
     order: 2,
     placeholder: {
-      i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q2Placeholder',
+      i18nId: 'xpack.feedbackRegistry.ml.dfaResultsExplorer.q2Placeholder',
       defaultMessage: 'Share what would help',
     },
     label: {
-      i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q2Label',
+      i18nId: 'xpack.feedbackRegistry.ml.dfaResultsExplorer.q2Label',
       defaultMessage: "What's one thing that would make this more useful for you?",
     },
     ariaLabel: {
-      i18nId: 'xpack.feedbackRegistry.ml.resultExplorer.q2AriaLabel',
+      i18nId: 'xpack.feedbackRegistry.ml.dfaResultsExplorer.q2AriaLabel',
       defaultMessage: "What's one thing that would make this more useful for you?",
     },
     question: "What's one thing that would make this more useful for you?",

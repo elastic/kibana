@@ -17,7 +17,7 @@ const feedbackRegistry: FeedbackRegistry = new Map([
   ],
   [
     'ml:resultExplorer',
-    () => import('./questions/machine_learning').then((m) => m.resultExplorerQuestions),
+    () => import('./questions/machine_learning').then((m) => m.dfaResultsExplorerQuestions),
   ],
   [
     'ml:analyticsMap',
