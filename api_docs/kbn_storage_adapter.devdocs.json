@@ -109,7 +109,7 @@
           "<TStorageSettings, TApplicationType>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-        "lineNumber": 116,
+        "lineNumber": 136,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -125,7 +125,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-            "lineNumber": 142,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -141,7 +141,7 @@
                   "ElasticsearchClient"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-                "lineNumber": 143,
+                "lineNumber": 170,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -164,7 +164,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-                "lineNumber": 144,
+                "lineNumber": 171,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -181,7 +181,7 @@
                   "TStorageSettings"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-                "lineNumber": 145,
+                "lineNumber": 172,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -199,7 +199,7 @@
                   "<TApplicationType>"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-                "lineNumber": 146,
+                "lineNumber": 173,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -227,7 +227,7 @@
               "<TApplicationType>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-            "lineNumber": 652,
+            "lineNumber": 718,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
