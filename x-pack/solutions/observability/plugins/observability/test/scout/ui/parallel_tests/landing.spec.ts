@@ -16,8 +16,7 @@ import {
 } from '../fixtures/generators';
 import { BIGGER_TIMEOUT } from '../fixtures/constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/253824
-test.describe.skip(
+test.describe(
   'Observability Landing Page',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -43,10 +42,18 @@ test.describe.skip(
         defaultRoute: '/app/metrics',
       });
 
-      // Navigate to observability landing page
       await page.goto(kbnUrl.get('/'));
 
-      // Wait for redirect and verify we're on the metrics page
+      // If the uiSettings change is slow to propagate, the default route
+      // may still direct to observability landing first. Retry once.
+      await page.waitForURL(/\/app\/(metrics|observability)/, {
+        timeout: BIGGER_TIMEOUT,
+      });
+
+      if (page.url().includes('/app/observability')) {
+        await page.goto(kbnUrl.get('/'));
+      }
+
       await expect(page).toHaveURL(/\/app\/metrics/, { timeout: BIGGER_TIMEOUT });
 
       // Restore default route
