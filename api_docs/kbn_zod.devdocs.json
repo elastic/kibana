@@ -5242,8 +5242,8 @@
             "path": "x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations.ts"
           },
           {
-            "plugin": "@kbn/agent-builder-genai-utils",
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/visualization/guess_chart_type.ts"
+            "plugin": "@kbn/agent-builder-tools-base",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/guess_chart_type.ts"
           },
           {
             "plugin": "workflowsManagement",
@@ -15233,6 +15233,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/locators/ai_value_report/locator.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/agent_builder/attachments/entity.ts"
               },
               {
                 "plugin": "@kbn/workflows",

@@ -10,12 +10,12 @@ import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { fireEvent, act } from '@testing-library/react';
 
-import { createFleetTestRendererMock, type TestRenderer } from '../../../../../../../mock';
-import type { GlobalDataTag } from '../../../../../../../../common/types';
+import { createFleetTestRendererMock, type TestRenderer } from '../../../../mock';
+import type { GlobalDataTag } from '../../../../../common/types';
 
 import { GlobalDataTagsTable } from './global_data_tags_table';
 
-jest.mock('../../../../../../../hooks/use_fleet_status', () => ({
+jest.mock('../../../../hooks/use_fleet_status', () => ({
   FleetStatusProvider: (props: any) => {
     return props.children;
   },
