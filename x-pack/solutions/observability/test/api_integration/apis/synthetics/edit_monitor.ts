@@ -14,7 +14,10 @@ import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from './services/private_location_test_service';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -50,8 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
+      await cleanSyntheticsTestData(kibanaServer);
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
@@ -62,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     it.skip('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {

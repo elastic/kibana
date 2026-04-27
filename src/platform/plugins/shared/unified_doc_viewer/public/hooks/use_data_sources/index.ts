@@ -14,10 +14,11 @@ type UseDataSourcesParams = DataSources;
 
 export interface DataSources {
   indexes: ObservabilityIndexes;
+  profileId: string;
 }
 
-const useDataSources = ({ indexes }: UseDataSourcesParams) => {
-  return { indexes };
+const useDataSources = ({ indexes, profileId }: UseDataSourcesParams) => {
+  return { indexes, profileId };
 };
 
 export const [DataSourcesProvider, useDataSourcesContext] = createContainer(useDataSources);

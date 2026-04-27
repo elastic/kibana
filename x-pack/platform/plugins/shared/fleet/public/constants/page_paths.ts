@@ -52,6 +52,7 @@ export type DynamicPage =
   | 'agent_details_logs'
   | 'agent_details_settings'
   | 'agent_details_diagnostics'
+  | 'agent_details_collector_config'
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
   | 'settings_edit_fleet_server_hosts'
@@ -75,6 +76,7 @@ export const FLEET_ROUTING_PATHS = {
   agent_details_logs: '/agents/:agentId/logs',
   agent_details_diagnostics: '/agents/:agentId/diagnostics',
   agent_details_settings: '/agents/:agentId/settings',
+  agent_details_collector_config: '/agents/:agentId/collector-config',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -307,6 +309,10 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
   agent_details_settings: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/settings`],
+  agent_details_collector_config: ({ agentId }) => [
+    FLEET_BASE_PATH,
+    `/agents/${agentId}/collector-config`,
+  ],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],

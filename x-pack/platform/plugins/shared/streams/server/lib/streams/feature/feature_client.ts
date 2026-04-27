@@ -32,6 +32,7 @@ import {
   FEATURE_EXCLUDED_AT,
   FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
+  FEATURE_RUN_ID,
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
@@ -201,7 +202,10 @@ export class FeatureClient {
     await this.clients.storageClient.clean();
   }
 
-  async bulk(stream: string, operations: FeatureBulkOperation[]) {
+  async bulk(
+    stream: string,
+    operations: FeatureBulkOperation[]
+  ): Promise<{ applied: number; skipped: number }> {
     validateFeatures(
       operations
         .filter((operation) => 'index' in operation)
@@ -209,8 +213,13 @@ export class FeatureClient {
     );
 
     const resolvedOperations = await this.filterValidOperations(stream, operations);
+    const skipped = operations.length - resolvedOperations.length;
 
-    return await this.clients.storageClient.bulk({
+    if (resolvedOperations.length === 0) {
+      return { applied: 0, skipped };
+    }
+
+    await this.clients.storageClient.bulk({
       operations: resolvedOperations.map((operation) => {
         if ('index' in operation) {
           const document = toStorage(stream, operation.index.feature, this.inferenceAvailable);
@@ -226,6 +235,8 @@ export class FeatureClient {
       }),
       throwOnFail: true,
     });
+
+    return { applied: resolvedOperations.length, skipped };
   }
 
   async getFeatures(
@@ -280,6 +291,34 @@ export class FeatureClient {
       throw new StatusError(`Feature ${uuid} not found`, 404);
     }
     return fromStorage(source);
+  }
+
+  /**
+   * Resolves a list of feature UUIDs to their owning stream by querying storage
+   * directly on `_id` (which is the UUID by construction — see `bulk` above).
+   * UUIDs that do not exist in storage are simply absent from the result; the
+   * caller can compute "not found" as `input.length - result.length` (deduped)
+   * and treat them as idempotent no-ops.
+   */
+  async findFeaturesByUuids(
+    uuids: string[]
+  ): Promise<Array<{ uuid: string; stream_name: string }>> {
+    if (uuids.length === 0) {
+      return [];
+    }
+    const response = await this.clients.storageClient.search({
+      size: uuids.length,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [{ terms: { _id: uuids } }],
+        },
+      },
+    });
+    return response.hits.hits.map((hit) => ({
+      uuid: hit._id!,
+      stream_name: hit._source![STREAM_NAME] as string,
+    }));
   }
 
   async deleteFeature(stream: string, uuid: string) {
@@ -589,6 +628,7 @@ function toStorage(stream: string, feature: Feature, inferenceAvailable: boolean
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
     [FEATURE_EXCLUDED_AT]: feature.excluded_at,
+    [FEATURE_RUN_ID]: feature.run_id,
     [FEATURE_TITLE]: feature.title,
     [FEATURE_FILTER]: feature.filter,
     ...(inferenceAvailable && embeddingText ? { [FEATURE_SEARCH_EMBEDDING]: embeddingText } : {}),
@@ -613,6 +653,7 @@ function fromStorage(feature: StoredFeature): Feature {
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
     excluded_at: feature[FEATURE_EXCLUDED_AT],
+    run_id: feature[FEATURE_RUN_ID],
     title: feature[FEATURE_TITLE],
     filter: feature[FEATURE_FILTER],
   };

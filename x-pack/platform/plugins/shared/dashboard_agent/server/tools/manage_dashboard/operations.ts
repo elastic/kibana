@@ -30,7 +30,13 @@ import type { VisualizationFailure } from './utils';
 
 export const setMetadataOperationSchema = z.object({
   operation: z.literal('set_metadata'),
-  title: z.string().optional(),
+  title: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      "Non-empty dashboard title. If the current title is empty, missing, or a placeholder, invent one from the dashboard's contents."
+    ),
   description: z.string().optional(),
 });
 
@@ -201,7 +207,7 @@ export const dashboardOperationSchema = z.discriminatedUnion('operation', [
 export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
 
 interface ExecuteDashboardOperationsParams {
-  dashboardData: DashboardAttachmentData;
+  dashboardData?: DashboardAttachmentData;
   operations: DashboardOperation[];
   logger: Logger;
   resolvePanelsFromAttachments: (
@@ -379,6 +385,12 @@ const materializeResolvedVisualizationPanels = ({
   return successfulPanels;
 };
 
+const createEmptyDashboardData = (): DashboardAttachmentData => ({
+  title: 'User Dashboard',
+  description: undefined,
+  panels: [],
+});
+
 export const executeDashboardOperations = async ({
   dashboardData,
   operations,
@@ -389,7 +401,7 @@ export const executeDashboardOperations = async ({
   dashboardData: DashboardAttachmentData;
   failures: VisualizationFailure[];
 }> => {
-  let nextDashboardData = structuredClone(dashboardData);
+  let nextDashboardData = structuredClone(dashboardData ?? createEmptyDashboardData());
   const failures: VisualizationFailure[] = [];
   const visualizationCreationRequests = collectVisualizationCreationRequests(operations);
   const resolvedVisualizationCreationRequests = await resolveVisualizationCreationRequests({

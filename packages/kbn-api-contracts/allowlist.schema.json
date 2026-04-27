@@ -43,6 +43,16 @@
             "type": "string",
             "format": "date",
             "description": "Optional expiration date (ISO 8601) after which this entry should be reviewed"
+          },
+          "oasdiffId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional oasdiff rule ID to scope suppression to a specific breaking change type (e.g. 'request-property-removed')"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional JSON pointer / source location to scope suppression to a specific schema location"
           }
         }
       }
