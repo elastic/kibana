@@ -241,12 +241,12 @@ export const AlertEpisodesListPage = () => {
   const assigneeUids = useMemo(
     () => [
       ...new Set(
-        [...(episodeActionsMap?.values() ?? [])]
-          .map((a) => a.lastAssigneeUid)
+        (episodesData ?? [])
+          .map((row) => row.last_assignee_uid)
           .filter((uid): uid is string => uid != null)
       ),
     ],
-    [episodeActionsMap]
+    [episodesData]
   );
 
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
