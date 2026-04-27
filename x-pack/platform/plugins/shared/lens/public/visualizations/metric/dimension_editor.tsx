@@ -1149,6 +1149,7 @@ export function DimensionEditorAdditionalSection({
           }
         >
           <EuiButtonGroup
+            isFullWidth
             buttonSize="compressed"
             legend={i18n.translate('xpack.lens.metric.supportingVis.applyColorTo', {
               defaultMessage: 'Apply color to',
@@ -1156,9 +1157,16 @@ export function DimensionEditorAdditionalSection({
             data-test-subj="lnsMetric_apply_color_to_buttons"
             options={[
               {
+                id: `${buttonIdPrefix}none`,
+                label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.none', {
+                  defaultMessage: 'None',
+                }),
+                value: 'none',
+              },
+              {
                 id: `${buttonIdPrefix}background`,
                 label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.background', {
-                  defaultMessage: 'Background',
+                  defaultMessage: 'Panel',
                 }),
                 value: 'background',
               },
@@ -1170,12 +1178,15 @@ export function DimensionEditorAdditionalSection({
                 value: 'value',
               },
             ]}
-            idSelected={state.applyColorTo ? `${buttonIdPrefix}${state.applyColorTo}` : ''}
+            idSelected={
+              state.applyColorTo
+                ? `${buttonIdPrefix}${state.applyColorTo}`
+                : `${buttonIdPrefix}none`
+            }
             onChange={(_id, newApplyColorTo) => {
-              const clear = newApplyColorTo === undefined || newApplyColorTo === state.applyColorTo;
               setState({
                 ...state,
-                applyColorTo: clear ? undefined : newApplyColorTo,
+                applyColorTo: newApplyColorTo === 'none' ? undefined : newApplyColorTo,
               });
               scrollToColorControls();
             }}
