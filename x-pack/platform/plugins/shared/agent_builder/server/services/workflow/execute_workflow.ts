@@ -13,7 +13,7 @@ import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-
 import {
   getExecutionState,
   type WorkflowExecutionState,
-} from '@kbn/agent-builder-genai-utils/tools/utils/workflows';
+} from '@kbn/agent-builder-tools-base/workflows';
 import type { WorkflowExecutionResult } from './types';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
