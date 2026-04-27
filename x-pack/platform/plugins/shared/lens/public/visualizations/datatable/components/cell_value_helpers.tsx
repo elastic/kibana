@@ -17,7 +17,7 @@ import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
-export type RenderMode = 'badge' | 'link' | 'html';
+export type RenderMode = 'badge' | 'link' | 'formatted';
 
 export type Alignment = 'left' | 'right' | 'center' | undefined;
 
@@ -64,7 +64,7 @@ export const getRenderMode = (
 ): RenderMode => {
   if (colorMode === 'badge' && !isNonColorable) return 'badge';
   if (isClickable) return 'link';
-  return 'html';
+  return 'formatted';
 };
 
 /**
@@ -122,14 +122,19 @@ export const applyCellColoring = ({
 // Cell renderers
 // -----------------------------
 
-export interface HtmlCellProps {
+export interface FormattedCellProps {
   content: ReactNode;
   alignment: Alignment;
   fitRowToContent?: boolean;
   isColored: boolean;
 }
 
-export const HtmlCell = ({ content, alignment, fitRowToContent, isColored }: HtmlCellProps) => (
+export const FormattedCell = ({
+  content,
+  alignment,
+  fitRowToContent,
+  isColored,
+}: FormattedCellProps) => (
   <div
     data-test-subj="lnsTableCellContent"
     className={getCellClassName(alignment, fitRowToContent, isColored)}

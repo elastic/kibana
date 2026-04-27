@@ -20,7 +20,7 @@ import {
   getRenderMode,
   applyCellColoring,
   isNonColorableValue,
-  HtmlCell,
+  FormattedCell,
   LinkCell,
   BadgeCell,
 } from './cell_value_helpers';
@@ -147,10 +147,10 @@ export const createGridCell = (
         );
       }
 
-      case 'html':
+      case 'formatted':
       default:
         return (
-          <HtmlCell
+          <FormattedCell
             content={formatter?.reactConvert(rawValue) ?? fallbackText}
             alignment={alignment}
             fitRowToContent={fitRowToContent}
