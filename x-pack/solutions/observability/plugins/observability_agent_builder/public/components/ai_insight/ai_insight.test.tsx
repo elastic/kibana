@@ -48,6 +48,7 @@ const mockConnectorInfo = {
 const baseStreamingState = () => ({
   isLoading: false,
   error: undefined as string | undefined,
+  errorRetryable: true,
   summary: '',
   context: '',
   connectorInfo: mockConnectorInfo,
@@ -148,6 +149,21 @@ describe('AiInsight', () => {
       expect(
         container.querySelector('[data-test-subj="AiInsightErrorBannerRetryButton"]')
       ).toBeTruthy();
+
+      unmount();
+    });
+
+    it('hides the retry button when errorRetryable is false', () => {
+      mockUseStreamingAiInsight.mockReturnValue(
+        createStreamingState({ error: errorMessage, errorRetryable: false })
+      );
+
+      const { container, unmount } = renderComponent();
+      openAccordion(container);
+
+      expect(
+        container.querySelector('[data-test-subj="AiInsightErrorBannerRetryButton"]')
+      ).toBeNull();
 
       unmount();
     });

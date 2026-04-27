@@ -79,8 +79,18 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
-  const { isLoading, error, summary, context, connectorInfo, wasStopped, fetch, stop, regenerate } =
-    useStreamingAiInsight(createStream);
+  const {
+    isLoading,
+    error,
+    errorRetryable,
+    summary,
+    context,
+    connectorInfo,
+    wasStopped,
+    fetch,
+    stop,
+    regenerate,
+  } = useStreamingAiInsight(createStream);
 
   // Report the response generated event when the stream finishes (completely or stopped)
   useEffect(() => {
@@ -188,7 +198,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
         <EuiSpacer size="m" />
         <EuiPanel color="subdued">
           {error ? (
-            <AiInsightErrorBanner error={error} onRetry={fetch} />
+            <AiInsightErrorBanner error={error} onRetry={errorRetryable ? fetch : undefined} />
           ) : (
             <EuiText size="s">
               <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>

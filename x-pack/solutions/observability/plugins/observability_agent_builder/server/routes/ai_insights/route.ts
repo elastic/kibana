@@ -9,7 +9,10 @@ import * as t from 'io-ts';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
+import { i18n } from '@kbn/i18n';
 import { throwError } from 'rxjs';
+import { ServerSentEventError } from '@kbn/sse-utils';
+import { ServerSentEventErrorCode } from '@kbn/sse-utils/src/errors';
 import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
@@ -27,20 +30,39 @@ import {
 import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../../common/constants';
 import { resolveConnectorForFeature } from '../../utils/resolve_connector_for_feature';
 
+function getRawErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
+}
+
 function aiInsightSseErrorResponse({
   response,
-  error,
+  message,
   isCloudEnabled,
   logger,
   request,
 }: {
   response: KibanaResponseFactory;
-  error: unknown;
+  message: string;
   isCloudEnabled: boolean;
   logger: Pick<Logger, 'debug' | 'error'>;
   request: KibanaRequest;
 }) {
-  const err$ = throwError(() => (error instanceof Error ? error : new Error(String(error))));
+  const err$ = throwError(
+    () =>
+      new ServerSentEventError(ServerSentEventErrorCode.internalError, message, {
+        retryable: false,
+      })
+  );
   return response.ok({
     headers: getSSEResponseHeaders(isCloudEnabled),
     body: observableIntoEventSourceStream(err$, {
@@ -48,6 +70,54 @@ function aiInsightSseErrorResponse({
       signal: getRequestAbortedSignal(request),
     }),
   });
+}
+
+function toErrorForAiInsightStream({
+  error,
+  response,
+  isCloudEnabled,
+  logger,
+  request,
+}: {
+  error: unknown;
+  response: KibanaResponseFactory;
+  isCloudEnabled: boolean;
+  logger: Pick<Logger, 'debug' | 'error'>;
+  request: KibanaRequest;
+}) {
+  if (isNoMatchingProjectError(error)) {
+    const message = i18n.translate(
+      'xpack.observabilityAgentBuilder.aiInsight.error.noMatchingProject',
+      {
+        defaultMessage: 'AI insights are not supported for data from linked projects.',
+      }
+    );
+    const rawErrorMessage = getRawErrorMessage(error);
+    return aiInsightSseErrorResponse({
+      response,
+      message: `${message}\n\nError details: ${rawErrorMessage}`,
+      isCloudEnabled,
+      logger,
+      request,
+    });
+  }
+  if (isIndexNotFoundError(error)) {
+    const message = i18n.translate(
+      'xpack.observabilityAgentBuilder.aiInsight.error.indexUnavailable',
+      {
+        defaultMessage: 'The source index for this data is unavailable.',
+      }
+    );
+    const rawErrorMessage = getRawErrorMessage(error);
+    return aiInsightSseErrorResponse({
+      response,
+      message: `${message}\n\nError details: ${rawErrorMessage}`,
+      isCloudEnabled,
+      logger,
+      request,
+    });
+  }
+  throw error;
 }
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
@@ -106,16 +176,13 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
       } catch (error) {
         logger.error(error);
-        if (isIndexNotFoundError(error) || isNoMatchingProjectError(error)) {
-          return aiInsightSseErrorResponse({
-            response,
-            error,
-            isCloudEnabled,
-            logger,
-            request,
-          });
-        }
-        throw error;
+        return toErrorForAiInsightStream({
+          error,
+          response,
+          isCloudEnabled,
+          logger,
+          request,
+        });
       }
     },
   });
@@ -180,16 +247,13 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
       } catch (error) {
         logger.error(error);
-        if (isIndexNotFoundError(error) || isNoMatchingProjectError(error)) {
-          return aiInsightSseErrorResponse({
-            response,
-            error,
-            isCloudEnabled,
-            logger,
-            request,
-          });
-        }
-        throw error;
+        return toErrorForAiInsightStream({
+          error,
+          response,
+          isCloudEnabled,
+          logger,
+          request,
+        });
       }
     },
   });
@@ -262,16 +326,13 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         });
       } catch (error) {
         logger.error(error);
-        if (isIndexNotFoundError(error) || isNoMatchingProjectError(error)) {
-          return aiInsightSseErrorResponse({
-            response,
-            error,
-            isCloudEnabled,
-            logger,
-            request,
-          });
-        }
-        throw error;
+        return toErrorForAiInsightStream({
+          error,
+          response,
+          isCloudEnabled,
+          logger,
+          request,
+        });
       }
     },
   });
